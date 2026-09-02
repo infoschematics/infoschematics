@@ -10,7 +10,7 @@ blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
-> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-018`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the current workspace split: read `src/diagram/` as `workspaces/view-model/src/`, product-model paths as `workspaces/domain-model/src/`, and other reusable application paths as `workspaces/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
+> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-018`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the current package split: read `src/diagram/` as `packages/view-model/src/`, product-model paths as `packages/domain-model/src/`, and other reusable application paths as `packages/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
 
 ## Goal
 
@@ -69,7 +69,7 @@ Delivery splits judgment from mechanics, per [GDR-INFOSCHEMATICS-002](../decisio
 
 ## Current state
 
-The reusable boundary is now explicit: `workspaces/view-model/` owns framework-neutral visual calculations, `workspaces/domain-model/` owns the serialisable product contract, and `workspaces/view-studio/` publishes the current React Studio view. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only Infoschematic and the public site now exercise the same public package seam.
+The reusable boundary is now explicit: `packages/view-model/` owns framework-neutral visual calculations, `packages/domain-model/` owns the serialisable product contract, and `packages/view-studio/` publishes the current React Studio view. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only Infoschematic and the public site now exercise the same public package seam.
 
 The separation objective is complete. The larger additive Canvas, Present, Studio and static SVG package split is now [INFOSCHEMATICS-TOOL-008](INFOSCHEMATICS-TOOL-008-establish-additive-views.md), and full visual-token consolidation is now [INFOSCHEMATICS-TOOL-009](INFOSCHEMATICS-TOOL-009-centralise-visual-tokens.md). Neither follow-on reopens this repository-extraction boundary.
 
@@ -79,7 +79,7 @@ The separation objective is complete. The larger additive Canvas, Present, Studi
 - [x] Remove realisation-specific content and wiring from the root diagram component; track the later additive package decomposition in `INFOSCHEMATICS-TOOL-008`.
 - [x] Found `src/app/` and break the root entry into it: the shell legible on its own, the entry thinned to mounting.
 - [x] Regroup the scattered UI — panels, editor surfaces, hooks — by ownership, kind within.
-- [x] Found `workspaces/domain-model/` as the framework-neutral authored contract, leaving derived runtime structures in the view packages.
+- [x] Found `packages/domain-model/` as the framework-neutral authored contract, leaving derived runtime structures in the view packages.
 - [x] Move each retained test with its subject, and re-point tests that crossed the new public boundaries.
 - [x] Give scripts and documentation explicit owners: root scripts govern the monorepo, while the site owns deployment commands and configuration.
 - [x] Replace authored singleton imports with a complete host-supplied `InfoschematicConfig`, so reusable surfaces describe a configured product rather than one realisation.
@@ -113,7 +113,7 @@ Second tranche, same evening:
 ## Files touched
 
 - `core/src/**`
-- `workspaces/view-studio/src/**`
+- `packages/view-studio/src/**`
 - `.dependency-cruiser.mjs`
 - Package export maps and affected architecture documentation
 
@@ -140,7 +140,7 @@ Update vocabulary and package-boundary specifications where the first realisatio
 
 ### Guides
 
-Update architecture and contributor guidance to describe the `workspaces/domain-model/`, `workspaces/view-model/`, `workspaces/view-studio/`, and host-owned realisation boundary.
+Update architecture and contributor guidance to describe the `packages/domain-model/`, `packages/view-model/`, `packages/view-studio/`, and host-owned realisation boundary.
 
 ### Roadmap
 
@@ -162,7 +162,7 @@ Repository tests, type checks, dependency rules and the production Site build pa
 
 ### Outstanding concerns
 
-The packages still live below the generic `workspaces/` root pending a deliberate monorepo-root decision. Canvas, Present, Studio and static SVG are still combined or absent until `INFOSCHEMATICS-TOOL-008`; visual-token consolidation remains `INFOSCHEMATICS-TOOL-009`.
+Canvas, Present, Studio and static SVG are still combined or absent until `INFOSCHEMATICS-TOOL-008`; visual-token consolidation remains `INFOSCHEMATICS-TOOL-009`.
 
 ### Post-change review
 

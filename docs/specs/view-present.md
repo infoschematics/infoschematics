@@ -1,6 +1,6 @@
 # Present View specification
 
-Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around an Infoschematic. These requirements describe reusable behaviour currently represented by `workspaces/view-studio`; the future package boundary does not change their ownership.
+Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around an Infoschematic. These requirements describe reusable behaviour currently represented by `packages/view-studio`; the future package boundary does not change their ownership.
 
 ## Visibility and focus
 
@@ -10,7 +10,7 @@ Each scope and flow-family filter bank MUST allow all of its members to be hidde
 
 _Provenance: generalised from IBC DASH-002._
 
-_Implementation surface: `showAllScopes` and `showAllFamilies` in `workspaces/view-studio/src/app/hooks/use-presentation.ts`; controls in `workspaces/view-studio/src/app/panels/ProducerControls.tsx` and `workspaces/view-studio/src/app/panels/PanelRail.tsx`._
+_Implementation surface: `showAllScopes` and `showAllFamilies` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/ProducerControls.tsx` and `packages/view-studio/src/app/panels/PanelRail.tsx`._
 
 ### PRESENT-002 — No Scene means full-strength rendering
 
@@ -18,7 +18,7 @@ When no Standalone Scene, Thematic Scene or Story Scene is active, every visible
 
 _Provenance: generalised from IBC DASH-003 and DASH-004._
 
-_Implementation surface: focus precedence, `lightNothing` and Scene selection in `workspaces/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx`._
+_Implementation surface: focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
 ### PRESENT-003 — Focus does not change geometry
 
@@ -26,7 +26,7 @@ Selecting, stepping or clearing a Scene MUST change emphasis without changing au
 
 _Provenance: retained from the fixed-geometry constraint in IBC dashboard design and the intent behind DASH-004._
 
-_Implementation surface: Present state is reduced to visibility and highlight sets in `workspaces/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `workspaces/view-studio/src/app/infoschematic-context.tsx`._
+_Implementation surface: Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-studio/src/app/infoschematic-context.tsx`._
 
 ## Stories
 
@@ -36,7 +36,7 @@ While a Story runs, the Audience MUST be able to step forward, step backward, ho
 
 _Provenance: generalised from IBC DASH-010._
 
-_Implementation surface: `stepStory`, `toggleAutoAdvance` and `stopStory` in `workspaces/view-studio/src/app/hooks/use-presentation.ts`; controls in `workspaces/view-studio/src/app/panels/SceneCallout.tsx`; keyboard handling in `workspaces/view-studio/src/app/App.tsx`._
+_Implementation surface: `stepStory`, `toggleAutoAdvance` and `stopStory` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/SceneCallout.tsx`; keyboard handling in `packages/view-studio/src/app/App.tsx`._
 
 ## Callouts
 
@@ -46,9 +46,9 @@ When a Scene does not author an explicit Callout position, Present View MUST cho
 
 _Provenance: generalised from IBC DASH-024._
 
-_Verification: `workspaces/view-model/src/placement.test.ts` covers candidate order, weighted obstruction, least-cost fallback and view-box clamping._
+_Verification: `packages/view-model/src/placement.test.ts` covers candidate order, weighted obstruction, least-cost fallback and view-box clamping._
 
-_Implementation surface: `chooseSpot` in `workspaces/view-model/src/placement.ts`; focused-content obstacles and authored override in `workspaces/view-studio/src/app/panels/SceneCallout.tsx`._
+_Implementation surface: `chooseSpot` in `packages/view-model/src/placement.ts`; focused-content obstacles and authored override in `packages/view-studio/src/app/panels/SceneCallout.tsx`._
 
 ## Details
 
@@ -58,7 +58,7 @@ Info MUST derive its Card, Fabric and Flow register from the current Infoschemat
 
 _Provenance: generalised from IBC DASH-030._
 
-_Implementation surface: `workspaces/view-studio/src/app/panels/ModelRegister.tsx` reads the runtime register, scopes, families, interfaces and endpoint labels._
+_Implementation surface: `packages/view-studio/src/app/panels/ModelRegister.tsx` reads the runtime register, scopes, families, interfaces and endpoint labels._
 
 ## Visual language
 
@@ -68,7 +68,7 @@ Rectangular component-scale shapes rendered by the supplied view library MUST us
 
 _Provenance: generalised from IBC DASH-023._
 
-_Implementation surface: `cornerRadius` in `workspaces/view-model/src/tokens.ts`, consumed by `workspaces/view-studio/src/app/InfoschematicDiagram.tsx` and supplied Fabric renderers._
+_Implementation surface: `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-studio/src/app/InfoschematicDiagram.tsx` and supplied Fabric renderers._
 
 ## Presentation controls
 
@@ -78,7 +78,7 @@ Present View MUST expose in-view keyboard help for Story stepping, automatic-adv
 
 _Provenance: generalised from IBC DASH-010 and DASH-017._
 
-_Implementation surface: `workspaces/view-studio/src/app/panels/ShortcutOverlay.tsx`, `workspaces/view-studio/src/app/panels/SceneCallout.tsx` and global presentation-key handling in `workspaces/view-studio/src/app/App.tsx`._
+_Implementation surface: `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages/view-studio/src/app/panels/SceneCallout.tsx` and global presentation-key handling in `packages/view-studio/src/app/App.tsx`._
 
 ### PRESENT-009 — The Infoschematic can take the available canvas
 
@@ -86,7 +86,7 @@ Present View MUST offer a collapsed layout in which the Infoschematic panel take
 
 _Provenance: generalised from IBC DASH-015 and DASH-016._
 
-_Implementation surface: collapsed state and full-screen handling in `workspaces/view-studio/src/app/App.tsx`; compact controls in `workspaces/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `workspaces/view-studio/src/app/panels/TitleBar.tsx`._
+_Implementation surface: collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`._
 
 ## Gaps
 

@@ -1,6 +1,6 @@
 # Repository guidance
 
-Infoschematics contains the domain contract, framework-neutral view calculations, interactive views, authored Infoschematics, public guidance, and website. Keep changes inside the workspace that owns them and preserve the dependency direction documented in [the architecture guide](docs/design/architecture.md).
+Infoschematics contains the domain contract, framework-neutral view calculations, interactive views, authored Infoschematics, public guidance, and website. Keep changes inside the ownership root that owns them: reusable libraries under `packages/`, deployable applications under `apps/`, and independently authored Infoschematic examples under `examples/`. Preserve the dependency direction documented in [the architecture guide](docs/design/architecture.md).
 
 Use canonical terms from [the vocabulary reference](docs/reference/vocabulary.md) and preserve durable reasoning in [the decision-record index](docs/decisions/README.md). Do not introduce `topology`, `programme`, `demonstration`, `spotlight`, `vendor`, or `stage` as new public product concepts. Existing internal occurrences are migration work owned by `INFOSCHEMATICS-TOOL-002`.
 

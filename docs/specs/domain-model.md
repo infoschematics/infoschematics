@@ -10,7 +10,7 @@ Every authored artefact and flow MUST carry an identifier and a display code. Id
 
 _Provenance: IBC TOPO-001 and TOPO-019._
 
-_Implementation surface: `workspaces/domain-model/src/artefact.ts`, `workspaces/domain-model/src/flow.ts` and `workspaces/domain-model/src/point.ts`._
+_Implementation surface: `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts` and `packages/domain-model/src/point.ts`._
 
 ### DOMAIN-002 — Codes are authored, not inferred from position
 
@@ -18,7 +18,7 @@ A code MUST be part of the authored model rather than derived from array positio
 
 _Provenance: IBC TOPO-019, generalised to remove IBC scope and flow-family prefixes._
 
-_Implementation surface: the `code` fields in `workspaces/domain-model/src/artefact.ts`, `workspaces/domain-model/src/flow.ts`, `workspaces/domain-model/src/point.ts`, `workspaces/domain-model/src/scene.ts` and `workspaces/domain-model/src/story.ts`._
+_Implementation surface: the `code` fields in `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/point.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`._
 
 ### DOMAIN-003 — Port references use compass-side identity
 
@@ -26,7 +26,7 @@ A flow endpoint that terminates on an artefact MUST name a port using `N`, `E`, 
 
 _Provenance: IBC TOPO-004._
 
-_Implementation surface: `PortId` in `workspaces/domain-model/src/ports.ts` and flow endpoints in `workspaces/domain-model/src/flow.ts`._
+_Implementation surface: `PortId` in `packages/domain-model/src/ports.ts` and flow endpoints in `packages/domain-model/src/flow.ts`._
 
 ## Authored data
 
@@ -36,7 +36,7 @@ An Infoschematic definition MUST be expressible as serialisable data. It MUST NO
 
 _Provenance: IBC TOPO-022, adapted from its former `src/play` layout to the package boundary._
 
-_Verification: `workspaces/domain-model/src/modules.test.ts` checks the public module surface; dependency direction is checked by the repository `check:deps` script._
+_Verification: `packages/domain-model/src/modules.test.ts` checks the public module surface; dependency direction is checked by the repository `check:deps` script._
 
 ### DOMAIN-005 — Authored data and calculations have separate owners
 
@@ -52,7 +52,7 @@ A fabric MUST have authored identity and placement and MUST be available as a fl
 
 _Provenance: IBC TOPO-005 and TOPO-023, without IBC-specific fabric kinds or editing presentation._
 
-_Implementation surface: `workspaces/domain-model/src/fabric.ts` and `workspaces/domain-model/src/flow.ts`._
+_Implementation surface: `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/flow.ts`._
 
 ## Geography
 
@@ -64,7 +64,7 @@ An artefact MAY cross a zone boundary. Its placement, rather than membership in 
 
 _Provenance: IBC TOPO-009._
 
-_Implementation surface: `workspaces/domain-model/src/lane.ts`, `workspaces/domain-model/src/zone.ts` and `workspaces/domain-model/src/infoschematic.ts`._
+_Implementation surface: `packages/domain-model/src/lane.ts`, `packages/domain-model/src/zone.ts` and `packages/domain-model/src/infoschematic.ts`._
 
 ### DOMAIN-008 — Placed artefacts belong to the Infoschematic geography
 
@@ -72,7 +72,7 @@ Cards and fabrics MUST carry explicit placement within the Infoschematic coordin
 
 _Provenance: IBC TOPO-017, generalised from its lane-specific audit._
 
-_Implementation surface: `workspaces/domain-model/src/card.ts`, `workspaces/domain-model/src/fabric.ts` and `workspaces/domain-model/src/infoschematic.ts`._
+_Implementation surface: `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/infoschematic.ts`._
 
 ## Relationships
 
@@ -82,7 +82,7 @@ A flow MUST state its family and the two things it joins independently from the 
 
 _Provenance: IBC TOPO-008 and TOPO-021._
 
-_Implementation surface: `FlowConfig` in `workspaces/domain-model/src/flow.ts`._
+_Implementation surface: `FlowConfig` in `packages/domain-model/src/flow.ts`._
 
 ### DOMAIN-010 — Component and flow conformance are distinct
 
@@ -90,7 +90,7 @@ An artefact MAY name specifications that it offers. A flow MAY separately name s
 
 _Provenance: IBC TOPO-024 and TOPO-008._
 
-_Implementation surface: `conformsTo` in `workspaces/domain-model/src/artefact.ts` and `workspaces/domain-model/src/flow.ts`._
+_Implementation surface: `conformsTo` in `packages/domain-model/src/artefact.ts` and `packages/domain-model/src/flow.ts`._
 
 ### DOMAIN-011 — Containment is an authored relationship
 
@@ -98,7 +98,7 @@ A card that adapts or wraps another card MUST name the card it wraps. That relat
 
 _Provenance: IBC TOPO-018._
 
-_Implementation surface: `wraps` in `workspaces/domain-model/src/card.ts`._
+_Implementation surface: `wraps` in `packages/domain-model/src/card.ts`._
 
 ### DOMAIN-012 — Scopes control applicability without changing identity
 
@@ -106,7 +106,7 @@ Artefacts MAY belong to one or more scopes and MAY require either any or all nam
 
 _Provenance: IBC TOPO-013 and TOPO-014, generalised from architecture-scope filtering._
 
-_Implementation surface: `scopes` and `scopeRule` in `workspaces/domain-model/src/artefact.ts`._
+_Implementation surface: `scopes` and `scopeRule` in `packages/domain-model/src/artefact.ts`._
 
 ## Gaps
 

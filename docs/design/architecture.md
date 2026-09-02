@@ -2,13 +2,13 @@
 
 Infoschematics separates authored product data, framework-neutral behaviour, derived visual calculations, output-specific rendering, authored examples, and host publication.
 
-The reasons for this direction are recorded in [the framework-neutral library decision](../decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md), [the workspace-ownership decision](../decisions/ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), and [the host-boundary decision](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md).
+The reasons for this direction are recorded in [the framework-neutral library decision](../decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md), [the ownership decision](../decisions/ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), [the host-boundary decision](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md), and [the monorepo-root decision](../decisions/ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).
 
-## Current workspace graph
+## Current package graph
 
 ```text
 @infoschematics/domain-model
-└── no workspace dependencies
+└── no package dependencies
 
 @infoschematics/domain-core
 └── @infoschematics/domain-model
@@ -31,16 +31,24 @@ The reasons for this direction are recorded in [the framework-neutral library de
 
 Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it; neither imports an interactive view, authored Infoschematic, or site. Authored Infoschematics do not import interactive views. Site consumes public package exports rather than package internals.
 
-## Workspace responsibilities
+## Ownership roots
 
-- `workspaces/domain-model` owns the dependency-free `InfoschematicConfig` and focused authored product-type modules.
-- `workspaces/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
-- `workspaces/view-model` owns geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
-- `workspaces/view-studio` owns the current combined interactive view, presentation controls, Producer controls, and runtime state derived from configuration.
-- `workspaces/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
-- `workspaces/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
+Bun treats every package, application, and example as part of one workspace graph, but the physical roots communicate why each unit exists:
 
-Authored Infoschematic workspaces use the `is-` prefix. Reusable packages and host applications use role-based workspace names. Published package names retain the `@infoschematics/*` namespace.
+- `packages/` contains independently consumable libraries, including Domain, View, and renderer packages.
+- `apps/` contains deployable composition roots. The public website follows the shared convention at `apps/site`.
+- `examples/` contains independently authored Infoschematic definitions. Their directory and package names use the `is-*` prefix.
+
+## Responsibilities
+
+- `packages/domain-model` owns the dependency-free `InfoschematicConfig` and focused authored product-type modules.
+- `packages/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
+- `packages/view-model` owns geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
+- `packages/view-studio` owns the current combined interactive view, presentation controls, Producer controls, and runtime state derived from configuration.
+- `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
+- `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
+
+Authored Infoschematic examples use the `is-` prefix. Reusable packages and host applications use role-based names. Published package names retain the `@infoschematics/*` namespace.
 
 ## Host boundary
 
@@ -88,4 +96,4 @@ Current built-in Fabric keys are provisional implementation capability. A stable
 
 [ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
 
-The blank example and future self-describing example remain separate authored definitions so they can be tested and reused independently. The former standalone website repository is outside this workspace graph.
+The blank example and future self-describing example remain separate authored definitions so they can be tested and reused independently. The former standalone website repository is outside this monorepo.

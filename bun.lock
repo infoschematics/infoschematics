@@ -20,25 +20,7 @@
         "vitest": "^4.0.3",
       },
     },
-    "workspaces/domain-core": {
-      "name": "@infoschematics/domain-core",
-      "version": "0.1.0",
-      "dependencies": {
-        "@infoschematics/domain-model": "0.1.0",
-      },
-    },
-    "workspaces/domain-model": {
-      "name": "@infoschematics/domain-model",
-      "version": "0.1.0",
-    },
-    "workspaces/is-blank": {
-      "name": "@infoschematics/is-blank",
-      "version": "0.1.0",
-      "dependencies": {
-        "@infoschematics/domain-core": "0.1.0",
-      },
-    },
-    "workspaces/site": {
+    "apps/site": {
       "name": "@infoschematics/site",
       "version": "0.1.0",
       "dependencies": {
@@ -59,14 +41,32 @@
         "wrangler": "^4.123.0",
       },
     },
-    "workspaces/view-model": {
+    "examples/is-blank": {
+      "name": "@infoschematics/is-blank",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+      },
+    },
+    "packages/domain-core": {
+      "name": "@infoschematics/domain-core",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-model": "0.1.0",
+      },
+    },
+    "packages/domain-model": {
+      "name": "@infoschematics/domain-model",
+      "version": "0.1.0",
+    },
+    "packages/view-model": {
       "name": "@infoschematics/view-model",
       "version": "0.1.0",
       "dependencies": {
         "@infoschematics/domain-model": "0.1.0",
       },
     },
-    "workspaces/view-studio": {
+    "packages/view-studio": {
       "name": "@infoschematics/view-studio",
       "version": "0.1.0",
       "dependencies": {
@@ -290,17 +290,17 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.35.2", "", { "os": "win32", "cpu": "x64" }, "sha512-imoOyBcoM/iiUr4J6VPpCNjPnjvP/Gks95898yB8YqoGGYmHYbOyCuNv9FMhFgtaiHFGbHW8bxKqRV6VjtXThQ=="],
 
-    "@infoschematics/domain-core": ["@infoschematics/domain-core@workspace:workspaces/domain-core"],
+    "@infoschematics/domain-core": ["@infoschematics/domain-core@workspace:packages/domain-core"],
 
-    "@infoschematics/domain-model": ["@infoschematics/domain-model@workspace:workspaces/domain-model"],
+    "@infoschematics/domain-model": ["@infoschematics/domain-model@workspace:packages/domain-model"],
 
-    "@infoschematics/is-blank": ["@infoschematics/is-blank@workspace:workspaces/is-blank"],
+    "@infoschematics/is-blank": ["@infoschematics/is-blank@workspace:examples/is-blank"],
 
-    "@infoschematics/site": ["@infoschematics/site@workspace:workspaces/site"],
+    "@infoschematics/site": ["@infoschematics/site@workspace:apps/site"],
 
-    "@infoschematics/view-model": ["@infoschematics/view-model@workspace:workspaces/view-model"],
+    "@infoschematics/view-model": ["@infoschematics/view-model@workspace:packages/view-model"],
 
-    "@infoschematics/view-studio": ["@infoschematics/view-studio@workspace:workspaces/view-studio"],
+    "@infoschematics/view-studio": ["@infoschematics/view-studio@workspace:packages/view-studio"],
 
     "@internationalized/date": ["@internationalized/date@3.12.4", "", { "dependencies": { "@swc/helpers": "^0.5.0" } }, "sha512-M1dEn4c1U1HsSlaVR8upZtSqvXrTkHDfv18H01uCSJyjVLDxnBR38v/fMxecmlwXKR4i9HeZcmgQAPE6A+aGJQ=="],
 

@@ -31,6 +31,8 @@ SITE = "site-experience"
 TOOL = "tool"
 
 [skills.ki-repo-website]
+site-root = "apps/site"
+
+[skills.ki-repo-website-app]
 
 [skills.ki-repo-website-cloudflare]
-site-root = "workspaces/site"

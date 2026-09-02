@@ -1,6 +1,6 @@
 # Author an Infoschematic
 
-Author product data with types from `@infoschematics/domain-model` and normalise complete definitions with `defineInfoschematic` from `@infoschematics/domain-core`. Keep a definition in its own workspace or package when it represents an independently maintained Infoschematic.
+Author product data with types from `@infoschematics/domain-model` and normalise complete definitions with `defineInfoschematic` from `@infoschematics/domain-core`. Keep an independently maintained definition in its own `examples/is-*` package.
 
 ## Start blank
 
@@ -36,9 +36,9 @@ Copying a Standalone Scene into a Theme or Story creates independently owned mat
 ## Keep configuration portable
 
 - Export one complete value created by `defineInfoschematic`.
-- Import domain types from `@infoschematics/domain-model` and domain behaviour from `@infoschematics/domain-core`; never import a view package from an authored workspace.
+- Import domain types from `@infoschematics/domain-model` and domain behaviour from `@infoschematics/domain-core`; never import a view package from an authored example.
 - Use stable string identifiers and renderer keys.
 - Keep React components, browser APIs, fetched documents, and derived maps out of configuration.
 - Let the host own contract files and other static assets addressed by configuration URLs.
 
-The [`workspaces/is-blank`](../../workspaces/is-blank/) package is the minimum executable reference. The public website consumes it at `/examples/blank/`.
+The [`examples/is-blank`](../../examples/is-blank/) package is the minimum executable reference. The public website consumes it at `/examples/blank/`.

@@ -40,19 +40,19 @@
     "url": "git+https://github.com/infoschematics/infoschematics.git"
   },
   "scripts": {
-    "build": "bun run --cwd workspaces/site build",
+    "build": "bun run --cwd apps/site build",
     "check": "bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run build",
-    "clean": "bun run --cwd workspaces/site clean",
-    "dev": "bun run --cwd workspaces/site dev",
-    "ki:site:build": "bun run --cwd workspaces/site build",
-    "ki:site:clean": "bun run --cwd workspaces/site clean",
-    "ki:site:deploy": "bun run --cwd workspaces/site deploy",
-    "ki:site:dev": "bun run --cwd workspaces/site dev",
-    "ki:site:preview": "bun run --cwd workspaces/site preview",
-		"ki:verify:depcruise": "depcruise workspaces/domain-model/src workspaces/domain-core/src workspaces/view-model/src workspaces/view-studio/src workspaces/is-blank/src workspaces/site/src",
-		"ki:verify:typecheck": "tsc --noEmit -p workspaces/domain-model && tsc --noEmit -p workspaces/domain-core && tsc --noEmit -p workspaces/view-model && tsc --noEmit -p workspaces/view-studio && tsc --noEmit -p workspaces/is-blank && tsc --noEmit -p workspaces/site",
+    "clean": "bun run --cwd apps/site clean",
+    "dev": "bun run --cwd apps/site dev",
+    "ki:site:build": "bun run --cwd apps/site build",
+    "ki:site:clean": "bun run --cwd apps/site clean",
+    "ki:site:deploy": "bun run --cwd apps/site deploy",
+    "ki:site:dev": "bun run --cwd apps/site dev",
+    "ki:site:preview": "bun run --cwd apps/site preview",
+		"ki:verify:depcruise": "depcruise packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-studio/src examples/is-blank/src apps/site/src",
+		"ki:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-studio && tsc --noEmit -p examples/is-blank && tsc --noEmit -p apps/site",
     "test": "vitest run --root ."
   },
   "type": "module",
-  "workspaces": ["workspaces/*"]
+  "workspaces": ["packages/*", "apps/*", "examples/*"]
 }

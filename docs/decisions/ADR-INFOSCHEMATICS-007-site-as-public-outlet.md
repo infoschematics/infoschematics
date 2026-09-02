@@ -16,10 +16,10 @@ The public site, package examples, and consumer documentation need one repositor
 
 ## Decision
 
-The Site workspace is the public outlet for this repository. It composes published package APIs, independently authored `is-*` examples, and selected canonical Markdown from `docs/`.
+The Site application at `apps/site` is the public outlet for this repository. It composes published package APIs, independently authored `is-*` examples, and selected canonical Markdown from `docs/`.
 
 Documentation remains authored once under `docs/`. The site renders consumer guides and reference material at stable public routes. Maintainer-facing decisions, architecture, specifications, and roadmap records remain repository documents unless explicitly selected for publication.
 
 ## Consequences
 
-Website presentation can improve without duplicating product knowledge. Examples prove public package seams and remain reusable outside the site. The Site workspace may own navigation, page metadata, layout, and deployment, but any general Infoschematic behaviour must move into the appropriate package before the site consumes it.
+Website presentation can improve without duplicating product knowledge. Examples prove public package seams and remain reusable outside the site. The Site application may own navigation, page metadata, layout, and deployment, but any general Infoschematic behaviour must move into the appropriate package before the site consumes it.

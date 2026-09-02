@@ -10,7 +10,7 @@ Opening an editing capability MUST be an explicit producer action. A fresh appli
 
 _Provenance: retained from IBC EDIT-001; obsolete storage-key details were removed._
 
-_Implementation surface: `workspaces/view-studio/src/app/editor/use-editor.ts` and `workspaces/view-studio/src/app/hooks/use-persistent-state.ts`._
+_Implementation surface: `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/hooks/use-persistent-state.ts`._
 
 ### EDIT-002 — Studio does not write authored source
 
@@ -18,7 +18,7 @@ Studio MUST NOT write repository source, a deployment service or an external dat
 
 _Provenance: retained from IBC EDIT-002 and EDIT-019._
 
-_Implementation surface: `workspaces/view-studio/src/app/editor/use-editor.ts` and `workspaces/view-studio/src/app/editor/ChangePane.tsx`._
+_Implementation surface: `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/editor/ChangePane.tsx`._
 
 ### EDIT-064 — Reasserting the current mode changes nothing
 
@@ -26,7 +26,7 @@ Setting Studio to the mode it already occupies MUST preserve view preferences an
 
 _Provenance: retained from IBC EDIT-064._
 
-_Implementation surface: mode transitions in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: mode transitions in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-005 — Editing aids appear only while editing
 
@@ -34,7 +34,7 @@ The editing grid, ports and manipulation handles MUST be available while editing
 
 _Provenance: retained from IBC EDIT-005, EDIT-007 and EDIT-012._
 
-_Implementation surface: editing layers in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx` and `workspaces/view-studio/src/styles.css`._
+_Implementation surface: editing layers in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`._
 
 ## Selection
 
@@ -44,7 +44,7 @@ Selecting an artefact, flow, label, lane, zone, port or waypoint MUST NOT move o
 
 _Provenance: retained from IBC EDIT-034 and EDIT-039._
 
-_Implementation surface: selection and handle contracts in `workspaces/view-model/src/editable.ts` and `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: selection and handle contracts in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-035 — Selection can be cleared
 
@@ -52,7 +52,7 @@ A producer MUST be able to clear selection by choosing the canvas rather than an
 
 _Provenance: retained from IBC EDIT-035._
 
-_Implementation surface: `select` in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `select` in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-036 — The editor identifies the selected kind
 
@@ -60,7 +60,7 @@ The properties view MUST identify what kind of thing is selected before presenti
 
 _Provenance: retained from IBC EDIT-036 and EDIT-037._
 
-_Implementation surface: `Placement` in `workspaces/view-model/src/editable.ts` and `workspaces/view-studio/src/app/panels/PlacementPanel.tsx`._
+_Implementation surface: `Placement` in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/panels/PlacementPanel.tsx`._
 
 ### EDIT-061 — Hover and selection use related, distinct treatments
 
@@ -68,7 +68,7 @@ Every selectable kind SHOULD use one visual treatment family for pointing and se
 
 _Provenance: retained from IBC EDIT-061._
 
-_Implementation surface: selected and hovered state in `workspaces/view-studio/src/app/editor/use-editor.ts` and styles in `workspaces/view-studio/src/styles.css`._
+_Implementation surface: selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts` and styles in `packages/view-studio/src/styles.css`._
 
 ### EDIT-030 — A flow is selectable by its route
 
@@ -76,7 +76,7 @@ A producer MUST be able to select a flow by its rendered route rather than only 
 
 _Provenance: retained from IBC EDIT-030._
 
-_Implementation surface: flow interaction in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx` and pointer-target styles in `workspaces/view-studio/src/styles.css`._
+_Implementation surface: flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-studio/src/styles.css`._
 
 ### EDIT-041 — A selected flow exposes both attachments
 
@@ -84,7 +84,7 @@ Selecting a flow MUST identify its source and target artefacts and ports. The at
 
 _Provenance: retained from IBC EDIT-041._
 
-_Implementation surface: selected-flow derivation in `workspaces/view-studio/src/app/App.tsx` and port rendering in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx`._
+_Implementation surface: selected-flow derivation in `packages/view-studio/src/app/App.tsx` and port rendering in `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
 ### EDIT-050 — Fabrics participate as artefacts
 
@@ -92,7 +92,7 @@ A fabric with authored placement and ports MUST be selectable and editable throu
 
 _Provenance: retained from IBC EDIT-050, generalised from the original component terminology._
 
-_Implementation surface: placeable handles in `workspaces/view-studio/src/app/editor/infoschematic-editable.ts`._
+_Implementation surface: placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`._
 
 ## Editing
 
@@ -102,7 +102,7 @@ Studio MUST ask the current diagram for handles, guides, placement constraints, 
 
 _Provenance: IBC EDIT-008, generalised to the `EditableDiagram` seam._
 
-_Implementation surface: `EditableDiagram` in `workspaces/view-model/src/editable.ts` and its use by `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `EditableDiagram` in `packages/view-model/src/editable.ts` and its use by `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-011 — Keyboard nudging is exact
 
@@ -110,7 +110,7 @@ Keyboard nudging MUST move the current movable selection by the exact requested 
 
 _Provenance: retained from IBC EDIT-011._
 
-_Implementation surface: `nudge` in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `nudge` in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-017 — Every route change is represented
 
@@ -118,7 +118,7 @@ When a component movement, endpoint reattachment or direct route edit changes a 
 
 _Provenance: retained from IBC EDIT-017 and EDIT-026._
 
-_Implementation surface: derived changes, attachments and routes in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: derived changes, attachments and routes in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-018 — Port counts are editable per side
 
@@ -126,7 +126,7 @@ Studio MUST allow each side's port count to be edited independently. Changing on
 
 _Provenance: retained from IBC EDIT-018._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers layering a side-specific count over the counts in force._
+_Verification: `packages/view-model/src/guides.test.ts` covers layering a side-specific count over the counts in force._
 
 ### EDIT-013 — A port shows whether it is used
 
@@ -134,7 +134,7 @@ While editing, a port MUST visually distinguish whether a flow currently termina
 
 _Provenance: retained from IBC EDIT-012 and EDIT-013._
 
-_Implementation surface: port classes and labels in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx` and `workspaces/view-studio/src/styles.css`._
+_Implementation surface: port classes and labels in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`._
 
 ### EDIT-042 — A flow end can be reattached to an offered port
 
@@ -142,7 +142,7 @@ A producer MUST be able to drag a selected flow endpoint to any compatible port 
 
 _Provenance: retained from IBC EDIT-042 and EDIT-048._
 
-_Implementation surface: endpoint drag and `dropPort` state in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx`._
+_Implementation surface: endpoint drag and `dropPort` state in `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
 ### EDIT-031 — Flow waypoints can be edited deliberately
 
@@ -150,7 +150,7 @@ A selected flow MUST expose its interior waypoints. Adding or removing a waypoin
 
 _Provenance: retained from IBC EDIT-031._
 
-_Implementation surface: waypoint actions in `workspaces/view-studio/src/app/editor/use-editor.ts` and `workspaces/view-studio/src/app/InfoschematicDiagram.tsx`._
+_Implementation surface: waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
 ## Undo and drafts
 
@@ -160,7 +160,7 @@ Studio MUST offer undo and redo for every draft-changing action. One pointer ges
 
 _Provenance: retained from IBC EDIT-028._
 
-_Implementation surface: checkpoints, gesture closure, undo and redo in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: checkpoints, gesture closure, undo and redo in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-040 — Change actions form one control group
 
@@ -168,7 +168,7 @@ Undo, redo, discard and change-set export SHOULD be presented together because t
 
 _Provenance: retained from IBC EDIT-040 and EDIT-072, without its application-specific toolbar layout._
 
-_Implementation surface: `workspaces/view-studio/src/app/editor/ChangePane.tsx` and `workspaces/view-studio/src/app/editor/EditorTools.tsx`._
+_Implementation surface: `packages/view-studio/src/app/editor/ChangePane.tsx` and `packages/view-studio/src/app/editor/EditorTools.tsx`._
 
 ### EDIT-029 — Undo history is not persisted
 
@@ -176,7 +176,7 @@ Draft data MAY survive reload, but undo and redo history MUST be scoped to the c
 
 _Provenance: retained from IBC EDIT-029._
 
-_Implementation surface: draft persistence and in-memory history in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: draft persistence and in-memory history in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-060 — Drafts already reflected by the model are dropped
 
@@ -184,7 +184,7 @@ A pending change whose value the authored model now states MUST be removed. A dr
 
 _Provenance: retained from IBC EDIT-060._
 
-_Verification: `workspaces/view-studio/src/app/editor/use-editor.test.ts` covers spent component, endpoint and port-count drafts, partial endpoint changes and missing model keys._
+_Verification: `packages/view-studio/src/app/editor/use-editor.test.ts` covers spent component, endpoint and port-count drafts, partial endpoint changes and missing model keys._
 
 ## Change consolidation
 
@@ -194,7 +194,7 @@ Every draft adjustment MUST appear in one reviewable change set. The producer MU
 
 _Provenance: retained from IBC EDIT-019._
 
-_Implementation surface: `pending`, `changeCount` and `discard` in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `pending`, `changeCount` and `discard` in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-052 — One pending change can be dropped
 
@@ -202,7 +202,7 @@ Each independently authored pending change MUST be removable without discarding 
 
 _Provenance: retained from IBC EDIT-052._
 
-_Implementation surface: pending origins and `drop` in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: pending origins and `drop` in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-056 — A change names what it describes
 
@@ -210,7 +210,7 @@ Every pending change MUST identify the artefact or flow it describes. Selecting 
 
 _Provenance: retained from IBC EDIT-056._
 
-_Implementation surface: `PendingChange`, selection and hover in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `PendingChange`, selection and hover in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-058 — Changes are consolidated by property
 
@@ -218,7 +218,7 @@ The change set MUST contain at most one effective entry for a property of an aut
 
 _Provenance: retained from IBC EDIT-058._
 
-_Verification: `workspaces/view-studio/src/app/editor/use-editor.test.ts` covers natural code ordering and property grouping._
+_Verification: `packages/view-studio/src/app/editor/use-editor.test.ts` covers natural code ordering and property grouping._
 
 ## Creation and removal
 
@@ -228,7 +228,7 @@ Removing an authored artefact MUST mark it as pending removal rather than making
 
 _Provenance: retained from IBC EDIT-067._
 
-_Implementation surface: removal drafts in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: removal drafts in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-068 — A flow can be created between ports
 
@@ -238,7 +238,7 @@ Code allocation and allowed families MUST be supplied by the current Infoschemat
 
 _Provenance: retained from IBC EDIT-068, with IBC code-family and ADR references removed._
 
-_Implementation surface: creation state in `workspaces/view-studio/src/app/editor/use-editor.ts` and flow interaction in `workspaces/view-studio/src/app/InfoschematicDiagram.tsx`._
+_Implementation surface: creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
 ### EDIT-069 — A card can be created with a valid default
 
@@ -248,7 +248,7 @@ Identity allocation, scope choice and default appearance MUST be supplied by the
 
 _Provenance: retained from IBC EDIT-069, with IBC adapter and code-series policy removed._
 
-_Implementation surface: `CreatedComponent` in `workspaces/view-model/src/editable.ts` and card creation state in `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: `CreatedComponent` in `packages/view-model/src/editable.ts` and card creation state in `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ### EDIT-071 — Moving a component carries attached presentation
 
@@ -256,7 +256,7 @@ Moving a component MUST carry route ends attached to it. When a wrapping card de
 
 _Provenance: retained from IBC EDIT-071 and domain relationship TOPO-018._
 
-_Implementation surface: derived changes in `workspaces/view-model/src/editable.ts` and `workspaces/view-studio/src/app/editor/use-editor.ts`._
+_Implementation surface: derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ## Verification
 
@@ -266,7 +266,7 @@ Studio MUST have a rendered component test covering both read-only and editing-c
 
 _Provenance: retained from IBC EDIT-059 and EDIT-046._
 
-_Verification: `workspaces/view-studio/src/app/App.test.tsx` renders the application against blank and structural configurations. Pointer interaction coverage remains a gap below._
+_Verification: `packages/view-studio/src/app/App.test.tsx` renders the application against blank and structural configurations. Pointer interaction coverage remains a gap below._
 
 ## Gaps
 

@@ -10,7 +10,7 @@ Every rendered route MUST consist only of absolute horizontal and vertical runs.
 
 _Provenance: IBC TOPO-007._
 
-_Verification: `workspaces/view-model/src/routing.test.ts` and `workspaces/view-model/src/waypoints.test.ts` exercise orthogonal route edits; `routePath` in `workspaces/view-model/src/geometry.ts` rejects diagonals._
+_Verification: `packages/view-model/src/routing.test.ts` and `packages/view-model/src/waypoints.test.ts` exercise orthogonal route edits; `routePath` in `packages/view-model/src/geometry.ts` rejects diagonals._
 
 ### VIEW-002 — Route edits preserve anchored ends
 
@@ -18,7 +18,7 @@ Moving one end of a route MUST carry the endpoint to its requested position whil
 
 _Provenance: IBC EDIT-017, EDIT-053 and EDIT-055._
 
-_Verification: `workspaces/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality._
+_Verification: `packages/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality._
 
 ### VIEW-003 — Waypoint edits preserve route validity
 
@@ -26,7 +26,7 @@ Inserting, moving or deleting an interior waypoint, and moving an interior run, 
 
 _Provenance: IBC EDIT-031, EDIT-032 and EDIT-033._
 
-_Verification: `workspaces/view-model/src/waypoints.test.ts` covers insertion, movement, deletion, segment movement and terminal protection._
+_Verification: `packages/view-model/src/waypoints.test.ts` covers insertion, movement, deletion, segment movement and terminal protection._
 
 ### VIEW-004 — Route normalisation removes redundant points
 
@@ -34,7 +34,7 @@ Normalising a route MUST remove repeated points and merge consecutive collinear 
 
 _Provenance: extracted from the route-normalisation behaviour supporting IBC EDIT-033 and EDIT-068._
 
-_Verification: `workspaces/view-model/src/routing.test.ts` covers repeated points, collinear runs and already-normal routes._
+_Verification: `packages/view-model/src/routing.test.ts` covers repeated points, collinear runs and already-normal routes._
 
 ## Ports
 
@@ -44,7 +44,7 @@ Every calculated port MUST lie on the edge named by its compass-side identifier.
 
 _Provenance: IBC TOPO-020, EDIT-016 and EDIT-062._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers edge placement and per-side counts._
+_Verification: `packages/view-model/src/guides.test.ts` covers edge placement and per-side counts._
 
 ### VIEW-006 — A side is subdivided rather than filled from one end
 
@@ -52,7 +52,7 @@ Ports on one side MUST be spread across the usable side length. Numbering MUST p
 
 _Provenance: IBC EDIT-014 and EDIT-015._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers subdivision, centre-outward numbering and the position of port one._
+_Verification: `packages/view-model/src/guides.test.ts` covers subdivision, centre-outward numbering and the position of port one._
 
 ### VIEW-007 — A side offers every count it can place safely
 
@@ -60,7 +60,7 @@ A side MUST accept every port count for which its ports can occupy distinct inte
 
 _Provenance: IBC EDIT-044 and EDIT-063._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count._
+_Verification: `packages/view-model/src/guides.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count._
 
 ### VIEW-008 — Unspecified port counts use one declared default
 
@@ -68,7 +68,7 @@ When an artefact side has no authored count, port calculation MUST use the View 
 
 _Provenance: IBC EDIT-024._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers the default count; `defaultPortCount` is exported by `workspaces/view-model/src/ports.ts`._
+_Verification: `packages/view-model/src/guides.test.ts` covers the default count; `defaultPortCount` is exported by `packages/view-model/src/ports.ts`._
 
 ### VIEW-009 — Port audits expose collisions and mismatches
 
@@ -76,7 +76,7 @@ A port audit MUST report routes landing on the same port, ports that are closer 
 
 _Provenance: IBC TOPO-011 and TOPO-020._
 
-_Implementation surface: `auditPorts` in `workspaces/view-model/src/ports.ts`._
+_Implementation surface: `auditPorts` in `packages/view-model/src/ports.ts`._
 
 ## Grid and guides
 
@@ -86,7 +86,7 @@ Grid snapping MUST operate in the Infoschematic's coordinate space. The standard
 
 _Provenance: IBC TOPO-016 and EDIT-006._
 
-_Implementation surface: grid projection in `workspaces/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `workspaces/view-model/src/ports.ts`._
+_Implementation surface: grid projection in `packages/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `packages/view-model/src/ports.ts`._
 
 ### VIEW-011 — Alignment guides come from the scene
 
@@ -94,7 +94,7 @@ Alignment guides MUST be derived from visible box edges, box centres and other h
 
 _Provenance: IBC EDIT-008._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers box edges, centres, handles and duplicate suppression._
+_Verification: `packages/view-model/src/guides.test.ts` covers box edges, centres, handles and duplicate suppression._
 
 ### VIEW-012 — Each axis snaps independently
 
@@ -102,7 +102,7 @@ Snapping MUST choose the nearest guide within threshold on each axis independent
 
 _Provenance: IBC EDIT-009 and EDIT-010._
 
-_Verification: `workspaces/view-model/src/guides.test.ts` covers independent axes, nearest-guide preference and no-guide behaviour._
+_Verification: `packages/view-model/src/guides.test.ts` covers independent axes, nearest-guide preference and no-guide behaviour._
 
 ## Labels and overlays
 
@@ -112,7 +112,7 @@ A flow-label position MUST be represented as a share of route length rather than
 
 _Provenance: IBC TOPO-012, EDIT-047 and EDIT-057._
 
-_Verification: `workspaces/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `workspaces/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision._
+_Verification: `packages/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `packages/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision._
 
 ### VIEW-014 — Automatic label placement avoids occupied space
 
@@ -120,7 +120,7 @@ Automatically placed route labels MUST try candidate positions in a stable order
 
 _Provenance: IBC TOPO-012._
 
-_Implementation surface: `placeLabels` in `workspaces/view-model/src/placement.ts`._
+_Implementation surface: `placeLabels` in `packages/view-model/src/placement.ts`._
 
 ### VIEW-015 — Floating overlays remain within the view
 
@@ -128,7 +128,7 @@ A floating overlay position MUST be clamped inside the view before being scored.
 
 _Provenance: extracted from the IBC scene and callout placement implementation rather than a numbered topology requirement._
 
-_Verification: `workspaces/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates._
+_Verification: `packages/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates._
 
 ## Gaps
 

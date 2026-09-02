@@ -10,7 +10,7 @@ blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
-> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-019`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the workspace split: read `src/diagram/` as `workspaces/view-model/src/`, and any other `src/` path as `workspaces/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
+> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-019`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the package split: read `src/diagram/` as `packages/view-model/src/`, and any other `src/` path as `packages/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
 
 ## Goal
 
@@ -371,7 +371,7 @@ Capability gaps discovered by the mapping are retained separately in `INFOSCHEMA
 
 - This roadmap record and any follow-on records it explicitly creates
 - Vocabulary, architecture, and contributor documentation affected by the settled terms
-- `workspaces/view-model/src/**` and `workspaces/view-studio/src/**` identifiers named by the approved rollout
+- `packages/view-model/src/**` and `packages/view-studio/src/**` identifiers named by the approved rollout
 
 ## Verify
 

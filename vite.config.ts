@@ -9,9 +9,13 @@ export default defineConfig({
   test: {
     // Both extensions: a component test has to be .tsx, and leaving it out of
     // the pattern meant one could be written and silently never run.
-      include: [
-        fileURLToPath(new URL('./workspaces/*/src/**/*.test.ts', import.meta.url)),
-        fileURLToPath(new URL('./workspaces/*/src/**/*.test.tsx', import.meta.url))
-      ]
+    include: [
+      fileURLToPath(new URL('./packages/*/src/**/*.test.ts', import.meta.url)),
+      fileURLToPath(new URL('./packages/*/src/**/*.test.tsx', import.meta.url)),
+      fileURLToPath(new URL('./apps/*/src/**/*.test.ts', import.meta.url)),
+      fileURLToPath(new URL('./apps/*/src/**/*.test.tsx', import.meta.url)),
+      fileURLToPath(new URL('./examples/*/src/**/*.test.ts', import.meta.url)),
+      fileURLToPath(new URL('./examples/*/src/**/*.test.tsx', import.meta.url))
+    ]
   }
 })

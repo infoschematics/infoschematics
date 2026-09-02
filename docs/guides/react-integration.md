@@ -29,7 +29,7 @@ The host owns:
 
 Studio View owns the current rendering, Producer controls, and runtime state derived from configuration. It must not import a particular authored Infoschematic.
 
-## Workspace development
+## Monorepo development
 
 Inside this repository, Bun resolves matching `0.1.0` package dependencies to local workspaces:
 
@@ -38,7 +38,7 @@ bun install
 bun run dev
 ```
 
-The website runs from `workspaces/site`. The root verification gate runs all tests and type checks, checks dependency boundaries, and produces the site build:
+The website runs from `apps/site`. The root verification gate runs all tests and type checks, checks dependency boundaries, and produces the site build:
 
 ```bash
 bun run check
