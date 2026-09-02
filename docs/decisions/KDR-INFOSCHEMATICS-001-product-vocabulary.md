@@ -6,14 +6,13 @@ status: current
 decision_type: knowledge
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/kdr
 decision_depends_on: [PDR-INFOSCHEMATICS-003]
-transferred_from: KDR-IBC2026-001
 ---
 
 # KDR-INFOSCHEMATICS-001: Product vocabulary
 
 ## Context
 
-The first realisation used overlapping diagram, theatre, delivery, and application language. The same thing could be a node, component, service, or card depending on the file, while public interface labels exposed implementation-era names. That ambiguity became more expensive once the model, views, renderers, and authored configurations became independent packages.
+The domain, views, renderers, authored configurations, documentation, and interfaces need the same concepts to carry the same names. Allowing node, component, service, and Card to compete for one concept makes package boundaries and public APIs ambiguous.
 
 ## Decision
 

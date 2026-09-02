@@ -4,7 +4,7 @@ area: TOOL
 title: Settle vocabulary before renaming
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
@@ -426,6 +426,10 @@ The public seam and internal implementation now use the same product and product
 ### Mini recap
 
 Infoschematics now has one vocabulary from authored configuration through React presentation, with capability gaps preserved as independently shapeable work. Verification is green and no new durable learning needs promotion beyond the repository guidance and specification added here.
+
+## Done
+
+Accepted by Kris on 2026-09-02. The reviewed vocabulary, naming rollout, and recorded follow-on boundaries are the current baseline.
 
 ## Discussion
 

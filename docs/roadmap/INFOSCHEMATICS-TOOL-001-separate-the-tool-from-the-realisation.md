@@ -4,7 +4,7 @@ area: TOOL
 title: Separate tool from realisation
 theme: tool
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
@@ -52,7 +52,7 @@ So the tests move with their subjects, colocated as they are now, and the refact
 
 ### Still to settle while this is shaped
 
-- **`scripts/`** — three loose `.mjs` files (`check-interactive`, `status`, `verify-pages-output`); whether they move, gain a stated owner, or fold into package scripts belongs in this refactor rather than after it.
+- **`scripts/`** — the loose `.mjs` files (`status`, `verify-pages-output`) still need either a stated owner or a package home; the interaction invariant now lives beside `InfoschematicDiagram` as a Vitest test.
 - **`docs/`** — the documentation folders are part of the tree being tidied, and the consolidation thread is in them now; what this record does about them is settled when it is made ready, against whatever that thread lands.
 
 ## Boundary
@@ -69,12 +69,14 @@ Delivery splits judgment from mechanics, per [GDR-INFOSCHEMATICS-002](../decisio
 
 ## Current state
 
-The reusable boundary is now explicit: `workspaces/view-model/` owns framework-neutral visual calculations, `workspaces/domain-model/` owns the serialisable product contract, and `workspaces/view-studio/` publishes the current React Studio view. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only Infoschematic and the public site now exercise the same public package seam. The remaining structural work is the view split and a complete colour/token pass; vocabulary rollout is tracked by `INFOSCHEMATICS-TOOL-002`.
+The reusable boundary is now explicit: `workspaces/view-model/` owns framework-neutral visual calculations, `workspaces/domain-model/` owns the serialisable product contract, and `workspaces/view-studio/` publishes the current React Studio view. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only Infoschematic and the public site now exercise the same public package seam.
+
+The separation objective is complete. The larger additive Canvas, Present, Studio and static SVG package split is now [INFOSCHEMATICS-TOOL-008](INFOSCHEMATICS-TOOL-008-establish-additive-views.md), and full visual-token consolidation is now [INFOSCHEMATICS-TOOL-009](INFOSCHEMATICS-TOOL-009-centralise-visual-tokens.md). Neither follow-on reopens this repository-extraction boundary.
 
 ## Steps
 
 - [x] Agree the axis and the target layout, and record the decision before the first file moves.
-- [ ] Split the root diagram component along what it mixes — the stage as the generic renderer keeping the settled name, the fabric artwork with the authored material, the wiring to the app.
+- [x] Remove realisation-specific content and wiring from the root diagram component; track the later additive package decomposition in `INFOSCHEMATICS-TOOL-008`.
 - [x] Found `src/app/` and break the root entry into it: the shell legible on its own, the entry thinned to mounting.
 - [x] Regroup the scattered UI — panels, editor surfaces, hooks — by ownership, kind within.
 - [x] Found `workspaces/domain-model/` as the framework-neutral authored contract, leaving derived runtime structures in the view packages.
@@ -83,7 +85,7 @@ The reusable boundary is now explicit: `workspaces/view-model/` owns framework-n
 - [x] Replace authored singleton imports with a complete host-supplied `InfoschematicConfig`, so reusable surfaces describe a configured product rather than one realisation.
 - [x] Model Standalone, Thematic and Story Scenes explicitly, with Themes and Stories owning their respective Scenes.
 - [x] Give a Fabric's display caption and detail one authored home in its appearance configuration.
-- [ ] Name the colour decisions into tokens and route the authored colours — taxonomy and lanes — through the same layer, leaving new theme sets to `DBD-011`.
+- [x] Keep the extraction colour-neutral and move complete visual-token consolidation into `INFOSCHEMATICS-TOOL-009` rather than retaining it as an unbounded separation task.
 - [x] Baseline dependency-cruiser, then widen it across Domain Model, View Model, Studio View, authored Infoschematics and the site so each forbidden ownership crossing fails verification.
 - [x] Move `StageOverlay.tsx`'s figures out of `src/diagram/` with the rest of the authored material.
 
@@ -112,7 +114,7 @@ Second tranche, same evening:
 
 - `core/src/**`
 - `workspaces/view-studio/src/**`
-- `.dependency-cruiser.cjs`
+- `.dependency-cruiser.mjs`
 - Package export maps and affected architecture documentation
 
 ## Verify
@@ -143,6 +145,32 @@ Update architecture and contributor guidance to describe the `workspaces/domain-
 ### Roadmap
 
 Keep dependent work aligned with the final package surface and replace stale source-repository paths as the separation lands.
+
+## Review
+
+### Delivered
+
+Separated the reusable Infoschematics library from its first authored realisation, established host-owned configuration and enforceable package boundaries, and retained a blank authored example and public site as local consumers.
+
+### Summary of changes
+
+The repository now owns Domain Model, Domain Core, View Model and the current Studio view without importing the 5G play, contracts or assets. Dependency Cruiser enforces the ownership direction, interaction coverage runs with the normal test suite, and the remaining additive-view and visual-token work has explicit follow-on records.
+
+### Verification
+
+Repository tests, type checks, dependency rules, unused-code checks and the production Site build pass through `bun run check`.
+
+### Outstanding concerns
+
+The packages still live below the generic `workspaces/` root pending a deliberate monorepo-root decision. Canvas, Present, Studio and static SVG are still combined or absent until `INFOSCHEMATICS-TOOL-008`; visual-token consolidation remains `INFOSCHEMATICS-TOOL-009`.
+
+### Post-change review
+
+Ready for human acceptance. The separation boundary is complete and the remaining concerns no longer belong to this item.
+
+### Mini recap
+
+Infoschematics is now independently evolvable from the first 5G realisation. The next package work can proceed locally without pulling authored programme content back into the library.
 
 ## Discussion
 

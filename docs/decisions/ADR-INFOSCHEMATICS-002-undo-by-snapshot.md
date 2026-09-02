@@ -6,7 +6,6 @@ status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
 decision_depends_on: [ADR-INFOSCHEMATICS-001]
-transferred_from: ADR-IBC2026-002
 ---
 
 # ADR-INFOSCHEMATICS-002: Undo by snapshot

@@ -6,7 +6,6 @@ status: current
 decision_type: product
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/pdr
 decision_depends_on: [PDR-INFOSCHEMATICS-001]
-transferred_from: PDR-IBC2026-002
 ---
 
 # PDR-INFOSCHEMATICS-002: A structured editor, not a drawing tool

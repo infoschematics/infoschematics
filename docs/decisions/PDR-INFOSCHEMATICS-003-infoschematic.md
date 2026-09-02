@@ -6,14 +6,13 @@ status: current
 decision_type: product
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/pdr
 decision_depends_on: [PDR-INFOSCHEMATICS-001]
-transferred_from: PDR-IBC2026-003
 ---
 
 # PDR-INFOSCHEMATICS-003: The product is called Infoschematic
 
 ## Context
 
-The extracted approach needed a name for both the reusable library and the authored thing it produces. It draws how a system is put together and what moves through it: more structural than an infographic and more explanatory than an implementation diagram.
+The reusable library and the authored thing it produces need a shared name. The product shows how a system is put together and what moves through it: more structural than an infographic and more explanatory than an implementation diagram.
 
 Names based on `schema` were rejected because this repository also handles configuration and interface specifications, where schema already has a precise meaning.
 

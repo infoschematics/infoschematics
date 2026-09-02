@@ -6,14 +6,13 @@ status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
 decision_depends_on: [PDR-INFOSCHEMATICS-001, KDR-INFOSCHEMATICS-001]
-transferred_from: ADR-IBC2026-005
 ---
 
 # ADR-INFOSCHEMATICS-004: Source sorted by ownership before kind
 
 ## Context
 
-A tree sorted only by file kind says what a file is but not who owns it. During extraction, apparently generic directories still contained hard-coded realisation material, while reusable behaviour was scattered between model, application, and component folders. Import cleanliness alone could not detect literals owned by a particular Infoschematic.
+A tree sorted only by file kind says what a file is but not who owns it. A generic-looking directory can still contain hard-coded realisation material, while reusable behaviour can be scattered between model, application, and component folders. Import cleanliness alone cannot detect literals owned by a particular Infoschematic.
 
 ## Decision
 

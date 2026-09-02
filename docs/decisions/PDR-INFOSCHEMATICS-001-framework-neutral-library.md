@@ -6,14 +6,13 @@ status: current
 decision_type: product
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/pdr
 decision_depends_on: [GDR-INFOSCHEMATICS-001]
-transferred_from: PDR-IBC2026-001
 ---
 
 # PDR-INFOSCHEMATICS-001: A framework-neutral Infoschematic library
 
 ## Context
 
-The first realisation produced reusable geometry, routing, placement, editing, presentation, and rendering concepts alongside one 5G-EMERGE Infoschematic. Keeping those concepts tied to the realisation would make every new Infoschematic repeat the same work or vendor the source.
+Infoschematics provides geometry, routing, placement, editing, presentation, and rendering concepts that apply across independently authored products. Tying those concepts to one realisation would make every new Infoschematic repeat the same work or vendor source.
 
 ## Decision
 
@@ -23,4 +22,4 @@ Dependencies point from a realisation toward the reusable library, never from th
 
 ## Consequences
 
-The first realisation becomes a consumer rather than the owner of the tool. Generic packages use generic vocabulary even when only one realisation initially exercises a capability. The extra abstraction is intentional: it creates an importable product boundary and lets SVG, React, and future outputs share one model.
+Each realisation is a consumer rather than the owner of the tool. Generic packages use generic vocabulary even when only one realisation exercises a capability. The abstraction is intentional: it creates an importable product boundary and lets SVG, React, and future outputs share one model.

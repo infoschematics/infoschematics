@@ -1,23 +1,22 @@
 ---
 id: GDR-INFOSCHEMATICS-001
-title: Documentation instruments
+title: Adopt decision records and documentation instruments
 date: 2026-08-22
 status: current
 decision_type: governance
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/gdr
 decision_depends_on: []
-transferred_from: GDR-IBC2026-001
 ---
 
-# GDR-INFOSCHEMATICS-001: Documentation instruments
+# GDR-INFOSCHEMATICS-001: Adopt decision records and documentation instruments
 
 ## Context
 
-The first Infoschematic realisation grew design intent, specifications, roadmap records, operating guidance, and architectural reasoning alongside its implementation. Without distinct homes, current behaviour, future intent, delivery state, and the reason for a choice became difficult to distinguish.
+Infoschematics needs durable architectural and product reasoning that can be cited independently of delivery work. Without distinct homes, current behaviour, future intent, delivery state, and the reason for a choice become difficult to distinguish.
 
 ## Decision
 
-This repository separates documentation instruments by the question each answers:
+This repository adopts local decision records and separates documentation instruments by the question each answers:
 
 - decision records in `docs/decisions/` say **why**;
 - specifications in `docs/specs/` say **what is true now**, using numbered requirements with verification hooks;

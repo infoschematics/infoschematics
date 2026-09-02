@@ -6,7 +6,6 @@ status: current
 decision_type: governance
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/gdr
 decision_depends_on: [GDR-INFOSCHEMATICS-001]
-transferred_from: GDR-IBC2026-002
 ---
 
 # GDR-INFOSCHEMATICS-002: Delegated mechanical work

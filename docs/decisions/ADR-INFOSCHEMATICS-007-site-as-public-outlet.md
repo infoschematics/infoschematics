@@ -12,7 +12,7 @@ decision_depends_on: [GDR-INFOSCHEMATICS-001, ADR-INFOSCHEMATICS-004]
 
 ## Context
 
-The public site, package examples, and consumer documentation were previously split between repositories. Keeping a second copy of guides on the site would create two sources of truth, while placing reusable behaviour inside the site would reverse package ownership.
+The public site, package examples, and consumer documentation need one repository boundary. Keeping a second copy of guides on the site would create two sources of truth, while placing reusable behaviour inside the site would reverse package ownership.
 
 ## Decision
 

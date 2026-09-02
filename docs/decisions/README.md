@@ -1,8 +1,8 @@
 # Decision records
 
-Decision records explain why Infoschematics is shaped as it is. Records transferred from the first IBC2026 realisation retain their original identity in `transferred_from`; the Infoschematics-scoped record is authoritative for the reusable library.
+Decision records explain why Infoschematics is shaped as it is. They state the current decisions governing this repository; delivery history belongs in roadmap records and Git.
 
-1. [GDR-INFOSCHEMATICS-001](GDR-INFOSCHEMATICS-001-documentation-instruments.md) — decisions, specifications, designs, guides, reference material, and roadmap records answer different questions.
+1. [GDR-INFOSCHEMATICS-001](GDR-INFOSCHEMATICS-001-adopt-decision-records.md) — the repository adopts decision records and keeps each documentation instrument focused on one question.
 2. [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-framework-neutral-library.md) — Infoschematics is a framework-neutral library with adapters and applications above it.
 3. [ADR-INFOSCHEMATICS-001](ADR-INFOSCHEMATICS-001-routes-authored-as-points.md) — route points are authored; rendered path strings are derived.
 4. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — architectural judgment stays with the coordinator while bounded mechanical work can be delegated.

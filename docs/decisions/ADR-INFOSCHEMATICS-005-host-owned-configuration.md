@@ -12,7 +12,7 @@ decision_depends_on: [PDR-INFOSCHEMATICS-001, ADR-INFOSCHEMATICS-004]
 
 ## Context
 
-The original application imported one authored realisation from inside the reusable runtime. That made the library depend on content, hid the composition boundary, and prevented hosts from choosing an Infoschematic independently.
+A reusable runtime that imports an authored realisation depends on content, hides the composition boundary, and prevents hosts from choosing an Infoschematic independently.
 
 ## Decision
 
