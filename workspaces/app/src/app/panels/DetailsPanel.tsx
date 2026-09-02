@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { Placement } from '@infoschematics/core/editable'
 import type { PortCounts, Side } from '@infoschematics/core/ports'
-import type { InterfaceConfig } from '@infoschematics/model'
+import type { InterfaceConfig } from '@infoschematics/model/interface'
 import { ChangePane } from '../editor/ChangePane.tsx'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
 import { EditorTools } from '../editor/EditorTools.tsx'

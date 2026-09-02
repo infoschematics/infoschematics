@@ -10,7 +10,7 @@ import type { Box } from '@infoschematics/core/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/core/geometry'
 import { guidesFrom } from '@infoschematics/core/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/core/ports'
-import type { LaneConfig } from '@infoschematics/model'
+import type { LaneConfig } from '@infoschematics/model/lane'
 type InfoschematicScopeId = string
 
 type InfoschematicFlow = {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { InterfaceConfig } from '@infoschematics/model'
+import type { InterfaceConfig } from '@infoschematics/model/interface'
 
 // The published contract pack as the dashboard reads it: which specifications
 // nothing on the Infoschematic reaches, and how one is fetched and summarised.

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { InfoschematicConfig } from '@infoschematics/model'
+import type { InfoschematicConfig } from '@infoschematics/model/config'
 import type { CreatedComponent, CreatedFlow } from '@infoschematics/core/editable'
 import type { Box } from '@infoschematics/core/geometry'
 import { portsForBox } from '@infoschematics/core/ports'

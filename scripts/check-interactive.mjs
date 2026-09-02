@@ -10,7 +10,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
-const markup = await readFile(join(root, 'workspaces/app/src/app/TopologyDiagram.tsx'), 'utf8')
+const markup = await readFile(join(root, 'workspaces/app/src/app/InfoschematicDiagram.tsx'), 'utf8')
 const styles = await readFile(join(root, 'workspaces/app/src/styles.css'), 'utf8')
 
 // One JSX opening tag at a time, rather than a window of characters: a window

@@ -1,13 +1,10 @@
 import { createContext, useContext } from 'react'
-import type {
-  InfoschematicConfig,
-  InterfaceConfig,
-  LaneConfig,
-  ScopeConfig,
-  StoryConfig,
-  StorySceneConfig,
-  ThematicSceneConfig,
-} from '@infoschematics/model'
+import type { InfoschematicConfig } from '@infoschematics/model/config'
+import type { InterfaceConfig } from '@infoschematics/model/interface'
+import type { LaneConfig } from '@infoschematics/model/lane'
+import type { ScopeConfig } from '@infoschematics/model/scope'
+import type { StoryConfig, StorySceneConfig } from '@infoschematics/model/story'
+import type { ThematicSceneConfig } from '@infoschematics/model/theme'
 import type { CreatedComponent } from '@infoschematics/core/editable'
 import type { AttachedEnd, CreatedFlow } from '@infoschematics/core/editable'
 import type { Box, Offset, Point } from '@infoschematics/core/geometry'

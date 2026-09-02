@@ -20,11 +20,11 @@ Dependencies point downward. Core and Model never import React or the site. Exam
 
 - `workspaces/core` — geometry, ports, routing, guides, placement, edit primitives and shared tokens.
 - `workspaces/model` — `InfoschematicConfig`, authored product types and `defineInfoschematic` defaults.
-- `workspaces/app` — the `@infoschematics/react` application, renderer, producer controls and runtime derived from configuration.
-- `workspaces/examples/*` — independently authored serialisable definitions. Each example depends on Model only.
+- `workspaces/app` — the `@infoschematics/react` React view, application, producer controls and runtime derived from configuration.
+- `workspaces/is-blank` — the independently authored, serialisable blank definition. It depends on Model only.
 - `workspaces/site` — the public homepage, example routing, static assets and Cloudflare deployment boundary.
 
-The folder `workspaces/app` retains the package name `@infoschematics/react`. The folder describes its product role; the package name describes its integration technology.
+Authored Infoschematic configuration workspaces use the `is-` prefix; reusable packages and host applications use role-based workspace names. Published package names retain the `@infoschematics/*` namespace.
 
 ## Host boundary
 

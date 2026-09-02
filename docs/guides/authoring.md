@@ -41,4 +41,4 @@ Copying a Standalone Scene into a Theme or Story creates independently owned mat
 - Keep React components, browser APIs, fetched documents and derived maps out of configuration.
 - Let the host own contract files and other static assets addressed by configuration URLs.
 
-The blank example at `workspaces/examples/blank` is the minimum executable reference. The public website consumes it at `/examples/blank/`.
+The blank example at `workspaces/is-blank` is the minimum executable reference. The public website consumes it at `/examples/blank/`.

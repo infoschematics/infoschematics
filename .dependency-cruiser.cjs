@@ -56,7 +56,7 @@ module.exports = {
       name: 'examples-stay-framework-neutral',
       comment: 'Authored examples depend on the product model, never on a UI or deployment host.',
       severity: 'error',
-      from: { path: '^workspaces/examples/' },
+      from: { path: '^workspaces/is-blank/src' },
       to: { path: '^workspaces/(app|site)/src' }
     },
     {

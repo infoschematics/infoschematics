@@ -48,13 +48,10 @@
     "ki:site:deploy": "bun run --cwd workspaces/site deploy",
     "ki:site:dev": "bun run --cwd workspaces/site dev",
     "ki:site:preview": "bun run --cwd workspaces/site preview",
-    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src workspaces/examples/blank/src workspaces/site/src",
-    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app && tsc --noEmit -p workspaces/examples/blank && tsc --noEmit -p workspaces/site",
+    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src workspaces/is-blank/src workspaces/site/src",
+    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app && tsc --noEmit -p workspaces/is-blank && tsc --noEmit -p workspaces/site",
     "test": "vitest run --root ."
   },
   "type": "module",
-  "workspaces": [
-    "workspaces/*",
-    "workspaces/examples/*"
-  ]
+  "workspaces": ["workspaces/*"]
 }

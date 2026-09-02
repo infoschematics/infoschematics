@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { defineInfoschematic } from '@infoschematics/model'
+import { defineInfoschematic } from '@infoschematics/model/config'
 import { App } from './App.tsx'
 import { createInfoschematicRuntime } from './infoschematic-context.tsx'
 

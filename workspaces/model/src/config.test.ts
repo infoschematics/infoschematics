@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defineInfoschematic } from "./config.ts";
+import { defineInfoschematic } from "@infoschematics/model";
 
 describe("defineInfoschematic", () => {
 	it("makes a title-only configuration a valid blank Infoschematic", () => {

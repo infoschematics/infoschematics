@@ -38,7 +38,7 @@
       "name": "@infoschematics/core",
       "version": "0.1.0",
     },
-    "workspaces/examples/blank": {
+    "workspaces/is-blank": {
       "name": "@infoschematics/example-blank",
       "version": "0.1.0",
       "dependencies": {
@@ -282,7 +282,7 @@
 
     "@infoschematics/core": ["@infoschematics/core@workspace:workspaces/core"],
 
-    "@infoschematics/example-blank": ["@infoschematics/example-blank@workspace:workspaces/examples/blank"],
+    "@infoschematics/example-blank": ["@infoschematics/example-blank@workspace:workspaces/is-blank"],
 
     "@infoschematics/model": ["@infoschematics/model@workspace:workspaces/model"],
 

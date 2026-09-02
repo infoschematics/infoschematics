@@ -6,8 +6,8 @@ This Bun monorepo owns the reusable packages, examples, guidance and public webs
 
 - [Core](workspaces/core/) — `@infoschematics/core`, framework-neutral geometry, routing, placement and editing primitives.
 - [Model](workspaces/model/) — `@infoschematics/model`, the serialisable Infoschematic configuration contract and defaults.
-- [App](workspaces/app/) — `@infoschematics/react`, the React application, renderer and producer controls.
-- [Examples](workspaces/examples/) — independently authored definitions that depend on Model only.
+- [React](workspaces/app/) — `@infoschematics/react`, the React view, application and producer controls.
+- [Blank](workspaces/is-blank/) — `@infoschematics/example-blank`, the minimum independently authored Infoschematic.
 - [Site](workspaces/site/) — the designed homepage, guidance outlet, examples and Cloudflare deployment boundary.
 
 ## Use the React application

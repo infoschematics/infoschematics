@@ -1,4 +1,4 @@
-import type { InterfaceConfig } from '@infoschematics/model'
+import type { InterfaceConfig } from '@infoschematics/model/interface'
 import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '../infoschematic-context.tsx'
 
 /*
