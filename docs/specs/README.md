@@ -11,11 +11,9 @@ These specifications define the reusable contracts owned by Infoschematics. They
 
 The [vocabulary reference](../reference/vocabulary.md) is the canonical source for product terms. Requirements in these files use that vocabulary but do not redefine it.
 
-## Lineage
+## Scope
 
-The initial requirements were lifted from the topology and editor specifications of `5g-emerge-ibc-2026`. Each migrated requirement records its former identifier so later changes retain a trace back to the behaviour from which the library was extracted.
-
-The migration deliberately excludes IBC and MSF completeness rules, telemetry coverage, contract packs, dashboards, deployment, obsolete storage keys and legacy theatre vocabulary. Those are application concerns, not reusable library contracts.
+These specifications state the current reusable product contract. Application-specific completeness rules, authored content, deployment behaviour and compatibility history remain outside the reusable specifications unless they establish a current supported capability.
 
 ## Requirement language
 
