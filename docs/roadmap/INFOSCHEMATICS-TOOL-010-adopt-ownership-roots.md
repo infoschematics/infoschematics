@@ -4,7 +4,7 @@ area: TOOL
 title: Adopt ownership roots
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 5c9cce879f06b51f7782efef91f7c09bfa0df8c6
@@ -93,11 +93,15 @@ None within this item. `INFOSCHEMATICS-TOOL-008` still owns the additive Canvas,
 
 ### Post-change review
 
-Ready for human acceptance. The public package names and behaviour are unchanged while physical paths now communicate ownership and the shared skills enforce the same convention.
+Accepted by the user on 2026-09-02. The public package names and behaviour are unchanged while the physical paths now communicate ownership and the shared skills enforce the same convention.
 
 ### Mini recap
 
 Infoschematics and the shared repository skills now agree on one reusable monorepo shape: packages are consumable, apps are deployable, and examples are independently authored.
+
+## Done
+
+Accepted by the user on 2026-09-02. The ownership-root migration and corresponding shared-skill support are complete.
 
 ## Discussion
 
