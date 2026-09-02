@@ -3,7 +3,7 @@ id: INFOSCHEMATICS-TOOL-008
 area: TOOL
 title: Establish additive views
 theme: tool
-horizon: now
+horizon: next
 status: draft
 blocks: [INFOSCHEMATICS-SITE-001, INFOSCHEMATICS-TOOL-004, INFOSCHEMATICS-TOOL-005, INFOSCHEMATICS-TOOL-007, INFOSCHEMATICS-TOOL-009]
 blocked_by: [INFOSCHEMATICS-TOOL-011]
