@@ -1,0 +1,19 @@
+import { type ReactNode, StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { isBlankExamplePath } from './routes.ts'
+
+async function resolvePage(pathname: string): Promise<ReactNode> {
+  if (isBlankExamplePath(pathname)) {
+    const { BlankInfoschematic } = await import('./BlankInfoschematic.tsx')
+    return <BlankInfoschematic />
+  }
+
+  const { App } = await import('./App.tsx')
+  return <App />
+}
+const rootElement = document.getElementById('root')
+
+if (rootElement) {
+  const page = await resolvePage(window.location.pathname)
+  createRoot(rootElement).render(<StrictMode>{page}</StrictMode>)
+}

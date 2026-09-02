@@ -152,7 +152,7 @@ describe('attachment points', () => {
 
   // Every port the diagram already names has to exist, or the editor would show
   // fewer places than the model uses.
-  it('covers the deepest port the topology actually uses', () => {
+  it('covers the deepest port the Infoschematic actually uses', () => {
     const ports = portsForBox(card).map((port) => port.id)
 
     for (const id of ['N3', 'E4', 'S4', 'W3']) expect(ports).toContain(id)

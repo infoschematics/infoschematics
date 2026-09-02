@@ -1,14 +1,18 @@
 # Infoschematics
 
-Infoschematics is a visual instrument for making complex systems legible. An Infoschematic is a structural diagram built from Lanes, Zones, Fabrics, Cards, Flows and Graphics, presented through Scenes, Themes and Stories, and worked on in Present, Design and Direct modes.
+Infoschematics is a visual instrument for making complex systems legible. An Infoschematic combines structural artefacts with Scenes, Themes and Stories, then supports Present, Design and Direct production modes.
 
-This Bun repository contains three publishable TypeScript workspaces:
+This Bun monorepo owns the reusable packages, examples, guidance and public website:
 
-- [`workspaces/core/`](workspaces/core/) — `@infoschematics/core`, framework-neutral geometry, routing, placement and editing primitives.
-- [`workspaces/model/`](workspaces/model/) — `@infoschematics/model`, the serialisable Infoschematic configuration contract and defaults.
-- [`workspaces/app/`](workspaces/app/) — `@infoschematics/react`, the React application shell, renderer, controls and editor.
+- [Core](workspaces/core/) — `@infoschematics/core`, framework-neutral geometry, routing, placement and editing primitives.
+- [Model](workspaces/model/) — `@infoschematics/model`, the serialisable Infoschematic configuration contract and defaults.
+- [App](workspaces/app/) — `@infoschematics/react`, the React application, renderer and producer controls.
+- [Examples](workspaces/examples/) — independently authored definitions that depend on Model only.
+- [Site](workspaces/site/) — the designed homepage, guidance outlet, examples and Cloudflare deployment boundary.
 
-Each host owns its Infoschematic configuration. The React package contains no built-in realisation and requires the complete configuration at its public boundary:
+## Use the React application
+
+Each host owns one complete configuration and passes it into React:
 
 ```tsx
 import { defineInfoschematic } from '@infoschematics/model'
@@ -22,18 +26,28 @@ export function InfoschematicPage() {
 }
 ```
 
-A title-only configuration renders a blank canvas safely. Realisations add their structural model, presentation material and serialisable renderer keys through `defineInfoschematic`.
+A title-only definition renders a blank canvas safely. See [the authoring guide](docs/guides/authoring.md) and [the React integration guide](docs/guides/react-integration.md) for the complete ownership boundary.
 
-The packages ship TypeScript source behind explicit export maps for host compilation. Their manifests use matching `0.1.0` dependencies, which Bun resolves to sibling workspaces in this repository.
+## Understand the project
 
-During local development across repositories, point all three package names at local package directories. Add root overrides for `@infoschematics/core` and `@infoschematics/model` so Bun also resolves the React and model packages' transitive dependencies locally.
+- [Vocabulary](docs/specs/vocabulary.md) defines canonical product and production language.
+- [Architecture](docs/design/architecture.md) defines package responsibilities and dependency direction.
+- [Roadmap](ROADMAP.md) points to active and future work.
+- The public website runs at [infoschematics.info](https://infoschematics.info/).
 
-## Verify
+## Develop
 
-```sh
+[Bun](https://bun.sh) manages the workspace.
+
+```bash
 bun install
+bun run dev
 bun run check
 ```
+
+`bun run check` runs tests and TypeScript across every workspace, verifies dependency boundaries and builds the production website.
+
+The packages currently ship TypeScript source through explicit export maps. Bun resolves matching versions locally in this monorepo. External source checkouts require local overrides until package publication; hosts must not vendor library source.
 
 ## Licence
 

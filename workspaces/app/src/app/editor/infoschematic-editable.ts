@@ -1,12 +1,19 @@
-import type { AttachedEnd, Change, CreatedComponent, EditableDiagram, Handle, Placement } from '@infoschematics/core/editable'
+import type {
+  AttachedEnd,
+  Change,
+  CreatedComponent,
+  EditableDiagram,
+  Handle,
+  Placement,
+} from '@infoschematics/core/editable'
 import type { Box } from '@infoschematics/core/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/core/geometry'
 import { guidesFrom } from '@infoschematics/core/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/core/ports'
 import type { LaneConfig } from '@infoschematics/model'
-type TopologyScopeId = string
+type InfoschematicScopeId = string
 
-type TopologyFlow = {
+type InfoschematicFlow = {
   code: string
   d: string
   family: string
@@ -22,7 +29,7 @@ type TopologyFlow = {
 const boxCentreOf = (box: Box): Point => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 })
 
 // This diagram's side of the editable interface. Labels are keyed by flow
-// code, because that is what a reader sees on the stage and what a change has to
+// code, because that is what a reader sees on the Infoschematic and what a change has to
 // name when it is pasted onto a flow definition.
 
 const sideNames: Record<string, string> = { E: 'east', N: 'north', S: 'south', W: 'west' }
@@ -43,38 +50,41 @@ type EditableModel = {
   layout: Readonly<Record<string, Box>>
   register: { byCode: (code: string) => unknown }
   registerWith: (created: readonly CreatedComponent[]) => {
-    cardAt: (code: string) =>
-      | { code: string; detail?: string; group?: string; id: string; label: string; wraps?: string }
-      | undefined
+    cardAt: (
+      code: string,
+    ) => { code: string; detail?: string; group?: string; id: string; label: string; wraps?: string } | undefined
   }
   placeables: (
     scopes: ReadonlySet<string>,
-    drafts?: { created?: readonly CreatedComponent[]; offsets?: ReadonlyMap<string, Offset> }
+    drafts?: { created?: readonly CreatedComponent[]; offsets?: ReadonlyMap<string, Offset> },
   ) => readonly { box: Box; code: string; id: string; ports?: PortCounts }[]
   annotationLabelPositions: (
-    flows: readonly TopologyFlow[],
+    flows: readonly InfoschematicFlow[],
     scopes: ReadonlySet<string>,
-    labels?: ReadonlyMap<string, number>
+    labels?: ReadonlyMap<string, number>,
   ) => ReadonlyMap<string, Point>
   flowsAfterAttachments: (
-    flows: readonly TopologyFlow[],
+    flows: readonly InfoschematicFlow[],
     attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }>,
-    portAt: (endpoint: string, port: string) => Point | undefined
-  ) => readonly TopologyFlow[]
-  flowsAfterMoves: (flows: readonly TopologyFlow[], drafts: ReadonlyMap<string, Offset>) => readonly TopologyFlow[]
+    portAt: (endpoint: string, port: string) => Point | undefined,
+  ) => readonly InfoschematicFlow[]
+  flowsAfterMoves: (
+    flows: readonly InfoschematicFlow[],
+    drafts: ReadonlyMap<string, Offset>,
+  ) => readonly InfoschematicFlow[]
 }
 
-export const topologyEditable = (
+export const infoschematicEditable = (
   model: EditableModel,
-  flows: readonly TopologyFlow[],
-  visibleScopes: ReadonlySet<TopologyScopeId>,
+  flows: readonly InfoschematicFlow[],
+  visibleScopes: ReadonlySet<InfoschematicScopeId>,
   drafts: ReadonlyMap<string, Offset>,
   labels: ReadonlyMap<string, number> = new Map(),
   attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }> = new Map(),
   // Cards made in the editor. Defaulted so every existing caller and every test
   // keeps working unchanged; supplied by the app, which is the only place that
   // holds drafts.
-  createdCards: readonly CreatedComponent[] = []
+  createdCards: readonly CreatedComponent[] = [],
 ): EditableDiagram => {
   const register = model.registerWith(createdCards)
   /*
@@ -84,11 +94,11 @@ export const topologyEditable = (
    * created one - which is the same thing said twice, since a created card's
    * box *is* what was written down for it. Without the second half a created
    * card has no origin to measure a drag against, so it draws and cannot be
-   * dragged: on the stage and inert, which is worse than absent.
+   * dragged: on the Infoschematic and inert, which is worse than absent.
    */
   const originOf = (card: { code: string; id: string }): Box | undefined =>
     model.layout[card.id] ?? createdCards.find((made) => made.code === card.code)?.box
-  const placeables = (scopes: ReadonlySet<TopologyScopeId>, more?: { offsets?: ReadonlyMap<string, Offset> }) =>
+  const placeables = (scopes: ReadonlySet<InfoschematicScopeId>, more?: { offsets?: ReadonlyMap<string, Offset> }) =>
     model.placeables(scopes, { created: createdCards, ...more })
   // Where a port is, worked out here rather than passed in: the editable knows
   // every placeable already, and asking the caller would make it depend on the
@@ -99,7 +109,7 @@ export const topologyEditable = (
   }
 
   const positions = model.annotationLabelPositions(flows, visibleScopes, labels)
-  const byCode = new Map<string, TopologyFlow>(flows.map((flow) => [flow.code, flow]))
+  const byCode = new Map<string, InfoschematicFlow>(flows.map((flow) => [flow.code, flow]))
 
   // A dragged component reports where the drag has put it, not where the model
   // still says it is - so the panel, the guides and the handles all agree with
@@ -110,7 +120,7 @@ export const topologyEditable = (
   }
 
   const usedPorts = new Set(
-    flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`])
+    flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`]),
   )
 
   // Geometry from the placeables and kind from the register, which is the whole
@@ -138,7 +148,7 @@ export const topologyEditable = (
         flows.flatMap((other) => {
           const at = positions.get(other.id)
           return at && other.code !== key ? [at] : []
-        })
+        }),
       )
 
       // Along a horizontal run only x can move, and the reverse on a vertical
@@ -159,7 +169,7 @@ export const topologyEditable = (
       ...placeables(visibleScopes).map((service) => ({
         at: boxCentreOf(boxFor(service.code, service.box)),
         key: service.code,
-        kind: 'component' as const
+        kind: 'component' as const,
       })),
       // Lanes and zones are geography, not components - they are handles only so
       // the panel can be told what a reader clicked, never so one can be dragged.
@@ -170,28 +180,28 @@ export const topologyEditable = (
         portsForBox(boxFor(placeable.code, placeable.box), placeable.ports).map((port) => ({
           at: port.at,
           key: `port:${placeable.code}:${port.id}`,
-          kind: 'port' as const
-        }))
+          kind: 'port' as const,
+        })),
       ),
       ...flows.flatMap((flow) =>
         flow.points.slice(1, -1).map((point, offset) => ({
           at: point,
           key: `waypoint:${flow.code}:${offset + 1}`,
-          kind: 'waypoint' as const
-        }))
+          kind: 'waypoint' as const,
+        })),
       ),
       ...model.lanes.map((lane) => ({
         at: { x: lane.panel.x + lane.panel.width / 2, y: lane.panel.y + lane.panel.height / 2 },
         key: `lane:${lane.id}`,
-        kind: 'lane' as const
+        kind: 'lane' as const,
       })),
       ...model.lanes.flatMap((lane) =>
         lane.zones.map((zone) => ({
           at: { x: zone.x + zone.width / 2, y: lane.y + lane.height / 2 },
           key: `zone:${lane.id}:${zone.id}`,
-          kind: 'zone' as const
-        }))
-      )
+          kind: 'zone' as const,
+        })),
+      ),
     ],
 
     // A label lives on its line, so its drop is a distance along it rather than
@@ -271,11 +281,11 @@ export const topologyEditable = (
           const nearest = [...after].sort(
             (left, right) =>
               Math.hypot(left.at.x - was.at.x, left.at.y - was.at.y) -
-              Math.hypot(right.at.x - was.at.x, right.at.y - was.at.y)
+              Math.hypot(right.at.x - was.at.x, right.at.y - was.at.y),
           )[0]
           if (!nearest || nearest.id === flow[`${end}Port`]) return []
           return [{ code: flow.code, component: placeable.id, end, port: nearest.id }]
-        })
+        }),
       )
     },
 
@@ -288,13 +298,12 @@ export const topologyEditable = (
      * Deliberately the authored register, not the effective one.
      *
      * `register` above has the created cards folded in, which is right for
-     * every other question - they are on the stage and must behave like it.
+     * every other question - they are on the Infoschematic and must behave like it.
      * This is the one question where that is exactly wrong: a created card
      * would report that the model already carries it, and the sweep would drop
      * the draft that is the only record of it the moment it was made.
      */
-    authors: (key: string) =>
-      model.flowCodes.has(key) || model.register.byCode(key) !== undefined,
+    authors: (key: string) => model.flowCodes.has(key) || model.register.byCode(key) !== undefined,
 
     onRoute: (key: string, point: Point) => {
       const flow = byCode.get(key)
@@ -357,8 +366,8 @@ export const topologyEditable = (
             key: flow.code,
             kind: 'label' as const,
             offset: { dx: 0, dy: 0 },
-            source: `${flow.code}  ->  points: [${list}],`
-          }
+            source: `${flow.code}  ->  points: [${list}],`,
+          },
         ]
       })
     },
@@ -389,7 +398,7 @@ export const topologyEditable = (
           at: port.at,
           side: sideNames[portId[0]] ?? portId[0],
           number: Number(portId.slice(1)),
-          used: usedPorts.has(`${placeable.id}:${portId}`)
+          used: usedPorts.has(`${placeable.id}:${portId}`),
         }
       }
 
@@ -411,7 +420,7 @@ export const topologyEditable = (
           kind: 'box',
           label: 'Lane',
           box: { x: lane.panel.x, y: lane.y, width: lane.panel.width, height: lane.height },
-          editable: []
+          editable: [],
         }
       }
 
@@ -426,7 +435,7 @@ export const topologyEditable = (
           kind: 'box',
           label: 'Zone',
           box: { x: zone.x, y: lane.y, width: zone.width, height: lane.height },
-          editable: []
+          editable: [],
         }
       }
 
@@ -437,7 +446,7 @@ export const topologyEditable = (
           label: 'Flow',
           from: `${model.endpointCodes.get(flow.source) ?? flow.source}:${flow.sourcePort}`,
           to: `${model.endpointCodes.get(flow.target) ?? flow.target}:${flow.targetPort}`,
-          points: flow.points.length
+          points: flow.points.length,
         }
       }
 
@@ -457,6 +466,6 @@ export const topologyEditable = (
       return card.wraps
         ? { kind: 'box', label: 'Adapter', box, editable: [] }
         : { kind: 'box', label: 'Standard card', box, editable: ['x', 'y'] }
-    }
+    },
   }
 }

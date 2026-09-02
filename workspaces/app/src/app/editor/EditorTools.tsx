@@ -44,18 +44,18 @@ export function EditorTools({
   /** Which editor is open. The tab decides it; this only reads it. */
   mode?: EditorMode
 }) {
-  // The stage editor's own tools. A scene has no geometry, so none of this
+  // The Infoschematic editor's own tools. A scene has no geometry, so none of this
   // applies to it and none of it is rendered while it is open.
-  // The stage editor's own tools. A scene has no geometry, so none of this
+  // The Infoschematic editor's own tools. A scene has no geometry, so none of this
   // applies to it and none of it is rendered while the scene editor is open.
-  if (mode === 'scene' || mode === 'story') {
+  if (mode === 'scenes' || mode === 'stories') {
     return (
       <fieldset className="editor-tools">
         <legend className="sr-only">Scene tools</legend>
         <span className="scene-hint">
-          {mode === 'scene'
-            ? 'Click a card or a flow on the stage to add it to the selected scene.'
-            : 'Beats that play a named scene are edited under Scenes.'}
+        {mode === 'scenes'
+          ? 'Click a card or a flow on the Infoschematic to add it to the selected scene.'
+            : 'Story Scenes that play a named scene are edited under Scenes.'}
         </span>
       </fieldset>
     )

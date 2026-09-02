@@ -118,9 +118,9 @@ const overlapArea = (left: Box, right: Box) => {
  * is describing.
  *
  * The first candidate clear of everything wins, so the preferred position is
- * kept whenever it is free and the panel does not wander between beats that
+ * kept whenever it is free and the panel does not wander between scenes that
  * both have room in the middle. Where nothing is clear - which is the normal
- * case once a step has lit most of the stage - the least-obstructed candidate
+ * case once a Scene has lit most of the canvas - the least-obstructed candidate
  * wins rather than the first, because falling back to a fixed position puts the
  * panel over the diagram precisely when the diagram is busiest.
  *

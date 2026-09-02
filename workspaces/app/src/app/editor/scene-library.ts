@@ -52,7 +52,7 @@ export const nextSceneCode = (library: SceneLibrary): string => {
 }
 
 /**
- * A new scene, lighting nothing.
+ * A new scene, focusing nothing.
  *
  * Empty rather than a copy of whatever was selected. A duplicated scene lights
  * the same things under a different name, which looks finished while being
@@ -68,8 +68,8 @@ export const addScene = (library: SceneLibrary, label: string): SceneLibrary => 
       description: '',
       flows: [],
       id: identifierFrom(named),
-      label: named
-    }
+      label: named,
+    },
   ]
 }
 
@@ -80,7 +80,7 @@ export const editScene = (library: SceneLibrary, id: string, change: Partial<Sce
  * Take a scene out, unless a story plays it.
  *
  * A story naming a scene that has gone keeps its own lists rather than being
- * emptied, so the beat would quietly light nothing. Refusing here is how the
+ * emptied, so the Story Scene would quietly light nothing. Refusing here is how the
  * editor states a constraint the model cannot: the caller passes what is
  * played, since the library does not know about stories.
  */
@@ -117,10 +117,10 @@ export const libraryAsSource = (library: SceneLibrary): string => {
       scene.short ? `    short: ${quoted(scene.short)},` : undefined,
       `    description: ${quoted(scene.description)},`,
       `    components: ${list(scene.components)},`,
-      `    flows: ${list(scene.flows)}`
+      `    flows: ${list(scene.flows)}`,
     ].filter(Boolean)
     return `  {\n${rows.join('\n')}\n  }`
   })
 
-  return `spotlights  ->  [\n${scenes.join(',\n')}\n]`
+  return `standaloneScenes  ->  [\n${scenes.join(',\n')}\n]`
 }

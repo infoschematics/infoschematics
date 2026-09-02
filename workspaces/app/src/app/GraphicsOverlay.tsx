@@ -1,4 +1,4 @@
-// Figures drawn over the whole stage, for the beats that argue about the
+// Figures drawn over the whole Infoschematic, for the Story Scenes that argue about the
 // diagram rather than describing it. Each carries the claim it makes as its
 // own title rather than being hidden - the argument is the point of drawing it,
 // so it should reach a reader who cannot see it. Both are drawn faint and behind nothing:
@@ -11,7 +11,7 @@
  * `tail` and `head` are how far each corner arrow reaches back along the edge
  * it came from and on along the edge it leaves by. They are short enough that
  * the four pieces never meet: the gaps are what stop the figure reading as a
- * border drawn around the stage, and the top gap is where the callout sits.
+ * border drawn around the Infoschematic, and the top gap is where the callout sits.
  */
 const cycle = {
   x: 96,
@@ -34,7 +34,7 @@ const cycle = {
  */
 function Gap() {
   return (
-    <g className="stage-overlay overlay-gap">
+    <g className="graphics-overlay overlay-gap">
       <title>Nothing decides which of the available pathways to use</title>
       <circle className="gap-mark" cx="1580" cy="440" r="54" />
       <text className="gap-glyph" x="1580" y="462">
@@ -54,10 +54,10 @@ function Gap() {
  * The turn that never stops, drawn as four corner arrows rather than a ring.
  *
  * A single closed outline had to be read as a loop before it said anything, and
- * at this size it read as a box around the stage instead. Four arrowheads all
+ * at this size it read as a box around the Infoschematic instead. Four arrowheads all
  * pointing the same way round say the direction outright, and the gaps between
  * them say the figure continues past what is drawn - which is the claim the
- * beat makes: this keeps turning, and what it decides changes each time round.
+ * Story Scene makes: this keeps turning, and what it decides changes each time round.
  *
  * Oversized and low-contrast on purpose: at this weight it reads as the shape
  * of the whole thing, where anything thinner would read as another route to be
@@ -75,7 +75,7 @@ function Cycle() {
     `M${x + r + tail} ${bottom}H${x + r}A${r} ${r} 0 0 1 ${x} ${bottom - r}V${bottom - r - head}`
   ]
   return (
-    <g className="stage-overlay overlay-cycle">
+    <g className="graphics-overlay overlay-cycle">
       <title>The federation keeps turning, adapting to demand as it changes</title>
       {corners.map((d) => (
         <path className="cycle-turn" d={d} key={d} markerEnd="url(#cycle-head)" />
@@ -84,7 +84,7 @@ function Cycle() {
   )
 }
 
-export function StageOverlay({ overlay }: { overlay?: string }) {
+export function GraphicsOverlay({ overlay }: { overlay?: string }) {
   return (
     <>
       <defs>

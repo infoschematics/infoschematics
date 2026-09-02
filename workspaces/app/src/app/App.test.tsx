@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/model'
 import { App } from './App.tsx'
+import { createInfoschematicRuntime } from './infoschematic-context.tsx'
 
 describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
@@ -16,7 +17,7 @@ describe('App', () => {
     expect(markup).toContain('<h1>Infoschematics</h1>')
     expect(markup).toContain('<svg')
     expect(markup).toContain('viewBox="0 0 1200 800"')
-    expect(markup).not.toContain('topology-service')
+    expect(markup).not.toContain('infoschematic-service')
     expect(localStorage.getItem).not.toHaveBeenCalled()
     expect(sessionStorage.getItem).not.toHaveBeenCalled()
   })
@@ -33,8 +34,8 @@ describe('App', () => {
             label: 'System',
             description: 'The configured system',
             color: '#6699cc',
-            fill: '#112233'
-          }
+            fill: '#112233',
+          },
         ],
         cards: [
           {
@@ -44,15 +45,25 @@ describe('App', () => {
             detail: 'Supplied by the host',
             scope: 'system',
             scopes: ['system'],
-            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} }
-          }
-        ]
-      }
+            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} },
+          },
+        ],
+      },
     })
 
     const markup = renderToStaticMarkup(<App config={config} />)
 
     expect(markup).toContain('Configured source')
     expect(markup).toContain('SYS-01')
+  })
+
+  it('exposes the settled Infoschematic runtime vocabulary', () => {
+    const runtime = createInfoschematicRuntime(defineInfoschematic({ title: 'Vocabulary' }))
+
+    expect(runtime).toMatchObject({ standaloneScenes: [], stories: [], thematicScenes: [] })
+    expect(runtime).not.toHaveProperty('programme')
+    expect(runtime).not.toHaveProperty('demonstrations')
+    expect(runtime).not.toHaveProperty('spotlights')
+    expect(runtime).not.toHaveProperty('vendors')
   })
 })

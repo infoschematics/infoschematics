@@ -1,5 +1,5 @@
 /** The gradients, patterns and cloud shapes the fabric artwork draws itself
- * with. A single `<defs>` output rendered once, inside the stage's own
+ * with. A single `<defs>` output rendered once, inside the Infoschematic's own
  * `<defs>`, so every fabric component can reference these ids without
  * carrying its own copy. */
 export function FabricDefs() {

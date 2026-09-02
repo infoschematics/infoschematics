@@ -4,48 +4,47 @@ import type { CreatedComponent, CreatedFlow } from '@infoschematics/core/editabl
 import type { Box } from '@infoschematics/core/geometry'
 import { portsForBox } from '@infoschematics/core/ports'
 import { routeBetweenPorts } from '@infoschematics/core/routing'
-import { topologyEditable } from './editor/topology-editable.ts'
+import { infoschematicEditable } from './editor/infoschematic-editable.ts'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { type Attachment, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
 import { usePersistentState } from './hooks/use-persistent-state.ts'
-import { useStage } from './hooks/use-stage.ts'
-import { Book } from './panels/Book.tsx'
-import { DemonstrationCallout } from './panels/DemonstrationCallout.tsx'
-import { Lighting } from './panels/Lighting.tsx'
+import { usePresentation } from './hooks/use-presentation.ts'
+import { DetailsPanel } from './panels/DetailsPanel.tsx'
+import { SceneCallout } from './panels/SceneCallout.tsx'
+import { ProducerControls } from './panels/ProducerControls.tsx'
 import { PanelRail } from './panels/PanelRail.tsx'
 import { ShortcutOverlay } from './panels/ShortcutOverlay.tsx'
 import { TitleBar } from './panels/TitleBar.tsx'
-import { TopologyDiagram } from './TopologyDiagram.tsx'
+import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
 import {
   createInfoschematicRuntime,
   InfoschematicContext,
   type InfoschematicRuntime,
   type RuntimeStory,
-  useInfoschematic
+  useInfoschematic,
 } from './infoschematic-context.tsx'
 
-type TopologyFamilyId = string
-type TopologyScopeId = string
+type InfoschematicScopeId = string
 
-// The stage carries more than published APIs: traditional media and metadata
+// The Infoschematic carries more than published APIs: traditional media and metadata
 // delivery are real pathways with no contract behind them, and they belong in
 // the same picker so a reader can light them up the same way.
 
 /*
  * Which lines meet a card, by code.
  *
- * The editor keys everything by code and knows nothing about the topology, so
- * the topology answers this rather than the editor guessing. A code that names
+ * The editor keys everything by code and knows nothing about the Infoschematic,
+ * so the Infoschematic answers this rather than the editor guessing. A code that names
  * a flow meets nothing: a line has no lines of its own.
  */
 function linesMeeting(
   code: string,
   flows: readonly { code: string; source: string; target: string }[],
-  runtime: InfoschematicRuntime
+  runtime: InfoschematicRuntime,
 ) {
-  const card = runtime.topologyRegister.cardAt(code)
+  const card = runtime.infoschematicRegister.cardAt(code)
   if (!card) return []
   return flows.filter((flow) => flow.source === card.id || flow.target === card.id).map((flow) => flow.code)
 }
@@ -61,15 +60,15 @@ function linesMeeting(
 const authoredPortAt =
   (
     runtime: InfoschematicRuntime,
-    visibleScopes: ReadonlySet<TopologyScopeId>,
-    created: readonly CreatedComponent[] = []
+    visibleScopes: ReadonlySet<InfoschematicScopeId>,
+    created: readonly CreatedComponent[] = [],
   ) =>
   (endpoint: string, port: string) => {
     // Created cards are included but their offsets are not, which is the same
     // rule authored cards get here: a created card's own box is what was
     // written down for it, and the drag on top of that is applied afterwards.
     const placeable = runtime
-      .topologyPlaceables(visibleScopes, { created })
+      .infoschematicPlaceables(visibleScopes, { created })
       .find((candidate) => candidate.id === endpoint)
     return placeable && portsForBox(placeable.box, placeable.ports).find((candidate) => candidate.id === port)?.at
   }
@@ -117,7 +116,7 @@ const identifierFrom = (name: string) =>
 /**
  * Where a new card lands.
  *
- * The middle of the stage, stepped along for each card already made this
+ * The middle of the Infoschematic, stepped along for each card already made this
  * session so a second does not hide the first. It is put somewhere visible
  * rather than somewhere correct - a card belongs where its architecture puts
  * it, which is a judgment, and dragging it there is a gesture the editor
@@ -127,7 +126,7 @@ const roomForCard = (made: number): Box => ({
   height: 80,
   width: 160,
   x: 780 + made * 20,
-  y: 530 + made * 20
+  y: 530 + made * 20,
 })
 
 export function App({ config }: { config: InfoschematicConfig }) {
@@ -144,14 +143,14 @@ function AppContent() {
   const {
     flowsAfterCreations,
     flowsAfterEdits,
-    partnerLogos,
-    topologyFamilies,
-    topologyFlows,
-    topologyPlaceables,
-    topologyRegister,
-    topologyRegisterWith,
-    topologyScopes,
-    vendors
+    infoschematicFamilies,
+    infoschematicFlows,
+    infoschematicPlaceables,
+    infoschematicRegister,
+    infoschematicRegisterWith,
+    infoschematicScopes,
+    thematicScenes,
+    themeLogos,
   } = runtime
   const storage = runtime.config.id
   const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
@@ -163,12 +162,12 @@ function AppContent() {
   // back from a reload with every label outlined and draggable in front of a room.
   // Drafts do persist, because losing unsaved placements would be real work lost.
 
-  const topologyPanel = useRef<HTMLDivElement>(null)
-  const topologyControls = useRef<HTMLDivElement>(null)
+  const infoschematicPanel = useRef<HTMLDivElement>(null)
+  const infoschematicControls = useRef<HTMLDivElement>(null)
   const controlRoom = useRef<HTMLElement>(null)
   const [_connected, _setConnected] = useState(false)
 
-  const stage = useStage()
+  const presentation = usePresentation()
   // The diagram describes its own handles and constraints; the editor only holds
   // what has been dragged and what that should be written back as.
   const buildEditable = useCallback(
@@ -177,31 +176,35 @@ function AppContent() {
       labels: ReadonlyMap<string, number>,
       attached: ReadonlyMap<string, Attachment>,
       created: readonly CreatedFlow[],
-      createdCards: readonly CreatedComponent[]
+      createdCards: readonly CreatedComponent[],
     ) =>
-      topologyEditable(
+      infoschematicEditable(
         runtime.editableModel,
-        flowsAfterCreations(stage.visibleFlows, created, authoredPortAt(runtime, stage.visibleScopes, createdCards)),
-        stage.visibleScopes,
+        flowsAfterCreations(
+          presentation.visibleFlows,
+          created,
+          authoredPortAt(runtime, presentation.visibleScopes, createdCards),
+        ),
+        presentation.visibleScopes,
         drafts,
         labels,
         attached,
-        createdCards
+        createdCards,
       ),
-    [flowsAfterCreations, runtime, stage.visibleFlows, stage.visibleScopes]
+    [flowsAfterCreations, presentation.visibleFlows, presentation.visibleScopes, runtime],
   )
   const editor = useEditor(buildEditable)
   // Lifted here because two things read it: the panel that edits a scene, and
-  // the stage that marks what the selected one lights.
-  const sceneList = useSceneList(stage.playing)
+  // the Infoschematic that marks what the selected one lights.
+  const sceneList = useSceneList(presentation.playing)
   const sceneLibrary = useSceneLibrary()
-  const { highlight, playing, runningDemonstration, runningStep, visibleFlows, visibleScopes } = stage
+  const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
   // A dragged card's routes have to redraw with it, and a hand-edited route
-  // has to draw as edited, so the stage draws flows folded with both
+  // has to draw as edited, so the Infoschematic draws flows folded with both
   // rather than the authored ones while an edit is live.
   // The register the app reads, which is the effective one: a card created a
   // moment ago has to answer what it is exactly as an authored one does.
-  const register = topologyRegisterWith(editor.createdCards)
+  const register = infoschematicRegisterWith(editor.createdCards)
 
   /*
    * A card's move is its adapter's move.
@@ -230,11 +233,11 @@ function AppContent() {
   const portAt = useCallback(
     (endpoint: string, port: string) => {
       const drafts = { created: editor.createdCards, offsets: movedComponents, portCounts: editor.portCounts }
-      const placeable = topologyPlaceables(visibleScopes, drafts).find((candidate) => candidate.id === endpoint)
+      const placeable = infoschematicPlaceables(visibleScopes, drafts).find((candidate) => candidate.id === endpoint)
       if (!placeable) return undefined
       return portsForBox(placeable.box, placeable.ports).find((candidate) => candidate.id === port)?.at
     },
-    [editor.createdCards, editor.portCounts, movedComponents, visibleScopes]
+    [editor.createdCards, editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes],
   )
 
   /*
@@ -252,7 +255,7 @@ function AppContent() {
   const proposeLine = useCallback(
     (ends: { source: string; sourcePort: string; target: string; targetPort: string }, at: { x: number; y: number }) =>
       setProposed({ at, ends }),
-    []
+    [],
   )
 
   /*
@@ -284,12 +287,12 @@ function AppContent() {
     (kind: 'adapter' | 'card') => {
       const held = kind === 'adapter' ? wrappable : undefined
       if (kind === 'adapter' && !held) return
-      const scope = held?.group ?? topologyScopes[0].id
-      const prefix = topologyScopes.find((entry) => entry.id === scope)?.prefix
+      const scope = held?.group ?? infoschematicScopes[0].id
+      const prefix = infoschematicScopes.find((entry) => entry.id === scope)?.prefix
       if (!prefix) return
 
       const label = held ? `${held.label} adapter` : 'New card'
-      const taken = [...topologyRegister.all.map((entry) => entry.code), ...Object.keys(editor.cards)]
+      const taken = [...infoschematicRegister.all.map((entry) => entry.code), ...Object.keys(editor.cards)]
       const code = nextCodeIn(prefix, taken)
       editor.createCard(code, {
         // An adapter has no box: it is placed from the card it clasps.
@@ -300,10 +303,17 @@ function AppContent() {
         label,
         ports: held ? { east: 0, north: 0, south: 3, west: 0 } : { east: 3, north: 3, south: 3, west: 3 },
         scopes: [scope],
-        wraps: held?.id
+        wraps: held?.id,
       })
     },
-    [editor.cards, editor.createCard, editor.createdCards.length, wrappable]
+    [
+      editor.cards,
+      editor.createCard,
+      editor.createdCards.length,
+      infoschematicRegister,
+      infoschematicScopes,
+      wrappable,
+    ],
   )
 
   // Created lines join the authored ones before the edit drafts are folded in,
@@ -316,7 +326,7 @@ function AppContent() {
     movedComponents,
     editor.routes,
     editor.attachments instanceof Map ? editor.attachments : new Map(Object.entries(editor.attachments)),
-    portAt
+    portAt,
   )
 
   /*
@@ -343,7 +353,7 @@ function AppContent() {
     }
     editor.addWaypoint(selectedRoute.code, points, {
       x: (points[at].x + points[at - 1].x) / 2,
-      y: (points[at].y + points[at - 1].y) / 2
+      y: (points[at].y + points[at - 1].y) / 2,
     })
   }, [editor.addWaypoint, selectedRoute])
 
@@ -356,23 +366,23 @@ function AppContent() {
   }, [editor.setRoute, portAt, selectedRoute])
 
   useEffect(() => {
-    if (!playing || !runningDemonstration || !stage.autoAdvance) return
-    const step = runningDemonstration.steps[playing.step]
+    if (!playing || !runningStory || !presentation.autoAdvance) return
+    const step = runningStory.steps[playing.step]
     if (!step) {
-      stage.stopDemonstration()
+      presentation.stopStory()
       return
     }
 
     const timer = window.setTimeout(() => {
-      stage.setPlaying((current) => {
+      presentation.setPlaying((current) => {
         if (!current || current.id !== playing.id || current.step !== playing.step) return current
-        const count = runningDemonstration.steps.length
+        const count = runningStory.steps.length
         return { id: current.id, step: (current.step + 1) % count }
       })
     }, step.hold)
 
     return () => window.clearTimeout(timer)
-  }, [playing, runningDemonstration, stage.autoAdvance, stage.setPlaying, stage.stopDemonstration])
+  }, [playing, presentation.autoAdvance, presentation.setPlaying, presentation.stopStory, runningStory])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -393,7 +403,7 @@ function AppContent() {
       }
 
       // Escape clears a selection before it can reach the branch below that
-      // stops a demonstration - the two only compete because both bind the
+      // stops a Story - the two only compete because both bind the
       // same key, not because a presenter ever means both at once.
       if (event.key === 'Escape' && editor.editing && editor.selected) {
         event.preventDefault()
@@ -427,7 +437,7 @@ function AppContent() {
       const arrow = { ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1] }[event.key]
 
       // While a handle is being edited the arrows nudge it; otherwise they step
-      // whatever demonstration is running.
+      // whatever Story is running.
       if (arrow && editor.editing && editor.selected) {
         event.preventDefault()
         const step = event.shiftKey ? 10 : 1
@@ -435,16 +445,16 @@ function AppContent() {
         return
       }
 
-      // A chosen partner steps the same way a demonstration does, minus the
+      // A chosen Thematic Scene steps the same way a Story does, minus the
       // hold: there is nothing running to pause. Stepping is by hand either way,
       // so the keys mean the same thing whichever card is open.
-      if (!playing && stage.vendor) {
+      if (!playing && presentation.thematicScene) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
           event.preventDefault()
-          stage.stepVendor(event.key === 'ArrowRight' ? 1 : -1)
+          presentation.stepThematicScene(event.key === 'ArrowRight' ? 1 : -1)
         } else if (event.key === 'Escape') {
           event.preventDefault()
-          stage.lightNothing()
+          presentation.lightNothing()
         }
         return
       }
@@ -453,13 +463,13 @@ function AppContent() {
 
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault()
-        stage.stepDemonstration(event.key === 'ArrowRight' ? 1 : -1)
+        presentation.stepStory(event.key === 'ArrowRight' ? 1 : -1)
       } else if (event.key === ' ' || event.key === 'Spacebar') {
         event.preventDefault()
-        stage.toggleAutoAdvance()
+        presentation.toggleAutoAdvance()
       } else if (event.key === 'Escape') {
         event.preventDefault()
-        stage.stopDemonstration()
+        presentation.stopStory()
       }
     }
 
@@ -472,16 +482,17 @@ function AppContent() {
     editor.select,
     editor.selected,
     playing,
-    stage.stepDemonstration,
-    stage.stopDemonstration,
-    stage.toggleAutoAdvance,
+    presentation.stepStory,
+    presentation.stopStory,
+    presentation.toggleAutoAdvance,
     editor.undo,
     editor.redo,
     shortcuts,
-    stage.lightNothing,
-    stage.stepVendor,
-    stage.vendor,
-    drawnFlows
+    presentation.lightNothing,
+    presentation.stepThematicScene,
+    presentation.thematicScene,
+    drawnFlows,
+    runtime,
   ])
 
   useEffect(() => {
@@ -494,13 +505,13 @@ function AppContent() {
   // after the controls tray. Measuring it here keeps the panel free of dead space
   // below the diagram and hands the remaining width to the operations panel.
   useLayoutEffect(() => {
-    const panel = topologyPanel.current
+    const panel = infoschematicPanel.current
     // Collapsed mode lets the diagram take the whole column, so the measured
     // width is neither applied nor needed until the panels come back.
     if (!panel || collapsed) return
 
     const measure = () => {
-      // The stage panel is the stage now, so its own height is what there is:
+      // The Infoschematic panel is the Infoschematic now, so its own height is what there is:
       // the column above it has already taken the controls and the seam out.
       const available = panel.clientHeight
       if (available <= 0) return
@@ -513,16 +524,16 @@ function AppContent() {
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(panel)
-    if (topologyControls.current) observer.observe(topologyControls.current)
+    if (infoschematicControls.current) observer.observe(infoschematicControls.current)
     return () => observer.disconnect()
   }, [collapsed])
 
-  function playDemonstration(demonstration: RuntimeStory) {
-    if (playing?.id === demonstration.id) {
-      stage.stopDemonstration()
+  function playStory(story: RuntimeStory) {
+    if (playing?.id === story.id) {
+      presentation.stopStory()
       return
     }
-    stage.startDemonstration(demonstration)
+    presentation.startStory(story)
   }
 
   // Dragging the splitter pins the panel width, which retires the aspect-derived
@@ -564,7 +575,7 @@ function AppContent() {
         fullscreen={fullscreen}
         onToggleCollapsed={() => setCollapsed((current) => !current)}
         onToggleFullscreen={toggleFullscreen}
-        stage={stage}
+        presentation={presentation}
       />
 
       <section
@@ -581,15 +592,15 @@ function AppContent() {
         }
       >
         {/*
-         * The stage and the controls are two panels in one column, not one
-         * panel with a tray at the foot. They are different things - the stage
+         * The Infoschematic and the controls are two panels in one column, not one
+         * panel with a tray at the foot. They are different things - the Infoschematic
          * is what is being shown, the controls are how it is chosen - and the
          * seam between them is the same seam that runs everywhere else.
          */}
-        <div className="stage-column">
-          <div className="stage-panel" ref={topologyPanel}>
-            <section className="topology" aria-label={`${runtime.config.title} Infoschematic`}>
-              <TopologyDiagram
+        <div className="presentation-column">
+          <div className="infoschematic-panel" ref={infoschematicPanel}>
+            <section className="infoschematic" aria-label={`${runtime.config.title} Infoschematic`}>
+              <InfoschematicDiagram
                 componentOffsets={movedComponents}
                 removals={editor.removals}
                 highlight={highlight}
@@ -598,15 +609,15 @@ function AppContent() {
                 onAddWaypoint={editor.editing ? editor.addWaypoint : undefined}
                 onAttach={editor.editing ? editor.attachTo : undefined}
                 /*
-                 * The stage is told which editor is open rather than inferring it
-                 * from a callback. Everything below is still the stage editor's:
+                 * The Infoschematic is told which editor is open rather than inferring it
+                 * from a callback. Everything below is still the Infoschematic editor's:
                  * in scene mode the diagram renders none of it, so passing them is
                  * harmless and removing them would mean two prop sets to keep in
                  * step.
                  */
                 mode={editor.mode}
-                litByScene={editor.mode === 'scene' ? sceneLibrary.lit : sceneList.lit}
-                onLight={editor.mode === 'scene' ? sceneLibrary.toggle : sceneList.toggle}
+                litByScene={editor.mode === 'scenes' ? sceneLibrary.lit : sceneList.lit}
+                onLight={editor.mode === 'scenes' ? sceneLibrary.toggle : sceneList.toggle}
                 createdCards={editor.createdCards}
                 onCreateLine={editor.editing ? proposeLine : undefined}
                 onFreeEnd={editor.editing ? editor.moveFreeEnd : undefined}
@@ -624,9 +635,9 @@ function AppContent() {
                 portCounts={editor.portCounts}
                 flows={drawnFlows}
                 selected={editor.selected}
-                annotated={stage.annotated}
+                annotated={presentation.annotated}
                 grid={editor.view.grid}
-                overlay={runningStep?.overlay}
+                overlay={runningStoryScene?.overlay}
                 visibleScopes={visibleScopes}
               />
               {proposed ? (
@@ -634,52 +645,54 @@ function AppContent() {
                   at={proposed.at}
                   onCancel={() => setProposed(null)}
                   onChoose={(family) => {
-                    const prefix = topologyFamilies.find((entry) => entry.id === family)?.prefix
+                    const prefix = infoschematicFamilies.find((entry) => entry.id === family)?.prefix
                     if (prefix) {
-                      const taken = [...topologyFlows.map((line) => line.code), ...Object.keys(editor.creations)]
+                      const taken = [...infoschematicFlows.map((line) => line.code), ...Object.keys(editor.creations)]
                       editor.create(nextCodeIn(prefix, taken), { family, ...proposed.ends })
                     }
                     setProposed(null)
                   }}
                 />
               ) : null}
-              {runningStep ? (
-                <DemonstrationCallout
-                  autoAdvance={stage.autoAdvance}
-                  body={runningStep.caption}
-                  eyebrow={runningDemonstration?.label ?? ''}
-                  onExit={stage.stopDemonstration}
-                  onStep={stage.stepDemonstration}
-                  onToggleAuto={stage.toggleAutoAdvance}
-                  step={runningStep}
+              {runningStoryScene ? (
+                <SceneCallout
+                  autoAdvance={presentation.autoAdvance}
+                  body={runningStoryScene.caption}
+                  eyebrow={runningStory?.label ?? ''}
+                  onExit={presentation.stopStory}
+                  onStep={presentation.stepStory}
+                  onToggleAuto={presentation.toggleAutoAdvance}
+                  step={runningStoryScene}
                   stepNumber={(playing?.step ?? 0) + 1}
-                  stepTotal={runningDemonstration?.steps.length ?? 0}
-                  takeaways={stage.takeaways ? runningStep.takeaways : undefined}
-                  title={runningStep.title}
+                  stepTotal={runningStory?.steps.length ?? 0}
+                  takeaways={presentation.takeaways ? runningStoryScene.takeaways : undefined}
+                  title={runningStoryScene.title}
                 />
-              ) : stage.vendor ? (
-                /* The same card for a partner, without the timer: a briefing is
+              ) : presentation.thematicScene ? (
+                /* The same card for a Thematic Scene, without the timer: its content is
                  read at the reader's pace, so it steps by hand and never on
                  its own. */
-                <DemonstrationCallout
-                  body={stage.vendor.description}
-                  eyebrow={stage.vendor.label}
-                  key={stage.vendor.id}
-                  logo={partnerLogos[stage.vendor.id]}
-                  profile={stage.vendor.profile}
-                  onExit={stage.lightNothing}
-                  onStep={stage.stepVendor}
-                  step={stage.vendor}
-                  stepNumber={vendors.findIndex((entry) => entry.id === stage.vendor?.id) + 1}
-                  stepTotal={vendors.length}
-                  takeaways={stage.takeaways ? stage.vendor.takeaways : undefined}
-                  wide={stage.vendor.cover}
-                  title={stage.vendor.headline}
+                <SceneCallout
+                  body={presentation.thematicScene.description}
+                  eyebrow={presentation.thematicScene.label}
+                  key={presentation.thematicScene.id}
+                  logo={themeLogos[presentation.thematicScene.id]}
+                  profile={presentation.thematicScene.profile}
+                  onExit={presentation.lightNothing}
+                  onStep={presentation.stepThematicScene}
+                  step={presentation.thematicScene}
+                  stepNumber={
+                    thematicScenes.findIndex((entry) => entry.id === presentation.thematicScene?.id) + 1
+                  }
+                  stepTotal={thematicScenes.length}
+                  takeaways={presentation.takeaways ? presentation.thematicScene.takeaways : undefined}
+                  wide={presentation.thematicScene.cover}
+                  title={presentation.thematicScene.headline}
                 />
               ) : null}
             </section>
           </div>
-          <Lighting onPlay={playDemonstration} ref={topologyControls} stage={stage} />
+          <ProducerControls onPlay={playStory} ref={infoschematicControls} presentation={presentation} />
         </div>
 
         {collapsed ? null : (
@@ -693,26 +706,26 @@ function AppContent() {
           />
         )}
 
-        <aside className="book-panel">
-          {collapsed ? <PanelRail onPlay={playDemonstration} stage={stage} /> : null}
+        <aside className="details-panel">
+          {collapsed ? <PanelRail onPlay={playStory} presentation={presentation} /> : null}
 
-          <Book
+          <DetailsPanel
             scenes={sceneLibrary}
             stories={sceneList}
             editor={{
               ...editor,
               canRoute: Boolean(selectedRoute),
               canWrap,
-              // Which of a beat's two lists the selection belongs in. The
+              // Which of a Story Scene's two lists the selection belongs in. The
               // descriptors keep flows apart from components because their id
-              // types are two unions, and that typecheck is what stops a beat
+              // types are two unions, and that typecheck is what stops a Story Scene
               // naming something that does not exist.
-              selectedIsFlow: Boolean(selectedRoute)
+              selectedIsFlow: Boolean(selectedRoute),
             }}
             onAddWaypoint={addWaypoint}
             onCreateCard={createCard}
             onResetRoute={resetRoute}
-            stage={stage}
+            presentation={presentation}
           />
         </aside>
       </section>

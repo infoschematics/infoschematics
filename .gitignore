@@ -12,5 +12,6 @@
 # Toolchain output — never committed.
 node_modules/
 dist/
+.wrangler/
 reports/
 .rumdl_cache/

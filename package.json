@@ -1,6 +1,6 @@
 {
   "name": "infoschematics",
-  "description": "The Infoschematics workspace: a visual instrument for making complex systems legible, as a framework-agnostic core and a React component library.",
+  "description": "The Infoschematics product model, framework-neutral core, React application, examples, guidance, and public website.",
   "version": "0.1.0",
   "author": "Infoschematics",
   "bugs": {
@@ -39,13 +39,22 @@
     "url": "git+https://github.com/infoschematics/infoschematics.git"
   },
   "scripts": {
-    "check": "bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise",
-    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src",
-    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app",
+    "build": "bun run --cwd workspaces/site build",
+    "check": "bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run build",
+    "clean": "bun run --cwd workspaces/site clean",
+    "dev": "bun run --cwd workspaces/site dev",
+    "ki:site:build": "bun run --cwd workspaces/site build",
+    "ki:site:clean": "bun run --cwd workspaces/site clean",
+    "ki:site:deploy": "bun run --cwd workspaces/site deploy",
+    "ki:site:dev": "bun run --cwd workspaces/site dev",
+    "ki:site:preview": "bun run --cwd workspaces/site preview",
+    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src workspaces/examples/blank/src workspaces/site/src",
+    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app && tsc --noEmit -p workspaces/examples/blank && tsc --noEmit -p workspaces/site",
     "test": "vitest run --root ."
   },
   "type": "module",
   "workspaces": [
-    "workspaces/*"
+    "workspaces/*",
+    "workspaces/examples/*"
   ]
 }

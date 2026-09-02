@@ -1,9 +1,9 @@
 import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PencilRuler, Tags } from 'lucide-react'
-import type { Stage } from '../hooks/use-stage.ts'
+import type { Presentation } from '../hooks/use-presentation.ts'
 import { useInfoschematic } from '../infoschematic-context.tsx'
 
 /*
- * The programme's identity, at whatever height the mode can afford.
+ * The product identity, at whatever height the mode can afford.
  *
  * Expanded, the panels are open and a row of chrome is not what is short, so it
  * takes two: the title over its strapline, with the consortium named in full
@@ -11,7 +11,7 @@ import { useInfoschematic } from '../infoschematic-context.tsx'
  *
  * Collapsed, the point is the diagram, so the bar reduces to one line - the
  * strapline beside the title rather than under it - and everything else goes to
- * the rail, which is already there and already vertical. The partners go with
+ * the rail, which is already there and already vertical. The Themes go with
  * them, as codes.
  */
 export function TitleBar({
@@ -19,15 +19,15 @@ export function TitleBar({
   fullscreen,
   onToggleCollapsed,
   onToggleFullscreen,
-  stage
+  presentation,
 }: {
   collapsed: boolean
   fullscreen: boolean
   onToggleCollapsed: () => void
   onToggleFullscreen: () => void
-  stage: Stage
+  presentation: Presentation
 }) {
-  const { programme } = useInfoschematic()
+  const { config } = useInfoschematic()
   /*
    * One header, whatever the panels are doing.
    *
@@ -42,8 +42,8 @@ export function TitleBar({
   return (
     <header className="title-bar">
       <hgroup>
-        <h1>{programme.title}</h1>
-        <p>{programme.subtitle}</p>
+        <h1>{config.title}</h1>
+        <p>{config.subtitle}</p>
       </hgroup>
 
       <div className="title-bar-actions">
@@ -53,13 +53,13 @@ export function TitleBar({
          * whatever anyone is doing - and they leave with the performance,
          * which is why the divider has to say which side it is on.
          */}
-        {stage.backstage ? null : (
+        {presentation.designing ? null : (
           <>
             <button
               aria-label="Annotate"
-              aria-pressed={stage.annotated}
+              aria-pressed={presentation.annotated}
               className="icon-button"
-              onClick={stage.toggleAnnotated}
+              onClick={presentation.toggleAnnotated}
               title="Annotate"
               type="button"
             >
@@ -67,9 +67,9 @@ export function TitleBar({
             </button>
             <button
               aria-label="Key takeaways"
-              aria-pressed={stage.takeaways}
+              aria-pressed={presentation.takeaways}
               className="icon-button"
-              onClick={stage.toggleTakeaways}
+              onClick={presentation.toggleTakeaways}
               title="Key takeaways"
               type="button"
             >
@@ -79,11 +79,11 @@ export function TitleBar({
           </>
         )}
         <button
-          aria-label={stage.backstage ? 'Leave the editors' : 'Open the editors'}
-          aria-pressed={stage.backstage}
+          aria-label={presentation.designing ? 'Leave the editors' : 'Open the editors'}
+          aria-pressed={presentation.designing}
           className="icon-button"
-          onClick={() => stage.setBackstage(!stage.backstage)}
-          title={stage.backstage ? 'Front of house — what a visitor sees' : 'Backstage — the editors'}
+          onClick={() => presentation.setDesigning(!presentation.designing)}
+          title={presentation.designing ? 'Present — what an audience sees' : 'Design — the editors'}
           type="button"
         >
           <PencilRuler aria-hidden="true" size={14} />

@@ -1,4 +1,4 @@
-import type { Stage } from '../hooks/use-stage.ts'
+import type { Presentation } from '../hooks/use-presentation.ts'
 import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
 import { scopeIcon } from '../scope-icons.ts'
 
@@ -6,12 +6,12 @@ import { scopeIcon } from '../scope-icons.ts'
 // diagram, so switching a dimension off never needs the panels back.
 export function PanelRail({
   onPlay,
-  stage
+  presentation,
 }: {
-  onPlay: (demonstration: RuntimeStory) => void
-  stage: Stage
+  onPlay: (story: RuntimeStory) => void
+  presentation: Presentation
 }) {
-  const { demonstrations, partnerLogos, topologyFamilies, topologyScopes, vendors } = useInfoschematic()
+  const { infoschematicFamilies, infoschematicScopes, stories, thematicScenes, themeLogos } = useInfoschematic()
   return (
     <div className="panel-rail">
       {/*
@@ -24,15 +24,15 @@ export function PanelRail({
        * a column and useless anywhere else.
        */}
       <section className="rail-group" aria-label="Scopes">
-        {topologyScopes.map((scope) => {
+        {infoschematicScopes.map((scope) => {
           const ScopeIcon = scopeIcon(scope.icon)
           return (
             <button
               aria-label={scope.label}
-              aria-pressed={stage.visibleScopes.has(scope.id)}
+              aria-pressed={presentation.visibleScopes.has(scope.id)}
               className="rail-scope"
               key={scope.id}
-              onClick={() => stage.toggleScope(scope.id)}
+              onClick={() => presentation.toggleScope(scope.id)}
               title={`${scope.label} — ${scope.description}`}
               type="button"
             >
@@ -42,22 +42,22 @@ export function PanelRail({
         })}
         <button
           className="rail-toggle"
-          onClick={() => stage.showAllScopes(!stage.hasVisibleScopes)}
-          title={stage.hasVisibleScopes ? 'Hide all components' : 'Show all components'}
+          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
+          title={presentation.hasVisibleScopes ? 'Hide all components' : 'Show all components'}
           type="button"
         >
-          {stage.hasVisibleScopes ? 'Hide' : 'Show'}
+          {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
         </button>
       </section>
 
       <section className="rail-group" aria-label="Families">
-        {topologyFamilies.map((family) => (
+        {infoschematicFamilies.map((family) => (
           <button
             aria-label={family.label}
-            aria-pressed={stage.visibleFamilies.has(family.id)}
+            aria-pressed={presentation.visibleFamilies.has(family.id)}
             className="rail-swatch"
             key={family.id}
-            onClick={() => stage.toggleFamily(family.id)}
+            onClick={() => presentation.toggleFamily(family.id)}
             style={{ '--family-color': family.color } as React.CSSProperties}
             title={`${family.label} — ${family.description}`}
             type="button"
@@ -65,32 +65,32 @@ export function PanelRail({
         ))}
         <button
           className="rail-toggle"
-          onClick={() => stage.showAllFamilies(!stage.hasVisibleFamilies)}
-          title={stage.hasVisibleFamilies ? 'Hide all flows' : 'Show all flows'}
+          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
+          title={presentation.hasVisibleFamilies ? 'Hide all flows' : 'Show all flows'}
           type="button"
         >
-          {stage.hasVisibleFamilies ? 'Hide' : 'Show'}
+          {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
         </button>
       </section>
 
       <section className="rail-group" aria-label="Stories">
-        {demonstrations.map((demonstration) => (
+        {stories.map((story) => (
           <button
-            aria-label={demonstration.label}
-            aria-pressed={stage.playing?.id === demonstration.id}
+            aria-label={story.label}
+            aria-pressed={presentation.playing?.id === story.id}
             className="rail-pathway"
-            key={demonstration.id}
-            onClick={() => onPlay(demonstration)}
-            title={`${demonstration.label} — ${demonstration.question}`}
+            key={story.id}
+            onClick={() => onPlay(story)}
+            title={`${story.label} — ${story.question}`}
             type="button"
           >
-            {demonstration.short ?? demonstration.code}
+            {story.short ?? story.code}
           </button>
         ))}
         <button
           className="rail-toggle"
-          disabled={!stage.playing}
-          onClick={() => stage.stopDemonstration()}
+          disabled={!presentation.playing}
+          onClick={() => presentation.stopStory()}
           title="Stop the story"
           type="button"
         >
@@ -100,25 +100,25 @@ export function PanelRail({
 
       {/* Theme scenes use compact codes here because the collapsed rail has no
           room for their full labels. */}
-      <section className="rail-group" aria-label="Partners">
-        {vendors.map((entry) => (
+      <section className="rail-group" aria-label="Themes">
+        {thematicScenes.map((entry) => (
           <button
             aria-label={entry.label}
-            aria-pressed={stage.vendor?.id === entry.id}
-            className="rail-pathway rail-partner"
+            aria-pressed={presentation.thematicScene?.id === entry.id}
+            className="rail-pathway rail-theme"
             key={entry.id}
-            onClick={() => stage.toggleVendor(entry)}
+            onClick={() => presentation.toggleThematicScene(entry)}
             title={`${entry.label} — ${entry.headline}`}
             type="button"
           >
-            {partnerLogos[entry.id] ? <img alt="" src={partnerLogos[entry.id]} /> : entry.code}
+            {themeLogos[entry.id] ? <img alt="" src={themeLogos[entry.id]} /> : entry.code}
           </button>
         ))}
         <button
           className="rail-toggle"
-          disabled={!stage.vendor}
-          onClick={() => stage.lightNothing()}
-          title="Clear the partner"
+          disabled={!presentation.thematicScene}
+          onClick={() => presentation.lightNothing()}
+          title="Clear the Theme"
           type="button"
         >
           Clear

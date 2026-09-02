@@ -9,8 +9,8 @@ import type { SceneLibraryEditor } from './use-scene-library.ts'
  * editor could arrange scenes into a story and could not make one, which is the
  * wrong way round since the story is what depends on them.
  *
- * What a scene lights is chosen by clicking the stage, exactly as it is for a
- * story's own beats. One gesture for one idea, whichever layer is being edited.
+ * What a scene lights is chosen by clicking the Infoschematic, exactly as it is for a
+ * story's own Story Scenes. One gesture for one idea, whichever layer is being edited.
  */
 export function SceneLibraryPanel({
   editor,
@@ -51,7 +51,7 @@ export function SceneLibraryPanel({
         >
           <Plus aria-hidden="true" size={13} />
         </button>
-        {/* A scene a story plays cannot go: the beat would keep its own lists
+        {/* A scene a story plays cannot go: the Story Scene would keep its own lists
             and quietly light nothing. The title says which story to look at. */}
         <button
           aria-label="Remove this scene"
@@ -112,7 +112,7 @@ export function SceneLibraryPanel({
               onClick={() => selected && editor.toggle(selected, selectedIsFlow)}
               type="button"
             >
-              {selected ? `Add or remove ${selected}` : 'Click something on the stage to add it'}
+              {selected ? `Add or remove ${selected}` : 'Click something on the Infoschematic to add it'}
             </button>
           </p>
         </div>

@@ -31,7 +31,7 @@ export function ComponentControls({
    * Which counts those are is read from this component's own box. Assuming a
    * card's 160 by 80 offered a fabric counts its box cannot divide into: a 200
    * unit side has no seven, so asking for one gave back three, and the panel
-   * and the stage both sat there unchanged.
+   * and the Infoschematic both sat there unchanged.
    */
   const allowedOn = (side: Side) => portCountsForSide(side === 'east' || side === 'west' ? box.height : box.width)
 

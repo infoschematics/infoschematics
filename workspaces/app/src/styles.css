@@ -36,7 +36,7 @@ main {
   /*
    * One gap, used everywhere two panels meet or a panel meets the edge.
    *
-   * The space between the stage and the side panel was its own number and
+   * The space between the Infoschematic and the side panel was its own number and
    * drifted from the space around them, so the seam in the middle read as
    * wider than the margin outside. Stated once so the two cannot disagree.
    */
@@ -366,7 +366,7 @@ h2 {
   grid-template-columns: minmax(0, 1fr) 48px;
 }
 
-.control-room.collapsed .lighting-panel,
+.control-room.collapsed .producer-controls,
 .control-room.collapsed .state-panel {
   display: none;
 }
@@ -376,15 +376,15 @@ h2 {
  *
  * The column keeps a two-row template and a seam between them, and a gap is
  * drawn whether or not anything is in the row after it - so hiding the controls
- * left their seam behind as a band under the stage. The same mistake as the
+ * left their seam behind as a band under the Infoschematic. The same mistake as the
  * phantom row under `main`, made in the same week and found the same way.
  */
-.control-room.collapsed .stage-column {
+.control-room.collapsed .presentation-column {
   gap: 0;
   grid-template-rows: minmax(0, 1fr);
 }
 
-.control-room.collapsed .book-panel {
+.control-room.collapsed .details-panel {
   grid-template-rows: minmax(0, 1fr);
 }
 
@@ -457,16 +457,16 @@ h2 {
   color: #cce1f8;
 }
 
-.stage-panel,
-.book-panel {
+.infoschematic-panel,
+.details-panel {
   background: #0a1929d9;
   border: 1px solid #ffffff1c;
   border-radius: 14px;
   box-shadow: 0 15px 60px #00000030;
 }
 
-/* The column the stage and its controls share, seamed like everything else. */
-.stage-column {
+/* The column the Infoschematic and its controls share, seamed like everything else. */
+.presentation-column {
   display: grid;
   gap: var(--panel-seam);
   grid-template-rows: minmax(0, 1fr) auto;
@@ -474,7 +474,7 @@ h2 {
   min-width: 0;
 }
 
-.stage-panel {
+.infoschematic-panel {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
@@ -511,7 +511,7 @@ h2 {
   color: white;
 }
 
-.topology {
+.infoschematic {
   aspect-ratio: 3 / 2;
   background: #081725;
   margin-inline: auto;
@@ -522,14 +522,14 @@ h2 {
   position: relative;
 }
 
-.topology-svg {
+.infoschematic-svg {
   aspect-ratio: 3 / 2;
   display: block;
   height: auto;
   width: 100%;
 }
 
-.topology-zone-label {
+.infoschematic-zone-label {
   fill: #ffffff65;
   font: 600 12px 'DM Mono', monospace;
   letter-spacing: 1.5px;
@@ -537,17 +537,17 @@ h2 {
 
 /* The outline is a path with a gap rather than a rect, so the lane's name can
    sit on the border like a legend. */
-.topology-group path {
+.infoschematic-group path {
   stroke-width: 1.5px;
 }
 
 /* The lane outline is a filled path drawn over the zones, so it swallowed every
    click meant for the zone beneath it. Only its legend is interactive. */
-.topology-group path {
+.infoschematic-group path {
   pointer-events: none;
 }
 
-.topology-group text {
+.infoschematic-group text {
   font: 600 13px 'DM Mono', monospace;
   letter-spacing: 1.6px;
 }
@@ -586,13 +586,13 @@ h2 {
 /* The plane is a fabric like the clouds are, so it is drawn as one: a shell, a
    grid, a motif and the same two lines of text, in the same blue every other
    fabric wears. It kept its own pink for a while, which made it the one thing
-   on the stage painted a colour that named nothing - the taxonomy issues every
+   on the Infoschematic painted a colour that named nothing - the taxonomy issues every
    other colour here, and telemetry's own family colour was never that pink.
-   What still sets the plane apart is its shape: a strip the width of the stage,
+   What still sets the plane apart is its shape: a strip the width of the Infoschematic,
    which keeps the title at the left rather than centred over it.
 
    Only the fill and the stroke weight are its own. The fill is a shade deeper
-   than the clouds' because the strip is a backdrop the whole stage sits above,
+   than the clouds' because the strip is a backdrop the whole Infoschematic sits above,
    and the stroke is lighter because forty units of height carry a border the
    way a hundred and thirty do not. */
 .telemetry-fabric .fabric-shell {
@@ -605,10 +605,10 @@ h2 {
   text-anchor: start;
 }
 
-/* Drawn over the stage, and deliberately faint: a scene's own argument about
+/* Drawn over the Infoschematic, and deliberately faint: a scene's own argument about
    the picture, which a reader has to be able to look straight past at the lines
    underneath. Neither figure takes pointer events - there is nothing to click. */
-.stage-overlay {
+.graphics-overlay {
   pointer-events: none;
 }
 
@@ -717,20 +717,20 @@ h2 {
    attachment points can be changed like any other's. It says so where it is
    drawn rather than being raised above the cards - a cloud over a card hides
    more than the selection reveals. */
-.topology-svg.editing .topology-fabric-shape.selected .fabric-shell,
-.topology-svg.editing .topology-satcom.selected .satcom-shell {
+.infoschematic-svg.editing .infoschematic-fabric-shape.selected .fabric-shell,
+.infoschematic-svg.editing .infoschematic-satcom.selected .satcom-shell {
   stroke: #dff3ff;
   stroke-width: 2.5px;
 }
 
-.topology-svg.editing .topology-fabric-shape,
-.topology-svg.editing .topology-satcom {
+.infoschematic-svg.editing .infoschematic-fabric-shape,
+.infoschematic-svg.editing .infoschematic-satcom {
   cursor: pointer;
   pointer-events: auto;
 }
 
-.topology-satcom .fabric-title,
-.topology-satcom .fabric-detail {
+.infoschematic-satcom .fabric-title,
+.infoschematic-satcom .fabric-detail {
   text-anchor: start;
 }
 
@@ -753,9 +753,9 @@ h2 {
   stroke-width: 2px;
 }
 
-.topology-satellite rect,
-.topology-satellite path,
-.topology-dish path {
+.infoschematic-satellite rect,
+.infoschematic-satellite path,
+.infoschematic-dish path {
   fill: none;
   stroke: #a8cde6;
   stroke-linecap: round;
@@ -763,7 +763,7 @@ h2 {
   stroke-width: 2.5px;
 }
 
-.topology-satellite rect {
+.infoschematic-satellite rect {
   fill: #17354b;
 }
 
@@ -782,48 +782,48 @@ h2 {
 /* The layer ignores the pointer so a line drawn across a card never takes a
    click meant for it. Each line's own hit path opts back in, which is how a
    line can be hovered without the layer blocking anything. */
-.topology-flows {
+.infoschematic-flows {
   pointer-events: none;
 }
 
-.topology-pipe,
-.topology-route {
+.infoschematic-pipe,
+.infoschematic-route {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.topology-pipe {
+.infoschematic-pipe {
   opacity: 0.75;
   stroke: #06101c;
   stroke-width: 9px;
 }
 
-.topology-route {
+.infoschematic-route {
   filter: drop-shadow(0 0 4px #000000cc);
   opacity: 0.95;
   stroke-width: 4px;
 }
 
-.topology-route.dashed {
+.infoschematic-route.dashed {
   stroke-dasharray: 13 11;
 }
 
 /* Selecting a published contract lights the lines that carry it and drops
-   everything else back, so the stage answers "where does this API live?". */
-.topology-svg.highlighting .topology-flows > g,
-.topology-svg.highlighting .topology-service {
+   everything else back, so the Infoschematic answers "where does this API live?". */
+.infoschematic-svg.highlighting .infoschematic-flows > g,
+.infoschematic-svg.highlighting .infoschematic-service {
   transition: opacity 180ms ease-out;
 }
 
-.topology-svg.highlighting .topology-flows > g:not(.highlighted),
-.topology-svg.highlighting .topology-service:not(.highlighted),
-.topology-svg.highlighting .topology-fabric:not(.highlighted),
-.topology-svg.highlighting .audit-flow:not(.highlighted) {
+.infoschematic-svg.highlighting .infoschematic-flows > g:not(.highlighted),
+.infoschematic-svg.highlighting .infoschematic-service:not(.highlighted),
+.infoschematic-svg.highlighting .infoschematic-fabric:not(.highlighted),
+.infoschematic-svg.highlighting .audit-flow:not(.highlighted) {
   opacity: 0.14;
 }
 
-.topology-svg.highlighting .topology-flows > g.highlighted .topology-route {
+.infoschematic-svg.highlighting .infoschematic-flows > g.highlighted .infoschematic-route {
   filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 4px currentColor);
   opacity: 1;
   stroke-width: 5px;
@@ -831,89 +831,89 @@ h2 {
 
 /* The backing pipe under a lit line is what keeps it legible where it crosses a
    dimmed one, so it brightens with the line rather than staying near-black. */
-.topology-svg.highlighting .topology-flows > g.highlighted .topology-pipe {
+.infoschematic-svg.highlighting .infoschematic-flows > g.highlighted .infoschematic-pipe {
   opacity: 1;
   stroke: #06101ce6;
   stroke-width: 11px;
 }
 
-.topology-svg.highlighting .topology-service.highlighted rect {
+.infoschematic-svg.highlighting .infoschematic-service.highlighted rect {
   filter: drop-shadow(0 0 10px #79c9ff5c);
   stroke-width: 3px;
 }
 
-.topology-svg.highlighting .topology-fabric {
+.infoschematic-svg.highlighting .infoschematic-fabric {
   transition: opacity 180ms ease-out;
 }
 
-.topology-svg.highlighting .topology-fabric.highlighted .fabric-shell,
-.topology-svg.highlighting .topology-fabric.highlighted .satcom-shell {
+.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .fabric-shell,
+.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .satcom-shell {
   filter: drop-shadow(0 0 12px #79c9ff4a);
 }
 
 /* One treatment for "this one", whichever kind of thing it is and whichever end
-   points at it - the pointer on the stage or a change in the panel. Pointing is
+   points at it - the pointer on the Infoschematic or a change in the panel. Pointing is
    the lighter half: it says "this one" while the pointer rests and nothing once
    it moves on. Selecting keeps the same glow in the selection's own colour, so
    what has been chosen goes on saying so after the pointer leaves. */
-.topology-svg .pointed {
+.infoschematic-svg .pointed {
   --glow: #79c9ff;
 }
 
-.topology-svg .selected {
+.infoschematic-svg .selected {
   --glow: #82b366;
 }
 
-.topology-svg .topology-service.pointed rect,
-.topology-svg.editing .topology-service.selected rect {
+.infoschematic-svg .infoschematic-service.pointed rect,
+.infoschematic-svg.editing .infoschematic-service.selected rect {
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
 }
 
-.topology-svg .topology-service.pointed rect {
+.infoschematic-svg .infoschematic-service.pointed rect {
   stroke: #cfe9ff;
 }
 
-.topology-svg .audit-flow.pointed rect,
-.topology-svg.editing .audit-flow.selected rect {
+.infoschematic-svg .audit-flow.pointed rect,
+.infoschematic-svg.editing .audit-flow.selected rect {
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glow) 55%, transparent));
 }
 
-.topology-svg .audit-flow.pointed rect {
+.infoschematic-svg .audit-flow.pointed rect {
   stroke: #cfe9ff;
   stroke-width: 1.5px;
 }
 
-.topology-svg .topology-fabric-shape.pointed .fabric-shell,
-.topology-svg .topology-satcom.pointed .satcom-shell,
-.topology-svg.editing .topology-fabric-shape.selected .fabric-shell,
-.topology-svg.editing .topology-satcom.selected .satcom-shell {
+.infoschematic-svg .infoschematic-fabric-shape.pointed .fabric-shell,
+.infoschematic-svg .infoschematic-satcom.pointed .satcom-shell,
+.infoschematic-svg.editing .infoschematic-fabric-shape.selected .fabric-shell,
+.infoschematic-svg.editing .infoschematic-satcom.selected .satcom-shell {
   filter: drop-shadow(0 0 12px color-mix(in srgb, var(--glow) 40%, transparent));
 }
 
 /* A lane's legend and a zone's heading are text, so the glow is a text shadow.
    Geography is pointed at the same way a component is; only dragging differs. */
-.topology-svg .lane-selectable.pointed,
-.topology-svg .zone-selectable.pointed,
-.topology-svg.editing .lane-selectable.selected,
-.topology-svg.editing .zone-selectable.selected {
+.infoschematic-svg .lane-selectable.pointed,
+.infoschematic-svg .zone-selectable.pointed,
+.infoschematic-svg.editing .lane-selectable.selected,
+.infoschematic-svg.editing .zone-selectable.selected {
   text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
 }
 
-.topology-svg .lane-selectable.pointed,
-.topology-svg .zone-selectable.pointed {
+.infoschematic-svg .lane-selectable.pointed,
+.infoschematic-svg .zone-selectable.pointed {
   fill: #dff3ff;
 }
 
 /* A port and a waypoint are small enough that the glow is most of what is seen,
    so theirs is tighter and brighter than a card's. */
-.topology-svg .audit-port.pointed circle,
-.topology-svg .audit-port.selected circle,
-.topology-svg .route-waypoint.pointed,
-.topology-svg .route-waypoint.selected {
+.infoschematic-svg .audit-port.pointed circle,
+.infoschematic-svg .audit-port.selected circle,
+.infoschematic-svg .route-waypoint.pointed,
+.infoschematic-svg .route-waypoint.selected {
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--glow) 85%, transparent));
 }
 
-.topology-svg .route-waypoint.pointed {
+.infoschematic-svg .route-waypoint.pointed {
   stroke: #cfe9ff;
 }
 
@@ -925,46 +925,46 @@ h2 {
   stroke-width: 2px;
 }
 
-.topology-adapter.selectable {
+.infoschematic-adapter.selectable {
   cursor: pointer;
   pointer-events: auto;
 }
 
-.topology-adapter.pointed .adapter-socket,
-.topology-svg.editing .topology-adapter.selected .adapter-socket {
+.infoschematic-adapter.pointed .adapter-socket,
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
 }
 
-.topology-svg.editing .topology-adapter.selected .adapter-socket {
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
   stroke: #82b366;
   stroke-width: 3px;
 }
 
 /* A card's own treatment: an adapter is a component and names itself the way
    every other component does. It carried its own size and a scope tint that
-   nothing else on the stage uses - no card colours its name by scope. */
+   nothing else on the Infoschematic uses - no card colours its name by scope. */
 .adapter-label {
   fill: #f2f7ff;
   font: 700 14px Manrope, Arial, sans-serif;
   text-anchor: middle;
 }
 
-.topology-svg.highlighting .topology-adapter:not(.highlighted) {
+.infoschematic-svg.highlighting .infoschematic-adapter:not(.highlighted) {
   opacity: 0.14;
 }
 
-.topology-service rect {
+.infoschematic-service rect {
   filter: drop-shadow(0 8px 18px #00000038);
   stroke-width: 2px;
 }
 
-.topology-service-label {
+.infoschematic-service-label {
   fill: #f2f7ff;
   font: 700 14px Manrope, Arial, sans-serif;
   text-anchor: middle;
 }
 
-.topology-audit {
+.infoschematic-audit {
   pointer-events: none;
 }
 
@@ -984,33 +984,33 @@ h2 {
   stroke-width: 3px;
 }
 
-.topology-svg.editing .audit-flow.editable {
+.infoschematic-svg.editing .audit-flow.editable {
   cursor: grab;
   pointer-events: auto;
 }
 
-/* Sits behind everything else on the stage, transparent rather than absent, so
+/* Sits behind everything else on the Infoschematic, transparent rather than absent, so
    a click only ever reaches it once every card, zone and line drawn above it
-   has been missed - which is what makes an empty stage clickable to clear the
+   has been missed - which is what makes an empty Infoschematic clickable to clear the
    selection without this having to know what else is on screen. */
-.stage-backdrop {
+.infoschematic-backdrop {
   fill: transparent;
   pointer-events: none;
 }
 
-.topology-svg.editing .stage-backdrop {
+.infoschematic-svg.editing .infoschematic-backdrop {
   cursor: default;
   pointer-events: auto;
 }
 
 /* The last handle dragged is what the arrow keys nudge, so it says so. */
 /* A card is selectable while the editor is open, so its controls can be shown. */
-.topology-svg.editing .topology-service.selectable {
+.infoschematic-svg.editing .infoschematic-service.selectable {
   cursor: pointer;
   pointer-events: auto;
 }
 
-.topology-svg.editing .topology-service.selected rect {
+.infoschematic-svg.editing .infoschematic-service.selected rect {
   stroke: #82b366;
   stroke-width: 3px;
 }
@@ -1023,7 +1023,7 @@ h2 {
 
 /* A zone is geography rather than a component - selectable so its position can
    be read, never draggable, which is why there is no .selectable variant here. */
-.topology-svg.editing .zone-selectable {
+.infoschematic-svg.editing .zone-selectable {
   cursor: pointer;
   pointer-events: auto;
 }
@@ -1226,24 +1226,24 @@ h2 {
   margin: 0;
 }
 
-.topology-svg.editing .audit-flow.selected rect {
+.infoschematic-svg.editing .audit-flow.selected rect {
   stroke: #82b366;
   stroke-width: 2px;
 }
 
-.topology-svg.editing .audit-flow.editable:active {
+.infoschematic-svg.editing .audit-flow.editable:active {
   cursor: grabbing;
 }
 
 /* Shown only while a handle is being dragged, and only for the guides it
-   actually snapped to, so the stage never fills with lines that mean nothing. */
-.topology-guides line {
+   actually snapped to, so the Infoschematic never fills with lines that mean nothing. */
+.infoschematic-guides line {
   stroke: #79c9ff;
   stroke-dasharray: 6 6;
   stroke-width: 1;
 }
 
-.topology-svg.editing .audit-flow.editable rect {
+.infoschematic-svg.editing .audit-flow.editable rect {
   stroke: #79c9ff88;
   stroke-width: 1px;
 }
@@ -1394,7 +1394,7 @@ h2 {
 }
 
 /* A change points at what it is about, so it is lit the same way the thing on
-   stage is - and the row it is on is a button, not a line of text. */
+   Infoschematic is - and the row it is on is a button, not a line of text. */
 .change-list li.highlighted {
   box-shadow: inset 2px 0 0 #79c9ff;
 }
@@ -1513,15 +1513,15 @@ h2 {
    control inside it has to ask for interaction back. A port is a control while
    editing: clicking selects it, and dragging the one a selected flow
    meets moves that end elsewhere. */
-.topology-svg.editing .audit-port {
+.infoschematic-svg.editing .audit-port {
   pointer-events: auto;
 }
 
-.topology-svg.editing .audit-port.in-use {
+.infoschematic-svg.editing .audit-port.in-use {
   cursor: grab;
 }
 
-.topology-svg.editing .audit-port.in-use:active {
+.infoschematic-svg.editing .audit-port.in-use:active {
   cursor: grabbing;
 }
 
@@ -1550,7 +1550,7 @@ h2 {
  * Each bank is drawn as its own enclosure rather than divided from its
  * neighbour by a single rule. The banks were laid out as quadrants and split by
  * two hairlines placed by position - one down the middle, one across the third
- * child onwards. Retiring the spotlight bank left three banks in a grid built
+ * child onwards. Retiring the standalone-scene bank left three banks in a grid built
  * for four, so the rule meant to run under the top row ran under half of it and
  * stopped, and the last bank sat in a column with nothing beside it. Borders
  * that belong to the bank cannot come apart from it that way, however many
@@ -1559,16 +1559,16 @@ h2 {
 /*
  * Two columns sized to what is in them, not to each other.
  *
- * Equal halves put three scope buttons in the same width as eight partner
+ * Equal halves put three scope buttons in the same width as eight theme
  * marks: the left column sat mostly empty while the right wrapped onto a
  * second line. The banks hold very different numbers of very different
  * things, and a grid that insists they are the same size is asserting
  * something about them that is not true.
  *
  * `auto` takes what the narrow column needs and the rest goes to the wide one,
- * so the partners get the room that was being held for nothing.
+ * so the Themes get the room that was being held for nothing.
  */
-.lighting-panel {
+.producer-controls {
   background: #0a1929d9;
   border: 1px solid #ffffff1c;
   border-radius: 14px;
@@ -1582,7 +1582,7 @@ h2 {
 
 /* One line where the content fits, wrapping to a second where it does not -
    nothing is ever hidden behind a scroll the viewer cannot see. */
-.lighting-bank {
+.producer-bank {
   align-content: center;
   align-items: center;
   row-gap: 4px;
@@ -1595,33 +1595,33 @@ h2 {
   padding: 6px 10px;
 }
 
-.lighting-bank > button {
+.producer-bank > button {
   flex: 0 0 auto;
 }
 
-/* Choosing what to play is not filtering what is on stage, so it reads as a
+/* Choosing what to play is not filtering what is on Infoschematic, so it reads as a
    band of its own rather than as a third filter that happens to be short. */
-.lighting-bank.spanning {
+.producer-bank.spanning {
   grid-column: 1 / -1;
 }
 
 /* Fixed rather than sized to the word, so the first button of every bank starts
    at the same place down the column. Narrowed with the labels themselves: they
    were Components and Connections and are now Scopes and Families. */
-.lighting-label {
+.producer-label {
   flex: 0 0 58px;
   margin-right: 3px;
   white-space: nowrap;
 }
 
-.lighting-label,
+.producer-label,
 .family-description {
   font: 500 9px 'DM Mono', monospace;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-.lighting-label {
+.producer-label {
   color: #d7e6f8;
 }
 
@@ -1687,7 +1687,7 @@ h2 {
   opacity: 0.4;
 }
 
-.book-panel {
+.details-panel {
   align-self: stretch;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
@@ -2025,17 +2025,17 @@ h2 {
   padding: 15px 5px;
 }
 
-/* The callout is the narrative for a scene of a demonstration, so it sits over
-   the stage and points at the component the scene is about. The layer ignores the
+/* The callout is the narrative for a scene of a story, so it sits over
+   the Infoschematic and points at the component the scene is about. The layer ignores the
    pointer so nothing underneath becomes unclickable; its controls opt back in. */
-.topology-callout-layer {
+.infoschematic-callout-layer {
   inset: 0;
   pointer-events: none;
   position: absolute;
   z-index: 5;
 }
 
-.demonstration-callout {
+.scene-callout {
   animation: callout-in 220ms ease-out;
   background: #071624f2;
   border: 1px solid #79c9ff66;
@@ -2050,7 +2050,7 @@ h2 {
   width: max-content;
 }
 
-/* The partner's mark where one has arrived, sized to sit on the heading line
+/* The theme's mark where one has arrived, sized to sit on the heading line
    rather than above it. */
 .callout-logo {
   height: 18px;
@@ -2060,7 +2060,7 @@ h2 {
 }
 
 /* What this one is called, between whose voice it is and what it says. A scene
-   and a partner briefing both carry it, which is what makes them one card. */
+   and a theme briefing both carry it, which is what makes them one card. */
 .callout-title {
   color: #cfe6ff;
   font-size: 13px;
@@ -2097,16 +2097,16 @@ h2 {
 }
 
 /* The cover carries the whole synopsis and four takeaways rather than one
-   partner's contribution, so it is given the room to hold them without becoming
+   theme's contribution, so it is given the room to hold them without becoming
    a column of six-word lines. */
-.demonstration-callout.wide {
+.scene-callout.wide {
   max-width: min(560px, 84%);
 }
 
 /* Two sides needs the width of two, and the same rule between them the shortcut
    overlay uses - they are the same idea, two answers that would read as one
    rambling list if the gap alone had to separate them. */
-.demonstration-callout.sided {
+.scene-callout.sided {
   max-width: min(640px, 88%);
 }
 
@@ -2140,7 +2140,7 @@ h2 {
   align-content: start;
 }
 
-/* Larger than the mark on the heading line: here it is the partner's own side
+/* Larger than the mark on the heading line: here it is the theme's own side
    of the card rather than a tag beside their name. */
 .callout-mark {
   height: 30px;
@@ -2158,7 +2158,7 @@ h2 {
 
 /* The register. A reader scans this for one entry rather than reading it
    through, so the three parts are separated hard, the groups within them
-   softly, and a row lights when the stage is pointing at it. */
+   softly, and a row lights when the Infoschematic is pointing at it. */
 .model-register {
   display: grid;
   gap: 14px;
@@ -2268,7 +2268,7 @@ h2 {
   padding: 3px 6px;
 }
 
-/* Pointing, not lighting: the same faint mark the stage puts on whatever the
+/* Pointing, not focusing: the same faint mark the Infoschematic puts on whatever the
    pointer is over, so a row and its subject are found together in either
    direction. */
 .register-row:hover,
@@ -2306,7 +2306,7 @@ h2 {
   line-height: 1.3;
 }
 
-.vendor-headline {
+.theme-headline {
   color: #c39bff;
   font: 600 11px 'DM Mono', monospace;
   letter-spacing: 0.04em;
@@ -2498,7 +2498,7 @@ button:focus-visible,
       minmax(420px, 1fr);
   }
 
-  .lighting-bank {
+  .producer-bank {
     padding-inline: 14px;
   }
 }
@@ -2524,7 +2524,7 @@ button:focus-visible,
     grid-template-columns: 1fr;
   }
 
-  .topology {
+  .infoschematic {
     max-height: none;
     width: 100%;
   }
@@ -2535,7 +2535,7 @@ button:focus-visible,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .demonstration-callout {
+  .scene-callout {
     animation: none;
     transition: none;
   }
@@ -2544,8 +2544,8 @@ button:focus-visible,
     animation: none;
   }
 
-  .topology-svg.highlighting .topology-flows > g,
-  .topology-svg.highlighting .topology-service {
+  .infoschematic-svg.highlighting .infoschematic-flows > g,
+  .infoschematic-svg.highlighting .infoschematic-service {
     transition: none;
   }
 
@@ -2659,8 +2659,8 @@ button:focus-visible,
 /* A wide, invisible stroke over each route while editing, so a 4px line is
    still an easy target - the first click on it selects the flow, the
    next one adds a waypoint. Rendered only while editing, so it never needs a
-   .topology-svg.editing prefix the way the always-present selectables do. */
-.topology-route-hit {
+   .infoschematic-svg.editing prefix the way the always-present selectables do. */
+.infoschematic-route-hit {
   cursor: pointer;
   cursor: default;
   fill: none;
@@ -2669,11 +2669,11 @@ button:focus-visible,
   stroke-width: 12px;
 }
 
-.topology-svg.editing .topology-route-hit {
+.infoschematic-svg.editing .infoschematic-route-hit {
   cursor: pointer;
 }
 
-.topology-flows > g.selected .topology-route {
+.infoschematic-flows > g.selected .infoschematic-route {
   stroke-width: 5px;
 }
 
@@ -2685,15 +2685,15 @@ button:focus-visible,
    The fill attribute on the path stays as the fallback: where this value is not
    understood the declaration is dropped and the family colour applies, which is
    what the head looked like before. */
-.topology-svg .arrow-head {
+.infoschematic-svg .arrow-head {
   fill: context-stroke;
 }
 
-/* A line pointed at, from the stage or from the register. It cannot take the
+/* A line pointed at, from the Infoschematic or from the register. It cannot take the
    drop-shadow a card takes - a glow around a two-unit stroke reads as a smudge
    rather than emphasis - so it thickens and brightens instead, which is what
    the eye follows along a line. */
-.topology-svg .topology-flows > g.pointed .topology-route {
+.infoschematic-svg .infoschematic-flows > g.pointed .infoschematic-route {
   stroke: #cfe9ff;
   stroke-width: 4px;
 }
@@ -2879,10 +2879,10 @@ button:focus-visible,
 }
 
 /* The consortium keeps its own colour wherever it is drawn - purple against the
-   spotlights' blue - so a reader tells the two apart without reading either. */
-/* A partner reads as a mark rather than as a word, so its button is shaped for
+   standalone scenes' blue - so a reader tells the two apart without reading either. */
+/* A theme reads as a mark rather than as a word, so its button is shaped for
    one: a pill that a wordmark sits inside without being cropped. */
-.partner-button {
+.theme-button {
   align-items: center;
   background: #10263b;
   border: 1px solid #ffffff1e;
@@ -2896,25 +2896,25 @@ button:focus-visible,
   white-space: nowrap;
 }
 
-.partner-button img {
+.theme-button img {
   display: block;
   height: 15px;
   max-width: 92px;
   object-fit: contain;
 }
 
-.partner-button:hover,
-.panel-rail .rail-pathway.rail-partner:hover {
+.theme-button:hover,
+.panel-rail .rail-pathway.rail-theme:hover {
   border-color: #c39bff;
   color: white;
 }
 
-.partner-button[aria-pressed='true'] {
+.theme-button[aria-pressed='true'] {
   box-shadow: 0 0 0 1px #c39bff55;
 }
 
-.partner-button[aria-pressed='true'],
-.panel-rail .rail-pathway.rail-partner[aria-pressed='true'] {
+.theme-button[aria-pressed='true'],
+.panel-rail .rail-pathway.rail-theme[aria-pressed='true'] {
   background: #2a1f3d;
   border-color: #c39bff;
   color: white;
@@ -2982,7 +2982,7 @@ button:focus-visible,
   white-space: nowrap;
 }
 
-/* A published specification, rendered over the stage rather than opened as raw
+/* A published specification, rendered over the Infoschematic rather than opened as raw
    JSON in a new tab. Sits above the shortcut overlay, which is the only other
    thing that covers the whole window. */
 .specification-overlay {
@@ -3063,29 +3063,29 @@ button:focus-visible,
 
 /* Marked for removal, and drawn as going rather than gone.
    Nothing is destroyed by marking it - the change set says what to take out of
-   the model, and the model is the file - so the thing stays on the stage,
+   the model, and the model is the file - so the thing stays on the Infoschematic,
    faded and struck through, until the reader applies the set or lifts the mark
    with the same key. Showing it as already absent would claim an edit the
    editor has not made. */
-.topology-service.going,
-.topology-flows .going {
+.infoschematic-service.going,
+.infoschematic-flows .going {
   opacity: 0.32;
 }
 
-.topology-service.going rect {
+.infoschematic-service.going rect {
   stroke-dasharray: 4 3;
 }
 
-.topology-service.going text {
+.infoschematic-service.going text {
   text-decoration: line-through;
 }
 
-.topology-flows .going path {
+.infoschematic-flows .going path {
   stroke-dasharray: 5 4;
 }
 
 /* A removal in the change list. Struck through like the thing it names is on
-   the stage, so the two read as the same edit seen twice. */
+   the Infoschematic, so the two read as the same edit seen twice. */
 .change-list li.removing code {
   color: #e0a0a0;
   text-decoration: line-through;
@@ -3101,7 +3101,7 @@ button:focus-visible,
  * Which family a new line belongs to, asked where the drag was let go.
  *
  * Positioned in page coordinates because that is what a pointer release
- * reports; the stage is scaled and panned, so a diagram coordinate would put
+ * reports; the Infoschematic is scaled and panned, so a diagram coordinate would put
  * the question somewhere other than the reader's hand.
  */
 .family-choice {
@@ -3157,7 +3157,7 @@ button:focus-visible,
 }
 
 /* Catches the click that dismisses the picker, and nothing else - so it carries
-   no appearance of its own and covers the stage rather than sitting on it. */
+   no appearance of its own and covers the Infoschematic rather than sitting on it. */
 .family-choice-backdrop {
   background: none;
   border: 0;
@@ -3170,7 +3170,7 @@ button:focus-visible,
 /*
  * A story's scenes, and what one says.
  *
- * The list is the sequence, which is the one thing the stage cannot show: what
+ * The list is the sequence, which is the one thing the Infoschematic cannot show: what
  * a scene lights is on the diagram, but which scene comes third is nowhere.
  */
 .editor-panes {
@@ -3340,27 +3340,27 @@ button:focus-visible,
  * scene needs to see which are in it, not what it will look like when it plays -
  * they can play it for that.
  */
-.topology-svg.lighting .topology-service.lit rect {
+.infoschematic-svg.focusing .infoschematic-service.lit rect {
   stroke-dasharray: none;
   stroke-width: 2.5;
 }
 
-.topology-svg.lighting .topology-service.lit .topology-service-label {
+.infoschematic-svg.focusing .infoschematic-service.lit .infoschematic-service-label {
   fill: white;
 }
 
-.topology-svg.lighting [class*='flow-family-'].lit .topology-route {
+.infoschematic-svg.focusing [class*='flow-family-'].lit .infoschematic-route {
   stroke-width: 4;
 }
 
 /* Everything not in the scene recedes, so what is in it reads at a glance. */
-.topology-svg.lighting .topology-service:not(.lit),
-.topology-svg.lighting [class*='flow-family-']:not(.lit) {
+.infoschematic-svg.focusing .infoschematic-service:not(.lit),
+.infoschematic-svg.focusing [class*='flow-family-']:not(.lit) {
   opacity: 0.35;
 }
 
 /* In the scene editor a card is a thing to include, so it says so on hover. */
-.topology-svg.lighting .topology-service.selectable {
+.infoschematic-svg.focusing .infoschematic-service.selectable {
   cursor: pointer;
 }
 
@@ -3383,7 +3383,7 @@ button:focus-visible,
   padding: 4px 6px;
 }
 
-/* A scene's code, where a story's beat shows its number: both say which one
+/* A scene's code, where a story's Story Scene shows its number: both say which one
    this is in a way that survives the list being reordered. */
 .scene-row em {
   font-size: 9px;

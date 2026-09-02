@@ -84,7 +84,7 @@ export const editScene = (story: Story, at: number, change: Partial<Scene>): Sto
  * Add or remove what a scene lights, by code.
  *
  * Takes an id and works out which of the two lists it belongs in, because a
- * reader selecting something on the stage has selected a component or a flow
+ * reader selecting something on the Infoschematic has selected a component or a flow
  * and should not have to say which. The descriptors keep two lists because
  * their id types are two unions, and the typecheck on those is what stops a
  * scene naming something that does not exist.

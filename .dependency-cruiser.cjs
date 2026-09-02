@@ -51,6 +51,20 @@ module.exports = {
       severity: 'error',
       from: { path: '^workspaces/app/src/library' },
       to: { path: '^workspaces/app/src/app' }
+    },
+    {
+      name: 'examples-stay-framework-neutral',
+      comment: 'Authored examples depend on the product model, never on a UI or deployment host.',
+      severity: 'error',
+      from: { path: '^workspaces/examples/' },
+      to: { path: '^workspaces/(app|site)/src' }
+    },
+    {
+      name: 'site-does-not-own-product-model',
+      comment: 'The public site consumes packages and examples; it does not reach into Core or Model internals.',
+      severity: 'error',
+      from: { path: '^workspaces/site/src' },
+      to: { path: '^workspaces/(core|model)/src' }
     }
   ],
   options: {

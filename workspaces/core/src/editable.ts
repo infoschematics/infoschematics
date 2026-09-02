@@ -26,7 +26,7 @@ export type AttachedEnd = { component: string; port: string; from?: string }
  * it conforms to, which way its heads point - is authored afterwards against
  * the entry this creates, in the file where every other line's is.
  *
- * Here rather than beside the topology that draws it, because the editor holds
+ * Here rather than beside the Infoschematic that draws it, because the editor holds
  * these and the editor knows nothing about this diagram. `family` is a plain
  * string for the same reason: which families exist is the model's business.
  */
@@ -137,13 +137,13 @@ export type EditableDiagram = {
    * a change set that has since been applied, is not a change any more.
    */
   authored: (key: string, field: string) => string | undefined
-  /** Whether anything on the stage answers to this key at all. */
+  /** Whether anything on the rendered Infoschematic answers to this key at all. */
   knows: (key: string) => boolean
   /**
-   * Whether the model itself carries this key, as against the stage showing it.
+   * Whether the model itself carries this key, as against the rendered Infoschematic showing it.
    *
    * The two part company for exactly one kind of draft. A created thing is
-   * folded onto the stage so that it can be dragged, selected and removed like
+   * folded onto the canvas so that it can be dragged, selected and removed like
    * anything else, which makes `knows` say yes to it from the moment it is
    * made - and that is the wrong question to ask when deciding whether the
    * creation has been applied. This one asks the right one: the model has the

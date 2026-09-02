@@ -48,16 +48,16 @@ export function SatcomBlock({
       <text className="fabric-detail" x="886" y="334">
         {detail}
       </text>
-      <g className="topology-satellite" transform="translate(916 335)">
+      <g className="infoschematic-satellite" transform="translate(916 335)">
         <rect height="26" rx="4" width="38" x="13" y="12" />
         <rect height="30" width="32" x="-23" y="10" />
         <rect height="30" width="32" x="55" y="10" />
         <path d="M-13 10 V40 M-3 10 V40 M65 10 V40 M75 10 V40 M32 38 V54 M24 54 H40 M20 54 Q32 72 44 54" />
       </g>
-      <g className="topology-dish" transform="translate(835 400)">
+      <g className="infoschematic-dish" transform="translate(835 400)">
         <path d="M0 0 Q18 36 52 14 M4 2 L46 36 M26 24 L17 62 M26 24 L38 62 M13 62 H42" />
       </g>
-      <g className="topology-dish" transform="translate(1000 400)">
+      <g className="infoschematic-dish" transform="translate(1000 400)">
         <path d="M52 0 Q34 36 0 14 M48 2 L6 36 M26 24 L17 62 M26 24 L38 62 M13 62 H42" />
       </g>
     </g>

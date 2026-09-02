@@ -16,13 +16,13 @@ import { useInfoschematic } from '../infoschematic-context.tsx'
 export function FamilyChoice({
   at,
   onChoose,
-  onCancel
+  onCancel,
 }: {
   at: { x: number; y: number }
   onChoose: (family: string) => void
   onCancel: () => void
 }) {
-  const { topologyFamilies } = useInfoschematic()
+  const { infoschematicFamilies } = useInfoschematic()
   return (
     <>
       {/* Anywhere else calls the choice off, so there is no way to be left with
@@ -30,7 +30,7 @@ export function FamilyChoice({
       <button aria-label="Cancel the new flow" className="family-choice-backdrop" onClick={onCancel} type="button" />
       <div className="family-choice" style={{ left: at.x, top: at.y }}>
         <p>New flow</p>
-        {topologyFamilies.map((family) => (
+        {infoschematicFamilies.map((family) => (
           <button key={family.id} onClick={() => onChoose(family.id)} type="button">
             <span className="family-choice-swatch" style={{ background: family.color }} />
             <b>{family.prefix}</b>

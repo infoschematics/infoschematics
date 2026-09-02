@@ -7,7 +7,7 @@ horizon: now
 status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: 24eac6c6d931e7fbadb0a3fea8f616d5dfaec170
+baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
 > Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-018`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the current workspace split: read `src/diagram/` as `workspaces/core/src/`, product-model paths as `workspaces/model/src/`, and other reusable application paths as `workspaces/app/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
@@ -69,7 +69,7 @@ Delivery splits judgment from mechanics, per [GDR-IBC2026-002](https://github.co
 
 ## Current state
 
-The workspace split has established `workspaces/core/` and `workspaces/app/`, and several ownership moves are already complete. The React package still carries the first realisation's model and play behind a temporary `./model` export, so the tool/realisation boundary is not yet complete.
+The reusable boundary is now explicit: `workspaces/core/` owns framework-neutral calculations, `workspaces/model/` owns the serialisable product contract, and `workspaces/app/` publishes the React adapter. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only example and the public site now exercise the same public package seam. The remaining structural work is the renderer split inside the React package and a complete colour/token pass; vocabulary rollout is tracked by `INFOSCHEMATICS-TOOL-002`.
 
 ## Steps
 
@@ -77,14 +77,14 @@ The workspace split has established `workspaces/core/` and `workspaces/app/`, an
 - [ ] Split the root diagram component along what it mixes — the stage as the generic renderer keeping the settled name, the fabric artwork with the authored material, the wiring to the app.
 - [x] Found `src/app/` and break the root entry into it: the shell legible on its own, the entry thinned to mounting.
 - [x] Regroup the scattered UI — panels, editor surfaces, hooks — by ownership, kind within.
-- [ ] Found `src/model/` from `src/topology/`, separating the types used outside the app — the authored contract — from the model structures only this realisation keeps.
-- [ ] Move each test with its subject, and re-point any that reach through internals at the stated boundaries.
-- [ ] Decide what `scripts/` and the `docs/` folders become, once the consolidation thread has landed.
-- [ ] Replace the generic surfaces' topology imports with a configured vocabulary, so they describe a model rather than this model.
-- [ ] Make a scene one type where there are three, and give an act a type of its own.
-- [ ] Give a fabric's caption one home, so the register and the stage cannot print different names for it.
+- [x] Found `workspaces/model/` as the framework-neutral authored contract, leaving only derived runtime structures in the React application.
+- [x] Move each retained test with its subject, and re-point tests that crossed the new public boundaries.
+- [x] Give scripts and documentation explicit owners: root scripts govern the monorepo, while the site owns deployment commands and configuration.
+- [x] Replace authored singleton imports with a complete host-supplied `InfoschematicConfig`, so reusable surfaces describe a configured product rather than one realisation.
+- [x] Model Standalone, Thematic and Story Scenes explicitly, with Themes and Stories owning their respective Scenes.
+- [x] Give a Fabric's display caption and detail one authored home in its appearance configuration.
 - [ ] Name the colour decisions into tokens and route the authored colours — taxonomy and lanes — through the same layer, leaving new theme sets to `DBD-011`.
-- [ ] Baseline dependency-cruiser on today's boundaries before the first move, then widen it to every seam the new layout states — and audit each framework-side file by reading for ownership an import check cannot see.
+- [x] Baseline dependency-cruiser, then widen it across Core, Model, React, examples and the site so each forbidden ownership crossing fails verification.
 - [x] Move `StageOverlay.tsx`'s figures out of `src/diagram/` with the rest of the authored material.
 
 ## Delivery so far
@@ -161,6 +161,6 @@ The win this buys is that `DBD-011` stops being a refactor wearing an extraction
 - **The public seam is configuration.** `@infoschematics/model` owns `InfoschematicConfig` and `defineInfoschematic`; `@infoschematics/react` requires `<App config={config} />`; each host owns `document.title`. A title-only definition is a valid blank Infoschematic and, without optional config identifier, creates no shared persistence key.
 - **The package graph is directional.** Model depends on Core geometry types, React depends on Model Core, each host definition depends only on Model. Three MIT library packages use normal `0.1.0` dependencies so manifests publishable; local source consumers use root overrides while packages remain unpublished.
 - **The realisation is home.** 5G host owns contracts, assets complete serialisable definition. Temporary React `./model` export, authored play, singleton model 5G fixtures are gone from this repository.
-- **Hosts are independent workspaces.** Both 5G project infoschematics.info separate `workspaces/app` from `workspaces/infoschematic`. TOOL-003 moved website as [INFOSCHEMATICS-WEB-SITE-001](https://github.com/infoschematics/infoschematics-website/blob/main/docs/roadmap/INFOSCHEMATICS-WEB-SITE-001-an-infoschematic-of-infoschematics.md); blank definition is deliberately distinct from future self-describing example.
-- **Each host authors its own play.** Kris settled the open question of where the 5G-EMERGE realisation lives when this record lands: it returns to `5g-emerge-ibc-2026` alone. The website's example does not share it — the website gets its own realisation, transferred to [INFOSCHEMATICS-WEB-SITE-001](https://github.com/infoschematics/infoschematics-website/blob/main/docs/roadmap/INFOSCHEMATICS-WEB-SITE-001-an-infoschematic-of-infoschematics.md).
+- **Hosts are independent workspaces.** Both 5G project infoschematics.info separate `workspaces/app` from `workspaces/infoschematic`. TOOL-003 moved website as [INFOSCHEMATICS-SITE-001](INFOSCHEMATICS-SITE-001-an-infoschematic-of-infoschematics.md); blank definition is deliberately distinct from future self-describing example.
+- **Each host authors its own play.** Kris settled the open question of where the 5G-EMERGE realisation lives when this record lands: it returns to `5g-emerge-ibc-2026` alone. The website's example does not share it — the website gets its own realisation, transferred to [INFOSCHEMATICS-SITE-001](INFOSCHEMATICS-SITE-001-an-infoschematic-of-infoschematics.md).
 - **The contract pack went back first.** The pack was never imported by code — the Schematics panel fetches specifications by `href` from whatever the host serves — so it left this repository ahead of the rest of the realisation. Its verification tests went home with it: the host imports the exported `readSpec` and, until this record returns the model too, the model over the temporary `./model` subpath export. Removing that subpath is part of this record's finish line.

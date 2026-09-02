@@ -4,10 +4,10 @@ area: TOOL
 title: Settle vocabulary before renaming
 theme: tool
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: 24eac6c6d931e7fbadb0a3fea8f616d5dfaec170
+baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
 > Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-019`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the workspace split: read `src/diagram/` as `workspaces/core/src/`, and any other `src/` path as `workspaces/app/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
@@ -355,17 +355,17 @@ This item settles vocabulary, maps the current implementation, and prepares a co
 
 ## Current state
 
-The public seam is the first bounded rollout tranche. It now uses `InfoschematicConfig`, Standalone Scene, Theme and Story without waiting for every internal implementation noun to change. Host applications pass one complete serialisable definition into React; authored data contains renderer keys rather than React components or derived runtime singletons. Internal `demonstration`, `vendor`, `stage` and related names remain implementation debt owned by the rest of this item, not public vocabulary precedent.
+The canonical vocabulary is now documented and applied across the public model, React runtime, component names, editor modes, visible copy, accessibility copy and CSS hooks. Host applications pass one complete serialisable `InfoschematicConfig` into React; authored data contains renderer keys rather than React components or derived runtime singletons. Compatibility-only storage keys retain their historical strings so an upgrade does not silently discard a user's saved preferences.
 
-The product and production vocabulary is substantially defined and the current code has been mapped against it. Mapping gaps, rename recipes, and the documentation rollout remain open, while the workspace split has changed the paths that the original record described.
+Capability gaps discovered by the mapping are retained separately in `INFOSCHEMATICS-TOOL-005`, `INFOSCHEMATICS-TOOL-006` and `INFOSCHEMATICS-TOOL-007`. Package consumption and release readiness is retained in `INFOSCHEMATICS-TOOL-004`.
 
 ## Steps
 
 - [x] Define the product and production vocabulary.
 - [x] Map current implementation terms to the settled concepts.
-- [ ] Resolve the remaining mapping gaps and explicit alternatives.
-- [ ] Update vocabulary documentation and prepare dependency-ordered rename recipes.
-- [ ] Capture capability gaps as separate roadmap items rather than implementing them here.
+- [x] Resolve the remaining mapping gaps and explicit alternatives.
+- [x] Update vocabulary documentation and execute dependency-ordered rename tranches.
+- [x] Capture capability gaps as separate roadmap items rather than implementing them here.
 
 ## Files touched
 
@@ -400,6 +400,32 @@ Update architecture, contributor, and end-user guidance so product and productio
 ### Roadmap
 
 Create separate work items for capability gaps and keep `INFOSCHEMATICS-TOOL-001` aligned with the approved names.
+
+## Review
+
+### Delivered
+
+Delivered the settled vocabulary, implementation mapping, documentation and dependency-ordered rename rollout against baseline `53c81f4d6c0b9f002b86d05030e37005c706d8ec`. The change remains terminology-only: capability gaps were recorded separately and visible behaviour was preserved.
+
+### Summary of changes
+
+Added the canonical vocabulary specification and repository guidance; aligned public Model and React seams; renamed React runtime members, components, files, editor modes, visible copy, accessibility copy and CSS hooks; and captured publication, production-mode, artefact-editing and renderer-registry follow-ons as `INFOSCHEMATICS-TOOL-004` through `INFOSCHEMATICS-TOOL-007`. Historical local-storage keys remain readable compatibility details and are documented as such.
+
+### Verification
+
+`bun install --frozen-lockfile` completed without changes. `bun run check` passed 87 tests in nine files, TypeScript checks for Core, Model, React, the blank example and the site, dependency-cruiser across 89 modules and 198 dependencies, and the production site build. `rumdl check` passed all changed guidance and roadmap files; the authoring audit passed.
+
+### Outstanding concerns
+
+None within this item's naming boundary. Remaining capability work is explicit in the follow-on records rather than hidden in this review.
+
+### Post-change review
+
+The public seam and internal implementation now use the same product and production language. Compatibility strings cannot leak through exports or visible copy, and regression tests assert that retired public members remain absent. The item is ready for human acceptance review.
+
+### Mini recap
+
+Infoschematics now has one vocabulary from authored configuration through React presentation, with capability gaps preserved as independently shapeable work. Verification is green and no new durable learning needs promotion beyond the repository guidance and specification added here.
 
 ## Discussion
 

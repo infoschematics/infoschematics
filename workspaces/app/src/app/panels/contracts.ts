@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { InterfaceConfig } from '@infoschematics/model'
 
 // The published contract pack as the dashboard reads it: which specifications
-// nothing on the stage reaches, and how one is fetched and summarised.
+// nothing on the Infoschematic reaches, and how one is fetched and summarised.
 //
 // The list itself is no longer here. Six entries were authored in this file,
 // naming a code, a label and an `href` the model already knew - so the panel

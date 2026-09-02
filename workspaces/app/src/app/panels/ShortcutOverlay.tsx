@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import { useInfoschematic } from '../infoschematic-context.tsx'
 
-// What the keyboard does and what the stage is made of, side by side. The two
+// What the keyboard does and what the Infoschematic is made of, side by side. The two
 // answer the questions a visitor arrives with - how do I drive this, and what
 // am I looking at - and both are asked at the same moment, so both are here.
 
@@ -11,24 +11,24 @@ const groups = [
   {
     bindings: [
       ['?', 'Show and hide this'],
-      ['Esc', 'Close it']
+      ['Esc', 'Close it'],
     ],
-    label: 'Anywhere'
+    label: 'Anywhere',
   },
   {
     bindings: [
       ['←  →', 'Step back and forward'],
       ['Space', 'Hold and release the auto-advance'],
-      ['Esc', 'Stop the demonstration']
+      ['Esc', 'Stop the Story'],
     ],
-    label: 'While a demonstration runs'
+    label: 'While a Story runs',
   },
   {
     bindings: [
-      ['←  →', 'Step to the previous or next partner, wrapping at either end'],
-      ['Esc', 'Clear the partner']
+      ['←  →', 'Step to the previous or next Thematic Scene, wrapping at either end'],
+      ['Esc', 'Clear the Theme'],
     ],
-    label: 'While a partner briefing is open'
+    label: 'While a Theme is open',
   },
   {
     bindings: [
@@ -39,14 +39,14 @@ const groups = [
       ['Shift, held', 'Offer to add or remove a waypoint on the selected flow'],
       ['Delete', 'Mark the selection for removal, and lines a card cannot lose'],
       ['Drag port to port', 'Make a flow between them, choosing its family at the drop'],
-      ['Esc', 'Clear the selection']
+      ['Esc', 'Clear the selection'],
     ],
-    label: 'In edit mode'
-  }
+    label: 'In edit mode',
+  },
 ] as const
 
 /*
- * What a shape on the stage means.
+ * What a shape on the Infoschematic means.
  *
  * Authored, unlike the two lists below it, because the taxonomy says what the
  * colours are and nothing says what the forms are - a reader seeing an adapter
@@ -56,16 +56,16 @@ const forms = [
   ['Card', 'A service. Its outline is the architecture scope it belongs to.'],
   [
     'Card held in a socket',
-    'An adapter and the service it adapts. Containment is the relationship, so no line is drawn between them.'
+    'An adapter and the service it adapts. Containment is the relationship, so no line is drawn between them.',
   ],
   ['Cloud or strip', 'A fabric: a region traffic crosses rather than originates in.'],
   ['Line', 'A flow. Its colour is the family it carries, and its label is its code.'],
   ['Broken line', 'A logical relationship rather than carried traffic.'],
-  ['Two arrowheads', 'The relationship runs both ways.']
+  ['Two arrowheads', 'The relationship runs both ways.'],
 ] as const
 
 export function ShortcutOverlay({ onClose }: { onClose: () => void }) {
-  const { topologyFamilies, topologyScopes } = useInfoschematic()
+  const { infoschematicFamilies, infoschematicScopes } = useInfoschematic()
   return (
     <div className="shortcut-overlay">
       <button aria-label="Close" className="shortcut-scrim" onClick={onClose} type="button" />
@@ -104,12 +104,12 @@ export function ShortcutOverlay({ onClose }: { onClose: () => void }) {
 
           <div>
             {/* Both lists are read from the taxonomy rather than written out
-                again, so a colour here is the colour on the stage by
+                again, so a colour here is the colour on the Infoschematic by
                 construction and a family added to the model appears here. */}
             <div className="shortcut-group">
               <p className="contract-meta">Architecture scope, which a card is outlined in</p>
               <dl className="legend-rows">
-                {topologyScopes.map((scope) => (
+                {infoschematicScopes.map((scope) => (
                   <div className="legend-row" key={scope.id}>
                     <dt>
                       <span className="legend-swatch" style={{ background: scope.color }} />
@@ -126,7 +126,7 @@ export function ShortcutOverlay({ onClose }: { onClose: () => void }) {
             <div className="shortcut-group">
               <p className="contract-meta">Flow family, which a flow is drawn in</p>
               <dl className="legend-rows">
-                {topologyFamilies.map((family) => (
+                {infoschematicFamilies.map((family) => (
                   <div className="legend-row" key={family.id}>
                     <dt>
                       <span className="legend-rule" style={{ background: family.color }} />

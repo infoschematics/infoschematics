@@ -22,7 +22,7 @@ describe('choosing where a floating panel sits', () => {
   })
 
   // The preferred position is kept whenever it is free, so the panel does not
-  // wander between two beats that both have room in the middle.
+  // wander between two scenes that both have room in the middle.
   it('keeps the preferred candidate even where a later one is emptier', () => {
     const obstacles = [blocking(0.5, 0.9)]
     expect(chooseSpot({ candidates: [at(0.5, 0.5), at(0.5, 0.2)], label, obstacles, view })).toEqual(at(0.5, 0.5))
@@ -35,7 +35,7 @@ describe('choosing where a floating panel sits', () => {
 
   /*
    * The case that matters most, because it is the normal one once a step has
-   * lit most of the stage. Falling back to a fixed position puts the panel over
+   * lit most of the canvas. Falling back to a fixed position puts the panel over
    * the diagram exactly when the diagram is busiest, so the least-obstructed
    * candidate wins instead.
    */

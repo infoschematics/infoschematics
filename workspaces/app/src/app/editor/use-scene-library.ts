@@ -12,11 +12,11 @@ import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLi
  * checkable without rendering anything.
  */
 export function useSceneLibrary() {
-  const { config, demonstrations, spotlights } = useInfoschematic()
+  const { config, standaloneScenes, stories } = useInfoschematic()
   const [draft, setDraft] = usePersistentState<readonly Scene[] | null>(config.id && `${config.id}.scenes`, null)
-  const [chosen, setChosen] = useState<string>(spotlights[0]?.id ?? '')
+  const [chosen, setChosen] = useState<string>(standaloneScenes[0]?.id ?? '')
 
-  const library = draft ?? spotlights
+  const library = draft ?? standaloneScenes
   const scene = library.find((entry) => entry.id === chosen) ?? library[0]
 
   /*
@@ -24,11 +24,11 @@ export function useSceneLibrary() {
    *
    * Read from what is authored rather than from any edited story, because that
    * is what the change set will be pasted alongside: a scene removed here and a
-   * story still naming it is a beat that lights nothing, silently.
+   * story still naming it is a Story Scene that lights nothing, silently.
    */
   const played = useMemo(
-    () => new Set(demonstrations.flatMap((story) => story.steps.flatMap((step) => (step.scene ? [step.scene] : [])))),
-    [demonstrations]
+    () => new Set(stories.flatMap((story) => story.steps.flatMap((step) => (step.scene ? [step.scene] : [])))),
+    [stories],
   )
 
   return {
@@ -43,7 +43,7 @@ export function useSceneLibrary() {
     edited: draft !== null,
     edit: (change: Partial<Scene>) => scene && setDraft(editScene(library, scene.id, change)),
     library,
-    /** What this scene lights, by id, for the stage to mark. */
+    /** What this scene lights, by id, for the Infoschematic to mark. */
     lit: new Set<string>([...(scene?.components ?? []), ...(scene?.flows ?? [])]),
     /** A scene a story plays cannot be removed; the panel says so rather than failing quietly. */
     played,
@@ -57,7 +57,7 @@ export function useSceneLibrary() {
     revert: () => setDraft(null),
     scene,
     source: libraryAsSource(library),
-    toggle: (id: string, isFlow: boolean) => scene && setDraft(toggleLit(library, scene.id, id, isFlow))
+    toggle: (id: string, isFlow: boolean) => scene && setDraft(toggleLit(library, scene.id, id, isFlow)),
   }
 }
 

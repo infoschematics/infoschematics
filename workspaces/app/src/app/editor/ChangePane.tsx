@@ -20,7 +20,7 @@ export function ChangePane({
   count: number
   canRedo: boolean
   canUndo: boolean
-  /** What the pointer is over on the stage, so its changes light up here. */
+  /** What the pointer is over on the Infoschematic, so its changes light up here. */
   hovered: string | null
   onDiscard: () => void
   onDiscardOne: (origin: PendingOrigin) => void
@@ -92,7 +92,7 @@ export function ChangePane({
             {/* A change and the thing it describes point at each other: hovering
                 either lights both, and picking a change selects what it is
                 about, so a list of forty lines stays readable against the
-                stage. The row is a button rather than a clickable li - it is
+                Infoschematic. The row is a button rather than a clickable li - it is
                 one, and the keyboard should reach it. */}
             {/* A removal is not a property set to a value, and a reader
                 scanning forty lines of `code -> field: value,` will skim past

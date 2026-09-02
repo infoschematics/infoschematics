@@ -13,14 +13,14 @@ const minutes = (ms: number) => {
 /*
  * A story's scenes, and what one says.
  *
- * The scenes are a list here rather than markers on the stage, because a
- * sequence is the one thing a stage cannot show: what a scene lights is on the
+ * The scenes are a list here rather than markers on the Infoschematic, because a
+ * sequence is the one thing a Infoschematic cannot show: what a scene lights is on the
  * diagram, but which scene comes third is not anywhere. That is the split
- * The lit set is chosen on the stage, because that is where the things being
- * lit are; the words and the order are chosen here, because a stage cannot show
+ * The lit set is chosen on the Infoschematic, because that is where the things being
+ * lit are; the words and the order are chosen here, because a Infoschematic cannot show
  * an order.
  *
- * What a scene lights is added from the stage selection rather than by a click
+ * What a scene lights is added from the Infoschematic selection rather than by a click
  * mode of its own. Selecting a card and pressing a button is a gesture the
  * reader already has, where a mode is one they have to be told about and then
  * remember they are in.
@@ -31,7 +31,7 @@ export function SceneListPanel({
   selectedIsFlow
 }: {
   editor: SceneList
-  /** What is selected on the stage, so a scene can be given it. */
+  /** What is selected on the Infoschematic, so a scene can be given it. */
   selected: string | null
   selectedIsFlow: boolean
 }) {
@@ -165,7 +165,7 @@ export function SceneListPanel({
             placeholder="Add a takeaway"
           />
 
-          {/* A beat either owns what it lights or plays a scene that does. The
+          {/* A Story Scene either owns what it lights or plays a scene that does. The
               second is not editable here: the scene is authored elsewhere and
               other stories may play it. */}
           <p className="scene-lit">
@@ -182,7 +182,7 @@ export function SceneListPanel({
                   onClick={() => selected && editor.toggle(selected, selectedIsFlow)}
                   type="button"
                 >
-                  {selected ? `Add or remove ${selected}` : 'Select something on the stage to add it'}
+                  {selected ? `Add or remove ${selected}` : 'Select something on the Infoschematic to add it'}
                 </button>
               </>
             )}

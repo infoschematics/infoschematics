@@ -3,8 +3,8 @@ harnesses = ["knowledgeislands/ki-agentic-harness"]
 
 [skills.ki-repo]
 repository = "https://github.com/infoschematics/infoschematics"
-title = "Infoschematic"
-description = "The Infoschematic tool: a visual instrument for making complex systems legible, shipped as TypeScript source with its first realisation aboard as the built-in example."
+title = "Infoschematics"
+description = "The Infoschematic product model, framework-neutral core, React application, examples, guidance, and public website."
 repo_code = "INFOSCHEMATICS"
 supported_runtimes = ["claude-code", "chatgpt-codex"]
 visibility = "public"
@@ -27,4 +27,10 @@ adapter = "roadmap"
 [skills.ki-work-roadmap]
 
 [skills.ki-work-roadmap.areas]
+SITE = "site-experience"
 TOOL = "tool"
+
+[skills.ki-repo-website]
+
+[skills.ki-repo-website-cloudflare]
+site-root = "workspaces/site"

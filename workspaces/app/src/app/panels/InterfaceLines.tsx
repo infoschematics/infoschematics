@@ -2,7 +2,7 @@ import type { InterfaceConfig } from '@infoschematics/model'
 import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '../infoschematic-context.tsx'
 
 /*
- * What on the stage answers for a specification.
+ * What on the Infoschematic answers for a specification.
  *
  * Two lists, because there are two relationships and they are not the same
  * claim. A flow carries a specification: the traffic on it meets that document.
@@ -15,13 +15,13 @@ import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '../inf
 export function InterfaceLines({
   cards,
   flows,
-  interfaceEntry
+  interfaceEntry,
 }: {
   cards: readonly RuntimeIdentity[]
   flows: readonly RuntimeFlow[]
   interfaceEntry: InterfaceConfig | undefined
 }) {
-  const { topologyEndpointLabels } = useInfoschematic()
+  const { infoschematicEndpointLabels } = useInfoschematic()
   if (!interfaceEntry) return null
 
   const nothing = cards.length === 0 && flows.length === 0
@@ -39,8 +39,8 @@ export function InterfaceLines({
               <li key={line.id}>
                 <code>{line.code}</code>
                 <span>
-                  {topologyEndpointLabels.get(line.source) ?? line.source} →{' '}
-                  {topologyEndpointLabels.get(line.target) ?? line.target}
+                  {infoschematicEndpointLabels.get(line.source) ?? line.source} →{' '}
+                  {infoschematicEndpointLabels.get(line.target) ?? line.target}
                 </span>
                 {line.operation ? <em>{line.operation}</em> : null}
               </li>

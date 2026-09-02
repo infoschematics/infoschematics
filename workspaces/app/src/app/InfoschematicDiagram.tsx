@@ -12,8 +12,8 @@ import { MobileCloud } from '../library/MobileCloud.tsx'
 import { SatcomBlock } from '../library/SatcomBlock.tsx'
 import { TelemetryPlane } from '../library/TelemetryPlane.tsx'
 import type { EditorMode } from './editor/use-editor.ts'
-import { type RuntimeFlow as TopologyFlow, useInfoschematic } from './infoschematic-context.tsx'
-import { StageOverlay } from './StageOverlay.tsx'
+import { type RuntimeFlow as InfoschematicFlow, useInfoschematic } from './infoschematic-context.tsx'
+import { GraphicsOverlay } from './GraphicsOverlay.tsx'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -48,7 +48,7 @@ const addReach = 14
 /** The grid the add control snaps its offer to, matching the editor's own. */
 const gridSize = 10
 
-export function TopologyDiagram({
+export function InfoschematicDiagram({
   componentOffsets,
   removals = {},
   guides,
@@ -79,7 +79,7 @@ export function TopologyDiagram({
   annotated,
   grid,
   overlay,
-  visibleScopes
+  visibleScopes,
 }: {
   /** Codes marked for removal, drawn as going rather than gone. */
   removals?: Record<string, unknown>
@@ -103,9 +103,9 @@ export function TopologyDiagram({
   /** Release for a waypoint or segment drag, closing the gesture the way a component drag does. */
   onRouteRelease?: () => void
   onAttach?: (code: string, end: 'source' | 'target', port: string, component: string) => void
-  /** Which editor is open, if either. The stage does not infer it. */
+  /** Which editor is open, if either. The Infoschematic does not infer it. */
   mode?: EditorMode
-  /** In scene editing, what the selected scene lights, so the stage can show it. */
+  /** In scene editing, what the selected scene lights, so the Infoschematic can show it. */
   litByScene?: ReadonlySet<string>
   /** In scene editing, a click adds or removes what it lands on. */
   onLight?: (id: string, isFlow: boolean) => void
@@ -122,16 +122,16 @@ export function TopologyDiagram({
   onFreeEnd?: (code: string, points: readonly Point[], end: 'end' | 'start', to: Point) => void
   /** What the pointer is over, so a change in the panel can light up with it. */
   onHover?: (code: string | null) => void
-  /** What the panel is pointing back at, lit here the way a hover on stage is. */
+  /** What the panel is pointing back at, lit here the way a hover on Infoschematic is. */
   hovered?: string | null
   onSelect?: (code: string) => void
   /** Port counts changed in the editor but not yet written into the model. */
   portCounts?: Readonly<Record<string, PortCounts>>
   selected?: string | null
-  flows: readonly TopologyFlow[]
+  flows: readonly InfoschematicFlow[]
   annotated?: boolean
   grid?: boolean
-  /** A figure a demonstration beat draws over the whole stage, where it names one. */
+  /** A Graphic a Story Scene draws over the Infoschematic, where it names one. */
   overlay?: string
   visibleScopes: ReadonlySet<string>
 }) {
@@ -139,53 +139,57 @@ export function TopologyDiagram({
     adapterFloor,
     config,
     telemetryPlaneTop,
-    topologyAnnotationLabelPositions,
-    topologyEndpointCodes,
-    topologyEndpointLabels,
-    topologyFabricIsVisible,
-    topologyFabrics,
-    topologyFamilies,
-    topologyInterfaceById,
-    topologyLaneLabelX,
-    topologyLaneLabelY,
-    topologyLanePanelOutline,
-    topologyLanes,
-    topologyLayout,
-    topologyPlaceables,
-    topologyPortAudit,
-    topologyRegisterWith,
-    topologyScopes,
-    topologyViewBox
+    infoschematicAnnotationLabelPositions,
+    infoschematicEndpointCodes,
+    infoschematicEndpointLabels,
+    infoschematicFabricIsVisible,
+    infoschematicFabrics,
+    infoschematicFamilies,
+    infoschematicInterfaceById,
+    infoschematicLaneLabelX,
+    infoschematicLaneLabelY,
+    infoschematicLanePanelOutline,
+    infoschematicLanes,
+    infoschematicLayout,
+    infoschematicPlaceables,
+    infoschematicPortAudit,
+    infoschematicRegisterWith,
+    infoschematicScopes,
+    infoschematicViewBox,
   } = useInfoschematic()
-  const familyById = new Map(topologyFamilies.map((family) => [family.id, family]))
-  const familyLayer = new Map(topologyFamilies.map((family, index) => [family.id, index]))
+  const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
+  const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
   const scopeAppearance = Object.fromEntries(
-    topologyScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }])
+    infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }]),
   ) as Record<string, { fill: string; stroke: string }>
-  const internetFabric = topologyFabrics.find((fabric) => fabric.appearance?.renderer === 'internet-cloud')
-  const satcomFabric = topologyFabrics.find((fabric) => fabric.appearance?.renderer === 'satcom-block')
-  const mobileFabric = topologyFabrics.find((fabric) => fabric.appearance?.renderer === 'mobile-cloud')
-  const telemetryFabric = topologyFabrics.find((fabric) => fabric.appearance?.renderer === 'telemetry-plane')
-  const _audit = topologyPortAudit(flows)
+  const internetFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'internet-cloud')
+  const satcomFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'satcom-block')
+  const mobileFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'mobile-cloud')
+  const telemetryFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'telemetry-plane')
+  const _audit = infoschematicPortAudit(flows)
   // Every port a card offers is shown; the ones a route already meets are drawn
   // solid and named, so a reader can see what is taken and what is free.
   // Green marks the ports the *selected* flow meets, not every port in
-  // use anywhere: a stage full of green says nothing about what is selected,
+  // use anywhere: a Infoschematic full of green says nothing about what is selected,
   // and the two ends you can re-attach are the two worth pointing at.
   const selectedFlow = flows.find((flow) => flow.code === selected)
   const used = new Set(
     selectedFlow
       ? [`${selectedFlow.source}:${selectedFlow.sourcePort}`, `${selectedFlow.target}:${selectedFlow.targetPort}`]
-      : []
+      : [],
   )
   // Boxes and ports with the edits in hand already folded in, so the drop
   // target, the ports drawn, and the lookup that resolves a chosen port all
   // read one answer rather than three merges of the same two drafts.
-  const placeables = topologyPlaceables(visibleScopes, { created: createdCards, offsets: componentOffsets, portCounts })
+  const placeables = infoschematicPlaceables(visibleScopes, {
+    created: createdCards,
+    offsets: componentOffsets,
+    portCounts,
+  })
   // The register with the created cards folded in, so a card made a moment ago
   // answers what it is called and what scope it belongs to exactly as one that
   // was authored does.
-  const register = topologyRegisterWith(createdCards)
+  const register = infoschematicRegisterWith(createdCards)
 
   // A card keeps its authored box until it is dragged; only a moved one needs
   // the editor's offset folded in, so ports, the code badge, and the card
@@ -212,28 +216,28 @@ export function TopologyDiagram({
       }
       return [
         ...(anchored(flow.source, flow.sourcePort) ? [`${flow.code}:start`] : []),
-        ...(anchored(flow.target, flow.targetPort) ? [`${flow.code}:end`] : [])
+        ...(anchored(flow.target, flow.targetPort) ? [`${flow.code}:end`] : []),
       ]
-    })
+    }),
   )
-  const labelPositions = topologyAnnotationLabelPositions(flows, visibleScopes, labelAlong)
+  const labelPositions = infoschematicAnnotationLabelPositions(flows, visibleScopes, labelAlong)
   /*
    * Which editor is open, told rather than guessed.
    *
    * This read `Boolean(onLabelMove)` - edit mode inferred from a callback being
-   * present, so the stage learned what it could do from what it had been handed
+   * present, so the Infoschematic learned what it could do from what it had been handed
    * rather than from what was being edited. That was serviceable while there was
    * one editor and became wrong the moment there were two.
    *
-   * `editing` below still means "the stage editor is open", which is what all
+   * `editing` below still means "the Infoschematic editor is open", which is what all
    * thirty-odd checks meant when they were written. Scene editing shows none of
    * them: `TERM-010` requires absent rather than dimmed, so the handles, ports
    * and waypoint controls simply are not rendered.
    */
-  const editing = mode === 'stage'
-  // Both editing layers above the stage light rather than place: a scene says
-  // what it shows, and a story's beat does the same through the scene it plays.
-  const lighting = mode === 'scene' || mode === 'story'
+  const editing = mode === 'design'
+  // Both editing layers above the Infoschematic light rather than place: a scene says
+  // what it shows, and a story's Story Scene does the same through the scene it plays.
+  const focusing = mode === 'scenes' || mode === 'stories'
 
   // Which waypoint carries the delete control. Local rather than editor state:
   // it names a dot on screen for as long as it is looked at, not an edit worth
@@ -250,7 +254,7 @@ export function TopologyDiagram({
   // always offered: a selected flow is a thing to look at more often than
   // a thing to change, and an unarmed pointer cannot alter it by accident.
   const [armed, setArmed] = useState(false)
-  const stage = useRef<SVGSVGElement>(null)
+  const infoschematic = useRef<SVGSVGElement>(null)
   // The last pointer position, since a key press does not carry one.
   const pointer = useRef<MouseEvent | null>(null)
   const [dropPort, setDropPort] = useState<string | null>(null)
@@ -282,7 +286,7 @@ export function TopologyDiagram({
      * run of the selected flow - so it is answered from the window.
      */
     const offer = (event: MouseEvent) => {
-      const svg = stage.current
+      const svg = infoschematic.current
       const chosen = flows.find((candidate) => candidate.code === selected)
       const matrix = svg?.getScreenCTM()
       if (!svg || !chosen || !matrix || !event.shiftKey) {
@@ -400,7 +404,7 @@ export function TopologyDiagram({
    * port it is dropped nearest. A port is chosen rather than placed, so the drop
    * snaps to a real port or does nothing - it never leaves an end in mid-air.
    */
-  // Every port on the stage, not just the end's own component's: an end on the
+  // Every port on the Infoschematic, not just the end's own component's: an end on the
   // wrong component is exactly the case worth being able to correct. Drafted
   // counts are included, so a port added a moment ago can be dropped onto.
   const portChoices = () =>
@@ -408,8 +412,8 @@ export function TopologyDiagram({
       portsForBox(placeable.box, placeable.ports).map((port) => ({
         at: port.at,
         endpoint: placeable.id,
-        id: port.id
-      }))
+        id: port.id,
+      })),
     )
 
   /**
@@ -430,37 +434,38 @@ export function TopologyDiagram({
         Math.hypot(port.at.x - dropped.x, port.at.y - dropped.y) <
         Math.hypot(best.at.x - dropped.x, best.at.y - dropped.y)
           ? port
-          : best
+          : best,
       )
       return Math.hypot(nearest.at.x - dropped.x, nearest.at.y - dropped.y) <= attachmentReach ? nearest : undefined
     }
   }
 
-  const dragAttachment = (flow: TopologyFlow, end: 'source' | 'target') => (event: React.PointerEvent<SVGElement>) => {
-    if (!onAttach) return
-    const svg = event.currentTarget.ownerSVGElement
-    const matrix = svg?.getScreenCTM()
-    if (!svg || !matrix) return
-    event.preventDefault()
-    event.stopPropagation()
+  const dragAttachment =
+    (flow: InfoschematicFlow, end: 'source' | 'target') => (event: React.PointerEvent<SVGElement>) => {
+      if (!onAttach) return
+      const svg = event.currentTarget.ownerSVGElement
+      const matrix = svg?.getScreenCTM()
+      if (!svg || !matrix) return
+      event.preventDefault()
+      event.stopPropagation()
 
-    const nearestTo = portFinder(svg, matrix)
+      const nearestTo = portFinder(svg, matrix)
 
-    const track = (moved: PointerEvent) => {
-      const over = nearestTo(moved.clientX, moved.clientY)
-      setDropPort(over ? `${over.endpoint}:${over.id}` : null)
+      const track = (moved: PointerEvent) => {
+        const over = nearestTo(moved.clientX, moved.clientY)
+        setDropPort(over ? `${over.endpoint}:${over.id}` : null)
+      }
+
+      const stop = (released: PointerEvent) => {
+        const over = nearestTo(released.clientX, released.clientY)
+        if (over) onAttach(flow.code, end, over.id, over.endpoint)
+        setDropPort(null)
+        window.removeEventListener('pointermove', track)
+        window.removeEventListener('pointerup', stop)
+      }
+      window.addEventListener('pointermove', track)
+      window.addEventListener('pointerup', stop)
     }
-
-    const stop = (released: PointerEvent) => {
-      const over = nearestTo(released.clientX, released.clientY)
-      if (over) onAttach(flow.code, end, over.id, over.endpoint)
-      setDropPort(null)
-      window.removeEventListener('pointermove', track)
-      window.removeEventListener('pointerup', stop)
-    }
-    window.addEventListener('pointermove', track)
-    window.addEventListener('pointerup', stop)
-  }
 
   /**
    * An end anchored to nothing - the satellite hops, whose endpoints are named
@@ -469,48 +474,49 @@ export function TopologyDiagram({
    * the release decides which of the two it was: a port in reach anchors it,
    * anywhere else leaves it where it was let go.
    */
-  const dragUnanchoredEnd = (flow: TopologyFlow, end: 'end' | 'start') => (event: React.PointerEvent<SVGElement>) => {
-    if (!onFreeEnd) return
-    const svg = event.currentTarget.ownerSVGElement
-    const matrix = svg?.getScreenCTM()
-    if (!svg || !matrix) return
-    event.preventDefault()
-    event.stopPropagation()
+  const dragUnanchoredEnd =
+    (flow: InfoschematicFlow, end: 'end' | 'start') => (event: React.PointerEvent<SVGElement>) => {
+      if (!onFreeEnd) return
+      const svg = event.currentTarget.ownerSVGElement
+      const matrix = svg?.getScreenCTM()
+      if (!svg || !matrix) return
+      event.preventDefault()
+      event.stopPropagation()
 
-    const nearestTo = portFinder(svg, matrix)
-    const inverse = matrix.inverse()
-    const toDiagram = (clientX: number, clientY: number) => {
-      const point = svg.createSVGPoint()
-      point.x = clientX
-      point.y = clientY
-      const mapped = point.matrixTransform(inverse)
-      return { x: mapped.x, y: mapped.y }
-    }
-
-    const from = { x: event.clientX, y: event.clientY }
-    let dragging = false
-
-    const move = (moved: PointerEvent) => {
-      if (!dragging) {
-        if (Math.hypot(moved.clientX - from.x, moved.clientY - from.y) < dragThreshold) return
-        dragging = true
+      const nearestTo = portFinder(svg, matrix)
+      const inverse = matrix.inverse()
+      const toDiagram = (clientX: number, clientY: number) => {
+        const point = svg.createSVGPoint()
+        point.x = clientX
+        point.y = clientY
+        const mapped = point.matrixTransform(inverse)
+        return { x: mapped.x, y: mapped.y }
       }
-      const over = nearestTo(moved.clientX, moved.clientY)
-      setDropPort(over ? `${over.endpoint}:${over.id}` : null)
-      onFreeEnd(flow.code, flow.points, end, over ? over.at : toDiagram(moved.clientX, moved.clientY))
-    }
 
-    const stop = (released: PointerEvent) => {
-      const over = dragging ? nearestTo(released.clientX, released.clientY) : undefined
-      if (over && onAttach) onAttach(flow.code, end === 'start' ? 'source' : 'target', over.id, over.endpoint)
-      else if (dragging) onRouteRelease?.()
-      setDropPort(null)
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', stop)
+      const from = { x: event.clientX, y: event.clientY }
+      let dragging = false
+
+      const move = (moved: PointerEvent) => {
+        if (!dragging) {
+          if (Math.hypot(moved.clientX - from.x, moved.clientY - from.y) < dragThreshold) return
+          dragging = true
+        }
+        const over = nearestTo(moved.clientX, moved.clientY)
+        setDropPort(over ? `${over.endpoint}:${over.id}` : null)
+        onFreeEnd(flow.code, flow.points, end, over ? over.at : toDiagram(moved.clientX, moved.clientY))
+      }
+
+      const stop = (released: PointerEvent) => {
+        const over = dragging ? nearestTo(released.clientX, released.clientY) : undefined
+        if (over && onAttach) onAttach(flow.code, end === 'start' ? 'source' : 'target', over.id, over.endpoint)
+        else if (dragging) onRouteRelease?.()
+        setDropPort(null)
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', stop)
+      }
+      window.addEventListener('pointermove', move)
+      window.addEventListener('pointerup', stop)
     }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', stop)
-  }
 
   /**
    * Dragging from a free port to another port makes a line between them.
@@ -564,7 +570,7 @@ export function TopologyDiagram({
       if (over && !(over.endpoint === endpoint && over.id === port.id)) {
         onCreateLine(
           { source: endpoint, sourcePort: port.id, target: over.endpoint, targetPort: over.id },
-          { x: released.clientX, y: released.clientY }
+          { x: released.clientX, y: released.clientY },
         )
       }
       setDropPort(null)
@@ -581,17 +587,17 @@ export function TopologyDiagram({
   // Waypoint and segment handles carry an index dragHandle knows nothing about,
   // so each gets its own key and folds the index into the callback closure
   // rather than dragHandle's generic (key, point) shape.
-  const dragWaypoint = (flow: TopologyFlow, index: number) =>
+  const dragWaypoint = (flow: InfoschematicFlow, index: number) =>
     dragHandle(
       `${flow.code}:waypoint:${index}`,
       onMoveWaypoint && ((_key, point) => onMoveWaypoint(flow.code, flow.points, index, point)),
-      onRouteRelease
+      onRouteRelease,
     )
-  const dragSegment = (flow: TopologyFlow, index: number) =>
+  const dragSegment = (flow: InfoschematicFlow, index: number) =>
     dragHandle(
       `${flow.code}:segment:${index}`,
       onMoveSegment && ((_key, point) => onMoveSegment(flow.code, flow.points, index, point)),
-      onRouteRelease
+      onRouteRelease,
     )
 
   // The first click on a line selects its flow, same as a card; only a
@@ -600,7 +606,7 @@ export function TopologyDiagram({
   // Clicking a line selects it and does nothing else. Adding a waypoint used to
   // share that click, which meant a line could not be inspected without being
   // changed - so the add is its own control, offered where the pointer is.
-  const routeClicked = (flow: TopologyFlow) => (event: React.PointerEvent<SVGPathElement>) => {
+  const routeClicked = (flow: InfoschematicFlow) => (event: React.PointerEvent<SVGPathElement>) => {
     if (!editing || !onSelect || selected === flow.code) return
     event.stopPropagation()
     onSelect(flow.code)
@@ -609,40 +615,40 @@ export function TopologyDiagram({
   // Where the delete control sits: pushed away from whichever card's centre is
   // nearest the waypoint, so it never lands back over the card it is beside.
 
-  // A transport region is a component like any other: it dims with the rest and
-  // lights when a spotlight or demonstration step names it.
+  // A Fabric is an artefact like any other: it dims with the rest and is focused
+  // when a Standalone Scene, Thematic Scene or Story Scene names it.
   /*
    * What a thing says when the pointer rests on it. One shape for all four
    * kinds - code, name, what it is - because a reader hovering a cloud and a
    * reader hovering a card are asking the same question and were getting an
    * answer from three of them and silence from the fourth.
    */
-  const endpointLabel = (id: string) => topologyEndpointLabels.get(id) ?? id
+  const endpointLabel = (id: string) => infoschematicEndpointLabels.get(id) ?? id
 
   const fabricTitle = (code: string) => {
-    const region = topologyFabrics.find((candidate) => candidate.code === code)
+    const region = infoschematicFabrics.find((candidate) => candidate.code === code)
     return region ? `${region.code}: ${region.label} · ${region.detail}` : code
   }
 
   const fabricClass = (id: string) => {
-    const region = topologyFabrics.find((candidate) => candidate.id === id)
-    if (!region || !topologyFabricIsVisible(region, visibleScopes)) return undefined
-    return highlight?.endpoints.has(id) ? 'topology-fabric highlighted' : 'topology-fabric'
+    const region = infoschematicFabrics.find((candidate) => candidate.id === id)
+    if (!region || !infoschematicFabricIsVisible(region, visibleScopes)) return undefined
+    return highlight?.endpoints.has(id) ? 'infoschematic-fabric highlighted' : 'infoschematic-fabric'
   }
 
   // Drawn from one place and used twice: once in the layer beneath the cards,
   // and again above them for whichever flow is selected, so the line
   // being worked on is never behind a card.
-  const renderFlow = (flow: TopologyFlow) => {
-    const family = familyById.get(flow.family) ?? topologyFamilies[0]
-    const sourceCode = topologyEndpointCodes.get(flow.source) ?? flow.source
-    const targetCode = topologyEndpointCodes.get(flow.target) ?? flow.target
-    const conforms = (flow.conformsTo ?? []).map((id) => topologyInterfaceById.get(id)?.label ?? id).join(' or ')
+  const renderFlow = (flow: InfoschematicFlow) => {
+    const family = familyById.get(flow.family) ?? infoschematicFamilies[0]
+    const sourceCode = infoschematicEndpointCodes.get(flow.source) ?? flow.source
+    const targetCode = infoschematicEndpointCodes.get(flow.target) ?? flow.target
+    const conforms = (flow.conformsTo ?? []).map((id) => infoschematicInterfaceById.get(id)?.label ?? id).join(' or ')
     const call = flow.operation ? ` · ${flow.operation}` : ''
     const flowSelected = selected === flow.code
     return (
       <g
-        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${removals[flow.code] ? ' going' : ''}${lighting && litByScene?.has(flow.id) ? ' lit' : ''}`}
+        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${removals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}`}
         key={flow.id}
         style={{ color: family.color }}
       >
@@ -651,16 +657,16 @@ export function TopologyDiagram({
             somebody placing the line has and not the one somebody reading it
             has. */}
         <title>{`${flow.code}: ${endpointLabel(flow.source)} → ${endpointLabel(flow.target)}\n${conforms || 'Carriage'}${call}${editing ? `\n${sourceCode}:${flow.sourcePort} → ${targetCode}:${flow.targetPort}` : ''}`}</title>
-        <path className="topology-pipe" d={flow.d} />
+        <path className="infoschematic-pipe" d={flow.d} />
         <path
-          className={`topology-route${flow.dashed ? ' dashed' : ''}`}
+          className={`infoschematic-route${flow.dashed ? ' dashed' : ''}`}
           d={flow.d}
           /* A registration is bidirectional, and six heads converging on the
              registry said nothing a reader did not already know - every one of
              them points there. The head that carries meaning is the one at the
              provider, so a two-way line keeps that and drops the other. */
-          markerEnd={flow.bidirectional ? undefined : `url(#topology-arrow-${flow.family})`}
-          markerStart={flow.bidirectional ? `url(#topology-arrow-${flow.family})` : undefined}
+          markerEnd={flow.bidirectional ? undefined : `url(#infoschematic-arrow-${flow.family})`}
+          markerStart={flow.bidirectional ? `url(#infoschematic-arrow-${flow.family})` : undefined}
           stroke={family.color}
         />
         {/* Twelve units of transparent stroke, so a line can be pointed at
@@ -668,9 +674,9 @@ export function TopologyDiagram({
             is open: the tooltip and the highlight are for a reader, and only
             the click is for an author. */}
         <path
-          className="topology-route-hit"
+          className="infoschematic-route-hit"
           d={flow.d}
-          onPointerDown={editing ? routeClicked(flow) : lighting ? () => onLight?.(flow.id, true) : undefined}
+          onPointerDown={editing ? routeClicked(flow) : focusing ? () => onLight?.(flow.id, true) : undefined}
           onPointerEnter={onHover ? () => onHover(flow.code) : undefined}
           onPointerLeave={onHover ? () => onHover(null) : undefined}
         />
@@ -797,26 +803,26 @@ export function TopologyDiagram({
 
   return (
     <svg
-      ref={stage}
+      ref={infoschematic}
       aria-label={`${config.title} structural Infoschematic`}
-      className={`${highlight ? 'topology-svg highlighting' : 'topology-svg'}${editing ? ' editing' : ''}${lighting ? ' lighting' : ''}`}
-      height={topologyViewBox.height}
+      className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}`}
+      height={infoschematicViewBox.height}
       preserveAspectRatio="xMidYMid meet"
       role="img"
-      viewBox={`${topologyViewBox.x} ${topologyViewBox.y} ${topologyViewBox.width} ${topologyViewBox.height}`}
-      width={topologyViewBox.width}
+      viewBox={`${infoschematicViewBox.x} ${infoschematicViewBox.y} ${infoschematicViewBox.width} ${infoschematicViewBox.height}`}
+      width={infoschematicViewBox.width}
     >
-      {/* Sits behind everything else drawn onto the stage, so it is only ever
+      {/* Sits behind everything else drawn onto the Infoschematic, so it is only ever
           reached once a click has missed every card, zone, and line above it -
-          which is what makes "clicking empty stage clears the selection" true
+          which is what makes "clicking empty Infoschematic clears the selection" true
           without this having to know what else is on screen. */}
       <rect
-        className="stage-backdrop"
-        height={topologyViewBox.height}
+        className="infoschematic-backdrop"
+        height={infoschematicViewBox.height}
         onPointerDown={editing && onSelect ? () => onSelect('') : undefined}
-        width={topologyViewBox.width}
-        x={topologyViewBox.x}
-        y={topologyViewBox.y}
+        width={infoschematicViewBox.width}
+        x={infoschematicViewBox.x}
+        y={infoschematicViewBox.y}
       />
       <defs>
         <pattern height="10" id="edit-grid-minor" patternUnits="userSpaceOnUse" width="10" x="0" y="0">
@@ -827,13 +833,13 @@ export function TopologyDiagram({
           <path className="edit-grid-line major" d="M 50 0 V 50 M 0 50 H 50" />
         </pattern>
         <FabricDefs />
-        {topologyFamilies.map((family) => (
+        {infoschematicFamilies.map((family) => (
           <marker
-            id={`topology-arrow-${family.id}`}
+            id={`infoschematic-arrow-${family.id}`}
             key={family.id}
             markerHeight="32"
             /* In user units, not stroke widths: the default scales an arrowhead
-               with its line, so lighting a line inflated its head by a quarter
+               with its line, so focusing a line inflated its head by a quarter
                and a bidirectional line grew two of them. */
             markerUnits="userSpaceOnUse"
             markerWidth="32"
@@ -850,7 +856,7 @@ export function TopologyDiagram({
         ))}
       </defs>
 
-      {topologyLanes.map((lane) => (
+      {infoschematicLanes.map((lane) => (
         <g key={lane.id}>
           {lane.zones.map((zone) => (
             <rect fill={zone.fill} height={lane.height} key={zone.id} width={zone.width} x={zone.x} y={lane.y} />
@@ -858,8 +864,8 @@ export function TopologyDiagram({
         </g>
       ))}
 
-      <g className="topology-zone-label">
-        {topologyLanes.flatMap((lane) =>
+      <g className="infoschematic-zone-label">
+        {infoschematicLanes.flatMap((lane) =>
           lane.zones.map((zone) => (
             <text
               className={`${editing && onSelect ? 'zone-selectable' : ''}${
@@ -874,13 +880,13 @@ export function TopologyDiagram({
             >
               {zone.label.toUpperCase()}
             </text>
-          ))
+          )),
         )}
       </g>
 
-      {topologyLanes.map((lane) => (
-        <g className={`topology-group lane-${lane.id}`} key={`panel-${lane.id}`}>
-          <path d={topologyLanePanelOutline(lane)} />
+      {infoschematicLanes.map((lane) => (
+        <g className={`infoschematic-group lane-${lane.id}`} key={`panel-${lane.id}`}>
+          <path d={infoschematicLanePanelOutline(lane)} />
           {/* The zones tile their lane completely, so the legend is the only
               part of a lane a reader can aim at without hitting a zone. */}
           <text
@@ -890,8 +896,8 @@ export function TopologyDiagram({
             onPointerDown={editing && onSelect ? () => onSelect(`lane:${lane.id}`) : undefined}
             onPointerEnter={onHover ? () => onHover(`lane:${lane.id}`) : undefined}
             onPointerLeave={onHover ? () => onHover(null) : undefined}
-            x={topologyLaneLabelX(lane)}
-            y={topologyLaneLabelY(lane) + 5}
+            x={infoschematicLaneLabelX(lane)}
+            y={infoschematicLaneLabelY(lane) + 5}
           >
             {lane.label.toUpperCase()}
           </text>
@@ -904,27 +910,27 @@ export function TopologyDiagram({
       {editing ? (
         <rect
           className="canvas-edge"
-          height={topologyViewBox.height}
-          width={topologyViewBox.width}
-          x={topologyViewBox.x}
-          y={topologyViewBox.y}
+          height={infoschematicViewBox.height}
+          width={infoschematicViewBox.width}
+          x={infoschematicViewBox.x}
+          y={infoschematicViewBox.y}
         />
       ) : null}
 
       {editing && grid ? (
         <g className="edit-grid">
           <rect
-            height={topologyViewBox.height}
-            width={topologyViewBox.width}
-            x={topologyViewBox.x}
-            y={topologyViewBox.y}
+            height={infoschematicViewBox.height}
+            width={infoschematicViewBox.width}
+            x={infoschematicViewBox.x}
+            y={infoschematicViewBox.y}
           />
         </g>
       ) : null}
 
       {internetFabric && fabricClass(internetFabric.id) ? (
         <InternetCloud
-          className={`topology-fabric-shape internet-fabric ${fabricClass(internetFabric.id)}${selected === internetFabric.code ? ' selected' : ''}${hovered === internetFabric.code ? ' pointed' : ''}`}
+          className={`infoschematic-fabric-shape internet-fabric ${fabricClass(internetFabric.id)}${selected === internetFabric.code ? ' selected' : ''}${hovered === internetFabric.code ? ' pointed' : ''}`}
           title={fabricTitle(internetFabric.code)}
           caption={internetFabric.appearance?.caption ?? internetFabric.label}
           detail={internetFabric.appearance?.detail ?? internetFabric.detail}
@@ -947,12 +953,13 @@ export function TopologyDiagram({
           })()}
         />
       ) : null}
-      {satcomFabric && mobileFabric &&
-      topologyFabricIsVisible(satcomFabric, visibleScopes) &&
-      topologyFabricIsVisible(mobileFabric, visibleScopes) ? (
+      {satcomFabric &&
+      mobileFabric &&
+      infoschematicFabricIsVisible(satcomFabric, visibleScopes) &&
+      infoschematicFabricIsVisible(mobileFabric, visibleScopes) ? (
         <>
           <SatcomBlock
-            className={`topology-satcom ${fabricClass(satcomFabric.id)}${selected === satcomFabric.code ? ' selected' : ''}${hovered === satcomFabric.code ? ' pointed' : ''}`}
+            className={`infoschematic-satcom ${fabricClass(satcomFabric.id)}${selected === satcomFabric.code ? ' selected' : ''}${hovered === satcomFabric.code ? ' pointed' : ''}`}
             title={fabricTitle(satcomFabric.code)}
             caption={satcomFabric.appearance?.caption ?? satcomFabric.label}
             detail={satcomFabric.appearance?.detail ?? satcomFabric.detail}
@@ -961,7 +968,7 @@ export function TopologyDiagram({
             onPointerLeave={onHover ? () => onHover(null) : undefined}
           />
           <MobileCloud
-            className={`topology-fabric-shape mobile-fabric ${fabricClass(mobileFabric.id)}${selected === mobileFabric.code ? ' selected' : ''}${hovered === mobileFabric.code ? ' pointed' : ''}`}
+            className={`infoschematic-fabric-shape mobile-fabric ${fabricClass(mobileFabric.id)}${selected === mobileFabric.code ? ' selected' : ''}${hovered === mobileFabric.code ? ' pointed' : ''}`}
             title={fabricTitle(mobileFabric.code)}
             caption={mobileFabric.appearance?.caption ?? mobileFabric.label}
             detail={mobileFabric.appearance?.detail ?? mobileFabric.detail}
@@ -969,10 +976,7 @@ export function TopologyDiagram({
             onPointerEnter={onHover ? () => onHover(mobileFabric.code) : undefined}
             onPointerLeave={onHover ? () => onHover(null) : undefined}
             frame={(() => {
-              const frame = movedBox(
-                mobileFabric.bounds,
-                'FAB-03'
-              )
+              const frame = movedBox(mobileFabric.bounds, 'FAB-03')
               if (!editing) return null
               return (
                 <rect
@@ -995,7 +999,7 @@ export function TopologyDiagram({
           switched off and there was nothing left for it to observe. */}
       {telemetryFabric && fabricClass(telemetryFabric.id) ? (
         <TelemetryPlane
-          className={`topology-fabric-shape telemetry-fabric ${fabricClass(telemetryFabric.id)}${selected === telemetryFabric.code ? ' selected' : ''}${hovered === telemetryFabric.code ? ' pointed' : ''}`}
+          className={`infoschematic-fabric-shape telemetry-fabric ${fabricClass(telemetryFabric.id)}${selected === telemetryFabric.code ? ' selected' : ''}${hovered === telemetryFabric.code ? ' pointed' : ''}`}
           title={fabricTitle(telemetryFabric.code)}
           caption={telemetryFabric.appearance?.caption ?? telemetryFabric.label}
           detail={telemetryFabric.appearance?.detail ?? telemetryFabric.detail}
@@ -1006,7 +1010,7 @@ export function TopologyDiagram({
         />
       ) : null}
 
-      <g className="topology-flows">
+      <g className="infoschematic-flows">
         {[...flows]
           // Family order decides the resting stack, but a lit line always paints
           // last. Telemetry sits at the bottom of that stack, so without this its
@@ -1059,15 +1063,15 @@ export function TopologyDiagram({
               { x: held.x + held.width, y: box.y },
               { x: box.x + box.width, y: box.y },
               { x: box.x + box.width, y: box.y + box.height },
-              { x: box.x, y: box.y + box.height }
+              { x: box.x, y: box.y + box.height },
             ],
-            cornerRadius
+            cornerRadius,
           )
 
           return (
             <g
               aria-label={`${adapter.label}, holding ${adapter.wraps}`}
-              className={`topology-adapter${editing ? ' selectable' : ''}${
+              className={`infoschematic-adapter${editing ? ' selectable' : ''}${
                 highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
               }${selected === adapter.code ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
               key={placed.id}
@@ -1079,7 +1083,7 @@ export function TopologyDiagram({
                       // grip on the thing it holds rather than a thing with a
                       // position, so taking hold of one has to move that card -
                       // and refusing the drag outright, which is what this did,
-                      // left a shape on the stage that could be picked up and
+                      // left a shape on the Infoschematic that could be picked up and
                       // not moved.
                       dragComponent(holds.code)(event)
                     }
@@ -1103,7 +1107,7 @@ export function TopologyDiagram({
 
       {/* Geometry from the placeables, which already carry the drafts and the
           cards made this session; identity from the register. This read the
-          service list and the layout table and folded the offset in by hand,
+          Card list and the layout table and folded the offset in by hand,
           which is three sources for one card and no way at all to draw a card
           the model has never heard of. */}
       {placeables
@@ -1114,24 +1118,24 @@ export function TopologyDiagram({
         // The selected card paints last so nothing overlaps what is being worked
         // on, and drops back into place when it is let go.
         .sort((left, right) => (left.code === selected ? 1 : 0) - (right.code === selected ? 1 : 0))
-        .map((service) => {
-          const layout = service.box
-          const appearance = scopeAppearance[service.group as keyof typeof scopeAppearance]
-          const labelLines = splitLabel(service.label)
+        .map((card) => {
+          const layout = card.box
+          const appearance = scopeAppearance[card.group as keyof typeof scopeAppearance]
+          const labelLines = splitLabel(card.label)
           // The label is all a card carries now, so it sits centred rather than
           // sharing the height with a sub-label.
           const labelY = labelLines.length === 1 ? 46 : 39
 
           return (
             <g
-              className={`topology-service ${service.group}${highlight?.endpoints.has(service.id) ? ' highlighted' : ''}${
-                editing || lighting ? ' selectable' : ''
-              }${selected === service.code ? ' selected' : ''}${hovered === service.code ? ' pointed' : ''}${
-                removals[service.code] ? ' going' : ''
-              }${lighting && litByScene?.has(service.id) ? ' lit' : ''}`}
-              key={service.id}
+              className={`infoschematic-service ${card.group}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
+                editing || focusing ? ' selectable' : ''
+              }${selected === card.code ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
+                removals[card.code] ? ' going' : ''
+              }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
+              key={card.id}
               /*
-               * Two editors, two meanings for the same press. In the stage
+               * Two editors, two meanings for the same press. In the Infoschematic
                * editor a card is selected and dragged; in the scene editor it
                * is added to or removed from what the scene lights, and there is
                * nothing to drag because a scene has no geometry.
@@ -1139,18 +1143,18 @@ export function TopologyDiagram({
               onPointerDown={
                 editing
                   ? (event) => {
-                      onSelect?.(service.code)
-                      dragComponent(service.code)(event)
+                      onSelect?.(card.code)
+                      dragComponent(card.code)(event)
                     }
-                  : lighting
-                    ? () => onLight?.(service.id, false)
+                  : focusing
+                    ? () => onLight?.(card.id, false)
                     : undefined
               }
-              onPointerEnter={onHover ? () => onHover(service.code) : undefined}
+              onPointerEnter={onHover ? () => onHover(card.code) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
               transform={`translate(${layout.x} ${layout.y})`}
             >
-              <title>{`${service.code}: ${service.label} · ${service.name}`}</title>
+              <title>{`${card.code}: ${card.label} · ${card.name}`}</title>
               <rect
                 fill={appearance.fill}
                 height={layout.height}
@@ -1158,7 +1162,7 @@ export function TopologyDiagram({
                 stroke={appearance.stroke}
                 width={layout.width}
               />
-              <text className="topology-service-label" x={layout.width / 2} y={labelY}>
+              <text className="infoschematic-service-label" x={layout.width / 2} y={labelY}>
                 {labelLines.map((line, index) => (
                   <tspan key={line} x={layout.width / 2} dy={index === 0 ? 0 : 13}>
                     {line}
@@ -1171,36 +1175,38 @@ export function TopologyDiagram({
 
       {/* Above the cards, so a selected line and its controls are never behind
           one. It leaves this layer the moment it is deselected. */}
-      {selectedFlow ? <g className="topology-flows">{renderFlow(selectedFlow)}</g> : null}
+      {selectedFlow ? <g className="infoschematic-flows">{renderFlow(selectedFlow)}</g> : null}
 
       {annotated || editing ? (
-        <g aria-label="Topology annotations" className="topology-audit">
+        <g aria-label="Infoschematic annotations" className="infoschematic-audit">
           {/*
            * A scene narrows what is annotated to what it lights.
            *
-           * Annotating the whole stage while a scene is up puts a code on
+           * Annotating the whole Infoschematic while a scene is up puts a code on
            * every card the scene deliberately dimmed, which is the opposite
            * of what a scene is for: a reader turning codes on during a
            * walkthrough wants to name what they are being shown, not what
            * they are not.
            */}
-          {(annotated ? placeables.filter((service) => !highlight || highlight.endpoints.has(service.id)) : []).map(
-            (service) => {
+          {(annotated ? placeables.filter((placeable) => !highlight || highlight.endpoints.has(placeable.id)) : []).map(
+            (placeable) => {
               /*
                * The placeable's box already has the drag folded in, so folding it
                * in again moved the code badge at twice the speed of the card it
                * names. The ports a few lines below always read the box straight,
                * which is why a dragged card's badge and its ports came apart.
                */
-              const layout = service.box
+              const layout = placeable.box
               // An adapter's top corners are beside the card it clasps, so its code
               // goes in the rim along the bottom where its name already is. On
               // everything else the top right is clear and is where a reader looks.
-              const clasped = register.byCode(service.code)?.wraps
-              const held = clasped ? topologyLayout[clasped as keyof typeof topologyLayout] : undefined
-              const badge = held ? movedBox(held, service.code).y + held.height + (adapterFloor - 20) / 2 : layout.y + 5
+              const clasped = register.byCode(placeable.code)?.wraps
+              const held = clasped ? infoschematicLayout[clasped as keyof typeof infoschematicLayout] : undefined
+              const badge = held
+                ? movedBox(held, placeable.code).y + held.height + (adapterFloor - 20) / 2
+                : layout.y + 5
               return (
-                <g key={service.id}>
+                <g key={placeable.id}>
                   <rect
                     className="audit-component-code-bg"
                     height="20"
@@ -1210,30 +1216,30 @@ export function TopologyDiagram({
                     y={badge}
                   />
                   <text className="audit-component-code" x={layout.x + layout.width - 32} y={badge + 14}>
-                    {service.code}
+                    {placeable.code}
                   </text>
                 </g>
               )
-            }
+            },
           )}
           {editing
-            ? placeables.flatMap((service) =>
-                portsForBox(service.box, service.ports).map((port) => {
-                  const inUse = used.has(`${service.id}:${port.id}`) || dropPort === `${service.id}:${port.id}`
+            ? placeables.flatMap((placeable) =>
+                portsForBox(placeable.box, placeable.ports).map((port) => {
+                  const inUse = used.has(`${placeable.id}:${port.id}`) || dropPort === `${placeable.id}:${port.id}`
                   return (
                     <g
                       className={`${inUse ? 'audit-port in-use' : 'audit-port'}${
-                        selected === `port:${service.code}:${port.id}` ? ' selected' : ''
-                      }${hovered === `port:${service.code}:${port.id}` ? ' pointed' : ''}`}
-                      key={`${service.id}-${port.id}`}
-                      onPointerEnter={onHover ? () => onHover(`port:${service.code}:${port.id}`) : undefined}
+                        selected === `port:${placeable.code}:${port.id}` ? ' selected' : ''
+                      }${hovered === `port:${placeable.code}:${port.id}` ? ' pointed' : ''}`}
+                      key={`${placeable.id}-${port.id}`}
+                      onPointerEnter={onHover ? () => onHover(`port:${placeable.code}:${port.id}`) : undefined}
                       onPointerLeave={onHover ? () => onHover(null) : undefined}
                       onPointerDown={(event) => {
                         const end =
                           selectedFlow && inUse
-                            ? selectedFlow.source === service.id && selectedFlow.sourcePort === port.id
+                            ? selectedFlow.source === placeable.id && selectedFlow.sourcePort === port.id
                               ? ('source' as const)
-                              : selectedFlow.target === service.id && selectedFlow.targetPort === port.id
+                              : selectedFlow.target === placeable.id && selectedFlow.targetPort === port.id
                                 ? ('target' as const)
                                 : undefined
                             : undefined
@@ -1242,19 +1248,19 @@ export function TopologyDiagram({
                           return
                         }
                         event.stopPropagation()
-                        onSelect?.(`port:${service.code}:${port.id}`)
+                        onSelect?.(`port:${placeable.code}:${port.id}`)
                         // Selecting and starting a line are the same press: the
                         // drag only becomes one past the threshold, so a click
                         // that does not travel still just selects the port.
-                        dragNewFlow(service.id, port)(event)
+                        dragNewFlow(placeable.id, port)(event)
                       }}
                     >
                       <circle className="audit-port-target" cx={port.at.x} cy={port.at.y} r="9" />
                       <circle cx={port.at.x} cy={port.at.y} r="3.5" />
-                      <text x={port.at.x + 8} y={port.at.y - 8}>{`${service.code}:${port.id}`}</text>
+                      <text x={port.at.x + 8} y={port.at.y - 8}>{`${placeable.code}:${port.id}`}</text>
                     </g>
                   )
-                })
+                }),
               )
             : null}
           {/* The line a port-to-port drag is making, which has no entry to be
@@ -1301,20 +1307,20 @@ export function TopologyDiagram({
       ) : null}
 
       {guides?.length ? (
-        <g className="topology-guides">
+        <g className="infoschematic-guides">
           {guides.map((guide) => (
             <line
               key={`${guide.axis}-${guide.at}-${guide.from}`}
-              x1={guide.axis === 'x' ? guide.at : topologyViewBox.x}
-              x2={guide.axis === 'x' ? guide.at : topologyViewBox.x + topologyViewBox.width}
-              y1={guide.axis === 'y' ? guide.at : topologyViewBox.y}
-              y2={guide.axis === 'y' ? guide.at : topologyViewBox.y + topologyViewBox.height}
+              x1={guide.axis === 'x' ? guide.at : infoschematicViewBox.x}
+              x2={guide.axis === 'x' ? guide.at : infoschematicViewBox.x + infoschematicViewBox.width}
+              y1={guide.axis === 'y' ? guide.at : infoschematicViewBox.y}
+              y2={guide.axis === 'y' ? guide.at : infoschematicViewBox.y + infoschematicViewBox.height}
             />
           ))}
         </g>
       ) : null}
 
-      <StageOverlay overlay={overlay} />
+      <GraphicsOverlay overlay={overlay} />
     </svg>
   )
 }

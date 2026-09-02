@@ -1,0 +1,32 @@
+{
+  "name": "@infoschematics/site",
+  "description": "The official Infoschematics website, documentation and example host.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/example-blank": "0.1.0",
+    "@infoschematics/react": "0.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^4.0.3",
+    "wrangler": "^4.123.0"
+  },
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "clean": "rm -rf dist .wrangler",
+    "deploy": "bun run build && wrangler deploy",
+    "dev": "vite",
+    "preview": "bun run build && wrangler dev",
+    "test": "vitest run --root .",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module"
+}

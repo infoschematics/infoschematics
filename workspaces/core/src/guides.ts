@@ -1,6 +1,6 @@
 import type { Box, Point } from './geometry.ts'
 
-// Alignment guides come from what is already on the stage rather than from a
+// Alignment guides come from what is already on the Infoschematic canvas rather than from a
 // fixed grid, because a diagram's own edges and centres are what a viewer reads
 // alignment against. Nothing here knows what the boxes are.
 

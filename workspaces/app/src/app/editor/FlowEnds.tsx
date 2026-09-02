@@ -3,7 +3,7 @@
  *
  * The counterpart of a card's port counts, and shown in the same place for the
  * same reason: attachment is the third thing worth knowing about anything on
- * the stage, after what it is and where it sits. A card offers ports; a line
+ * the Infoschematic, after what it is and where it sits. A card offers ports; a line
  * lands on two of them.
  *
  * Read rather than typed. An end is moved by dragging it onto a port, which is

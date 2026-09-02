@@ -35,7 +35,7 @@ function Row({
   detail,
   name,
   onPoint,
-  pointed
+  pointed,
 }: {
   code: string
   detail: string
@@ -46,10 +46,10 @@ function Row({
   const row = useRef<HTMLDivElement>(null)
 
   /*
-   * Brought into view when the stage is pointing at it.
+   * Brought into view when the Infoschematic is pointing at it.
    *
-   * Lighting a row says nothing if the row is eighty entries down a scrolling
-   * panel, which is where most of them are: pointing at a line on the stage lit
+   * Focusing a row says nothing if the row is eighty entries down a scrolling
+   * panel, which is where most of them are: pointing at a line on the Infoschematic lit
    * something the reader could not see. `nearest` rather than `center` so a row
    * already on screen does not jump under the eye that is reading it.
    */
@@ -75,30 +75,27 @@ function Row({
 
 export function ModelRegister({
   hovered,
-  onPoint
+  onPoint,
 }: {
-  /** What the stage is pointing at, so the row for it lights with it. */
+  /** What the Infoschematic is pointing at, so the row for it lights with it. */
   hovered: string | null
   onPoint: (code: string | null) => void
 }) {
   const runtime = useInfoschematic()
   const {
     config,
-    topologyEndpointLabels,
-    topologyFamilies,
-    topologyFlows,
-    topologyInterfaceById,
-    topologyRegister,
-    topologyScopes
+    infoschematicEndpointLabels,
+    infoschematicFamilies,
+    infoschematicFlows,
+    infoschematicInterfaceById,
+    infoschematicRegister,
+    infoschematicScopes,
   } = runtime
-  const cards = topologyRegister.all.filter((entry) => entry.kind === 'card')
-  const fabrics = topologyRegister.all.filter((entry) => entry.kind === 'fabric')
+  const cards = infoschematicRegister.all.filter((entry) => entry.kind === 'card')
+  const fabrics = infoschematicRegister.all.filter((entry) => entry.kind === 'fabric')
   const heldBy = new Map(cards.filter((card) => card.wraps).map((adapter) => [adapter.code, adapter.wraps as string]))
-  const endpointName = (id: string) => topologyEndpointLabels.get(id) ?? id
-  const [shut, setShut] = usePersistentState<Record<string, boolean>>(
-    config.id && `${config.id}.register.shut`,
-    {}
-  )
+  const endpointName = (id: string) => infoschematicEndpointLabels.get(id) ?? id
+  const [shut, setShut] = usePersistentState<Record<string, boolean>>(config.id && `${config.id}.register.shut`, {})
   const toggle = (part: string) => setShut((current) => ({ ...current, [part]: !current[part] }))
 
   const row = (code: string, name: string, detail: string) => (
@@ -114,7 +111,7 @@ export function ModelRegister({
         open={!shut.cards}
         title="Cards"
       >
-        {topologyScopes.map((scope) => {
+        {infoschematicScopes.map((scope) => {
           const within = cards.filter((card) => card.group === scope.id)
           if (within.length === 0) return null
           return (
@@ -152,14 +149,14 @@ export function ModelRegister({
       </Part>
 
       <Part
-        count={topologyFlows.length}
+        count={infoschematicFlows.length}
         note="Each flow names what it joins and the interface it carries. Two flows carrying the same interface are the same contract met by different components."
         onToggle={() => toggle('flows')}
         open={!shut.flows}
         title="Flows"
       >
-        {topologyFamilies.map((family) => {
-          const carried = topologyFlows.filter((flow) => flow.family === family.id)
+        {infoschematicFamilies.map((family) => {
+          const carried = infoschematicFlows.filter((flow) => flow.family === family.id)
           if (carried.length === 0) return null
           return (
             <div className="register-group" key={family.id}>
@@ -173,18 +170,20 @@ export function ModelRegister({
                    * Two different relationships, told apart.
                    *
                    * `conformsTo` is alternatives: where a flow names two, the
-                   * partner decides which is true and the flow cannot. `over`
+                   * theme decides which is true and the flow cannot. `over`
                    * is a payload on a transport, which is not a choice at all.
                    * Both read as "or" until now, so five telemetry flows
                    * offered a choice nobody makes.
                    */
-                  const named = (id: string) => topologyInterfaceById.get(id)?.label ?? id
+                  const named = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id
                   const alternatives = (flow.conformsTo ?? []).map(named).join(' or ')
                   const conforms = flow.over ? `${alternatives} over ${named(flow.over)}` : alternatives
                   return row(
                     flow.code,
                     `${endpointName(flow.source)} → ${endpointName(flow.target)}`,
-                    [conforms || 'Carriage, to no specification of its own', flow.operation].filter(Boolean).join(' · ')
+                    [conforms || 'Carriage, to no specification of its own', flow.operation]
+                      .filter(Boolean)
+                      .join(' · '),
                   )
                 })}
               </dl>

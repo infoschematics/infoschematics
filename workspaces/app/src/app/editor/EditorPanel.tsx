@@ -61,7 +61,7 @@ export function EditorPanel({
        * a card offers ports and a line lands on two of them - so both read the
        * same way down the panel rather than each having its own arrangement.
        *
-       * Everything else on the stage answers only the middle one. A lane, a
+       * Everything else on the Infoschematic answers only the middle one. A lane, a
        * zone, a port and a waypoint get the single panel they always had, and
        * it keeps saying which of those it is, since no identity set will.
        */}
@@ -80,7 +80,7 @@ export function EditorPanel({
         <Part
           onToggle={() => toggle('dimensions')}
           open={!shut.dimensions}
-          // Everything else on the stage answers only this question, so its set
+          // Everything else on the Infoschematic answers only this question, so its set
           // keeps saying which kind of thing is selected - nothing else will.
           title={identity ? 'Dimensions' : placement.label}
         >
