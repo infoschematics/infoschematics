@@ -4,7 +4,7 @@ area: TOOL
 title: Separate tool from realisation
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
@@ -166,11 +166,15 @@ Canvas, Present, Studio and static SVG are still combined or absent until `INFOS
 
 ### Post-change review
 
-Ready for human acceptance. The separation boundary is complete and the remaining concerns no longer belong to this item.
+Accepted by the user on 2026-09-03. The separation boundary is complete and the remaining concerns no longer belong to this item.
 
 ### Mini recap
 
 Infoschematics is now independently evolvable from the first 5G realisation. The next package work can proceed locally without pulling authored programme content back into the library.
+
+## Done
+
+Accepted by the user on 2026-09-03. The reusable library is separated from the first authored realisation, with remaining package decomposition captured independently.
 
 ## Discussion
 
