@@ -22,14 +22,10 @@ const grown = (box: Box, by: number, weight: number): Obstacle => ({
   y: box.y - by,
 })
 
-/*
- * Everything a step has lit, as boxes.
- *
- * Fabrics are read from their own bounds rather than the layout, which holds
- * cards only - so SATCOM, both clouds and the telemetry plane were invisible
- * here, and they are the largest things on the Infoschematic. Lines are taken a segment
- * at a time: the routes are orthogonal, so a segment's bounds are the segment,
- * where a whole route's bounds would claim the empty rectangle it turns through.
+/**
+ * Everything the step has lit, as boxes. Fabrics are read from their own
+ * bounds because the layout holds Cards only. Lines are taken one segment at
+ * a time so an orthogonal route does not claim the empty rectangle it turns through.
  */
 export const litObstacles = (step: Lit, runtime: InfoschematicRuntime): Obstacle[] => {
   const { infoschematicFabrics, infoschematicFlows, infoschematicLayout } = runtime

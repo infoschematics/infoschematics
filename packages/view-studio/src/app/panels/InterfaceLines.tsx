@@ -2,15 +2,11 @@ import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '../infoschematic-context.tsx'
 
 /*
- * What on the Infoschematic answers for a specification.
+ * What the Infoschematic answers for a specification.
  *
- * Two lists, because there are two relationships and they are not the same
- * claim. A flow carries a specification: the traffic on it meets that document.
- * A card offers one: the card implements it, whether or not anything drawn
- * calls it. Only the second can be said about the SCAL APIs, which describe an
- * adapter-to-component relationship the diagram draws as containment rather
- * than as a line - so counting flows alone reported four published contracts as
- * unreachable when each is implemented by a card in plain view.
+ * A Flow carries a specification, while a Card offers one whether or not a
+ * drawn Flow calls it. Counting only routed specifications would report an
+ * offered contract as unreachable even when its Card is in plain view.
  */
 export function InterfaceLines({
   cards,

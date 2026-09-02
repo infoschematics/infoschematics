@@ -329,7 +329,7 @@ export function DetailsPanel({
         <div className="contract-body">
           {/* Says what the tab is for, and nothing about what this diagram
               happens to contain. The sentence here counted the interfaces and
-              apportioned them between the federation and everybody else, which
+              apportioned them between one deployment's groups, which
               is a fact about one deployment's model rather than about the
               control, and was quoted to a visitor as though it were the point
               of the panel. */}

@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { LaneConfig } from '@infoschematics/domain-model/lane'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
@@ -53,12 +54,12 @@ export type RuntimeStandaloneScene = {
   flows: readonly string[]
 }
 
-export type RuntimeStoryScene = Omit<StorySceneConfig, 'callout'> & {
+export type RuntimeStoryScene = Omit<StorySceneConfig, 'callout' | 'graphic'> & {
   caption: string
   hold: number
   components: readonly string[]
   flows: readonly string[]
-  overlay?: string
+  graphic?: GraphicConfig
   callout?: Point
   takeaways?: readonly string[]
   scene?: string
@@ -215,7 +216,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
         hold: scene.duration ?? 0,
         components: scene.focus?.artefacts ?? source?.components ?? [],
         flows: scene.focus?.flows ?? source?.flows ?? [],
-        overlay: scene.graphic ? (graphicById.get(scene.graphic)?.renderer ?? scene.graphic) : undefined,
+        graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
         callout: scene.callout?.at,
         takeaways: scene.callout?.takeaways,
         scene: scene.sourceScene,
@@ -501,7 +502,6 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     calloutPorts: config.calloutPositions,
     themeLogos: Object.fromEntries(thematicScenes.flatMap((scene) => (scene.logo ? [[scene.id, scene.logo]] : []))),
     adapterFloor,
-    telemetryPlaneTop: fabrics.find((fabric) => fabric.appearance?.renderer === 'telemetry-plane')?.bounds.y ?? 0,
   }
 }
 

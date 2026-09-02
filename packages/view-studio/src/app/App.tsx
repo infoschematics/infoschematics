@@ -18,6 +18,7 @@ import { PanelRail } from './panels/PanelRail.tsx'
 import { ShortcutOverlay } from './panels/ShortcutOverlay.tsx'
 import { TitleBar } from './panels/TitleBar.tsx'
 import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
+import { InfoschematicRenderersContext, type InfoschematicRenderers } from './renderers.tsx'
 import {
   createInfoschematicRuntime,
   InfoschematicContext,
@@ -101,7 +102,7 @@ function nextCodeIn(prefix: string, taken: readonly string[]): string {
 /**
  * An identifier from what the reader called the card.
  *
- * Every authored id was arrived at this way - "Demand Controller" is
+ * Every authored id follows this same name-derived rule, and
  * `demand-controller` - so deriving it keeps a created card indistinguishable
  * from the rest once its change set lands. Derived rather than asked for
  * separately because two fields describing the same thing is two chances to
@@ -122,19 +123,21 @@ const identifierFrom = (name: string) =>
  * it, which is a judgment, and dragging it there is a gesture the editor
  * already has.
  */
-const roomForCard = (made: number): Box => ({
+const roomForCard = (viewBox: Box, made: number): Box => ({
   height: 80,
   width: 160,
-  x: 780 + made * 20,
-  y: 530 + made * 20,
+  x: viewBox.x + viewBox.width / 2 - 80 + made * 20,
+  y: viewBox.y + viewBox.height / 2 - 40 + made * 20,
 })
 
-export function App({ config }: { config: InfoschematicConfig }) {
+export function App({ config, renderers }: { config: InfoschematicConfig; renderers?: InfoschematicRenderers }) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
   return (
-    <InfoschematicContext value={runtime}>
-      <AppContent />
-    </InfoschematicContext>
+    <InfoschematicRenderersContext value={renderers ?? {}}>
+      <InfoschematicContext value={runtime}>
+        <AppContent />
+      </InfoschematicContext>
+    </InfoschematicRenderersContext>
   )
 }
 
@@ -296,7 +299,7 @@ function AppContent() {
       const code = nextCodeIn(prefix, taken)
       editor.createCard(code, {
         // An adapter has no box: it is placed from the card it clasps.
-        box: held ? undefined : roomForCard(editor.createdCards.length),
+        box: held ? undefined : roomForCard(runtime.infoschematicViewBox, editor.createdCards.length),
         detail: '',
         group: scope,
         id: identifierFrom(held ? `${held.label} adapter` : code),
@@ -637,7 +640,7 @@ function AppContent() {
                 selected={editor.selected}
                 annotated={presentation.annotated}
                 grid={editor.view.grid}
-                overlay={runningStoryScene?.overlay}
+                graphic={runningStoryScene?.graphic}
                 visibleScopes={visibleScopes}
               />
               {proposed ? (

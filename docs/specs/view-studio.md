@@ -258,6 +258,26 @@ _Provenance: retained from IBC EDIT-071 and domain relationship TOPO-018._
 
 _Implementation surface: derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
+## Host rendering
+
+### EDIT-072 — Hosts supply visual implementations
+
+Studio MUST accept host-owned renderer configuration separately from `InfoschematicConfig`. Fabric, Graphic, shared SVG definition and Scope icon implementations MUST NOT be stored in authored configuration or imported from a particular realisation by the reusable package.
+
+_Implementation surface: `InfoschematicRenderers` in `packages/view-studio/src/app/renderers.tsx` and the `renderers` prop in `packages/view-studio/src/app/App.tsx`._
+
+### EDIT-073 — Fabrics retain a generic fallback
+
+Every visible authored Fabric MUST render independently. A configured renderer receives the Fabric and its effective edited bounds; an absent or unknown renderer key MUST use the generic bounds-driven Fabric rendering rather than coupling visibility to another Fabric or known key.
+
+_Verification: `packages/view-studio/src/app/App.test.tsx` covers configured and unknown Fabric renderers._
+
+### EDIT-074 — Story Graphics resolve through authored data
+
+A Story Graphic reference MUST resolve to a Graphic in the serialisable Infoschematic definition before Studio invokes the matching host renderer. An unresolved reference MUST NOT be treated as a renderer key or produce embedded fallback narrative.
+
+_Verification: `packages/view-studio/src/app/App.test.tsx` covers resolved and unresolved Story Graphic references._
+
 ## Verification
 
 ### EDIT-059 — The rendered editor is tested

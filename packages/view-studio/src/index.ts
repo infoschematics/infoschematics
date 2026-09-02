@@ -7,3 +7,9 @@
  */
 export { App } from './app/App.tsx'
 export { readSpec } from './app/panels/contracts.ts'
+export type {
+  FabricRendererProps,
+  GraphicRendererProps,
+  InfoschematicRenderers,
+  ScopeIconRenderer,
+} from './app/renderers.tsx'

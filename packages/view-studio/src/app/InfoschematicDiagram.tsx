@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import type { FabricConfig } from '@infoschematics/domain-model/fabric'
+import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { CreatedComponent } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
@@ -6,14 +8,9 @@ import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { cornerRadius } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
-import { FabricDefs } from '../library/FabricDefs.tsx'
-import { InternetCloud } from '../library/InternetCloud.tsx'
-import { MobileCloud } from '../library/MobileCloud.tsx'
-import { SatcomBlock } from '../library/SatcomBlock.tsx'
-import { TelemetryPlane } from '../library/TelemetryPlane.tsx'
 import type { EditorMode } from './editor/use-editor.ts'
 import { type RuntimeFlow as InfoschematicFlow, useInfoschematic } from './infoschematic-context.tsx'
-import { GraphicsOverlay } from './GraphicsOverlay.tsx'
+import { type FabricRendererProps, useInfoschematicRenderers } from './renderers.tsx'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -28,12 +25,44 @@ type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
  * so the card and the button that filters for it cannot disagree.
  */
 const splitLabel = (label: string) => {
-  if (label.startsWith('Transmission Management')) return ['Transmission', label.replace('Transmission ', '')]
-  if (label.startsWith('HLS/DASH Content Steering')) return ['HLS/DASH Content', 'Steering Server']
-  if (label.startsWith('Content Steering')) return ['Content Steering', 'Server']
-  if (label.startsWith('Exposure Gateway'))
-    return ['Exposure Gateway', label.slice('Exposure Gateway '.length) || 'SCAL']
-  return [label]
+  if (label.length <= 22 || !label.includes(' ')) return [label]
+
+  const words = label.split(' ')
+  const candidates = words.slice(1).map((_, index) => {
+    const first = words.slice(0, index + 1).join(' ')
+    const second = words.slice(index + 1).join(' ')
+    return { first, second, width: Math.max(first.length, second.length) }
+  })
+  const balanced = candidates.reduce((best, candidate) => (candidate.width < best.width ? candidate : best))
+  return [balanced.first, balanced.second]
+}
+
+function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
+  const caption = fabric.appearance?.caption ?? fabric.label
+  const detail = fabric.appearance?.detail ?? fabric.detail
+  const centre = bounds.x + bounds.width / 2
+  const captionY = bounds.y + bounds.height / 2 - (detail ? 4 : 0)
+
+  return (
+    <>
+      <rect
+        className="fabric-shell"
+        height={bounds.height}
+        rx={cornerRadius}
+        width={bounds.width}
+        x={bounds.x}
+        y={bounds.y}
+      />
+      <text className="fabric-title" x={centre} y={captionY}>
+        {caption}
+      </text>
+      {detail ? (
+        <text className="fabric-detail" x={centre} y={captionY + 18}>
+          {detail}
+        </text>
+      ) : null}
+    </>
+  )
 }
 
 /** How far a pointer travels before a click becomes a drag, in screen pixels. */
@@ -78,7 +107,7 @@ export function InfoschematicDiagram({
   flows,
   annotated,
   grid,
-  overlay,
+  graphic,
   visibleScopes,
 }: {
   /** Codes marked for removal, drawn as going rather than gone. */
@@ -131,14 +160,13 @@ export function InfoschematicDiagram({
   flows: readonly InfoschematicFlow[]
   annotated?: boolean
   grid?: boolean
-  /** A Graphic a Story Scene draws over the Infoschematic, where it names one. */
-  overlay?: string
+  /** A resolved Graphic drawn by the active Story Scene. */
+  graphic?: GraphicConfig
   visibleScopes: ReadonlySet<string>
 }) {
   const {
     adapterFloor,
     config,
-    telemetryPlaneTop,
     infoschematicAnnotationLabelPositions,
     infoschematicEndpointCodes,
     infoschematicEndpointLabels,
@@ -157,15 +185,14 @@ export function InfoschematicDiagram({
     infoschematicScopes,
     infoschematicViewBox,
   } = useInfoschematic()
+  const renderers = useInfoschematicRenderers()
+  const Definitions = renderers.definitions
+  const GraphicRenderer = graphic ? renderers.graphics?.[graphic.renderer] : undefined
   const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
   const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
   const scopeAppearance = Object.fromEntries(
     infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }]),
   ) as Record<string, { fill: string; stroke: string }>
-  const internetFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'internet-cloud')
-  const satcomFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'satcom-block')
-  const mobileFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'mobile-cloud')
-  const telemetryFabric = infoschematicFabrics.find((fabric) => fabric.appearance?.renderer === 'telemetry-plane')
   const _audit = infoschematicPortAudit(flows)
   // Every port a card offers is shown; the ones a route already meets are drawn
   // solid and named, so a reader can see what is taken and what is free.
@@ -200,12 +227,9 @@ export function InfoschematicDiagram({
   }
 
   /*
-   * An end is anchored only if the port it names is really there. An anchored
-   * end is grabbed by its port dot rather than by a handle of its own, so one
-   * naming a port its component does not offer had nothing to take hold of at
-   * all - which is how the satellite hop to the client came to have no visible
-   * start. Treating it as
-   * unanchored gives it a handle back, and the drop can still find a real port.
+   * An end is anchored only when its component offers the named port. Treating
+   * an invalid reference as unanchored gives the editor a visible handle and
+   * lets a later drop resolve it to a real port.
    */
   const anchoredEnds = new Set(
     flows.flatMap((flow) => {
@@ -468,16 +492,13 @@ export function InfoschematicDiagram({
     }
 
   /**
-   * An end anchored to nothing - the satellite hops, whose endpoints are named
-   * points rather than components - is placed by hand, but it may still be
-   * dropped onto a port. The line follows the pointer as a free end does, and
-   * the release decides which of the two it was: a port in reach anchors it,
-   * anywhere else leaves it where it was let go.
+   * An end anchored to nothing, or to a point rather than a component, is
+   * placed by hand but may still be dropped onto a port.
    */
   const dragUnanchoredEnd =
     (flow: InfoschematicFlow, end: 'end' | 'start') => (event: React.PointerEvent<SVGElement>) => {
       if (!onFreeEnd) return
-      const svg = event.currentTarget.ownerSVGElement
+  const svg = event.currentTarget.ownerSVGElement
       const matrix = svg?.getScreenCTM()
       if (!svg || !matrix) return
       event.preventDefault()
@@ -625,14 +646,9 @@ export function InfoschematicDiagram({
    */
   const endpointLabel = (id: string) => infoschematicEndpointLabels.get(id) ?? id
 
-  const fabricTitle = (code: string) => {
-    const region = infoschematicFabrics.find((candidate) => candidate.code === code)
-    return region ? `${region.code}: ${region.label} · ${region.detail}` : code
-  }
+  const fabricTitle = (fabric: FabricConfig) => `${fabric.code}: ${fabric.label} · ${fabric.detail}`
 
   const fabricClass = (id: string) => {
-    const region = infoschematicFabrics.find((candidate) => candidate.id === id)
-    if (!region || !infoschematicFabricIsVisible(region, visibleScopes)) return undefined
     return highlight?.endpoints.has(id) ? 'infoschematic-fabric highlighted' : 'infoschematic-fabric'
   }
 
@@ -832,7 +848,7 @@ export function InfoschematicDiagram({
           <rect fill="url(#edit-grid-minor)" height="50" width="50" x="0" y="0" />
           <path className="edit-grid-line major" d="M 50 0 V 50 M 0 50 H 50" />
         </pattern>
-        <FabricDefs />
+        {Definitions ? <Definitions /> : null}
         {infoschematicFamilies.map((family) => (
           <marker
             id={`infoschematic-arrow-${family.id}`}
@@ -928,92 +944,41 @@ export function InfoschematicDiagram({
         </g>
       ) : null}
 
-      {internetFabric && fabricClass(internetFabric.id) ? (
-        <InternetCloud
-          className={`infoschematic-fabric-shape internet-fabric ${fabricClass(internetFabric.id)}${selected === internetFabric.code ? ' selected' : ''}${hovered === internetFabric.code ? ' pointed' : ''}`}
-          title={fabricTitle(internetFabric.code)}
-          caption={internetFabric.appearance?.caption ?? internetFabric.label}
-          detail={internetFabric.appearance?.detail ?? internetFabric.detail}
-          onPointerDown={editing && onSelect ? () => onSelect(internetFabric.code) : undefined}
-          onPointerEnter={onHover ? () => onHover(internetFabric.code) : undefined}
-          onPointerLeave={onHover ? () => onHover(null) : undefined}
-          frame={(() => {
-            const frame = movedBox(internetFabric.bounds, internetFabric.code)
-            if (!editing) return null
-            return (
-              <rect
-                className="fabric-frame"
-                height={frame.height}
-                rx={cornerRadius}
-                width={frame.width}
-                x={frame.x}
-                y={frame.y}
-              />
-            )
-          })()}
-        />
-      ) : null}
-      {satcomFabric &&
-      mobileFabric &&
-      infoschematicFabricIsVisible(satcomFabric, visibleScopes) &&
-      infoschematicFabricIsVisible(mobileFabric, visibleScopes) ? (
-        <>
-          <SatcomBlock
-            className={`infoschematic-satcom ${fabricClass(satcomFabric.id)}${selected === satcomFabric.code ? ' selected' : ''}${hovered === satcomFabric.code ? ' pointed' : ''}`}
-            title={fabricTitle(satcomFabric.code)}
-            caption={satcomFabric.appearance?.caption ?? satcomFabric.label}
-            detail={satcomFabric.appearance?.detail ?? satcomFabric.detail}
-            onPointerDown={editing && onSelect ? () => onSelect(satcomFabric.code) : undefined}
-            onPointerEnter={onHover ? () => onHover(satcomFabric.code) : undefined}
-            onPointerLeave={onHover ? () => onHover(null) : undefined}
-          />
-          <MobileCloud
-            className={`infoschematic-fabric-shape mobile-fabric ${fabricClass(mobileFabric.id)}${selected === mobileFabric.code ? ' selected' : ''}${hovered === mobileFabric.code ? ' pointed' : ''}`}
-            title={fabricTitle(mobileFabric.code)}
-            caption={mobileFabric.appearance?.caption ?? mobileFabric.label}
-            detail={mobileFabric.appearance?.detail ?? mobileFabric.detail}
-            onPointerDown={editing && onSelect ? () => onSelect(mobileFabric.code) : undefined}
-            onPointerEnter={onHover ? () => onHover(mobileFabric.code) : undefined}
-            onPointerLeave={onHover ? () => onHover(null) : undefined}
-            frame={(() => {
-              const frame = movedBox(mobileFabric.bounds, 'FAB-03')
-              if (!editing) return null
-              return (
+      {infoschematicFabrics
+        .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
+        .map((fabric) => {
+          const bounds = movedBox(fabric.bounds, fabric.code)
+          const rendererKey = fabric.appearance?.renderer
+          const Renderer = rendererKey ? renderers.fabrics?.[rendererKey] : undefined
+          return (
+            <g
+              aria-label={fabric.label}
+              className={`${fabricClass(fabric.id)}${editing ? ' selectable' : ''}${selected === fabric.code ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+              key={fabric.id}
+              onPointerDown={editing && onSelect ? () => onSelect(fabric.code) : undefined}
+              onPointerEnter={onHover ? () => onHover(fabric.code) : undefined}
+              onPointerLeave={onHover ? () => onHover(null) : undefined}
+            >
+              <title>{fabricTitle(fabric)}</title>
+              {Renderer ? <Renderer bounds={bounds} fabric={fabric} /> : <DefaultFabric bounds={bounds} fabric={fabric} />}
+              {editing ? (
                 <rect
                   className="fabric-frame"
-                  height={frame.height}
+                  height={bounds.height}
                   rx={cornerRadius}
-                  width={frame.width}
-                  x={frame.x}
-                  y={frame.y}
+                  width={bounds.width}
+                  x={bounds.x}
+                  y={bounds.y}
                 />
-              )
-            })()}
-          />
-        </>
-      ) : null}
-
-      {/* With the other fabrics, and gated like them. It was drawn last, after
-          the annotations, so it covered its own code badge - and drawn
-          unconditionally, so it stayed on screen after every scope had been
-          switched off and there was nothing left for it to observe. */}
-      {telemetryFabric && fabricClass(telemetryFabric.id) ? (
-        <TelemetryPlane
-          className={`infoschematic-fabric-shape telemetry-fabric ${fabricClass(telemetryFabric.id)}${selected === telemetryFabric.code ? ' selected' : ''}${hovered === telemetryFabric.code ? ' pointed' : ''}`}
-          title={fabricTitle(telemetryFabric.code)}
-          caption={telemetryFabric.appearance?.caption ?? telemetryFabric.label}
-          detail={telemetryFabric.appearance?.detail ?? telemetryFabric.detail}
-          top={telemetryPlaneTop}
-          onPointerDown={editing && onSelect ? () => onSelect(telemetryFabric.code) : undefined}
-          onPointerEnter={onHover ? () => onHover(telemetryFabric.code) : undefined}
-          onPointerLeave={onHover ? () => onHover(null) : undefined}
-        />
-      ) : null}
+              ) : null}
+            </g>
+          )
+        })}
 
       <g className="infoschematic-flows">
         {[...flows]
           // Family order decides the resting stack, but a lit line always paints
-          // last. Telemetry sits at the bottom of that stack, so without this its
+          // last. A lower family can otherwise leave its
           // glow ends up underneath the dark backing pipe of every dimmed line
           // crossing it - lit, and invisible.
           .sort((left, right) => {
@@ -1094,10 +1059,7 @@ export function InfoschematicDiagram({
             >
               <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
               <path className="adapter-socket" d={socket} />
-              {/* The whole label, as authored. It used to draw the last word
-                  upper-cased, which read as SCAL while the labels ended in it
-                  and as CONTROL the moment they stopped - a transformation with
-                  nothing holding it to the name it was transforming. */}
+              {/* The whole label is rendered exactly as authored. */}
               <text className="adapter-label" x={box.x + box.width / 2} y={held.y + held.height + adapterFloor / 2 + 5}>
                 {adapter.label}
               </text>
@@ -1320,7 +1282,11 @@ export function InfoschematicDiagram({
         </g>
       ) : null}
 
-      <GraphicsOverlay overlay={overlay} />
+      {graphic && GraphicRenderer ? (
+        <g className="infoschematic-graphic">
+          <GraphicRenderer graphic={graphic} viewBox={infoschematicViewBox} />
+        </g>
+      ) : null}
     </svg>
   )
 }

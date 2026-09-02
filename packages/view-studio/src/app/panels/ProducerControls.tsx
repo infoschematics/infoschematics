@@ -1,7 +1,7 @@
 import type { Ref } from 'react'
 import type { Presentation } from '../hooks/use-presentation.ts'
 import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
-import { scopeIcon } from '../scope-icons.ts'
+import { useInfoschematicRenderers } from '../renderers.tsx'
 import { ThemeStrip } from './ThemeStrip.tsx'
 
 // Four banks in two rows: what is on Infoschematic and what its lines carry above, what
@@ -18,6 +18,7 @@ export function ProducerControls({
   presentation: Presentation
 }) {
   const { infoschematicFamilies, infoschematicScopes, stories } = useInfoschematic()
+  const { scopeIcons } = useInfoschematicRenderers()
   return (
     <section className="producer-controls legend" aria-label="Infoschematic controls" ref={ref}>
       {/* Named for the taxonomy each bank toggles rather than for what it
@@ -30,7 +31,7 @@ export function ProducerControls({
         {infoschematicScopes.map((scope) => {
           // The same mark the collapsed rail uses, so a scope is recognised by
           // one thing however the panel is showing it.
-          const ScopeIcon = scopeIcon(scope.icon)
+          const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
           return (
             <button
               aria-label={scope.label}
@@ -42,7 +43,7 @@ export function ProducerControls({
               title={`${scope.label} — ${scope.description}`}
               type="button"
             >
-              <ScopeIcon aria-hidden="true" size={13} />
+              {ScopeIcon ? <ScopeIcon aria-hidden={true} size={13} /> : null}
               {scope.prefix}
             </button>
           )

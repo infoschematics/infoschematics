@@ -1,6 +1,6 @@
 import type { Presentation } from '../hooks/use-presentation.ts'
 import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
-import { scopeIcon } from '../scope-icons.ts'
+import { useInfoschematicRenderers } from '../renderers.tsx'
 
 // Everything the control surface offers, folded into 48px for the maximised
 // diagram, so switching a dimension off never needs the panels back.
@@ -12,6 +12,7 @@ export function PanelRail({
   presentation: Presentation
 }) {
   const { infoschematicFamilies, infoschematicScopes, stories, thematicScenes, themeLogos } = useInfoschematic()
+  const { scopeIcons } = useInfoschematicRenderers()
   return (
     <div className="panel-rail">
       {/*
@@ -25,7 +26,7 @@ export function PanelRail({
        */}
       <section className="rail-group" aria-label="Scopes">
         {infoschematicScopes.map((scope) => {
-          const ScopeIcon = scopeIcon(scope.icon)
+          const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
           return (
             <button
               aria-label={scope.label}
@@ -36,7 +37,7 @@ export function PanelRail({
               title={`${scope.label} — ${scope.description}`}
               type="button"
             >
-              <ScopeIcon aria-hidden="true" size={16} />
+              {ScopeIcon ? <ScopeIcon aria-hidden={true} size={16} /> : scope.prefix}
             </button>
           )
         })}

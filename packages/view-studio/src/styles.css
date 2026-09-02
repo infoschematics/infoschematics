@@ -186,7 +186,6 @@ h2 {
 }
 
 .toggle-button:disabled,
-.scenario-button:disabled,
 .action-button:disabled {
   background: #0d1c2b;
   border-color: #ffffff10;
@@ -538,6 +537,8 @@ h2 {
 /* The outline is a path with a gap rather than a rect, so the lane's name can
    sit on the border like a legend. */
 .infoschematic-group path {
+  fill: #12273b24;
+  stroke: #b5c4d54d;
   stroke-width: 1.5px;
 }
 
@@ -548,149 +549,25 @@ h2 {
 }
 
 .infoschematic-group text {
+  fill: #9ed9ff;
   font: 600 13px 'DM Mono', monospace;
   letter-spacing: 1.6px;
 }
 
-.lane-media-streaming path {
-  fill: #17334a17;
-  stroke: #b5c4d54d;
-}
-
-.lane-media-streaming text {
-  fill: #9ed9ff;
-}
-
-.lane-supply-demand-control path {
-  fill: #12273b38;
-  stroke: #b5c4d54d;
-}
-
-.lane-supply-demand-control text {
-  fill: #9ed9ff;
-}
-
 .fabric-shell {
+  fill: #102638b8;
   stroke: #83b2d2c4;
   stroke-width: 3px;
 }
 
-.internet-fabric .fabric-shell {
-  fill: url('#internet-fill');
-}
-
-.mobile-fabric .fabric-shell {
-  fill: url('#mobile-fill');
-}
-
-/* The plane is a fabric like the clouds are, so it is drawn as one: a shell, a
-   grid, a motif and the same two lines of text, in the same blue every other
-   fabric wears. It kept its own pink for a while, which made it the one thing
-   on the Infoschematic painted a colour that named nothing - the taxonomy issues every
-   other colour here, and telemetry's own family colour was never that pink.
-   What still sets the plane apart is its shape: a strip the width of the Infoschematic,
-   which keeps the title at the left rather than centred over it.
-
-   Only the fill and the stroke weight are its own. The fill is a shade deeper
-   than the clouds' because the strip is a backdrop the whole Infoschematic sits above,
-   and the stroke is lighter because forty units of height carry a border the
-   way a hundred and thirty do not. */
-.telemetry-fabric .fabric-shell {
-  fill: url('#telemetry-fill');
-  stroke-width: 1.5px;
-}
-
-.telemetry-fabric .fabric-title,
-.telemetry-fabric .fabric-detail {
-  text-anchor: start;
-}
-
-/* Drawn over the Infoschematic, and deliberately faint: a scene's own argument about
-   the picture, which a reader has to be able to look straight past at the lines
-   underneath. Neither figure takes pointer events - there is nothing to click. */
-.graphics-overlay {
-  pointer-events: none;
-}
-
-.overlay-gap .gap-mark {
-  fill: #d79b0016;
-  stroke: #d79b00aa;
-  stroke-dasharray: 7 7;
-  stroke-width: 2.5px;
-}
-
-.overlay-gap .gap-glyph {
-  fill: #f0b23a;
-  font: 700 58px Manrope, Arial, sans-serif;
-  text-anchor: middle;
-}
-
-.overlay-gap .gap-tie {
-  fill: none;
-  opacity: 0.5;
-  stroke: #d79b00;
-  stroke-dasharray: 4 8;
-  stroke-linecap: round;
-  stroke-width: 2px;
-}
-
-/* Faded once, on the group: an arrowhead overlaps the round cap of the stroke
-   it finishes, and two translucent shapes over one another read brighter where
-   they meet, which drew a seam across every head. A group's opacity is applied
-   to the figure after it is drawn, so the four arrows fade as one shape. */
-.overlay-cycle {
-  opacity: 0.16;
-}
-
-/* Far heavier than a route: the corner arrows are the shape of the whole thing,
-   and at a route's weight they read as one more path to follow. */
-.overlay-cycle .cycle-turn {
-  fill: none;
-  stroke: #9ed9ff;
-  stroke-linecap: round;
-  stroke-width: 52px;
-}
-
-.cycle-head {
-  fill: #9ed9ff;
-}
-
-.telemetry-pulse {
-  fill: none;
-  opacity: 0.4;
-  stroke: #83b2d2;
-  stroke-linecap: round;
-  stroke-width: 1.6px;
-}
-
-/* Every fabric wears the same frame, whatever is drawn inside it. SATCOM and
-   the telemetry plane are that frame; the two clouds sit within theirs. The
-   frame is what a route meets, so it is on the grid even where the shape it
-   holds is not - which is what gives a cloud somewhere to be attached at all. */
+/* The authored bounds remain visible while editing even when a host renderer
+   draws an irregular shape within them. */
 .fabric-frame {
   fill: none;
   stroke: #6f8ba3a8;
   stroke-dasharray: 2 6;
   stroke-linecap: round;
   stroke-width: 1.5px;
-}
-
-.fabric-grid {
-  opacity: 0.8;
-}
-
-.network-constellation path {
-  fill: none;
-  opacity: 0.28;
-  stroke: #9cd5f5;
-  stroke-dasharray: 6 8;
-  stroke-width: 2px;
-}
-
-.network-constellation circle {
-  fill: #9cd5f5;
-  filter: drop-shadow(0 0 5px #79c9ff);
-  opacity: 0.5;
 }
 
 .fabric-title {
@@ -707,76 +584,19 @@ h2 {
   text-anchor: middle;
 }
 
-.satcom-shell {
-  fill: url('#satcom-fill');
-  stroke: #90a8c178;
-  stroke-width: 3px;
-}
-
-/* A fabric is a component: it selects, so the panel can say what it is and its
-   attachment points can be changed like any other's. It says so where it is
-   drawn rather than being raised above the cards - a cloud over a card hides
-   more than the selection reveals. */
-.infoschematic-svg.editing .infoschematic-fabric-shape.selected .fabric-shell,
-.infoschematic-svg.editing .infoschematic-satcom.selected .satcom-shell {
+/* A Fabric remains selectable regardless of the host renderer it uses. */
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
   stroke: #dff3ff;
   stroke-width: 2.5px;
 }
 
-.infoschematic-svg.editing .infoschematic-fabric-shape,
-.infoschematic-svg.editing .infoschematic-satcom {
+.infoschematic-svg.editing .infoschematic-fabric.selectable {
   cursor: pointer;
   pointer-events: auto;
 }
 
-.infoschematic-satcom .fabric-title,
-.infoschematic-satcom .fabric-detail {
-  text-anchor: start;
-}
-
-.satcom-orbit,
-.satcom-beam {
-  fill: none;
-  stroke: #83b2d2;
-  stroke-linecap: round;
-}
-
-.satcom-orbit {
-  opacity: 0.3;
-  stroke-dasharray: 4 9;
-  stroke-width: 1.5px;
-}
-
-.satcom-beam {
-  opacity: 0.45;
-  stroke-dasharray: 5 6;
-  stroke-width: 2px;
-}
-
-.infoschematic-satellite rect,
-.infoschematic-satellite path,
-.infoschematic-dish path {
-  fill: none;
-  stroke: #a8cde6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 2.5px;
-}
-
-.infoschematic-satellite rect {
-  fill: #17354b;
-}
-
-.network-radio circle {
-  fill: #a8d7e8;
-  filter: drop-shadow(0 0 6px #79c9ff);
-}
-
-.network-radio path {
-  fill: none;
-  stroke: #a8d7e8;
-  stroke-linecap: round;
-  stroke-width: 2.5px;
+.infoschematic-graphic {
+  pointer-events: none;
 }
 
 /* The layer ignores the pointer so a line drawn across a card never takes a
@@ -846,8 +666,7 @@ h2 {
   transition: opacity 180ms ease-out;
 }
 
-.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .fabric-shell,
-.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .satcom-shell {
+.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .fabric-shell {
   filter: drop-shadow(0 0 12px #79c9ff4a);
 }
 
@@ -883,10 +702,8 @@ h2 {
   stroke-width: 1.5px;
 }
 
-.infoschematic-svg .infoschematic-fabric-shape.pointed .fabric-shell,
-.infoschematic-svg .infoschematic-satcom.pointed .satcom-shell,
-.infoschematic-svg.editing .infoschematic-fabric-shape.selected .fabric-shell,
-.infoschematic-svg.editing .infoschematic-satcom.selected .satcom-shell {
+.infoschematic-svg .infoschematic-fabric.pointed .fabric-shell,
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
   filter: drop-shadow(0 0 12px color-mix(in srgb, var(--glow) 40%, transparent));
 }
 
@@ -1947,84 +1764,6 @@ h2 {
   gap: 8px;
 }
 
-.reset-demo {
-  font-size: 10px;
-  padding: 5px 8px;
-}
-
-.event-panel {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  min-height: 0;
-  overflow: hidden;
-}
-
-.event-heading {
-  margin: 0;
-  padding: 12px 12px 10px;
-}
-
-.events {
-  list-style: none;
-  margin: 0;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0 12px 12px;
-}
-
-.events li {
-  border-left: 2px solid #778faa;
-  margin: 0 0 9px;
-  padding: 0 0 2px 12px;
-}
-
-.events li.priority {
-  border-color: #b783ff;
-}
-
-.events li.selection {
-  border-color: #f6bf4b;
-}
-
-.events li.outcome {
-  border-color: #67e0aa;
-}
-
-.events li.pathway {
-  border-color: #73d4ff;
-}
-
-.events time,
-.events code {
-  color: #91a8c0;
-  font: 9px 'DM Mono', monospace;
-}
-
-.events strong {
-  display: block;
-  font-size: 10px;
-  margin: 4px 0;
-  text-transform: uppercase;
-}
-
-.events p {
-  color: #d6e1ee;
-  font-size: 10px;
-  line-height: 1.35;
-  margin-bottom: 4px;
-}
-
-.events .empty {
-  border: 0;
-  color: #9db0c8;
-  font-size: 12px;
-  padding: 15px 5px;
-}
-
 /* The callout is the narrative for a scene of a story, so it sits over
    the Infoschematic and points at the component the scene is about. The layer ignores the
    pointer so nothing underneath becomes unclickable; its controls opt back in. */
@@ -2529,9 +2268,6 @@ button:focus-visible,
     width: 100%;
   }
 
-  .event-panel {
-    min-height: 360px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

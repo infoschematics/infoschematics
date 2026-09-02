@@ -53,14 +53,14 @@ const groups = [
  * clasping a card has no way to learn that containment is the relationship.
  */
 const forms = [
-  ['Card', 'A service. Its outline is the architecture scope it belongs to.'],
+  ['Card', 'An artefact that originates, transforms or consumes a Flow.'],
   [
     'Card held in a socket',
-    'An adapter and the service it adapts. Containment is the relationship, so no line is drawn between them.',
+    'An Adapter and the Card it adapts. Containment is the relationship, so no line is drawn between them.',
   ],
-  ['Cloud or strip', 'A fabric: a region traffic crosses rather than originates in.'],
+  ['Fabric', 'A background region that Flows cross rather than originate in.'],
   ['Line', 'A flow. Its colour is the family it carries, and its label is its code.'],
-  ['Broken line', 'A logical relationship rather than carried traffic.'],
+  ['Broken line', 'A logical relationship rather than a carried Flow.'],
   ['Two arrowheads', 'The relationship runs both ways.'],
 ] as const
 

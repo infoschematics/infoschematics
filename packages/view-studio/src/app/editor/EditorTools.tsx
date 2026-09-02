@@ -82,7 +82,7 @@ export function EditorTools({
       <span className="tool-divider" />
 
       <button
-        aria-label="Add a service card"
+        aria-label="Add a Card"
         className="tool-button"
         disabled={!onCreateCard}
         onClick={() => onCreateCard?.('card')}

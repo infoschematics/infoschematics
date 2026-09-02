@@ -4,7 +4,7 @@ import { useInfoschematic } from '../infoschematic-context.tsx'
 import { Part } from './Part.tsx'
 
 /*
- * What the federation is made of, as a list.
+ * What the Infoschematic contains, as a list.
  *
  * Three parts, because there are three kinds of component: the cards, the
  * fabrics they sit in, and the flows between them. Component is all three, so
@@ -12,8 +12,8 @@ import { Part } from './Part.tsx'
  * a part called Flows uses narrowly the one word the vocabulary widened.
  *
  * An adapter card is a component like any other and is listed under its own scope
- * rather than under the card it holds. It belongs to the federation, and filing
- * it under the satellite card it clasps said it belonged to the satellite.
+ * rather than under the card it holds. It belongs to its own Scope, and filing
+ * it under the Card it holds would misstate that ownership.
  *
  * The external points are not a fourth part. They have no box, no ports and no
  * scope; their codes appear only in a flow's tooltip and the editor's placement
@@ -106,7 +106,7 @@ export function ModelRegister({
     <div className="model-register">
       <Part
         count={cards.length}
-        note="Boxes that originate, transform or consume traffic, grouped by the scope their code prefix names. An adapter card is listed under its own scope and names the card it holds."
+        note="Cards that originate, transform or consume flows, grouped by the Scope their code prefix names. An Adapter is listed under its own Scope and names the Card it holds."
         onToggle={() => toggle('cards')}
         open={!shut.cards}
         title="Cards"
@@ -138,7 +138,7 @@ export function ModelRegister({
 
       <Part
         count={fabrics.length}
-        note="Backgrounds that traffic crosses rather than starts in. A fabric has no ports of its own: a flow meets it wherever its route reaches it."
+        note="Background regions that Flows cross rather than start in. A Fabric participates through its authored placement and ports."
         onToggle={() => toggle('fabrics')}
         open={!shut.fabrics}
         title="Fabrics"
@@ -172,7 +172,7 @@ export function ModelRegister({
                    * `conformsTo` is alternatives: where a flow names two, the
                    * theme decides which is true and the flow cannot. `over`
                    * is a payload on a transport, which is not a choice at all.
-                   * Both read as "or" until now, so five telemetry flows
+                   * Both read as "or" until now, so several Flows
                    * offered a choice nobody makes.
                    */
                   const named = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id

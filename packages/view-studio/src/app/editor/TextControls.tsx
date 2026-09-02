@@ -36,7 +36,7 @@ export function TextControls({
     <div className="text-controls">
       {/*
        * The code, because that is what identifies this thing to a reader. The
-       * registry also carries a `satcom-to-player` sort of identifier, which is
+       * The register may also carry internal identifiers used to relate entries,
        * how one entry refers to another in the file - but it is not what the
        * Infoschematic shows, not what a change-set line is keyed by, and not what
        * anyone says out loud. ADR-INFOSCHEMATICS-003 named the codes the authored
