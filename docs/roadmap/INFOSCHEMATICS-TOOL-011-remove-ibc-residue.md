@@ -5,7 +5,7 @@ title: Remove IBC residue
 theme: tool
 horizon: now
 status: awaiting-review
-blocks: [INFOSCHEMATICS-TOOL-008]
+blocks: []
 blocked_by: []
 baseline_ref: 1ac734b31673cf2cdf6948be580fc6d31fea786e
 ---
@@ -54,7 +54,7 @@ In the IBC repository, type checking, tests, and the production build must pass 
 
 ## Dependencies / blocks
 
-This item blocks `INFOSCHEMATICS-TOOL-008` so package extraction does not preserve or spread source-specific assumptions. Both repositories are available locally and the user has explicitly authorised the paired changes and commits. `INFOSCHEMATICS-TOOL-007`, `INFOSCHEMATICS-TOOL-006`, and `INFOSCHEMATICS-TOOL-009` retain their renderer-registry, editing, and visual-token scopes; this item establishes only the minimal host injection seam required for separation.
+This item supplied the host-neutral precondition for `INFOSCHEMATICS-TOOL-008`; the delivered renderer seam and residue guard now let additive-view planning proceed while this record awaits acceptance. Both repositories had to be available locally and the user explicitly authorised the paired changes and commits. `INFOSCHEMATICS-TOOL-007`, `INFOSCHEMATICS-TOOL-006`, and `INFOSCHEMATICS-TOOL-009` retain their renderer-registry, editing, and visual-token scopes; this item establishes only the minimal host injection seam required for separation.
 
 ## Documentation impact
 
@@ -72,7 +72,7 @@ Document how a React host declares renderers separately from its serialisable In
 
 ### Roadmap
 
-Keep this item as the active blocker and return `INFOSCHEMATICS-TOOL-008` to Next until this delivery reaches review.
+Keep this item awaiting review until human acceptance. `INFOSCHEMATICS-TOOL-008` may proceed independently because the source precondition and retained guard are already delivered.
 
 ## Review
 

@@ -4,9 +4,9 @@ area: TOOL
 title: Establish additive views
 theme: tool
 horizon: next
-status: draft
-blocks: [INFOSCHEMATICS-SITE-001, INFOSCHEMATICS-TOOL-004, INFOSCHEMATICS-TOOL-005, INFOSCHEMATICS-TOOL-007, INFOSCHEMATICS-TOOL-009]
-blocked_by: [INFOSCHEMATICS-TOOL-011]
+status: ready
+blocks: []
+blocked_by: []
 baseline_ref: null
 ---
 
@@ -26,9 +26,9 @@ This item does not publish packages, add domain-specific renderers, redesign the
 
 ## Current state
 
-`packages/view-studio` owns the public `App`, the React runtime context, `InfoschematicDiagram`, built-in Fabric and Graphic implementations, Audience presentation state and controls, Producer controls, editing state, and one aggregate stylesheet. `apps/site` mounts that combined package around the framework-neutral `examples/is-blank` definition. `packages/view-model` already owns geometry, routing, placement and the first shared visual token, but the reusable runtime derivation remains trapped in the React context module.
+`packages/view-studio` owns the public `App`, the React runtime context, `InfoschematicDiagram`, host-provided Fabric and Graphic renderer bindings, Audience presentation state and controls, Producer controls, editing state, and one aggregate stylesheet. `apps/site` mounts that combined package around the framework-neutral `examples/is-blank` definition. `packages/view-model` already owns geometry, routing, placement and the first shared visual token, but the reusable runtime derivation remains trapped in the React context module.
 
-The ownership roots and package direction are settled. The remaining work is a behaviour-preserving extraction with one new non-React output, not another naming or repository-layout decision.
+The ownership roots and package direction are settled. IBC residue removal delivered the host-owned renderer seam and reusable-package neutrality that this extraction needs; its retained residue guard is now an implementation precondition check rather than an unfinished source dependency. The remaining work is a behaviour-preserving extraction with one new non-React output, not another naming or repository-layout decision.
 
 ## Steps
 
@@ -59,9 +59,9 @@ Static SVG tests must prove byte-for-byte deterministic, escaped markup for a bl
 
 ## Dependencies / blocks
 
-The public vocabulary, package ownership and physical monorepo roots are settled by ADR-INFOSCHEMATICS-006 and ADR-INFOSCHEMATICS-008. `INFOSCHEMATICS-TOOL-010` establishes `packages/`, `apps/` and `examples/`; those roots are present in the current tree and this item does not reopen their migration. Implementation preflight must start from the committed ownership-root result and stop if that source move is still changing.
+The public vocabulary, package ownership and physical monorepo roots are settled by ADR-INFOSCHEMATICS-006 and ADR-INFOSCHEMATICS-008. `INFOSCHEMATICS-TOOL-010` established `packages/`, `apps/` and `examples/`; those roots are present in the current tree, so this item does not reopen that migration. `INFOSCHEMATICS-TOOL-011` has delivered the required host-neutral renderer seam and residue guard and is awaiting acceptance, but no unfinished source change blocks this plan. Implementation preflight must confirm both results remain present and stop if another source move is changing them.
 
-This item enables the six shaped Soon records named in `blocks`. It does not absorb their publication, production-mode, editing, registry, token or authored-example outcomes.
+No other roadmap item is a hard prerequisite. Publication, production-mode, editing, registry, token and authored-example work can each be planned independently against the owning contracts and may choose additive-view delivery order during implementation.
 
 ## Documentation impact
 
