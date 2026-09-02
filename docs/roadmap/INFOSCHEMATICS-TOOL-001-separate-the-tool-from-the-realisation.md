@@ -50,10 +50,10 @@ Seventeen `.test.` files sit beside what they test, and the question was whether
 
 So the tests move with their subjects, colocated as they are now, and the refactor re-points any that reach through internals at the boundaries the new layout states — a test that broke because a private arrangement changed was testing the arrangement, not the behaviour.
 
-### Still to settle while this is shaped
+### Earlier open questions resolved
 
-- **`scripts/`** — the loose `.mjs` files (`status`, `verify-pages-output`) still need either a stated owner or a package home; the interaction invariant now lives beside `InfoschematicDiagram` as a Vitest test.
-- **`docs/`** — the documentation folders are part of the tree being tidied, and the consolidation thread is in them now; what this record does about them is settled when it is made ready, against whatever that thread lands.
+- **`scripts/`** — `status` and `verify-pages-output` govern the monorepo from the root; the interaction invariant lives beside `InfoschematicDiagram` as a Vitest test.
+- **`docs/`** — repository documentation is canonical, while the Site publishes selected consumer material under stable routes as governed by [ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md).
 
 ## Boundary
 
@@ -158,7 +158,7 @@ The repository now owns Domain Model, Domain Core, View Model and the current St
 
 ### Verification
 
-Repository tests, type checks, dependency rules, unused-code checks and the production Site build pass through `bun run check`.
+Repository tests, type checks, dependency rules and the production Site build pass through `bun run check`.
 
 ### Outstanding concerns
 
