@@ -4,7 +4,7 @@ area: TOOL
 title: Remove IBC residue
 theme: tool
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-008]
 blocked_by: []
 baseline_ref: 1ac734b31673cf2cdf6948be580fc6d31fea786e
@@ -30,14 +30,14 @@ This item removes, generalises, or isolates first-realisation material only wher
 
 ## Steps
 
-- [ ] Add an explicit host-owned renderer configuration to Studio for Fabric components, Story Graphics, shared SVG definitions, and Scope icons while keeping authored definitions serialisable.
-- [ ] Replace the reusable package's IBC-specific Fabric selection and coupling with independent key lookup, generic bounds-driven fallback rendering, and host-neutral interaction wrappers.
-- [ ] Resolve Story Graphic references through authored Graphic records and configured renderers, removing the implicit `gap` and `cycle` fallback and its embedded narrative.
-- [ ] Remove fixed IBC label branches, telemetry state, lane selectors, scope mappings, card placement coordinates, stale interface CSS, and source-specific visible or accessibility copy from reusable code.
-- [ ] Move the four IBC Fabric renderers, their SVG definitions and CSS, both Story Graphic renderers, Scope icon mapping, and explicit Graphic declarations into the IBC 2026 host.
-- [ ] Migrate the IBC host to the current Infoschematics package names and ownership-root paths so local linking and clean vendor builds consume the same public surfaces.
-- [ ] Add focused reusable-package tests for renderer injection, generic fallback behaviour, bounds-driven placement, and unresolved Graphic references, plus IBC host assertions for every declared renderer key.
-- [ ] Run both repositories' complete checks and record the paired commit evidence without pushing either repository.
+- [x] Add an explicit host-owned renderer configuration to Studio for Fabric components, Story Graphics, shared SVG definitions, and Scope icons while keeping authored definitions serialisable.
+- [x] Replace the reusable package's IBC-specific Fabric selection and coupling with independent key lookup, generic bounds-driven fallback rendering, and host-neutral interaction wrappers.
+- [x] Resolve Story Graphic references through authored Graphic records and configured renderers, removing the implicit `gap` and `cycle` fallback and its embedded narrative.
+- [x] Remove fixed IBC label branches, telemetry state, lane selectors, scope mappings, card placement coordinates, stale interface CSS, and source-specific visible or accessibility copy from reusable code.
+- [x] Move the four IBC Fabric renderers, their SVG definitions and CSS, both Story Graphic renderers, Scope icon mapping, and explicit Graphic declarations into the IBC 2026 host.
+- [x] Migrate the IBC host to the current Infoschematics package names and ownership-root paths so local linking and clean vendor builds consume the same public surfaces.
+- [x] Add focused reusable-package tests for renderer injection, generic fallback behaviour, bounds-driven placement, and unresolved Graphic references, plus IBC host assertions for every declared renderer key.
+- [x] Run both repositories' complete checks and record the paired commit evidence without pushing either repository.
 
 ## Files touched
 
@@ -73,6 +73,32 @@ Document how a React host declares renderers separately from its serialisable In
 ### Roadmap
 
 Keep this item as the active blocker and return `INFOSCHEMATICS-TOOL-008` to Next until this delivery reaches review.
+
+## Review
+
+### Delivered
+
+Removed IBC-specific rendering and narrative residue from reusable Studio code while preserving the complete visual realisation through explicit, serialisable declarations and host-owned React renderers in the IBC 2026 repository.
+
+### Summary of changes
+
+Studio now accepts an `InfoschematicRenderers` host configuration for Fabrics, Graphics, shared SVG definitions, and Scope icons. It resolves Story Graphics through authored records, renders each visible Fabric independently, and supplies a generic bounds-driven fallback. The IBC host now owns its four Fabric implementations, two authored Graphics, shared SVG resources, visual CSS, icon mapping, and current package integration. The paired implementation commits are Infoschematics `cb2a7caee13605bf90997648e87825bbbe3becbf` and IBC 2026 `1a9be3d598d9af5297a7a0be04967d6e5c3ee178`, delivered from baseline `1ac734b31673cf2cdf6948be580fc6d31fea786e`.
+
+### Verification
+
+Infoschematics passed `bun run check`, including tests, all TypeScript workspaces, dependency boundaries, and the production Site build. IBC 2026 passed `bun run typecheck`, `bun run test`, and `bun run build`. Focused tests cover configured renderers, generic Fabric fallback, authored and unresolved Story Graphic references, complete IBC renderer-key coverage, and server-rendered host Fabric output. A bounded reusable-package source search found no remaining first-realisation names, labels, narrative, renderer keys, or source-specific visual selectors covered by this item.
+
+### Outstanding concerns
+
+The production builds retain their existing large-chunk advisory. General renderer registration ergonomics, versioned property schemas, diagnostics, and future unknown-key policy remain correctly assigned to `INFOSCHEMATICS-TOOL-007`; they are not residue required for this separation.
+
+### Post-change review
+
+Ready for human acceptance. The reusable-to-host ownership boundary is explicit, the original information is retained in serialisable IBC declarations and host renderers, and both repositories build against the same current public package surfaces.
+
+### Mini recap
+
+Infoschematics no longer embeds knowledge of the IBC 2026 diagram. The IBC project now composes that realisation through configuration and host rendering, making the boundary visible in both repositories' commit histories.
 
 ## Discussion
 
