@@ -4,10 +4,10 @@ area: TOOL
 title: Remove IBC residue
 theme: tool
 horizon: now
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-TOOL-008]
 blocked_by: []
-baseline_ref: null
+baseline_ref: 1ac734b31673cf2cdf6948be580fc6d31fea786e
 ---
 
 ## Goal
