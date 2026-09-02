@@ -1,46 +1,50 @@
 # Architecture
 
-Infoschematics separates authored product data, framework-neutral calculations, the React runtime, examples and the public website.
+Infoschematics separates authored product data, framework-neutral behaviour, derived visual calculations, output-specific rendering, authored examples, and host publication.
+
+The reasons for this direction are recorded in [the framework-neutral library decision](../decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md), [the workspace-ownership decision](../decisions/ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), and [the host-boundary decision](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md).
+
+## Current workspace graph
 
 ```text
 @infoschematics/domain-model
-  └── no workspace dependencies
+└── no workspace dependencies
 
 @infoschematics/domain-core
-  └── @infoschematics/domain-model
+└── @infoschematics/domain-model
 
 @infoschematics/view-model
-  └── @infoschematics/domain-model
+└── @infoschematics/domain-model
 
 @infoschematics/view-studio
-  ├── @infoschematics/domain-core
-  ├── @infoschematics/domain-model
-  └── @infoschematics/view-model
+├── @infoschematics/domain-core
+├── @infoschematics/domain-model
+└── @infoschematics/view-model
 
 @infoschematics/is-blank
-  └── @infoschematics/domain-core
+└── @infoschematics/domain-core
 
 @infoschematics/site
-  ├── @infoschematics/view-studio
-  └── @infoschematics/is-blank
+├── @infoschematics/view-studio
+└── @infoschematics/is-blank
 ```
 
-Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it, and neither imports an interactive view or the site. Authored Infoschematics never import interactive views. The site consumes public package exports rather than package internals.
+Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it; neither imports an interactive view, authored Infoschematic, or site. Authored Infoschematics do not import interactive views. Site consumes public package exports rather than package internals.
 
-## Workspaces
+## Workspace responsibilities
 
-- `workspaces/domain-model` — dependency-free `InfoschematicConfig` and focused authored product-type modules.
-- `workspaces/domain-core` — `defineInfoschematic`, defaults, validation and other framework-neutral domain behaviour.
-- `workspaces/view-model` — geometry, ports, routing, guides, placement, edit primitives and shared tokens.
-- `workspaces/view-studio` — the current combined interactive view, presentation controls, producer controls and runtime derived from configuration.
-- `workspaces/is-blank` — an independently authored, serialisable blank definition. It depends on Domain Core only.
-- `workspaces/site` — the public homepage, example routing, static assets and Cloudflare deployment boundary.
+- `workspaces/domain-model` owns the dependency-free `InfoschematicConfig` and focused authored product-type modules.
+- `workspaces/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
+- `workspaces/view-model` owns geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
+- `workspaces/view-studio` owns the current combined interactive view, presentation controls, Producer controls, and runtime state derived from configuration.
+- `workspaces/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
+- `workspaces/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 
-Authored Infoschematic configuration workspaces use the `is-` prefix; reusable packages and host applications use role-based workspace names. Published package names retain the `@infoschematics/*` namespace.
+Authored Infoschematic workspaces use the `is-` prefix. Reusable packages and host applications use role-based workspace names. Published package names retain the `@infoschematics/*` namespace.
 
 ## Host boundary
 
-A host creates or imports one complete `InfoschematicConfig`, owns the document title and passes the definition into React:
+A host imports one complete `InfoschematicConfig`, owns the document title, and passes the definition into a view:
 
 ```tsx
 import { defineInfoschematic } from '@infoschematics/domain-core'
@@ -54,13 +58,13 @@ export function Page() {
 }
 ```
 
-React derives lookup tables, routed paths, visibility state and editor state from that prop. Descendants consume the derived runtime through the internal application context; they do not import an authored definition.
+The view derives lookup tables, routed paths, visibility state, and editing state from that prop. Descendants consume derived runtime state through internal application context rather than importing an authored definition.
 
-When `config.id` is absent, the application must not create a shared persistence key. A title-only definition is therefore a safe blank canvas.
+When `config.id` is absent, an application must not create a shared persistence key. A title-only definition is therefore a safe blank canvas.
 
 ## Additive view direction
 
-The current Studio package is the source being separated into an additive view chain:
+[ADR-INFOSCHEMATICS-006](../decisions/ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) establishes the intended interactive chain:
 
 ```text
 @infoschematics/view-canvas
@@ -70,16 +74,18 @@ The current Studio package is the source being separated into an additive view c
 @infoschematics/view-studio
 ```
 
-Canvas owns the reusable Infoschematic component. Present wraps Canvas with Audience navigation and presentation state. Studio wraps Present with Producer-facing Design and Direct capabilities. `@infoschematics/render-svg` will consume the same View Model in parallel to produce deterministic static SVG without React.
+Canvas owns the reusable Infoschematic component. Present wraps Canvas with Audience navigation and presentation state. Studio wraps Present with Producer-facing Design and Direct capabilities.
+
+`@infoschematics/render-svg` consumes the same View Model in parallel and produces deterministic static SVG without React. Future renderers can target other outputs without acquiring interactive-view dependencies.
 
 ## Renderer boundary
 
-Authored Fabrics, Graphics and Callouts may carry renderer keys and serialisable properties. React maps those keys to visual implementations. Configuration never carries JSX, component constructors or callbacks.
+Authored Fabrics, Graphics, and Callouts may carry renderer keys and serialisable properties. A renderer maps those keys to visual implementations. Configuration never carries JSX, component constructors, callbacks, or runtime stores.
 
-The current built-in Fabric keys are provisional implementation capability. Adding a stable public renderer requires documenting the key, its properties and fallback behaviour before examples rely on it.
+Current built-in Fabric keys are provisional implementation capability. A stable public renderer requires a documented key, property contract, and fallback behaviour before examples rely on it.
 
 ## Website role
 
-The website is the public outlet for packages, guidance and examples. Its homepage may explain Infoschematics visually, but it does not define product types or reusable behaviour. The blank example and future self-describing example remain separate authored definitions so they can be tested and reused independently.
+[ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
 
-The former standalone website repository is not part of this workspace graph. Deployment migration or archival of that repository is a separate operational action.
+The blank example and future self-describing example remain separate authored definitions so they can be tested and reused independently. The former standalone website repository is outside this workspace graph.

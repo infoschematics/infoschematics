@@ -5,7 +5,7 @@ import type { TextDraft, TextField } from './use-editor.ts'
  * What a thing is called and what kind of thing it is.
  *
  * The last of the editor's properties to become editable, and it waited on
- * ADR-IBC2026-003 rather than on the work: while a code was counted off from
+ * ADR-INFOSCHEMATICS-003 rather than on the work: while a code was counted off from
  * its scope, changing a card's scope reissued its identity and renumbered its
  * neighbours. Codes are authored now, so a card can change what it is without
  * changing what it is called by.
@@ -39,7 +39,7 @@ export function TextControls({
        * registry also carries a `satcom-to-player` sort of identifier, which is
        * how one entry refers to another in the file - but it is not what the
        * Infoschematic shows, not what a change-set line is keyed by, and not what
-       * anyone says out loud. ADR-IBC2026-003 named the codes the authored
+       * anyone says out loud. ADR-INFOSCHEMATICS-003 named the codes the authored
        * identity, and this is the panel agreeing with it.
        *
        * Read rather than typed. Every draft in the editor is keyed by code, so

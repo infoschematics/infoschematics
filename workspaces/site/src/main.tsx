@@ -1,8 +1,16 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { isBlankExamplePath } from './routes.ts'
+import { getDocumentationRoute, isBlankExamplePath } from './routes.ts'
 
 async function resolvePage(pathname: string): Promise<ReactNode> {
+  const documentationRoute = getDocumentationRoute(pathname)
+
+  if (documentationRoute) {
+    const { DocumentPage } = await import('./DocumentPage.tsx')
+    document.title = `${documentationRoute.title} · Infoschematics`
+    return <DocumentPage route={documentationRoute} />
+  }
+
   if (isBlankExamplePath(pathname)) {
     const { BlankInfoschematic } = await import('./BlankInfoschematic.tsx')
     return <BlankInfoschematic />

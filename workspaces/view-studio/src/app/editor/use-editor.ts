@@ -120,7 +120,7 @@ type PendingField =
  *
  * `name` is a card's own label rather than a flow's label position, which
  * is the older `label` field and means something else entirely. These four are
- * the properties ADR-IBC2026-003 made editable: a code is authored now, so
+ * the properties ADR-INFOSCHEMATICS-003 made editable: a code is authored now, so
  * changing a card's scope or a line's family no longer reissues its identity.
  *
  * A registry identifier is not among them. It is what one entry calls another

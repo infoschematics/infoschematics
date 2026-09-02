@@ -77,7 +77,7 @@ const authoredPortAt =
  * The next code free in a family's series.
  *
  * Counted off the highest in use rather than off how many there are, because a
- * removal leaves a gap and ADR-IBC2026-003 keeps it: filling one would hand a
+ * removal leaves a gap and ADR-INFOSCHEMATICS-003 keeps it: filling one would hand a
  * code back out that a decision record, a specification or a change set may
  * still be talking about. Offered rather than issued - the reader can write
  * something else over it before applying the set.
@@ -275,7 +275,7 @@ function AppContent() {
    *
    * A default rather than a form. The scope issues the code prefix, as a family
    * does for a line, so a card renamed into a different scope afterwards keeps
-   * the code its first scope gave it - `ADR-IBC2026-003` renumbers nothing. The
+   * the code its first scope gave it - `ADR-INFOSCHEMATICS-003` renumbers nothing. The
    * default is the standard scope because it is the one most cards are in, and
    * the properties panel below is where it is corrected.
    *

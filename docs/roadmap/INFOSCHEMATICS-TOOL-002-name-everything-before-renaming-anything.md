@@ -21,7 +21,7 @@ The work has two ordered parts:
 1. **Naming** settles the concepts, their boundaries, the areas they belong to and the preferred words for them without reference to today's implementation names.
 2. **Mapping** classifies today's documents, interface and code against those settled concepts without renaming them.
 
-Only after both parts are agreed does rollout change `docs/specs/vocabulary.md` or code.
+Only after both parts are agreed does rollout change `docs/reference/vocabulary.md` or code.
 
 Product and production are deliberately distinct:
 
@@ -431,9 +431,9 @@ Infoschematics now has one vocabulary from authored configuration through React 
 
 ### Rollout
 
-First complete and agree this mapping without renaming anything. Then update `docs/specs/vocabulary.md` in one coherent pass and prepare exact rename recipes in dependency order: conceptual ownership, product data, App state, panels, types, components, identifiers, visible labels, accessibility labels and CSS hooks.
+First complete and agree this mapping without renaming anything. Then update `docs/reference/vocabulary.md` in one coherent pass and prepare exact rename recipes in dependency order: conceptual ownership, product data, App state, panels, types, components, identifiers, visible labels, accessibility labels and CSS hooks.
 
-This naming retires the theatre register wholesale — stage, lighting, book, play, playwriting, performance, spotlighting and act stop being the settled words. The rollout pass therefore covers every document that states that register as settled, not only the vocabulary spec: `docs/specs/vocabulary.md` (TERM-011 and kin), `ADR-IBC2026-005`'s directory prose, `IBC2026-DBD-018`'s named parts, the `docs/design/` documents and `AGENTS.md` — one pass, so no two records disagree about which vocabulary is current.
+This naming retires the theatre register wholesale — stage, lighting, book, play, playwriting, performance, spotlighting and act stop being the settled words. The rollout pass therefore covers every document that states that register as settled, not only the vocabulary spec: `docs/reference/vocabulary.md` (TERM-011 and kin), `ADR-INFOSCHEMATICS-004`'s directory prose, `IBC2026-DBD-018`'s named parts, the `docs/design/` documents and `AGENTS.md` — one pass, so no two records disagree about which vocabulary is current.
 
 The Naming section is also the bootstrap for the end-user documentation: the product and production described on their own terms, before any implementation vocabulary, is exactly what a reader new to the tool needs first, so end-user docs start from this text rather than being written fresh.
 

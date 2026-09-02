@@ -7,7 +7,7 @@ import { useInfoschematic } from '../infoschematic-context.tsx'
  * offered as a correction afterwards, because the family is not decoration: it
  * issues the code the line will be known by and the colour it will be read by.
  * A line created in the wrong family and moved later leaves its code behind in
- * the wrong series, which ADR-IBC2026-003 will not renumber.
+ * the wrong series, which ADR-INFOSCHEMATICS-003 will not renumber.
  *
  * It appears where the drag was let go, which is where the reader is looking.
  * Anywhere else - a panel, a modal - and the answer is given somewhere other

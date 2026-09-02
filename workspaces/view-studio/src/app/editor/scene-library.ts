@@ -2,7 +2,7 @@
  * The scenes themselves, as against the scenes a story plays.
  *
  * A scene is the atom: one set of components lit together, carrying no words
- * and no timing. Until now they could only be authored in `src/play/`, so the
+ * and no timing. Until now they could only be authored in host configuration, so the
  * editor could arrange scenes into a story and could not make one - which is
  * the wrong way round, since the story is the thing that depends on them.
  *
@@ -41,7 +41,7 @@ export const identifierFrom = (label: string) =>
  * The next code free in the series.
  *
  * Counted past the highest rather than filling a gap, for the reason
- * ADR-IBC2026-003 gives everywhere else: a gap is the honest record of a
+ * ADR-INFOSCHEMATICS-003 gives everywhere else: a gap is the honest record of a
  * removal, and filling one hands back a code something may still name.
  */
 export const nextSceneCode = (library: SceneLibrary): string => {

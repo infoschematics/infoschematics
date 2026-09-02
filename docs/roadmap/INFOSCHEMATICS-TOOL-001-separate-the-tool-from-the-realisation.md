@@ -65,7 +65,7 @@ Nothing new is built. No themes, no fabric genres, no viewer build — capabilit
 
 Renames follow the settled vocabulary. The consolidation thread owns terminology; this record consumes it.
 
-Delivery splits judgment from mechanics, per [GDR-IBC2026-002](https://github.com/5g-emerge/5g-emerge-ibc-2026/blob/main/docs/decisions/GDR-IBC2026-002-delegated-mechanical-work.md). The coordinating agent holds the design and the architecture — the axis, the target layout, what each move claims — and hands the moves themselves to cost-effective models as precise recipes: exact files, exact strings, the verification commands, and the instruction to report rather than improvise on any mismatch. One delegate at a time, the coordinator reviews the diff and makes the commit.
+Delivery splits judgment from mechanics, per [GDR-INFOSCHEMATICS-002](../decisions/GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md). The coordinating agent holds the design and the architecture — the axis, the target layout, what each move claims — and hands the moves themselves to cost-effective models as precise recipes: exact files, exact strings, the verification commands, and the instruction to report rather than improvise on any mismatch. One delegate at a time, the coordinator reviews the diff and makes the commit.
 
 ## Current state
 
@@ -104,7 +104,7 @@ Second tranche, same evening:
 - `fa2f09f` — landed by Kris's parallel session mid-flight, carrying the fabric extraction: four fabric components and `FabricDefs` in `src/library/` with all realisation contact via props, `cornerRadius` to `src/diagram/tokens.ts`, the `cycle-head` marker into `StageOverlay`, plus that session's own specification-groups work.
 - `e0679d3` — `register.test.ts` to `src/model/` (it tests the model, not the panel beside it); `library-stays-reusable` landed as the fabrics' rule.
 - `7522dc6` — `calloutPorts` to `src/data/demonstrations.ts`, Kris's call: authored placement, not panel logic.
-- Axis refined, Kris's call: the editor is part of the app, so `src/editor/`, the generic panels and `use-persistent-state` fold into `src/app/` — the application whole is tool-side in destination, decoupling pending. `ADR-IBC2026-005` amended to match. The framework core the extraction lifts unchanged is `src/diagram/` + `src/library/`.
+- Axis refined, Kris's call: the editor is part of the app, so `src/editor/`, the generic panels and `use-persistent-state` fold into `src/app/` — the application whole is tool-side in destination, decoupling pending. `ADR-INFOSCHEMATICS-004` amended to match. The framework core the extraction lifts unchanged is `src/diagram/` + `src/library/`.
 - Still open from the fabric work: the caption's one home — on-canvas caption/detail literals are passed as props from the stage while `src/play/registry.ts` fabric entries carry prose labels; unifying means the fabric entries gain the display pair and feed the props.
 - `src/data/` → `src/play/`, Kris's call: the directory takes the vocabulary's own word — "that is the play, and it is authored in `src/play/`" is now literally true. `data-sources-declared` became `play-sources-declared`; one stale pointer (`src/presentation.ts` citing a `src/data/types.ts` that does not exist — the ids are typed in `src/model/types.ts`) was corrected in the sweep.
 

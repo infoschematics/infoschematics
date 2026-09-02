@@ -8,7 +8,7 @@ import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 // naming a code, a label and an `href` the model already knew - so the panel
 // looped over six while the model held twenty-six, and the twenty with no
 // published document had nowhere to appear. `href` now sits on the
-// specification in `src/play/interfaces.ts`, beside the rest of one.
+// specification in the authored `InfoschematicConfig.interfaces` collection.
 
 
 export type ContractOperation = { name: string; detail: string; summary?: string }
