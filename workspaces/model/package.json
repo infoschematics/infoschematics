@@ -1,0 +1,14 @@
+{
+  "name": "@infoschematics/model",
+  "description": "The framework-neutral Infoschematic product model and serialisable configuration contract.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/core": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/config.ts",
+    "./*": "./src/*.ts"
+  },
+  "license": "MIT",
+  "type": "module"
+}

@@ -1,0 +1,51 @@
+{
+  "name": "infoschematics",
+  "description": "The Infoschematics workspace: a visual instrument for making complex systems legible, as a framework-agnostic core and a React component library.",
+  "version": "0.1.0",
+  "author": "Infoschematics",
+  "bugs": {
+    "url": "https://github.com/infoschematics/infoschematics/issues"
+  },
+  "devDependencies": {
+    "@infoschematics/core": "0.1.0",
+    "@infoschematics/model": "0.1.0",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "dependency-cruiser": "^18.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vitest": "^4.0.3"
+  },
+  "engines": {
+    "bun": ">=1.3.0",
+    "node": ">=22"
+  },
+  "homepage": "https://infoschematics.info/",
+  "keywords": [
+    "diagram",
+    "infoschematic",
+    "react",
+    "typescript"
+  ],
+  "license": "MIT",
+  "packageManager": "bun@1.4.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infoschematics/infoschematics.git"
+  },
+  "scripts": {
+    "check": "bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise",
+    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src",
+    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app",
+    "test": "vitest run --root ."
+  },
+  "type": "module",
+  "workspaces": [
+    "workspaces/*"
+  ]
+}

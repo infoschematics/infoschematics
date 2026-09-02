@@ -1,0 +1,30 @@
+[repo]
+harnesses = ["knowledgeislands/ki-agentic-harness"]
+
+[skills.ki-repo]
+repository = "https://github.com/infoschematics/infoschematics"
+title = "Infoschematic"
+description = "The Infoschematic tool: a visual instrument for making complex systems legible, shipped as TypeScript source with its first realisation aboard as the built-in example."
+repo_code = "INFOSCHEMATICS"
+supported_runtimes = ["claude-code", "chatgpt-codex"]
+visibility = "public"
+license = "MIT"
+
+[skills.ki-authoring]
+
+[skills.ki-git]
+
+[skills.ki-agora]
+
+[skills.ki-agora.memberships.hnr]
+
+home = "https://github.com/krisb/kit-hnr"
+role = "maintainer"
+
+[skills.ki-work]
+adapter = "roadmap"
+
+[skills.ki-work-roadmap]
+
+[skills.ki-work-roadmap.areas]
+TOOL = "tool"

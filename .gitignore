@@ -1,0 +1,16 @@
+.DS_Store
+*.log
+.claude/settings.local.json
+
+# Generated project-local KI links — never committed.
+.claude/skills/*
+.claude/agents/
+.agents/skills/*
+!.agents/skills/ki-self/
+!.agents/skills/ki-self/**
+
+# Toolchain output — never committed.
+node_modules/
+dist/
+reports/
+.rumdl_cache/

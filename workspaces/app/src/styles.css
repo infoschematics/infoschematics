@@ -1,0 +1,3471 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --app-chrome: 196px;
+  color: #f5f8ff;
+  background: #07111e;
+  font-family: Manrope, Arial, sans-serif;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 1100px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 6%, #12334d 0, transparent 26rem),
+    radial-gradient(circle at 78% 32%, #17144e 0, transparent 30rem),
+    #07111e;
+}
+
+button {
+  font: inherit;
+}
+
+main {
+  /*
+   * One gap, used everywhere two panels meet or a panel meets the edge.
+   *
+   * The space between the stage and the side panel was its own number and
+   * drifted from the space around them, so the seam in the middle read as
+   * wider than the margin outside. Stated once so the two cannot disagree.
+   */
+  --panel-gap: 10px;
+
+  /*
+   * One distance: between two panels, and between a panel and the window.
+   *
+   * They were separate numbers on the argument that a seam bounded by two
+   * borders reads wider than a margin bounded by one. That is true and it was
+   * the wrong conclusion - the fix is a smaller number everywhere, not two
+   * numbers, because a window edge is not a wider kind of gap.
+   */
+  --panel-seam: 14px;
+
+  display: grid;
+  gap: var(--panel-gap);
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  width: 100%;
+  margin: 0;
+  /* The margin round the outside is the seam between the panels. They were
+     twenty-four and fourteen, and a window edge is not a wider kind of gap than
+     the one down the middle - it just has less on the far side of it. */
+  padding: 8px var(--panel-seam) var(--panel-seam);
+}
+
+/* Open, it has the room for two lines and the consortium named in full. */
+.title-bar {
+  align-items: center;
+  border-bottom: 1px solid #ffffff1c;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+/* Title and strapline on one line, the strapline beside the title rather than
+   under it. One header whatever the panels are doing, so nothing reflows. */
+.title-bar hgroup {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.title-bar h1 {
+  font-size: 20px;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.title-bar hgroup p {
+  color: #9db4c9;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+.title-bar-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+/* The same four controls the title bar has, at rail width. */
+.panel-rail .rail-action {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #8fa9c4;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  padding: 4px;
+  width: 30px;
+  writing-mode: horizontal-tb;
+}
+
+.panel-rail .rail-action:hover {
+  border-color: #ffffff2e;
+  color: #cde8fb;
+}
+
+.panel-rail .rail-action[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  color: white;
+}
+
+.title-bar-actions .icon-button[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  color: white;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+}
+
+.eyebrow {
+  color: #79c9ff;
+  font: 500 10px/1 'DM Mono', monospace;
+  letter-spacing: 0.14em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 24px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 0;
+}
+
+h2 {
+  font-size: 18px;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.flow {
+  color: #b7c7dc;
+  font: 500 12px 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+.flow i,
+.toggle-button {
+  border-radius: 999px;
+}
+
+.toggle-button[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  box-shadow: 0 0 0 1px #79c9ff55;
+  color: white;
+}
+
+.toggle-button:disabled,
+.scenario-button:disabled,
+.action-button:disabled {
+  background: #0d1c2b;
+  border-color: #ffffff10;
+  color: #55697d;
+  cursor: not-allowed;
+}
+
+.panel-rail .rail-pathway {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  color: #55708c;
+  cursor: pointer;
+  font: 600 8px 'DM Mono', monospace;
+  padding: 3px 2px;
+  width: 30px;
+  writing-mode: horizontal-tb;
+}
+
+.panel-rail .rail-pathway[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  color: white;
+}
+
+/* The maximised diagram keeps every reset the tray offers, so a presenter never
+   has to restore the panels just to switch everything back on. */
+.panel-rail .rail-toggle {
+  background: #10263b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #a9c2da;
+  cursor: pointer;
+  font: 600 8px 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+  padding: 4px 2px;
+  text-transform: uppercase;
+  width: 30px;
+  writing-mode: horizontal-tb;
+}
+
+.panel-rail .rail-toggle:hover:not(:disabled) {
+  border-color: #79c9ff;
+  color: white;
+}
+
+.panel-rail .rail-toggle:disabled {
+  color: #4a5d70;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* A component button is outlined in its own colour and carries the same mark
+   the collapsed rail uses, so a scope is recognised by one thing however the
+   panel is showing it. A flow has no mark of its own, so its colour is
+   the dot. */
+.scope-button {
+  border-color: color-mix(in srgb, var(--family-color) 55%, transparent);
+  color: color-mix(in srgb, var(--family-color) 45%, #dbe7f5);
+}
+
+.scope-button[aria-pressed='true'] {
+  border-color: var(--family-color);
+}
+
+.scope-button svg {
+  margin-right: 6px;
+}
+
+/* Buttons carry the code and say the rest on hover: the banks are one row each
+   and a full name in every one of them leaves no room to add a kind. */
+.flow-family-button i {
+  border-radius: 50%;
+  display: inline-block;
+  height: 7px;
+  margin-right: 7px;
+  width: 7px;
+}
+
+.flow .up {
+  background: #78e6a5;
+  box-shadow: 0 0 14px #78e6a5;
+}
+
+.flow .down {
+  background: #ff7290;
+}
+
+.control-room {
+  display: grid;
+  /* No gap of its own: the resizer is the gap, and adding one either side put
+     sixteen units between two panels to hold a two-unit line. */
+  gap: 0;
+  grid-template-columns:
+    minmax(0, var(--diagram-width, calc((100dvh - var(--app-chrome)) * 3 / 2)))
+    minmax(380px, 1fr);
+  min-height: 0;
+}
+
+/* Once the panel has been dragged to a width, it keeps it and the diagram takes
+   whatever is left, fitting itself by aspect rather than driving the column. */
+.control-room.sized {
+  grid-template-columns: minmax(0, 1fr) var(--panel-seam) var(--panel-width);
+}
+
+.control-room:not(.sized):not(.collapsed) {
+  grid-template-columns:
+    minmax(0, var(--diagram-width, calc((100dvh - var(--app-chrome)) * 3 / 2)))
+    var(--panel-seam)
+    minmax(380px, 1fr);
+}
+
+/*
+ * A grip rather than a rule.
+ *
+ * This was a two-unit line stretched down most of the panel's height, sitting
+ * in sixteen units of gap. It read as a border somebody had drawn in the wrong
+ * place: nothing about a full-height hairline says it can be taken hold of.
+ *
+ * A short run of dots does, because that is what a grip looks like everywhere
+ * else. It is centred and small, so the space between the panels can be small
+ * too - the handle no longer has to be a gap wide enough to see a line in.
+ */
+.panel-resizer {
+  align-self: stretch;
+  background: transparent;
+  border: 0;
+  cursor: col-resize;
+  padding: 0;
+  position: relative;
+  touch-action: none;
+  width: var(--panel-seam);
+}
+
+/*
+ * The grip, centred in the gap rather than filling it.
+ *
+ * Absolutely placed so the gap can be whatever the layout wants without the
+ * handle growing with it: the seam between two panels is a margin, and the
+ * handle is a thing sitting in the middle of it.
+ */
+.panel-resizer::after {
+  background-image: radial-gradient(circle at center, #ffffff40 1.1px, transparent 1.3px);
+  background-position: center;
+  background-repeat: repeat-y;
+  background-size: 100% 5px;
+  content: '';
+  height: 44px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: background-image 140ms ease;
+  width: 5px;
+}
+
+.panel-resizer:hover::after,
+.panel-resizer:focus-visible::after {
+  background-image: radial-gradient(circle at center, #79c9ff 1.4px, transparent 1.6px);
+}
+
+/* The collapsed bar is a line shorter than the open one, and the diagram is
+   sized against whatever the chrome above it actually costs. */
+.control-room.collapsed {
+  --app-chrome: 168px;
+
+  /*
+   * The seam is there collapsed too, as a gap rather than a column.
+   *
+   * Collapsed has two children where open has three: the resizer is not
+   * rendered, because there is nothing left to drag. Adding a seam column
+   * anyway put the rail in it - fourteen units wide - and left the forty-eight
+   * standing empty beside it.
+   */
+  column-gap: var(--panel-seam);
+  grid-template-columns: minmax(0, 1fr) 48px;
+}
+
+.control-room.collapsed .lighting-panel,
+.control-room.collapsed .state-panel {
+  display: none;
+}
+
+/*
+ * One row when the controls are not there.
+ *
+ * The column keeps a two-row template and a seam between them, and a gap is
+ * drawn whether or not anything is in the row after it - so hiding the controls
+ * left their seam behind as a band under the stage. The same mistake as the
+ * phantom row under `main`, made in the same week and found the same way.
+ */
+.control-room.collapsed .stage-column {
+  gap: 0;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.control-room.collapsed .book-panel {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.panel-rail {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.panel-rail button {
+  background: transparent;
+  border: 0;
+  color: #8fa9c4;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 0;
+  writing-mode: vertical-rl;
+}
+
+.panel-rail button:hover {
+  color: #cce1f8;
+}
+
+.panel-rail .rail-restore {
+  writing-mode: horizontal-tb;
+}
+
+.rail-group {
+  border-top: 1px solid #ffffff15;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding-top: 10px;
+  width: 100%;
+}
+
+.panel-rail .rail-swatch {
+  background: var(--family-color);
+  border: 1px solid #ffffff33;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 16px;
+  opacity: 0.3;
+  padding: 0;
+  width: 16px;
+}
+
+.panel-rail .rail-swatch[aria-pressed='true'] {
+  border-color: #ffffff77;
+  opacity: 1;
+}
+
+.panel-rail .rail-scope {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #55708c;
+  cursor: pointer;
+  display: grid;
+  padding: 4px;
+  place-items: center;
+  writing-mode: horizontal-tb;
+}
+
+.panel-rail .rail-scope[aria-pressed='true'] {
+  background: #10263b;
+  border-color: #ffffff1e;
+  color: #cce1f8;
+}
+
+.stage-panel,
+.book-panel {
+  background: #0a1929d9;
+  border: 1px solid #ffffff1c;
+  border-radius: 14px;
+  box-shadow: 0 15px 60px #00000030;
+}
+
+/* The column the stage and its controls share, seamed like everything else. */
+.stage-column {
+  display: grid;
+  gap: var(--panel-seam);
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.stage-panel {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.quiet {
+  background: transparent;
+  border: 1px solid #8cacce55;
+  border-radius: 7px;
+  color: #cce1f8;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 7px 10px;
+}
+
+.quiet:hover {
+  border-color: #79c9ff;
+  color: white;
+}
+
+/* A toggle has to show which way it is set. Annotate and Takeaways keep one
+   label whichever way they are set, so the only thing that can say which is how
+   they are drawn - and the pressed treatment existed for the audit toggle
+   alone, so both were drawn the same either way. Collapse and Full screen are
+   not in this rule: their labels change, which says it already. */
+.audit-toggle[aria-pressed='true'],
+.quiet[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  box-shadow: inset 0 0 0 1px #79c9ff55;
+  color: white;
+}
+
+.topology {
+  aspect-ratio: 3 / 2;
+  background: #081725;
+  margin-inline: auto;
+  max-height: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.topology-svg {
+  aspect-ratio: 3 / 2;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.topology-zone-label {
+  fill: #ffffff65;
+  font: 600 12px 'DM Mono', monospace;
+  letter-spacing: 1.5px;
+}
+
+/* The outline is a path with a gap rather than a rect, so the lane's name can
+   sit on the border like a legend. */
+.topology-group path {
+  stroke-width: 1.5px;
+}
+
+/* The lane outline is a filled path drawn over the zones, so it swallowed every
+   click meant for the zone beneath it. Only its legend is interactive. */
+.topology-group path {
+  pointer-events: none;
+}
+
+.topology-group text {
+  font: 600 13px 'DM Mono', monospace;
+  letter-spacing: 1.6px;
+}
+
+.lane-media-streaming path {
+  fill: #17334a17;
+  stroke: #b5c4d54d;
+}
+
+.lane-media-streaming text {
+  fill: #9ed9ff;
+}
+
+.lane-supply-demand-control path {
+  fill: #12273b38;
+  stroke: #b5c4d54d;
+}
+
+.lane-supply-demand-control text {
+  fill: #9ed9ff;
+}
+
+.fabric-shell {
+  stroke: #83b2d2c4;
+  stroke-width: 3px;
+}
+
+.internet-fabric .fabric-shell {
+  fill: url('#internet-fill');
+}
+
+.mobile-fabric .fabric-shell {
+  fill: url('#mobile-fill');
+}
+
+/* The plane is a fabric like the clouds are, so it is drawn as one: a shell, a
+   grid, a motif and the same two lines of text, in the same blue every other
+   fabric wears. It kept its own pink for a while, which made it the one thing
+   on the stage painted a colour that named nothing - the taxonomy issues every
+   other colour here, and telemetry's own family colour was never that pink.
+   What still sets the plane apart is its shape: a strip the width of the stage,
+   which keeps the title at the left rather than centred over it.
+
+   Only the fill and the stroke weight are its own. The fill is a shade deeper
+   than the clouds' because the strip is a backdrop the whole stage sits above,
+   and the stroke is lighter because forty units of height carry a border the
+   way a hundred and thirty do not. */
+.telemetry-fabric .fabric-shell {
+  fill: url('#telemetry-fill');
+  stroke-width: 1.5px;
+}
+
+.telemetry-fabric .fabric-title,
+.telemetry-fabric .fabric-detail {
+  text-anchor: start;
+}
+
+/* Drawn over the stage, and deliberately faint: a scene's own argument about
+   the picture, which a reader has to be able to look straight past at the lines
+   underneath. Neither figure takes pointer events - there is nothing to click. */
+.stage-overlay {
+  pointer-events: none;
+}
+
+.overlay-gap .gap-mark {
+  fill: #d79b0016;
+  stroke: #d79b00aa;
+  stroke-dasharray: 7 7;
+  stroke-width: 2.5px;
+}
+
+.overlay-gap .gap-glyph {
+  fill: #f0b23a;
+  font: 700 58px Manrope, Arial, sans-serif;
+  text-anchor: middle;
+}
+
+.overlay-gap .gap-tie {
+  fill: none;
+  opacity: 0.5;
+  stroke: #d79b00;
+  stroke-dasharray: 4 8;
+  stroke-linecap: round;
+  stroke-width: 2px;
+}
+
+/* Faded once, on the group: an arrowhead overlaps the round cap of the stroke
+   it finishes, and two translucent shapes over one another read brighter where
+   they meet, which drew a seam across every head. A group's opacity is applied
+   to the figure after it is drawn, so the four arrows fade as one shape. */
+.overlay-cycle {
+  opacity: 0.16;
+}
+
+/* Far heavier than a route: the corner arrows are the shape of the whole thing,
+   and at a route's weight they read as one more path to follow. */
+.overlay-cycle .cycle-turn {
+  fill: none;
+  stroke: #9ed9ff;
+  stroke-linecap: round;
+  stroke-width: 52px;
+}
+
+.cycle-head {
+  fill: #9ed9ff;
+}
+
+.telemetry-pulse {
+  fill: none;
+  opacity: 0.4;
+  stroke: #83b2d2;
+  stroke-linecap: round;
+  stroke-width: 1.6px;
+}
+
+/* Every fabric wears the same frame, whatever is drawn inside it. SATCOM and
+   the telemetry plane are that frame; the two clouds sit within theirs. The
+   frame is what a route meets, so it is on the grid even where the shape it
+   holds is not - which is what gives a cloud somewhere to be attached at all. */
+.fabric-frame {
+  fill: none;
+  stroke: #6f8ba3a8;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+  stroke-width: 1.5px;
+}
+
+.fabric-grid {
+  opacity: 0.8;
+}
+
+.network-constellation path {
+  fill: none;
+  opacity: 0.28;
+  stroke: #9cd5f5;
+  stroke-dasharray: 6 8;
+  stroke-width: 2px;
+}
+
+.network-constellation circle {
+  fill: #9cd5f5;
+  filter: drop-shadow(0 0 5px #79c9ff);
+  opacity: 0.5;
+}
+
+.fabric-title {
+  fill: #b9cde0;
+  font: 600 13px 'DM Mono', monospace;
+  letter-spacing: 1.5px;
+  text-anchor: middle;
+}
+
+.fabric-detail {
+  fill: #7f9bb3;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 1.2px;
+  text-anchor: middle;
+}
+
+.satcom-shell {
+  fill: url('#satcom-fill');
+  stroke: #90a8c178;
+  stroke-width: 3px;
+}
+
+/* A fabric is a component: it selects, so the panel can say what it is and its
+   attachment points can be changed like any other's. It says so where it is
+   drawn rather than being raised above the cards - a cloud over a card hides
+   more than the selection reveals. */
+.topology-svg.editing .topology-fabric-shape.selected .fabric-shell,
+.topology-svg.editing .topology-satcom.selected .satcom-shell {
+  stroke: #dff3ff;
+  stroke-width: 2.5px;
+}
+
+.topology-svg.editing .topology-fabric-shape,
+.topology-svg.editing .topology-satcom {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.topology-satcom .fabric-title,
+.topology-satcom .fabric-detail {
+  text-anchor: start;
+}
+
+.satcom-orbit,
+.satcom-beam {
+  fill: none;
+  stroke: #83b2d2;
+  stroke-linecap: round;
+}
+
+.satcom-orbit {
+  opacity: 0.3;
+  stroke-dasharray: 4 9;
+  stroke-width: 1.5px;
+}
+
+.satcom-beam {
+  opacity: 0.45;
+  stroke-dasharray: 5 6;
+  stroke-width: 2px;
+}
+
+.topology-satellite rect,
+.topology-satellite path,
+.topology-dish path {
+  fill: none;
+  stroke: #a8cde6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.5px;
+}
+
+.topology-satellite rect {
+  fill: #17354b;
+}
+
+.network-radio circle {
+  fill: #a8d7e8;
+  filter: drop-shadow(0 0 6px #79c9ff);
+}
+
+.network-radio path {
+  fill: none;
+  stroke: #a8d7e8;
+  stroke-linecap: round;
+  stroke-width: 2.5px;
+}
+
+/* The layer ignores the pointer so a line drawn across a card never takes a
+   click meant for it. Each line's own hit path opts back in, which is how a
+   line can be hovered without the layer blocking anything. */
+.topology-flows {
+  pointer-events: none;
+}
+
+.topology-pipe,
+.topology-route {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.topology-pipe {
+  opacity: 0.75;
+  stroke: #06101c;
+  stroke-width: 9px;
+}
+
+.topology-route {
+  filter: drop-shadow(0 0 4px #000000cc);
+  opacity: 0.95;
+  stroke-width: 4px;
+}
+
+.topology-route.dashed {
+  stroke-dasharray: 13 11;
+}
+
+/* Selecting a published contract lights the lines that carry it and drops
+   everything else back, so the stage answers "where does this API live?". */
+.topology-svg.highlighting .topology-flows > g,
+.topology-svg.highlighting .topology-service {
+  transition: opacity 180ms ease-out;
+}
+
+.topology-svg.highlighting .topology-flows > g:not(.highlighted),
+.topology-svg.highlighting .topology-service:not(.highlighted),
+.topology-svg.highlighting .topology-fabric:not(.highlighted),
+.topology-svg.highlighting .audit-flow:not(.highlighted) {
+  opacity: 0.14;
+}
+
+.topology-svg.highlighting .topology-flows > g.highlighted .topology-route {
+  filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 4px currentColor);
+  opacity: 1;
+  stroke-width: 5px;
+}
+
+/* The backing pipe under a lit line is what keeps it legible where it crosses a
+   dimmed one, so it brightens with the line rather than staying near-black. */
+.topology-svg.highlighting .topology-flows > g.highlighted .topology-pipe {
+  opacity: 1;
+  stroke: #06101ce6;
+  stroke-width: 11px;
+}
+
+.topology-svg.highlighting .topology-service.highlighted rect {
+  filter: drop-shadow(0 0 10px #79c9ff5c);
+  stroke-width: 3px;
+}
+
+.topology-svg.highlighting .topology-fabric {
+  transition: opacity 180ms ease-out;
+}
+
+.topology-svg.highlighting .topology-fabric.highlighted .fabric-shell,
+.topology-svg.highlighting .topology-fabric.highlighted .satcom-shell {
+  filter: drop-shadow(0 0 12px #79c9ff4a);
+}
+
+/* One treatment for "this one", whichever kind of thing it is and whichever end
+   points at it - the pointer on the stage or a change in the panel. Pointing is
+   the lighter half: it says "this one" while the pointer rests and nothing once
+   it moves on. Selecting keeps the same glow in the selection's own colour, so
+   what has been chosen goes on saying so after the pointer leaves. */
+.topology-svg .pointed {
+  --glow: #79c9ff;
+}
+
+.topology-svg .selected {
+  --glow: #82b366;
+}
+
+.topology-svg .topology-service.pointed rect,
+.topology-svg.editing .topology-service.selected rect {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
+}
+
+.topology-svg .topology-service.pointed rect {
+  stroke: #cfe9ff;
+}
+
+.topology-svg .audit-flow.pointed rect,
+.topology-svg.editing .audit-flow.selected rect {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glow) 55%, transparent));
+}
+
+.topology-svg .audit-flow.pointed rect {
+  stroke: #cfe9ff;
+  stroke-width: 1.5px;
+}
+
+.topology-svg .topology-fabric-shape.pointed .fabric-shell,
+.topology-svg .topology-satcom.pointed .satcom-shell,
+.topology-svg.editing .topology-fabric-shape.selected .fabric-shell,
+.topology-svg.editing .topology-satcom.selected .satcom-shell {
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--glow) 40%, transparent));
+}
+
+/* A lane's legend and a zone's heading are text, so the glow is a text shadow.
+   Geography is pointed at the same way a component is; only dragging differs. */
+.topology-svg .lane-selectable.pointed,
+.topology-svg .zone-selectable.pointed,
+.topology-svg.editing .lane-selectable.selected,
+.topology-svg.editing .zone-selectable.selected {
+  text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
+}
+
+.topology-svg .lane-selectable.pointed,
+.topology-svg .zone-selectable.pointed {
+  fill: #dff3ff;
+}
+
+/* A port and a waypoint are small enough that the glow is most of what is seen,
+   so theirs is tighter and brighter than a card's. */
+.topology-svg .audit-port.pointed circle,
+.topology-svg .audit-port.selected circle,
+.topology-svg .route-waypoint.pointed,
+.topology-svg .route-waypoint.selected {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--glow) 85%, transparent));
+}
+
+.topology-svg .route-waypoint.pointed {
+  stroke: #cfe9ff;
+}
+
+/* The socket the card drops into: the rim is what is seen, so the outline
+   carries it and the fill only separates the recess from the lane behind. */
+.adapter-socket {
+  fill: #1a1436c9;
+  stroke: #8062b4;
+  stroke-width: 2px;
+}
+
+.topology-adapter.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.topology-adapter.pointed .adapter-socket,
+.topology-svg.editing .topology-adapter.selected .adapter-socket {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
+}
+
+.topology-svg.editing .topology-adapter.selected .adapter-socket {
+  stroke: #82b366;
+  stroke-width: 3px;
+}
+
+/* A card's own treatment: an adapter is a component and names itself the way
+   every other component does. It carried its own size and a scope tint that
+   nothing else on the stage uses - no card colours its name by scope. */
+.adapter-label {
+  fill: #f2f7ff;
+  font: 700 14px Manrope, Arial, sans-serif;
+  text-anchor: middle;
+}
+
+.topology-svg.highlighting .topology-adapter:not(.highlighted) {
+  opacity: 0.14;
+}
+
+.topology-service rect {
+  filter: drop-shadow(0 8px 18px #00000038);
+  stroke-width: 2px;
+}
+
+.topology-service-label {
+  fill: #f2f7ff;
+  font: 700 14px Manrope, Arial, sans-serif;
+  text-anchor: middle;
+}
+
+.topology-audit {
+  pointer-events: none;
+}
+
+.audit-component-code-bg,
+.audit-flow rect {
+  fill: #06101ee8;
+  stroke: #79c9ffaa;
+  stroke-width: 1px;
+}
+
+.audit-component-code,
+.audit-flow text {
+  fill: #dff3ff;
+  font: 700 9px 'DM Mono', monospace;
+  paint-order: stroke;
+  stroke: #06101e;
+  stroke-width: 3px;
+}
+
+.topology-svg.editing .audit-flow.editable {
+  cursor: grab;
+  pointer-events: auto;
+}
+
+/* Sits behind everything else on the stage, transparent rather than absent, so
+   a click only ever reaches it once every card, zone and line drawn above it
+   has been missed - which is what makes an empty stage clickable to clear the
+   selection without this having to know what else is on screen. */
+.stage-backdrop {
+  fill: transparent;
+  pointer-events: none;
+}
+
+.topology-svg.editing .stage-backdrop {
+  cursor: default;
+  pointer-events: auto;
+}
+
+/* The last handle dragged is what the arrow keys nudge, so it says so. */
+/* A card is selectable while the editor is open, so its controls can be shown. */
+.topology-svg.editing .topology-service.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.topology-svg.editing .topology-service.selected rect {
+  stroke: #82b366;
+  stroke-width: 3px;
+}
+
+.lane-selectable {
+  cursor: pointer;
+}
+
+
+
+/* A zone is geography rather than a component - selectable so its position can
+   be read, never draggable, which is why there is no .selectable variant here. */
+.topology-svg.editing .zone-selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+
+
+/* Typed as readily as stepped: a side with room for sixteen counts is a lot of
+   clicking to cross, and the number is the thing being chosen. */
+.port-count {
+  appearance: textfield;
+  background: #0c1c2c;
+  border: 1px solid #ffffff1f;
+  border-radius: 5px;
+  color: #dce9f7;
+  font: 600 11px 'DM Mono', monospace;
+  min-height: 22px;
+  padding: 0 4px;
+  text-align: center;
+  width: 40px;
+}
+
+.port-count::-webkit-inner-spin-button,
+.port-count::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+
+.port-count:focus-visible {
+  border-color: #79c9ff;
+  outline: none;
+}
+
+/* How regular the spacing turns out at this count: "even" where the side
+   divides exactly, otherwise the narrowest and widest gap it produces. */
+.port-spacing {
+  color: #7892ad;
+  font: 400 9px 'DM Mono', monospace;
+  font-style: normal;
+  margin-left: 6px;
+  min-width: 34px;
+}
+
+/* Identity, above the attachment points and below the position: what a thing is
+   called, then where it sits, then how a line meets it. */
+.text-controls {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.text-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 54px minmax(0, 1fr);
+}
+
+.text-row span {
+  color: #8fa9c4;
+  font: 600 9px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The code, which is read rather than typed. Set in the code face the badges
+   and the headings use, and given no field around it, so it does not invite an
+   edit the panel will not take. */
+.text-row output {
+  color: #dff0ff;
+  font: 500 11px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  padding: 4px 0;
+}
+
+.text-row input,
+.text-row select {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+}
+
+.text-row input:focus,
+.text-row select:focus {
+  border-color: #79c9ff;
+  outline: none;
+}
+
+.component-controls {
+  margin-bottom: 10px;
+}
+
+.port-counts {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+}
+
+.port-counts div {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.port-counts dt {
+  color: #7892ad;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.port-counts dd {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+}
+
+.port-counts button {
+  background: #10263b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #cde8fb;
+  cursor: pointer;
+  font: 600 11px 'DM Mono', monospace;
+  padding: 1px 8px;
+}
+
+.port-counts button:hover:not(:disabled) {
+  border-color: #79c9ff;
+  color: white;
+}
+
+.port-counts button:disabled {
+  color: #4a5d70;
+  cursor: not-allowed;
+}
+
+.port-counts span {
+  color: #cde8fb;
+  font: 600 11px 'DM Mono', monospace;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Named like the changes below it, so the two halves of the tab read as a pair
+   rather than one being labelled and the other simply starting. */
+.pane-heading {
+  color: #82b366;
+  margin-bottom: 8px;
+}
+
+/* The folding heading above it draws the rule now, so the panel sheds the one
+   it drew for itself and the margin that went with it. */
+.placement-panel {
+  margin-bottom: 10px;
+}
+
+.placement-input {
+  background: #0b1d33;
+  border: 1px solid #ffffff1e;
+  border-radius: 4px;
+  color: #dff3ff;
+  font: 600 11px 'DM Mono', monospace;
+  padding: 2px 6px;
+  text-align: right;
+  width: 68px;
+}
+
+.placement-input:focus-visible {
+  border-color: #79c9ff;
+  outline: none;
+}
+
+.placement-rows {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0 0;
+}
+
+.placement-row {
+  align-items: center;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.placement-row dt {
+  color: #7892ad;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.placement-row dd {
+  color: #cde8fb;
+  font: 600 11px 'DM Mono', monospace;
+  margin: 0;
+}
+
+.topology-svg.editing .audit-flow.selected rect {
+  stroke: #82b366;
+  stroke-width: 2px;
+}
+
+.topology-svg.editing .audit-flow.editable:active {
+  cursor: grabbing;
+}
+
+/* Shown only while a handle is being dragged, and only for the guides it
+   actually snapped to, so the stage never fills with lines that mean nothing. */
+.topology-guides line {
+  stroke: #79c9ff;
+  stroke-dasharray: 6 6;
+  stroke-width: 1;
+}
+
+.topology-svg.editing .audit-flow.editable rect {
+  stroke: #79c9ff88;
+  stroke-width: 1px;
+}
+
+.change-panel .eyebrow {
+  color: #82b366;
+}
+
+/* The edit tab is split: what is selected above, what it changed below, with a
+   divider the user can drag between them. */
+.split-pane {
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/*
+ * Both halves scroll, and neither pushes the other about.
+ *
+ * The top half had no overflow of its own, so it could not be made shorter
+ * than its contents: dragging the divider up asked for a height the pane
+ * refused to take, and the split stopped tracking the handle. A pane in a grid
+ * row needs `min-height: 0` before `1fr` means anything, since the default
+ * minimum is the content.
+ */
+.split-pane > * {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* The seam stays tight: whatever ends a pane sheds its trailing margin, so
+   the divider's own hit area is the only space between the halves. */
+.split-pane .editor-panel > :last-child {
+  margin-bottom: 0;
+}
+
+/*
+ * Except its heading, which is never the last thing in spirit even when it is
+ * the last thing in the document. With nothing selected the properties pane is
+ * just its title, the rule above stripped the title's margin, and the divider
+ * came to rest against the lettering.
+ */
+.split-pane .editor-panel > .pane-heading:last-child {
+  margin-bottom: 10px;
+}
+
+/* A hairline that stays grabbable: the element is nine units tall for the
+   pointer, but only the one-unit line through its centre is drawn. */
+/*
+ * The rule, with the same grip sitting on the middle of it.
+ *
+ * The rule is what says the pane ends here; the grip is what says the end can
+ * be moved. Replacing the first with the second lost the seam, so both are
+ * drawn and the handle overlays its centre.
+ */
+.split-handle {
+  background: linear-gradient(#ffffff14, #ffffff14) center / 100% 1px no-repeat;
+  border: none;
+  cursor: row-resize;
+  height: 10px;
+  margin: 0;
+  position: relative;
+}
+
+.split-handle::after {
+  background-image: radial-gradient(circle at center, #ffffff40 1.1px, transparent 1.3px);
+  background-position: center;
+  background-repeat: repeat-x;
+  background-size: 5px 100%;
+  content: '';
+  height: 5px;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: background-image 120ms ease;
+  width: 44px;
+}
+
+.split-handle:focus-visible,
+.split-handle:hover {
+  outline: none;
+}
+
+.split-handle:focus-visible::after,
+.split-handle:hover::after {
+  background-image: radial-gradient(circle at center, #79c9ff 1.4px, transparent 1.6px);
+}
+
+/*
+ * Both halves of the tab sit on the same inset.
+ *
+ * The properties pane took the panel's padding and the changes pane added its
+ * own to it, so the two columns of text started at different places and the
+ * seam between them looked misaligned rather than merely close.
+ */
+.editor-panes,
+.change-panel {
+  padding-inline: 2px;
+}
+
+.change-panel {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The heading carries no controls now, so it sheds the margin it kept for them. */
+.change-panel .compact-heading {
+  margin-bottom: 4px;
+}
+
+.change-tools {
+  margin-bottom: 8px;
+}
+
+.change-panel .contract-empty,
+.change-panel .contract-meta {
+  padding-right: 4px;
+}
+
+/* One row per change, so a single one can be dropped without discarding the
+   rest. The drop control appears on hover, since a list of them reads as noise. */
+.change-list {
+  align-content: start;
+  display: grid;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+
+.change-list li {
+  align-items: center;
+  border-radius: 4px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 18px;
+  padding: 2px 4px;
+}
+
+.change-list li:hover,
+.change-list li.highlighted {
+  background: #ffffff0d;
+}
+
+/* A change points at what it is about, so it is lit the same way the thing on
+   stage is - and the row it is on is a button, not a line of text. */
+.change-list li.highlighted {
+  box-shadow: inset 2px 0 0 #79c9ff;
+}
+
+.change-pick {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: block;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.change-list code {
+  color: #cde8fb;
+  display: block;
+  font: 500 11px 'DM Mono', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-pick:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #79c9ff;
+  outline-offset: 1px;
+}
+
+.change-drop {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #7892ad;
+  cursor: pointer;
+  display: flex;
+  height: 18px;
+  justify-content: center;
+  opacity: 0;
+  padding: 0;
+  width: 18px;
+}
+
+.change-list li:hover .change-drop,
+.change-drop:focus-visible {
+  opacity: 1;
+}
+
+.change-drop:hover {
+  background: #ff647c22;
+  color: #ff647c;
+}
+
+.change-carried {
+  color: #4d6070;
+  font-size: 11px;
+  text-align: center;
+}
+
+.change-panel pre {
+  background: #08151f;
+  border: 1px solid #ffffff14;
+  border-radius: 8px;
+  color: #cde8fb;
+  font: 500 10px 'DM Mono', monospace;
+  margin: 0 0 8px;
+  overflow: auto;
+  padding: 9px 11px;
+}
+
+.audit-component-code,
+.audit-flow text {
+  text-anchor: middle;
+}
+
+.audit-port circle {
+  fill: #0b1d33;
+  stroke: #79c9ff;
+  stroke-width: 1.5;
+}
+
+/*
+ * A line being drawn between two ports, before it is one. Broken and in the
+ * port colour rather than a family's: it has no family yet, and borrowing one
+ * would say the line is something it has not been decided to be.
+ */
+.audit-new-flow {
+  fill: none;
+  pointer-events: none;
+  stroke: #79c9ff;
+  stroke-dasharray: 6 4;
+  stroke-width: 2;
+}
+
+.audit-port.selected circle {
+  fill: #79c9ff;
+  stroke: #dff3ff;
+  stroke-width: 2;
+}
+
+.audit-port.in-use circle {
+  fill: #57d9a3;
+  stroke: #06101e;
+  stroke-width: 1.5;
+}
+
+/* An invisible target, so a 3.5px dot is still easy to hover. */
+.audit-port .audit-port-target {
+  fill: transparent;
+  stroke: none;
+}
+
+/* The annotation layer is inert so codes never eat a click, which means every
+   control inside it has to ask for interaction back. A port is a control while
+   editing: clicking selects it, and dragging the one a selected flow
+   meets moves that end elsewhere. */
+.topology-svg.editing .audit-port {
+  pointer-events: auto;
+}
+
+.topology-svg.editing .audit-port.in-use {
+  cursor: grab;
+}
+
+.topology-svg.editing .audit-port.in-use:active {
+  cursor: grabbing;
+}
+
+.audit-port text {
+  fill: #dff3ff;
+  font: 700 9px 'DM Mono', monospace;
+  opacity: 0;
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: #06101e;
+  stroke-width: 3px;
+  transition: opacity 100ms ease;
+}
+
+.audit-port:hover text {
+  opacity: 1;
+}
+
+.audit-flow rect {
+  stroke: #ffffff44;
+}
+
+/*
+ * The two filters side by side, and what to play across the foot.
+ *
+ * Each bank is drawn as its own enclosure rather than divided from its
+ * neighbour by a single rule. The banks were laid out as quadrants and split by
+ * two hairlines placed by position - one down the middle, one across the third
+ * child onwards. Retiring the spotlight bank left three banks in a grid built
+ * for four, so the rule meant to run under the top row ran under half of it and
+ * stopped, and the last bank sat in a column with nothing beside it. Borders
+ * that belong to the bank cannot come apart from it that way, however many
+ * banks there turn out to be.
+ */
+/*
+ * Two columns sized to what is in them, not to each other.
+ *
+ * Equal halves put three scope buttons in the same width as eight partner
+ * marks: the left column sat mostly empty while the right wrapped onto a
+ * second line. The banks hold very different numbers of very different
+ * things, and a grid that insists they are the same size is asserting
+ * something about them that is not true.
+ *
+ * `auto` takes what the narrow column needs and the rest goes to the wide one,
+ * so the partners get the room that was being held for nothing.
+ */
+.lighting-panel {
+  background: #0a1929d9;
+  border: 1px solid #ffffff1c;
+  border-radius: 14px;
+  box-shadow: 0 15px 60px #00000030;
+  color: #aabbd0;
+  display: grid;
+  gap: 6px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding: 6px;
+}
+
+/* One line where the content fits, wrapping to a second where it does not -
+   nothing is ever hidden behind a scroll the viewer cannot see. */
+.lighting-bank {
+  align-content: center;
+  align-items: center;
+  row-gap: 4px;
+  border: 1px solid #ffffff12;
+  border-radius: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-width: 0;
+  padding: 6px 10px;
+}
+
+.lighting-bank > button {
+  flex: 0 0 auto;
+}
+
+/* Choosing what to play is not filtering what is on stage, so it reads as a
+   band of its own rather than as a third filter that happens to be short. */
+.lighting-bank.spanning {
+  grid-column: 1 / -1;
+}
+
+/* Fixed rather than sized to the word, so the first button of every bank starts
+   at the same place down the column. Narrowed with the labels themselves: they
+   were Components and Connections and are now Scopes and Families. */
+.lighting-label {
+  flex: 0 0 58px;
+  margin-right: 3px;
+  white-space: nowrap;
+}
+
+.lighting-label,
+.family-description {
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lighting-label {
+  color: #d7e6f8;
+}
+
+.family-description {
+  color: #8fa8c1;
+  margin-left: auto;
+}
+
+.flow-family-button,
+.action-button,
+.toggle-button,
+.scope-button,
+.signal-button {
+  align-items: center;
+  background: #10263b;
+  border: 1px solid #ffffff25;
+  border-radius: 6px;
+  color: #c9d7e7;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 9px;
+  min-height: 27px;
+  padding: 5px 8px;
+  transition: 140ms ease;
+}
+
+.flow-family-button:hover,
+.action-button:hover,
+.scope-button:hover,
+.signal-button:hover {
+  background: #18344d;
+  color: white;
+}
+
+.flow-family-button[aria-pressed='true'] {
+  border-color: var(--family-color);
+  box-shadow: inset 0 0 0 1px var(--family-color), 0 0 14px #00000042;
+  color: white;
+}
+
+.scope-button[aria-pressed='true'] {
+  background: #18344d;
+  border-color: #79c9ff;
+  box-shadow: inset 0 0 0 1px #79c9ff66, 0 0 14px #00000042;
+  color: white;
+}
+
+.action-button {
+  border-color: #79c9ff88;
+  color: #dff1ff;
+  margin-left: 4px;
+}
+
+.signal-button {
+  background: #20405a;
+  border-color: #79c9ff;
+  color: white;
+}
+
+.action-button:disabled,
+.signal-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.book-panel {
+  align-self: stretch;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.state-panel {
+  border-bottom: 1px solid #ffffff15;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 12px 12px;
+}
+
+.panel-tabs {
+  align-items: center;
+  border-bottom: 1px solid #ffffff15;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.panel-tabs button {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: #8fa9c4;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 10px 6px;
+}
+
+.panel-tabs button:hover {
+  color: #cce1f8;
+}
+
+.panel-tabs button.active {
+  border-bottom-color: #79c9ff;
+  color: white;
+}
+
+.panel-tabs .flow {
+  margin-left: auto;
+}
+
+/* One group per state a specification can be in. The heading carries the gap
+   above it rather than the group carrying one below, so the first group sits
+   against the lead paragraph's rule instead of a row of empty space. */
+.specification-group + .specification-group .contract-meta {
+  margin-top: 14px;
+}
+
+.specification-group .contract-meta {
+  margin: 0 0 6px;
+}
+
+.api-links {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
+.api-links button {
+  background: #10263b;
+  border: 1px solid #ffffff1e;
+  border-radius: 6px;
+  color: #cde8fb;
+  cursor: pointer;
+  font: 500 10px 'DM Mono', monospace;
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.api-links button:hover {
+  background: #173653;
+  border-color: #79c9ff;
+}
+
+.api-links button[aria-pressed='true'] {
+  background: #173653;
+  border-color: #79c9ff;
+  color: white;
+}
+
+.api-links button:disabled {
+  background: #0d1c2b;
+  border-color: #ffffff10;
+  color: #55697d;
+  cursor: not-allowed;
+}
+
+.state-summary {
+  display: grid;
+  gap: 5px;
+  margin: 0 0 12px;
+}
+
+.state-summary div {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 74px minmax(0, 1fr);
+}
+
+.state-summary dt {
+  color: #7892ad;
+  font: 500 9px 'DM Mono', monospace;
+  letter-spacing: 0.05em;
+  padding-top: 1px;
+  text-transform: uppercase;
+}
+
+.state-summary dd {
+  color: #cde8fb;
+  font-size: 11px;
+  margin: 0;
+}
+
+/*
+ * A horizontal rule means a boundary that can be moved. Nothing else draws one.
+ *
+ * There were four kinds of line doing four different jobs and looking alike: an
+ * empty state drew one above itself, every folding heading drew one beneath, the
+ * tab strip drew one, and the resizer drew one. So a reader could not tell a
+ * heading from a seam, and the panel changed which lines it had depending on
+ * whether anything was selected - a rule under PROPERTIES that vanished when you
+ * picked something, and none under CHANGES ever.
+ *
+ * The headings do not need them. An eyebrow is green and set in caps; a folding
+ * heading is bold and carries a chevron. Both already say what they are, and
+ * spacing says where a section ends.
+ */
+.editor-empty,
+.specifications-empty,
+.state-contract-heading {
+  margin-bottom: 8px;
+  padding-top: 4px;
+}
+
+.contract-detail {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.contract-detail .compact-heading a {
+  color: #79c9ff;
+  font: 500 10px 'DM Mono', monospace;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.contract-body {
+  color: #c3d4e6;
+  font-size: 12px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.contract-meta {
+  color: #7892ad;
+  font: 500 10px 'DM Mono', monospace;
+}
+
+/* Guidance rather than content: it says what to do next, so it is set apart
+   from the values a filled panel shows rather than sitting where they would. */
+.contract-empty {
+  color: #7892ad;
+  font-size: 12px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.contract-operations {
+  display: grid;
+  gap: 4px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+}
+
+.contract-operations li {
+  align-items: baseline;
+  border-top: 1px solid #ffffff12;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  padding-top: 5px;
+}
+
+.contract-operations code {
+  color: #82b366;
+  font: 600 10px 'DM Mono', monospace;
+}
+
+.contract-operations span {
+  font: 500 11px 'DM Mono', monospace;
+}
+
+.contract-operations em {
+  color: #7892ad;
+  font-size: 11px;
+  font-style: normal;
+  grid-column: 2;
+}
+
+.contract-flows {
+  border-top: 1px solid #ffffff1c;
+  margin-top: 14px;
+  padding-top: 10px;
+}
+
+.contract-flows .eyebrow {
+  color: #9673a6;
+  margin-bottom: 6px;
+}
+
+/* Two lists under one rule - what carries the specification and what offers it
+   - so the second heading needs the gap the first gets from the rule above. */
+.contract-flows .contract-operations + .eyebrow {
+  margin-top: 12px;
+}
+
+.contract-flows .contract-operations code {
+  color: #79c9ff;
+}
+
+.compact-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.compact-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.compact-heading h2 {
+  font-size: 15px;
+}
+
+.compact-heading > span,
+.compact-heading-actions > span {
+  color: #7892ad;
+  font: 500 9px 'DM Mono', monospace;
+  text-transform: uppercase;
+}
+
+.compact-heading-actions {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.reset-demo {
+  font-size: 10px;
+  padding: 5px 8px;
+}
+
+.event-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.event-heading {
+  margin: 0;
+  padding: 12px 12px 10px;
+}
+
+.events {
+  list-style: none;
+  margin: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 12px 12px;
+}
+
+.events li {
+  border-left: 2px solid #778faa;
+  margin: 0 0 9px;
+  padding: 0 0 2px 12px;
+}
+
+.events li.priority {
+  border-color: #b783ff;
+}
+
+.events li.selection {
+  border-color: #f6bf4b;
+}
+
+.events li.outcome {
+  border-color: #67e0aa;
+}
+
+.events li.pathway {
+  border-color: #73d4ff;
+}
+
+.events time,
+.events code {
+  color: #91a8c0;
+  font: 9px 'DM Mono', monospace;
+}
+
+.events strong {
+  display: block;
+  font-size: 10px;
+  margin: 4px 0;
+  text-transform: uppercase;
+}
+
+.events p {
+  color: #d6e1ee;
+  font-size: 10px;
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+
+.events .empty {
+  border: 0;
+  color: #9db0c8;
+  font-size: 12px;
+  padding: 15px 5px;
+}
+
+/* The callout is the narrative for a scene of a demonstration, so it sits over
+   the stage and points at the component the scene is about. The layer ignores the
+   pointer so nothing underneath becomes unclickable; its controls opt back in. */
+.topology-callout-layer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 5;
+}
+
+.demonstration-callout {
+  animation: callout-in 220ms ease-out;
+  background: #071624f2;
+  border: 1px solid #79c9ff66;
+  border-radius: 10px;
+  box-shadow: 0 10px 34px #00000066;
+  color: #f2f8ff;
+  max-width: min(400px, 74%);
+  padding: 13px 17px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition: left 260ms ease, top 260ms ease;
+  width: max-content;
+}
+
+/* The partner's mark where one has arrived, sized to sit on the heading line
+   rather than above it. */
+.callout-logo {
+  height: 18px;
+  max-width: 80px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+/* What this one is called, between whose voice it is and what it says. A scene
+   and a partner briefing both carry it, which is what makes them one card. */
+.callout-title {
+  color: #cfe6ff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0 0 5px;
+}
+
+/* The same scene in three or four lines, under the prose rather than instead of
+   it: a reader following the narrative reads the paragraph, a reader scanning a
+   room reads these. Set quieter than the body, so the prose stays the thing
+   being read and these stay the thing being glanced at. */
+.callout-takeaways {
+  color: #a9c4dc;
+  display: grid;
+  font-size: 11.5px;
+  gap: 3px;
+  line-height: 1.35;
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.callout-takeaways li {
+  padding-left: 13px;
+  position: relative;
+}
+
+.callout-takeaways li::before {
+  color: #79c9ff;
+  content: '\203A';
+  left: 2px;
+  position: absolute;
+}
+
+/* The cover carries the whole synopsis and four takeaways rather than one
+   partner's contribution, so it is given the room to hold them without becoming
+   a column of six-word lines. */
+.demonstration-callout.wide {
+  max-width: min(560px, 84%);
+}
+
+/* Two sides needs the width of two, and the same rule between them the shortcut
+   overlay uses - they are the same idea, two answers that would read as one
+   rambling list if the gap alone had to separate them. */
+.demonstration-callout.sided {
+  max-width: min(640px, 88%);
+}
+
+.callout-sides {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+}
+
+.callout-sides > div + div {
+  border-left: 1px solid #ffffff1a;
+  padding-left: 16px;
+}
+
+@media (width <= 700px) {
+  .callout-sides {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .callout-sides > div + div {
+    border-left: 0;
+    border-top: 1px solid #ffffff1a;
+    padding-left: 0;
+    padding-top: 12px;
+  }
+}
+
+.callout-aside {
+  display: grid;
+  gap: 9px;
+  align-content: start;
+}
+
+/* Larger than the mark on the heading line: here it is the partner's own side
+   of the card rather than a tag beside their name. */
+.callout-mark {
+  height: 30px;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.callout-aside p {
+  color: #a9c4dc;
+  font-size: 11.5px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* The register. A reader scans this for one entry rather than reading it
+   through, so the three parts are separated hard, the groups within them
+   softly, and a row lights when the stage is pointing at it. */
+.model-register {
+  display: grid;
+  gap: 14px;
+}
+
+/* Spacing is what separates one section from the next now that no rule does. */
+.register-part-section + .register-part-section {
+  margin-top: 14px;
+}
+
+/*
+ * One spacing between two parts, not two spacings.
+ *
+ * The container's gap and the sibling margin were both separating the same
+ * pair. Open, the content between them hid it; shut, there is nothing between
+ * one heading and the next except the two of them added together, and three
+ * headings sat a finger apart.
+ */
+.model-register > .register-part-section + .register-part-section {
+  margin-top: 0;
+}
+
+/* The whole heading is the control, not a chevron beside one: a part of a list
+   is a thing a reader aims at rather than a target they have to find. */
+.register-part {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #dff0ff;
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  letter-spacing: -0.01em;
+  margin: 0 0 8px;
+  padding: 0 0 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.register-part:hover {
+  color: white;
+}
+
+.register-part span {
+  flex: 1;
+}
+
+/* What is inside a part you have shut, which is the one thing worth saying
+   about it while it is closed. */
+.register-part em {
+  color: #7f9bb3;
+  font: 600 10px 'DM Mono', monospace;
+  font-style: normal;
+}
+
+.register-part[aria-expanded='false'] {
+  margin-bottom: 0;
+}
+
+.register-note {
+  color: #7f9bb3;
+  font-size: 11px;
+  line-height: 1.4;
+  margin: -3px 0 9px;
+}
+
+.register-group + .register-group {
+  margin-top: 11px;
+}
+
+.model-register .contract-meta {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 5px;
+}
+
+.register-swatch {
+  border-radius: 3px;
+  display: inline-block;
+  height: 9px;
+  width: 9px;
+}
+
+.register-rule {
+  border-radius: 2px;
+  display: inline-block;
+  height: 3px;
+  width: 14px;
+}
+
+.register-rows {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+.register-row {
+  align-items: baseline;
+  border-radius: 5px;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 62px minmax(0, 1fr);
+  margin: 0 -6px;
+  padding: 3px 6px;
+}
+
+/* Pointing, not lighting: the same faint mark the stage puts on whatever the
+   pointer is over, so a row and its subject are found together in either
+   direction. */
+.register-row:hover,
+.register-row.pointed {
+  background: #173653;
+}
+
+.register-row.pointed dt {
+  color: white;
+}
+
+.register-row dt {
+  color: #79c9ff;
+  font: 600 9px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.register-row dd {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  min-width: 0;
+}
+
+.register-name {
+  color: #dff0ff;
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+.register-detail {
+  color: #7f9bb3;
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.vendor-headline {
+  color: #c39bff;
+  font: 600 11px 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.callout-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin: 0 0 7px;
+}
+
+.callout-heading span {
+  color: #79c9ff;
+  font: 600 10px 'DM Mono', monospace;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.callout-heading em {
+  color: #7892ad;
+  font: 500 10px 'DM Mono', monospace;
+  font-style: normal;
+}
+
+.callout-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 9px;
+  pointer-events: auto;
+}
+
+.callout-timer {
+  padding: 4px 7px;
+}
+
+.callout-exit {
+  margin-left: 4px;
+}
+
+/* Dismissal turns red on approach, wherever it is. */
+.callout-exit:hover:not(:disabled),
+.icon-button.dismiss:hover {
+  border-color: #ff8398;
+  color: #ffd2da;
+}
+
+.callout-countdown {
+  display: block;
+  height: 15px;
+  width: 15px;
+}
+
+.countdown-track {
+  fill: none;
+  stroke: #ffffff26;
+  stroke-width: 2.25;
+}
+
+/* Depletes clockwise from twelve o'clock over the scene's own hold. */
+.countdown-sweep {
+  animation: countdown linear forwards;
+  fill: none;
+  stroke: #79c9ff;
+  stroke-dasharray: 39.27;
+  stroke-linecap: round;
+  stroke-width: 2.25;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+@keyframes countdown {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: 39.27;
+  }
+}
+
+/* A button that is only its icon. The callout's controls were the one place
+   that had this, and anything else wanting it reached for .quiet - which is
+   sized for a word beside the icon and reads as a slab around one on its own. */
+.callout-actions button,
+.icon-button {
+  align-items: center;
+  background: #10263b;
+  border: 1px solid #ffffff26;
+  border-radius: 6px;
+  color: #cde8fb;
+  cursor: pointer;
+  display: flex;
+  padding: 4px 9px;
+}
+
+.callout-actions button:hover:not(:disabled),
+.icon-button:hover {
+  border-color: #79c9ff;
+  color: white;
+}
+
+.callout-actions button:disabled {
+  color: #4a5d70;
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.callout-body {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@keyframes callout-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+.error {
+  background: #5c2030;
+  border: 1px solid #ff8398;
+  border-radius: 7px;
+  color: #ffd2da;
+  font-size: 12px;
+  left: 50%;
+  margin: 0;
+  max-width: min(620px, calc(100vw - 40px));
+  padding: 10px 13px;
+  position: fixed;
+  top: 74px;
+  transform: translateX(-50%);
+  z-index: 30;
+}
+
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+button:focus-visible,
+.state-panel a:focus-visible {
+  outline: 2px solid #79c9ff;
+  outline-offset: 2px;
+}
+
+@media (min-width: 1700px) and (min-height: 1000px) {
+  /*
+   * Two rows, because `main` has two children.
+   *
+   * This declared three and the gap before the third was still drawn, so every
+   * wide screen had a band of dead space under the panels - the space a row
+   * would have sat in if there had been one. It also set its own gap, which
+   * left the seam between the title bar and the panels twelve where every
+   * other seam is fourteen.
+   */
+  main {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  /*
+   * A wider floor for the side panel, where there is room for one.
+   *
+   * Matched to the open template's specificity rather than left on
+   * `.control-room`, which that template outranks - so this asked for two
+   * columns, never got them, and its own comment was written about a seam it
+   * had never in fact produced.
+   */
+  .control-room:not(.sized):not(.collapsed) {
+    grid-template-columns:
+      minmax(0, var(--diagram-width, calc((100dvh - var(--app-chrome)) * 3 / 2)))
+      var(--panel-seam)
+      minmax(420px, 1fr);
+  }
+
+  .lighting-bank {
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 1199px), (max-height: 799px) {
+  body {
+    overflow: auto;
+  }
+
+  main {
+    height: auto;
+    min-height: 800px;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 1199px) {
+  main {
+    grid-template-rows: auto auto;
+  }
+
+  .control-room {
+    grid-template-columns: 1fr;
+  }
+
+  .topology {
+    max-height: none;
+    width: 100%;
+  }
+
+  .event-panel {
+    min-height: 360px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demonstration-callout {
+    animation: none;
+    transition: none;
+  }
+
+  .countdown-sweep {
+    animation: none;
+  }
+
+  .topology-svg.highlighting .topology-flows > g,
+  .topology-svg.highlighting .topology-service {
+    transition: none;
+  }
+
+  .flow-family-button,
+  .action-button,
+  .toggle-button,
+  .scope-button,
+  .signal-button {
+    transition: none;
+  }
+}
+
+/*
+ * The tab lays out its own two rows: the tools, then the split.
+ *
+ * The tools used to sit inside the properties pane, which scrolls, so the one
+ * part of the tab that is always relevant scrolled away with a long list of
+ * properties belonging to something else entirely.
+ */
+.editor-tab {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-tools {
+  align-items: center;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+}
+
+/* Between the three groups: what the editor shows, what it can add, and what
+   it can do to the thing in hand. A rule rather than a gap, because a gap at
+   this size reads as a wrap. */
+.tool-divider {
+  align-self: stretch;
+  background: #ffffff1c;
+  margin: 2px 2px;
+  width: 1px;
+}
+
+/* Dimmed rather than hidden. A control that vanishes teaches nothing about
+   when it would have been there, and the title says what to select. */
+.tool-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+.tool-button:disabled:hover {
+  background: #ffffff08;
+  color: inherit;
+}
+
+.tool-button {
+  align-items: center;
+  background: #ffffff08;
+  border: 1px solid #ffffff18;
+  border-radius: 6px;
+  color: #9fb4cc;
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  transition: all 120ms ease;
+  width: 30px;
+}
+
+.tool-button:hover {
+  border-color: #79c9ff55;
+  color: #dff3ff;
+}
+
+.tool-button[aria-pressed='true'] {
+  background: #79c9ff22;
+  border-color: #79c9ff;
+  color: #dff3ff;
+}
+
+/* The canvas's own edge, drawn whenever the editor is open regardless of
+   whether the grid is switched on, and distinct from the lane panels inside
+   it - a dragged card runs out of room here, not at a lane's rounded corner. */
+.canvas-edge {
+  fill: none;
+  pointer-events: none;
+  stroke: #79c9ffcc;
+  stroke-width: 1.5px;
+}
+
+/* Drawn only while editing: what components, waypoints and labels align to. */
+.edit-grid rect {
+  fill: url(#edit-grid-major);
+  pointer-events: none;
+}
+
+.edit-grid-line {
+  fill: none;
+  stroke: #79c9ff59;
+  stroke-width: 0.7;
+}
+
+.edit-grid-line.major {
+  stroke: #79c9ffa6;
+  stroke-width: 1.1;
+}
+
+/* A wide, invisible stroke over each route while editing, so a 4px line is
+   still an easy target - the first click on it selects the flow, the
+   next one adds a waypoint. Rendered only while editing, so it never needs a
+   .topology-svg.editing prefix the way the always-present selectables do. */
+.topology-route-hit {
+  cursor: pointer;
+  cursor: default;
+  fill: none;
+  pointer-events: stroke;
+  stroke: transparent;
+  stroke-width: 12px;
+}
+
+.topology-svg.editing .topology-route-hit {
+  cursor: pointer;
+}
+
+.topology-flows > g.selected .topology-route {
+  stroke-width: 5px;
+}
+
+/* An arrowhead is a marker, so it cannot inherit from the line the way a
+   stroke does - its fill is its own. `context-stroke` resolves to the stroke of
+   whatever references the marker, so the head follows the line into every state
+   it has rather than only the one it was authored in.
+ 
+   The fill attribute on the path stays as the fallback: where this value is not
+   understood the declaration is dropped and the family colour applies, which is
+   what the head looked like before. */
+.topology-svg .arrow-head {
+  fill: context-stroke;
+}
+
+/* A line pointed at, from the stage or from the register. It cannot take the
+   drop-shadow a card takes - a glow around a two-unit stroke reads as a smudge
+   rather than emphasis - so it thickens and brightens instead, which is what
+   the eye follows along a line. */
+.topology-svg .topology-flows > g.pointed .topology-route {
+  stroke: #cfe9ff;
+  stroke-width: 4px;
+}
+
+.route-free-end {
+  cursor: grab;
+  pointer-events: auto;
+  fill: #0b1d33;
+  stroke: #f0b357;
+  stroke-width: 2;
+}
+
+.route-free-end:active {
+  cursor: grabbing;
+}
+
+/* A selected flow's corners, shown only for that one flow so
+   fifty-eight lines do not turn into fifty-eight lines of dots. */
+.route-waypoint {
+  cursor: grab;
+  fill: #0b1d33;
+  pointer-events: auto;
+  stroke: #82b366;
+  stroke-width: 2px;
+}
+
+.route-waypoint.selected {
+  fill: #82b366;
+}
+
+.route-waypoint:active {
+  cursor: grabbing;
+}
+
+/* The grab target for the run between two waypoints - wider than the line
+   itself so a horizontal or vertical run is easy to catch precisely. */
+.route-segment-grip {
+  cursor: move;
+  fill: #79c9ff33;
+  pointer-events: auto;
+  stroke: #79c9ff;
+  stroke-width: 1px;
+}
+
+.route-segment-grip:active {
+  cursor: grabbing;
+}
+
+.waypoint-add {
+  cursor: copy;
+  pointer-events: auto;
+}
+
+.waypoint-add circle {
+  fill: #0b1d33e6;
+  stroke: #57d9a3;
+  stroke-width: 1.5;
+}
+
+.waypoint-add path {
+  stroke: #57d9a3;
+  stroke-width: 1.5;
+}
+
+/* Offset off the waypoint it belongs to, away from the nearest card, so it
+   never sits under the drag path of the dot it deletes. */
+.waypoint-delete {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.waypoint-delete circle {
+  fill: #2a0e14;
+  stroke: #ff647c;
+  stroke-width: 1.5px;
+}
+
+.waypoint-delete path {
+  fill: none;
+  stroke: #ff647c;
+  stroke-linecap: round;
+  stroke-width: 1.5px;
+}
+
+/* Asked for with ? and dismissed with Escape or the scrim, so it sits above
+   everything rather than in the panel: it describes the whole dashboard. */
+.shortcut-overlay {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 40;
+}
+
+.shortcut-scrim {
+  background: #040a12b8;
+  border: none;
+  cursor: default;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.shortcut-card {
+  background: #0a1929;
+  border: 1px solid #ffffff1e;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px #02060cb3;
+  max-height: 88vh;
+  max-width: 940px;
+  overflow-y: auto;
+  padding: 18px 20px;
+  position: relative;
+  width: 92vw;
+}
+
+/* Two questions, side by side: how do I drive this, and what am I looking at.
+   One column on a narrow window, where side by side would leave neither
+   readable. */
+.shortcut-columns {
+  display: grid;
+  gap: 26px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+/* A rule between the two, since they answer different questions and the gap
+   alone left them reading as one long list in two pieces. It sits on the second
+   column so it turns with the layout: a line down the middle while they are
+   side by side, a line across once they stack. */
+.shortcut-columns > div + div {
+  border-left: 1px solid #ffffff1a;
+  padding-left: 26px;
+}
+
+@media (width <= 860px) {
+  .shortcut-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .shortcut-columns > div + div {
+    border-left: 0;
+    border-top: 1px solid #ffffff1a;
+    padding-left: 0;
+    padding-top: 22px;
+  }
+}
+
+.legend-rows {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.legend-row {
+  align-items: baseline;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 74px minmax(0, 1fr);
+}
+
+.legend-row dt {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin: 0;
+}
+
+/* A form has no colour to show, so its name takes the column the swatch and
+   code share on the two lists above it. */
+.legend-row.form dt {
+  color: #cfe6ff;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.legend-row dd {
+  color: #cde8fb;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* The consortium keeps its own colour wherever it is drawn - purple against the
+   spotlights' blue - so a reader tells the two apart without reading either. */
+/* A partner reads as a mark rather than as a word, so its button is shaped for
+   one: a pill that a wordmark sits inside without being cropped. */
+.partner-button {
+  align-items: center;
+  background: #10263b;
+  border: 1px solid #ffffff1e;
+  border-radius: 999px;
+  color: #cde8fb;
+  cursor: pointer;
+  display: inline-flex;
+  font: 500 10px 'DM Mono', monospace;
+  gap: 5px;
+  padding: 5px 12px;
+  white-space: nowrap;
+}
+
+.partner-button img {
+  display: block;
+  height: 15px;
+  max-width: 92px;
+  object-fit: contain;
+}
+
+.partner-button:hover,
+.panel-rail .rail-pathway.rail-partner:hover {
+  border-color: #c39bff;
+  color: white;
+}
+
+.partner-button[aria-pressed='true'] {
+  box-shadow: 0 0 0 1px #c39bff55;
+}
+
+.partner-button[aria-pressed='true'],
+.panel-rail .rail-pathway.rail-partner[aria-pressed='true'] {
+  background: #2a1f3d;
+  border-color: #c39bff;
+  color: white;
+}
+
+/* In the rail there is no room for a name beside it, so the mark is the
+   button. */
+.panel-rail .rail-pathway img {
+  display: block;
+  height: 12px;
+  margin: 0 auto;
+  max-width: 26px;
+  object-fit: contain;
+}
+
+.legend-swatch {
+  border-radius: 3px;
+  display: inline-block;
+  height: 11px;
+  width: 11px;
+}
+
+.legend-rule {
+  border-radius: 2px;
+  display: inline-block;
+  height: 3px;
+  width: 16px;
+}
+
+.shortcut-group + .shortcut-group {
+  margin-top: 14px;
+}
+
+.shortcut-rows {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0;
+}
+
+.shortcut-row {
+  align-items: baseline;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 150px minmax(0, 1fr);
+}
+
+.shortcut-row dt {
+  margin: 0;
+}
+
+.shortcut-row dd {
+  color: #cde8fb;
+  font-size: 12px;
+  margin: 0;
+}
+
+.shortcut-row kbd {
+  background: #10263b;
+  border: 1px solid #ffffff24;
+  border-radius: 5px;
+  color: #dff3ff;
+  display: inline-block;
+  font: 600 10px 'DM Mono', monospace;
+  padding: 3px 7px;
+  white-space: nowrap;
+}
+
+/* A published specification, rendered over the stage rather than opened as raw
+   JSON in a new tab. Sits above the shortcut overlay, which is the only other
+   thing that covers the whole window. */
+.specification-overlay {
+  align-items: center;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: fixed;
+  z-index: 50;
+}
+
+.specification-card {
+  background: #0a1929;
+  border: 1px solid #ffffff1e;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px #02060cb3;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  max-width: 1180px;
+  overflow: hidden;
+  position: relative;
+  width: 92vw;
+}
+
+.specification-head {
+  align-items: center;
+  border-bottom: 1px solid #ffffff14;
+  display: flex;
+  flex: none;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px 16px;
+}
+
+.specification-head h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.specification-head-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+}
+
+.specification-head-actions a {
+  color: #7fb2e5;
+  font-size: 12px;
+}
+
+/* Scalar brings its own scrolling, so the frame only has to give it a bounded
+   box to do that in. */
+.specification-frame {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: #7fb2e5;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Sits above the specification list, ruled off from it: what the tab is for,
+   read before the list rather than after it. */
+.specification-lead {
+  border-bottom: 1px solid #ffffff14;
+  margin: 0 0 12px;
+  padding-bottom: 10px;
+}
+
+/* Marked for removal, and drawn as going rather than gone.
+   Nothing is destroyed by marking it - the change set says what to take out of
+   the model, and the model is the file - so the thing stays on the stage,
+   faded and struck through, until the reader applies the set or lifts the mark
+   with the same key. Showing it as already absent would claim an edit the
+   editor has not made. */
+.topology-service.going,
+.topology-flows .going {
+  opacity: 0.32;
+}
+
+.topology-service.going rect {
+  stroke-dasharray: 4 3;
+}
+
+.topology-service.going text {
+  text-decoration: line-through;
+}
+
+.topology-flows .going path {
+  stroke-dasharray: 5 4;
+}
+
+/* A removal in the change list. Struck through like the thing it names is on
+   the stage, so the two read as the same edit seen twice. */
+.change-list li.removing code {
+  color: #e0a0a0;
+  text-decoration: line-through;
+}
+
+/* A creation in the same list. Marked in the affirmative colour a removal is
+   marked in the negative one, so the two ends of the same idea look like it. */
+.change-list li.creating code {
+  color: #9fd6a4;
+}
+
+/*
+ * Which family a new line belongs to, asked where the drag was let go.
+ *
+ * Positioned in page coordinates because that is what a pointer release
+ * reports; the stage is scaled and panned, so a diagram coordinate would put
+ * the question somewhere other than the reader's hand.
+ */
+.family-choice {
+  background: #10161f;
+  border: 1px solid #2c3a4d;
+  border-radius: 8px;
+  box-shadow: 0 12px 32px #00000080;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  position: fixed;
+  transform: translate(-50%, 8px);
+  z-index: 40;
+}
+
+.family-choice p {
+  color: #8fa3bd;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  margin: 2px 6px 6px;
+  text-transform: uppercase;
+}
+
+.family-choice button {
+  align-items: center;
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  color: #d6e2f0;
+  cursor: pointer;
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  padding: 5px 8px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.family-choice button:hover {
+  background: #1d2735;
+}
+
+.family-choice button b {
+  color: #8fa3bd;
+  font-weight: 600;
+  min-width: 34px;
+}
+
+.family-choice-swatch {
+  border-radius: 2px;
+  height: 10px;
+  width: 10px;
+}
+
+/* Catches the click that dismisses the picker, and nothing else - so it carries
+   no appearance of its own and covers the stage rather than sitting on it. */
+.family-choice-backdrop {
+  background: none;
+  border: 0;
+  cursor: default;
+  inset: 0;
+  position: fixed;
+  z-index: 39;
+}
+
+/*
+ * A story's scenes, and what one says.
+ *
+ * The list is the sequence, which is the one thing the stage cannot show: what
+ * a scene lights is on the diagram, but which scene comes third is nowhere.
+ */
+.editor-panes {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: 2px;
+}
+
+.story-panel {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.scene-tools {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+}
+
+.scene-tools button {
+  align-items: center;
+  background: #ffffff08;
+  border: 1px solid #ffffff1a;
+  border-radius: 5px;
+  color: #aabbd0;
+  cursor: pointer;
+  display: inline-flex;
+  padding: 4px 6px;
+}
+
+.scene-tools button:hover:not(:disabled) {
+  background: #1d2735;
+  color: #dff0ff;
+}
+
+.scene-tools button:disabled {
+  cursor: not-allowed;
+  opacity: 0.32;
+}
+
+/* The run time, which follows every hold rather than policing one. */
+.scene-run-time {
+  align-items: center;
+  color: #8fa9c4;
+  display: inline-flex;
+  font: 600 10px 'DM Mono', monospace;
+  gap: 4px;
+  margin-right: auto;
+}
+
+.scene-list {
+  display: grid;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.scene-row {
+  align-items: center;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #aabbd0;
+  cursor: pointer;
+  display: grid;
+  font-size: 11px;
+  gap: 8px;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  padding: 4px 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.scene-row:hover {
+  background: #ffffff08;
+}
+
+.scene-row.selected {
+  background: #16283a;
+  border-color: #2f5878;
+  color: #dff0ff;
+}
+
+.scene-row em {
+  color: #7f9bb3;
+  font: 600 10px 'DM Mono', monospace;
+  font-style: normal;
+}
+
+.scene-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scene-row b {
+  color: #7f9bb3;
+  font: 500 10px 'DM Mono', monospace;
+}
+
+.scene-fields {
+  display: grid;
+  gap: 5px;
+}
+
+.scene-fields textarea {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+  resize: vertical;
+}
+
+.scene-hold {
+  align-items: center;
+  display: flex;
+  gap: 5px;
+}
+
+.scene-hold input {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+  width: 74px;
+}
+
+.scene-hold button,
+.scene-lit button {
+  background: #1d2735;
+  border: 1px solid #2c3a4d;
+  border-radius: 4px;
+  color: #d6e2f0;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+.scene-hold button:disabled,
+.scene-lit button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.scene-lit {
+  color: #8fa9c4;
+  font-size: 11px;
+  margin: 2px 0 0;
+}
+
+/*
+ * What the selected scene lights, while the scene editor is open.
+ *
+ * Marked rather than highlighted: the highlight treatment belongs to a scene
+ * being *shown*, and this is a scene being *built*. A reader adding things to a
+ * scene needs to see which are in it, not what it will look like when it plays -
+ * they can play it for that.
+ */
+.topology-svg.lighting .topology-service.lit rect {
+  stroke-dasharray: none;
+  stroke-width: 2.5;
+}
+
+.topology-svg.lighting .topology-service.lit .topology-service-label {
+  fill: white;
+}
+
+.topology-svg.lighting [class*='flow-family-'].lit .topology-route {
+  stroke-width: 4;
+}
+
+/* Everything not in the scene recedes, so what is in it reads at a glance. */
+.topology-svg.lighting .topology-service:not(.lit),
+.topology-svg.lighting [class*='flow-family-']:not(.lit) {
+  opacity: 0.35;
+}
+
+/* In the scene editor a card is a thing to include, so it says so on hover. */
+.topology-svg.lighting .topology-service.selectable {
+  cursor: pointer;
+}
+
+/* The scene editor has no tools of its own, so it says what to do instead. */
+.scene-hint {
+  color: #8fa3bd;
+  font-size: 11px;
+}
+
+/* Naming a new scene sits with the controls that act on the list, since making
+   one is the first thing done here and the rest follow from it. */
+.scene-tools input[type='text'] {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  flex: 1 1 auto;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+}
+
+/* A scene's code, where a story's beat shows its number: both say which one
+   this is in a way that survives the list being reordered. */
+.scene-row em {
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.scene-fields textarea {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+  resize: vertical;
+}
+
+/* Following a run: the panel says so, because a scene list that changes under
+   the reader without explanation looks like a bug rather than a feature. */
+.scene-following {
+  color: #8fa9c4;
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* A list of short lines, each its own field so removing the third is a control
+   beside the third rather than a run of characters to find. */
+.line-list {
+  display: grid;
+  gap: 5px;
+  grid-template-columns: 54px minmax(0, 1fr);
+}
+
+.line-list-label {
+  color: #8fa9c4;
+  font: 600 9px 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  padding-top: 5px;
+  text-transform: uppercase;
+}
+
+.line-list-rows {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.line-list-row {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.line-list-row input {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font: 500 11px Manrope, Arial, sans-serif;
+  min-width: 0;
+  padding: 4px 6px;
+}
+
+.line-list-row button,
+.line-list-add {
+  align-items: center;
+  background: #ffffff08;
+  border: 1px solid #ffffff1a;
+  border-radius: 5px;
+  color: #8fa9c4;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 4px;
+  font-size: 11px;
+  justify-content: center;
+  padding: 4px 8px;
+}
+
+.line-list-row button:hover,
+.line-list-add:hover {
+  background: #1d2735;
+  color: #dff0ff;
+}
