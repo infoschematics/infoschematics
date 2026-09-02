@@ -1,11 +1,11 @@
 # Author an Infoschematic
 
-Author product data against `@infoschematics/model`. Keep the definition in its own workspace or package when it represents a separately maintained Infoschematic.
+Author product data with types from `@infoschematics/domain-model` and normalise complete definitions with `defineInfoschematic` from `@infoschematics/domain-core`. Keep the definition in its own workspace or package when it represents a separately maintained Infoschematic.
 
 ## Start blank
 
 ```ts
-import { defineInfoschematic } from '@infoschematics/model'
+import { defineInfoschematic } from '@infoschematics/domain-core'
 
 export const myInfoschematic = defineInfoschematic({
   title: 'My Infoschematic'
@@ -25,7 +25,7 @@ Populate `infoschematic` with the structural world:
 - `scopes` and `flowFamilies` provide filtering and visual identity;
 - `interfaces` and `specificationGroups` describe technical contracts.
 
-Coordinates use the Core `Box` and `Point` shapes exposed through Model configuration types. Placement and routing algorithms remain Core behaviour; authored output remains plain data.
+Coordinates use View Model `Box` and `Point` shapes exposed through Domain Model configuration types. Placement and routing algorithms remain View Model behaviour; authored output remains plain data.
 
 ## Add presentation material
 
@@ -36,7 +36,7 @@ Copying a Standalone Scene into a Theme or Story creates independently owned mat
 ## Keep configuration portable
 
 - Export one complete value created by `defineInfoschematic`.
-- Import only `@infoschematics/model` from the authored workspace.
+- Import domain types from `@infoschematics/domain-model` and domain behaviour from `@infoschematics/domain-core`; never import a view package from an authored workspace.
 - Use stable string identifiers and renderer keys.
 - Keep React components, browser APIs, fetched documents and derived maps out of configuration.
 - Let the host own contract files and other static assets addressed by configuration URLs.

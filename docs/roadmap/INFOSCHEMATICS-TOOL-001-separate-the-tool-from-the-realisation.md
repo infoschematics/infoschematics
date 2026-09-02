@@ -10,7 +10,7 @@ blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
-> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-018`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the current workspace split: read `src/diagram/` as `workspaces/core/src/`, product-model paths as `workspaces/model/src/`, and other reusable application paths as `workspaces/app/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
+> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-018`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the current workspace split: read `src/diagram/` as `workspaces/view-model/src/`, product-model paths as `workspaces/domain-model/src/`, and other reusable application paths as `workspaces/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
 
 ## Goal
 
@@ -69,7 +69,7 @@ Delivery splits judgment from mechanics, per [GDR-IBC2026-002](https://github.co
 
 ## Current state
 
-The reusable boundary is now explicit: `workspaces/core/` owns framework-neutral calculations, `workspaces/model/` owns the serialisable product contract, and `workspaces/app/` publishes the React adapter. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only example and the public site now exercise the same public package seam. The remaining structural work is the renderer split inside the React package and a complete colour/token pass; vocabulary rollout is tracked by `INFOSCHEMATICS-TOOL-002`.
+The reusable boundary is now explicit: `workspaces/view-model/` owns framework-neutral visual calculations, `workspaces/domain-model/` owns the serialisable product contract, and `workspaces/view-studio/` publishes the current React Studio view. The first 5G realisation, its contracts and its authored singleton have left the repository. A blank, data-only Infoschematic and the public site now exercise the same public package seam. The remaining structural work is the view split and a complete colour/token pass; vocabulary rollout is tracked by `INFOSCHEMATICS-TOOL-002`.
 
 ## Steps
 
@@ -77,14 +77,14 @@ The reusable boundary is now explicit: `workspaces/core/` owns framework-neutral
 - [ ] Split the root diagram component along what it mixes — the stage as the generic renderer keeping the settled name, the fabric artwork with the authored material, the wiring to the app.
 - [x] Found `src/app/` and break the root entry into it: the shell legible on its own, the entry thinned to mounting.
 - [x] Regroup the scattered UI — panels, editor surfaces, hooks — by ownership, kind within.
-- [x] Found `workspaces/model/` as the framework-neutral authored contract, leaving only derived runtime structures in the React application.
+- [x] Found `workspaces/domain-model/` as the framework-neutral authored contract, leaving derived runtime structures in the view packages.
 - [x] Move each retained test with its subject, and re-point tests that crossed the new public boundaries.
 - [x] Give scripts and documentation explicit owners: root scripts govern the monorepo, while the site owns deployment commands and configuration.
 - [x] Replace authored singleton imports with a complete host-supplied `InfoschematicConfig`, so reusable surfaces describe a configured product rather than one realisation.
 - [x] Model Standalone, Thematic and Story Scenes explicitly, with Themes and Stories owning their respective Scenes.
 - [x] Give a Fabric's display caption and detail one authored home in its appearance configuration.
 - [ ] Name the colour decisions into tokens and route the authored colours — taxonomy and lanes — through the same layer, leaving new theme sets to `DBD-011`.
-- [x] Baseline dependency-cruiser, then widen it across Core, Model, React, examples and the site so each forbidden ownership crossing fails verification.
+- [x] Baseline dependency-cruiser, then widen it across Domain Model, View Model, Studio View, authored Infoschematics and the site so each forbidden ownership crossing fails verification.
 - [x] Move `StageOverlay.tsx`'s figures out of `src/diagram/` with the rest of the authored material.
 
 ## Delivery so far
@@ -111,7 +111,7 @@ Second tranche, same evening:
 ## Files touched
 
 - `core/src/**`
-- `workspaces/app/src/**`
+- `workspaces/view-studio/src/**`
 - `.dependency-cruiser.cjs`
 - Package export maps and affected architecture documentation
 
@@ -138,7 +138,7 @@ Update vocabulary and package-boundary specifications where the first realisatio
 
 ### Guides
 
-Update architecture and contributor guidance to describe the final `workspaces/core/`, `workspaces/app/`, and host-owned realisation boundary.
+Update architecture and contributor guidance to describe the `workspaces/domain-model/`, `workspaces/view-model/`, `workspaces/view-studio/`, and host-owned realisation boundary.
 
 ### Roadmap
 
@@ -158,8 +158,8 @@ The win this buys is that `DBD-011` stops being a refactor wearing an extraction
 
 ### Decisions since the move (2026-09-02)
 
-- **The public seam is configuration.** `@infoschematics/model` owns `InfoschematicConfig` and `defineInfoschematic`; `@infoschematics/react` requires `<App config={config} />`; each host owns `document.title`. A title-only definition is a valid blank Infoschematic and, without optional config identifier, creates no shared persistence key.
-- **The package graph is directional.** Model depends on Core geometry types, React depends on Model Core, each host definition depends only on Model. Three MIT library packages use normal `0.1.0` dependencies so manifests publishable; local source consumers use root overrides while packages remain unpublished.
+- **The public seam is configuration.** `@infoschematics/domain-model` owns `InfoschematicConfig`; `@infoschematics/domain-core` owns `defineInfoschematic`; `@infoschematics/view-studio` currently requires `<App config={config} />`; each host owns `document.title`. A title-only definition is a valid blank Infoschematic and, without an optional config identifier, creates no shared persistence key.
+- **The package graph is directional.** Domain Model depends on View Model geometry types, Studio View depends on Domain Model and View Model, and each authored Infoschematic depends only on Domain Model. The MIT library packages use normal `0.1.0` dependencies so their manifests are publishable; local source consumers use root overrides while packages remain unpublished.
 - **The realisation is home.** 5G host owns contracts, assets complete serialisable definition. Temporary React `./model` export, authored play, singleton model 5G fixtures are gone from this repository.
 - **Hosts are independent workspaces.** Both the 5G project and infoschematics.info separate their application from their Infoschematic. TOOL-003 moved with the website and is now represented by [INFOSCHEMATICS-SITE-001](INFOSCHEMATICS-SITE-001-an-infoschematic-of-infoschematics.md); the blank definition is deliberately distinct from that future self-describing example.
 - **Each host authors its own play.** Kris settled the open question of where the 5G-EMERGE realisation lives when this record lands: it returns to `5g-emerge-ibc-2026` alone. The website's example does not share it — the website gets its own realisation, transferred to [INFOSCHEMATICS-SITE-001](INFOSCHEMATICS-SITE-001-an-infoschematic-of-infoschematics.md).

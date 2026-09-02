@@ -1,0 +1,13 @@
+{
+	"name": "@infoschematics/domain-core",
+	"description": "Framework-neutral Infoschematic domain behaviour and configuration normalisation.",
+	"version": "0.1.0",
+	"dependencies": {
+		"@infoschematics/domain-model": "0.1.0"
+	},
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"license": "MIT",
+	"type": "module"
+}

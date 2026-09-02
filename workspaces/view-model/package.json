@@ -1,0 +1,13 @@
+{
+  "name": "@infoschematics/view-model",
+	"description": "The framework-agnostic Infoschematic view model: geometry, ports, routing, guides, placement, editing primitives and shared tokens.",
+	"version": "0.1.0",
+	"dependencies": {
+		"@infoschematics/domain-model": "0.1.0"
+	},
+	"exports": {
+    "./*": "./src/*.ts"
+  },
+  "license": "MIT",
+  "type": "module"
+}

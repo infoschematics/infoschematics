@@ -1,10 +1,10 @@
 # Integrate with React
 
-The React package renders one complete host-owned `InfoschematicConfig`.
+The current Studio View package renders one complete host-owned `InfoschematicConfig` using React. It temporarily contains Canvas and Present while those additive view packages are extracted.
 
 ```tsx
-import { App as InfoschematicApp } from '@infoschematics/react'
-import '@infoschematics/react/styles.css'
+import { App as InfoschematicApp } from '@infoschematics/view-studio'
+import '@infoschematics/view-studio/styles.css'
 import { myInfoschematic } from '@example/my-infoschematic'
 import { useEffect } from 'react'
 
@@ -27,7 +27,7 @@ The host owns:
 - deployment and cache policy;
 - selection of the authored Infoschematic definition.
 
-The React package owns rendering, producer controls and runtime state derived from configuration. It must not import a particular example.
+The Studio View package owns the current rendering, producer controls and runtime state derived from configuration. It must not import a particular authored Infoschematic.
 
 ## Workspace development
 
@@ -44,4 +44,4 @@ The website runs from `workspaces/site`. The root verification gate runs all tes
 bun run check
 ```
 
-External source checkouts currently require local package overrides until the three public packages are published. Package publication is separate release work; do not vendor source into a host.
+External source checkouts currently require local package overrides until the public packages are published. Package publication is separate release work; do not vendor source into a host.

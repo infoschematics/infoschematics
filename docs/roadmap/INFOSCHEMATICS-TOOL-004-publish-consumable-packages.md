@@ -13,7 +13,7 @@ baseline_ref: null
 
 ## Goal
 
-Publish Core, Model and React as independently consumable packages with stable build artefacts, export maps and release guidance.
+Publish Domain Model, View Model and Studio View as independently consumable packages with stable build artefacts, export maps and release guidance.
 
 ## Context
 
@@ -21,7 +21,7 @@ The monorepo currently exposes TypeScript source and resolves matching package v
 
 ## Boundary
 
-This item does not change the product model, add renderers, publish the site as a library, or introduce application-specific content. Package names remain `@infoschematics/core`, `@infoschematics/model` and `@infoschematics/react` unless a separate naming decision changes them first.
+This item does not change the product model, add renderers, publish the site as a library, or introduce application-specific content. The initial publication targets are `@infoschematics/domain-model`, `@infoschematics/domain-core`, `@infoschematics/view-model` and `@infoschematics/view-studio`; later view and renderer packages join through their own delivery work.
 
 ## Discussion
 

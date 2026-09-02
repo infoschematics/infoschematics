@@ -1,14 +1,15 @@
 {
   "name": "infoschematics",
-  "description": "The Infoschematics product model, framework-neutral core, React application, examples, guidance, and public website.",
+  "description": "The Infoschematics domain model, derived view model, Studio view, examples, guidance, and public website.",
   "version": "0.1.0",
   "author": "Infoschematics",
   "bugs": {
     "url": "https://github.com/infoschematics/infoschematics/issues"
   },
-  "devDependencies": {
-    "@infoschematics/core": "0.1.0",
-    "@infoschematics/model": "0.1.0",
+	"devDependencies": {
+		"@infoschematics/domain-core": "0.1.0",
+		"@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-model": "0.1.0",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -48,8 +49,8 @@
     "ki:site:deploy": "bun run --cwd workspaces/site deploy",
     "ki:site:dev": "bun run --cwd workspaces/site dev",
     "ki:site:preview": "bun run --cwd workspaces/site preview",
-    "ki:verify:depcruise": "depcruise workspaces/core/src workspaces/model/src workspaces/app/src workspaces/is-blank/src workspaces/site/src",
-    "ki:verify:typecheck": "tsc --noEmit -p workspaces/core && tsc --noEmit -p workspaces/model && tsc --noEmit -p workspaces/app && tsc --noEmit -p workspaces/is-blank && tsc --noEmit -p workspaces/site",
+		"ki:verify:depcruise": "depcruise workspaces/domain-model/src workspaces/domain-core/src workspaces/view-model/src workspaces/view-studio/src workspaces/is-blank/src workspaces/site/src",
+		"ki:verify:typecheck": "tsc --noEmit -p workspaces/domain-model && tsc --noEmit -p workspaces/domain-core && tsc --noEmit -p workspaces/view-model && tsc --noEmit -p workspaces/view-studio && tsc --noEmit -p workspaces/is-blank && tsc --noEmit -p workspaces/site",
     "test": "vitest run --root ."
   },
   "type": "module",

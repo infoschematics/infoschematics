@@ -18,9 +18,9 @@ Author an Infoschematic of Infoschematics so the public website explains the pro
 
 ## Context
 
-The website is now part of this repository as the public outlet for the packages, guidance and examples. Its designed homepage already uses a small schematic-like sequence to explain the idea, while `@infoschematics/example-blank` proves the React application accepts a valid title-only configuration.
+The website is now part of this repository as the public outlet for the packages, guidance and examples. Its designed homepage already uses a small schematic-like sequence to explain the idea, while `@infoschematics/is-blank` proves the Studio view accepts a valid title-only configuration.
 
-The future example should replace neither of those. It should be a complete authored product that demonstrates the Model contract, the React application and the vocabulary without becoming hidden application state.
+The future example should replace neither of those. It should be a complete authored product that demonstrates the Domain Model contract, an appropriate View package and the vocabulary without becoming hidden application state.
 
 ## Boundary
 

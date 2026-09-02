@@ -3,8 +3,8 @@
   "description": "The official Infoschematics website, documentation and example host.",
   "version": "0.1.0",
   "dependencies": {
-    "@infoschematics/example-blank": "0.1.0",
-    "@infoschematics/react": "0.1.0",
+    "@infoschematics/is-blank": "0.1.0",
+    "@infoschematics/view-studio": "0.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

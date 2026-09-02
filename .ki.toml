@@ -4,7 +4,7 @@ harnesses = ["knowledgeislands/ki-agentic-harness"]
 [skills.ki-repo]
 repository = "https://github.com/infoschematics/infoschematics"
 title = "Infoschematics"
-description = "The Infoschematic product model, framework-neutral core, React application, examples, guidance, and public website."
+description = "The Infoschematic domain model, framework-neutral view model, interactive views, authored examples, guidance, and public website."
 repo_code = "INFOSCHEMATICS"
 supported_runtimes = ["claude-code", "chatgpt-codex"]
 visibility = "public"

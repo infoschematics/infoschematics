@@ -1,9 +1,5 @@
 /**
- * The seams of the source, stated as rules rather than habits.
- *
- * Carried over from the first realisation (5g-emerge-ibc-2026, IBC2026-DBD-018):
- * the baseline states today's boundaries, and every move tightens these rules
- * in the same commit that makes it.
+ * Architectural dependency rules for the Infoschematics workspace families.
  */
 module.exports = {
   forbidden: [
@@ -12,63 +8,79 @@ module.exports = {
       comment: 'A cycle is two owners disagreeing about who is on top.',
       severity: 'error',
       from: {},
-      to: { circular: true }
+      to: { circular: true },
     },
     {
-      name: 'app-is-mounted-not-borrowed',
-      comment:
-        "src/app is the realisation's composition root: the entry mounts it, and nothing else reaches into it.",
+      name: 'studio-is-mounted-not-borrowed',
+      comment: "src/app is Studio's composition root: entry mounts it, nothing else reaches into it.",
       severity: 'error',
-      from: { path: '^workspaces/app/src', pathNot: '^workspaces/app/src/(app|index\\.ts)' },
-      to: { path: '^workspaces/app/src/app' }
+      from: {
+        path: '^workspaces/view-studio/src',
+        pathNot: '^workspaces/view-studio/src/(app|index\\.ts)',
+      },
+      to: { path: '^workspaces/view-studio/src/app' },
     },
     {
       name: 'entry-stays-thin',
-      comment: 'src/index.ts only exports the public surface: the app, and nothing else.',
+      comment: 'src/index.ts only exports the public Studio surface.',
       severity: 'error',
-      from: { path: '^workspaces/app/src/index\\.ts$' },
-      to: { pathNot: '^workspaces/app/src/app|node_modules' }
+      from: { path: '^workspaces/view-studio/src/index\\.ts$' },
+      to: { pathNot: '^workspaces/view-studio/src/app|node_modules' },
     },
     {
-      name: 'diagram-stays-generic',
-      comment:
-        "src/diagram is the framework side: geometry, ports, routing, guides. It never learns the realisation's nouns.",
-      severity: 'error',
-      from: { path: '^workspaces/core/src' },
-      to: { path: '^workspaces/(model|app)/src' }
-    },
-    {
-      name: 'model-stays-framework-neutral',
-      comment: 'The product model may use core primitives and never reaches into a UI adapter.',
-      severity: 'error',
-      from: { path: '^workspaces/model/src' },
-      to: { path: '^workspaces/app/src' }
+			name: 'view-model-stays-generic',
+			comment: 'The view model may consume domain data, but never application, authored-example or deployment code.',
+			severity: 'error',
+			from: { path: '^workspaces/view-model/src' },
+			to: {
+				path: '^workspaces/',
+				pathNot: '^workspaces/(domain-model|view-model)/src',
+			},
+		},
+		{
+			name: 'domain-model-has-no-workspace-dependencies',
+			comment: 'The serialisable domain contract is the dependency root and imports no other workspace.',
+			severity: 'error',
+			from: { path: '^workspaces/domain-model/src' },
+			to: {
+				path: '^workspaces/',
+				pathNot: '^workspaces/domain-model/src',
+			},
+		},
+		{
+			name: 'domain-core-depends-only-on-domain-model',
+			comment: 'Domain behaviour may consume the domain contract but no view, example or deployment workspace.',
+			severity: 'error',
+			from: { path: '^workspaces/domain-core/src' },
+			to: {
+				path: '^workspaces/',
+				pathNot: '^workspaces/(domain-core|domain-model)/src',
+			},
     },
     {
       name: 'library-stays-reusable',
-      comment:
-        "src/library is reusable authored artwork: it may reach the framework's geometry, never this realisation's model or data.",
+      comment: 'Reusable artwork may reach the view model, never Studio application state.',
       severity: 'error',
-      from: { path: '^workspaces/app/src/library' },
-      to: { path: '^workspaces/app/src/app' }
+      from: { path: '^workspaces/view-studio/src/library' },
+      to: { path: '^workspaces/view-studio/src/app' },
     },
     {
-      name: 'examples-stay-framework-neutral',
-      comment: 'Authored examples depend on the product model, never on a UI or deployment host.',
+      name: 'authored-infoschematics-stay-framework-neutral',
+			comment: 'Authored Infoschematics may use domain contracts and behaviour, never a view or deployment host.',
       severity: 'error',
-      from: { path: '^workspaces/is-blank/src' },
-      to: { path: '^workspaces/(app|site)/src' }
+      from: { path: '^workspaces/is-[^/]+/src' },
+      to: { path: '^workspaces/(view-[^/]+|site)/src' },
     },
     {
       name: 'site-does-not-own-product-model',
-      comment: 'The public site consumes packages and examples; it does not reach into Core or Model internals.',
+      comment: 'The site consumes public packages; it does not reach into domain or view-model internals.',
       severity: 'error',
       from: { path: '^workspaces/site/src' },
-      to: { path: '^workspaces/(core|model)/src' }
-    }
+      to: { path: '^workspaces/(domain-model|view-model)/src' },
+    },
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
-    tsConfig: { fileName: 'tsconfig.base.json' }
-  }
+    tsConfig: { fileName: 'tsconfig.base.json' },
+  },
 }

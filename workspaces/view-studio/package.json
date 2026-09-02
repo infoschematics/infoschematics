@@ -1,0 +1,23 @@
+{
+  "name": "@infoschematics/view-studio",
+  "description": "The Infoschematic Studio view: React canvas, presentation controls and producer-facing editing capabilities.",
+  "version": "0.1.0",
+	"dependencies": {
+		"@infoschematics/domain-core": "0.1.0",
+		"@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-model": "0.1.0",
+    "@scalar/api-reference-react": "^0.9.65",
+    "lucide-react": "^1.31.0",
+    "zod": "^4.1.12"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "type": "module"
+}

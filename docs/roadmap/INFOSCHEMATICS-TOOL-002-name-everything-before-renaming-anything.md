@@ -10,7 +10,7 @@ blocked_by: []
 baseline_ref: 53c81f4d6c0b9f002b86d05030e37005c706d8ec
 ---
 
-> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-019`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the workspace split: read `src/diagram/` as `workspaces/core/src/`, and any other `src/` path as `workspaces/app/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
+> Moved from `5g-emerge-ibc-2026` (as `IBC2026-DBD-019`) on 2026-09-02, when the tool's source moved to this repository and the dashboard became a host. Paths in this record predate the workspace split: read `src/diagram/` as `workspaces/view-model/src/`, and any other `src/` path as `workspaces/view-studio/src/`. Cross-references to IBC2026 decision records and specs resolve in the [5g-emerge-ibc-2026 repository](https://github.com/5g-emerge/5g-emerge-ibc-2026).
 
 ## Goal
 
@@ -371,7 +371,7 @@ Capability gaps discovered by the mapping are retained separately in `INFOSCHEMA
 
 - This roadmap record and any follow-on records it explicitly creates
 - Vocabulary, architecture, and contributor documentation affected by the settled terms
-- `workspaces/core/src/**` and `workspaces/app/src/**` identifiers named by the approved rollout
+- `workspaces/view-model/src/**` and `workspaces/view-studio/src/**` identifiers named by the approved rollout
 
 ## Verify
 
@@ -409,11 +409,11 @@ Delivered the settled vocabulary, implementation mapping, documentation and depe
 
 ### Summary of changes
 
-Added the canonical vocabulary specification and repository guidance; aligned public Model and React seams; renamed React runtime members, components, files, editor modes, visible copy, accessibility copy and CSS hooks; and captured publication, production-mode, artefact-editing and renderer-registry follow-ons as `INFOSCHEMATICS-TOOL-004` through `INFOSCHEMATICS-TOOL-007`. Historical local-storage keys remain readable compatibility details and are documented as such.
+Added the canonical vocabulary specification and repository guidance; aligned the public Domain Model and Studio View seams; renamed runtime members, components, files, editor modes, visible copy, accessibility copy and CSS hooks; and captured publication, production-mode, artefact-editing and renderer-registry follow-ons as `INFOSCHEMATICS-TOOL-004` through `INFOSCHEMATICS-TOOL-007`. Historical local-storage keys remain readable compatibility details and are documented as such.
 
 ### Verification
 
-`bun install --frozen-lockfile` completed without changes. `bun run check` passed 87 tests in nine files, TypeScript checks for Core, Model, React, the blank example and the site, dependency-cruiser across 89 modules and 198 dependencies, and the production site build. `rumdl check` passed all changed guidance and roadmap files; the authoring audit passed.
+`bun install --frozen-lockfile` completed without changes. `bun run check` passed 87 tests in nine files, TypeScript checks for Domain Model, View Model, Studio View, the blank Infoschematic and the site, dependency-cruiser across 89 modules and 198 dependencies, and the production site build. `rumdl check` passed all changed guidance and roadmap files; the authoring audit passed.
 
 ### Outstanding concerns
 

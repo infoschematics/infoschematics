@@ -1,4 +1,4 @@
-import { defineInfoschematic } from "@infoschematics/model/config";
+import { defineInfoschematic } from "@infoschematics/domain-core";
 
 export const blankInfoschematic = defineInfoschematic({
   title: "Infoschematics",

@@ -1,0 +1,29 @@
+{
+  "name": "@infoschematics/domain-model",
+  "description": "The framework-neutral Infoschematic domain model and serialisable configuration contract.",
+  "version": "0.1.0",
+	"exports": {
+    ".": "./src/index.ts",
+    "./artefact": "./src/artefact.ts",
+    "./card": "./src/card.ts",
+    "./fabric": "./src/fabric.ts",
+    "./flow": "./src/flow.ts",
+    "./flow-family": "./src/flow-family.ts",
+		"./graphic": "./src/graphic.ts",
+		"./geometry": "./src/geometry.ts",
+    "./infoschematic": "./src/infoschematic.ts",
+    "./interface": "./src/interface.ts",
+    "./lane": "./src/lane.ts",
+    "./metadata": "./src/metadata.ts",
+		"./point": "./src/point.ts",
+		"./ports": "./src/ports.ts",
+    "./scene": "./src/scene.ts",
+    "./scope": "./src/scope.ts",
+    "./specification-group": "./src/specification-group.ts",
+    "./story": "./src/story.ts",
+    "./theme": "./src/theme.ts",
+    "./zone": "./src/zone.ts"
+  },
+  "license": "MIT",
+  "type": "module"
+}

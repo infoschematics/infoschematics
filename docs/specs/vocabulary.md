@@ -60,8 +60,9 @@ The persistent interface regions are the **Infoschematic panel**, **Producer con
 - Runtime types are derived from configuration and do not leak into authored definitions.
 - Identifiers and renderer keys are stable strings. A renderer key selects host or React-package behaviour without embedding a component in configuration.
 - The host owns browser title, mounting, routing, static assets and deployment.
-- `@infoschematics/model` owns the public product contract.
-- `@infoschematics/core` owns calculations and geometry.
-- `@infoschematics/react` owns the React application and runtime adapter.
+- `@infoschematics/domain-model` owns the public product contract.
+- `@infoschematics/domain-core` owns framework-neutral domain behaviour and configuration normalisation.
+- `@infoschematics/view-model` owns framework-neutral visual calculations and geometry.
+- `@infoschematics/view-studio` owns the current combined interactive application and producer runtime while the additive view packages are extracted.
 
 The terms `topology`, `programme`, `demonstration`, `spotlight`, `vendor`, `play`, `stage`, `lighting`, `book`, `act` and `beat` are not public Infoschematics concepts. Domain prose may still use an ordinary-language term where it genuinely describes its subject; this rule governs product vocabulary, not unrelated content.

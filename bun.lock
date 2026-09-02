@@ -5,8 +5,9 @@
     "": {
       "name": "infoschematics",
       "devDependencies": {
-        "@infoschematics/core": "0.1.0",
-        "@infoschematics/model": "0.1.0",
+        "@infoschematics/domain-core": "0.1.0",
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-model": "0.1.0",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
@@ -19,45 +20,30 @@
         "vitest": "^4.0.3",
       },
     },
-    "workspaces/app": {
-      "name": "@infoschematics/react",
+    "workspaces/domain-core": {
+      "name": "@infoschematics/domain-core",
       "version": "0.1.0",
       "dependencies": {
-        "@infoschematics/core": "0.1.0",
-        "@infoschematics/model": "0.1.0",
-        "@scalar/api-reference-react": "^0.9.65",
-        "lucide-react": "^1.31.0",
-        "zod": "^4.1.12",
-      },
-      "peerDependencies": {
-        "react": "^19.2.0",
-        "react-dom": "^19.2.0",
+        "@infoschematics/domain-model": "0.1.0",
       },
     },
-    "workspaces/core": {
-      "name": "@infoschematics/core",
+    "workspaces/domain-model": {
+      "name": "@infoschematics/domain-model",
       "version": "0.1.0",
     },
     "workspaces/is-blank": {
-      "name": "@infoschematics/example-blank",
+      "name": "@infoschematics/is-blank",
       "version": "0.1.0",
       "dependencies": {
-        "@infoschematics/model": "0.1.0",
-      },
-    },
-    "workspaces/model": {
-      "name": "@infoschematics/model",
-      "version": "0.1.0",
-      "dependencies": {
-        "@infoschematics/core": "0.1.0",
+        "@infoschematics/domain-core": "0.1.0",
       },
     },
     "workspaces/site": {
       "name": "@infoschematics/site",
       "version": "0.1.0",
       "dependencies": {
-        "@infoschematics/example-blank": "0.1.0",
-        "@infoschematics/react": "0.1.0",
+        "@infoschematics/is-blank": "0.1.0",
+        "@infoschematics/view-studio": "0.1.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
       },
@@ -70,6 +56,29 @@
         "vite": "^7.1.12",
         "vitest": "^4.0.3",
         "wrangler": "^4.123.0",
+      },
+    },
+    "workspaces/view-model": {
+      "name": "@infoschematics/view-model",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-model": "0.1.0",
+      },
+    },
+    "workspaces/view-studio": {
+      "name": "@infoschematics/view-studio",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-model": "0.1.0",
+        "@scalar/api-reference-react": "^0.9.65",
+        "lucide-react": "^1.31.0",
+        "zod": "^4.1.12",
+      },
+      "peerDependencies": {
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
       },
     },
   },
@@ -280,15 +289,17 @@
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.35.2", "", { "os": "win32", "cpu": "x64" }, "sha512-imoOyBcoM/iiUr4J6VPpCNjPnjvP/Gks95898yB8YqoGGYmHYbOyCuNv9FMhFgtaiHFGbHW8bxKqRV6VjtXThQ=="],
 
-    "@infoschematics/core": ["@infoschematics/core@workspace:workspaces/core"],
+    "@infoschematics/domain-core": ["@infoschematics/domain-core@workspace:workspaces/domain-core"],
 
-    "@infoschematics/example-blank": ["@infoschematics/example-blank@workspace:workspaces/is-blank"],
+    "@infoschematics/domain-model": ["@infoschematics/domain-model@workspace:workspaces/domain-model"],
 
-    "@infoschematics/model": ["@infoschematics/model@workspace:workspaces/model"],
-
-    "@infoschematics/react": ["@infoschematics/react@workspace:workspaces/app"],
+    "@infoschematics/is-blank": ["@infoschematics/is-blank@workspace:workspaces/is-blank"],
 
     "@infoschematics/site": ["@infoschematics/site@workspace:workspaces/site"],
+
+    "@infoschematics/view-model": ["@infoschematics/view-model@workspace:workspaces/view-model"],
+
+    "@infoschematics/view-studio": ["@infoschematics/view-studio@workspace:workspaces/view-studio"],
 
     "@internationalized/date": ["@internationalized/date@3.12.4", "", { "dependencies": { "@swc/helpers": "^0.5.0" } }, "sha512-M1dEn4c1U1HsSlaVR8upZtSqvXrTkHDfv18H01uCSJyjVLDxnBR38v/fMxecmlwXKR4i9HeZcmgQAPE6A+aGJQ=="],
 
