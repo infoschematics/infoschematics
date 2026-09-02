@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-TOOL-007
 area: TOOL
 title: Generalise renderer registry
 theme: tool
-horizon: future
+horizon: soon
 status: draft
-candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-TOOL-008]
 baseline_ref: null
 ---
 
@@ -22,6 +21,10 @@ The model already carries renderer keys and serialisable properties, while React
 ## Boundary
 
 This item does not put JSX, component constructors or callbacks into `InfoschematicConfig`. It does not add domain-specific renderers to Core or Model, and it does not require the website to own reusable rendering behaviour.
+
+## Shaping
+
+Place renderer lookup and fallback at the Canvas host boundary established by `INFOSCHEMATICS-TOOL-008`, while authored data retains only stable keys and serialisable properties. Before promotion, choose the public registry API, define versioned property validation and diagnostics, specify deterministic unknown-key fallbacks for Fabrics, Graphics and Callouts, and prove that external hosts can register implementations without introducing React into Domain Model or authored definitions.
 
 ## Discussion
 

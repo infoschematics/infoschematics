@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-TOOL-009
 area: TOOL
 title: Centralise visual tokens
 theme: tool
-horizon: future
+horizon: soon
 status: draft
-candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-TOOL-008]
 baseline_ref: null
 ---
 
@@ -22,6 +21,10 @@ The extraction removed the first realisation's authored content, but inherited v
 ## Boundary
 
 This item centralises existing visual decisions; it does not design multiple themes, add host-authored arbitrary styling, or make unrestricted colour and typography part of `InfoschematicConfig`.
+
+## Shaping
+
+Audit reusable values after `INFOSCHEMATICS-TOOL-008` has assigned Canvas, Present, Studio and static SVG ownership. Define framework-neutral semantic tokens below React, adapt them into renderer-appropriate forms, and leave interaction chrome with its owning View. Before promotion, inventory literals and existing tokens, settle naming and override boundaries, identify migration slices, and specify cross-renderer consistency tests without turning authored configuration into a styling API.
 
 ## Discussion
 

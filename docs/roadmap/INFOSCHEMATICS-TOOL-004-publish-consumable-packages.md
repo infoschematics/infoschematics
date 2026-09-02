@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-TOOL-004
 area: TOOL
 title: Publish consumable packages
 theme: tool
-horizon: future
+horizon: soon
 status: draft
-candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-TOOL-008]
 baseline_ref: null
 ---
 
@@ -22,6 +21,10 @@ The monorepo currently exposes TypeScript source and resolves matching package v
 ## Boundary
 
 This item does not change the product model, add renderers, publish the site as a library, or introduce application-specific content. The initial publication targets are `@infoschematics/domain-model`, `@infoschematics/domain-core`, `@infoschematics/view-model` and `@infoschematics/view-studio`; later view and renderer packages join through their own delivery work.
+
+## Shaping
+
+Define one repeatable build, pack and release path for independently consumable packages, beginning with the framework-neutral packages and extending to the additive View surfaces once `INFOSCHEMATICS-TOOL-008` has stabilised them. Before promotion, settle compiled versus source distribution, declaration and export-map output, peer dependency ranges, coordinated versioning, provenance, registry authority, and an isolated packed-consumer smoke test.
 
 ## Discussion
 

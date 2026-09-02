@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-TOOL-006
 area: TOOL
 title: Complete artefact editing
 theme: tool
-horizon: future
+horizon: soon
 status: draft
-candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-TOOL-005]
 baseline_ref: null
 ---
 
@@ -22,6 +21,10 @@ Current editing capability is strongest for Cards and Flows. The settled product
 ## Boundary
 
 This item changes Design capabilities and persistent authored data only where required. It does not own Scene composition, production-mode navigation, package publication, or the visual design of the public site.
+
+## Shaping
+
+Extend the existing draft-and-change-set editing model rather than creating a second editor state path. `INFOSCHEMATICS-TOOL-005` must first establish Design ownership and transitions. Before promotion, inventory creation, selection, geometry, deletion and ordering support for every artefact kind; define per-kind mutation operations and copy-from-Library semantics; divide the work into inspectable steps; and specify interaction plus serialisation tests that preserve fixed depth and kind order.
 
 ## Discussion
 

@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-TOOL-005
 area: TOOL
 title: Complete production modes
 theme: tool
-horizon: future
+horizon: soon
 status: draft
-candidate: true
-blocks: []
-blocked_by: []
+blocks: [INFOSCHEMATICS-TOOL-006]
+blocked_by: [INFOSCHEMATICS-TOOL-008]
 baseline_ref: null
 ---
 
@@ -22,6 +21,10 @@ The vocabulary distinguishes the Audience-facing Present mode from the Producer'
 ## Boundary
 
 This item owns mode state, mode transitions and the division of production controls. It does not redesign the six artefact contracts, publish packages, or add a domain-specific Infoschematic.
+
+## Shaping
+
+Build the settled Present, Design and Direct vocabulary into an explicit mode model after `INFOSCHEMATICS-TOOL-008` establishes Present and Studio ownership. Present owns Audience session state; Studio owns the Producer's mode selection and the Design and Direct controls. Before promotion, specify transition behaviour, the single-active Scene, Theme or Story invariant, empty-sequence guards, Scope and Flow-family precedence, persistence boundaries, and interaction tests for every transition.
 
 ## Discussion
 

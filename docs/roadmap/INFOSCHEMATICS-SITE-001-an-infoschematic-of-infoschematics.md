@@ -3,11 +3,10 @@ id: INFOSCHEMATICS-SITE-001
 area: SITE
 title: Explain Infoschematics visually
 theme: site-experience
-horizon: future
+horizon: soon
 status: draft
-candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-TOOL-008]
 baseline_ref: null
 transferred_from: INFOSCHEMATICS-WEB-SITE-001
 ---
@@ -25,6 +24,10 @@ The future example should replace neither of those. It should be a complete auth
 ## Boundary
 
 This item does not reintroduce 5G-EMERGE content, add domain-specific renderers to the reusable packages, or make the website the source of product types. It does not remove the designed homepage or the blank example.
+
+## Shaping
+
+Author the self-describing definition as a new `examples/is-infoschematics` workspace, keep its configuration independent of React, and let Site mount it through the narrowest additive View package that supports the intended experience. `INFOSCHEMATICS-TOOL-008` must first establish that package surface. Before promotion, settle the narrative scope, representative artefacts and Scenes, Site route, and assertions that keep the example valid and serialisable.
 
 ## Discussion
 
