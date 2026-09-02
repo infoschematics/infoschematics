@@ -1,7 +1,8 @@
 /**
  * Architectural dependency rules for the Infoschematics workspace families.
  */
-module.exports = {
+/** @type {import('dependency-cruiser').IConfiguration} */
+const config = {
   forbidden: [
     {
       name: 'no-circular',
@@ -84,3 +85,5 @@ module.exports = {
     tsConfig: { fileName: 'tsconfig.base.json' },
   },
 }
+
+export default config
