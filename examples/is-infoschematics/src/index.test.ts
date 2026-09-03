@@ -46,6 +46,43 @@ describe('infoschematicsInfoschematic', () => {
     ])
   })
 
+  it('authors visual treatments and Domain classification independently of Scope', () => {
+    expect(diagram.appearance).toEqual({
+      card: {
+        compact: true,
+        description: false,
+        identity: true,
+        stereotype: true,
+      },
+      grid: 'major-plus-minor',
+      surface: 'blueprint',
+    })
+    expect(diagram.domains?.map(({ id }) => id)).toEqual([
+      'product-foundation',
+      'interactive-experience',
+      'publication',
+    ])
+
+    const domains = new Set((diagram.domains ?? []).map(({ id }) => id))
+    expect(diagram.cards.every((card) => card.domain && domains.has(card.domain))).toBe(true)
+    expect(diagram.cards.every((card) => card.stereotype)).toBe(true)
+
+    const publicationCards = diagram.cards.filter(({ domain }) => domain === 'publication')
+    expect(new Set(publicationCards.map(({ scope }) => scope))).toEqual(
+      new Set(['renderer-output', 'authored-examples', 'application-hosts']),
+    )
+
+    expect(diagram.lanes.map(({ appearance }) => appearance?.frame)).toEqual([
+      'notched',
+      'notched',
+      'notched',
+      'notched',
+    ])
+    expect(diagram.lanes.flatMap(({ zones }) => zones).every(({ appearance }) => appearance)).toBe(
+      true,
+    )
+  })
+
   it('expresses only the allowed dependency direction', () => {
     const edges = diagram.flows.map((flow) => `${flow.source}->${flow.target}`)
 

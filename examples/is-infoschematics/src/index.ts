@@ -13,12 +13,15 @@ const packageCard = (
   label: string,
   detail: string,
   scope: string,
+  domain: string,
+  stereotype: string,
   x: number,
   y: number,
   width = 280,
 ) => ({
   code,
   detail,
+  domain,
   id,
   label,
   placement: {
@@ -27,6 +30,7 @@ const packageCard = (
   },
   scope,
   scopes: [scope],
+  stereotype,
 })
 
 const dependency = (
@@ -61,6 +65,39 @@ export const infoschematicsInfoschematic = defineInfoschematic({
   ],
   infoschematic: {
     viewBox: { height: 920, width: 1400, x: 0, y: 0 },
+    appearance: {
+      surface: 'blueprint',
+      grid: 'major-plus-minor',
+      card: {
+        compact: true,
+        identity: true,
+        stereotype: true,
+        description: false,
+      },
+    },
+    domains: [
+      {
+        color: '#2456a6',
+        description: 'Reusable contracts and framework-neutral behaviour.',
+        fill: '#e8f0ff',
+        id: 'product-foundation',
+        label: 'Product foundation',
+      },
+      {
+        color: '#087f5b',
+        description: 'Interactive capability for Producers and Audiences.',
+        fill: '#e4f7ef',
+        id: 'interactive-experience',
+        label: 'Interactive experience',
+      },
+      {
+        color: '#a23b72',
+        description: 'Authored and rendered outlets for sharing Infoschematics.',
+        fill: '#fdebf5',
+        id: 'publication',
+        label: 'Publication',
+      },
+    ],
     scopes: [
       {
         color: '#2456a6',
@@ -122,6 +159,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
     ],
     lanes: [
       {
+        appearance: { frame: 'notched', label: 'north-west' },
         height: 160,
         id: 'lane-domain-contract',
         label: 'Authored contract',
@@ -130,6 +168,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 20,
         zones: [
           {
+            appearance: { frame: 'plain', label: 'south-east' },
             fill: '#e8f0ff',
             id: 'zone-domain-model',
             label: 'Dependency root',
@@ -139,6 +178,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
+        appearance: { frame: 'notched', label: 'north' },
         height: 170,
         id: 'lane-neutral-behaviour',
         label: 'Framework-neutral behaviour',
@@ -147,6 +187,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 210,
         zones: [
           {
+            appearance: { frame: 'plain', label: 'west' },
             fill: '#f4f0ff',
             id: 'zone-domain-behaviour',
             label: 'Domain behaviour',
@@ -154,6 +195,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
+            appearance: { frame: 'plain', label: 'east' },
             fill: '#ece9ff',
             id: 'zone-view-calculations',
             label: 'View calculations',
@@ -163,6 +205,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
+        appearance: { frame: 'notched', label: 'north-east' },
         height: 170,
         id: 'lane-output-packages',
         label: 'View and renderer packages',
@@ -171,6 +214,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 410,
         zones: [
           {
+            appearance: { frame: 'plain', label: 'south-west' },
             fill: '#e4f7ef',
             id: 'zone-interactive-views',
             label: 'Additive interactive Views',
@@ -178,6 +222,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
+            appearance: { frame: 'plain', label: 'south-east' },
             fill: '#fff4d6',
             id: 'zone-static-output',
             label: 'Static output',
@@ -187,6 +232,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
+        appearance: { frame: 'notched', label: 'south' },
         height: 230,
         id: 'lane-composition',
         label: 'Authored composition',
@@ -195,6 +241,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 660,
         zones: [
           {
+            appearance: { frame: 'plain', label: 'north-west' },
             fill: '#fdebf5',
             id: 'zone-authored-examples',
             label: 'Authored examples',
@@ -202,6 +249,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
+            appearance: { frame: 'plain', label: 'north-east' },
             fill: '#fff0e5',
             id: 'zone-application-hosts',
             label: 'Application hosts',
@@ -218,6 +266,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Domain Model',
         'Serialisable authored product types and no package dependencies.',
         'domain-contract',
+        'product-foundation',
+        'package',
         560,
         65,
         280,
@@ -228,6 +278,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Domain Core',
         'Framework-neutral defaults and domain behaviour.',
         'neutral-behaviour',
+        'product-foundation',
+        'package',
         180,
         255,
         280,
@@ -238,6 +290,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'View Model',
         'Framework-neutral geometry, routing, presentation, and editing calculations.',
         'neutral-behaviour',
+        'product-foundation',
+        'package',
         900,
         255,
         280,
@@ -248,6 +302,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Canvas View',
         'Reusable interactive Infoschematic surface.',
         'interactive-views',
+        'interactive-experience',
+        'package',
         80,
         450,
       ),
@@ -257,6 +313,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Present View',
         'Audience focus, navigation, Callouts, and Story playback over Canvas.',
         'interactive-views',
+        'interactive-experience',
+        'package',
         380,
         450,
       ),
@@ -266,6 +324,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Studio View',
         'Producer-facing Design and Direct capability over Present.',
         'interactive-views',
+        'interactive-experience',
+        'package',
         680,
         450,
       ),
@@ -275,6 +335,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'SVG Renderer',
         'Deterministic static SVG from the same authored definition.',
         'renderer-output',
+        'publication',
+        'package',
         1080,
         450,
       ),
@@ -284,6 +346,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Authored examples',
         'Independent serialisable products depending only on Domain Core.',
         'authored-examples',
+        'publication',
+        'Infoschematic',
         220,
         710,
         280,
@@ -294,6 +358,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Public Site',
         'Host-owned routing, metadata, composition, and deployment.',
         'application-hosts',
+        'publication',
+        'application',
         900,
         710,
         280,
