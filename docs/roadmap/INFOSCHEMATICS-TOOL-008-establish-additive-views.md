@@ -111,7 +111,7 @@ Additive Views are now physical public packages rather an architectural destinat
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03.
 
 ## Discussion
 
