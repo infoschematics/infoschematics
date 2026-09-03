@@ -1,6 +1,10 @@
 # Knowledge Islands repository configuration.
 # Its presence declares conformance with the Knowledge Islands repository standard.
 
+# -----------------------------------------------------------------------------
+# Foundation
+# -----------------------------------------------------------------------------
+
 [repo]
 harnesses = ["knowledgeislands/ki-agentic-harness"]
 
@@ -9,19 +13,37 @@ repository = "https://github.com/infoschematics/infoschematics"
 title = "Infoschematics"
 description = "The Infoschematic domain model, framework-neutral view model, interactive views, authored examples, guidance, and public website."
 repo_code = "INFOSCHEMATICS"
-supported_runtimes = ["claude-code", "chatgpt-codex"]
 visibility = "public"
 license = "MIT"
+supported_runtimes = ["claude-code", "chatgpt-codex"]
 
 [skills.ki-repo.checks]
 # The standard topic set (mcp, model-context-protocol, claude) describes MCP servers,
 # not this diagramming product; accurate topics are set directly on GitHub instead.
 topics = false
-# The KI engineering toolchain (Biome, knip, syncpack, compiled root build) conflicts
-# with the delivered per-package release build; adopt it through a roadmap item first.
-coverage-engineering = false
+
+[skills.ki-authoring]
+
+# -----------------------------------------------------------------------------
+# Repository shape
+# -----------------------------------------------------------------------------
 
 [skills.ki-repo-project]
+
+[skills.ki-repo-website]
+site-root = "apps/site"
+
+[skills.ki-repo-website-app]
+
+[skills.ki-repo-website-cloudflare]
+
+# -----------------------------------------------------------------------------
+# Governance runtime
+# -----------------------------------------------------------------------------
+
+[skills.ki-engineering]
+
+[skills.ki-git]
 
 [skills.ki-housekeeping-claude]
 
@@ -31,29 +53,20 @@ coverage-engineering = false
 
 [skills.ki-tokenomics-codex]
 
-[skills.ki-authoring]
-
-[skills.ki-git]
-
-[skills.ki-agora]
-
-[skills.ki-agora.memberships.hnr]
-
-home = "https://github.com/krisb/kit-hnr"
-role = "maintainer"
+# -----------------------------------------------------------------------------
+# Change management
+# -----------------------------------------------------------------------------
 
 [skills.ki-work]
 adapter = "roadmap"
 
 [skills.ki-work-roadmap]
+areas.SITE = "site-experience"
+areas.TOOL = "tool"
 
-[skills.ki-work-roadmap.areas]
-SITE = "site-experience"
-TOOL = "tool"
+# -----------------------------------------------------------------------------
+# Relationships
+# -----------------------------------------------------------------------------
 
-[skills.ki-repo-website]
-site-root = "apps/site"
-
-[skills.ki-repo-website-app]
-
-[skills.ki-repo-website-cloudflare]
+[skills.ki-agora]
+memberships.hnr = { home = "https://github.com/krisb/kit-hnr", role = "maintainer" }
