@@ -6,15 +6,15 @@ const box = { height: 100, width: 180, x: 10, y: 20 }
 
 describe('region label geometry', () => {
   it.each([
-    ['north-west', 26, 20, 'start'],
-    ['north', 100, 20, 'middle'],
-    ['north-east', 174, 20, 'end'],
+    ['north-west', 26, 36, 'start'],
+    ['north', 100, 36, 'middle'],
+    ['north-east', 174, 36, 'end'],
     ['west', 10, 70, 'start'],
     ['center', 100, 70, 'middle'],
     ['east', 190, 70, 'end'],
-    ['south-west', 26, 120, 'start'],
-    ['south', 100, 120, 'middle'],
-    ['south-east', 174, 120, 'end'],
+    ['south-west', 26, 104, 'start'],
+    ['south', 100, 104, 'middle'],
+    ['south-east', 174, 104, 'end'],
   ] as const)('places %s deterministically', (placement, x, y, textAnchor) => {
     const geometry = regionGeometry({
       box,

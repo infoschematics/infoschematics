@@ -77,7 +77,11 @@ const labelGeometry = (box: Box, placement: RegionLabelPlacement): RegionLabelGe
           ? x
           : x + regionGeometryDefaults.labelInset
         : x + width / 2,
-    y: north ? y : south ? y + height : y + height / 2,
+    y: north
+      ? y + regionGeometryDefaults.labelInset
+      : south
+        ? y + height - regionGeometryDefaults.labelInset
+        : y + height / 2,
   }
 }
 
