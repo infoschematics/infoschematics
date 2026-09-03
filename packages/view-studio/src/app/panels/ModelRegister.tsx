@@ -172,8 +172,8 @@ export function ModelRegister({
                    * `conformsTo` is alternatives: where a flow names two, the
                    * theme decides which is true and the flow cannot. `over`
                    * is a payload on a transport, which is not a choice at all.
-                   * Both read as "or" until now, so several Flows
-                   * offered a choice nobody makes.
+                   * Rendering these relationships differently avoids presenting
+                   * a transport relationship as an alternative.
                    */
                   const named = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id
                   const alternatives = (flow.conformsTo ?? []).map(named).join(' or ')

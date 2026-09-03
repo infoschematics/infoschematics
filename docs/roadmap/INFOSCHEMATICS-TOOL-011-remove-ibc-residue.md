@@ -18,11 +18,11 @@ Remove the original IBC 2026 realisation's authored and rendering residue from r
 
 A source comparison with the original IBC 2026 repository found first-realisation material still embedded in `packages/view-studio`. The residue includes fixed Story Graphics and narrative text, Fabric implementations and coordinates, exact labels and identifiers, IBC-specific runtime coupling, source-specific icon mappings, fixed card placement, media-service copy, test fixtures, comments, selectors, and stale interface CSS.
 
-The authored IBC definition itself is not present. Historical documentation provenance and the legacy persistence-key compatibility path are intentional and are not residue. `INFOSCHEMATICS-TOOL-008` is explicitly behaviour-preserving, so it would otherwise distribute the embedded assumptions into the new package boundaries.
+The authored IBC definition itself is not present. Current documentation and reusable source should describe only the host-neutral design; historical provenance and compatibility-only persistence names are not part of the product contract. `INFOSCHEMATICS-TOOL-008` is explicitly behaviour-preserving, so it would otherwise distribute embedded assumptions into the new package boundaries.
 
 ## Boundary
 
-This item removes, generalises, or isolates first-realisation material only where it leaks into reusable product behaviour. The approved delivery includes the matching host declaration and compatibility migration in the original IBC repository. It does not erase historical provenance, remove intentional storage compatibility, design the versioned renderer registry and validation contract owned by `INFOSCHEMATICS-TOOL-007`, complete editing owned by `INFOSCHEMATICS-TOOL-006`, or centralise all visual tokens owned by `INFOSCHEMATICS-TOOL-009`.
+This item removes, generalises, or isolates first-realisation material where it leaks into reusable product behaviour or its current design description. The approved delivery includes the matching host declaration in the original IBC repository. It does not design the versioned renderer registry and validation contract owned by `INFOSCHEMATICS-TOOL-007`, complete editing owned by `INFOSCHEMATICS-TOOL-006`, or centralise all visual tokens owned by `INFOSCHEMATICS-TOOL-009`.
 
 ## Current state
 
@@ -38,12 +38,14 @@ This item removes, generalises, or isolates first-realisation material only wher
 - [x] Migrate the IBC host to the current Infoschematics package names and ownership-root paths so local linking and clean vendor builds consume the same public surfaces.
 - [x] Add focused reusable-package tests for renderer injection, generic fallback behaviour, bounds-driven placement, and unresolved Graphic references, plus IBC host assertions for every declared renderer key.
 - [x] Run both repositories' complete checks and record the paired commit evidence without pushing either repository.
+- [x] Remove remaining IBC provenance, compatibility-only persistence names, source-specific examples, and historical implementation commentary from reusable documentation and Studio source.
 
 ## Files touched
 
 - `packages/view-studio/src/app/**`, `packages/view-studio/src/index.ts`, and `packages/view-studio/src/styles.css` for the renderer seam, neutral fallbacks, composition, copy, and tests;
 - removal of `packages/view-studio/src/library/**` and the embedded Story Graphic component;
 - `docs/specs/view-studio.md` and `docs/guides/react-integration.md` for the host-owned rendering contract;
+- `docs/design/view-present.md` and reusable Studio comments for current-state, host-neutral design descriptions;
 - the IBC repository's package manifests, authored Graphic declarations, Site renderer components, host composition, CSS, tests, and integration guidance.
 
 ## Verify
@@ -84,21 +86,23 @@ Removed IBC-specific rendering and narrative residue from reusable Studio code w
 
 Studio now accepts an `InfoschematicRenderers` host configuration for Fabrics, Graphics, shared SVG definitions, and Scope icons. It resolves Story Graphics through authored records, renders each visible Fabric independently, and supplies a generic bounds-driven fallback. The IBC host now owns its four Fabric implementations, two authored Graphics, shared SVG resources, visual CSS, icon mapping, and current package integration. The paired implementation commits are Infoschematics `cb2a7caee13605bf90997648e87825bbbe3becbf` and IBC 2026 `1a9be3d598d9af5297a7a0be04967d6e5c3ee178`, delivered from baseline `1ac734b31673cf2cdf6948be580fc6d31fea786e`.
 
+The remedial pass renamed persisted presentation and panel-tab keys for the current concepts, removed provenance from the Present View design, replaced source-specific and historical comments with current host-neutral explanations, and extended the residue guard to cover those categories.
+
 ### Verification
 
-Infoschematics passed `bun run check`, including tests, all TypeScript workspaces, dependency boundaries, and the production Site build. IBC 2026 passed `bun run typecheck`, `bun run test`, and `bun run build`. Focused tests cover configured renderers, generic Fabric fallback, authored and unresolved Story Graphic references, complete IBC renderer-key coverage, and server-rendered host Fabric output. A bounded reusable-package source search found no remaining first-realisation names, labels, narrative, renderer keys, or source-specific visual selectors covered by this item.
+Infoschematics passed `bun run check`, including 98 tests, all TypeScript workspaces, dependency boundaries, and the production Site build. IBC 2026 passed `bun run typecheck`, `bun run test` with 10 tests, and `bun run build` against the current linked packages. Focused tests cover configured renderers, generic Fabric fallback, authored and unresolved Story Graphic references, complete IBC renderer-key coverage, server-rendered host Fabric output, and a bounded reusable-source guard against historical, compatibility and source-specific language. A final literal search found none of the guarded residue outside the test that defines the guard.
 
 ### Outstanding concerns
 
-The production builds retain their existing large-chunk advisory. General renderer registration ergonomics, versioned property schemas, diagnostics, and future unknown-key policy remain correctly assigned to `INFOSCHEMATICS-TOOL-007`; they are not residue required for this separation.
+The production builds retain existing toolchain advisories for compatibility options, third-party annotations and large chunks. General renderer registration ergonomics, versioned property schemas, diagnostics, and future unknown-key policy remain correctly assigned to `INFOSCHEMATICS-TOOL-007`; visual-token consolidation remains assigned to `INFOSCHEMATICS-TOOL-009`.
 
 ### Post-change review
 
-Ready for human acceptance. The reusable-to-host ownership boundary is explicit, the original information is retained in serialisable IBC declarations and host renderers, and both repositories build against the same current public package surfaces.
+Ready for renewed human acceptance. The reusable-to-host ownership boundary is explicit, the original information is retained in serialisable IBC declarations and host renderers, and reusable source and documentation now state only the current host-neutral contract.
 
 ### Mini recap
 
-Infoschematics no longer embeds knowledge of the IBC 2026 diagram. The IBC project now composes that realisation through configuration and host rendering, making the boundary visible in both repositories' commit histories.
+Infoschematics no longer embeds knowledge of the IBC 2026 diagram or compatibility names from its first realisation. The IBC project composes that realisation through configuration and host rendering.
 
 ## Discussion
 
@@ -116,6 +120,6 @@ The reusable public seam lands first so the linked IBC checkout can consume it. 
 
 Content, geometry, identifiers, or branching that exists only because of the first IBC 2026 authored Infoschematic belongs in authored data or its host. A reusable implementation may retain a general rendering capability only when its inputs and behaviour no longer encode that specific realisation.
 
-### Compatibility
+### Persistence
 
-Delivery must measure the original IBC host's dependency on every removed built-in and record the required handoff. Compatibility risk is evidence for migration work, not a reason to leave undocumented source-specific behaviour in reusable packages.
+Persistence keys describe the current Studio concepts directly. They do not retain aliases or compatibility paths for earlier host terminology.

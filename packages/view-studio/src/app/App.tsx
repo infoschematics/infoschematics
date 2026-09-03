@@ -29,9 +29,8 @@ import {
 
 type InfoschematicScopeId = string
 
-// The Infoschematic carries more than published APIs: traditional media and metadata
-// delivery are real pathways with no contract behind them, and they belong in
-// the same picker so a reader can light them up the same way.
+// Flow Families remain visible controls whether or not their Flows reference a
+// published interface specification.
 
 /*
  * Which lines meet a card, by code.
@@ -86,28 +85,12 @@ const authoredPortAt =
 function nextCodeIn(prefix: string, taken: readonly string[]): string {
   const serials = taken.flatMap((code) => new RegExp(`^${prefix}-(\\d+)$`).exec(code)?.slice(1) ?? [])
   const highest = serials.reduce((best, serial) => Math.max(best, Number(serial)), 0)
-  /*
-   * Padded to the width the series already uses.
-   *
-   * Every code in this model is written `STD-01`, not `STD-1`, and a series
-   * that had fewer than nine members was being handed an unpadded code that
-   * sorted and read unlike every one of its neighbours. Read off the series
-   * rather than fixed at two, so a series that outgrows two digits keeps
-   * numbering rather than being silently truncated back into them.
-   */
+  // Follow the configured series width, with two digits as the minimum.
   const width = serials.reduce((widest, serial) => Math.max(widest, serial.length), 2)
   return `${prefix}-${String(highest + 1).padStart(width, '0')}`
 }
 
-/**
- * An identifier from what the reader called the card.
- *
- * Every authored id follows this same name-derived rule, and
- * `demand-controller` - so deriving it keeps a created card indistinguishable
- * from the rest once its change set lands. Derived rather than asked for
- * separately because two fields describing the same thing is two chances to
- * disagree, and the model has no use for an id that is not the name.
- */
+/** Derives a stable identifier from the Card name using the authored naming rule. */
 const identifierFrom = (name: string) =>
   name
     .toLowerCase()
@@ -161,10 +144,6 @@ function AppContent() {
   const [fullscreen, setFullscreen] = useState(false)
   const [diagramWidth, setDiagramWidth] = useState<number | null>(null)
   const [panelWidth, setPanelWidth] = usePersistentState<number | null>(storage && `${storage}.panels.width`, null)
-  // Authoring state, not a presentation preference: the dashboard must never come
-  // back from a reload with every label outlined and draggable in front of a room.
-  // Drafts do persist, because losing unsaved placements would be real work lost.
-
   const infoschematicPanel = useRef<HTMLDivElement>(null)
   const infoschematicControls = useRef<HTMLDivElement>(null)
   const controlRoom = useRef<HTMLElement>(null)
@@ -210,16 +189,8 @@ function AppContent() {
   const register = infoschematicRegisterWith(editor.createdCards)
 
   /*
-   * A card's move is its adapter's move.
-   *
-   * The offsets are keyed by code, and a line meeting an adapter names the
-   * adapter - so dragging a card moved the lines attached to the card and left
-   * the ones attached to its adapter where they were. Three of four, on the
-   * transmission card, which is a stranger thing to look at than all or none.
-   *
-   * Recorded here rather than resolved at each reader, because it is one fact
-   * about the model - an adapter has no position of its own - and the placement,
-   * the routing and the drawing should not each have to remember it.
+   * An adapter has no independent position, so it inherits the held Card's
+   * offset. Placement, routing and drawing therefore share one model fact.
    */
   const movedComponents = useMemo(() => {
     const all = new Map(editor.drafts)
@@ -274,17 +245,8 @@ function AppContent() {
   const canWrap = Boolean(wrappable && !wrappable.wraps && !wrapped.has(wrappable.id))
 
   /*
-   * Make a card, or an adapter around the selected one.
-   *
-   * A default rather than a form. The scope issues the code prefix, as a family
-   * does for a line, so a card renamed into a different scope afterwards keeps
-   * the code its first scope gave it - `ADR-INFOSCHEMATICS-003` renumbers nothing. The
-   * default is the standard scope because it is the one most cards are in, and
-   * the properties panel below is where it is corrected.
-   *
-   * An adapter takes the scope of the card it holds, which is the one thing
-   * about it that is not a free choice: it belongs where the thing it sits on
-   * belongs.
+   * A new Card starts in the first configured Scope. An adapter inherits the
+   * Scope of the Card it wraps because it has no independent ownership.
    */
   const createCard = useCallback(
     (kind: 'adapter' | 'card') => {

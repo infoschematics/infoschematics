@@ -34,12 +34,7 @@ export function usePersistentState<T>(key: string | undefined, fallback: T) {
   return useStored(key, fallback, () => (typeof window === 'undefined' ? undefined : window.localStorage))
 }
 
-/**
- * Kept for as long as the tab is open, and no longer. A reload while authoring
- * should not throw away where you were; opening the dashboard fresh should not
- * reopen it in edit mode in front of a room. Session storage is exactly that
- * distinction, which localStorage cannot express.
- */
+/** Retains transient interface state across reloads within the current browser tab. */
 export function useSessionState<T>(key: string | undefined, fallback: T) {
   return useStored(key, fallback, () => (typeof window === 'undefined' ? undefined : window.sessionStorage))
 }

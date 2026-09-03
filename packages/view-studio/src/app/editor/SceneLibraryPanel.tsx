@@ -2,16 +2,7 @@ import { Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import type { SceneLibraryEditor } from './use-scene-library.ts'
 
-/*
- * The scenes themselves, made and named here rather than only in the config.
- *
- * A scene is the atom - one set of components lit together - and until now the
- * editor could arrange scenes into a story and could not make one, which is the
- * wrong way round since the story is what depends on them.
- *
- * What a scene lights is chosen by clicking the Infoschematic, exactly as it is for a
- * story's own Story Scenes. One gesture for one idea, whichever layer is being edited.
- */
+/* A Scene is one independently named set of components and Flows lit together. */
 export function SceneLibraryPanel({
   editor,
   selected,

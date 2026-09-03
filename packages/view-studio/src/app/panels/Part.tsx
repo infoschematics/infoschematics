@@ -4,10 +4,8 @@ import type { ReactNode } from 'react'
 /*
  * A part of a panel that folds.
  *
- * Written for the register, where fifty-eight flows are a long way to
- * scroll past to reach the components under them, and taken out of it when the
- * properties panel wanted the same thing for the same reason: three sets down
- * one narrow column, of which a reader working on ports has no use for two.
+ * Useful in narrow panels where a large register or property set would
+ * otherwise hide the section a reader needs.
  *
  * The whole heading is the control rather than a chevron beside one. A part is
  * a thing a reader aims at, not a target they have to find.

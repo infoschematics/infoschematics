@@ -323,11 +323,8 @@ export function InfoschematicDiagram({
       point.y = event.clientY
       const at = point.matrixTransform(matrix.inverse())
 
-      // Which offer, decided here rather than by which element the pointer
-      // happens to be over. A waypoint within reach wins, since standing on one
-      // means removing it; anywhere else along a run means adding one. The
-      // delete used to wait on the waypoint's own pointer enter, so pressing
-      // Shift while already resting on it produced nothing at all.
+      // A nearby waypoint receives the delete affordance before a new waypoint
+      // is offered at the pointer position.
       const near = chosen.points
         .slice(1, -1)
         .map((waypoint, offset) => ({ away: Math.hypot(waypoint.x - at.x, waypoint.y - at.y), index: offset + 1 }))
@@ -621,12 +618,8 @@ export function InfoschematicDiagram({
       onRouteRelease,
     )
 
-  // The first click on a line selects its flow, same as a card; only a
-  // second click, once it is already selected, adds a waypoint - otherwise
-  // selecting a flow would plant a corner nobody asked for.
-  // Clicking a line selects it and does nothing else. Adding a waypoint used to
-  // share that click, which meant a line could not be inspected without being
-  // changed - so the add is its own control, offered where the pointer is.
+  // Selecting a Flow and adding a waypoint are separate actions. The dedicated
+  // waypoint control prevents selection from changing the route.
   const routeClicked = (flow: InfoschematicFlow) => (event: React.PointerEvent<SVGPathElement>) => {
     if (!editing || !onSelect || selected === flow.code) return
     event.stopPropagation()

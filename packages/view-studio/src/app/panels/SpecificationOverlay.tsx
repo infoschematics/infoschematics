@@ -1,18 +1,7 @@
 import { X } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 
-/*
- * A published specification, rendered to be read.
- *
- * The link this replaces opened the raw JSON in a new tab, which is honest but
- * asks a visitor to parse OpenAPI by eye at a trade stand. Scalar renders the
- * same document as documentation, and the document is still one click away
- * underneath for anyone who wants it.
- *
- * Loaded only when a specification is opened. The renderer is far larger than
- * the rest of the dashboard put together, and most visitors never open one, so
- * it must not sit in the bundle they wait for.
- */
+/* A host-published specification rendered as readable documentation on demand. */
 const ApiReference = lazy(async () => {
   // Its stylesheet comes with it rather than sitting in the entry bundle, so a
   // visitor who never opens a specification never fetches either.
@@ -26,7 +15,7 @@ export function SpecificationOverlay({
   name,
   onClose
 }: {
-  /** The published document, served from the contract pack beside the dashboard. */
+  /** The published document supplied by the host's contract pack. */
   href: string
   name: string
   onClose: () => void

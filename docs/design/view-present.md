@@ -2,7 +2,7 @@
 
 Present View is the audience-facing composition around an Infoschematic. It lets a presenter control what remains visible, focus the Audience on a Scene, move through a Story and explain the model without changing the model itself.
 
-This design was lifted from the dashboard developed for `5g-emerge-ibc-2026`. The reusable interaction model is retained here; event-specific content, consortium attribution, fixed layouts and the former theatre vocabulary are not.
+Present View owns reusable presentation behaviour. Authored content, attribution and geometry come from the Infoschematic; product identity and surrounding application behaviour come from the host.
 
 ## Audience questions
 
@@ -46,7 +46,3 @@ The title bar remains stable across those modes. Entering a larger presentation 
 The primary presentation actions are available as ordinary labelled buttons and are mirrored by contextual keyboard shortcuts. While a Story runs, left and right step through it, space holds or resumes automatic advance, and Escape stops it. Thematic Scenes use the same stepping keys without implying playback.
 
 Keyboard help is available in the view and groups bindings by the context in which they apply. Callouts announce changes politely and expose explicit previous, next and exit controls, so keyboard shortcuts remain an acceleration rather than the only route through a Story.
-
-## Lineage
-
-This document retains the generic presentation intent from IBC's `docs/design/dashboard.md`: subtractive filtering versus emphatic focus, explanation derived from the model, fixed geometry under changing emphasis, full-canvas presentation and presenter-oriented controls. The source's event-specific business questions, partner material and exact dashboard arrangement deliberately remain with that Infoschematic.

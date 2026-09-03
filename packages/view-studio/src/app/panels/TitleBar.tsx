@@ -2,18 +2,7 @@ import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PencilRule
 import type { Presentation } from '../hooks/use-presentation.ts'
 import { useInfoschematic } from '../infoschematic-context.tsx'
 
-/*
- * The product identity, at whatever height the mode can afford.
- *
- * Expanded, the panels are open and a row of chrome is not what is short, so it
- * takes two: the title over its strapline, with the consortium named in full
- * beside them and the controls to their right.
- *
- * Collapsed, the point is the diagram, so the bar reduces to one line - the
- * strapline beside the title rather than under it - and everything else goes to
- * the rail, which is already there and already vertical. The Themes go with
- * them, as codes.
- */
+/* Product identity and controls remain stable across panel layouts. */
 export function TitleBar({
   collapsed,
   fullscreen,
@@ -28,17 +17,7 @@ export function TitleBar({
   presentation: Presentation
 }) {
   const { config } = useInfoschematic()
-  /*
-   * One header, whatever the panels are doing.
-   *
-   * Collapsing used to render a different header with no controls at all, and
-   * the rail put its own copies of them down the side - so every icon jumped
-   * from the top of the window to the right edge and back as the panels opened
-   * and shut, and the control you had just used was never where you left it.
-   *
-   * The title also shrank, which bought a few pixels and cost the one thing a
-   * maximised diagram still needs the header for.
-   */
+  // The same header remains available whether the panels are open or collapsed.
   return (
     <header className="title-bar">
       <hgroup>
@@ -96,17 +75,7 @@ export function TitleBar({
         >
           {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
         </button>
-        {/*
-         * An action, drawn as what it will do - the same convention fullscreen
-         * uses, and the reason that one reads without being explained.
-         *
-         * It was a pressed state with the arrows the other way round, which is
-         * two mistakes agreeing: a button showing what *is* wants the opposite
-         * icon from one showing what *will be*, so reversing only the arrows
-         * would have made it read correctly for the wrong reason. Edit stays a
-         * pressed toggle, because a mode is a state you are in rather than an
-         * act you perform.
-         */}
+        {/* The icon and label describe the panel action rather than its current state. */}
         <button
           aria-label={collapsed ? 'Show the panels' : 'Collapse the panels'}
           className="icon-button"

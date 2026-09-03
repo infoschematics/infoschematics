@@ -88,31 +88,18 @@ export function DetailsPanel({
     infoschematicUnroutedInterfaces,
   } = useInfoschematic()
   const unroutedInterfaceIds = new Set(infoschematicUnroutedInterfaces.map((entry) => entry.id))
-  // Where you were, for as long as the tab is open. A reload mid-edit should
-  // not lose the tab; a fresh session should still open on Info.
-  /*
-   * A tab per mode, remembered separately.
-   *
-   * Present and Design are different work, so returning to one should
-   * return a reader to what they were doing there rather than to its first tab.
-   * One remembered tab across both would have sent an author back to Info every
-   * time they came out of the editors to check something.
-   */
-  const [frontTab, setFrontTab] = useSessionState<'showing' | 'specifications'>(
-    config.id && `${config.id}.panel.tab`,
+  // Present and Design remember their active tabs independently for this session.
+  const [presentTab, setPresentTab] = useSessionState<'showing' | 'specifications'>(
+    config.id && `${config.id}.panel.tab.present`,
     'showing',
   )
-  // Compatibility contract: this session key retains its former suffix until
-  // an explicit persisted-state migration can preserve the selected Design tab.
-  const [backTab, setBackTab] = useSessionState<'scenes' | 'design' | 'stories'>(
-    config.id && `${config.id}.panel.tab.backstage`,
+  const [designTab, setDesignTab] = useSessionState<'scenes' | 'design' | 'stories'>(
+    config.id && `${config.id}.panel.tab.design`,
     'design',
   )
-  const panelTab = presentation.designing ? backTab : frontTab
-  // Dispatched by which side the tab belongs to rather than by which mode is
-  // open, so choosing one cannot write it into the other mode's memory.
+  const panelTab = presentation.designing ? designTab : presentTab
   const chooseTab = (id: 'scenes' | 'showing' | 'specifications' | 'design' | 'stories') =>
-    id === 'showing' || id === 'specifications' ? setFrontTab(id) : setBackTab(id)
+    id === 'showing' || id === 'specifications' ? setPresentTab(id) : setDesignTab(id)
   const [selectedContract, setSelectedContract] = useState<InterfaceConfig | null>(null)
   /* Which specification is open for reading, which is not the same as which is
      selected: selecting one lists what conforms to it, reading one renders it. */
@@ -130,21 +117,7 @@ export function DetailsPanel({
   )
   const { runningStory, standaloneScene, thematicScene } = presentation
 
-  // Restoring the tab has to restore the mode with it, since the Edit tab is
-  // how edit mode is entered at all.
-  /*
-   * The tab decides whether an editor is open; the mode decides which one.
-   *
-   * Leaving the tab closes both. Entering it returns to the Infoschematic editor,
-   * because that is what the tab has always been and a reader arriving at it
-   * has not yet said they want the other.
-   */
-  /*
-   * The tab is the mode. Two editors were one tab with a switch inside it,
-   * which put the choice a level below where it belongs: a reader picks what
-   * they are working on the same way they pick Info or Specifications, and the
-   * tab strip is where that choice already lives.
-   */
+  // The selected Design tab determines which editor is active.
   const { mode, setMode } = editor
   /*
    * Each editor's own changes, as the one entry each is.
@@ -163,11 +136,9 @@ export function DetailsPanel({
   const layerSource = mode === 'stories' ? stories.source : mode === 'scenes' ? scenes.source : editor.source
   const layerDiscard = mode === 'stories' ? stories.revert : mode === 'scenes' ? scenes.revert : editor.discard
   useEffect(() => {
-    // Present mode closes every editor, whatever Design tab was left open:
-    // the mode decides whether an editor is open, and the tab only which.
-    const wanted = presentation.designing ? backTab : null
+    const wanted = presentation.designing ? designTab : null
     if (wanted !== mode) setMode(wanted)
-  }, [backTab, mode, presentation.designing, setMode])
+  }, [designTab, mode, presentation.designing, setMode])
 
   useEffect(() => {
     if (!reading) return
@@ -277,27 +248,6 @@ export function DetailsPanel({
               onDiscardOne={editor.discardOne}
               onHover={editor.hover}
               onSelect={editor.select}
-              /*
-               * An edited story joins the change set as one entry, where
-               * every other change is a line. A scene is identified by where it
-               * sits, so a reorder cannot be described as a set of property
-               * changes whose order of application matters - the sequence says
-               * the same thing with nothing to get wrong.
-               */
-              /*
-               * Each editor's own changes, and only its own.
-               *
-               * Both were shown in both, so the pane read the same in Infoschematic
-               * editing and scene editing and a reader could not tell which
-               * work they were looking at. They land in different files and
-               * are applied at different times, so showing them together says
-               * they are one set when they are two.
-               *
-               * A story joins as one entry where every other change is a line.
-               * A scene is identified by where it sits, so a reorder cannot be
-               * a set of property changes whose order of application matters -
-               * the sequence says the same thing with nothing to get wrong.
-               */
               pending={mode === 'design' ? editor.pending : layerChanges}
               onRedo={editor.redo}
               onUndo={editor.undo}

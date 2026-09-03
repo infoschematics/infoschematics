@@ -64,7 +64,7 @@ main {
   padding: 8px var(--panel-seam) var(--panel-seam);
 }
 
-/* Open, it has the room for two lines and the consortium named in full. */
+/* The expanded header has room for title, subtitle and attribution. */
 .title-bar {
   align-items: center;
   border-bottom: 1px solid #ffffff1c;
@@ -2514,8 +2514,7 @@ button:focus-visible,
   stroke-width: 1.5px;
 }
 
-/* Asked for with ? and dismissed with Escape or the scrim, so it sits above
-   everything rather than in the panel: it describes the whole dashboard. */
+/* Keyboard help describes the complete Studio and sits above every panel. */
 .shortcut-overlay {
   align-items: center;
   display: flex;
@@ -2614,8 +2613,7 @@ button:focus-visible,
   margin: 0;
 }
 
-/* The consortium keeps its own colour wherever it is drawn - purple against the
-   standalone scenes' blue - so a reader tells the two apart without reading either. */
+/* Thematic and standalone Scene controls remain visually distinct. */
 /* A theme reads as a mark rather than as a word, so its button is shaped for
    one: a pill that a wordmark sits inside without being cropped. */
 .theme-button {

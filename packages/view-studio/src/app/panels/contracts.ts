@@ -1,15 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 
-// The published contract pack as the dashboard reads it: which specifications
-// nothing on the Infoschematic reaches, and how one is fetched and summarised.
-//
-// The list itself is no longer here. Six entries were authored in this file,
-// naming a code, a label and an `href` the model already knew - so the panel
-// looped over six while the model held twenty-six, and the twenty with no
-// published document had nowhere to appear. `href` now sits on the
-// specification in the authored `InfoschematicConfig.interfaces` collection.
-
+// The host supplies published specification documents; this module reads and
+// summarises their standard fields.
 
 export type ContractOperation = { name: string; detail: string; summary?: string }
 
@@ -25,15 +18,7 @@ export type SpecDocument = {
   openapi?: string
   info?: { title?: string; version?: string; description?: string }
   servers?: Record<string, { url?: string; host?: string; protocol?: string }> | { url?: string }[]
-  /**
-   * OpenAPI's own field, and not ours to rename.
-   *
-   * This said `connections`, because a rename that moved this repository's own
-   * word away from `path` reached into the shape of a document it does not own.
-   * Every contract then read as having no operations at all: the field was
-   * never present, `?? {}` swallowed it, and the Specifications tab showed an
-   * empty list rather than an error.
-   */
+  /** OpenAPI's standard operation-path field. */
   paths?: Record<string, Record<string, { summary?: string }>>
   channels?: Record<string, { address?: string }>
   operations?: Record<string, { action?: string; summary?: string; channel?: { $ref?: string } }>

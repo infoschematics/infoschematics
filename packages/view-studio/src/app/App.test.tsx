@@ -147,9 +147,5 @@ describe('App', () => {
     const runtime = createInfoschematicRuntime(defineInfoschematic({ title: 'Vocabulary' }))
 
     expect(runtime).toMatchObject({ standaloneScenes: [], stories: [], thematicScenes: [] })
-    expect(runtime).not.toHaveProperty('programme')
-    expect(runtime).not.toHaveProperty('demonstrations')
-    expect(runtime).not.toHaveProperty('spotlights')
-    expect(runtime).not.toHaveProperty('vendors')
   })
 })

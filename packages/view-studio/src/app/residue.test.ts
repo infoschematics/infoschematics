@@ -18,7 +18,7 @@ async function sourceFiles(directory: string): Promise<string[]> {
 }
 
 describe('reusable Studio source', () => {
-  it('contains no renderer or narrative residue from the first realisation', async () => {
+  it('contains only host-neutral renderer and presentation language', async () => {
     const banned = [
       ['internet', 'cloud'].join('-'),
       ['satcom', 'block'].join('-'),
@@ -31,6 +31,16 @@ describe('reusable Studio source', () => {
       ['HLS/DASH', 'Content', 'Steering'].join(' '),
       ['Exposure', 'Gateway'].join(' '),
       ['5G', 'EMERGE'].join('-'),
+      ['demonstration', 'auto'].join('.'),
+      ['panel', 'tab', 'backstage'].join('.'),
+      ['trade', 'stand'].join(' '),
+      ['front', 'room'].join(' '),
+      ['transmission', 'card'].join(' '),
+      ['demand', 'controller'].join('-'),
+      ['con', 'sortium'].join(''),
+      ['dash', 'board'].join(''),
+      ['leg', 'acy'].join(''),
+      ['migra', 'tion'].join(''),
     ]
     const findings: string[] = []
 

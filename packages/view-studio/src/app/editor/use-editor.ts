@@ -15,13 +15,8 @@ import * as waypoints from '@infoschematics/view-model/waypoints'
 import { useInfoschematic } from '../infoschematic-context.tsx'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
 
-// Editing state for a diagram, held apart from the diagram itself and from the
-// app around it. Drafts persist because losing an unsaved placement is real work
-// lost; the mode does not, because a dashboard that reopens in edit mode in
-// front of a room is a foot-gun.
-
-// Annotations moved to the Infoschematic, since they are worth showing without the
-// editor open. What is left here is genuinely about editing.
+// Editing state is held apart from the Infoschematic and its host. Drafts
+// persist because they represent unsaved work; the active editor does not.
 export type EditorView = { grid: boolean; snapping: boolean }
 
 /**
