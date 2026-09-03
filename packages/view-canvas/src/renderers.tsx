@@ -30,6 +30,8 @@ export type FabricRendererProps = {
 
 export type GraphicRendererProps = {
   graphic: GraphicConfig
+  /** Effective Design bounds, including an uncommitted move or resize. */
+  bounds: Box
   viewBox: Box
 }
 

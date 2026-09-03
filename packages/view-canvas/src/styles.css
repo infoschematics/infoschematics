@@ -90,6 +90,64 @@
   pointer-events: none;
 }
 
+.infoschematic-svg.editing .artefact-selectable {
+  cursor: grab;
+  outline: none;
+  pointer-events: auto;
+}
+
+.infoschematic-svg.editing .infoschematic-group.artefact-selectable,
+.infoschematic-svg.editing .infoschematic-zone.artefact-selectable {
+  pointer-events: auto;
+}
+
+.infoschematic-svg.editing .infoschematic-group.artefact-selectable > path {
+  pointer-events: stroke;
+}
+
+.graphic-frame {
+  fill: transparent;
+  pointer-events: all;
+  stroke: var(--infoschematic-canvas-surfaces-fabric-frame);
+  stroke-dasharray: 2 6;
+  stroke-width: 1.5px;
+}
+
+.infoschematic-svg.editing .artefact-selectable:focus-visible {
+  filter: drop-shadow(0 0 7px color-mix(in srgb, var(--infoschematic-canvas-selection-selected) 75%, transparent));
+}
+
+.infoschematic-svg.editing .infoschematic-zone.selected > rect,
+.infoschematic-svg.editing .infoschematic-graphic.selected .fabric-shell {
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-width: 3px;
+}
+
+.artefact-resize-handle,
+.artefact-action {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.artefact-resize-handle rect,
+.artefact-action circle {
+  fill: var(--infoschematic-canvas-text-strong);
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-width: 2px;
+}
+
+.artefact-resize-handle:focus-visible rect,
+.artefact-action:focus-visible circle {
+  filter: drop-shadow(0 0 6px var(--infoschematic-canvas-selection-selected));
+}
+
+.artefact-action text {
+  fill: var(--infoschematic-canvas-surfaces-backdrop);
+  font: 700 11px var(--infoschematic-canvas-text-code-family);
+  pointer-events: none;
+  text-anchor: middle;
+}
+
 /* The layer ignores the pointer so a line drawn across a card never takes a
    click meant for it. Each line's own hit path opts back in, which is how a
    line can be hovered without the layer blocking anything. */

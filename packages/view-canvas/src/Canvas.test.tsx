@@ -120,8 +120,14 @@ describe('Canvas', () => {
         ],
       },
     })
-    const Badge = ({ properties }: FabricRendererProps & { properties: RendererProperties }) => (
-      <text data-badge={properties.label}>validated</text>
+    const Badge = ({ fabric, properties }: FabricRendererProps & { properties: RendererProperties }) => (
+      <text
+        data-authored-label={fabric.appearance?.properties?.label}
+        data-badge={properties.label}
+        data-renderer={fabric.appearance?.renderer}
+      >
+        validated
+      </text>
     )
     const markup = renderToStaticMarkup(
       <Canvas
@@ -145,6 +151,8 @@ describe('Canvas', () => {
     )
 
     expect(markup).toContain('data-badge="safe"')
+    expect(markup).toContain('data-authored-label="safe"')
+    expect(markup).toContain('data-renderer="badge"')
     expect(markup).toContain('Invalid Fabric fallback')
     expect(markup).toContain('aria-label="Graphic fallback"')
     expect(markup).toContain('>Graphic fallback</text>')
@@ -152,8 +160,15 @@ describe('Canvas', () => {
   })
 
   it('renders a validated Graphic definition with its normalised properties', () => {
-    const Graphic = ({ graphic, properties }: GraphicRendererProps & { properties: RendererProperties }) => (
-      <text data-graphic={graphic.id}>{properties.caption}</text>
+    const Graphic = ({ bounds, graphic, properties }: GraphicRendererProps & { properties: RendererProperties }) => (
+      <text
+        data-authored-caption={graphic.properties?.caption}
+        data-bounds={`${bounds.x},${bounds.y},${bounds.width},${bounds.height}`}
+        data-graphic={graphic.id}
+        data-renderer={graphic.renderer}
+      >
+        {properties.caption}
+      </text>
     )
     const markup = renderToStaticMarkup(
       <Canvas
@@ -176,6 +191,9 @@ describe('Canvas', () => {
     )
 
     expect(markup).toContain('data-graphic="custom-graphic"')
+    expect(markup).toContain('data-renderer="caption"')
+    expect(markup).toContain('data-authored-caption="Host graphic"')
+    expect(markup).toContain('data-bounds="440,360,320,80"')
     expect(markup).toContain('HOST GRAPHIC')
   })
 })

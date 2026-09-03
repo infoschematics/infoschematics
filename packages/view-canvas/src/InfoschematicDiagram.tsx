@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
-import type { CreatedComponent } from '@infoschematics/view-model/editable'
+import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
@@ -19,6 +19,24 @@ import {
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
+type MovableArtefactSelection = Exclude<ArtefactSelection, { kind: 'flow' }>
+type ResizeAxes = Readonly<{ height: boolean; width: boolean }>
+
+const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
+  left?.kind === right.kind &&
+  left.id === right.id &&
+  (left.kind !== 'zone' || (right.kind === 'zone' && left.laneId === right.laneId))
+
+const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
+  const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
+  const height = graphic.placement?.height ?? 80
+  return {
+    height,
+    width,
+    x: graphic.placement?.x ?? viewBox.x + (viewBox.width - width) / 2,
+    y: graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2,
+  }
+}
 
 // A card's border says where it sits in the delivery chain, which is a different
 // question from the architecture group its code comes from. The two disagree by
@@ -70,11 +88,8 @@ function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
   )
 }
 
-function DefaultGraphic({ graphic, viewBox }: { graphic: GraphicConfig; viewBox: Box }) {
-  const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
-  const height = graphic.placement?.height ?? 80
-  const x = graphic.placement?.x ?? viewBox.x + (viewBox.width - width) / 2
-  const y = graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2
+function DefaultGraphic({ graphic, bounds }: { graphic: GraphicConfig; bounds: Box }) {
+  const { height, width, x, y } = bounds
   const label = graphic.label ?? graphic.id
 
   return (
@@ -121,8 +136,15 @@ export function InfoschematicDiagram({
   onFreeEnd,
   onHover,
   onSelect,
+  onArtefactMove,
+  onArtefactRelease,
+  onArtefactRemove,
+  onArtefactReorder,
+  onArtefactResize,
+  onArtefactSelect,
   portCounts,
   selected,
+  selectedArtefact,
   flows,
   annotated,
   grid,
@@ -173,9 +195,19 @@ export function InfoschematicDiagram({
   /** What the panel is pointing back at, lit here the way a hover on Infoschematic is. */
   hovered?: string | null
   onSelect?: (code: string) => void
+  /** Typed six-kind Design selection. String selection remains for auxiliary handles during migration. */
+  onArtefactSelect?: (selection: ArtefactSelection | null) => void
+  /** Canvas emits pointer coordinates; View Model owns constraints and operation construction. */
+  onArtefactMove?: (selection: MovableArtefactSelection, point: Point) => void
+  onArtefactResize?: (selection: MovableArtefactSelection, size: ResizeMinimum) => void
+  onArtefactReorder?: (selection: ArtefactSelection, direction: -1 | 1) => void
+  onArtefactRemove?: (selection: ArtefactSelection) => void
+  /** Closes one pointer gesture for undo grouping. */
+  onArtefactRelease?: () => void
   /** Port counts changed in the editor but not yet written into the model. */
   portCounts?: Readonly<Record<string, PortCounts>>
   selected?: string | null
+  selectedArtefact?: ArtefactSelection | null
   flows: readonly InfoschematicFlow[]
   annotated?: boolean
   grid?: boolean
@@ -206,9 +238,10 @@ export function InfoschematicDiagram({
   } = useInfoschematic()
   const renderers = useInfoschematicRenderers()
   const Definitions = renderers.definitions
-  const graphicRenderer = graphic
-    ? resolveInfoschematicRenderer(renderers, 'graphic', graphic.renderer, graphic.properties, graphic.id)
-    : undefined
+  const activeGraphicRenderer =
+    mode !== 'design' && graphic
+      ? resolveInfoschematicRenderer(renderers, 'graphic', graphic.renderer, graphic.properties, graphic.id)
+      : undefined
   const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
   const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
   const scopeAppearance = Object.fromEntries(
@@ -220,7 +253,11 @@ export function InfoschematicDiagram({
   // Green marks the ports the *selected* flow meets, not every port in
   // use anywhere: a Infoschematic full of green says nothing about what is selected,
   // and the two ends you can re-attach are the two worth pointing at.
-  const selectedFlow = flows.find((flow) => flow.code === selected)
+  const selectedFlow = flows.find(
+    (flow) =>
+      flow.code === selected ||
+      (selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id),
+  )
   const used = new Set(
     selectedFlow
       ? [`${selectedFlow.source}:${selectedFlow.sourcePort}`, `${selectedFlow.target}:${selectedFlow.targetPort}`]
@@ -280,6 +317,7 @@ export function InfoschematicDiagram({
    * and waypoint controls simply are not rendered.
    */
   const editing = mode === 'design'
+  const graphics = editing ? config.infoschematic.graphics : graphic ? [graphic] : []
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
   const focusing = mode === 'scenes' || mode === 'stories'
@@ -311,6 +349,198 @@ export function InfoschematicDiagram({
   if (lastSelected.current !== selected) {
     lastSelected.current = selected
     setSelectedWaypoint(null)
+  }
+
+  const artefactSelected = (selection: ArtefactSelection, legacyKey: string) =>
+    selectedArtefact ? sameArtefact(selectedArtefact, selection) : selected === legacyKey
+
+  const selectArtefact = (selection: ArtefactSelection, legacyKey: string) => {
+    if (onArtefactSelect) onArtefactSelect(selection)
+    else onSelect?.(legacyKey)
+  }
+
+  const artefactKeyDown = (selection: ArtefactSelection, legacyKey: string) => (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      selectArtefact(selection, legacyKey)
+      return
+    }
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      event.preventDefault()
+      selectArtefact(selection, legacyKey)
+      onArtefactRemove?.(selection)
+      return
+    }
+    if (event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      event.preventDefault()
+      selectArtefact(selection, legacyKey)
+      onArtefactReorder?.(selection, event.key === 'ArrowUp' ? -1 : 1)
+    }
+  }
+
+  const eventPoint = (element: SVGElement, clientX: number, clientY: number): Point | undefined => {
+    const svg = element.ownerSVGElement
+    const matrix = svg?.getScreenCTM()
+    if (!svg || !matrix) return undefined
+    const point = svg.createSVGPoint()
+    point.x = clientX
+    point.y = clientY
+    const mapped = point.matrixTransform(matrix.inverse())
+    return { x: mapped.x, y: mapped.y }
+  }
+
+  const dragArtefact = (
+    selection: MovableArtefactSelection,
+    legacyKey: string,
+    origin: Point,
+    axes: Readonly<{ x: boolean; y: boolean }>,
+    selectionToSelect: ArtefactSelection = selection,
+  ) =>
+    (event: React.PointerEvent<SVGElement>) => {
+      selectArtefact(selectionToSelect, legacyKey)
+      if (!onArtefactMove) return
+      event.preventDefault()
+      event.stopPropagation()
+      const element = event.currentTarget
+      const from = { x: event.clientX, y: event.clientY }
+      let dragging = false
+      const move = (moved: PointerEvent) => {
+        if (!dragging) {
+          if (Math.hypot(moved.clientX - from.x, moved.clientY - from.y) < dragThreshold) return
+          dragging = true
+        }
+        const point = eventPoint(element, moved.clientX, moved.clientY)
+        if (!point) return
+        onArtefactMove(selection, {
+          x: axes.x ? point.x : origin.x,
+          y: axes.y ? point.y : origin.y,
+        })
+      }
+      const stop = () => {
+        if (dragging) onArtefactRelease?.()
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', stop)
+      }
+      window.addEventListener('pointermove', move)
+      window.addEventListener('pointerup', stop)
+    }
+
+  const ResizeHandle = ({
+    axes,
+    bounds,
+    label,
+    renderOrigin,
+    selection,
+  }: {
+    axes: ResizeAxes
+    bounds: Box
+    label: string
+    renderOrigin?: Point
+    selection: MovableArtefactSelection
+  }) => {
+    if (!onArtefactResize) return null
+    const resize = (point: Point) =>
+      onArtefactResize(selection, {
+        height: axes.height ? point.y - bounds.y : undefined,
+        width: axes.width ? point.x - bounds.x : undefined,
+      })
+    return (
+      // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the labelled group is keyboard operable.
+      <g
+        aria-label={`Resize ${label}`}
+        className="artefact-resize-handle"
+        onKeyDown={(event) => {
+          const step = event.shiftKey ? 10 : 1
+          const size: ResizeMinimum =
+            axes.width && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+              ? { width: bounds.width + (event.key === 'ArrowRight' ? step : -step) }
+              : axes.height && (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+                ? { height: bounds.height + (event.key === 'ArrowDown' ? step : -step) }
+                : {}
+          if (size.height === undefined && size.width === undefined) return
+          event.preventDefault()
+          onArtefactResize(selection, size)
+        }}
+        onPointerDown={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          const element = event.currentTarget
+          const from = { x: event.clientX, y: event.clientY }
+          let dragging = false
+          const move = (moved: PointerEvent) => {
+            if (!dragging) {
+              if (Math.hypot(moved.clientX - from.x, moved.clientY - from.y) < dragThreshold) return
+              dragging = true
+            }
+            const point = eventPoint(element, moved.clientX, moved.clientY)
+            if (point) resize(point)
+          }
+          const stop = () => {
+            if (dragging) onArtefactRelease?.()
+            window.removeEventListener('pointermove', move)
+            window.removeEventListener('pointerup', stop)
+          }
+          window.addEventListener('pointermove', move)
+          window.addEventListener('pointerup', stop)
+        }}
+        role="button"
+        tabIndex={0}
+        transform={`translate(${(renderOrigin?.x ?? bounds.x) + bounds.width} ${(renderOrigin?.y ?? bounds.y) + bounds.height})`}
+      >
+        <rect height="12" width="12" x="-6" y="-6" />
+      </g>
+    )
+  }
+
+  const ArtefactActions = ({
+    at,
+    label,
+    selection,
+  }: {
+    at: Point
+    label: string
+    selection: ArtefactSelection
+  }) => {
+    const actions = [
+      ...(onArtefactReorder
+        ? [
+            { action: () => onArtefactReorder(selection, -1), glyph: '↑', label: `Move ${label} earlier` },
+            { action: () => onArtefactReorder(selection, 1), glyph: '↓', label: `Move ${label} later` },
+          ]
+        : []),
+      ...(onArtefactRemove
+        ? [{ action: () => onArtefactRemove(selection), glyph: '×', label: `Remove ${label}` }]
+        : []),
+    ] as const
+    if (actions.length === 0) return null
+    return (
+      <g className="artefact-actions" transform={`translate(${at.x} ${at.y})`}>
+        {actions.map((entry, index) => (
+          // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; every action is labelled and keyboard operable.
+          <g
+            aria-label={entry.label}
+            className="artefact-action"
+            key={entry.label}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return
+              event.preventDefault()
+              entry.action()
+            }}
+            onPointerDown={(event) => {
+              event.preventDefault()
+              event.stopPropagation()
+              entry.action()
+            }}
+            role="button"
+            tabIndex={0}
+            transform={`translate(${index * 18} 0)`}
+          >
+            <circle r="7" />
+            <text y="4">{entry.glyph}</text>
+          </g>
+        ))}
+      </g>
+    )
   }
 
   // Drag in the SVG's own coordinates, so a handle lands under the pointer at
@@ -642,9 +872,12 @@ export function InfoschematicDiagram({
   // Selecting a Flow and adding a waypoint are separate actions. The dedicated
   // waypoint control prevents selection from changing the route.
   const routeClicked = (flow: InfoschematicFlow) => (event: React.PointerEvent<SVGPathElement>) => {
-    if (!editing || !onSelect || selected === flow.code) return
+    if (!editing) return
     event.stopPropagation()
-    onSelect(flow.code)
+    selectArtefact(
+      { code: flow.code, geometry: 'route', id: flow.id, kind: 'flow' },
+      flow.code,
+    )
   }
 
   // Where the delete control sits: pushed away from whichever card's centre is
@@ -670,17 +903,30 @@ export function InfoschematicDiagram({
   // and again above them for whichever flow is selected, so the line
   // being worked on is never behind a card.
   const renderFlow = (flow: InfoschematicFlow) => {
+    const selection = {
+      code: flow.code,
+      geometry: 'route',
+      id: flow.id,
+      kind: 'flow',
+    } as const satisfies ArtefactSelection
     const family = familyById.get(flow.family) ?? infoschematicFamilies[0]
     const sourceCode = infoschematicEndpointCodes.get(flow.source) ?? flow.source
     const targetCode = infoschematicEndpointCodes.get(flow.target) ?? flow.target
     const conforms = (flow.conformsTo ?? []).map((id) => infoschematicInterfaceById.get(id)?.label ?? id).join(' or ')
     const call = flow.operation ? ` · ${flow.operation}` : ''
-    const flowSelected = selected === flow.code
+    const flowSelected = artefactSelected(selection, flow.code)
     return (
+      // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the route is keyboard operable in Design.
       <g
+        aria-label={`Flow ${flow.code}`}
+        data-artefact-id={selection.id}
+        data-artefact-kind={selection.kind}
         className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${removals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}`}
         key={flow.id}
+        onKeyDown={editing ? artefactKeyDown(selection, flow.code) : undefined}
+        role={editing ? 'button' : undefined}
         style={{ color: family.color }}
+        tabIndex={editing ? 0 : undefined}
       >
         {/* Names for a reader, ports for an editor. It said
             origin:E1 → cdn-ingress:W1 to everyone, which is the question
@@ -827,6 +1073,9 @@ export function InfoschematicDiagram({
               )
             })
           : null}
+        {editing && flowSelected && flow.points[0] ? (
+          <ArtefactActions at={flow.points[0]} label={flow.code} selection={selection} />
+        ) : null}
       </g>
     )
   }
@@ -849,7 +1098,14 @@ export function InfoschematicDiagram({
       <rect
         className="infoschematic-backdrop"
         height={infoschematicViewBox.height}
-        onPointerDown={editing && onSelect ? () => onSelect('') : undefined}
+        onPointerDown={
+          editing
+            ? () => {
+                if (onArtefactSelect) onArtefactSelect(null)
+                else onSelect?.('')
+              }
+            : undefined
+        }
         width={infoschematicViewBox.width}
         x={infoschematicViewBox.x}
         y={infoschematicViewBox.y}
@@ -898,51 +1154,129 @@ export function InfoschematicDiagram({
 
       {infoschematicLanes.map((lane) => (
         <g key={lane.id}>
-          {lane.zones.map((zone) => (
-            <rect fill={zone.fill} height={lane.height} key={zone.id} width={zone.width} x={zone.x} y={lane.y} />
-          ))}
+          {lane.zones.map((zone) => {
+            const selection = {
+              code: null,
+              geometry: 'zone',
+              id: zone.id,
+              kind: 'zone',
+              laneId: lane.id,
+            } as const satisfies ArtefactSelection
+            const legacyKey = `zone:${lane.id}:${zone.id}`
+            const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+            return (
+              // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Zone is keyboard operable in Design.
+              <g
+                aria-label={`Zone ${zone.label}`}
+                className={`infoschematic-zone artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+                data-artefact-id={selection.id}
+                data-artefact-kind={selection.kind}
+                key={zone.id}
+                onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+                onPointerDown={
+                  editing
+                    ? dragArtefact(selection, legacyKey, { x: zone.x + zone.width / 2, y: lane.y + lane.height / 2 }, { x: true, y: false })
+                    : undefined
+                }
+                role={editing ? 'button' : undefined}
+                tabIndex={editing ? 0 : undefined}
+              >
+                <rect fill={zone.fill} height={lane.height} width={zone.width} x={zone.x} y={lane.y} />
+                {editing && artefactSelected(selection, legacyKey) ? (
+                  <>
+                    <ResizeHandle axes={{ height: false, width: true }} bounds={bounds} label={zone.label} selection={selection} />
+                    <ArtefactActions at={{ x: zone.x + zone.width - 48, y: lane.y + 12 }} label={zone.label} selection={selection} />
+                  </>
+                ) : null}
+              </g>
+            )
+          })}
         </g>
       ))}
 
       <g className="infoschematic-zone-label">
         {infoschematicLanes.flatMap((lane) =>
-          lane.zones.map((zone) => (
-            <text
-              className={`${editing && onSelect ? 'zone-selectable' : ''}${
-                selected === `zone:${lane.id}:${zone.id}` ? ' selected' : ''
-              }${hovered === `zone:${lane.id}:${zone.id}` ? ' pointed' : ''}`}
+          lane.zones.map((zone) => {
+            const selection = {
+              code: null,
+              geometry: 'zone',
+              id: zone.id,
+              kind: 'zone',
+              laneId: lane.id,
+            } as const satisfies ArtefactSelection
+            const legacyKey = `zone:${lane.id}:${zone.id}`
+            return (
+              <text
+              className={`${editing && (onSelect || onArtefactSelect) ? 'zone-selectable' : ''}${
+                artefactSelected(selection, legacyKey) ? ' selected' : ''
+              }${hovered === legacyKey ? ' pointed' : ''}`}
               key={`${lane.id}-${zone.id}`}
-              onPointerDown={editing && onSelect ? () => onSelect(`zone:${lane.id}:${zone.id}`) : undefined}
-              onPointerEnter={onHover ? () => onHover(`zone:${lane.id}:${zone.id}`) : undefined}
+              onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
+              onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
               x={Math.max(zone.x + 16, 58)}
               y={lane.labelY}
             >
               {zone.label.toUpperCase()}
-            </text>
-          )),
+              </text>
+            )
+          }),
         )}
       </g>
 
-      {infoschematicLanes.map((lane) => (
-        <g className={`infoschematic-group lane-${lane.id}`} key={`panel-${lane.id}`}>
+      {infoschematicLanes.map((lane) => {
+        const selection = {
+          code: null,
+          geometry: 'lane',
+          id: lane.id,
+          kind: 'lane',
+        } as const satisfies ArtefactSelection
+        const legacyKey = `lane:${lane.id}`
+        const bounds = { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y }
+        return (
+          // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the Lane outline is keyboard operable in Design.
+          <g
+            aria-label={`Lane ${lane.label}`}
+            className={`infoschematic-group lane-${lane.id} artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+            data-artefact-id={selection.id}
+            data-artefact-kind={selection.kind}
+            key={`panel-${lane.id}`}
+            onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+            onPointerDown={
+              editing
+                ? dragArtefact(selection, legacyKey, { x: lane.panel.x + lane.panel.width / 2, y: lane.y + lane.height / 2 }, { x: false, y: true })
+                : undefined
+            }
+            role={editing ? 'button' : undefined}
+            tabIndex={editing ? 0 : undefined}
+          >
           <path d={infoschematicLanePanelOutline(lane)} />
           {/* The zones tile their lane completely, so the legend is the only
               part of a lane a reader can aim at without hitting a zone. */}
           <text
-            className={`${editing && onSelect ? 'lane-selectable' : ''}${selected === `lane:${lane.id}` ? ' selected' : ''}${
-              hovered === `lane:${lane.id}` ? ' pointed' : ''
-            }`}
-            onPointerDown={editing && onSelect ? () => onSelect(`lane:${lane.id}`) : undefined}
-            onPointerEnter={onHover ? () => onHover(`lane:${lane.id}`) : undefined}
+            className={`${editing && (onSelect || onArtefactSelect) ? 'lane-selectable' : ''}${
+              artefactSelected(selection, legacyKey) ? ' selected' : ''
+            }${hovered === legacyKey ? ' pointed' : ''}`}
+            onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
             onPointerLeave={onHover ? () => onHover(null) : undefined}
             x={infoschematicLaneLabelX(lane)}
             y={infoschematicLaneLabelY(lane) + 5}
           >
             {lane.label.toUpperCase()}
           </text>
-        </g>
-      ))}
+          {editing && artefactSelected(selection, legacyKey) ? (
+            <>
+              <ResizeHandle axes={{ height: true, width: false }} bounds={bounds} label={lane.label} selection={selection} />
+              <ArtefactActions
+                at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.y + 12 }}
+                label={lane.label}
+                selection={selection}
+              />
+            </>
+          ) : null}
+          </g>
+        )
+      })}
 
       {/* The canvas states its own edge, present whenever the editor is open
           regardless of whether the grid is switched on, so a card dragged
@@ -972,6 +1306,12 @@ export function InfoschematicDiagram({
         .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
         .map((fabric) => {
           const bounds = movedBox(fabric.bounds, fabric.code)
+          const selection = {
+            code: fabric.code,
+            geometry: 'box',
+            id: fabric.id,
+            kind: 'fabric',
+          } as const satisfies ArtefactSelection
           const rendererKey = fabric.appearance?.renderer
           const renderer = resolveInfoschematicRenderer(
             renderers,
@@ -984,11 +1324,25 @@ export function InfoschematicDiagram({
           return (
             <g
               aria-label={fabric.label}
-              className={`${fabricClass(fabric.id)}${editing ? ' selectable' : ''}${selected === fabric.code ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+              className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+              data-artefact-id={selection.id}
+              data-artefact-kind={selection.kind}
               key={fabric.id}
-              onPointerDown={editing && onSelect ? () => onSelect(fabric.code) : undefined}
+              onKeyDown={editing ? artefactKeyDown(selection, fabric.code) : undefined}
+              onPointerDown={
+                editing
+                  ? dragArtefact(
+                      selection,
+                      fabric.code,
+                      { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
+                      { x: true, y: true },
+                    )
+                  : undefined
+              }
               onPointerEnter={onHover ? () => onHover(fabric.code) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
+              role={editing ? 'button' : undefined}
+              tabIndex={editing ? 0 : undefined}
             >
               <title>{fabricTitle(fabric)}</title>
               {Renderer ? (
@@ -1006,6 +1360,16 @@ export function InfoschematicDiagram({
                   y={bounds.y}
                 />
               ) : null}
+              {editing && artefactSelected(selection, fabric.code) ? (
+                <>
+                  <ResizeHandle axes={{ height: true, width: true }} bounds={bounds} label={fabric.label} selection={selection} />
+                  <ArtefactActions
+                    at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
+                    label={fabric.label}
+                    selection={selection}
+                  />
+                </>
+              ) : null}
             </g>
           )
         })}
@@ -1019,8 +1383,10 @@ export function InfoschematicDiagram({
           .sort((left, right) => {
             // A selected flow paints above everything until it is let go,
             // so the line being worked on is never behind one that is not.
-            const leftPicked = left.code === selected ? 1 : 0
-            const rightPicked = right.code === selected ? 1 : 0
+            const leftPicked =
+              left.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === left.id) ? 1 : 0
+            const rightPicked =
+              right.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === right.id) ? 1 : 0
             if (leftPicked !== rightPicked) return leftPicked - rightPicked
 
             const leftLit = highlight?.flows.has(left.id) ? 1 : 0
@@ -1028,7 +1394,11 @@ export function InfoschematicDiagram({
             if (leftLit !== rightLit) return leftLit - rightLit
             return (familyLayer.get(right.family) ?? 0) - (familyLayer.get(left.family) ?? 0)
           })
-          .filter((flow) => flow.code !== selected)
+          .filter(
+            (flow) =>
+              flow.code !== selected &&
+              !(selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id),
+          )
           .map(renderFlow)}
       </g>
 
@@ -1050,6 +1420,18 @@ export function InfoschematicDiagram({
         })
         .map(({ held, holds, identity: adapter, ...placed }) => {
           const box = placed.box
+          const selection = {
+            code: adapter.code,
+            geometry: 'box',
+            id: adapter.id,
+            kind: 'card',
+          } as const satisfies ArtefactSelection
+          const heldSelection = {
+            code: holds.code,
+            geometry: 'box',
+            id: holds.id,
+            kind: 'card',
+          } as const satisfies ArtefactSelection
           // Traced as one outline so the clasp is a single shape: out along the
           // left arm, down into the notch the card sits in, up the right arm and
           // round the bottom. Every corner takes the card's own radius, the
@@ -1073,24 +1455,39 @@ export function InfoschematicDiagram({
               aria-label={`${adapter.label}, holding ${adapter.wraps}`}
               className={`infoschematic-adapter${editing ? ' selectable' : ''}${
                 highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
-              }${selected === adapter.code ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
+              }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
+              data-artefact-id={selection.id}
+              data-artefact-kind={selection.kind}
               key={placed.id}
+              onKeyDown={editing ? artefactKeyDown(selection, adapter.code) : undefined}
               onPointerDown={
                 editing
                   ? (event) => {
-                      onSelect?.(adapter.code)
                       // Selects the adapter, drags the card. An adapter is a
                       // grip on the thing it holds rather than a thing with a
                       // position, so taking hold of one has to move that card -
                       // and refusing the drag outright, which is what this did,
                       // left a shape on the Infoschematic that could be picked up and
                       // not moved.
-                      dragComponent(holds.code)(event)
+                      if (onArtefactMove) {
+                        dragArtefact(
+                          heldSelection,
+                          adapter.code,
+                          { x: held.x + held.width / 2, y: held.y + held.height / 2 },
+                          { x: true, y: true },
+                          selection,
+                        )(event)
+                      } else {
+                        selectArtefact(selection, adapter.code)
+                        dragComponent(holds.code)(event)
+                      }
                     }
                   : undefined
               }
               onPointerEnter={onHover ? () => onHover(adapter.code) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
+              role={editing ? 'button' : undefined}
+              tabIndex={editing ? 0 : undefined}
             >
               <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
               <path className="adapter-socket" d={socket} />
@@ -1098,6 +1495,13 @@ export function InfoschematicDiagram({
               <text className="adapter-label" x={box.x + box.width / 2} y={held.y + held.height + adapterFloor / 2 + 5}>
                 {adapter.label}
               </text>
+              {editing && artefactSelected(selection, adapter.code) ? (
+                <ArtefactActions
+                  at={{ x: box.x + box.width - 48, y: box.y + 12 }}
+                  label={adapter.label}
+                  selection={selection}
+                />
+              ) : null}
             </g>
           )
         })}
@@ -1114,9 +1518,21 @@ export function InfoschematicDiagram({
         })
         // The selected card paints last so nothing overlaps what is being worked
         // on, and drops back into place when it is let go.
-        .sort((left, right) => (left.code === selected ? 1 : 0) - (right.code === selected ? 1 : 0))
+        .sort((left, right) => {
+          const leftPicked =
+            left.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === left.id) ? 1 : 0
+          const rightPicked =
+            right.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === right.id) ? 1 : 0
+          return leftPicked - rightPicked
+        })
         .map((card) => {
           const layout = card.box
+          const selection = {
+            code: card.code,
+            geometry: 'box',
+            id: card.id,
+            kind: 'card',
+          } as const satisfies ArtefactSelection
           const appearance = scopeAppearance[card.group as keyof typeof scopeAppearance]
           const labelLines = splitLabel(card.label)
           // The label is all a card carries now, so it sits centred rather than
@@ -1125,12 +1541,16 @@ export function InfoschematicDiagram({
 
           return (
             <g
+              aria-label={`Card ${card.label}`}
               className={`infoschematic-service ${card.group}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
                 editing || focusing ? ' selectable' : ''
-              }${selected === card.code ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
+              }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
                 removals[card.code] ? ' going' : ''
               }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
+              data-artefact-id={selection.id}
+              data-artefact-kind={selection.kind}
               key={card.id}
+              onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
               /*
                * Two editors, two meanings for the same press. In the Infoschematic
                * editor a card is selected and dragged; in the scene editor it
@@ -1140,8 +1560,17 @@ export function InfoschematicDiagram({
               onPointerDown={
                 editing
                   ? (event) => {
-                      onSelect?.(card.code)
-                      dragComponent(card.code)(event)
+                      if (onArtefactMove) {
+                        dragArtefact(
+                          selection,
+                          card.code,
+                          { x: layout.x + layout.width / 2, y: layout.y + layout.height / 2 },
+                          { x: true, y: true },
+                        )(event)
+                      } else {
+                        selectArtefact(selection, card.code)
+                        dragComponent(card.code)(event)
+                      }
                     }
                   : focusing
                     ? () => onLight?.(card.id, false)
@@ -1149,6 +1578,8 @@ export function InfoschematicDiagram({
               }
               onPointerEnter={onHover ? () => onHover(card.code) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
+              role={editing ? 'button' : undefined}
+              tabIndex={editing ? 0 : undefined}
               transform={`translate(${layout.x} ${layout.y})`}
             >
               <title>{`${card.code}: ${card.label} · ${card.name}`}</title>
@@ -1166,6 +1597,22 @@ export function InfoschematicDiagram({
                   </tspan>
                 ))}
               </text>
+              {editing && artefactSelected(selection, card.code) ? (
+                <>
+                  <ResizeHandle
+                    axes={{ height: true, width: true }}
+                    bounds={layout}
+                    label={card.label}
+                    renderOrigin={{ x: 0, y: 0 }}
+                    selection={selection}
+                  />
+                  <ArtefactActions
+                    at={{ x: layout.width - 48, y: 12 }}
+                    label={card.label}
+                    selection={selection}
+                  />
+                </>
+              ) : null}
             </g>
           )
         })}
@@ -1274,9 +1721,15 @@ export function InfoschematicDiagram({
             : []
           ).map((flow) => {
             const { x, y } = labelPositions.get(flow.id) ?? { x: 0, y: 0 }
+            const selection = {
+              code: flow.code,
+              geometry: 'route',
+              id: flow.id,
+              kind: 'flow',
+            } as const satisfies ArtefactSelection
             return (
               <g
-                className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${selected === flow.code ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}`}
+                className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}`}
                 key={flow.code}
                 onPointerDown={
                   editing
@@ -1284,7 +1737,7 @@ export function InfoschematicDiagram({
                         // Select on the press, not on the drag: below the drag
                         // threshold nothing else would, and a label that cannot
                         // be selected cannot be nudged with the arrow keys.
-                        onSelect?.(flow.code)
+                        selectArtefact(selection, flow.code)
                         dragLabel(flow.code)(event)
                       }
                     : undefined
@@ -1317,20 +1770,76 @@ export function InfoschematicDiagram({
         </g>
       ) : null}
 
-      {graphic ? (
-        <g aria-label={graphic.label ?? graphic.id} className="infoschematic-graphic" role="img">
-          <title>{graphic.label ?? graphic.id}</title>
-          {graphicRenderer ? (
-            <graphicRenderer.Component
-              graphic={graphic}
-              properties={graphicRenderer.properties}
-              viewBox={infoschematicViewBox}
-            />
-          ) : (
-            <DefaultGraphic graphic={graphic} viewBox={infoschematicViewBox} />
-          )}
-        </g>
-      ) : null}
+      {graphics.map((entry) => {
+        const bounds = graphicBounds(entry, infoschematicViewBox)
+        const selection = {
+          code: null,
+          geometry: 'box',
+          id: entry.id,
+          kind: 'graphic',
+        } as const satisfies ArtefactSelection
+        const legacyKey = `graphic:${entry.id}`
+        const renderer =
+          !editing && graphic === entry
+            ? activeGraphicRenderer
+            : resolveInfoschematicRenderer(renderers, 'graphic', entry.renderer, entry.properties, entry.id)
+        const Renderer = renderer?.Component
+        return (
+          <g
+            aria-label={entry.label ?? entry.id}
+            className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${
+              artefactSelected(selection, legacyKey) ? ' selected' : ''
+            }`}
+            data-artefact-id={selection.id}
+            data-artefact-kind={selection.kind}
+            key={entry.id}
+            onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+            onPointerDown={
+              editing
+                ? dragArtefact(
+                    selection,
+                    legacyKey,
+                    { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
+                    { x: true, y: true },
+                  )
+                : undefined
+            }
+            role={editing ? 'button' : 'img'}
+            tabIndex={editing ? 0 : undefined}
+          >
+            <title>{entry.label ?? entry.id}</title>
+            {Renderer ? (
+              <Renderer
+                bounds={bounds}
+                graphic={entry}
+                properties={renderer.properties}
+                viewBox={infoschematicViewBox}
+              />
+            ) : (
+              <DefaultGraphic bounds={bounds} graphic={entry} />
+            )}
+            {editing ? (
+              <rect
+                className="graphic-frame"
+                height={bounds.height}
+                width={bounds.width}
+                x={bounds.x}
+                y={bounds.y}
+              />
+            ) : null}
+            {editing && artefactSelected(selection, legacyKey) ? (
+              <>
+                <ResizeHandle axes={{ height: true, width: true }} bounds={bounds} label={entry.label ?? entry.id} selection={selection} />
+                <ArtefactActions
+                  at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
+                  label={entry.label ?? entry.id}
+                  selection={selection}
+                />
+              </>
+            ) : null}
+          </g>
+        )
+      })}
     </svg>
   )
 }
