@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import {
+  clearScenes,
   editScene,
   insertScene,
   moveScene,
@@ -9,6 +10,9 @@ import {
   runTime,
   type Scene,
   scenesAsSource,
+  type Story,
+  storyCanActivate,
+  storyForEditing,
   toggleLit,
 } from './scenes.ts'
 
@@ -24,23 +28,31 @@ import {
  * reordering to a reload would be real work lost. Which scene is selected does
  * not, because it is a place in a list rather than an edit.
  */
-export function useSceneList(running?: { id: string; step: number } | null) {
-  const { config, stories: authoredStories } = useInfoschematic()
-  const [drafts, setDrafts] = usePersistentState<Record<string, RuntimeStory>>(config.id && `${config.id}.stories`, {})
+export function useSceneList(_running?: { id: string; step: number } | null) {
+  const { config } = useInfoschematic()
+  const authoredStories = useMemo(
+    () => config.stories.map((story) => storyForEditing(story, config.standaloneScenes)),
+    [config.standaloneScenes, config.stories],
+  )
+  const [drafts, setDrafts] = usePersistentState<Record<string, Story>>(config.id && `${config.id}.stories`, {})
   const [chosen, setChosen] = useState<string>(authoredStories[0]?.id ?? '')
   const [scene, setScene] = useState(0)
 
   // The authored story until it has been edited, and the draft after.
   const stories = useMemo(
-    () => authoredStories.map((authored) => drafts[authored.id] ?? authored),
+    () => authoredStories.map((authored) => (drafts[authored.id]?.authored ? drafts[authored.id] : authored)),
     [authoredStories, drafts],
   )
   const story = stories.find((entry) => entry.id === chosen) ?? stories[0]
+  const standaloneSceneIds = useMemo(() => new Set(config.standaloneScenes.map((entry) => entry.id)), [config.standaloneScenes])
 
   const apply = useCallback(
-    (change: (current: RuntimeStory) => RuntimeStory) => {
+    (change: (current: Story) => Story) => {
       if (!story) return
-      setDrafts((current) => ({ ...current, [story.id]: change(current[story.id] ?? story) }))
+      setDrafts((current) => {
+        const stored = current[story.id]
+        return { ...current, [story.id]: change(stored?.authored ? stored : story) }
+      })
     },
     [setDrafts, story],
   )
@@ -55,21 +67,26 @@ export function useSceneList(running?: { id: string; step: number } | null) {
    * thing - and what the author types goes to the draft, which the run will
    * pick up when it is next started from what has been applied.
    */
-  const followed = running && running.id === story?.id ? running.step : scene
-  const at = Math.min(followed, Math.max(0, (story?.steps.length ?? 1) - 1))
+  const at = Math.min(scene, Math.max(0, (story?.steps.length ?? 1) - 1))
 
   return {
     /** Which scene is being worked on, clamped so a removal cannot strand it past the end. */
     at,
     scenes: story?.steps ?? [],
     chosen: story?.id ?? '',
+    /** Empty or unresolved Stories remain editable but cannot start in Present. */
+    canActivate: story ? storyCanActivate(story, standaloneSceneIds) : false,
+    clear: () => {
+      apply(clearScenes)
+      setScene(0)
+    },
     choose: (id: string) => {
       setChosen(id)
       setScene(0)
     },
     edit: (change: Partial<Scene>) => apply((current) => editScene(current, at, change)),
     /** Whether this story differs from what is authored, which is what the change set describes. */
-    edited: Boolean(story && drafts[story.id]),
+    edited: Boolean(story && drafts[story.id]?.authored),
     insert: () => {
       apply((current) => insertScene(current, at))
       setScene(at + 1)
@@ -83,8 +100,8 @@ export function useSceneList(running?: { id: string; step: number } | null) {
       apply((current) => removeScene(current, at))
       setScene(Math.max(0, at - 1))
     },
-    /** Whether the shown scene is the one playing, so the panel can say so. */
-    following: Boolean(running && running.id === story?.id),
+    /** Direct selection never follows the Scene currently showing in Present. */
+    following: false,
     select: setScene,
     /** The whole `steps` array, which is how a sequence is handed back. */
     source: story ? scenesAsSource(story) : '',

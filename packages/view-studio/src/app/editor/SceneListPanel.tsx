@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Plus, RotateCcw, Timer, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, ListX, Plus, RotateCcw, Timer, Trash2 } from 'lucide-react'
 import { LineList } from './LineList.tsx'
 import { holdFor } from './scenes.ts'
 import type { SceneList } from './use-scene-list.ts'
@@ -56,22 +56,36 @@ export function SceneListPanel({
         <span className="scene-run-time" title="Total run time, which follows every hold you set">
           <Timer aria-hidden="true" size={12} /> {minutes(editor.runTime)}
         </span>
-        <button aria-label="Move this scene earlier" onClick={() => editor.move(-1)} type="button">
+        <button aria-label="Move this scene earlier" disabled={!scene || editor.at === 0} onClick={() => editor.move(-1)} type="button">
           <ChevronUp aria-hidden="true" size={13} />
         </button>
-        <button aria-label="Move this scene later" onClick={() => editor.move(1)} type="button">
+        <button
+          aria-label="Move this scene later"
+          disabled={!scene || editor.at >= editor.scenes.length - 1}
+          onClick={() => editor.move(1)}
+          type="button"
+        >
           <ChevronDown aria-hidden="true" size={13} />
         </button>
-        <button aria-label="Add a scene after this one" onClick={() => editor.insert()} type="button">
+        <button aria-label="Add a scene after this one" disabled={!editor.story} onClick={() => editor.insert()} type="button">
           <Plus aria-hidden="true" size={13} />
         </button>
         <button
           aria-label="Remove this scene"
-          disabled={editor.scenes.length <= 1}
+          disabled={!scene}
           onClick={() => editor.remove()}
           type="button"
         >
           <Trash2 aria-hidden="true" size={13} />
+        </button>
+        <button
+          aria-label="Clear every scene from this story"
+          disabled={editor.scenes.length === 0}
+          onClick={() => editor.clear()}
+          title="Clear this Story; it will remain editable but cannot start in Present"
+          type="button"
+        >
+          <ListX aria-hidden="true" size={13} />
         </button>
         <button
           aria-label="Discard the edits to this story"
@@ -83,6 +97,10 @@ export function SceneListPanel({
           <RotateCcw aria-hidden="true" size={13} />
         </button>
       </div>
+
+      {editor.story && !editor.canActivate ? (
+        <p className="scene-following">This Story can be drafted empty, but it needs a valid Scene before it can start in Present.</p>
+      ) : null}
 
       {editor.following ? (
         <p className="scene-following">
@@ -113,14 +131,26 @@ export function SceneListPanel({
         ))}
       </ol>
 
+      {editor.story && editor.scenes.length === 0 ? (
+        <p className="contract-empty">This Story has no Scenes. Add one to begin its storyboard.</p>
+      ) : null}
+
       {scene ? (
         <div className="scene-fields">
           <label className="text-row">
-            <span>Title</span>
+            <span>Storyboard title</span>
             <input
               onChange={(event) => editor.edit({ title: event.target.value })}
               type="text"
               value={scene.title ?? ''}
+            />
+          </label>
+          <label className="text-row">
+            <span>Callout title</span>
+            <input
+              onChange={(event) => editor.edit({ calloutTitle: event.target.value || undefined })}
+              type="text"
+              value={scene.calloutTitle ?? ''}
             />
           </label>
           <label className="text-row">
@@ -129,6 +159,14 @@ export function SceneListPanel({
               onChange={(event) => editor.edit({ caption: event.target.value })}
               rows={4}
               value={scene.caption}
+            />
+          </label>
+          <label className="text-row">
+            <span>Renderer</span>
+            <input
+              onChange={(event) => editor.edit({ renderer: event.target.value || undefined })}
+              type="text"
+              value={scene.renderer ?? ''}
             />
           </label>
           <label className="text-row">

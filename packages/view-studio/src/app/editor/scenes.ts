@@ -1,3 +1,6 @@
+import type { StandaloneSceneConfig } from '@infoschematics/domain-model/scene'
+import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
+
 /*
  * Editing a story, as a value rather than as a hook.
  *
@@ -15,23 +18,66 @@
  */
 
 export type Scene = {
+  /** The authored value this editable projection preserves and writes back. */
+  authored: StorySceneConfig
   anchor?: string
   callout?: { x: number; y: number }
+  calloutTitle?: string
   caption: string
   components: readonly string[]
   flows: readonly string[]
   hold: number
   overlay?: string
+  renderer?: string
+  scene?: string
   takeaways?: readonly string[]
   title?: string
 }
 export type Story = {
+  /** The authored value this editable projection preserves and writes back. */
+  authored: StoryConfig
   id: string
   code: string
   label: string
   short?: string
   question: string
   steps: readonly Scene[]
+}
+
+/**
+ * Project an authored Story into the fields the editor presents without
+ * throwing away fields the editor does not yet expose.
+ */
+export const storyForEditing = (
+  story: StoryConfig,
+  standaloneScenes: readonly StandaloneSceneConfig[],
+): Story => {
+  const standaloneById = new Map(standaloneScenes.map((scene) => [scene.id, scene]))
+  return {
+    authored: story,
+    code: story.code,
+    id: story.id,
+    label: story.title,
+    question: story.question ?? '',
+    short: story.short,
+    steps: story.scenes.map((scene) => {
+      const source = scene.sourceScene ? standaloneById.get(scene.sourceScene) : undefined
+      return {
+        anchor: scene.anchor,
+        authored: scene,
+        callout: scene.callout?.at,
+        calloutTitle: scene.callout?.title,
+        caption: scene.callout?.body ?? '',
+        components: scene.focus?.artefacts ?? source?.focus.artefacts ?? [],
+        flows: scene.focus?.flows ?? source?.focus.flows ?? [],
+        hold: scene.duration ?? 0,
+        renderer: scene.callout?.renderer,
+        scene: scene.sourceScene,
+        takeaways: scene.callout?.takeaways,
+        title: scene.title,
+      }
+    }),
+  }
 }
 
 export const holdFor = (caption: string): number => {
@@ -55,11 +101,13 @@ export const moveScene = (story: Story, at: number, delta: number): Story => {
 }
 
 export const removeScene = (story: Story, at: number): Story =>
-  // The last scene stays. A story with no scenes is not a shorter
-  // story, it is a broken descriptor that fails validation on load.
-  story.steps.length <= 1 || at < 0 || at >= story.steps.length
+  at < 0 || at >= story.steps.length
     ? story
     : { ...story, steps: story.steps.filter((_, index) => index !== at) }
+
+/** Empty is a valid Direct draft, even though it cannot be activated in Present. */
+export const clearScenes = (story: Story): Story =>
+  story.steps.length === 0 ? story : { ...story, steps: [] }
 
 /**
  * A new scene, after the one given.
@@ -69,7 +117,19 @@ export const removeScene = (story: Story, at: number): Story =>
  * the reader has to notice before they can fix it.
  */
 export const insertScene = (story: Story, after: number): Story => {
-  const blank: Scene = { caption: '', components: [], flows: [], hold: holdFor(''), title: 'New scene' }
+  const authored: StorySceneConfig = {
+    callout: { body: '' },
+    duration: holdFor(''),
+    title: 'New scene',
+  }
+  const blank: Scene = {
+    authored,
+    caption: '',
+    components: [],
+    flows: [],
+    hold: authored.duration ?? 0,
+    title: authored.title,
+  }
   const steps = [...story.steps]
   steps.splice(Math.min(Math.max(after + 1, 0), steps.length), 0, blank)
   return { ...story, steps }
@@ -77,7 +137,25 @@ export const insertScene = (story: Story, after: number): Story => {
 
 export const editScene = (story: Story, at: number, change: Partial<Scene>): Story => ({
   ...story,
-  steps: story.steps.map((step, index) => (index === at ? { ...step, ...change } : step))
+  steps: story.steps.map((step, index) => {
+    if (index !== at) return step
+
+    const authored = { ...step.authored }
+    if ('title' in change) authored.title = change.title
+    if ('anchor' in change) authored.anchor = change.anchor
+    if ('hold' in change) authored.duration = change.hold
+    if ('caption' in change || 'calloutTitle' in change || 'renderer' in change || 'takeaways' in change) {
+      authored.callout = {
+        ...authored.callout,
+        body: change.caption ?? step.caption,
+        renderer: 'renderer' in change ? change.renderer : step.renderer,
+        takeaways: change.takeaways ?? step.takeaways,
+        title: 'calloutTitle' in change ? change.calloutTitle : step.calloutTitle,
+      }
+    }
+
+    return { ...step, ...change, authored }
+  }),
 })
 
 /**
@@ -97,13 +175,39 @@ export const toggleLit = (story: Story, at: number, id: string, isFlow: boolean)
   const current = step[key] as readonly string[]
   const next = current.includes(id) ? current.filter((entry) => entry !== id) : [...current, id]
 
-  return editScene(story, at, { [key]: next } as Partial<Scene>)
+  const changed = editScene(story, at, { [key]: next } as Partial<Scene>)
+  return {
+    ...changed,
+    steps: changed.steps.map((candidate, index) =>
+      index === at
+        ? {
+            ...candidate,
+            authored: {
+              ...candidate.authored,
+              focus: {
+                ...candidate.authored.focus,
+                artefacts: isFlow ? candidate.components : next,
+                flows: isFlow ? next : candidate.flows,
+              },
+            },
+          }
+        : candidate,
+    ),
+  }
 }
 
 export const runTime = (story: Story): number => story.steps.reduce((total, step) => total + step.hold, 0)
 
-const quoted = (value: string) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`
-const list = (values: readonly string[]) => `[${values.map(quoted).join(', ')}]`
+/**
+ * Present can only activate a Story with at least one resolvable Scene.
+ * Inline Story Scenes are self-contained; references must still name an
+ * authored Standalone Scene.
+ */
+export const storyCanActivate = (story: Story, standaloneSceneIds: ReadonlySet<string>): boolean =>
+  story.steps.some((step) => {
+    const source = step.authored.sourceScene
+    return source === undefined || (source.trim() !== '' && standaloneSceneIds.has(source))
+  })
 
 /**
  * The whole `steps` array, ready to paste.
@@ -115,20 +219,14 @@ const list = (values: readonly string[]) => `[${values.map(quoted).join(', ')}]`
  * says the same thing with nothing to get wrong.
  */
 export const scenesAsSource = (story: Story): string => {
-  const scenes = story.steps.map((step) => {
-    const rows = [
-      `      caption: ${quoted(step.caption)},`,
-      `      hold: ${step.hold},`,
-      step.title ? `      title: ${quoted(step.title)},` : undefined,
-      step.takeaways?.length ? `      takeaways: ${list(step.takeaways)},` : undefined,
-      step.anchor ? `      anchor: ${quoted(step.anchor)},` : undefined,
-      step.callout ? `      callout: { x: ${step.callout.x}, y: ${step.callout.y} },` : undefined,
-      step.overlay ? `      overlay: ${quoted(step.overlay)},` : undefined,
-      `      components: ${list(step.components)},`,
-      `      flows: ${list(step.flows)}`
-    ].filter(Boolean)
-    return `    {\n${rows.join('\n')}\n    }`
-  })
-
-  return `${story.code}  ->  steps: [\n${scenes.join(',\n')}\n  ],`
+  const authored: StoryConfig = {
+    ...story.authored,
+    code: story.code,
+    id: story.id,
+    question: story.authored.question,
+    scenes: story.steps.map((step) => step.authored),
+    short: story.short,
+    title: story.label,
+  }
+  return `${story.code}  ->  ${JSON.stringify(authored, null, 2)}`
 }
