@@ -15,7 +15,8 @@ export default defineConfig({
       fileURLToPath(new URL('./apps/*/src/**/*.test.ts', import.meta.url)),
       fileURLToPath(new URL('./apps/*/src/**/*.test.tsx', import.meta.url)),
       fileURLToPath(new URL('./examples/*/src/**/*.test.ts', import.meta.url)),
-      fileURLToPath(new URL('./examples/*/src/**/*.test.tsx', import.meta.url))
+      fileURLToPath(new URL('./examples/*/src/**/*.test.tsx', import.meta.url)),
+      fileURLToPath(new URL('./scripts/**/*.test.ts', import.meta.url))
     ]
   }
 })

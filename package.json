@@ -56,6 +56,11 @@
     "ki:verify:depcruise": "depcruise packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-canvas/src packages/view-present/src packages/view-studio/src packages/render-svg/src examples/is-blank/src examples/is-infoschematics/src apps/site/src",
     "ki:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-canvas && tsc --noEmit -p packages/view-present && tsc --noEmit -p packages/view-studio && tsc --noEmit -p packages/render-svg && tsc --noEmit -p examples/is-blank && tsc --noEmit -p examples/is-infoschematics && tsc --noEmit -p apps/site",
     "ki:verify:visual-tokens": "bun scripts/generate-visual-tokens.ts --check",
+    "packages:build": "bun run packages:check-versions && bun run --cwd packages/domain-model build && bun run --cwd packages/domain-core build && bun run --cwd packages/view-model build && bun run --cwd packages/render-svg build && bun run --cwd packages/view-canvas build && bun run --cwd packages/view-present build && bun run --cwd packages/view-studio build",
+    "packages:check-versions": "bun scripts/release/check-versions.ts",
+    "packages:clean": "bun run --cwd packages/domain-model clean && bun run --cwd packages/domain-core clean && bun run --cwd packages/view-model clean && bun run --cwd packages/render-svg clean && bun run --cwd packages/view-canvas clean && bun run --cwd packages/view-present clean && bun run --cwd packages/view-studio clean",
+    "packages:pack-smoke": "bun scripts/release/pack-smoke.ts",
+    "release:verify": "bun run packages:build && bun run packages:pack-smoke",
     "test": "vitest run --root ."
   },
   "type": "module",
