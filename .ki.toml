@@ -37,6 +37,13 @@ site-root = "apps/site"
 # -----------------------------------------------------------------------------
 
 [skills.ki-engineering]
+# Each hold is a deliberate deferral of a major release pending its own verified migration.
+dependency_holds = [
+  "typescript — major release (6+); per-workspace type-checking and the package build migrate deliberately, not in passing",
+  "vite — major release (8); the site build migrates together with the @vitejs/plugin-react major",
+  "@vitejs/plugin-react — major release (6); adopted together with the vite major",
+  "@types/node — major release; tracks the TypeScript and toolchain majors and is adopted with them",
+]
 
 [skills.ki-git]
 

@@ -21,4 +21,4 @@ The website currently publishes:
 - [the React integration guide](guides/react-integration.md);
 - [the vocabulary reference](reference/vocabulary.md).
 
-Architecture, decision records, specifications, and roadmap records remain maintainer-facing unless publication would help a consumer understand a supported contract.
+Architecture, decision records, specifications, and roadmap records remain maintainer-facing unless publication would help a consumer understand a supported contract. The maintainer-facing [Cloudflare hosting guide](guides/cloudflare.md) records the dashboard-owned deployment settings.
