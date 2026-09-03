@@ -39,7 +39,6 @@ describe('visual tokens', () => {
     expect(visualTokens.canvas.surfaces.regionDash).toBe('8 6')
     expect(visualTokens.canvas.surfaces.regionDot).toBe('1.5 5')
     expect(visualTokens.canvas.flows.routeWidth).toBe(4)
-    expect(visualTokens.canvas.flows.signalRadius).toBe(5)
     expect(visualTokens.canvas.flows.signalStillWidth).toBe(7)
     expect(visualTokens.canvas.flows.lineCap).toBe('round')
     expect(visualTokens.canvas.flows.lineJoin).toBe('round')

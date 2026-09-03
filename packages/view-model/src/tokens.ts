@@ -54,7 +54,6 @@ export const visualTokens = Object.freeze({
       pipeWidth: 9,
       routeOpacity: 0.95,
       routeWidth: 4,
-      signalRadius: 5,
       signalStillWidth: 7,
     }),
     focus: tokenGroup({

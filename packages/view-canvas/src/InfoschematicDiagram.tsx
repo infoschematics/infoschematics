@@ -122,6 +122,8 @@ const {
   gridMajorSize,
   gridSize,
 } = visualTokens.canvas.geometry
+// The moving pulse is Canvas-only; static output shares only the still-path treatment.
+const signalRadius = 5
 
 export function InfoschematicDiagram({
   artefactOperations = [],
@@ -1047,7 +1049,7 @@ export function InfoschematicDiagram({
               key={flowSignalKey(signal)}
             >
               <path className="infoschematic-flow-signal-still" d={flow.d} />
-              <circle className="infoschematic-flow-signal-pulse" opacity="0" r={visualTokens.canvas.flows.signalRadius}>
+              <circle className="infoschematic-flow-signal-pulse" opacity="0" r={signalRadius}>
                 <animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0" />
                 <animateMotion dur="900ms" fill="freeze" path={flow.d} />
               </circle>
