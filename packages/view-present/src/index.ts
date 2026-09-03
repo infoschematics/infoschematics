@@ -10,6 +10,7 @@ export type {
   PlayingStory,
   PresentationAction,
   PresentationState,
+  SceneSignalPolicy,
 } from "./presentation.ts";
 export { createProductionState, directTargetIsValid, reduceProduction } from "./production.ts";
 export type {

@@ -4,6 +4,7 @@ import {
   createPresentationState,
   derivePresentation,
   reducePresentation,
+  type SceneSignalPolicy,
 } from "./presentation.ts";
 
 const readPreference = (key: string | undefined, fallback: boolean) => {
@@ -16,7 +17,10 @@ const readPreference = (key: string | undefined, fallback: boolean) => {
   }
 };
 
-export const usePresentation = (runtime: InfoschematicRuntime) => {
+export const usePresentation = (
+  runtime: InfoschematicRuntime,
+  signalPolicy: SceneSignalPolicy,
+) => {
   const storage = runtime.config.id;
   const [state, dispatch] = useReducer(
     reducePresentation,
@@ -32,8 +36,8 @@ export const usePresentation = (runtime: InfoschematicRuntime) => {
     }),
   );
   const derived = useMemo(
-    () => derivePresentation(runtime, state),
-    [runtime, state],
+    () => derivePresentation(runtime, state, signalPolicy),
+    [runtime, signalPolicy, state],
   );
 
   useEffect(() => {

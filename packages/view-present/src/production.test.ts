@@ -11,6 +11,7 @@ const presentation = (): PresentationState => ({
   annotated: true,
   autoAdvance: false,
   playing: { id: "story-one", step: 2 },
+  sceneOccurrence: 3,
   standaloneSceneId: null,
   takeaways: false,
   thematicSceneId: "theme-scene-one",

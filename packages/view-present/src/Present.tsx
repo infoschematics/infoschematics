@@ -5,17 +5,25 @@ import { createInfoschematicRuntime } from "@infoschematics/view-model/runtime";
 import { PresentationControls } from "./PresentationControls.tsx";
 import { PresentationDetails } from "./PresentationDetails.tsx";
 import { SceneCallout } from "./SceneCallout.tsx";
+import type { SceneSignalPolicy } from "./presentation.ts";
 import { usePresentation } from "./use-presentation.ts";
 
 export type PresentProps = Readonly<{
   className?: string;
   config: InfoschematicConfig;
   renderers?: CanvasProps["renderers"];
+  /** Signal focused Flows on Scene entry, or suppress automatic signalling. */
+  signalPolicy?: SceneSignalPolicy;
 }>;
 
-export function Present({ className, config, renderers }: PresentProps) {
+export function Present({
+  className,
+  config,
+  renderers,
+  signalPolicy = "focused-flows",
+}: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config]);
-  const presentation = usePresentation(runtime);
+  const presentation = usePresentation(runtime, signalPolicy);
   const { derived, dispatch, state } = presentation;
   const storyCallout = state.playing
     ? config.stories.find((story) => story.id === state.playing?.id)?.scenes[
@@ -183,6 +191,7 @@ export function Present({ className, config, renderers }: PresentProps) {
             graphic={derived.runningStoryScene?.graphic}
             highlight={derived.highlight}
             renderers={renderers}
+            signals={derived.signals}
             visibleScopes={state.visibleScopes}
           >
             {derived.runningStoryScene && derived.runningStory ? (

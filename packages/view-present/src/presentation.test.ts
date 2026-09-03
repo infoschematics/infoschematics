@@ -79,6 +79,19 @@ const runtime = () =>
               { x: 500, y: 140 },
             ],
           },
+          {
+            id: "return-flow",
+            code: "DEL-002",
+            family: "delivery",
+            source: "target",
+            sourcePort: "W1",
+            target: "source",
+            targetPort: "E1",
+            points: [
+              { x: 500, y: 160 },
+              { x: 260, y: 160 },
+            ],
+          },
         ],
       },
       standaloneScenes: [
@@ -87,7 +100,10 @@ const runtime = () =>
           code: "SCENE-001",
           label: "Standalone",
           description: "A standalone focus",
-          focus: { artefacts: ["source"], flows: ["delivery-flow"] },
+          focus: {
+            artefacts: ["source"],
+            flows: ["delivery-flow", "return-flow"],
+          },
         },
       ],
       themes: [
@@ -99,7 +115,7 @@ const runtime = () =>
               id: "theme-scene",
               code: "THEME-001",
               label: "Theme focus",
-              focus: { artefacts: ["target"] },
+              focus: { artefacts: ["target"], flows: ["delivery-flow"] },
               callout: { body: "A thematic focus" },
             },
           ],
@@ -112,6 +128,7 @@ const runtime = () =>
           title: "Journey",
           scenes: [
             {
+              sourceScene: "scene",
               focus: { artefacts: ["source"] },
               callout: { body: "First" },
               duration: 1000,
@@ -187,5 +204,90 @@ describe("presentation state", () => {
 
     expect(previous.playing?.step).toBe(1);
     expect(next.playing?.step).toBe(0);
+  });
+
+  it("signals every focused Flow once for a Scene entry", () => {
+    const source = runtime();
+    const entered = reducePresentation(createPresentationState(source), {
+      type: "toggle-standalone-scene",
+      scene: source.standaloneScenes[0]!,
+    });
+    const first = derivePresentation(source, entered);
+    const unrelated = reducePresentation(entered, {
+      type: "set-annotated",
+      value: true,
+    });
+
+    expect(first.signals).toEqual([
+      { flowId: "delivery-flow", occurrenceKey: "present-scene-1" },
+      { flowId: "return-flow", occurrenceKey: "present-scene-1" },
+    ]);
+    expect(derivePresentation(source, unrelated).signals).toEqual(
+      first.signals,
+    );
+  });
+
+  it("cancels obsolete signals and assigns a fresh key on re-entry", () => {
+    const source = runtime();
+    const entered = reducePresentation(createPresentationState(source), {
+      type: "toggle-standalone-scene",
+      scene: source.standaloneScenes[0]!,
+    });
+    const cleared = reducePresentation(entered, { type: "clear-focus" });
+    const replayed = reducePresentation(cleared, {
+      type: "toggle-standalone-scene",
+      scene: source.standaloneScenes[0]!,
+    });
+    const changed = reducePresentation(replayed, {
+      type: "toggle-theme-scene",
+      scene: source.thematicScenes[0]!,
+    });
+
+    expect(derivePresentation(source, cleared).signals).toEqual([]);
+    expect(derivePresentation(source, replayed).signals).toEqual([
+      { flowId: "delivery-flow", occurrenceKey: "present-scene-2" },
+      { flowId: "return-flow", occurrenceKey: "present-scene-2" },
+    ]);
+    expect(derivePresentation(source, changed).signals).toEqual([
+      { flowId: "delivery-flow", occurrenceKey: "present-scene-3" },
+    ]);
+  });
+
+  it("allows automatic Scene signalling to be disabled", () => {
+    const source = runtime();
+    const entered = reducePresentation(createPresentationState(source), {
+      type: "toggle-standalone-scene",
+      scene: source.standaloneScenes[0]!,
+    });
+
+    expect(derivePresentation(source, entered, "none").signals).toEqual([]);
+  });
+
+  it("replays inherited focused Flows when a Story re-enters a Scene", () => {
+    const source = runtime();
+    const started = reducePresentation(createPresentationState(source), {
+      type: "start-story",
+      story: source.stories[0]!,
+    });
+    const advanced = reducePresentation(started, {
+      type: "step-story",
+      stories: source.stories,
+      delta: 1,
+    });
+    const returned = reducePresentation(advanced, {
+      type: "step-story",
+      stories: source.stories,
+      delta: 1,
+    });
+
+    expect(derivePresentation(source, started).signals).toEqual([
+      { flowId: "delivery-flow", occurrenceKey: "present-scene-1" },
+      { flowId: "return-flow", occurrenceKey: "present-scene-1" },
+    ]);
+    expect(derivePresentation(source, advanced).signals).toEqual([]);
+    expect(derivePresentation(source, returned).signals).toEqual([
+      { flowId: "delivery-flow", occurrenceKey: "present-scene-3" },
+      { flowId: "return-flow", occurrenceKey: "present-scene-3" },
+    ]);
   });
 });

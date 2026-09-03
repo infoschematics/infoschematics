@@ -4,13 +4,20 @@ import type {
   RuntimeStory,
   RuntimeThemeScene,
 } from "@infoschematics/view-model/runtime";
+import {
+  type SceneSignalSelection,
+  resolveSceneFlowSignals,
+} from "@infoschematics/view-model/signals";
 
 export type PlayingStory = Readonly<{ id: string; step: number }>;
+
+export type SceneSignalPolicy = "focused-flows" | "none";
 
 export type PresentationState = Readonly<{
   annotated: boolean;
   autoAdvance: boolean;
   playing: PlayingStory | null;
+  sceneOccurrence: number;
   standaloneSceneId: string | null;
   takeaways: boolean;
   thematicSceneId: string | null;
@@ -56,6 +63,7 @@ export const createPresentationState = (
   annotated: false,
   autoAdvance: true,
   playing: null,
+  sceneOccurrence: 0,
   standaloneSceneId: null,
   takeaways: true,
   thematicSceneId: null,
@@ -105,6 +113,7 @@ export const reducePresentation = (
       return {
         ...state,
         playing: { id: action.story.id, step: 0 },
+        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
         thematicSceneId: null,
       };
@@ -118,7 +127,11 @@ export const reducePresentation = (
       const step =
         (state.playing.step + action.delta + story.steps.length) %
         story.steps.length;
-      return { ...state, playing: { ...state.playing, step } };
+      return {
+        ...state,
+        playing: { ...state.playing, step },
+        sceneOccurrence: state.sceneOccurrence + 1,
+      };
     }
     case "step-theme": {
       if (!state.thematicSceneId || action.scenes.length === 0) return state;
@@ -130,7 +143,13 @@ export const reducePresentation = (
         action.scenes[
           (current + action.delta + action.scenes.length) % action.scenes.length
         ];
-      return scene ? { ...state, thematicSceneId: scene.id } : state;
+      return scene
+        ? {
+            ...state,
+            sceneOccurrence: state.sceneOccurrence + 1,
+            thematicSceneId: scene.id,
+          }
+        : state;
     }
     case "stop-story":
       return { ...state, playing: null };
@@ -148,6 +167,10 @@ export const reducePresentation = (
       return {
         ...state,
         playing: null,
+        sceneOccurrence:
+          state.standaloneSceneId === action.scene.id
+            ? state.sceneOccurrence
+            : state.sceneOccurrence + 1,
         standaloneSceneId:
           state.standaloneSceneId === action.scene.id ? null : action.scene.id,
         thematicSceneId: null,
@@ -156,6 +179,10 @@ export const reducePresentation = (
       return {
         ...state,
         playing: null,
+        sceneOccurrence:
+          state.thematicSceneId === action.scene.id
+            ? state.sceneOccurrence
+            : state.sceneOccurrence + 1,
         standaloneSceneId: null,
         thematicSceneId:
           state.thematicSceneId === action.scene.id ? null : action.scene.id,
@@ -166,6 +193,7 @@ export const reducePresentation = (
 export const derivePresentation = (
   runtime: InfoschematicRuntime,
   state: PresentationState,
+  signalPolicy: SceneSignalPolicy = "focused-flows",
 ) => {
   const visibleCards = runtime.infoschematicCards.filter((card) =>
     runtime.infoschematicCardIsVisible(card, state.visibleScopes),
@@ -195,6 +223,35 @@ export const derivePresentation = (
       )
     : undefined;
   const focusedScene = runningStoryScene ?? thematicScene ?? standaloneScene;
+  const thematicThemeId = thematicScene
+    ? runtime.config.themes.find((theme) =>
+        theme.scenes.some((scene) => scene.id === thematicScene.id),
+      )?.id
+    : undefined;
+  let signalSelection: SceneSignalSelection | undefined;
+  if (state.playing) {
+    signalSelection = {
+      kind: "story",
+      sceneIndex: state.playing.step,
+      storyId: state.playing.id,
+    };
+  } else if (thematicScene && thematicThemeId) {
+    signalSelection = {
+      kind: "theme",
+      sceneId: thematicScene.id,
+      themeId: thematicThemeId,
+    };
+  } else if (standaloneScene) {
+    signalSelection = { kind: "standalone", sceneId: standaloneScene.id };
+  }
+  const signals =
+    signalPolicy === "focused-flows" && signalSelection
+      ? resolveSceneFlowSignals(
+          runtime.config,
+          signalSelection,
+          `present-scene-${state.sceneOccurrence}`,
+        )
+      : [];
   const focusedFlows = focusedScene
     ? visibleFlows
         .filter((flow) => focusedScene.flows.includes(flow.id))
@@ -214,6 +271,7 @@ export const derivePresentation = (
     highlight,
     runningStory,
     runningStoryScene,
+    signals,
     standaloneScene,
     thematicScene,
     visibleCards,
