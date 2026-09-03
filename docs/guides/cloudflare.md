@@ -15,14 +15,25 @@ Two custom domains are attached to the Worker, created by the `routes` declarati
 - `infoschematics.info`
 - `www.infoschematics.info`
 
-There are no redirect rules: `www.infoschematics.info` serves the Worker directly rather than redirecting to the apex. If a `www` → apex 301 is ever added (zone → Rules → Redirect Rules), record the exact rule here.
+A zone-level redirect rule (`infoschematics.info` → Rules → Redirect Rules → **`www → apex`**) sends `www.infoschematics.info` to the apex:
 
-## Deployment — no Workers Builds
+- Filter: `(http.host eq "www.infoschematics.info")`
+- Action: redirect to a **dynamic** target URL `concat("https://infoschematics.info", http.request.uri.path)`, type **301**, preserve query string
 
-Workers Builds is **not connected**: the Worker has no repository connection under Settings → Build, so a push to `main` does not build or deploy anything. Every deployment is operator-run from the repository root:
+The target URL must be the dynamic expression, not static text — a static `https://infoschematics.info${http.request.uri.path}` redirects every visitor to that literal broken URL.
+
+## Deployment — Workers Builds
+
+Workers Builds is connected under Settings → Build → Git repository `infoschematics/infoschematics`, branch `main`, so a push to `main` triggers Cloudflare to build and deploy automatically:
+
+- Build command: `bun run build`
+- Deploy command: `bun run ki:site:deploy`
+- Root directory: `/`
+
+`bun run build` (the root package-lifecycle script, not `ki:site:build`) is required: it runs `packages:build` before the site build, producing the `dist/` output the workspace packages (`@infoschematics/view-studio` and siblings) need to resolve. `dist/` is gitignored everywhere, so a fresh Workers Builds clone has none of it — a site-only build command fails to resolve those packages during the Vite build.
+
+A manual deploy from the repository root remains available when needed:
 
 ```bash
 bun run ki:site:deploy
 ```
-
-This builds the site and runs `wrangler deploy` from `apps/site`, uploading `dist/` as the Worker's assets. If Workers Builds is ever connected, record the build command, deploy command, root directory, and branch here in the same change.
