@@ -1,14 +1,36 @@
 {
   "name": "@infoschematics/view-model",
-	"description": "The framework-agnostic Infoschematic view model: geometry, ports, routing, guides, placement, editing primitives and shared tokens.",
-	"version": "0.1.0",
-	"dependencies": {
-		"@infoschematics/domain-model": "0.1.0"
-	},
-	"exports": {
-		"./tokens.css": "./src/tokens.generated.css",
-    "./*": "./src/*.ts"
-  },
+  "description": "The framework-agnostic Infoschematic view model: geometry, ports, routing, guides, placement, editing primitives and shared tokens.",
+  "version": "0.1.0",
+  "type": "module",
   "license": "MIT",
-  "type": "module"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infoschematics/infoschematics.git",
+    "directory": "packages/view-model"
+  },
+  "engines": { "node": ">=22" },
+  "publishConfig": { "access": "public" },
+  "files": ["dist"],
+  "sideEffects": ["./dist/tokens.generated.css"],
+  "scripts": {
+    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/tokens.generated.css dist/tokens.generated.css ../../LICENSE dist/LICENSE",
+    "clean": "node build.mjs --clean"
+  },
+  "exports": {
+    "./artefact-draft": { "types": "./dist/artefact-draft.d.ts", "import": "./dist/artefact-draft.js" },
+    "./editable": { "types": "./dist/editable.d.ts", "import": "./dist/editable.js" },
+    "./geometry": { "types": "./dist/geometry.d.ts", "import": "./dist/geometry.js" },
+    "./guides": { "types": "./dist/guides.d.ts", "import": "./dist/guides.js" },
+    "./placement": { "types": "./dist/placement.d.ts", "import": "./dist/placement.js" },
+    "./ports": { "types": "./dist/ports.d.ts", "import": "./dist/ports.js" },
+    "./routing": { "types": "./dist/routing.d.ts", "import": "./dist/routing.js" },
+    "./runtime": { "types": "./dist/runtime.d.ts", "import": "./dist/runtime.js" },
+    "./tokens": { "types": "./dist/tokens.d.ts", "import": "./dist/tokens.js" },
+    "./waypoints": { "types": "./dist/waypoints.d.ts", "import": "./dist/waypoints.js" },
+    "./tokens.css": "./dist/tokens.generated.css"
+  },
+  "dependencies": {
+    "@infoschematics/domain-model": "0.1.0"
+  }
 }

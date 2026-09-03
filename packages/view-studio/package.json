@@ -2,7 +2,27 @@
   "name": "@infoschematics/view-studio",
   "description": "The Infoschematic Studio view: React canvas, presentation controls and producer-facing editing capabilities.",
   "version": "0.1.0",
-	"dependencies": {
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infoschematics/infoschematics.git",
+    "directory": "packages/view-studio"
+  },
+  "engines": { "node": ">=22" },
+  "publishConfig": { "access": "public" },
+  "files": ["dist"],
+  "sideEffects": ["./dist/styles.css"],
+  "scripts": {
+    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/styles.css dist/styles.css ../../LICENSE dist/LICENSE",
+    "clean": "node build.mjs --clean"
+  },
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./styles.css": "./dist/styles.css"
+  },
+  "dependencies": {
     "@infoschematics/domain-core": "0.1.0",
     "@infoschematics/domain-model": "0.1.0",
     "@infoschematics/view-canvas": "0.1.0",
@@ -12,14 +32,8 @@
     "lucide-react": "^1.31.0",
     "zod": "^4.1.12"
   },
-  "exports": {
-    ".": "./src/index.ts",
-    "./styles.css": "./src/styles.css"
-  },
-  "license": "MIT",
   "peerDependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  },
-  "type": "module"
+  }
 }
