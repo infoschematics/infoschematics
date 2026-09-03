@@ -219,6 +219,14 @@ export type ArtefactOperation =
   | ReorderArtefactOperation
   | RemoveArtefactOperation
 
+export type EditableArtefact = Readonly<{
+  capabilities: ArtefactCapabilities
+  geometry: ArtefactGeometry
+  /** Adapters identify themselves but move through the Card they wrap. */
+  movementTarget: ArtefactSelection
+  selection: ArtefactSelection
+}>
+
 export type ResizeMinimum = Readonly<{ height?: number; width?: number }>
 
 export const artefactResizeMinimums: Readonly<
@@ -481,6 +489,8 @@ export type Change = {
 }
 
 export type EditableDiagram = {
+  /** Resolves a legacy Canvas key once, before downstream structured editing. */
+  selectionFor: (key: string) => EditableArtefact | undefined
   handles: () => readonly Handle[]
   /** What this diagram offers to align against while a handle is being dragged. */
   guidesFor: (key: string) => readonly Guide[]

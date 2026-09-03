@@ -1,4 +1,6 @@
 import type {
+  ArtefactCapabilities,
+  ArtefactSelection,
   AttachedEnd,
   Change,
   CreatedComponent,
@@ -6,12 +8,31 @@ import type {
   Handle,
   Placement,
 } from '@infoschematics/view-model/editable'
+import {
+  artefactCapabilities,
+  artefactResizeMinimums,
+  defineArtefactSelection,
+} from '@infoschematics/view-model/editable'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/view-model/geometry'
 import { guidesFrom } from '@infoschematics/view-model/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/view-model/ports'
 import type { LaneConfig } from '@infoschematics/domain-model/lane'
+import type { FabricConfig } from '@infoschematics/domain-model/fabric'
+import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 type InfoschematicScopeId = string
+
+type AuthoredEditableArtefacts = Readonly<{
+  fabrics?: readonly FabricConfig[]
+  graphics?: readonly GraphicConfig[]
+}>
+
+const adapterCapabilities = (canMove: boolean): ArtefactCapabilities =>
+  Object.freeze({
+    ...artefactCapabilities.card,
+    move: canMove,
+    resize: false,
+  })
 
 type InfoschematicFlow = {
   code: string
@@ -85,6 +106,7 @@ export const infoschematicEditable = (
   // keeps working unchanged; supplied by the app, which is the only place that
   // holds drafts.
   createdCards: readonly CreatedComponent[] = [],
+  authoredArtefacts: AuthoredEditableArtefacts = {},
 ): EditableDiagram => {
   const register = model.registerWith(createdCards)
   /*
@@ -131,7 +153,173 @@ export const infoschematicEditable = (
     .filter((placeable) => register.cardAt(placeable.code))
     .map((placeable) => boxFor(placeable.code, placeable.box))
 
+  const cardSelection = (card: { code: string; id: string }) =>
+    defineArtefactSelection({
+      code: card.code,
+      geometry: 'box' as const,
+      id: card.id,
+      kind: 'card' as const,
+    })
+
+  const componentSelectionFor = (code: string) => {
+    const card = register.cardAt(code)
+    if (card) {
+      const origin = originOf(card)
+      if (!origin) return undefined
+      const selection = cardSelection(card)
+      if (!card.wraps) {
+        return {
+          capabilities: artefactCapabilities.card,
+          geometry: { box: boxFor(code, origin), role: 'box' as const },
+          movementTarget: selection,
+          selection,
+        }
+      }
+
+      const wrappedCode = model.endpointCodes.get(card.wraps)
+      const wrapped = wrappedCode ? register.cardAt(wrappedCode) : undefined
+      const movementTarget = wrapped ? cardSelection(wrapped) : selection
+      return {
+        capabilities: adapterCapabilities(Boolean(wrapped)),
+        geometry: { box: boxFor(code, origin), role: 'box' as const },
+        movementTarget,
+        selection,
+      }
+    }
+
+    const authored = authoredArtefacts.fabrics?.find(
+      (fabric) => fabric.code === code,
+    )
+    const placeable = placeables(visibleScopes).find(
+      (candidate) => candidate.code === code,
+    )
+    if (!authored && !placeable) return undefined
+    const box = authored?.placement.box ?? placeable?.box
+    if (!box) return undefined
+    const selection = defineArtefactSelection({
+      code: authored?.code ?? code,
+      geometry: 'box' as const,
+      id: authored?.id ?? placeable?.id ?? code,
+      kind: 'fabric' as const,
+    })
+    return {
+      capabilities: artefactCapabilities.fabric,
+      geometry: { box: boxFor(code, box), role: 'box' as const },
+      movementTarget: selection,
+      selection,
+    }
+  }
+
+  const selectionFor = (key: string) => {
+    if (key.startsWith('port:')) {
+      const [, code] = key.split(':')
+      return componentSelectionFor(code)
+    }
+    if (key.startsWith('waypoint:')) {
+      const [, code] = key.split(':')
+      const flow = byCode.get(code)
+      if (!flow) return undefined
+      const selection = defineArtefactSelection({
+        code: flow.code,
+        geometry: 'route' as const,
+        id: flow.id,
+        kind: 'flow' as const,
+      })
+      return {
+        capabilities: artefactCapabilities.flow,
+        geometry: { points: flow.points, role: 'route' as const },
+        movementTarget: selection,
+        selection,
+      }
+    }
+    if (key.startsWith('lane:')) {
+      const lane = model.lanes.find(
+        (candidate) => candidate.id === key.slice('lane:'.length),
+      )
+      if (!lane) return undefined
+      const selection = defineArtefactSelection({
+        code: null,
+        geometry: 'lane' as const,
+        id: lane.id,
+        kind: 'lane' as const,
+      })
+      return {
+        capabilities: artefactCapabilities.lane,
+        geometry: { height: lane.height, role: 'lane' as const, y: lane.y },
+        movementTarget: selection,
+        selection,
+      }
+    }
+    if (key.startsWith('zone:')) {
+      const [, laneId, zoneId] = key.split(':')
+      const lane = model.lanes.find((candidate) => candidate.id === laneId)
+      const zone = lane?.zones.find((candidate) => candidate.id === zoneId)
+      if (!lane || !zone) return undefined
+      const selection = defineArtefactSelection({
+        code: null,
+        geometry: 'zone' as const,
+        id: zone.id,
+        kind: 'zone' as const,
+        laneId: lane.id,
+      })
+      return {
+        capabilities: artefactCapabilities.zone,
+        geometry: {
+          laneId: lane.id,
+          role: 'zone' as const,
+          width: zone.width,
+          x: zone.x,
+        },
+        movementTarget: selection,
+        selection,
+      }
+    }
+    if (key.startsWith('graphic:')) {
+      const graphic = authoredArtefacts.graphics?.find(
+        (candidate) => candidate.id === key.slice('graphic:'.length),
+      )
+      if (!graphic) return undefined
+      const selection = defineArtefactSelection({
+        code: null,
+        geometry: 'box' as const,
+        id: graphic.id,
+        kind: 'graphic' as const,
+      })
+      const box = graphic.placement ?? {
+        height: artefactResizeMinimums.graphic.height ?? 1,
+        width: artefactResizeMinimums.graphic.width ?? 1,
+        x: 0,
+        y: 0,
+      }
+      return {
+        capabilities: artefactCapabilities.graphic,
+        geometry: { box, role: 'box' as const },
+        movementTarget: selection,
+        selection,
+      }
+    }
+
+    const flow = byCode.get(key)
+    if (flow) {
+      const selection = defineArtefactSelection({
+        code: flow.code,
+        geometry: 'route' as const,
+        id: flow.id,
+        kind: 'flow' as const,
+      })
+      return {
+        capabilities: artefactCapabilities.flow,
+        geometry: { points: flow.points, role: 'route' as const },
+        movementTarget: selection,
+        selection,
+      }
+    }
+
+    return componentSelectionFor(key)
+  }
+
   return {
+    selectionFor,
     // A label aligns to the cards and to every label but itself, which is what
     // makes rows and columns of codes line up rather than nearly line up.
     // A label can only travel along the run it sits on, so only guides on that
