@@ -76,4 +76,6 @@ Progress every ready local roadmap item through its approved plan as far as the 
 
 | INFOSCHEMATICS-TOOL-009 | ready | awaiting-review | `432aecb6` → `a72fe30d`; `bun run check` passed | Review the item delivery packet |
 
-The run continues with the remaining independent items. No record has been accepted, pruned, pushed or released.
+| INFOSCHEMATICS-TOOL-005 | ready | awaiting-review | `7925809c` → `ae526a91`; `bun run check` passed | Review the item delivery packet |
+
+The run continues with the remaining independent items. Records accepted by separate human-review threads remain outside this run's closure authority; this run has not pruned, pushed or released anything.

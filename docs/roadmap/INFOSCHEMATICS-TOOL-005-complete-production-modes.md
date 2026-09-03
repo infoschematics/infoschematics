@@ -4,7 +4,7 @@ area: TOOL
 title: Complete production modes
 theme: tool
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 7925809c5af21241479d5ae2dfea0a83f1b2dc4f
@@ -28,17 +28,17 @@ This item owns mode state, mode transitions and the division of production contr
 
 ## Steps
 
-- [ ] Introduce an explicit transient `ProductionMode` union of `present`, `design` and `direct`, starting every application session in Present.
-- [ ] Separate retained Audience preferences and filters from active presentation focus, Story playback and Producer editing state.
-- [ ] Implement one tested mode-transition reducer: entering Design or Direct stops playback and hides presentation focus without discarding Audience filters; returning to Present restores filters but never resumes playback automatically.
-- [ ] Make Design show the complete authored Infoschematic independently of Audience filtering so hidden artefacts cannot become uneditable.
-- [ ] Consolidate Standalone Scene, Theme, Story, Callout and Storyboard authoring under Direct with a discriminated active-target state independent of the Scene currently shown in Present.
-- [ ] Add Theme creation and Scene composition using the same draft, undo, discard and change-set conventions already used by Standalone Scenes and Stories.
-- [ ] Enforce at most one active Standalone Scene, Thematic Scene or Story in Present, define Story precedence, and make all clear and step actions total at empty and stale selections.
-- [ ] Permit empty Themes and Stories in Direct while disabling their activation in Present until they contain a valid Scene.
-- [ ] Define Scope and Flow-family precedence once: Present filters visibility before Scene emphasis, while Design and Direct operate on complete authored content and preview their own draft focus.
-- [ ] Replace ambiguous tabs and boolean props with mode-accurate labels, keyboard actions and accessibility state without persisting Producer mode across reloads.
-- [ ] Add reducer, hook and rendered interaction tests covering every transition, empty collection, stale identifier, focus conflict and reload boundary.
+- [x] Introduce an explicit transient `ProductionMode` union of `present`, `design` and `direct`, starting every application session in Present.
+- [x] Separate retained Audience preferences and filters from active presentation focus, Story playback and Producer editing state.
+- [x] Implement one tested mode-transition reducer: entering Design or Direct stops playback and hides presentation focus without discarding Audience filters; returning to Present restores filters but never resumes playback automatically.
+- [x] Make Design show the complete authored Infoschematic independently of Audience filtering so hidden artefacts cannot become uneditable.
+- [x] Consolidate Standalone Scene, Theme, Story, Callout and Storyboard authoring under Direct with a discriminated active-target state independent of the Scene currently shown in Present.
+- [x] Add Theme creation and Scene composition using the same draft, undo, discard and change-set conventions already used by Standalone Scenes and Stories.
+- [x] Enforce at most one active Standalone Scene, Thematic Scene or Story in Present, define Story precedence, and make all clear and step actions total at empty and stale selections.
+- [x] Permit empty Themes and Stories in Direct while disabling their activation in Present until they contain a valid Scene.
+- [x] Define Scope and Flow-family precedence once: Present filters visibility before Scene emphasis, while Design and Direct operate on complete authored content and preview their own draft focus.
+- [x] Replace ambiguous tabs and boolean props with mode-accurate labels, keyboard actions and accessibility state without persisting Producer mode across reloads.
+- [x] Add reducer, hook and rendered interaction tests covering every transition, empty collection, stale identifier, focus conflict and reload boundary.
 
 ## Files touched
 
@@ -73,6 +73,45 @@ Update Producer guidance when the final controls and mode transitions are demons
 ### Roadmap
 
 Keep artefact editing in `INFOSCHEMATICS-TOOL-006`; capability gaps outside mode and presentation ownership become separate records.
+
+## Review
+
+### Delivered
+
+Delivered explicit transient Present, Design and Direct production modes, with reducer-owned transitions, complete-content Producer views and discriminated Direct authoring targets.
+
+### Summary of changes
+
+- Added the public `ProductionMode`, `ProductionState`, `DirectTarget` and pure reducer contract to Present, including all nine mode transitions and stale-target reconciliation.
+- Consolidated Studio presentation state onto the shared reducers so only Audience preferences persist and every session starts in Present.
+- Added Theme composition and complete Story/Callout storyboard drafting, including empty-sequence authoring, total edit actions, retained unexposed authored fields and change-set output.
+- Added explicit accessible Present, Design and Direct controls, mode-accurate panels and five independently selected Direct target kinds.
+- Disabled empty or stale Theme and Story activation in Present while keeping the drafts editable in Direct.
+- Routed Design and Direct through complete authored content and kept Direct draft focus independent of presentation focus.
+
+### Verification
+
+- Baseline: `7925809c5af21241479d5ae2dfea0a83f1b2dc4f`.
+- Delivery commits: `59e0de63`, `b2c71894`, `0f83024b`, `c122f9ed`, `56bd437e`, `58393764` and `ae526a91`.
+- The production reducer's focused suite passed 21 tests, including all nine transitions, focus cleanup, preference retention and stale Direct targets.
+- Focused Present, Studio App, production-control and Theme-composition tests passed with Studio TypeScript verification.
+- `bun run check` passed on 2026-09-03 after the integrated delivery.
+
+### Outstanding concerns
+
+Direct changes continue to be emitted as reviewable source change sets rather than mutating the host's authored configuration. Full six-kind artefact editing remains owned by TOOL-006. Present and Studio retain a temporary compatibility `designing` facade while hosts migrate to the explicit mode API.
+
+### Post-change review
+
+The implementation keeps mode state transient, preserves Audience filters across Producer work, clears presentation focus and playback on Producer entry, and prevents automatic playback resumption. Present alone owns Audience controls; Design and Direct expose the complete authored model and their own draft focus.
+
+### Mini recap
+
+TOOL-005 is ready for human review. Acceptance, pruning, pushing and releasing remain outside this delivery run.
+
+## Done
+
+Pending human acceptance.
 
 ## Discussion
 
