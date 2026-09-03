@@ -10,6 +10,7 @@ describe('website routes', () => {
 
     expect(page).toContain('See how it')
     expect(page).toContain('A system, explained')
+    expect(page).toContain('<fieldset aria-hidden="true" class="stage__lane"><legend>Infoschematic</legend>')
     expect(page).toContain('OBS-01')
     expect(page).toContain('SEE-04')
     expect(page.match(/system-card__tag/g)).toHaveLength(4)

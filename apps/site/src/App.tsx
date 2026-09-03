@@ -109,6 +109,9 @@ export function App() {
           </div>
 
           <div className="stage">
+            <fieldset aria-hidden="true" className="stage__lane">
+              <legend>Infoschematic</legend>
+            </fieldset>
             <div aria-hidden="true" className="stage__ambient stage__ambient--left" />
             <div aria-hidden="true" className="stage__ambient stage__ambient--right" />
             <p className="stage__axis stage__axis--input">Information</p>

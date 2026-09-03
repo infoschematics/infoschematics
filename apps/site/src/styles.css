@@ -292,20 +292,24 @@ a:focus-visible {
   background-position: -1px -1px;
 }
 
-.stage::before,
-.stage::after {
+.stage__lane {
   position: absolute;
   inset: 44px 3.4% 48px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   border: 1px solid #ffffff0d;
   border-radius: 10px;
-  content: '';
   pointer-events: none;
 }
 
-.stage::after {
-  inset: 56px 3.9% 60px;
-  border-style: dashed;
-  border-color: #79c9ff14;
+.stage__lane legend {
+  margin-left: 20px;
+  padding: 0 10px;
+  color: #617a91;
+  font: 600 10px/1 'DM Mono', monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 .stage__ambient {
@@ -826,12 +830,8 @@ a:focus-visible {
     padding: 74px 30px 70px;
   }
 
-  .stage::before {
+  .stage__lane {
     inset: 34px 22px 38px;
-  }
-
-  .stage::after {
-    inset: 44px 32px 48px;
   }
 
   .stage__axis {
