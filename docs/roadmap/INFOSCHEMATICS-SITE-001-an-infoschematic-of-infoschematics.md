@@ -13,68 +13,81 @@ transferred_from: INFOSCHEMATICS-WEB-SITE-001
 
 ## Goal
 
-Author an Infoschematic of Infoschematics so the public website explains the product architecture in its own medium.
+Deliver a self-describing Infoschematic as a reusable authored example, make it fully explorable through Studio, and render the same configuration as deterministic SVG so the homepage can compare its bespoke preview with the reusable renderer before replacement.
 
 ## Context
 
-The website is now part of this repository as the public outlet for the packages, guidance and examples. Its designed homepage already uses a small schematic-like sequence to explain the idea, while `@infoschematics/is-blank` proves the Studio view accepts a valid title-only configuration.
+The website is the public outlet for the packages, guidance and examples. Its designed homepage already uses a small schematic-like sequence to explain the idea, while `@infoschematics/is-blank` proves Studio accepts a valid title-only configuration. The substantial example must preserve both roles while demonstrating the real Domain Model, additive Views and static renderer from one serialisable source.
 
-The future example should replace neither of those. It should be a complete authored product that demonstrates the Domain Model contract, an appropriate View package and the vocabulary without becoming hidden application state.
+The comparison is intentionally temporary. It provides concrete visual evidence of which homepage treatments the reusable renderer already supports and which belong in follow-on capability work.
 
 ## Boundary
 
-This item does not reintroduce 5G-EMERGE content, add domain-specific renderers to the reusable packages, or make the website the source of product types. It does not remove the designed homepage or the blank example.
+This item does not reintroduce 5G-EMERGE content, add domain-specific renderers to reusable packages, or make website source part of the product types. It does not hide the editorial controls on the substantial example.
+
+It does not add general visual-treatment configuration merely to imitate the homepage, and it does not design Flow animation or signalling. Those concerns belong to `INFOSCHEMATICS-TOOL-012` and `INFOSCHEMATICS-TOOL-013`. The bespoke homepage preview remains available during comparison and is removed only after explicit visual-parity approval.
 
 ## Current state
 
-`examples/is-blank` is the only authored example and proves the minimum title-only contract. `apps/site` exposes that example at `/examples/blank/` through the current Studio View, while the homepage explains the idea with bespoke website composition. No complete authored Infoschematic currently explains the package architecture, dependency direction, View choices or host boundary.
+`examples/is-blank` is the only authored example and proves the minimum title-only contract. `apps/site` exposes it through Studio at `/examples/blank/`, while the homepage explains the idea with a bespoke composition.
+
+Canvas, Present, Studio and `renderInfoschematicSvg` now exist as additive public surfaces. No complete authored Infoschematic currently explains package architecture, dependency direction, View choices or the host boundary, and the homepage has no generated static rendering to compare with its bespoke treatment.
 
 ## Steps
 
-- [ ] Define the self-describing narrative around Domain Model, Domain Core, View Model, Canvas, Present, Studio, renderers, authored examples and hosts without introducing repository mechanics as product concepts.
-- [ ] Create `examples/is-infoschematics` as a framework-neutral workspace depending only on Domain Core and exporting one complete serialisable definition.
+- [ ] Define a self-describing narrative around Domain Model, Domain Core, View Model, Canvas, Present, Studio, renderers, authored examples and hosts without introducing repository mechanics as product concepts.
+- [ ] Create an `examples/is-infoschematics` framework-neutral workspace depending only on Domain Core and exporting one complete serialisable definition.
 - [ ] Use Lanes and Zones for ownership boundaries, Cards for packages and hosts, Flows for allowed dependency direction, and Scenes plus one concise Story to explain the architecture progressively.
-- [ ] Add model-level tests for stable identifiers, valid references, serialisability, complete Scene focus and the absence of React, browser state and callbacks from the definition.
-- [ ] Add a Site route at `/examples/infoschematics/`, a host component that owns page metadata, and navigation that keeps the homepage and blank example unchanged.
-- [ ] Mount the example through the narrowest available public View: Present when the additive packages exist, otherwise the current Studio compatibility surface without enabling Producer controls by default.
-- [ ] Add Site tests for direct routing, document title, representative rendered content and production build inclusion.
-- [ ] Update public guidance to distinguish the homepage introduction, blank contract example and substantial self-describing example.
+- [ ] Add model-level tests for stable identifiers, valid references, serialisability, complete Scene focus and the absence of React, browser state, callbacks or renderer implementations from the definition.
+- [ ] Add a Site route at `/examples/infoschematics/`; let the host own document metadata and retain navigation to the homepage and blank example.
+- [ ] Mount the substantial example through Studio with its Producer-facing Design, Direct and Present controls available for exploration and editing.
+- [ ] Render the same exported definition through `renderInfoschematicSvg` for the homepage without importing Studio, React or application state into the authored workspace.
+- [ ] Show the existing homepage preview and generated SVG side by side as a temporary visual-parity review surface, clearly labelling which is bespoke and which is renderer output.
+- [ ] Record reusable visual gaps against `INFOSCHEMATICS-TOOL-012` rather than patching page-specific presentation into the generated SVG.
+- [ ] Add Site tests for direct routing, document titles, editorial controls, representative rendered content, deterministic static SVG and production-build inclusion.
+- [ ] Update public guidance to distinguish the homepage introduction, blank contract example and substantial editable self-describing example.
 
 ## Files touched
 
-- new `examples/is-infoschematics/package.json`, `tsconfig.json` and `src/**` definition and tests;
-- `package.json` and `bun.lock` only for workspace verification wiring;
-- `apps/site/src/routes.ts`, `main.tsx`, a new example host component, navigation and focused tests;
-- `docs/guides/authoring.md`, `docs/guides/react-integration.md` and `docs/design/architecture.md` where they link to representative examples.
+- New `examples/is-infoschematics/package.json`, `tsconfig.json` and `src/**` definition and tests.
+- Root `package.json` and `bun.lock` only for workspace verification wiring.
+- `apps/site/src/routes.ts`, `main.tsx`, the new example host, homepage comparison and focused tests.
+- `docs/guides/authoring.md`, `docs/guides/react-integration.md` and `docs/design/architecture.md` where they link representative examples.
 
 ## Verify
 
-The authored-example tests must prove `JSON.stringify` succeeds, every referenced artefact and Scene exists, and the workspace imports no View or Site module. Site tests must prove both slash variants route directly, the document title comes from the definition, and representative package labels and dependency Flows render. `bun run check` is the final pass/fail gate.
+Authored-example tests must prove `JSON.stringify` succeeds, every referenced artefact and Scene exists, and the workspace imports no View or Site module. Site tests must prove both slash variants route directly, the host derives the document title from the definition, Studio exposes the editorial controls, and representative package labels and dependency Flows render.
+
+A deterministic snapshot must prove the homepage SVG and editable Studio example consume the same exported configuration. Browser review must show the bespoke and generated homepage treatments side by side at representative desktop and narrow widths. `bun run check` is the final pass/fail gate.
 
 ## Dependencies / blocks
 
-There is no hard dependency on the additive-view extraction: the current Studio View is a valid host surface, and the example definition remains framework-neutral whichever View is available. If `INFOSCHEMATICS-TOOL-008` lands first, Site uses Present directly; otherwise its later migration is mechanical and does not change the authored definition.
+`INFOSCHEMATICS-TOOL-008` and `INFOSCHEMATICS-TOOL-007` are complete, so the example can use the public Studio and SVG surfaces without a compatibility fallback. The initial side-by-side comparison does not wait for every visual refinement. Its reusable gaps inform `INFOSCHEMATICS-TOOL-012`; animation remains independently shaped by `INFOSCHEMATICS-TOOL-013`.
 
 ## Documentation impact
 
 ### Decision Records
 
-No new decision is expected. ADR-INFOSCHEMATICS-005 and ADR-INFOSCHEMATICS-007 already govern host-owned configuration and the Site outlet.
+No new decision is expected. ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-006 and ADR-INFOSCHEMATICS-007 already govern host-owned configuration, additive Views and the Site outlet.
 
 ### Specifications
 
-No behaviour-level specification change is expected; tests exercise the existing Domain and View contracts with a substantial example.
+No behaviour-level specification change is expected. Tests exercise the existing Domain, Studio and static SVG contracts through a substantial example.
 
 ### Guides
 
-Link the example from authoring and React integration guidance and explain the three distinct public-example roles.
+Link the example from authoring and React integration guidance, explaining the three distinct public-example roles and the shared configuration behind editable and static renderings.
 
 ### Roadmap
 
-Remove the example's forward-work record only through normal acceptance and pruning. Capture genuine reusable capability gaps separately rather than hiding them in Site code.
+Keep visual-treatment parity in `INFOSCHEMATICS-TOOL-012` and Flow signalling in `INFOSCHEMATICS-TOOL-013`. Replace the bespoke homepage preview only after the temporary comparison receives explicit visual approval.
 
 ## Discussion
 
-### Role of the example
+### Three public surfaces
 
-The homepage introduces the idea, the blank example establishes the minimum contract, and the self-describing Infoschematic will demonstrate a substantial authored definition. Keeping those roles separate lets each example remain legible and prevents the public site from becoming the product model.
+The homepage introduces the idea quickly, the blank example establishes the minimum valid contract, and `is-infoschematics` demonstrates a substantial authored product. The substantial route uses Studio because its purpose includes hands-on editorial exploration; the homepage consumes only deterministic static SVG from that same definition.
+
+### Comparison before replacement
+
+The existing homepage treatment is a visual reference, not reusable implementation. Keeping it beside renderer output for one review cycle makes missing capabilities visible without contaminating the authored example or static renderer with site-only CSS. Replacement follows explicit approval rather than being inferred from technical completeness.
