@@ -73,14 +73,33 @@ describe('infoschematicsInfoschematic', () => {
     )
 
     expect(diagram.lanes.map(({ appearance }) => appearance?.frame)).toEqual([
+      'solid',
+      'dashed',
+      'dotted',
+      'solid',
+    ])
+    expect(diagram.lanes.map(({ appearance }) => appearance?.labelTreatment)).toEqual([
       'notched',
       'notched',
       'notched',
       'notched',
     ])
-    expect(diagram.lanes.flatMap(({ zones }) => zones).every(({ appearance }) => appearance)).toBe(
-      true,
-    )
+    expect(
+      diagram.lanes
+        .flatMap(({ zones }) => zones)
+        .every(({ appearance }) => appearance?.labelTreatment === 'plain'),
+    ).toBe(true)
+    expect(
+      new Set(
+        diagram.lanes.flatMap(({ zones }) => zones).map(({ appearance }) => appearance?.frame),
+      ),
+    ).toEqual(new Set(['solid', 'dashed', 'dotted']))
+    expect(diagram.lanes.every(({ appearance }) => appearance?.label !== undefined)).toBe(true)
+    expect(
+      diagram.lanes
+        .flatMap(({ zones }) => zones)
+        .every(({ appearance }) => appearance?.label !== undefined),
+    ).toBe(true)
   })
 
   it('expresses only the allowed dependency direction', () => {

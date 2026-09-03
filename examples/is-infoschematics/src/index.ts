@@ -159,7 +159,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
     ],
     lanes: [
       {
-        appearance: { frame: 'notched', label: 'north-west' },
+        appearance: { frame: 'solid', label: 'north-west', labelTreatment: 'notched' },
         height: 160,
         id: 'lane-domain-contract',
         label: 'Authored contract',
@@ -168,7 +168,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 20,
         zones: [
           {
-            appearance: { frame: 'plain', label: 'south-east' },
+            appearance: { frame: 'solid', label: 'south-east', labelTreatment: 'plain' },
             fill: '#e8f0ff',
             id: 'zone-domain-model',
             label: 'Dependency root',
@@ -178,7 +178,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
-        appearance: { frame: 'notched', label: 'north' },
+        appearance: { frame: 'dashed', label: 'north', labelTreatment: 'notched' },
         height: 170,
         id: 'lane-neutral-behaviour',
         label: 'Framework-neutral behaviour',
@@ -187,7 +187,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 210,
         zones: [
           {
-            appearance: { frame: 'plain', label: 'west' },
+            appearance: { frame: 'dashed', label: 'west', labelTreatment: 'plain' },
             fill: '#f4f0ff',
             id: 'zone-domain-behaviour',
             label: 'Domain behaviour',
@@ -195,7 +195,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
-            appearance: { frame: 'plain', label: 'east' },
+            appearance: { frame: 'solid', label: 'east', labelTreatment: 'plain' },
             fill: '#ece9ff',
             id: 'zone-view-calculations',
             label: 'View calculations',
@@ -205,7 +205,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
-        appearance: { frame: 'notched', label: 'north-east' },
+        appearance: { frame: 'dotted', label: 'north-east', labelTreatment: 'notched' },
         height: 170,
         id: 'lane-output-packages',
         label: 'View and renderer packages',
@@ -214,7 +214,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 410,
         zones: [
           {
-            appearance: { frame: 'plain', label: 'south-west' },
+            appearance: { frame: 'solid', label: 'south-west', labelTreatment: 'plain' },
             fill: '#e4f7ef',
             id: 'zone-interactive-views',
             label: 'Additive interactive Views',
@@ -222,7 +222,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
-            appearance: { frame: 'plain', label: 'south-east' },
+            appearance: { frame: 'dotted', label: 'south-east', labelTreatment: 'plain' },
             fill: '#fff4d6',
             id: 'zone-static-output',
             label: 'Static output',
@@ -232,7 +232,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         ],
       },
       {
-        appearance: { frame: 'notched', label: 'south' },
+        appearance: { frame: 'solid', label: 'south', labelTreatment: 'notched' },
         height: 230,
         id: 'lane-composition',
         label: 'Authored composition',
@@ -241,7 +241,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         y: 660,
         zones: [
           {
-            appearance: { frame: 'plain', label: 'north-west' },
+            appearance: { frame: 'solid', label: 'north-west', labelTreatment: 'plain' },
             fill: '#fdebf5',
             id: 'zone-authored-examples',
             label: 'Authored examples',
@@ -249,7 +249,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
             x: 20,
           },
           {
-            appearance: { frame: 'plain', label: 'north-east' },
+            appearance: { frame: 'solid', label: 'north-east', labelTreatment: 'plain' },
             fill: '#fff0e5',
             id: 'zone-application-hosts',
             label: 'Application hosts',
