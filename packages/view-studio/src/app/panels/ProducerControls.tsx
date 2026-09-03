@@ -1,7 +1,7 @@
 import type { Ref } from 'react'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
-import { useInfoschematicRenderers } from '../renderers.tsx'
+import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
+import { useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import { ThemeStrip } from './ThemeStrip.tsx'
 
 // Four banks in two rows: what is on Infoschematic and what its lines carry above, what

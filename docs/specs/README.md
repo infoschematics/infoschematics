@@ -8,6 +8,7 @@ These specifications define the reusable contracts owned by Infoschematics. They
 - [View Model](view-model.md) defines geometry, routes, ports, guides and placement calculations.
 - [Present View](view-present.md) defines audience-facing filtering, Scene focus, Story playback and presentation controls.
 - [Studio View](view-studio.md) defines generic editing sessions, selection, drafts, change consolidation and creation or removal behaviour.
+- [Static SVG renderer](render-svg.md) defines deterministic, framework-neutral SVG output and visibility options.
 
 The [vocabulary reference](../reference/vocabulary.md) is the canonical source for product terms. Requirements in these files use that vocabulary but do not redefine it.
 

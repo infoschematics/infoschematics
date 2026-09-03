@@ -2,6 +2,14 @@
 
 The View Model owns framework-neutral calculations derived from Domain Model data. It may calculate geometry, routes, ports, guides and placement, but it does not render React, own browser state or decide application navigation.
 
+## Runtime derivation
+
+### VIEW-016 — Runtime derivation is framework-neutral
+
+Reusable registers, resolved Scenes and Stories, visibility predicates, routed Flows, placement lookup and interface lookup MUST derive from `InfoschematicConfig` without React or browser state. Equivalent consumers MUST receive deterministic results from the same configuration.
+
+_Verification: `packages/view-model/src/runtime.test.ts` exercises representative register, visibility, routing and Scene derivation through `createInfoschematicRuntime`._
+
 ## Routes
 
 ### VIEW-001 — Routes are orthogonal

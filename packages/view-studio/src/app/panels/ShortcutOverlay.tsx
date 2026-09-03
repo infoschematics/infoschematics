@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 
 // What the keyboard does and what the Infoschematic is made of, side by side. The two
 // answer the questions a visitor arrives with - how do I drive this, and what

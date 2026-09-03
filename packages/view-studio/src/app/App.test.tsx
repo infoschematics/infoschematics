@@ -1,9 +1,9 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
+import type { FabricRendererProps } from '@infoschematics/view-canvas'
+import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { App } from './App.tsx'
-import { createInfoschematicRuntime } from './infoschematic-context.tsx'
-import type { FabricRendererProps } from './renderers.tsx'
 
 describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())

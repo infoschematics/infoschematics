@@ -4,7 +4,7 @@ import {
   type RuntimeStory,
   type RuntimeThemeScene,
   useInfoschematic,
-} from '../infoschematic-context.tsx'
+} from '@infoschematics/view-canvas'
 import { usePersistentState } from './use-persistent-state.ts'
 
 // One state model supplies the diagram, controls and details panel. Filters

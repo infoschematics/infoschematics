@@ -1,4 +1,4 @@
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 
 /*
  * Which family a new line belongs to, asked at the drop.

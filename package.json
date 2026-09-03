@@ -7,9 +7,12 @@
     "url": "https://github.com/infoschematics/infoschematics/issues"
   },
 	"devDependencies": {
-		"@infoschematics/domain-core": "0.1.0",
-		"@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/domain-core": "0.1.0",
+    "@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/render-svg": "0.1.0",
+    "@infoschematics/view-canvas": "0.1.0",
     "@infoschematics/view-model": "0.1.0",
+    "@infoschematics/view-present": "0.1.0",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
@@ -49,8 +52,8 @@
     "ki:site:deploy": "bun run --cwd apps/site deploy",
     "ki:site:dev": "bun run --cwd apps/site dev",
     "ki:site:preview": "bun run --cwd apps/site preview",
-		"ki:verify:depcruise": "depcruise packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-studio/src examples/is-blank/src apps/site/src",
-		"ki:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-studio && tsc --noEmit -p examples/is-blank && tsc --noEmit -p apps/site",
+    "ki:verify:depcruise": "depcruise packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-canvas/src packages/view-present/src packages/view-studio/src packages/render-svg/src examples/is-blank/src apps/site/src",
+    "ki:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-canvas && tsc --noEmit -p packages/view-present && tsc --noEmit -p packages/view-studio && tsc --noEmit -p packages/render-svg && tsc --noEmit -p examples/is-blank && tsc --noEmit -p apps/site",
     "test": "vitest run --root ."
   },
   "type": "module",

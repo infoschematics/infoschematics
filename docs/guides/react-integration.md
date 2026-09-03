@@ -1,6 +1,6 @@
 # Integrate a React host
 
-The current Studio View package renders one complete host-owned `InfoschematicConfig` using React. It temporarily contains Canvas and Present while the additive view packages are extracted.
+The React View packages render one complete host-owned `InfoschematicConfig`. A host chooses Canvas, Present, or Studio according to the controls it needs.
 
 ```tsx
 import { App as InfoschematicApp } from '@infoschematics/view-studio'
@@ -16,6 +16,14 @@ export function App() {
   return <InfoschematicApp config={myInfoschematic} renderers={renderers} />
 }
 ```
+
+Choose the narrowest public View for the host:
+
+- `Canvas` from `@infoschematics/view-canvas` renders the interactive Infoschematic surface without presentation or authoring controls.
+- `Present` from `@infoschematics/view-present` adds Audience filtering, Scene focus, Story playback, Callouts, and details.
+- `Studio` from `@infoschematics/view-studio` adds Producer capabilities; `App` remains its compatibility name.
+
+Each package owns a stylesheet entry at `@infoschematics/<package>/styles.css`. Present includes Canvas styles, and Studio's compatibility stylesheet includes the lower View styles.
 
 ## Host renderers
 

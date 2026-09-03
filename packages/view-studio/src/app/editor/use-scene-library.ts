@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLit } from './scene-library.ts'
 
 /**

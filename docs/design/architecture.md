@@ -16,8 +16,23 @@ The reasons for this direction are recorded in [the framework-neutral library de
 @infoschematics/view-model
 └── @infoschematics/domain-model
 
+@infoschematics/view-canvas
+├── @infoschematics/domain-model
+└── @infoschematics/view-model
+
+@infoschematics/view-present
+├── @infoschematics/domain-model
+├── @infoschematics/view-model
+└── @infoschematics/view-canvas
+
 @infoschematics/view-studio
 ├── @infoschematics/domain-core
+├── @infoschematics/domain-model
+├── @infoschematics/view-model
+├── @infoschematics/view-canvas
+└── @infoschematics/view-present
+
+@infoschematics/render-svg
 ├── @infoschematics/domain-model
 └── @infoschematics/view-model
 
@@ -43,8 +58,11 @@ Bun treats every package, application, and example as part of one workspace grap
 
 - `packages/domain-model` owns the dependency-free `InfoschematicConfig` and focused authored product-type modules.
 - `packages/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
-- `packages/view-model` owns geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
-- `packages/view-studio` owns the current combined interactive view, presentation controls, Producer controls, and runtime state derived from configuration.
+- `packages/view-model` owns runtime derivation, geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
+- `packages/view-canvas` owns the interactive React Infoschematic surface, renderer bindings, and Canvas interaction contract.
+- `packages/view-present` owns Audience filtering, Scene focus, Story playback, Callouts, and presentation details over Canvas.
+- `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
+- `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
 - `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 
@@ -70,9 +88,9 @@ The view derives lookup tables, routed paths, visibility state, and editing stat
 
 When `config.id` is absent, an application must not create a shared persistence key. A title-only definition is therefore a safe blank canvas.
 
-## Additive view direction
+## Additive views
 
-[ADR-INFOSCHEMATICS-006](../decisions/ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) establishes the intended interactive chain:
+[ADR-INFOSCHEMATICS-006](../decisions/ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) governs the delivered interactive chain:
 
 ```text
 @infoschematics/view-canvas
@@ -82,9 +100,11 @@ When `config.id` is absent, an application must not create a shared persistence 
 @infoschematics/view-studio
 ```
 
-Canvas owns the reusable Infoschematic component. Present wraps Canvas with Audience navigation and presentation state. Studio wraps Present with Producer-facing Design and Direct capabilities.
+Canvas owns the reusable Infoschematic component. Present wraps Canvas with Audience navigation and presentation state. Studio consumes the lower View contracts and adds Producer-facing Design and Direct capabilities while retaining its integrated compatibility composition.
 
 `@infoschematics/render-svg` consumes the same View Model in parallel and produces deterministic static SVG without React. Future renderers can target other outputs without acquiring interactive-view dependencies.
+
+Hosts choose the narrowest surface that provides the behaviour they need. Canvas accepts optional visibility, flow, interaction, and renderer inputs; Present owns Audience session behaviour; Studio adds authoring controls. Static consumers call `renderInfoschematicSvg` without a DOM or React runtime.
 
 ## Renderer boundary
 

@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight, Pause, X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
-import { type InfoschematicRuntime, useInfoschematic } from '../infoschematic-context.tsx'
+import { type InfoschematicRuntime, useInfoschematic } from '@infoschematics/view-canvas'
 
 /** Anything that focuses part of the Infoschematic: a Story Scene or Thematic Scene. */
 export type Lit = { components: readonly string[]; flows: readonly string[]; callout?: { x: number; y: number } }

@@ -1,6 +1,6 @@
 # Studio View specification
 
-Studio View adds producer-facing editing to the interactive Infoschematic view. It owns an editing session and drafts, but it does not own the authored source or make deployment decisions.
+Studio View adds Producer-facing editing to the lower interactive View contracts. It owns editing session drafts, but it does not own authored source or deployment decisions. `Studio` is the public component name and `App` remains a compatibility alias.
 
 ## Session
 

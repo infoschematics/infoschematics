@@ -1,5 +1,5 @@
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '../infoschematic-context.tsx'
+import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '@infoschematics/view-canvas'
 
 /*
  * What the Infoschematic answers for a specification.

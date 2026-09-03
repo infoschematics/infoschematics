@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
+import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
 import {
   editScene,
   insertScene,

@@ -1,6 +1,8 @@
 # Present View specification
 
-Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around an Infoschematic. These requirements describe reusable behaviour currently represented by `packages/view-studio`; the future package boundary does not change their ownership.
+Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around Canvas. `packages/view-present` owns the reusable Audience component and pure presentation state; Studio retains compatible integrated controls while Producer-mode extraction continues.
+
+_Package verification: `packages/view-present/src/presentation.test.ts` and `packages/view-present/src/Present.test.tsx` cover state transitions and server-rendered composition._
 
 ## Visibility and focus
 

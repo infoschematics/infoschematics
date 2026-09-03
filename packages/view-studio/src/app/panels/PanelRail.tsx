@@ -1,6 +1,6 @@
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { type RuntimeStory, useInfoschematic } from '../infoschematic-context.tsx'
-import { useInfoschematicRenderers } from '../renderers.tsx'
+import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
+import { useInfoschematicRenderers } from '@infoschematics/view-canvas'
 
 // Everything the control surface offers, folded into 48px for the maximised
 // diagram, so switching a dimension off never needs the panels back.

@@ -1,5 +1,5 @@
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 
 /* Thematic Scenes appear alongside the other focus controls. */
 export function ThemeStrip({ presentation }: { presentation: Presentation }) {

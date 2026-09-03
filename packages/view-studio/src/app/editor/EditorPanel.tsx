@@ -1,7 +1,7 @@
 import type { Placement } from '@infoschematics/view-model/editable'
 import type { PortCounts, Side } from '@infoschematics/view-model/ports'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { Part } from '../panels/Part.tsx'
 import { PlacementPanel } from '../panels/PlacementPanel.tsx'
 import { ComponentControls } from './ComponentControls.tsx'

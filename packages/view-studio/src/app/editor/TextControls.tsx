@@ -1,4 +1,4 @@
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { TextDraft, TextField } from './use-editor.ts'
 
 /*

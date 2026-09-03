@@ -7,7 +7,10 @@
       "devDependencies": {
         "@infoschematics/domain-core": "0.1.0",
         "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/render-svg": "0.1.0",
+        "@infoschematics/view-canvas": "0.1.0",
         "@infoschematics/view-model": "0.1.0",
+        "@infoschematics/view-present": "0.1.0",
         "@types/node": "^24.10.0",
         "@types/react": "^19.2.2",
         "@types/react-dom": "^19.2.2",
@@ -59,11 +62,50 @@
       "name": "@infoschematics/domain-model",
       "version": "0.1.0",
     },
+    "packages/render-svg": {
+      "name": "@infoschematics/render-svg",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-model": "0.1.0",
+      },
+    },
+    "packages/view-canvas": {
+      "name": "@infoschematics/view-canvas",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-model": "0.1.0",
+      },
+      "devDependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+      },
+      "peerDependencies": {
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
+      },
+    },
     "packages/view-model": {
       "name": "@infoschematics/view-model",
       "version": "0.1.0",
       "dependencies": {
         "@infoschematics/domain-model": "0.1.0",
+      },
+    },
+    "packages/view-present": {
+      "name": "@infoschematics/view-present",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-canvas": "0.1.0",
+        "@infoschematics/view-model": "0.1.0",
+      },
+      "devDependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+      },
+      "peerDependencies": {
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0",
       },
     },
     "packages/view-studio": {
@@ -72,6 +114,7 @@
       "dependencies": {
         "@infoschematics/domain-core": "0.1.0",
         "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/view-canvas": "0.1.0",
         "@infoschematics/view-model": "0.1.0",
         "@scalar/api-reference-react": "^0.9.65",
         "lucide-react": "^1.31.0",
@@ -296,9 +339,15 @@
 
     "@infoschematics/is-blank": ["@infoschematics/is-blank@workspace:examples/is-blank"],
 
+    "@infoschematics/render-svg": ["@infoschematics/render-svg@workspace:packages/render-svg"],
+
     "@infoschematics/site": ["@infoschematics/site@workspace:apps/site"],
 
+    "@infoschematics/view-canvas": ["@infoschematics/view-canvas@workspace:packages/view-canvas"],
+
     "@infoschematics/view-model": ["@infoschematics/view-model@workspace:packages/view-model"],
+
+    "@infoschematics/view-present": ["@infoschematics/view-present@workspace:packages/view-present"],
 
     "@infoschematics/view-studio": ["@infoschematics/view-studio@workspace:packages/view-studio"],
 

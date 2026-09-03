@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { Part } from './Part.tsx'
 
 /*

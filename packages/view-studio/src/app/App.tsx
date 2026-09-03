@@ -1,9 +1,20 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import {
+  InfoschematicContext,
+  InfoschematicDiagram,
+  InfoschematicRenderersContext,
+  useInfoschematic,
+} from '@infoschematics/view-canvas'
+import type { PresentProps } from '@infoschematics/view-present'
 import type { CreatedComponent, CreatedFlow } from '@infoschematics/view-model/editable'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { portsForBox } from '@infoschematics/view-model/ports'
 import { routeBetweenPorts } from '@infoschematics/view-model/routing'
+import {
+  createInfoschematicRuntime,
+  type InfoschematicRuntime,
+  type RuntimeStory,
+} from '@infoschematics/view-model/runtime'
 import { infoschematicEditable } from './editor/infoschematic-editable.ts'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { type Attachment, useEditor } from './editor/use-editor.ts'
@@ -17,15 +28,6 @@ import { ProducerControls } from './panels/ProducerControls.tsx'
 import { PanelRail } from './panels/PanelRail.tsx'
 import { ShortcutOverlay } from './panels/ShortcutOverlay.tsx'
 import { TitleBar } from './panels/TitleBar.tsx'
-import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
-import { InfoschematicRenderersContext, type InfoschematicRenderers } from './renderers.tsx'
-import {
-  createInfoschematicRuntime,
-  InfoschematicContext,
-  type InfoschematicRuntime,
-  type RuntimeStory,
-  useInfoschematic,
-} from './infoschematic-context.tsx'
 
 type InfoschematicScopeId = string
 
@@ -113,7 +115,7 @@ const roomForCard = (viewBox: Box, made: number): Box => ({
   y: viewBox.y + viewBox.height / 2 - 40 + made * 20,
 })
 
-export function App({ config, renderers }: { config: InfoschematicConfig; renderers?: InfoschematicRenderers }) {
+export function Studio({ config, renderers }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
   return (
     <InfoschematicRenderersContext value={renderers ?? {}}>
@@ -123,6 +125,9 @@ export function App({ config, renderers }: { config: InfoschematicConfig; render
     </InfoschematicRenderersContext>
   )
 }
+
+/** Compatibility name retained for existing hosts while the additive View names settle. */
+export const App = Studio
 
 function AppContent() {
   const runtime = useInfoschematic()

@@ -12,7 +12,7 @@ import { type Guide, snapToGuides } from '@infoschematics/view-model/guides'
 import type { PortCounts, Side } from '@infoschematics/view-model/ports'
 import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing'
 import * as waypoints from '@infoschematics/view-model/waypoints'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
 
 // Editing state is held apart from the Infoschematic and its host. Drafts

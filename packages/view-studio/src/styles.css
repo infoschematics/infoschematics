@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap");
 
 :root {
   --app-chrome: 196px;
@@ -24,8 +24,7 @@ body {
   overflow: hidden;
   background:
     radial-gradient(circle at 12% 6%, #12334d 0, transparent 26rem),
-    radial-gradient(circle at 78% 32%, #17144e 0, transparent 30rem),
-    #07111e;
+    radial-gradient(circle at 78% 32%, #17144e 0, transparent 30rem), #07111e;
 }
 
 button {
@@ -123,13 +122,13 @@ main {
   color: #cde8fb;
 }
 
-.panel-rail .rail-action[aria-pressed='true'] {
+.panel-rail .rail-action[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   color: white;
 }
 
-.title-bar-actions .icon-button[aria-pressed='true'] {
+.title-bar-actions .icon-button[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   color: white;
@@ -142,7 +141,9 @@ main {
 
 .eyebrow {
   color: #79c9ff;
-  font: 500 10px/1 'DM Mono', monospace;
+  font:
+    500 10px/1 "DM Mono",
+    monospace;
   letter-spacing: 0.14em;
   margin: 0;
   text-transform: uppercase;
@@ -169,7 +170,9 @@ h2 {
 
 .flow {
   color: #b7c7dc;
-  font: 500 12px 'DM Mono', monospace;
+  font:
+    500 12px "DM Mono",
+    monospace;
   white-space: nowrap;
 }
 
@@ -178,7 +181,7 @@ h2 {
   border-radius: 999px;
 }
 
-.toggle-button[aria-pressed='true'] {
+.toggle-button[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   box-shadow: 0 0 0 1px #79c9ff55;
@@ -199,13 +202,15 @@ h2 {
   border-radius: 5px;
   color: #55708c;
   cursor: pointer;
-  font: 600 8px 'DM Mono', monospace;
+  font:
+    600 8px "DM Mono",
+    monospace;
   padding: 3px 2px;
   width: 30px;
   writing-mode: horizontal-tb;
 }
 
-.panel-rail .rail-pathway[aria-pressed='true'] {
+.panel-rail .rail-pathway[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   color: white;
@@ -219,7 +224,9 @@ h2 {
   border-radius: 5px;
   color: #a9c2da;
   cursor: pointer;
-  font: 600 8px 'DM Mono', monospace;
+  font:
+    600 8px "DM Mono",
+    monospace;
   letter-spacing: 0.06em;
   margin-top: 2px;
   padding: 4px 2px;
@@ -248,7 +255,7 @@ h2 {
   color: color-mix(in srgb, var(--family-color) 45%, #dbe7f5);
 }
 
-.scope-button[aria-pressed='true'] {
+.scope-button[aria-pressed="true"] {
   border-color: var(--family-color);
 }
 
@@ -329,11 +336,15 @@ h2 {
  * handle is a thing sitting in the middle of it.
  */
 .panel-resizer::after {
-  background-image: radial-gradient(circle at center, #ffffff40 1.1px, transparent 1.3px);
+  background-image: radial-gradient(
+    circle at center,
+    #ffffff40 1.1px,
+    transparent 1.3px
+  );
   background-position: center;
   background-repeat: repeat-y;
   background-size: 100% 5px;
-  content: '';
+  content: "";
   height: 44px;
   left: 50%;
   position: absolute;
@@ -345,7 +356,11 @@ h2 {
 
 .panel-resizer:hover::after,
 .panel-resizer:focus-visible::after {
-  background-image: radial-gradient(circle at center, #79c9ff 1.4px, transparent 1.6px);
+  background-image: radial-gradient(
+    circle at center,
+    #79c9ff 1.4px,
+    transparent 1.6px
+  );
 }
 
 /* The collapsed bar is a line shorter than the open one, and the diagram is
@@ -433,7 +448,7 @@ h2 {
   width: 16px;
 }
 
-.panel-rail .rail-swatch[aria-pressed='true'] {
+.panel-rail .rail-swatch[aria-pressed="true"] {
   border-color: #ffffff77;
   opacity: 1;
 }
@@ -450,7 +465,7 @@ h2 {
   writing-mode: horizontal-tb;
 }
 
-.panel-rail .rail-scope[aria-pressed='true'] {
+.panel-rail .rail-scope[aria-pressed="true"] {
   background: #10263b;
   border-color: #ffffff1e;
   color: #cce1f8;
@@ -502,8 +517,8 @@ h2 {
    they are drawn - and the pressed treatment existed for the audit toggle
    alone, so both were drawn the same either way. Collapse and Full screen are
    not in this rule: their labels change, which says it already. */
-.audit-toggle[aria-pressed='true'],
-.quiet[aria-pressed='true'] {
+.audit-toggle[aria-pressed="true"],
+.quiet[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   box-shadow: inset 0 0 0 1px #79c9ff55;
@@ -530,7 +545,9 @@ h2 {
 
 .infoschematic-zone-label {
   fill: #ffffff65;
-  font: 600 12px 'DM Mono', monospace;
+  font:
+    600 12px "DM Mono",
+    monospace;
   letter-spacing: 1.5px;
 }
 
@@ -550,7 +567,9 @@ h2 {
 
 .infoschematic-group text {
   fill: #9ed9ff;
-  font: 600 13px 'DM Mono', monospace;
+  font:
+    600 13px "DM Mono",
+    monospace;
   letter-spacing: 1.6px;
 }
 
@@ -572,14 +591,18 @@ h2 {
 
 .fabric-title {
   fill: #b9cde0;
-  font: 600 13px 'DM Mono', monospace;
+  font:
+    600 13px "DM Mono",
+    monospace;
   letter-spacing: 1.5px;
   text-anchor: middle;
 }
 
 .fabric-detail {
   fill: #7f9bb3;
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   letter-spacing: 1.2px;
   text-anchor: middle;
 }
@@ -643,7 +666,10 @@ h2 {
   opacity: 0.14;
 }
 
-.infoschematic-svg.highlighting .infoschematic-flows > g.highlighted .infoschematic-route {
+.infoschematic-svg.highlighting
+  .infoschematic-flows
+  > g.highlighted
+  .infoschematic-route {
   filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 4px currentColor);
   opacity: 1;
   stroke-width: 5px;
@@ -651,7 +677,10 @@ h2 {
 
 /* The backing pipe under a lit line is what keeps it legible where it crosses a
    dimmed one, so it brightens with the line rather than staying near-black. */
-.infoschematic-svg.highlighting .infoschematic-flows > g.highlighted .infoschematic-pipe {
+.infoschematic-svg.highlighting
+  .infoschematic-flows
+  > g.highlighted
+  .infoschematic-pipe {
   opacity: 1;
   stroke: #06101ce6;
   stroke-width: 11px;
@@ -666,7 +695,9 @@ h2 {
   transition: opacity 180ms ease-out;
 }
 
-.infoschematic-svg.highlighting .infoschematic-fabric.highlighted .fabric-shell {
+.infoschematic-svg.highlighting
+  .infoschematic-fabric.highlighted
+  .fabric-shell {
   filter: drop-shadow(0 0 12px #79c9ff4a);
 }
 
@@ -685,7 +716,9 @@ h2 {
 
 .infoschematic-svg .infoschematic-service.pointed rect,
 .infoschematic-svg.editing .infoschematic-service.selected rect {
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
+  filter: drop-shadow(
+    0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
+  );
 }
 
 .infoschematic-svg .infoschematic-service.pointed rect {
@@ -704,7 +737,9 @@ h2 {
 
 .infoschematic-svg .infoschematic-fabric.pointed .fabric-shell,
 .infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
-  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--glow) 40%, transparent));
+  filter: drop-shadow(
+    0 0 12px color-mix(in srgb, var(--glow) 40%, transparent)
+  );
 }
 
 /* A lane's legend and a zone's heading are text, so the glow is a text shadow.
@@ -749,7 +784,9 @@ h2 {
 
 .infoschematic-adapter.pointed .adapter-socket,
 .infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
+  filter: drop-shadow(
+    0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
+  );
 }
 
 .infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
@@ -762,7 +799,10 @@ h2 {
    nothing else on the Infoschematic uses - no card colours its name by scope. */
 .adapter-label {
   fill: #f2f7ff;
-  font: 700 14px Manrope, Arial, sans-serif;
+  font:
+    700 14px Manrope,
+    Arial,
+    sans-serif;
   text-anchor: middle;
 }
 
@@ -777,7 +817,10 @@ h2 {
 
 .infoschematic-service-label {
   fill: #f2f7ff;
-  font: 700 14px Manrope, Arial, sans-serif;
+  font:
+    700 14px Manrope,
+    Arial,
+    sans-serif;
   text-anchor: middle;
 }
 
@@ -795,7 +838,9 @@ h2 {
 .audit-component-code,
 .audit-flow text {
   fill: #dff3ff;
-  font: 700 9px 'DM Mono', monospace;
+  font:
+    700 9px "DM Mono",
+    monospace;
   paint-order: stroke;
   stroke: #06101e;
   stroke-width: 3px;
@@ -836,16 +881,12 @@ h2 {
   cursor: pointer;
 }
 
-
-
 /* A zone is geography rather than a component - selectable so its position can
    be read, never draggable, which is why there is no .selectable variant here. */
 .infoschematic-svg.editing .zone-selectable {
   cursor: pointer;
   pointer-events: auto;
 }
-
-
 
 /* Typed as readily as stepped: a side with room for sixteen counts is a lot of
    clicking to cross, and the number is the thing being chosen. */
@@ -855,7 +896,9 @@ h2 {
   border: 1px solid #ffffff1f;
   border-radius: 5px;
   color: #dce9f7;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   min-height: 22px;
   padding: 0 4px;
   text-align: center;
@@ -877,7 +920,9 @@ h2 {
    divides exactly, otherwise the narrowest and widest gap it produces. */
 .port-spacing {
   color: #7892ad;
-  font: 400 9px 'DM Mono', monospace;
+  font:
+    400 9px "DM Mono",
+    monospace;
   font-style: normal;
   margin-left: 6px;
   min-width: 34px;
@@ -900,7 +945,9 @@ h2 {
 
 .text-row span {
   color: #8fa9c4;
-  font: 600 9px 'DM Mono', monospace;
+  font:
+    600 9px "DM Mono",
+    monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -910,7 +957,9 @@ h2 {
    edit the panel will not take. */
 .text-row output {
   color: #dff0ff;
-  font: 500 11px 'DM Mono', monospace;
+  font:
+    500 11px "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   padding: 4px 0;
 }
@@ -921,7 +970,10 @@ h2 {
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
 }
@@ -950,7 +1002,9 @@ h2 {
 
 .port-counts dt {
   color: #7892ad;
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -968,7 +1022,9 @@ h2 {
   border-radius: 5px;
   color: #cde8fb;
   cursor: pointer;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   padding: 1px 8px;
 }
 
@@ -984,7 +1040,9 @@ h2 {
 
 .port-counts span {
   color: #cde8fb;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   min-width: 18px;
   text-align: center;
 }
@@ -1007,7 +1065,9 @@ h2 {
   border: 1px solid #ffffff1e;
   border-radius: 4px;
   color: #dff3ff;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   padding: 2px 6px;
   text-align: right;
   width: 68px;
@@ -1032,14 +1092,18 @@ h2 {
 
 .placement-row dt {
   color: #7892ad;
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .placement-row dd {
   color: #cde8fb;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   margin: 0;
 }
 
@@ -1126,11 +1190,15 @@ h2 {
 }
 
 .split-handle::after {
-  background-image: radial-gradient(circle at center, #ffffff40 1.1px, transparent 1.3px);
+  background-image: radial-gradient(
+    circle at center,
+    #ffffff40 1.1px,
+    transparent 1.3px
+  );
   background-position: center;
   background-repeat: repeat-x;
   background-size: 5px 100%;
-  content: '';
+  content: "";
   height: 5px;
   left: 50%;
   position: absolute;
@@ -1147,7 +1215,11 @@ h2 {
 
 .split-handle:focus-visible::after,
 .split-handle:hover::after {
-  background-image: radial-gradient(circle at center, #79c9ff 1.4px, transparent 1.6px);
+  background-image: radial-gradient(
+    circle at center,
+    #79c9ff 1.4px,
+    transparent 1.6px
+  );
 }
 
 /*
@@ -1230,7 +1302,9 @@ h2 {
 .change-list code {
   color: #cde8fb;
   display: block;
-  font: 500 11px 'DM Mono', monospace;
+  font:
+    500 11px "DM Mono",
+    monospace;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1278,7 +1352,9 @@ h2 {
   border: 1px solid #ffffff14;
   border-radius: 8px;
   color: #cde8fb;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   margin: 0 0 8px;
   overflow: auto;
   padding: 9px 11px;
@@ -1344,7 +1420,9 @@ h2 {
 
 .audit-port text {
   fill: #dff3ff;
-  font: 700 9px 'DM Mono', monospace;
+  font:
+    700 9px "DM Mono",
+    monospace;
   opacity: 0;
   paint-order: stroke;
   pointer-events: none;
@@ -1433,7 +1511,9 @@ h2 {
 
 .producer-label,
 .family-description {
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1473,16 +1553,20 @@ h2 {
   color: white;
 }
 
-.flow-family-button[aria-pressed='true'] {
+.flow-family-button[aria-pressed="true"] {
   border-color: var(--family-color);
-  box-shadow: inset 0 0 0 1px var(--family-color), 0 0 14px #00000042;
+  box-shadow:
+    inset 0 0 0 1px var(--family-color),
+    0 0 14px #00000042;
   color: white;
 }
 
-.scope-button[aria-pressed='true'] {
+.scope-button[aria-pressed="true"] {
   background: #18344d;
   border-color: #79c9ff;
-  box-shadow: inset 0 0 0 1px #79c9ff66, 0 0 14px #00000042;
+  box-shadow:
+    inset 0 0 0 1px #79c9ff66,
+    0 0 14px #00000042;
   color: white;
 }
 
@@ -1576,7 +1660,9 @@ h2 {
   border-radius: 6px;
   color: #cde8fb;
   cursor: pointer;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   padding: 7px 8px;
   text-align: left;
 }
@@ -1586,7 +1672,7 @@ h2 {
   border-color: #79c9ff;
 }
 
-.api-links button[aria-pressed='true'] {
+.api-links button[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
   color: white;
@@ -1613,7 +1699,9 @@ h2 {
 
 .state-summary dt {
   color: #7892ad;
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   letter-spacing: 0.05em;
   padding-top: 1px;
   text-transform: uppercase;
@@ -1656,7 +1744,9 @@ h2 {
 
 .contract-detail .compact-heading a {
   color: #79c9ff;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1670,7 +1760,9 @@ h2 {
 
 .contract-meta {
   color: #7892ad;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
 }
 
 /* Guidance rather than content: it says what to do next, so it is set apart
@@ -1701,11 +1793,15 @@ h2 {
 
 .contract-operations code {
   color: #82b366;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
 }
 
 .contract-operations span {
-  font: 500 11px 'DM Mono', monospace;
+  font:
+    500 11px "DM Mono",
+    monospace;
 }
 
 .contract-operations em {
@@ -1754,7 +1850,9 @@ h2 {
 .compact-heading > span,
 .compact-heading-actions > span {
   color: #7892ad;
-  font: 500 9px 'DM Mono', monospace;
+  font:
+    500 9px "DM Mono",
+    monospace;
   text-transform: uppercase;
 }
 
@@ -1785,7 +1883,9 @@ h2 {
   padding: 13px 17px;
   position: absolute;
   transform: translate(-50%, -50%);
-  transition: left 260ms ease, top 260ms ease;
+  transition:
+    left 260ms ease,
+    top 260ms ease;
   width: max-content;
 }
 
@@ -1830,7 +1930,7 @@ h2 {
 
 .callout-takeaways li::before {
   color: #79c9ff;
-  content: '\203A';
+  content: "\203A";
   left: 2px;
   position: absolute;
 }
@@ -1951,11 +2051,13 @@ h2 {
    about it while it is closed. */
 .register-part em {
   color: #7f9bb3;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
   font-style: normal;
 }
 
-.register-part[aria-expanded='false'] {
+.register-part[aria-expanded="false"] {
   margin-bottom: 0;
 }
 
@@ -2021,7 +2123,9 @@ h2 {
 
 .register-row dt {
   color: #79c9ff;
-  font: 600 9px 'DM Mono', monospace;
+  font:
+    600 9px "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   margin: 0;
 }
@@ -2047,7 +2151,9 @@ h2 {
 
 .theme-headline {
   color: #c39bff;
-  font: 600 11px 'DM Mono', monospace;
+  font:
+    600 11px "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   margin: 0 0 6px;
   text-transform: uppercase;
@@ -2063,14 +2169,18 @@ h2 {
 
 .callout-heading span {
   color: #79c9ff;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
 .callout-heading em {
   color: #7892ad;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   font-style: normal;
 }
 
@@ -2175,7 +2285,6 @@ h2 {
   }
 }
 
-
 .error {
   background: #5c2030;
   border: 1px solid #ff8398;
@@ -2232,7 +2341,10 @@ button:focus-visible,
    */
   .control-room:not(.sized):not(.collapsed) {
     grid-template-columns:
-      minmax(0, var(--diagram-width, calc((100dvh - var(--app-chrome)) * 3 / 2)))
+      minmax(
+        0,
+        var(--diagram-width, calc((100dvh - var(--app-chrome)) * 3 / 2))
+      )
       var(--panel-seam)
       minmax(420px, 1fr);
   }
@@ -2267,7 +2379,6 @@ button:focus-visible,
     max-height: none;
     width: 100%;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2359,7 +2470,7 @@ button:focus-visible,
   color: #dff3ff;
 }
 
-.tool-button[aria-pressed='true'] {
+.tool-button[aria-pressed="true"] {
   background: #79c9ff22;
   border-color: #79c9ff;
   color: #dff3ff;
@@ -2624,7 +2735,9 @@ button:focus-visible,
   color: #cde8fb;
   cursor: pointer;
   display: inline-flex;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   gap: 5px;
   padding: 5px 12px;
   white-space: nowrap;
@@ -2643,12 +2756,12 @@ button:focus-visible,
   color: white;
 }
 
-.theme-button[aria-pressed='true'] {
+.theme-button[aria-pressed="true"] {
   box-shadow: 0 0 0 1px #c39bff55;
 }
 
-.theme-button[aria-pressed='true'],
-.panel-rail .rail-pathway.rail-theme[aria-pressed='true'] {
+.theme-button[aria-pressed="true"],
+.panel-rail .rail-pathway.rail-theme[aria-pressed="true"] {
   background: #2a1f3d;
   border-color: #c39bff;
   color: white;
@@ -2711,7 +2824,9 @@ button:focus-visible,
   border-radius: 5px;
   color: #dff3ff;
   display: inline-block;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
   padding: 3px 7px;
   white-space: nowrap;
 }
@@ -2952,7 +3067,9 @@ button:focus-visible,
   align-items: center;
   color: #8fa9c4;
   display: inline-flex;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
   gap: 4px;
   margin-right: auto;
 }
@@ -2995,7 +3112,9 @@ button:focus-visible,
 
 .scene-row em {
   color: #7f9bb3;
-  font: 600 10px 'DM Mono', monospace;
+  font:
+    600 10px "DM Mono",
+    monospace;
   font-style: normal;
 }
 
@@ -3007,7 +3126,9 @@ button:focus-visible,
 
 .scene-row b {
   color: #7f9bb3;
-  font: 500 10px 'DM Mono', monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
 }
 
 .scene-fields {
@@ -3020,7 +3141,10 @@ button:focus-visible,
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
   resize: vertical;
@@ -3037,7 +3161,10 @@ button:focus-visible,
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
   width: 74px;
@@ -3079,17 +3206,19 @@ button:focus-visible,
   stroke-width: 2.5;
 }
 
-.infoschematic-svg.focusing .infoschematic-service.lit .infoschematic-service-label {
+.infoschematic-svg.focusing
+  .infoschematic-service.lit
+  .infoschematic-service-label {
   fill: white;
 }
 
-.infoschematic-svg.focusing [class*='flow-family-'].lit .infoschematic-route {
+.infoschematic-svg.focusing [class*="flow-family-"].lit .infoschematic-route {
   stroke-width: 4;
 }
 
 /* Everything not in the scene recedes, so what is in it reads at a glance. */
 .infoschematic-svg.focusing .infoschematic-service:not(.lit),
-.infoschematic-svg.focusing [class*='flow-family-']:not(.lit) {
+.infoschematic-svg.focusing [class*="flow-family-"]:not(.lit) {
   opacity: 0.35;
 }
 
@@ -3106,13 +3235,16 @@ button:focus-visible,
 
 /* Naming a new scene sits with the controls that act on the list, since making
    one is the first thing done here and the rest follow from it. */
-.scene-tools input[type='text'] {
+.scene-tools input[type="text"] {
   background: #0c1c2b;
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
   flex: 1 1 auto;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
 }
@@ -3129,7 +3261,10 @@ button:focus-visible,
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
   resize: vertical;
@@ -3155,7 +3290,9 @@ button:focus-visible,
 
 .line-list-label {
   color: #8fa9c4;
-  font: 600 9px 'DM Mono', monospace;
+  font:
+    600 9px "DM Mono",
+    monospace;
   letter-spacing: 0.08em;
   padding-top: 5px;
   text-transform: uppercase;
@@ -3178,7 +3315,10 @@ button:focus-visible,
   border: 1px solid #ffffff1e;
   border-radius: 5px;
   color: #dff0ff;
-  font: 500 11px Manrope, Arial, sans-serif;
+  font:
+    500 11px Manrope,
+    Arial,
+    sans-serif;
   min-width: 0;
   padding: 4px 6px;
 }
@@ -3203,3 +3343,4 @@ button:focus-visible,
   background: #1d2735;
   color: #dff0ff;
 }
+@import "@infoschematics/view-present/styles.css";

@@ -1,6 +1,6 @@
 import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PencilRuler, Tags } from 'lucide-react'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { useInfoschematic } from '../infoschematic-context.tsx'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 
 /* Product identity and controls remain stable across panel layouts. */
 export function TitleBar({
