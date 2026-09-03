@@ -15,13 +15,13 @@ The **product** is an Infoschematic together with its Standalone Scenes, Themes,
 | Lane | swimlane, band, tier |
 | Zone | column, segment |
 | Fabric | backdrop, plane, region, transport |
-| standard Card | node, box, service box |
-| adapter Card | sidecar, wrapper |
+| Standard Card | node, box, service box |
+| Adapter Card | sidecar, wrapper |
 | Flow | connection, connector, link, edge |
 | Graphic | overlay figure, drawn annotation |
-| route | geometry, line run |
-| waypoint | bend, corner, vertex |
-| port | connection point, attachment point |
+| Route | geometry, line run |
+| Waypoint | bend, corner, vertex |
+| Port | connection point, attachment point |
 | Scene | focus composition, highlight group |
 | Standalone Scene | reusable Scene |
 | Thematic Scene | Theme-owned Scene |
@@ -55,9 +55,9 @@ Three independent groupings classify what appears in an Infoschematic. None is a
 
 | Infoschematics term | Meaning |
 | ------------------- | ------- |
-| flow family | What a Flow carries and the visual identity associated with it |
-| scope | A selectable architectural grouping of artefacts |
-| domain | A sphere of concern that can classify or visually distinguish Cards |
+| Flow Family | What a Flow carries and the visual identity associated with it |
+| Scope | A selectable architectural grouping of artefacts |
+| Domain | A sphere of concern that can classify or visually distinguish Cards |
 
 `family` and `scope` are acceptable shorthand where the surrounding code or prose makes their full meaning unambiguous.
 
@@ -70,11 +70,11 @@ An Infoschematic contains exactly six primary artefact kinds:
 - **Lane** — a full-width background region.
 - **Zone** — a named subdivision of a Lane.
 - **Fabric** — a midground artefact that can participate in Flows and be focused by a Scene.
-- **Card** — a box-like foreground artefact. An adapter Card wraps a standard Card without taking an independent position.
+- **Card** — a box-like foreground artefact. An Adapter Card wraps a Standard Card without taking an independent position.
 - **Flow** — a foreground artefact showing movement between Cards and Fabrics.
 - **Graphic** — a foreground artefact normally hidden until a Scene makes it visible.
 
-Routes, waypoints, and ports describe Flow geometry; they are not additional artefact kinds. Lanes and Zones establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
+Routes, Waypoints, and Ports describe Flow geometry; they are not additional artefact kinds. Lanes and Zones establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
 
 Every independently identifiable artefact has a stable machine identifier. Human-readable codes are authored discussion handles and do not change merely because an item moves within a list.
 
@@ -119,7 +119,3 @@ Its persistent regions are the **Infoschematic panel**, **Producer controls**, a
 - The host owns mounting, page metadata, routing, static assets, and deployment.
 
 Package ownership and dependency direction are defined by [the architecture guide](../design/architecture.md) and its linked decision records, rather than repeated here.
-
-## Retired public terms
-
-`topology`, `programme`, `demonstration`, `spotlight`, `vendor`, `play`, `stage`, `lighting`, `book`, `act`, and `beat` are not public Infoschematics concepts. Domain prose may still use an ordinary-language term where it genuinely describes the subject; this rule governs product vocabulary, not unrelated English.
