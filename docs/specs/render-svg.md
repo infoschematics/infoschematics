@@ -42,6 +42,16 @@ The standalone SVG root MUST retain its accessible role, title, and whole-diagra
 
 _Verification: `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`._
 
+### SVG-008 — Explicit signals have deterministic still treatment
+
+The `signals` render option MAY identify configured Flows that should receive signalled emphasis. Static SVG MUST emit a deterministic, non-animated still treatment for each known identifier. Unknown identifiers MUST be ignored, and duplicate identifiers MUST NOT change output.
+
+Omitting `signals`, or supplying an empty list, MUST preserve the ordinary motion-free output. Static SVG MUST NOT derive signals from Scene focus, filtering, or authored Flow data. It MUST NOT serialise occurrence keys, animation elements, timers, callbacks, browser preferences, or runtime completion state.
+
+Signalled emphasis MUST leave the normal Flow route, direction, accessible label, authored geometry, and output ordering intact. It MUST use the shared signal still-treatment token so Canvas reduced-motion and static output interpret the emphasis consistently without requiring byte-identical markup.
+
+_Verification: `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output._
+
 ## Dependency boundary
 
 `@infoschematics/render-svg` MUST NOT depend on React, React DOM, browser globals, or any interactive View package. Shared derivation belongs in View Model.

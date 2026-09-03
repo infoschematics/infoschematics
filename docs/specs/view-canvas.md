@@ -60,6 +60,28 @@ Representative treatment fixtures MUST prove the same resolved surface, grid, fr
 
 _Verification: `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx` and `packages/view-model/src/region-geometry.test.ts`._
 
+## Flow signals
+
+### CANVAS-008 — Signals are finite keyed occurrences
+
+Canvas MAY receive framework-neutral `FlowSignal` occurrences from Present or its host through the `signals` prop. Each occurrence MUST identify one configured Flow through `flowId` and one host-owned `occurrenceKey`. Re-rendering the same pair MUST NOT restart a completed signal; a new occurrence key MAY replay that Flow. Simultaneous occurrences for different Flows MUST remain independent.
+
+Canvas MUST cancel an obsolete occurrence when the occurrence is removed. Cancellation and completion MUST leave the underlying Flow route, hit target, selection behaviour, and authored routing geometry unchanged. Filtering, hover, focus, and selection MUST NOT synthesize occurrences. An occurrence for an unknown or currently unavailable Flow MUST NOT make content visible or destabilise rendering.
+
+The travelling pulse MUST be finite and presentational. Signal graphics MUST be hidden from assistive technology and MUST NOT become the only evidence that a Flow was signalled.
+
+_Implementation surface: signal props in `packages/view-canvas/src/Canvas.tsx` and signal rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`._
+
+### CANVAS-009 — Signal meaning survives motion preferences
+
+Canvas MUST announce each newly received known Flow occurrence through a concise live region identifying the Flow. Re-rendering the same occurrence MUST NOT repeat its announcement. Removing or cancelling an occurrence MUST NOT announce new activity.
+
+Under `prefers-reduced-motion`, Canvas MUST replace spatial pulse travel with finite in-place emphasis on the same Flow route. The reduced-motion treatment MUST preserve the announcement, occurrence identity, cancellation, and static route semantics.
+
+Signal measurements shared with deterministic still output MUST come from View Model tokens. Canvas MAY own interaction-specific duration and easing while no other renderer depends on those values.
+
+_Verification: rendered Canvas signal tests cover occurrence replay, concurrent signals, cancellation, live announcements, reduced-motion markup, and unchanged Flow interaction geometry._
+
 ## Dependency boundary
 
 Canvas MAY depend on Domain Model and View Model. It MUST NOT depend on Present, Studio, a particular authored Infoschematic, or a host's renderer implementations.

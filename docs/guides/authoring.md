@@ -104,6 +104,14 @@ Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschem
 
 Copying a Standalone Scene into a Theme or Story creates independently owned material. Do not retain hidden object links or runtime references between them.
 
+## Keep Flow signals outside authored data
+
+Author a Flow with stable identity, endpoints, family, and route. Do not add signal state, occurrence keys, timers, callbacks, animation duration, event correlation, or Scene signal policy to the Flow or any other part of `InfoschematicConfig`.
+
+A Scene may focus Flows because focus is durable presentation material. Present can interpret entering that Scene as one transient signal occurrence per resolved focused Flow, while a host can disable that policy or supply explicit occurrences for application events. Neither choice mutates the authored Scene or Flow. Filtering, hover, selection, and inspection do not constitute signal authoring.
+
+Ensure the Flow's label, direction, endpoints, and surrounding explanation make sense in a still image. Interactive Canvas announces a signal and replaces travel with in-place emphasis for reduced-motion users; static SVG can show deterministic emphasis only when its caller explicitly requests Flow identifiers. Motion must never carry meaning absent from authored or persistent content.
+
 ## Author with Studio
 
 Open Design when you want the complete authored Infoschematic rather than the Audience's current Scope and Flow-family projection. Draft creates, movement, resize, property edits, within-kind ordering and safe removals appear immediately, but remain serialisable operations until the change set is applied to authored source.

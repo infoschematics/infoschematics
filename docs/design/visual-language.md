@@ -139,6 +139,12 @@ Flows have three presentation states:
 
 ## Motion
 
+Flow signalling is a finite presentation occurrence, not authored visual treatment. A host supplies a stable Flow identifier and occurrence key, or Present derives occurrences from focused Flows when a Scene is entered. Re-rendering the same occurrence does not replay it; a new key represents a new occurrence. Clearing or replacing a Scene cancels obsolete signals.
+
+Automatic Scene signalling uses an explicit `focused-flows` policy and can be disabled with `none`. Hover, filtering, selection, and ordinary focus inspection never imply activity. Neither signal policy nor signal state belongs in `InfoschematicConfig`.
+
+The underlying Flow route remains present and interactive throughout. A travelling pulse is decorative; a concise live announcement carries the semantic event. Under `prefers-reduced-motion`, the route receives brief in-place emphasis instead of spatial travel. Static SVG accepts only an explicit list of signalled Flow identifiers and renders deterministic still emphasis, so motion is never required to understand the Infoschematic.
+
 Animation explains change; it is not ambient decoration.
 
 - A signal should travel once and then leave the underlying Flow static.

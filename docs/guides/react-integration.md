@@ -124,6 +124,18 @@ The current authored renderer reference does not carry a separate schema version
 
 The renderer object is host runtime configuration, not part of `InfoschematicConfig`: do not place React components, callbacks, validators, diagnostic handlers, or shared SVG definitions in authored data.
 
+## Signal meaningful Flow activity
+
+Flow signals are transient presentation occurrences. Keep them in host or Present state and pass them through View props; never add occurrence keys, timers, callbacks, or animation policy to `InfoschematicConfig`.
+
+Present uses automatic Scene signalling by default. Entering a Standalone Scene, Thematic Scene, or Story Scene produces one occurrence for each resolved focused Flow. The occurrence remains stable while that Scene entry is active, so React re-renders do not replay completed motion. Stepping to or entering another Scene creates a new entry; clearing or replacing the Scene cancels obsolete occurrences.
+
+The `focused-flows` signal policy supplies this automatic behaviour and is the default. Set `signalPolicy="none"` on Present when a host should not interpret Scene entry as Flow activity. This suppresses automatic occurrences only. A host can still supply explicit framework-neutral occurrences through the Canvas `signals` prop for meaningful application events. Give each `FlowSignal` the configured `flowId` and a stable host-owned `occurrenceKey`; retain that key across re-renders and replace it only when a genuinely new event should replay the Flow.
+
+Do not create signals in response to hover, filtering, selection, or inspection. Canvas preserves the normal selectable Flow route, treats the travelling pulse as decorative, and announces a concise semantic description in a live region. Under `prefers-reduced-motion`, it uses finite in-place emphasis instead of travel. Hosts should not add a second announcement or use motion as the only evidence that an event occurred.
+
+For a still export, pass explicit Flow identifiers through the static SVG renderer's `signals` option. The renderer ignores unknown identifiers and emits deterministic non-animated emphasis; it does not infer transient Present state.
+
 ## Host responsibilities
 
 The host owns:

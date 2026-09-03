@@ -64,6 +64,26 @@ An empty Theme or Story MUST NOT be activatable in Present. Clear and step actio
 
 _Verification: presentation-state tests cover focus conflicts, empty Themes and Stories, stale identifiers and invalid steps._
 
+## Flow signals
+
+### PRESENT-015 — Scene entry can signal focused Flows once
+
+Present MUST expose a `signalPolicy` prop accepting `focused-flows` or `none`. Under `focused-flows`, entering a Standalone Scene, Thematic Scene, or Story Scene MUST derive one framework-neutral signal occurrence for each resolved focused Flow. The occurrence key MUST distinguish that Scene entry from earlier entries while remaining stable across ordinary renders of the same entry.
+
+Re-rendering, filtering, hover, selection, and focus inspection MUST NOT create a new occurrence. Stepping to another Story Scene or entering another Scene MAY create new occurrences for its resolved focused Flows, including a Flow signalled by an earlier entry.
+
+Under `none`, Present MUST derive no automatic occurrences. The policy MUST NOT prevent a host from supplying explicit occurrences directly through the Canvas boundary. Signal policy and active occurrences MUST remain transient host or Present state rather than authored Infoschematic or process-global state.
+
+_Implementation surface: signal derivation in `packages/view-model/src/signals.ts` and Scene-entry coordination in `packages/view-present`._
+
+### PRESENT-016 — Scene changes cancel obsolete signals
+
+Clearing a Scene MUST cancel its active occurrences. Replacing the active Standalone Scene, Thematic Scene, or Story Scene MUST cancel occurrences not owned by the new entry before deriving new ones. A completed occurrence MUST NOT resume merely because Present re-renders or the same Scene remains active.
+
+Unknown Flow identifiers MUST be ignored by focused-Flow resolution. Scene signal derivation MUST remain pure, framework-neutral, and independent of timers; Canvas owns finite rendering and accessible announcement.
+
+_Verification: presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Story stepping, cancellation, and filtering without signalling._
+
 ## Callouts
 
 ### PRESENT-005 — Automatic Callout placement is deterministic
