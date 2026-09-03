@@ -2,6 +2,12 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import {
+  type CardDetailOverrides,
+  resolveCardDomain,
+  resolveRegionTreatment,
+  resolveVisualTreatment,
+} from '@infoschematics/view-model/appearance'
+import {
   applyArtefactOperations,
   type ArtefactDraftOperation,
 } from '@infoschematics/view-model/artefact-draft'
@@ -10,6 +16,7 @@ import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
+import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
@@ -45,14 +52,10 @@ const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
   }
 }
 
-// A card's border says where it sits in the delivery chain, which is a different
-// question from the architecture group its code comes from. The two disagree by
-// design: colour answers "what part of the journey is this", the code answers
-// "which part of the architecture specifies it".
 /**
- * A card's colour names the part of the architecture it belongs to, so it says
- * the same thing its code does. Read from the scope rather than restated here,
- * so the card and the button that filters for it cannot disagree.
+ * Domain answers what semantic family a Card belongs to; Scope answers whether
+ * it is applicable and visible. Cards authored before Domain classification
+ * retain their Scope colours as a compatibility fallback.
  */
 const splitLabel = (label: string) => {
   if (label.length <= 22 || !label.includes(' ')) return [label]
@@ -155,6 +158,7 @@ export function InfoschematicDiagram({
   selectedArtefact,
   flows: suppliedFlows,
   annotated,
+  cardDetails,
   grid,
   graphic,
   visibleScopes,
@@ -220,6 +224,9 @@ export function InfoschematicDiagram({
   selectedArtefact?: ArtefactSelection | null
   flows: readonly InfoschematicFlow[]
   annotated?: boolean
+  /** Output-only Card metadata visibility; authored data remains unchanged. */
+  cardDetails?: CardDetailOverrides
+  /** Legacy Design grid overlay, independent of the authored grid treatment. */
   grid?: boolean
   /** A resolved Graphic drawn by the active Story Scene. */
   graphic?: GraphicConfig
@@ -240,6 +247,7 @@ export function InfoschematicDiagram({
     adapterFloor,
     config,
     infoschematicAnnotationLabelPositions,
+    infoschematicCards,
     infoschematicEndpointCodes,
     infoschematicEndpointLabels,
     infoschematicFabricIsVisible,
@@ -248,9 +256,6 @@ export function InfoschematicDiagram({
     infoschematicFlowIsVisible,
     infoschematicFlows,
     infoschematicInterfaceById,
-    infoschematicLaneLabelX,
-    infoschematicLaneLabelY,
-    infoschematicLanePanelOutline,
     infoschematicLanes,
     infoschematicLayout,
     infoschematicPlaceables,
@@ -311,6 +316,8 @@ export function InfoschematicDiagram({
     visibleScopes,
   ])
   const renderers = useInfoschematicRenderers()
+  const visualTreatment = resolveVisualTreatment(config.infoschematic.appearance, cardDetails)
+  const domains = config.infoschematic.domains ?? []
   const Definitions = renderers.definitions
   const activeGraphicRenderer =
     mode !== 'design' && graphic
@@ -321,6 +328,7 @@ export function InfoschematicDiagram({
   const scopeAppearance = Object.fromEntries(
     infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }]),
   ) as Record<string, { fill: string; stroke: string }>
+  const cardById = new Map(infoschematicCards.map((card) => [card.id, card]))
   const _audit = infoschematicPortAudit(flows)
   // Every port a card offers is shown; the ones a route already meets are drawn
   // solid and named, so a reader can see what is taken and what is free.
@@ -1158,7 +1166,9 @@ export function InfoschematicDiagram({
     <svg
       ref={infoschematic}
       aria-label={`${config.title} structural Infoschematic`}
-      className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}`}
+      className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''} surface-${visualTreatment.surface}`}
+      data-grid-treatment={visualTreatment.grid}
+      data-surface-treatment={visualTreatment.surface}
       height={infoschematicViewBox.height}
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -1185,20 +1195,33 @@ export function InfoschematicDiagram({
         y={infoschematicViewBox.y}
       />
       <defs>
-        <pattern height={gridSize} id="edit-grid-minor" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
-          <path className="edit-grid-line" d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`} />
+        <pattern height={gridSize} id="infoschematic-grid-minor" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
+          <path className="infoschematic-grid-line minor" d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`} />
         </pattern>
         <pattern
           height={gridMajorSize}
-          id="edit-grid-major"
+          id="infoschematic-grid-major"
           patternUnits="userSpaceOnUse"
           width={gridMajorSize}
           x="0"
           y="0"
         >
-          <rect fill="url(#edit-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
           <path
-            className="edit-grid-line major"
+            className="infoschematic-grid-line major"
+            d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
+          />
+        </pattern>
+        <pattern
+          height={gridMajorSize}
+          id="infoschematic-grid-major-plus-minor"
+          patternUnits="userSpaceOnUse"
+          width={gridMajorSize}
+          x="0"
+          y="0"
+        >
+          <rect fill="url(#infoschematic-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
+          <path
+            className="infoschematic-grid-line major"
             d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
           />
         </pattern>
@@ -1226,8 +1249,28 @@ export function InfoschematicDiagram({
         ))}
       </defs>
 
+      {visualTreatment.grid !== 'none' ? (
+        <rect
+          className="infoschematic-authored-grid"
+          fill={`url(#infoschematic-grid-${visualTreatment.grid})`}
+          height={infoschematicViewBox.height}
+          pointerEvents="none"
+          width={infoschematicViewBox.width}
+          x={infoschematicViewBox.x}
+          y={infoschematicViewBox.y}
+        />
+      ) : null}
+
       {infoschematicLanes.map((lane) => (
         <g key={lane.id}>
+          <rect
+            className="infoschematic-lane-fill"
+            height={lane.height}
+            rx={lane.panel.radius}
+            width={lane.panel.width}
+            x={lane.panel.x}
+            y={lane.y}
+          />
           {lane.zones.map((zone) => {
             const selection = {
               code: null,
@@ -1238,6 +1281,8 @@ export function InfoschematicDiagram({
             } as const satisfies ArtefactSelection
             const legacyKey = `zone:${lane.id}:${zone.id}`
             const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+            const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
+            const geometry = regionGeometry({ box: bounds, label: zone.label, radius: lane.panel.radius, treatment })
             return (
               // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Zone is keyboard operable in Design.
               <g
@@ -1245,6 +1290,8 @@ export function InfoschematicDiagram({
                 className={`infoschematic-zone artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
+                data-frame-treatment={treatment.frame}
+                data-label-placement={treatment.label ?? 'none'}
                 key={zone.id}
                 onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
                 onPointerDown={
@@ -1255,7 +1302,16 @@ export function InfoschematicDiagram({
                 role={editing ? 'button' : undefined}
                 tabIndex={editing ? 0 : undefined}
               >
-                <rect fill={zone.fill} height={lane.height} width={zone.width} x={zone.x} y={lane.y} />
+                <rect
+                  className="infoschematic-region-fill"
+                  fill={zone.fill}
+                  height={lane.height}
+                  rx={treatment.frame === 'none' ? undefined : lane.panel.radius}
+                  width={zone.width}
+                  x={zone.x}
+                  y={lane.y}
+                />
+                {geometry.outline ? <path className="infoschematic-region-frame" d={geometry.outline} /> : null}
                 {editing && artefactSelected(selection, legacyKey) ? (
                   <>
                     <ResizeHandle axes={{ height: false, width: true }} bounds={bounds} label={zone.label} selection={selection} />
@@ -1279,19 +1335,25 @@ export function InfoschematicDiagram({
               laneId: lane.id,
             } as const satisfies ArtefactSelection
             const legacyKey = `zone:${lane.id}:${zone.id}`
+            const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+            const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
+            const label = regionGeometry({ box: bounds, label: zone.label, radius: lane.panel.radius, treatment }).label
+            if (!label) return null
             return (
               <text
-              className={`${editing && (onSelect || onArtefactSelect) ? 'zone-selectable' : ''}${
-                artefactSelected(selection, legacyKey) ? ' selected' : ''
-              }${hovered === legacyKey ? ' pointed' : ''}`}
-              key={`${lane.id}-${zone.id}`}
-              onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
-              onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
-              onPointerLeave={onHover ? () => onHover(null) : undefined}
-              x={Math.max(zone.x + 16, 58)}
-              y={lane.labelY}
-            >
-              {zone.label.toUpperCase()}
+                className={`${editing && (onSelect || onArtefactSelect) ? 'zone-selectable' : ''}${
+                  artefactSelected(selection, legacyKey) ? ' selected' : ''
+                }${hovered === legacyKey ? ' pointed' : ''}`}
+                dominantBaseline={label.dominantBaseline}
+                key={`${lane.id}-${zone.id}`}
+                onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
+                onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                textAnchor={label.textAnchor}
+                x={label.x}
+                y={label.y}
+              >
+                {zone.label.toUpperCase()}
               </text>
             )
           }),
@@ -1307,6 +1369,8 @@ export function InfoschematicDiagram({
         } as const satisfies ArtefactSelection
         const legacyKey = `lane:${lane.id}`
         const bounds = { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y }
+        const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
+        const geometry = regionGeometry({ box: bounds, label: lane.label, radius: lane.panel.radius, treatment })
         return (
           // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the Lane outline is keyboard operable in Design.
           <g
@@ -1314,6 +1378,8 @@ export function InfoschematicDiagram({
             className={`infoschematic-group lane-${lane.id} artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
             data-artefact-id={selection.id}
             data-artefact-kind={selection.kind}
+            data-frame-treatment={treatment.frame}
+            data-label-placement={treatment.label ?? 'none'}
             key={`panel-${lane.id}`}
             onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
             onPointerDown={
@@ -1324,30 +1390,34 @@ export function InfoschematicDiagram({
             role={editing ? 'button' : undefined}
             tabIndex={editing ? 0 : undefined}
           >
-          <path d={infoschematicLanePanelOutline(lane)} />
-          {/* The zones tile their lane completely, so the legend is the only
-              part of a lane a reader can aim at without hitting a zone. */}
-          <text
-            className={`${editing && (onSelect || onArtefactSelect) ? 'lane-selectable' : ''}${
-              artefactSelected(selection, legacyKey) ? ' selected' : ''
-            }${hovered === legacyKey ? ' pointed' : ''}`}
-            onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
-            onPointerLeave={onHover ? () => onHover(null) : undefined}
-            x={infoschematicLaneLabelX(lane)}
-            y={infoschematicLaneLabelY(lane) + 5}
-          >
-            {lane.label.toUpperCase()}
-          </text>
-          {editing && artefactSelected(selection, legacyKey) ? (
-            <>
-              <ResizeHandle axes={{ height: true, width: false }} bounds={bounds} label={lane.label} selection={selection} />
-              <ArtefactActions
-                at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.y + 12 }}
-                label={lane.label}
-                selection={selection}
-              />
-            </>
-          ) : null}
+            {geometry.outline ? <path className="infoschematic-region-frame" d={geometry.outline} /> : null}
+            {/* The zones tile their lane completely, so the legend is the only
+                part of a lane a reader can aim at without hitting a zone. */}
+            {geometry.label ? (
+              <text
+                className={`${editing && (onSelect || onArtefactSelect) ? 'lane-selectable' : ''}${
+                  artefactSelected(selection, legacyKey) ? ' selected' : ''
+                }${hovered === legacyKey ? ' pointed' : ''}`}
+                dominantBaseline={geometry.label.dominantBaseline}
+                onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                textAnchor={geometry.label.textAnchor}
+                x={geometry.label.x}
+                y={geometry.label.y}
+              >
+                {lane.label.toUpperCase()}
+              </text>
+            ) : null}
+            {editing && artefactSelected(selection, legacyKey) ? (
+              <>
+                <ResizeHandle axes={{ height: true, width: false }} bounds={bounds} label={lane.label} selection={selection} />
+                <ArtefactActions
+                  at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.y + 12 }}
+                  label={lane.label}
+                  selection={selection}
+                />
+              </>
+            ) : null}
           </g>
         )
       })}
@@ -1368,6 +1438,7 @@ export function InfoschematicDiagram({
       {editing && grid ? (
         <g className="edit-grid">
           <rect
+            fill="url(#infoschematic-grid-major-plus-minor)"
             height={infoschematicViewBox.height}
             width={infoschematicViewBox.width}
             x={infoschematicViewBox.x}
@@ -1588,7 +1659,17 @@ export function InfoschematicDiagram({
       {placeables
         .flatMap((placeable) => {
           const card = register.cardAt(placeable.code)
-          return card && !card.wraps ? [{ ...placeable, group: card.group, label: card.label, name: card.detail }] : []
+          const authored = cardById.get(placeable.id)
+          return card && !card.wraps
+            ? [{
+                ...placeable,
+                domain: authored?.domain,
+                group: card.group,
+                label: card.label,
+                name: card.detail,
+                stereotype: authored?.stereotype,
+              }]
+            : []
         })
         // The selected card paints last so nothing overlaps what is being worked
         // on, and drops back into place when it is let go.
@@ -1607,22 +1688,37 @@ export function InfoschematicDiagram({
             id: card.id,
             kind: 'card',
           } as const satisfies ArtefactSelection
-          const appearance = scopeAppearance[card.group as keyof typeof scopeAppearance]
-          const labelLines = splitLabel(card.label)
-          // The label is all a card carries now, so it sits centred rather than
-          // sharing the height with a sub-label.
-          const labelY = labelLines.length === 1 ? 46 : 39
+          const domain = resolveCardDomain(card, domains)
+          const appearance = domain ?? scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
+            color: 'currentColor',
+            fill: 'transparent',
+          }
+          const labelLines = visualTreatment.card.compact ? [card.label] : splitLabel(card.label)
+          // The legacy treatment remains centred; compact Cards use a left-aligned
+          // editorial stack with optional metadata around the authored label.
+          const labelY = visualTreatment.card.compact
+            ? visualTreatment.card.stereotype && card.stereotype
+              ? 39
+              : 30
+            : labelLines.length === 1
+              ? 46
+              : 39
+          const labelX = visualTreatment.card.compact ? 14 : layout.width / 2
+          const identityWidth = Math.max(42, card.code.length * 6.5 + 14)
+          const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
 
           return (
             <g
               aria-label={`Card ${card.label}`}
-              className={`infoschematic-service ${card.group}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
+              className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
                 editing || focusing ? ' selectable' : ''
               }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
                 removals[card.code] ? ' going' : ''
               }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
               data-artefact-id={selection.id}
               data-artefact-kind={selection.kind}
+              data-card-compact={visualTreatment.card.compact || undefined}
+              data-domain={domain?.id}
               key={card.id}
               onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
               /*
@@ -1653,24 +1749,54 @@ export function InfoschematicDiagram({
               onPointerEnter={onHover ? () => onHover(card.code) : undefined}
               onPointerLeave={onHover ? () => onHover(null) : undefined}
               role={editing ? 'button' : undefined}
+              style={{ color: 'color' in appearance ? appearance.color : appearance.stroke }}
               tabIndex={editing ? 0 : undefined}
               transform={`translate(${layout.x} ${layout.y})`}
             >
-              <title>{`${card.code}: ${card.label} · ${card.name}`}</title>
+              <title>{accessibleDetail}</title>
               <rect
                 fill={appearance.fill}
                 height={layout.height}
                 rx={cornerRadius}
-                stroke={appearance.stroke}
+                stroke={'color' in appearance ? appearance.color : appearance.stroke}
                 width={layout.width}
               />
-              <text className="infoschematic-service-label" x={layout.width / 2} y={labelY}>
+              {visualTreatment.card.identity ? (
+                <g className="infoschematic-card-identity" data-card-detail="identity">
+                  <rect height="20" rx="4" width={identityWidth} x={layout.width - identityWidth - 8} y="8" />
+                  <text x={layout.width - identityWidth / 2 - 8} y="18">
+                    {card.code}
+                  </text>
+                </g>
+              ) : null}
+              {visualTreatment.card.stereotype && card.stereotype ? (
+                <text className="infoschematic-card-stereotype" data-card-detail="stereotype" x="14" y="18">
+                  {`«${card.stereotype}»`}
+                </text>
+              ) : null}
+              <text
+                className="infoschematic-service-label"
+                textAnchor={visualTreatment.card.compact ? 'start' : 'middle'}
+                x={labelX}
+                y={labelY}
+              >
                 {labelLines.map((line, index) => (
-                  <tspan key={line} x={layout.width / 2} dy={index === 0 ? 0 : 13}>
+                  <tspan key={line} x={labelX} dy={index === 0 ? 0 : 13}>
                     {line}
                   </tspan>
                 ))}
               </text>
+              {visualTreatment.card.description && card.name ? (
+                <text
+                  className="infoschematic-card-description"
+                  data-card-detail="description"
+                  textAnchor={visualTreatment.card.compact ? 'start' : 'middle'}
+                  x={labelX}
+                  y={Math.min(layout.height - 12, labelY + (labelLines.length - 1) * 13 + 18)}
+                >
+                  {card.name}
+                </text>
+              ) : null}
               {editing && artefactSelected(selection, card.code) ? (
                 <>
                   <ResizeHandle

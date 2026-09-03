@@ -19,23 +19,32 @@
   width: 100%;
 }
 
+.infoschematic-svg.surface-blueprint .infoschematic-backdrop {
+  fill: var(--infoschematic-canvas-surfaces-backdrop);
+}
+
 .infoschematic-zone-label {
   fill: var(--infoschematic-canvas-text-zone);
   font: 600 12px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.5px;
 }
 
-/* The outline is a path with a gap rather than a rect, so the lane's name can
-   sit on the border like a legend. */
-.infoschematic-group path {
+/* Fill stays separate from the shared frame path so a notched border does not
+   punch a gap through the region surface. */
+.infoschematic-lane-fill {
   fill: var(--infoschematic-canvas-surfaces-lane-fill);
+  pointer-events: none;
+}
+
+.infoschematic-region-frame {
+  fill: none;
   stroke: var(--infoschematic-canvas-surfaces-lane-stroke);
   stroke-width: 1.5px;
 }
 
-/* The lane outline is a filled path drawn over the zones, so it swallowed every
-   click meant for the zone beneath it. Only its legend is interactive. */
-.infoschematic-group path {
+/* Region frames never swallow clicks intended for content beneath them. Design
+   selection opts a Lane frame back in through the more-specific rule below. */
+.infoschematic-group .infoschematic-region-frame {
   pointer-events: none;
 }
 
@@ -213,7 +222,7 @@
   stroke-width: 11px;
 }
 
-.infoschematic-svg.highlighting .infoschematic-service.highlighted rect {
+.infoschematic-svg.highlighting .infoschematic-service.highlighted > rect {
   filter: drop-shadow(0 0 10px #79c9ff5c);
   stroke-width: 3px;
 }
@@ -242,14 +251,14 @@
   --glow: var(--infoschematic-canvas-selection-selected);
 }
 
-.infoschematic-svg .infoschematic-service.pointed rect,
-.infoschematic-svg.editing .infoschematic-service.selected rect {
+.infoschematic-svg .infoschematic-service.pointed > rect,
+.infoschematic-svg.editing .infoschematic-service.selected > rect {
   filter: drop-shadow(
     0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
   );
 }
 
-.infoschematic-svg .infoschematic-service.pointed rect {
+.infoschematic-svg .infoschematic-service.pointed > rect {
   stroke: var(--infoschematic-canvas-selection-focused-stroke);
 }
 
@@ -335,7 +344,7 @@
   opacity: var(--infoschematic-canvas-focus-dimmed-opacity);
 }
 
-.infoschematic-service rect {
+.infoschematic-service > rect {
   filter: drop-shadow(0 8px 18px #00000038);
   stroke-width: 2px;
 }
@@ -344,6 +353,36 @@
   fill: var(--infoschematic-canvas-text-label);
   font: 700 14px var(--infoschematic-canvas-text-body-family);
   text-anchor: middle;
+}
+
+.infoschematic-service.compact .infoschematic-service-label {
+  font-size: 13px;
+  text-anchor: start;
+}
+
+.infoschematic-card-identity rect {
+  fill: color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 88%, transparent);
+  stroke: currentColor;
+  stroke-width: 1px;
+}
+
+.infoschematic-card-identity text {
+  dominant-baseline: middle;
+  fill: var(--infoschematic-canvas-text-strong);
+  font: 600 9px var(--infoschematic-canvas-text-code-family);
+  letter-spacing: 0.5px;
+  text-anchor: middle;
+}
+
+.infoschematic-card-stereotype {
+  fill: var(--infoschematic-canvas-text-muted);
+  font: 500 9px var(--infoschematic-canvas-text-code-family);
+  letter-spacing: 0.4px;
+}
+
+.infoschematic-card-description {
+  fill: var(--infoschematic-canvas-text-muted);
+  font: 500 10px var(--infoschematic-canvas-text-body-family);
 }
 
 .infoschematic-audit {
@@ -392,7 +431,7 @@
   pointer-events: auto;
 }
 
-.infoschematic-svg.editing .infoschematic-service.selected rect {
+.infoschematic-svg.editing .infoschematic-service.selected > rect {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
@@ -518,19 +557,23 @@
 
 /* Drawn only while editing: what components, waypoints and labels align to. */
 .edit-grid rect {
-  fill: url(#edit-grid-major);
+  fill: url(#infoschematic-grid-major-plus-minor);
   pointer-events: none;
 }
 
-.edit-grid-line {
+.infoschematic-grid-line {
   fill: none;
   stroke: #79c9ff59;
   stroke-width: 0.7;
 }
 
-.edit-grid-line.major {
+.infoschematic-grid-line.major {
   stroke: #79c9ffa6;
   stroke-width: 1.1;
+}
+
+.infoschematic-authored-grid {
+  opacity: 0.72;
 }
 
 /* A wide, invisible stroke over each route while editing, so a 4px line is
@@ -665,7 +708,7 @@
   opacity: 0.32;
 }
 
-.infoschematic-service.going rect {
+.infoschematic-service.going > rect {
   stroke-dasharray: 4 3;
 }
 
@@ -676,7 +719,7 @@
 .infoschematic-flows .going path {
   stroke-dasharray: 5 4;
 }
-.infoschematic-svg.focusing .infoschematic-service.lit rect {
+.infoschematic-svg.focusing .infoschematic-service.lit > rect {
   stroke-dasharray: none;
   stroke-width: 2.5;
 }

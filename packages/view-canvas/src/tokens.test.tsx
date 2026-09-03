@@ -56,10 +56,10 @@ describe('Canvas visual tokens', () => {
       /const (?:addReach|attachmentReach|cornerRadius|dragThreshold|gridMajorSize|gridSize) = \d/,
     )
     expect(markup).toContain(
-      `<pattern height="${visualTokens.canvas.geometry.gridSize}" id="edit-grid-minor"`,
+      `<pattern height="${visualTokens.canvas.geometry.gridSize}" id="infoschematic-grid-minor"`,
     )
     expect(markup).toContain(
-      `<pattern height="${visualTokens.canvas.geometry.gridMajorSize}" id="edit-grid-major"`,
+      `<pattern height="${visualTokens.canvas.geometry.gridMajorSize}" id="infoschematic-grid-major"`,
     )
   })
 

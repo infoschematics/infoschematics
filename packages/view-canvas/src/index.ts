@@ -28,6 +28,7 @@ export type {
   ResolvedRenderer,
   ScopeIconRenderer,
 } from './renderers.tsx'
+export type { CardDetailOverrides } from '@infoschematics/view-model/appearance'
 export type {
   InfoschematicRuntime,
   RuntimeCard,
