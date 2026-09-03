@@ -29,6 +29,25 @@ Where the model constrains a value, Studio prevents an invalid choice rather tha
 
 This makes adding a new artefact kind deliberate. The model, vocabulary and renderer contract gain the concept before Studio gains a control for it.
 
+## Artefact capabilities
+
+Design uses one discriminated capability contract for the six authored kinds. A capability means the operation is available through the shared draft pipeline; the geometry role still determines what that operation may change.
+
+| Kind | Create | Select | Move | Resize | Properties | Remove | Reorder |
+| ---- | ------ | ------ | ---- | ------ | ---------- | ------ | ------- |
+| Lane | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Zone | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Fabric | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Card | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Flow | Yes | Yes | No | No | Yes | Yes | Yes |
+| Graphic | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+
+A selection always carries `kind`, stable `id`, geometry role and nullable authored `code`. Zone selection additionally carries its owning `laneId`. This prevents a stale identifier from being interpreted against the wrong collection and lets Canvas, Properties and Changes share one selection value.
+
+Lane movement and resize change only `y` and `height`; the Lane panel follows those values while retaining its authored `x` and `width`. Zone movement and resize change only `x` and `width` within the owning Lane. Fabrics, Cards and Graphics use box geometry and move on both axes. The minimum dimensions are 20 units for Lane height, 20 for Zone width, 40 by 40 for Fabric and Card, and 20 by 20 for Graphic. Flow geometry belongs to endpoint, waypoint and route operations rather than a generic box gesture.
+
+Reordering changes authored array order only within the selected kind. A Zone can reorder only among Zones in its owning Lane. The operation never introduces cross-family z-order or lets an object move between the fixed geographic, artefact, Flow and Graphic depths.
+
 ## Grid and Canvas
 
 Design uses one presentation grid for Cards, Flow waypoints, ports and labels. A finer rule and a stronger major rule make alignment readable by eye without competing with the Infoschematic.
@@ -79,6 +98,12 @@ An Adapter Card wraps one standard Card and derives its placement from that rela
 A Fabric may look like a background illustration, but Studio treats it as an addressable artefact: it has identity and bounds, can expose ports and can be a Flow endpoint. Rich artwork stays inside its stable geometric frame.
 
 Creation starts with a valid minimal artefact and then exposes its editable properties. Removal remains visible as a pending authored change until applied, including the dependent Flows that would otherwise lose an endpoint.
+
+## Library
+
+The Library offers reusable Card, Fabric and Flow starting points, not linked instances. Instantiation deep-copies the serialisable seed, allocates a fresh `id` and `code`, applies the current Scope or selected Flow endpoints and produces the same create operation as any other Design creation. Template metadata and provenance never enter `InfoschematicConfig`.
+
+A Flow template is available only when the Producer has selected two valid, distinct ports and a Flow family. Its copied route begins and ends at those ports and is orthogonal before it enters the draft.
 
 ## Ports
 
@@ -132,6 +157,14 @@ Related consequences travel together. Moving a Card includes the affected route 
 Changes can be discarded individually or together. Undo and redo operate on whole gestures, so one drag is one step regardless of the pointer events it produced. Snapshot history is appropriate while Studio state remains small, serialisable data.
 
 Once a new configuration already contains a pending value, Studio drops the corresponding draft instead of offering the same change forever.
+
+One serialisable draft contains typed artefact operations alongside the established route, attachment, label, port and text edits. The persisted draft, in-memory history snapshot and rendered change set therefore describe the same atomic state. A pointer gesture contributes one history step; a discrete command contributes one step.
+
+Change rows use deterministic phase and dependency order: creates precede updates, updates precede removals; containers precede dependants during creation and dependants precede owners during removal. Updates retain fixed kind depth and stable owner, authored index, field and identity ordering. Arrival timing does not become source order.
+
+Removal planning and materialisation keep relationships safe. Applied Card removal also removes wrapping Adapter Cards and every Flow ending on any removed Card; applied Fabric removal removes its endpoint Flows; applied Lane removal removes its Zones. Studio blocks an explicit Graphic removal while a Story Scene directly references it so the Producer can resolve the narrative choice. The framework-neutral materialiser also clears Graphic references and focus entries if it receives such an operation directly, keeping preview and handoff total rather than emitting a dangling reference.
+
+Design renders complete authored content with the materialised draft layered into a derived runtime. Creates, movement, resize, property replacement, authored reordering and safe removal are visible before handoff without mutating the host configuration. Existing component-offset, route and waypoint drafts remain the final transient overlay. Present continues to resolve its active Story Graphic independently.
 
 ## Session boundary
 

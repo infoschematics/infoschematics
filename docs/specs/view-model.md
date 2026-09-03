@@ -124,6 +124,46 @@ A floating overlay position MUST be clamped inside the view before being scored.
 
 _Verification: `packages/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates._
 
+## Artefact editing
+
+### VIEW-020 — Selection and capabilities are discriminated by kind
+
+View Model MUST expose a discriminated selection for Lane, Zone, Fabric, Card, Flow and Graphic. Every selection MUST carry `kind`, stable `id`, geometry role and nullable authored `code`; Zone MUST also carry its owning `laneId`.
+
+Each kind MUST support create, select, property editing, remove and within-kind reorder. Lane, Zone, Fabric, Card and Graphic MUST support move and resize. Flow MUST NOT expose generic move or resize because its endpoint and waypoint operations own route geometry.
+
+_Implementation surface: `ArtefactSelection`, `artefactCapabilities` and `artefactCan` in `packages/view-model/src/editable.ts`._
+
+### VIEW-021 — Geometry operations preserve kind constraints
+
+Lane geometry MUST expose and change only `y` and `height`; applying it MUST keep panel `x` and `width` fixed while synchronising panel `y` and `height`. Zone geometry MUST expose and change only `x` and `width` within its owning Lane. A Zone operation MUST NOT reflow sibling Zones.
+
+Fabric, Card and Graphic geometry MUST use a box movable on both axes. Default resize minima MUST be 20 units for Lane height, 20 for Zone width, 40 by 40 for Fabric and Card, and 20 by 20 for Graphic. Invalid, stale or kind-mismatched geometry MUST be rejected rather than partially applied.
+
+_Implementation surface: geometry records and `artefactResizeMinimums` in `packages/view-model/src/editable.ts`; immutable application in `packages/view-model/src/artefact-draft.ts`._
+
+### VIEW-022 — Draft materialisation is immutable and deterministic
+
+Applying artefact operations MUST return a new `InfoschematicConfig` without mutating the host configuration or supplied serialisable values. Created and replacement values MUST be deep-copied. A rejected operation MUST leave the current materialised value unchanged and produce an indexed diagnostic.
+
+Create, property replacement, geometry, reorder and remove operations MUST apply in their supplied order. Callers MUST use deterministic dependency ordering before persistence or handoff. Reorder MUST change only the authored array for the selected kind; Zone reorder MUST remain inside its owning Lane. Flow property replacement MAY replace route points and other authored Flow properties, but generic Flow movement and resize MUST remain invalid.
+
+_Verification: `packages/view-model/src/artefact-draft.test.ts` covers all six kinds, immutability, authored order, property replacement, rejection and cascades._
+
+### VIEW-023 — Removal materialisation preserves references
+
+Removing a Card MUST remove direct and transitive Adapter Cards that wrap it and every Flow ending on a removed Card. Removing a Fabric MUST remove its endpoint Flows. Removing a Lane MUST remove its nested Zones. Removing a Graphic MUST clear direct Story Scene Graphic references and remove it from Standalone Scene, Thematic Scene and Story Scene focus collections.
+
+Unrelated Scopes, Flow families, renderer keys, renderer properties and authored route data MUST survive materialisation unchanged.
+
+_Implementation surface: `applyArtefactOperations` in `packages/view-model/src/artefact-draft.ts`._
+
+### VIEW-024 — Draft preview derives a complete runtime
+
+Canvas MAY derive a transient runtime by materialising operations over the complete host configuration and passing the result to `createInfoschematicRuntime`. The preview MUST NOT mutate the host configuration. Existing component-offset and route drafts MUST remain later overlays, while an unchanged supplied Flow MUST NOT mask a materialised Flow route or property replacement.
+
+_Verification: `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx` covers six-kind creation, geometry, ordering, property replacement, safe removal, draft overlay precedence and Present Graphic independence._
+
 ## Gaps
 
 - `auditPorts` has no dedicated automated test in this repository.

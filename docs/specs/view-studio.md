@@ -106,6 +106,14 @@ A fabric with authored placement and ports MUST be selectable and editable throu
 
 _Implementation surface: placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`._
 
+### EDIT-079 — Design exposes the six-kind capability contract
+
+Design MUST use discriminated Lane, Zone, Fabric, Card, Flow and Graphic selections shared with Canvas and View Model. Lane, Zone, Fabric, Card and Graphic MUST be pointer-selectable and keyboard-selectable, movable, resizable, property-editable, removable and reorderable. Flow MUST be pointer-selectable and keyboard-selectable, property-editable, removable and reorderable, but MUST use endpoint and waypoint tools instead of generic move or resize.
+
+The selected kind MUST determine the Properties controls. A stale or empty selection MUST render a total empty state rather than interpreting an identifier as another kind.
+
+_Implementation surface: `packages/view-model/src/editable.ts`, `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/editor/ArtefactControls.tsx`._
+
 ## Editing
 
 ### EDIT-008 — A diagram supplies its editing rules
@@ -150,6 +158,14 @@ A selected flow MUST expose its interior waypoints. Adding or removing a waypoin
 
 _Implementation surface: waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/InfoschematicDiagram.tsx`._
 
+### EDIT-080 — Artefact geometry follows kind constraints
+
+Lane movement and resize MUST change only `y` and `height`; Zone movement and resize MUST change only `x` and `width` within its owning Lane. Fabric, Card and Graphic boxes MUST move on both axes and respect View Model minima. Flow MUST retain route-specific editing.
+
+Reorder MUST change authored order only inside the selected kind, with Zone restricted to its owning Lane. Studio MUST NOT expose cross-family z-order. Adapter interaction MUST direct movement to the wrapped Card and MUST NOT offer independent Adapter resize.
+
+_Verification: Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover six-kind selection, constraints, actions and Flow or Adapter exclusions._
+
 ## Undo and drafts
 
 ### EDIT-028 — Every draft edit can be undone
@@ -175,6 +191,14 @@ _Implementation surface: draft persistence and in-memory history in `packages/vi
 A pending change whose value the authored model now states MUST be removed. A draft naming a thing the model no longer knows MUST also be removed. Each endpoint and each port-count side MUST be compared independently where one may have caught up without the other.
 
 _Verification: `packages/view-studio/src/app/editor/use-editor.test.ts` covers spent component, endpoint and port-count drafts, partial endpoint changes and missing model keys._
+
+### EDIT-081 — Typed operations share one atomic draft lifecycle
+
+Typed artefact operations MUST persist in the same serialisable draft envelope as route, attachment, label, port and text changes. One pointer gesture MUST produce one history snapshot; one discrete operation MUST produce one snapshot. Undo, redo, discard and review MUST observe the same atomic draft value.
+
+The change set MUST order creates before updates and updates before removals. Creation MUST order containers before dependants; removal MUST order dependants before owners. Updates MUST use stable kind, owner, authored index, field and identity order rather than event arrival order.
+
+_Implementation surface: `packages/view-studio/src/app/editor/editor-draft.ts`, `packages/view-studio/src/app/editor/artefact-operations.ts`, `packages/view-studio/src/app/editor/source-changes.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
 ## Change consolidation
 
@@ -232,6 +256,30 @@ Moving a component MUST carry route ends attached to it. When a wrapping card de
 
 _Implementation surface: derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
+### EDIT-082 — Library creation produces independent authored values
+
+The Design Library MUST provide Card, Fabric and Flow templates. Instantiating a template MUST deep-copy its serialisable seed, allocate a fresh stable `id` and `code`, and create one ordinary typed operation. The created value MUST NOT contain Library metadata, template identity or provenance.
+
+Card and Fabric creation MUST apply the current Scope and requested Canvas placement. Flow creation MUST require two valid, distinct endpoints and a selected Flow family, and MUST create an orthogonal route whose terminal points match the selected ports. Repeated instantiation MUST return independent nested values.
+
+_Verification: `packages/view-studio/src/app/editor/library.test.ts`, `packages/view-studio/src/app/editor/artefact-factories.test.ts` and `packages/view-studio/src/app/editor/LibraryPanel.test.tsx`._
+
+### EDIT-083 — Design previews the complete materialised draft
+
+Design MUST start from complete authored content rather than Audience filters and MUST materialise typed operations into a derived runtime for Canvas. Creates, movement, resize, property replacement, within-kind reorder and safe removal MUST be visible without mutating the host configuration. Existing component-offset, route, waypoint and attachment drafts MUST remain effective later overlays.
+
+Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Story Graphic independently of Design's complete-content Graphic preview.
+
+_Implementation surface: composition in `packages/view-studio/src/app/App.tsx` and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`._
+
+### EDIT-084 — Removal plans make consequences explicit
+
+Removing a Card or Fabric MUST include endpoint Flow removals before the owner. Applied Card removal MUST also account for Adapter Cards that wrap it. Removing a Lane MUST include its Zones. Studio MUST block Graphic removal while a Story Scene directly references the Graphic and expose the reason to the Producer.
+
+The underlying materialiser MUST remain total when it receives a direct Graphic removal by clearing Story references and Scene focus entries atomically. This cleanup is a safety boundary, not permission for Studio to bypass the review block.
+
+_Verification: `packages/view-studio/src/app/editor/artefact-operations.test.ts` and `packages/view-model/src/artefact-draft.test.ts` cover removal plans, blocking and materialised cascades._
+
 ## Host rendering
 
 ### EDIT-072 — Hosts supply visual implementations
@@ -263,7 +311,5 @@ _Verification: `packages/view-studio/src/app/App.test.tsx` renders the applicati
 ## Gaps
 
 - Most interaction requirements are represented in implementation but do not yet have rendered interaction tests.
-- The editor still emits source-shaped change lines. A generic structured change contract, independent of one authoring file layout, has not yet been specified.
 - Studio currently derives persistence keys from Infoschematic identity and provides no host-owned persistence policy or storage-adapter contract.
-- The boundary between the future Canvas, Present and Studio view packages has not yet been reflected in the current single `view-studio` implementation.
 - Accessible keyboard operation, focus management and announcements for selection, creation, removal and undo require explicit requirements and tests.

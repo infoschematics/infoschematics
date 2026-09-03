@@ -50,6 +50,20 @@ Renderer availability MUST NOT determine an artefact's identity, relationships, 
 
 _Implementation surface: renderer references in `packages/domain-model/src/fabric.ts`, `packages/domain-model/src/graphic.ts`, and `packages/domain-model/src/scene.ts`._
 
+### DOMAIN-014 — Editable kinds retain distinct authored collections
+
+Lane, Zone, Fabric, Card, Flow and Graphic MUST remain distinct authored kinds. A Zone MUST belong to exactly one Lane's ordered `zones` collection. Every other kind MUST retain its own ordered collection in the Infoschematic definition. Reordering one kind MUST NOT imply cross-kind layering or move a Zone to another Lane.
+
+_Implementation surface: collections in `packages/domain-model/src/infoschematic.ts` and nested Zones in `packages/domain-model/src/lane.ts`._
+
+### DOMAIN-015 — Applied removal leaves valid authored references
+
+An applied configuration change MUST NOT retain a Flow whose source or target artefact was removed. Removing a Card MUST also remove Adapter Cards that directly or transitively wrap it before dependent Flows are retained. Removing a Lane MUST remove its owned Zones.
+
+A Graphic referenced directly by a Story Scene MUST either block the authored removal before application or clear the Story Scene reference atomically. Focus collections in Standalone Scenes, Thematic Scenes and Story Scenes MUST NOT retain the removed Graphic after an applied cleanup.
+
+_Implementation surface: relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/lane.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`._
+
 ## Geography
 
 ### DOMAIN-007 — Lanes and zones state geography

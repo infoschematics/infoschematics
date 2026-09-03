@@ -33,6 +33,14 @@ Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschem
 
 Copying a Standalone Scene into a Theme or Story creates independently owned material. Do not retain hidden object links or runtime references between them.
 
+## Author with Studio
+
+Open Design when you want the complete authored Infoschematic rather than the Audience's current Scope and Flow-family projection. Draft creates, movement, resize, property edits, within-kind ordering and safe removals appear immediately, but remain serialisable operations until the change set is applied to authored source.
+
+The Library provides Card, Fabric and Flow starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
+
+Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Lane removes its Zones. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
+
 ## Keep configuration portable
 
 - Export one complete value created by `defineInfoschematic`.
