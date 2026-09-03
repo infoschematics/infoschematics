@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import {
+  applyArtefactOperations,
+  type ArtefactDraftOperation,
+} from '@infoschematics/view-model/artefact-draft'
+import {
   artefactCan,
   createArtefactOperation,
   defineArtefactSelection,
@@ -10,6 +14,7 @@ import {
   resizeArtefactOperation,
 } from '@infoschematics/view-model/editable'
 import {
+  applyDiscreteDraft,
   applyGestureDraft,
   beginDraftGesture,
   createEditorDraftHistory,
@@ -23,9 +28,13 @@ import {
   artefactOperationKey,
   artefactSourceChanges,
   createdArtefactDetails,
+  discardArtefactOperation,
+  effectiveArtefactOperation,
+  effectiveArtefactValue,
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
+  replaceArtefactPropertiesOperation,
 } from './artefact-operations.ts'
 
 const card = defineArtefactSelection({
@@ -82,6 +91,11 @@ const config = defineInfoschematic({
     ],
     fabrics: [
       {
+        appearance: {
+          caption: 'Fabric caption',
+          properties: { emphasis: true, rank: 2 },
+          renderer: 'fabric-special',
+        },
         code: 'FABRIC-01',
         detail: 'Fabric',
         id: 'fabric-one',
@@ -110,7 +124,8 @@ const config = defineInfoschematic({
       {
         id: 'graphic-one',
         placement: { height: 60, width: 80, x: 100, y: 100 },
-        renderer: 'graphic',
+        properties: { caption: 'Graphic caption', opacity: 0.8 },
+        renderer: 'graphic-special',
       },
     ],
     lanes: [
@@ -187,6 +202,164 @@ describe('typed artefact operation lifecycle', () => {
         artefactIndex(config, target),
       ),
     ).toEqual([0, 0, 0, 0, 0, 0])
+  })
+
+  it('replaces partial properties for all six kinds without losing authored fields', () => {
+    const replacements = [
+      replaceArtefactPropertiesOperation(config, [], card, {
+        kind: 'card',
+        value: { detail: 'Card replaced', placement: { box: { x: 25 } } },
+      }),
+      replaceArtefactPropertiesOperation(config, [], fabric, {
+        kind: 'fabric',
+        value: { appearance: { caption: 'Fabric replaced' } },
+      }),
+      replaceArtefactPropertiesOperation(config, [], flow, {
+        kind: 'flow',
+        value: { dashed: true },
+      }),
+      replaceArtefactPropertiesOperation(config, [], graphic, {
+        kind: 'graphic',
+        value: { properties: { opacity: 1 } },
+      }),
+      replaceArtefactPropertiesOperation(config, [], lane, {
+        kind: 'lane',
+        value: { label: 'Lane replaced' },
+      }),
+      replaceArtefactPropertiesOperation(config, [], zone, {
+        kind: 'zone',
+        value: { fill: '#abc' },
+      }),
+    ]
+    expect(replacements.every(Boolean)).toBe(true)
+    const operations = replacements.filter(
+      (operation): operation is NonNullable<typeof operation> => Boolean(operation),
+    ) as readonly ArtefactDraftOperation[]
+    const materialised = applyArtefactOperations(config, operations)
+
+    expect(materialised.rejected).toEqual([])
+    expect(materialised.config.infoschematic.cards[0]).toMatchObject({
+      code: 'CARD-01',
+      detail: 'Card replaced',
+      placement: {
+        ...config.infoschematic.cards[0]!.placement,
+        box: { ...config.infoschematic.cards[0]!.placement.box, x: 25 },
+      },
+      scope: 'scope',
+    })
+    expect(materialised.config.infoschematic.fabrics[0]).toMatchObject({
+      appearance: {
+        caption: 'Fabric replaced',
+        properties: { emphasis: true, rank: 2 },
+        renderer: 'fabric-special',
+      },
+      placement: config.infoschematic.fabrics[0]!.placement,
+    })
+    expect(materialised.config.infoschematic.flows[0]).toMatchObject({
+      dashed: true,
+      family: 'family',
+      points: config.infoschematic.flows[0]!.points,
+      source: 'card-one',
+      sourcePort: 'E1',
+      target: 'fabric-one',
+      targetPort: 'W1',
+    })
+    expect(materialised.config.infoschematic.graphics[0]).toMatchObject({
+      placement: config.infoschematic.graphics[0]!.placement,
+      properties: { caption: 'Graphic caption', opacity: 1 },
+      renderer: 'graphic-special',
+    })
+    expect(materialised.config.infoschematic.lanes[0]).toMatchObject({
+      label: 'Lane replaced',
+      panel: config.infoschematic.lanes[0]!.panel,
+      zones: [{ ...config.infoschematic.lanes[0]!.zones[0], fill: '#abc' }],
+    })
+    expect(materialised.config.infoschematic.lanes[0]!.zones[0]).toEqual({
+      ...config.infoschematic.lanes[0]!.zones[0],
+      fill: '#abc',
+    })
+    expect(JSON.parse(JSON.stringify(operations))).toEqual(operations)
+    expect(operations.every(Object.isFrozen)).toBe(true)
+    expect(
+      artefactSourceChanges(operations).map((change) => change.target.kind),
+    ).toEqual(['lane', 'zone', 'fabric', 'card', 'graphic', 'flow'])
+  })
+
+  it('coalesces property edits and keeps them undoable, discardable and ordered', () => {
+    const first = replaceArtefactPropertiesOperation(config, [], card, {
+      kind: 'card',
+      value: { detail: 'First detail' },
+    })!
+    const once = recordArtefactOperation([], first)
+    const latest = replaceArtefactPropertiesOperation(config, once, card, {
+      kind: 'card',
+      value: { label: 'Latest label' },
+    })!
+    const operations = recordArtefactOperation(once, latest)
+
+    expect(operations).toEqual([latest])
+    expect(effectiveArtefactValue(config, operations, card)).toMatchObject({
+      detail: 'First detail',
+      label: 'Latest label',
+    })
+    expect(artefactSourceChanges(operations)).toHaveLength(1)
+    expect(artefactSourceChanges(operations)[0]?.source).toContain(
+      'replace card',
+    )
+    expect(
+      discardArtefactOperation(operations, artefactOperationKey(latest)),
+    ).toEqual([])
+
+    const changed = {
+      ...emptyEditorDraft(),
+      artefactOperations:
+        operations as ReturnType<typeof emptyEditorDraft>['artefactOperations'],
+    }
+    const history = applyDiscreteDraft(
+      createEditorDraftHistory(emptyEditorDraft()),
+      changed,
+    )
+    expect(undoEditorDraft(history).current.artefactOperations).toEqual([])
+    expect(redoEditorDraft(undoEditorDraft(history)).current).toEqual(changed)
+  })
+
+  it('rejects a property patch for the wrong selected kind', () => {
+    expect(
+      replaceArtefactPropertiesOperation(config, [], flow, {
+        kind: 'card',
+        value: { detail: 'Wrong kind' },
+      }),
+    ).toBeUndefined()
+  })
+
+  it('materialises the latest value for a newly-created target', () => {
+    const target = defineArtefactSelection({
+      code: 'CARD-NEW',
+      geometry: 'box' as const,
+      id: 'card-new',
+      kind: 'card' as const,
+    })
+    const value = {
+      ...config.infoschematic.cards[0]!,
+      code: 'CARD-NEW',
+      id: 'card-new',
+      label: 'New card',
+    }
+    const created = createArtefactOperation(target, value, 1)!
+    const replaced = replaceArtefactPropertiesOperation(
+      config,
+      [created],
+      target,
+      { kind: 'card', value: { detail: 'Edited before rebuild' } },
+    )!
+    const operations = recordArtefactOperation([created], replaced)
+
+    expect(effectiveArtefactValue(config, operations, target)).toMatchObject({
+      detail: 'Edited before rebuild',
+      label: 'New card',
+      placement: value.placement,
+    })
+    expect(effectiveArtefactOperation(operations, target)).toEqual(replaced)
   })
 
   it('coalesces repeated geometry changes and stays serialisable', () => {

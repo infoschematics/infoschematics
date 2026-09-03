@@ -1,9 +1,10 @@
 import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
+  artefactCapabilities as capabilitiesByKind,
   createArtefactOperation,
   type ArtefactKind,
-  type ArtefactOperation,
   type ArtefactSelection,
   type ArtefactValueByKind,
   type Change,
@@ -43,12 +44,16 @@ import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 import {
   artefactIndex,
   artefactOperationKey,
+  type ArtefactPropertiesPatch,
   artefactSourceChanges,
   createdArtefactDetails,
   discardArtefactOperation,
+  effectiveArtefactOperation,
+  effectiveArtefactValue,
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
+  replaceArtefactPropertiesOperation,
 } from './artefact-operations.ts'
 
 export type { Attachment, CardCreation, ComponentDraft, Creation, Removal, TextDraft, TextField } from './editor-draft.ts'
@@ -301,7 +306,7 @@ export function useEditor(
   )
   const draft = useMemo(() => normaliseEditorDraft(storedDraft), [storedDraft])
   const {
-    artefactOperations,
+    artefactOperations: storedArtefactOperations,
     attachments,
     cards,
     components: drafts,
@@ -312,6 +317,10 @@ export function useEditor(
     routes,
     text,
   } = draft
+  // The persisted envelope predates the materialiser's additive
+  // replace-properties operation, but remains wire-compatible JSON.
+  const artefactOperations =
+    storedArtefactOperations as readonly ArtefactDraftOperation[]
 
   const setDraftField = useCallback(
     <K extends Exclude<keyof EditorDraft, 'version'>>(field: K, update: SetStateAction<EditorDraft[K]>) =>
@@ -321,8 +330,13 @@ export function useEditor(
   const setAttachments = (update: SetStateAction<EditorDraft['attachments']>) =>
     setDraftField('attachments', update)
   const setArtefactOperations = (
-    update: SetStateAction<EditorDraft['artefactOperations']>,
-  ) => setDraftField('artefactOperations', update)
+    update: SetStateAction<readonly ArtefactDraftOperation[]>,
+  ) =>
+    setDraftField('artefactOperations', (current) => {
+      const typed = current as readonly ArtefactDraftOperation[]
+      const next = typeof update === 'function' ? update(typed) : update
+      return next as EditorDraft['artefactOperations']
+    })
   const setCards = (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update)
   const setCreations = (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update)
   const setDrafts = (update: SetStateAction<EditorDraft['components']>) => setDraftField('components', update)
@@ -399,10 +413,33 @@ export function useEditor(
           operation.target.kind === selectedArtefact.kind &&
           operation.target.id === selectedArtefact.id,
       )
-    return created?.operation === 'create'
-      ? createdArtefactDetails(created)
+    if (created?.operation !== 'create') return undefined
+    const value = effectiveArtefactValue(
+      config,
+      artefactOperations,
+      selectedArtefact,
+    )
+    return value
+      ? createdArtefactDetails({ ...created, value } as typeof created)
       : undefined
-  }, [artefactOperations, diagram, selected, selectedArtefact])
+  }, [artefactOperations, config, diagram, selected, selectedArtefact])
+  const selectedArtefactCapabilities =
+    selectedArtefactDetails?.capabilities ??
+    (selectedArtefact ? capabilitiesByKind[selectedArtefact.kind] : undefined)
+  const artefactValue = useMemo(
+    () =>
+      selectedArtefact
+        ? effectiveArtefactValue(config, artefactOperations, selectedArtefact)
+        : undefined,
+    [artefactOperations, config, selectedArtefact],
+  )
+  const artefactOperation = useMemo(
+    () =>
+      selectedArtefact
+        ? effectiveArtefactOperation(artefactOperations, selectedArtefact)
+        : undefined,
+    [artefactOperations, selectedArtefact],
+  )
 
   /*
    * Drafts the model has overtaken, cleared as the editor comes up.
@@ -712,7 +749,7 @@ export function useEditor(
   }
 
   const recordOperation = (
-    operation: ArtefactOperation,
+    operation: ArtefactDraftOperation,
     discrete: boolean,
   ) => {
     checkpoint()
@@ -821,6 +858,36 @@ export function useEditor(
     return undefined
   }
 
+  const replaceSelectedArtefactProperties = (
+    patch: ArtefactPropertiesPatch,
+  ): string | undefined => {
+    const target = selectedArtefactDetails?.selection ?? selectedArtefact
+    if (!target || !selectedArtefactCapabilities?.['edit-properties']) {
+      const reason = 'Selected artefact does not support property editing'
+      setArtefactIssue(reason)
+      return reason
+    }
+    if (patch.kind !== target.kind) {
+      const reason = `Cannot apply ${patch.kind} properties to ${target.kind}`
+      setArtefactIssue(reason)
+      return reason
+    }
+    const operation = replaceArtefactPropertiesOperation(
+      config,
+      artefactOperations,
+      target,
+      patch,
+    )
+    if (!operation) {
+      const reason = `Could not replace properties for ${target.kind} ${target.id}`
+      setArtefactIssue(reason)
+      return reason
+    }
+    recordOperation(operation, true)
+    setArtefactIssue(null)
+    return undefined
+  }
+
   const createTypedArtefact = <K extends ArtefactKind>(
     kind: K,
     value: ArtefactValueByKind[K],
@@ -833,7 +900,7 @@ export function useEditor(
       target as never,
       value as never,
       index,
-    ) as ArtefactOperation | undefined
+    ) as ArtefactDraftOperation | undefined
     if (!operation) return undefined
     recordOperation(operation, true)
     selectArtefact(target)
@@ -841,10 +908,12 @@ export function useEditor(
   }
 
   return {
-    artefactCapabilities: selectedArtefactDetails?.capabilities,
+    artefactCapabilities: selectedArtefactCapabilities,
     artefactGeometry: selectedArtefactDetails?.geometry,
     artefactIssue,
+    artefactOperation,
     artefactOperations,
+    artefactValue,
     createArtefact: createTypedArtefact,
     // A route-only edit is still a change the Discard button has to be able to
     // act on - ChangePane disables that button at count 0, so leaving routes
@@ -1080,6 +1149,7 @@ export function useEditor(
     // uses - so an empty key is read here as "nothing", the one string no
     // handle is ever keyed by.
     removeArtefact: removeSelectedArtefact,
+    replaceArtefactProperties: replaceSelectedArtefactProperties,
     reorderArtefact: reorderSelectedArtefact,
     resizeArtefact: resizeSelectedArtefact,
     select: (key: string) => {
