@@ -80,4 +80,6 @@ Progress every ready local roadmap item through its approved plan as far as the 
 
 | INFOSCHEMATICS-TOOL-006 | ready | awaiting-review | `fb2da8f1` → `0f22e5ce`; `bun run check` passed | Review the item delivery packet |
 
+| INFOSCHEMATICS-SITE-001 | ready | awaiting-review | `33000f30` to `61b0c0fa`; `bun run check` passed | Review Studio example and homepage comparison |
+
 The run continues with the remaining independent items. Records accepted by separate human-review threads remain outside this run's closure authority; this run has not pruned, pushed or released anything.

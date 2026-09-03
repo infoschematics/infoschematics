@@ -4,7 +4,7 @@ area: SITE
 title: Explain Infoschematics visually
 theme: site-experience
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 33000f301728f5b2669cb559fc38e5a87a71eb24
@@ -35,17 +35,17 @@ Canvas, Present, Studio and `renderInfoschematicSvg` now exist as additive publi
 
 ## Steps
 
-- [ ] Define a self-describing narrative around Domain Model, Domain Core, View Model, Canvas, Present, Studio, renderers, authored examples and hosts without introducing repository mechanics as product concepts.
-- [ ] Create an `examples/is-infoschematics` framework-neutral workspace depending only on Domain Core and exporting one complete serialisable definition.
-- [ ] Use Lanes and Zones for ownership boundaries, Cards for packages and hosts, Flows for allowed dependency direction, and Scenes plus one concise Story to explain the architecture progressively.
-- [ ] Add model-level tests for stable identifiers, valid references, serialisability, complete Scene focus and the absence of React, browser state, callbacks or renderer implementations from the definition.
-- [ ] Add a Site route at `/examples/infoschematics/`; let the host own document metadata and retain navigation to the homepage and blank example.
-- [ ] Mount the substantial example through Studio with its Producer-facing Design, Direct and Present controls available for exploration and editing.
-- [ ] Render the same exported definition through `renderInfoschematicSvg` for the homepage without importing Studio, React or application state into the authored workspace.
-- [ ] Show the existing homepage preview and generated SVG side by side as a temporary visual-parity review surface, clearly labelling which is bespoke and which is renderer output.
-- [ ] Record reusable visual gaps against `INFOSCHEMATICS-TOOL-012` rather than patching page-specific presentation into the generated SVG.
-- [ ] Add Site tests for direct routing, document titles, editorial controls, representative rendered content, deterministic static SVG and production-build inclusion.
-- [ ] Update public guidance to distinguish the homepage introduction, blank contract example and substantial editable self-describing example.
+- [x] Define a self-describing narrative around Domain Model, Domain Core, View Model, Canvas, Present, Studio, renderers, authored examples and hosts without introducing repository mechanics as product concepts.
+- [x] Create an `examples/is-infoschematics` framework-neutral workspace depending only on Domain Core and exporting one complete serialisable definition.
+- [x] Use Lanes and Zones for ownership boundaries, Cards for packages and hosts, Flows for allowed dependency direction, and Scenes plus one concise Story to explain the architecture progressively.
+- [x] Add model-level tests for stable identifiers, valid references, serialisability, complete Scene focus and the absence of React, browser state, callbacks or renderer implementations from the definition.
+- [x] Add a Site route at `/examples/infoschematics/`; let the host own document metadata and retain navigation to the homepage and blank example.
+- [x] Mount the substantial example through Studio with its Producer-facing Design, Direct and Present controls available for exploration and editing.
+- [x] Render the same exported definition through `renderInfoschematicSvg` for the homepage without importing Studio, React or application state into the authored workspace.
+- [x] Show the existing homepage preview and generated SVG side by side as a temporary visual-parity review surface, clearly labelling which is bespoke and which is renderer output.
+- [x] Record reusable visual gaps against `INFOSCHEMATICS-TOOL-012` rather than patching page-specific presentation into the generated SVG.
+- [x] Add Site tests for direct routing, document titles, editorial controls, representative rendered content, deterministic static SVG and production-build inclusion.
+- [x] Update public guidance to distinguish the homepage introduction, blank contract example and substantial editable self-describing example.
 
 ## Files touched
 
@@ -81,6 +81,43 @@ Link the example from authoring and React integration guidance, explaining the t
 ### Roadmap
 
 Keep visual-treatment parity in `INFOSCHEMATICS-TOOL-012` and Flow signalling in `INFOSCHEMATICS-TOOL-013`. Replace the bespoke homepage preview only after the temporary comparison receives explicit visual approval.
+
+## Review
+
+### Delivered
+
+The self-describing `@infoschematics/is-infoschematics` authored package is available through Studio at `/examples/infoschematics/` and through deterministic SVG on the homepage. The original bespoke homepage preview remains beside the shared-renderer output for explicit visual review.
+
+### Summary of changes
+
+- Added a framework-neutral definition with four Lanes, seven Zones, nine package or host Cards, seventeen dependency Flows, four Standalone Scenes, and one three-step Story.
+- Added stable-reference, dependency-direction, serialisability, Scene-focus, and authored-boundary tests.
+- Added the Site route, host-owned title metadata, Studio mounting, homepage navigation, and side-by-side shared SVG comparison.
+- Added workspace dependency and verification wiring and updated public authoring, React integration, architecture, and root orientation guidance.
+
+### Verification
+
+- `bun run check` passed: 40 test files and 248 tests, every TypeScript workspace, dependency boundaries across 176 modules and 414 dependencies, visual-token drift check, and the production Site build.
+- Focused authored-example tests, Site route and homepage tests, package and Site typechecks, and production build passed before their implementation commits.
+- The production build includes a lazy `InfoschematicsExample` route chunk and the homepage shared-renderer output.
+
+### Outstanding concerns
+
+- The build retains existing non-fatal CSS `@import` ordering and large-chunk warnings.
+- Browser-control setup was unavailable for the final local screenshot pass. Responsive behaviour is covered by authored CSS and production build, but the side-by-side visual decision still needs human browser review.
+- Reusable parity gaps are recorded on `INFOSCHEMATICS-TOOL-012`; Flow motion remains owned by `INFOSCHEMATICS-TOOL-013`.
+
+### Post-change review
+
+The authored workspace depends only on Domain Core and contains no React, browser state, callbacks, View imports, or renderer implementations. Site owns routing, metadata, interactive mounting, static rendering, and comparison presentation. The generated SVG is encoded as an image source rather than patched with page-specific SVG DOM or CSS.
+
+### Mini recap
+
+Implementation commits are `df5aea63`, `cb3f14f9`, `608cb9de`, `cecb106c`, and `61b0c0fa`, from baseline `33000f301728f5b2669cb559fc38e5a87a71eb24`. The item is ready for human review of the substantial Studio example and the desktop and narrow homepage comparison; accepting it must not remove the bespoke preview without explicit visual-parity approval.
+
+## Done
+
+Pending human acceptance.
 
 ## Discussion
 

@@ -85,6 +85,10 @@ Record any visual gap discovered by the SITE-001 comparison against this item on
 
 ## Discussion
 
+### Gaps observed through SITE-001
+
+The initial side-by-side comparison confirms the approved configuration boundary and exposes six reusable gaps: the shared SVG has a fixed light surface rather than the homepage's dark blueprint treatment; it lacks an authored grid or backdrop treatment; Lane and Zone frames and label placement differ from the subtle rounded region; Cards lack the compact top-right identity badge and editorial metadata hierarchy; a complete 1400-by-920 diagram becomes too dense at half-width without output detail or responsive controls; and the image host supplies whole-diagram alternative text while richer internal accessible metadata needs explicit SVG contract coverage. Flow pulse and motion remain outside this item under `INFOSCHEMATICS-TOOL-013`.
+
 ### Configuration boundary
 
 Configuration expresses stable visual meaning and intentional presentation defaults, not renderer implementation detail. Output options may hide identity tags, stereotypes or descriptions without deleting authored data. Tokens retain invariant measurements and colours that should not become per-diagram knobs.
