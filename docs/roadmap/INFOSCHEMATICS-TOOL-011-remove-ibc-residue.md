@@ -86,7 +86,7 @@ Removed IBC-specific rendering and narrative residue from reusable Studio code w
 
 Studio now accepts an `InfoschematicRenderers` host configuration for Fabrics, Graphics, shared SVG definitions, and Scope icons. It resolves Story Graphics through authored records, renders each visible Fabric independently, and supplies a generic bounds-driven fallback. The IBC host now owns its four Fabric implementations, two authored Graphics, shared SVG resources, visual CSS, icon mapping, and current package integration. The paired implementation commits are Infoschematics `cb2a7caee13605bf90997648e87825bbbe3becbf` and IBC 2026 `1a9be3d598d9af5297a7a0be04967d6e5c3ee178`, delivered from baseline `1ac734b31673cf2cdf6948be580fc6d31fea786e`.
 
-The remedial pass renamed persisted presentation and panel-tab keys for the current concepts, removed provenance from the Present View design, replaced source-specific and historical comments with current host-neutral explanations, and extended the residue guard to cover those categories.
+The remedial pass renamed persisted presentation and panel-tab keys for the current concepts, removed provenance from the Present View design, replaced source-specific and historical comments with current host-neutral explanations, and extended the residue guard to cover those categories. Its delivery commit is `ac7951a65986fe5c6d7b65a21aded2e1db58c0a0`.
 
 ### Verification
 
