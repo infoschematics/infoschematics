@@ -4,10 +4,10 @@ area: SITE
 title: Explain Infoschematics visually
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 33000f301728f5b2669cb559fc38e5a87a71eb24
 transferred_from: INFOSCHEMATICS-WEB-SITE-001
 ---
 
