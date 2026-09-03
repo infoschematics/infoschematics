@@ -11,3 +11,10 @@ export type {
   PresentationAction,
   PresentationState,
 } from "./presentation.ts";
+export { createProductionState, directTargetIsValid, reduceProduction } from "./production.ts";
+export type {
+  DirectTarget,
+  ProductionAction,
+  ProductionMode,
+  ProductionState,
+} from "./production.ts";
