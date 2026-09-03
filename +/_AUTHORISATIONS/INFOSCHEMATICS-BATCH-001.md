@@ -69,4 +69,8 @@ Progress every ready local roadmap item through its approved plan as far as the 
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-001-RUN-001 d491cdfbd49e4e80c92e36a120cc808d4d9a428600aba546d303fc55aa45acab -->
 
-The run is authorised and has not yet started an implementation lifecycle.
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-TOOL-008 | ready | awaiting-review | `17eff4ff` → `b3d27383`; `bun run check` passed | Review the item delivery packet |
+
+The run continues with the remaining independent items. No record has been accepted, pruned, pushed or released.
