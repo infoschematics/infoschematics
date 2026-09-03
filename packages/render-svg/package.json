@@ -1,0 +1,14 @@
+{
+  "name": "@infoschematics/render-svg",
+  "description": "Deterministic, framework-neutral SVG rendering for Infoschematics.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-model": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "type": "module"
+}

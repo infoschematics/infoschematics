@@ -1,0 +1,163 @@
+import { describe, expect, it } from 'vitest'
+import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import { renderInfoschematicSvg } from './index.ts'
+
+const blank = (title: string): InfoschematicConfig => ({
+  title,
+  infoschematic: {
+    viewBox: { height: 80, width: 120, x: 0, y: 0 },
+    scopes: [],
+    flowFamilies: [],
+    lanes: [],
+    cards: [],
+    fabrics: [],
+    points: [],
+    flows: [],
+    graphics: [],
+    interfaces: [],
+    specificationGroups: [],
+  },
+  standaloneScenes: [],
+  themes: [],
+  stories: [],
+  calloutPositions: [],
+})
+
+const representative: InfoschematicConfig = {
+  title: 'A & B <architecture>',
+  subtitle: 'Static "view"',
+  infoschematic: {
+    viewBox: { height: 240, width: 400, x: 0, y: 0 },
+    scopes: [
+      { color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' },
+      { color: '#b45309', description: 'Two', fill: '#fef3c7', id: 'two', label: 'Two', prefix: 'TWO' },
+    ],
+    flowFamilies: [
+      { color: '#7c3aed', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' },
+    ],
+    lanes: [
+      {
+        height: 200,
+        id: 'delivery',
+        label: 'Delivery',
+        labelY: 24,
+        panel: { height: 200, radius: 8, width: 380, x: 10, y: 20 },
+        y: 20,
+        zones: [{ fill: '#f8fafc', id: 'runtime', label: 'Runtime', width: 380, x: 10 }],
+      },
+    ],
+    cards: [
+      {
+        code: 'ONE-001',
+        detail: 'Source <entry>',
+        id: 'source',
+        label: 'Source & gateway',
+        placement: { box: { height: 60, width: 120, x: 40, y: 80 }, ports: {} },
+        scope: 'one',
+        scopes: ['one'],
+      },
+      {
+        code: 'TWO-001',
+        detail: 'Target',
+        id: 'target',
+        label: 'Target',
+        placement: { box: { height: 60, width: 120, x: 240, y: 80 }, ports: {} },
+        scope: 'two',
+        scopes: ['two'],
+      },
+    ],
+    fabrics: [],
+    points: [],
+    flows: [
+      {
+        code: 'CALL-001',
+        family: 'calls',
+        id: 'call',
+        points: [
+          { x: 160, y: 110 },
+          { x: 240, y: 110 },
+        ],
+        source: 'source',
+        sourcePort: 'E1',
+        target: 'target',
+        targetPort: 'W1',
+      },
+    ],
+    graphics: [
+      {
+        id: 'note',
+        label: 'Note <safe>',
+        placement: { height: 34, width: 90, x: 155, y: 170 },
+        renderer: 'note"renderer',
+      },
+    ],
+    interfaces: [],
+    specificationGroups: [],
+  },
+  standaloneScenes: [
+    {
+      code: 'SCN-001',
+      description: 'Source only',
+      focus: { artefacts: ['source'], flows: [], graphics: ['note'] },
+      id: 'source-only',
+      label: 'Source only',
+    },
+  ],
+  themes: [],
+  stories: [],
+  calloutPositions: [],
+}
+
+describe('renderInfoschematicSvg', () => {
+  it('renders a title-only Infoschematic as stable standalone SVG', () => {
+    expect(renderInfoschematicSvg(blank('A & <B> "quoted"'))).toBe(
+      [
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
+        '  <title>A &amp; &lt;B&gt; "quoted"</title>',
+        '  <rect class="infoschematic-backdrop" fill="#ffffff" height="80" width="120" x="0" y="0" />',
+        '</svg>',
+      ].join('\n'),
+    )
+  })
+
+  it('renders representative configuration byte-for-byte deterministically and escapes authored values', () => {
+    const options = { visibility: { graphics: 'all' as const } }
+    const first = renderInfoschematicSvg(representative, options)
+    const second = renderInfoschematicSvg(representative, options)
+
+    expect(first).toBe(second)
+    expect(first).toContain('<title>A &amp; B &lt;architecture&gt;</title>')
+    expect(first).toContain('Source &amp; gateway')
+    expect(first).toContain('Source &lt;entry&gt;')
+    expect(first).toContain('data-renderer="note&quot;renderer"')
+    expect(first).toContain('d="M160 110 H240"')
+    expect(first).not.toContain('Source <entry>')
+  })
+
+  it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
+    expect(renderInfoschematicSvg(representative)).not.toContain('data-renderer=')
+
+    const focused = renderInfoschematicSvg(representative, {
+      scene: { kind: 'standalone', sceneId: 'source-only' },
+      visibility: { scopes: ['one', 'two'], unfocused: 'hide' },
+    })
+
+    expect(focused).toContain('data-id="source"')
+    expect(focused).toContain('data-id="note"')
+    expect(focused).not.toContain('data-id="target"')
+    expect(focused).not.toContain('data-id="call"')
+
+    const oneScope = renderInfoschematicSvg(representative, { visibility: { scopes: ['one'] } })
+    expect(oneScope).toContain('data-id="source"')
+    expect(oneScope).not.toContain('data-id="target"')
+    expect(oneScope).not.toContain('data-id="call"')
+  })
+
+  it('fails explicitly when a selected Scene does not exist', () => {
+    expect(() =>
+      renderInfoschematicSvg(representative, {
+        scene: { kind: 'standalone', sceneId: 'missing' },
+      }),
+    ).toThrow('Unknown Standalone Scene: missing')
+  })
+})
