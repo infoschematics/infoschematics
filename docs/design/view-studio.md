@@ -13,6 +13,14 @@ Studio supports two closely related loops:
 
 Both loops should provide immediate visual feedback while keeping the authored `InfoschematicConfig` serialisable and reviewable. Studio derives runtime state from that configuration; it does not make browser state or React components part of the product.
 
+## Production modes and state ownership
+
+The application exposes one transient `ProductionMode`: `present`, `design` or `direct`. Present belongs to the Audience; Design and Direct belong to the Producer. A new session and every reload begin in Present, even when an editing draft has been retained.
+
+Mode does not collapse all interaction into one state object. Audience preferences and filters, active presentation focus and playback, and Producer editing state remain separate. Entering Design or Direct stops playback and clears the active Standalone Scene, Thematic Scene or Story without discarding the Audience's Scope and Flow-family filters. Returning to Present reuses those filters but never resumes a Story or restores presentation focus automatically.
+
+Design and Direct use the complete authored Infoschematic rather than the filtered Audience projection. Design therefore keeps every editable artefact reachable. Direct derives a separate draft preview from its active authoring target, so navigating or editing production material cannot accidentally change what Present had focused.
+
 ## Structured editing
 
 Studio offers choices the Infoschematic model already understands. It selects a Lane or Zone, chooses a Flow family, moves a waypoint or changes a renderer key; it does not expose arbitrary rotation, per-object paint, unrestricted shapes, fonts or z-order.
@@ -107,6 +115,10 @@ Direct uses the same Canvas to edit the product's presentation composition.
 
 Direct should distinguish editing the current Scene from merely navigating Present. Changing one Scene must not inherit accidental visibility or focus from whichever Scene was previously active.
 
+The active Direct target is an explicit discriminated choice rather than a generic selected tab. It identifies one Standalone Scene, Theme, Story, Callout or Storyboard and carries the stable identity needed for that kind. A Callout target also identifies its owning Theme or Story Scene. Switching targets changes the authoring context only; it does not activate the target in Present.
+
+Theme and Story authoring begins with an empty ordered collection when that is the clearest valid draft. Empty Themes and Stories remain editable, undoable and reviewable in Direct, but Present cannot activate them until they contain a valid Scene. A Callout storyboard belongs to its selected presentation owner and previews Callout content and placement without becoming a second presentation-focus source.
+
 Graphics and Callouts remain serialisable authored material selected by renderer keys and properties. Studio previews them through the host registry owned by Canvas and Present, including the same validation, diagnostics and accessible fallbacks. It does not embed implementations in configuration or create a Studio-only registration seam.
 
 ## Authored-source handoff
@@ -123,7 +135,7 @@ Once a new configuration already contains a pending value, Studio drops the corr
 
 ## Session boundary
 
-Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. Undo history can remain session-local even where drafts persist.
+Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. The `ProductionMode`, active Direct target, selection, presentation focus and playback are transient; reload always returns to Present with no active focus or running Story. Undo history can remain session-local even where drafts persist.
 
 Persistence keys belong to the host or an explicitly identified Infoschematic. A configuration without an identity must not accidentally share production state with another blank or embedded instance.
 

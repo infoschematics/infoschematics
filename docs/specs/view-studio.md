@@ -4,9 +4,9 @@ Studio View adds Producer-facing editing to the lower interactive View contracts
 
 ## Session
 
-### EDIT-001 — Editing mode is session state
+### EDIT-001 — Production mode is session state
 
-Opening an editing capability MUST be an explicit producer action. A fresh application session MUST begin outside editing mode. Draft changes MAY survive reload, but reopening a view MUST NOT unexpectedly place an audience in Studio.
+Opening a Producer capability MUST be an explicit action that changes the transient `ProductionMode` to `design` or `direct`. A fresh application session and every reload MUST begin in `present`. Draft changes MAY survive reload, but `ProductionMode`, selection and the active Direct target MUST NOT be persisted.
 
 _Implementation surface: `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/hooks/use-persistent-state.ts`._
 
@@ -18,9 +18,43 @@ _Implementation surface: `packages/view-studio/src/app/editor/use-editor.ts` and
 
 ### EDIT-064 — Reasserting the current mode changes nothing
 
-Setting Studio to the mode it already occupies MUST preserve view preferences and selection. Entering or leaving a mode MAY establish that mode's defaults.
+Setting Studio to the mode it already occupies MUST preserve Audience preferences, presentation activity, Producer selection and drafts. A transition to another mode MAY establish that mode's defaults only after applying the cleanup rules below.
 
 _Implementation surface: mode transitions in `packages/view-studio/src/app/editor/use-editor.ts`._
+
+### EDIT-075 — Mode transitions clean up presentation activity
+
+Entering `design` or `direct` MUST stop Story playback and clear the active presentation focus without discarding Audience filters or Producer drafts. Returning to `present` MUST preserve Audience filters and MUST NOT restart playback or reactivate a previous Standalone Scene, Thematic Scene or Story.
+
+Audience preferences and filters, presentation focus and playback, and Producer editing state MUST remain separate state areas so a mode transition cannot reset unrelated state accidentally.
+
+_Implementation surface: `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Studio application._
+
+_Verification: `packages/view-present/src/production.test.ts` covers all nine source-and-destination combinations; rendered application tests cover active-mode composition._
+
+### EDIT-076 — Producer modes use complete authored content
+
+Design and Direct MUST derive their working Canvas from complete authored content rather than the Audience's Scope and Flow-family filters. Design MUST keep every editable artefact and Flow reachable. Direct MUST preview the focus of its own draft target without mutating active presentation focus.
+
+_Implementation surface: active-mode composition in `packages/view-studio/src/app/App.tsx` and its Canvas derivation._
+
+## Direct
+
+### EDIT-077 — Direct has a discriminated active target
+
+Direct MUST represent its active authoring target as a discriminated value for exactly one Standalone Scene, Theme, Story, Callout or Storyboard. Every target MUST carry the stable identity required by its kind. A Callout target MUST identify its owning Theme or Story Scene. Mode selection, Direct target selection and Present focus MUST remain distinct operations.
+
+A Callout storyboard MUST be associated with its selected presentation owner rather than introduced as another presentation-focus source.
+
+_Implementation surface: `DirectTarget` and `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Direct surface under `packages/view-studio/src/app`._
+
+### EDIT-078 — Empty Themes and Stories remain authorable
+
+Direct MUST permit creation and editing of a Theme or Story whose ordered Scene collection is empty. Those drafts MUST participate in the same undo, discard and reviewable change-set conventions as other Direct edits.
+
+An empty Theme or Story MUST be identifiable as non-activatable, and Present MUST keep its activation action disabled until it contains a valid Scene. Editing or previewing the empty collection MUST NOT change presentation focus.
+
+_Verification: Direct state and rendered-control tests cover empty creation, editing, undo, activation guards and the first valid Scene._
 
 ### EDIT-005 — Editing aids appear only while editing
 

@@ -14,6 +14,18 @@ Present View should answer three questions in order:
 
 The Infoschematic answers first. Controls and Details help the Audience read it without becoming a competing application surface.
 
+## Production mode boundary
+
+Present is one member of the transient `ProductionMode` union: `present`, `design` or `direct`. A newly mounted application and every reload begin in Present. The current mode is session state, never an Audience preference and never part of authored `InfoschematicConfig`.
+
+The state behind those modes has three distinct owners:
+
+- **Audience preferences and filters** retain choices such as visible Scopes, visible Flow families, annotations, takeaways and automatic-advance preference.
+- **Presentation activity** holds the active Standalone Scene, Thematic Scene or Story, its step and whether playback is currently advancing.
+- **Producer editing** holds Design or Direct selection, draft targets, pending changes and editing history.
+
+Changing mode cleans up only the activity that cannot safely cross the boundary. Entering Design or Direct stops Story playback and clears presentation focus while preserving Audience preferences and filters. Returning to Present restores those preferences and filters, but does not restore a previous focus or restart playback.
+
 ## Visibility and focus
 
 Visibility filters and Scene focus are independent dimensions.
@@ -21,7 +33,9 @@ Visibility filters and Scene focus are independent dimensions.
 - Scope and flow-family controls are **subtractive**. They decide which artefacts and Flows remain present.
 - A Scene is **emphatic**. It keeps the visible Infoschematic in place, brings named content forward and pushes the remaining visible content back.
 
-These dimensions compose: a Scene focuses only content that remains available after filtering. Clearing every Scene leaves all visible content at full strength.
+These dimensions compose in one direction: Present applies Scope and Flow-family filters first, then focuses only the content that remains visible. Story focus takes precedence over Thematic Scene focus, which takes precedence over Standalone Scene focus, while the state permits at most one of them to be active. Clearing every Scene leaves all visible content at full strength.
+
+Design and Direct do not inherit this Audience filtering. They operate on complete authored content so a hidden artefact cannot become unreachable in Design and Direct can preview its own draft focus without changing the focus Present will use.
 
 ## Stable composition
 

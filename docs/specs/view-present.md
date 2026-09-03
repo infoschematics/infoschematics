@@ -1,8 +1,24 @@
 # Present View specification
 
-Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around Canvas. `packages/view-present` owns the reusable Audience component and pure presentation state; Studio retains compatible integrated controls while Producer-mode extraction continues.
+Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around Canvas. `packages/view-present` owns the reusable Audience component and pure presentation state; Studio composes it as the `present` member of the shared transient production mode.
 
 _Package verification: `packages/view-present/src/presentation.test.ts` and `packages/view-present/src/Present.test.tsx` cover state transitions and server-rendered composition._
+
+## Production mode
+
+### PRESENT-011 — Production mode is explicit and transient
+
+The interactive application MUST represent its current production mode as exactly one of `present`, `design` or `direct`. A new mount and every reload MUST start in `present`; the mode MUST NOT be persisted as an Audience preference or authored Infoschematic data.
+
+_Implementation surface: `ProductionMode` and `createProductionState` in `packages/view-present/src/production.ts`, composed by `packages/view-studio`._
+
+### PRESENT-012 — Mode changes preserve preferences, not presentation activity
+
+Audience preferences and filters, active presentation focus and Story playback, and Producer editing state MUST remain independently owned. Entering `design` or `direct` MUST stop Story playback and clear the active Standalone Scene, Thematic Scene or Story while retaining Scope and Flow-family filters and other Audience preferences. Returning to `present` MUST retain those preferences and MUST NOT resume playback or restore cleared focus automatically.
+
+Reasserting the current mode MUST leave all three state areas unchanged.
+
+_Verification: `packages/view-present/src/production.test.ts` covers every mode-to-mode transition; rendered Studio tests cover the reload boundary._
 
 ## Visibility and focus
 
@@ -24,6 +40,14 @@ Selecting, stepping or clearing a Scene MUST change emphasis without changing au
 
 _Implementation surface: Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-studio/src/app/infoschematic-context.tsx`._
 
+### PRESENT-013 — Visibility is resolved before focus
+
+Present MUST apply Scope and Flow-family filters before deriving Scene emphasis. An active Scene MUST NOT make a filtered artefact or Flow visible, and filtered content MUST NOT contribute to the resulting focus set.
+
+Design and Direct MUST NOT use that filtered Audience projection as their editable content source.
+
+_Implementation surface: presentation derivation in `packages/view-present/src/presentation.ts` and compatible integrated derivation in `packages/view-studio/src/app/hooks/use-presentation.ts`._
+
 ## Stories
 
 ### PRESENT-004 — A running Story can be steered
@@ -31,6 +55,14 @@ _Implementation surface: Present state is reduced to visibility and highlight se
 While a Story runs, the Audience MUST be able to step forward, step backward, hold or resume automatic advance and stop the Story. Stepping beyond either end MUST wrap within the Story.
 
 _Implementation surface: `stepStory`, `toggleAutoAdvance` and `stopStory` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/SceneCallout.tsx`; keyboard handling in `packages/view-studio/src/app/App.tsx`._
+
+### PRESENT-014 — Only activatable presentation material can own focus
+
+Present MUST allow at most one Standalone Scene, Thematic Scene or Story to be active. Story focus MUST take precedence over Thematic Scene focus, which MUST take precedence over Standalone Scene focus if stale external state contains more than one candidate.
+
+An empty Theme or Story MUST NOT be activatable in Present. Clear and step actions against an empty collection, a stale identifier or an invalid step MUST be total operations: they MUST return a valid state without throwing or activating unavailable content.
+
+_Verification: presentation-state tests cover focus conflicts, empty Themes and Stories, stale identifiers and invalid steps._
 
 ## Callouts
 
