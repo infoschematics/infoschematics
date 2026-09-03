@@ -18,7 +18,7 @@ export default defineConfig({
   },
   server: {
     port: 4173,
-    strictPort: true
+    strictPort: false
   },
   test: {
     include: [
