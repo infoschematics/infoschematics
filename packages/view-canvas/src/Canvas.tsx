@@ -9,29 +9,13 @@ import {
   type InfoschematicRenderers,
 } from './renderers.tsx'
 import { InfoschematicContext, useInfoschematic } from './runtime-context.tsx'
+import { reconcileFlowSignals } from './flow-signals.ts'
 
 type DiagramProps = ComponentProps<typeof InfoschematicDiagram>
 
-const signalKey = (signal: FlowSignal) => `${signal.flowId}:${signal.occurrenceKey}`
+const noSignals: readonly FlowSignal[] = []
 
-export const reconcileFlowSignals = (
-  current: readonly FlowSignal[],
-  suppliedSignals: readonly FlowSignal[],
-  shownFlowIds: ReadonlySet<string>,
-  seenSignals: Set<string>,
-): readonly FlowSignal[] => {
-  const supplied = new Set(suppliedSignals.map(signalKey))
-  const fresh = suppliedSignals.filter((signal) => {
-    const key = signalKey(signal)
-    if (seenSignals.has(key)) return false
-    seenSignals.add(key)
-    return shownFlowIds.has(signal.flowId)
-  })
-  return [
-    ...current.filter((signal) => supplied.has(signalKey(signal)) && shownFlowIds.has(signal.flowId)),
-    ...fresh,
-  ]
-}
+export { reconcileFlowSignals } from './flow-signals.ts'
 
 export type CanvasProps = Omit<DiagramProps, 'flows' | 'visibleScopes'> & {
   children?: ReactNode
@@ -46,7 +30,7 @@ function CanvasContent({
   children,
   className,
   flows,
-  signals = [],
+  signals = noSignals,
   visibleScopes,
   ...diagram
 }: Omit<CanvasProps, 'config' | 'renderers'>) {
@@ -61,12 +45,40 @@ function CanvasContent({
     const families = new Set(runtime.infoschematicFamilies.map((family) => family.id))
     return runtime.infoschematicFlows.filter((flow) => runtime.infoschematicFlowIsVisible(flow, families, scopes))
   }, [flows, runtime, scopes])
-  const seenSignals = useRef(new Set(signals.map(signalKey)))
-  const [activeSignals, setActiveSignals] = useState<readonly FlowSignal[]>(signals)
+  const shownFlowIds = useMemo(() => new Set(shownFlows.map(({ id }) => id)), [shownFlows])
+  const initialSignals = useRef<{
+    acceptedSignals: readonly FlowSignal[]
+    activeSignals: readonly FlowSignal[]
+    seenSignals: Set<string>
+  }>(undefined)
+  if (!initialSignals.current) {
+    const seenSignals = new Set<string>()
+    initialSignals.current = {
+      ...reconcileFlowSignals([], signals, shownFlowIds, seenSignals),
+      seenSignals,
+    }
+  }
+  const seenSignals = useRef(initialSignals.current.seenSignals)
+  const activeSignalsRef = useRef(initialSignals.current.activeSignals)
+  const initialAnnouncement = useRef(initialSignals.current.acceptedSignals)
+  const announcedInitialSignals = useRef(false)
+  const [activeSignals, setActiveSignals] = useState<readonly FlowSignal[]>(initialSignals.current.activeSignals)
+  const [announcement, setAnnouncement] = useState<
+    Readonly<{ revision: number; signals: readonly FlowSignal[] }> | undefined
+  >()
   useEffect(() => {
-    const shown = new Set(shownFlows.map(({ id }) => id))
-    setActiveSignals((current) => reconcileFlowSignals(current, signals, shown, seenSignals.current))
-  }, [shownFlows, signals])
+    const next = reconcileFlowSignals(activeSignalsRef.current, signals, shownFlowIds, seenSignals.current)
+    activeSignalsRef.current = next.activeSignals
+    setActiveSignals(next.activeSignals)
+
+    const newlyAccepted = announcedInitialSignals.current ? next.acceptedSignals : initialAnnouncement.current
+    announcedInitialSignals.current = true
+    if (newlyAccepted.length > 0) {
+      setAnnouncement((current) => ({ revision: (current?.revision ?? 0) + 1, signals: newlyAccepted }))
+    } else if (next.activeSignals.length === 0) {
+      setAnnouncement(undefined)
+    }
+  }, [shownFlowIds, signals])
 
   return (
     <section
@@ -80,7 +92,8 @@ function CanvasContent({
         visibleScopes={scopes}
       />
       <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {activeSignals
+        {announcement ? `Signal update ${announcement.revision}. ` : ''}
+        {announcement?.signals
           .map((signal) => {
             const flow = shownFlows.find((candidate) => candidate.id === signal.flowId)
             if (!flow) return null

@@ -31,6 +31,7 @@ import {
   resolveInfoschematicRenderer,
   useInfoschematicRenderers,
 } from './renderers.tsx'
+import { flowSignalKey } from './flow-signals.ts'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -1043,10 +1044,10 @@ export function InfoschematicDiagram({
               aria-hidden="true"
               className="infoschematic-flow-signal"
               data-occurrence-key={signal.occurrenceKey}
-              key={`${signal.flowId}:${signal.occurrenceKey}`}
+              key={flowSignalKey(signal)}
             >
               <path className="infoschematic-flow-signal-still" d={flow.d} />
-              <circle className="infoschematic-flow-signal-pulse" r={visualTokens.canvas.flows.signalRadius}>
+              <circle className="infoschematic-flow-signal-pulse" opacity="0" r={visualTokens.canvas.flows.signalRadius}>
                 <animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0" />
                 <animateMotion dur="900ms" fill="freeze" path={flow.d} />
               </circle>

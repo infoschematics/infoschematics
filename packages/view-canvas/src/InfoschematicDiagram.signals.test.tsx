@@ -2,7 +2,8 @@ import { readFile } from 'node:fs/promises'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import { Canvas, reconcileFlowSignals } from './Canvas.tsx'
+import { Canvas } from './Canvas.tsx'
+import { flowSignalKey, reconcileFlowSignals } from './flow-signals.ts'
 
 const config = defineInfoschematic({
   title: 'Signal reference',
@@ -59,7 +60,7 @@ const config = defineInfoschematic({
 })
 
 describe('Canvas Flow signals', () => {
-  it('renders a finite decorative pulse while preserving route geometry and announcing meaning', () => {
+  it('renders a finite decorative pulse while preserving route geometry', () => {
     const signals = [{ flowId: 'request-flow', occurrenceKey: 'scene:1' }]
     const markup = renderToStaticMarkup(<Canvas config={config} signals={signals} />)
 
@@ -67,11 +68,13 @@ describe('Canvas Flow signals', () => {
     expect(markup).toContain('data-occurrence-key="scene:1"')
     expect(markup).toContain('class="infoschematic-flow-signal"')
     expect(markup).toContain('aria-hidden="true"')
+    expect(markup).toContain('class="infoschematic-flow-signal-pulse" opacity="0" r="5"')
+    expect(markup).toContain('<animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0"></animate>')
     expect(markup).toContain('<animateMotion dur="900ms" fill="freeze" path="M140 70 H260"></animateMotion>')
     expect(markup).toContain('class="infoschematic-route" d="M140 70 H260"')
     expect(markup).toContain('class="infoschematic-route-hit" d="M140 70 H260"')
     expect(markup).toContain('aria-live="polite"')
-    expect(markup).toContain('Flow REQ-001, Source to Target, signalled.')
+    expect(markup).not.toContain('signalled.')
   })
 
   it('ignores unknown Flow ids without changing the stable route', () => {
@@ -96,14 +99,71 @@ describe('Canvas Flow signals', () => {
   it('does not replay a consumed occurrence when filtering hides then restores its Flow', () => {
     const first = { flowId: 'request-flow', occurrenceKey: 'scene:1' }
     const replay = { flowId: 'request-flow', occurrenceKey: 'scene:2' }
-    const seen = new Set(['request-flow:scene:1'])
+    const seen = new Set([flowSignalKey(first)])
 
     const hidden = reconcileFlowSignals([first], [first], new Set(), seen)
-    const restored = reconcileFlowSignals(hidden, [first], new Set(['request-flow']), seen)
-    const newOccurrence = reconcileFlowSignals(restored, [replay], new Set(['request-flow']), seen)
+    const restored = reconcileFlowSignals(hidden.activeSignals, [first], new Set(['request-flow']), seen)
+    const newOccurrence = reconcileFlowSignals(
+      restored.activeSignals,
+      [replay],
+      new Set(['request-flow']),
+      seen,
+    )
 
-    expect(hidden).toEqual([])
-    expect(restored).toEqual([])
-    expect(newOccurrence).toEqual([replay])
+    expect(hidden).toEqual({ acceptedSignals: [], activeSignals: [] })
+    expect(restored).toEqual({ acceptedSignals: [], activeSignals: [] })
+    expect(newOccurrence).toEqual({ acceptedSignals: [replay], activeSignals: [replay] })
+  })
+
+  it('deduplicates occurrences and distinguishes identifier pairs that contain separators', () => {
+    const left = { flowId: 'request-flow:scene', occurrenceKey: '1' }
+    const right = { flowId: 'request-flow', occurrenceKey: 'scene:1' }
+    const seen = new Set<string>()
+    const result = reconcileFlowSignals(
+      [],
+      [left, left, right, right],
+      new Set(['request-flow:scene', 'request-flow']),
+      seen,
+    )
+
+    expect(flowSignalKey(left)).not.toBe(flowSignalKey(right))
+    expect(result).toEqual({ acceptedSignals: [left, right], activeSignals: [left, right] })
+  })
+
+  it('accepts each occurrence once while supporting replay, simultaneous signals, and cancellation', () => {
+    const first = { flowId: 'request-flow', occurrenceKey: 'scene:1' }
+    const replay = { flowId: 'request-flow', occurrenceKey: 'scene:2' }
+    const simultaneous = { flowId: 'secondary-flow', occurrenceKey: 'scene:2' }
+    const shown = new Set(['request-flow', 'secondary-flow'])
+    const seen = new Set<string>()
+
+    const started = reconcileFlowSignals([], [first, first], shown, seen)
+    const unchanged = reconcileFlowSignals(started.activeSignals, [first], shown, seen)
+    const replayed = reconcileFlowSignals(unchanged.activeSignals, [replay, simultaneous], shown, seen)
+    const cancelled = reconcileFlowSignals(replayed.activeSignals, [], shown, seen)
+
+    expect(started).toEqual({ acceptedSignals: [first], activeSignals: [first] })
+    expect(unchanged).toEqual({ acceptedSignals: [], activeSignals: [first] })
+    expect(replayed).toEqual({
+      acceptedSignals: [replay, simultaneous],
+      activeSignals: [replay, simultaneous],
+    })
+    expect(cancelled).toEqual({ acceptedSignals: [], activeSignals: [] })
+  })
+
+  it('preserves Flow highlighting, hover, and selection while signalling', () => {
+    const markup = renderToStaticMarkup(
+      <Canvas
+        config={config}
+        highlight={{ endpoints: new Set(), flows: new Set(['request-flow']) }}
+        hovered="REQ-001"
+        selected="REQ-001"
+        signals={[{ flowId: 'request-flow', occurrenceKey: 'scene:1' }]}
+      />,
+    )
+
+    expect(markup).toContain('class="flow-family-request highlighted selected pointed"')
+    expect(markup).toContain('class="infoschematic-flow-signal"')
+    expect(markup).toContain('class="infoschematic-route-hit"')
   })
 })
