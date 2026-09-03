@@ -38,7 +38,7 @@ Static SVG MUST use View Model's visual-treatment and region-geometry resolvers 
 
 The `cardDetails` option MAY override identity, stereotype, and description visibility without mutating authored data. It MUST NOT override Card compactness. Domain colour MUST remain independent of Scope visibility, with existing Scope treatment available as the fallback for an unclassified Card.
 
-The standalone SVG root MUST retain its accessible role, title, and whole-diagram label. Each Card's `<title>` MUST retain useful authored detail even when optional visual rows are hidden. Output MUST expose stable semantic treatment attributes sufficient to compare representative Canvas and SVG fixtures without relying on browser CSS.
+The standalone SVG root MUST retain its accessible role, title, and whole-diagram label. Its description MUST summarise visible Card identity, stereotype, and description so visually hidden detail remains available at the image boundary. Each Card's accessible label and `<title>` MUST retain the same useful authored detail. Output MUST expose stable semantic treatment attributes sufficient to compare representative Canvas and SVG fixtures without relying on browser CSS.
 
 _Verification: `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`._
 

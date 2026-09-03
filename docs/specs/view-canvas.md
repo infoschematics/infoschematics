@@ -52,6 +52,8 @@ _Implementation surface: `packages/view-canvas/src/Canvas.tsx`, `packages/view-c
 
 ### CANVAS-007 — Visual reduction preserves accessible meaning
 
+The root SVG description MUST summarise visible Card identity, stereotype, and description. A Card's accessible label MUST retain those authored values even when output options hide their visual rows.
+
 Canvas MUST provide an accessible name for the complete Infoschematic and for interactive Lane, Zone, Card, and Flow elements. Hiding optional Card rows visually MUST NOT remove the Card's authored identity, stereotype, or description from its accessible SVG metadata. Domain colour, surface, and grid MUST NOT be the only source of meaning.
 
 Representative treatment fixtures MUST prove the same resolved surface, grid, frame, label placement, Card detail, compactness, and Domain decisions as static SVG. Tests MAY compare semantic attributes and deterministic geometry rather than byte-identical React and string-rendered markup.
