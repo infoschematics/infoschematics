@@ -80,7 +80,7 @@ Under `prefers-reduced-motion`, Canvas MUST replace spatial pulse travel with fi
 
 Signal measurements shared with deterministic still output MUST come from View Model tokens. Canvas MAY own interaction-specific duration and easing while no other renderer depends on those values.
 
-_Verification: rendered Canvas signal tests cover occurrence replay, concurrent signals, cancellation, live announcements, reduced-motion markup, and unchanged Flow interaction geometry._
+_Verification: pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry._
 
 ## Dependency boundary
 

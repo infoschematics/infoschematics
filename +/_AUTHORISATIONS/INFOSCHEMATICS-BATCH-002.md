@@ -48,6 +48,6 @@ Progress the remaining ready local roadmap items through their approved plans wh
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
 | INFOSCHEMATICS-TOOL-012 | ready | awaiting-review | `fc68a970` to `45aa89ad`; `bun run check` and `bun run release:verify` passed | Review the item delivery packet and desktop/narrow visual comparison |
-| INFOSCHEMATICS-TOOL-013 | ready | awaiting-review | `2c112fbc` to `b1df0c2d`; `bun run check` and `bun run release:verify` passed | Review the item delivery packet and normal/reduced-motion behaviour |
+| INFOSCHEMATICS-TOOL-013 | ready | awaiting-review | `2c112fbc` to `26cae53a`; `bun run check` and `bun run release:verify` passed | Review the item delivery packet and normal/reduced-motion behaviour |
 
 The run is complete. It did not prune, push, publish, or release anything.
