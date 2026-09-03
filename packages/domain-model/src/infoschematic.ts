@@ -1,4 +1,6 @@
+import type { InfoschematicAppearanceConfig } from './appearance.ts'
 import type { CardConfig } from "./card.ts";
+import type { DomainConfig } from './domain.ts'
 import type { FabricConfig } from "./fabric.ts";
 import type { FlowFamilyConfig } from "./flow-family.ts";
 import type { FlowConfig } from "./flow.ts";
@@ -12,7 +14,9 @@ import type { SpecificationGroupConfig } from "./specification-group.ts";
 
 export type InfoschematicDefinition = {
   viewBox: Box;
+  appearance?: InfoschematicAppearanceConfig;
   scopes: readonly ScopeConfig[];
+  domains?: readonly DomainConfig[];
   flowFamilies: readonly FlowFamilyConfig[];
   lanes: readonly LaneConfig[];
   cards: readonly CardConfig[];

@@ -4,6 +4,8 @@ import type { PortCounts } from "./ports.ts";
 
 export type CardConfig = ArtefactIdentity & {
   scope: string;
+  domain?: string;
+  stereotype?: string;
   wraps?: string;
   placement: { box: Box; ports?: PortCounts };
 };

@@ -20,8 +20,10 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
+    "./appearance": { "types": "./dist/appearance.d.ts", "import": "./dist/appearance.js" },
     "./artefact": { "types": "./dist/artefact.d.ts", "import": "./dist/artefact.js" },
     "./card": { "types": "./dist/card.d.ts", "import": "./dist/card.js" },
+    "./domain": { "types": "./dist/domain.d.ts", "import": "./dist/domain.js" },
     "./fabric": { "types": "./dist/fabric.d.ts", "import": "./dist/fabric.js" },
     "./flow": { "types": "./dist/flow.d.ts", "import": "./dist/flow.js" },
     "./flow-family": { "types": "./dist/flow-family.d.ts", "import": "./dist/flow-family.js" },

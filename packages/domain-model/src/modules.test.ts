@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
+import type {
+  CardDetailDefaults,
+  GridTreatment,
+  InfoschematicAppearanceConfig,
+  RegionAppearanceConfig,
+  RegionFrameTreatment,
+  RegionLabelPlacement,
+  RegionLabelTreatment,
+  SurfaceTreatment,
+} from '@infoschematics/domain-model/appearance'
 import type { ArtefactIdentity } from "@infoschematics/domain-model/artefact";
 import type { CardConfig } from "@infoschematics/domain-model/card";
+import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import type {
   InfoschematicConfig,
   InfoschematicConfigInput,
@@ -32,6 +43,15 @@ import type { ThematicSceneConfig, ThemeConfig } from "@infoschematics/domain-mo
 import type { ZoneConfig } from "@infoschematics/domain-model/zone";
 
 type PublicContracts = [
+  SurfaceTreatment,
+  GridTreatment,
+  RegionFrameTreatment,
+  RegionLabelPlacement,
+  RegionLabelTreatment,
+  RegionAppearanceConfig,
+  CardDetailDefaults,
+  InfoschematicAppearanceConfig,
+  DomainConfig,
   InfoschematicMetadata,
   ScopeConfig,
   FlowFamilyConfig,
@@ -64,7 +84,7 @@ type PublicContracts = [
 
 describe("public model modules", () => {
   it("resolves every explicit contract subpath", () => {
-		const contractCount: PublicContracts["length"] = 28;
-		expect(contractCount).toBe(28);
+    const contractCount: PublicContracts["length"] = 37;
+    expect(contractCount).toBe(37);
   });
 });
