@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  type AttachedEnd,
+  type ArtefactKind,
+  type ArtefactSelection,
   type Change,
   type CreatedComponent,
   type CreatedFlow,
@@ -14,6 +15,25 @@ import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing
 import * as waypoints from '@infoschematics/view-model/waypoints'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
+import {
+  type Attachment,
+  type CardCreation,
+  type ComponentDraft,
+  editorDraftHasChanges,
+  emptyEditorDraft,
+  type EditorDraft,
+  normaliseEditorDraft,
+  readPreviousEditorDraft,
+  type Removal,
+  sweepEditorDraft,
+  type TextDraft,
+  type TextField,
+  updateEditorDraft,
+  type Creation,
+} from './editor-draft.ts'
+import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
+
+export type { Attachment, CardCreation, ComponentDraft, Creation, Removal, TextDraft, TextField } from './editor-draft.ts'
 
 // Editing state is held apart from the Infoschematic and its host. Drafts
 // persist because they represent unsaved work; the active editor does not.
@@ -64,11 +84,6 @@ export type PendingOrigin = {
  * The code is the key rather than a field, as it is for every other draft, so
  * a creation can be dropped on its own by the same route the rest are.
  */
-export type Creation = Omit<CreatedFlow, 'code'>
-
-/** A card that does not exist yet, keyed by its code as every other draft is. */
-export type CardCreation = Omit<CreatedComponent, 'code'>
-
 /*
  * Deleting a component deletes the lines that meet it.
  *
@@ -84,8 +99,6 @@ export type CardCreation = Omit<CreatedComponent, 'code'>
  * is handed seven removals has been told what they did, which is the part
  * refusing was really for.
  */
-export type Removal = { because?: string }
-
 /**
  * One line of what to paste back, with the draft behind it where there is one.
  * The key names what the change is about - a component or a flow code -
@@ -123,10 +136,6 @@ type PendingField =
  * the file, rather than a field in a panel that quietly leaves the references
  * behind.
  */
-export type TextDraft = { detail?: string; family?: string; group?: string; name?: string }
-
-export type TextField = keyof TextDraft
-
 /** The registry property each field is written back to. */
 const textProperty: Record<TextField, string> = {
   detail: 'detail',
@@ -135,9 +144,9 @@ const textProperty: Record<TextField, string> = {
   name: 'label',
 }
 
-/** Which port each end of a flow has been moved to, where either has. */
-export type Attachment = { source?: AttachedEnd; target?: AttachedEnd }
+const sameValue = (left: unknown, right: unknown) => left === right || JSON.stringify(left) === JSON.stringify(right)
 
+/** Which port each end of a flow has been moved to, where either has. */
 /**
  * A dragged component's placement, held as an offset because that is what a
  * drag produces - and stamped with the line the model said when the drag was
@@ -147,46 +156,6 @@ export type Attachment = { source?: AttachedEnd; target?: AttachedEnd }
  * the model has caught up with is told apart from one the reader has made
  * again, which the value alone cannot say.
  */
-export type ComponentDraft = Offset & { from?: string }
-
-type EditorDraft = {
-  /** Label positions, as a distance along their route. */
-  labels: Record<string, number>
-  /** Re-attached ends, keyed by flow code. */
-  attachments: Record<string, Attachment>
-  drafts: Record<string, ComponentDraft>
-  portCounts: Record<string, PortCounts>
-  /**
-   * Edited waypoint lists, keyed by flow code. A route draft is a whole
-   * point list rather than an offset - an edited waypoint moved one way and
-   * its neighbours another is not expressible as a single dx/dy the way a
-   * dragged component or label is, so it gets its own map rather than being
-   * bent into the offset one.
-   */
-  routes: Record<string, readonly Point[]>
-  /** Names, subtitles, scopes and families changed by hand. */
-  text: Record<string, TextDraft>
-  /** Codes marked for removal, and the card whose removal took each one. */
-  removals: Record<string, Removal>
-  /** Lines made in the editor, keyed by the code issued for each. */
-  creations: Record<string, Creation>
-  /** Cards made in the editor, keyed the same way. */
-  cards: Record<string, CardCreation>
-}
-
-/** Nothing drafted. Stated once so `discard` cannot fall behind `EditorDraft`. */
-const emptyDraft: EditorDraft = {
-  attachments: {},
-  cards: {},
-  creations: {},
-  drafts: {},
-  labels: {},
-  portCounts: {},
-  removals: {},
-  routes: {},
-  text: {},
-}
-
 export function useEditor(
   build: (
     drafts: ReadonlyMap<string, Offset>,
@@ -221,36 +190,35 @@ export function useEditor(
   // can light each other up. Not persisted and not checkpointed: hovering is
   // not an edit, and where the pointer was last session means nothing.
   const [hovered, setHovered] = useState<string | null>(null)
-  const [portCounts, setPortCounts] = usePersistentState<Record<string, PortCounts>>(
-    storage && `${storage}.diagram.ports`,
-    {},
+  const previousDraft = useMemo(() => {
+    try {
+      return readPreviousEditorDraft(storage, typeof window === 'undefined' ? undefined : window.localStorage)
+    } catch {
+      return emptyEditorDraft()
+    }
+  }, [storage])
+  const [storedDraft, setStoredDraft] = usePersistentState<EditorDraft>(
+    storage && `${storage}.diagram.draft.v1`,
+    previousDraft,
   )
-  const [drafts, setDrafts] = usePersistentState<Record<string, ComponentDraft>>(
-    storage && `${storage}.diagram.labels`,
-    {},
+  const draft = useMemo(() => normaliseEditorDraft(storedDraft), [storedDraft])
+  const { attachments, cards, components: drafts, creations, labels, portCounts, removals, routes, text } = draft
+
+  const setDraftField = useCallback(
+    <K extends Exclude<keyof EditorDraft, 'version'>>(field: K, update: SetStateAction<EditorDraft[K]>) =>
+      setStoredDraft((current) => updateEditorDraft(normaliseEditorDraft(current), field, update)),
+    [setStoredDraft],
   )
-  const [attachments, setAttachments] = usePersistentState<Record<string, Attachment>>(
-    storage && `${storage}.diagram.attachments`,
-    {},
-  )
-  const [labels, setLabels] = usePersistentState<Record<string, number>>(
-    storage && `${storage}.diagram.labels.along`,
-    {},
-  )
-  const [routes, setRoutes] = usePersistentState<Record<string, readonly Point[]>>(
-    storage && `${storage}.diagram.routes`,
-    {},
-  )
-  const [text, setText] = usePersistentState<Record<string, TextDraft>>(storage && `${storage}.diagram.text`, {})
-  const [removals, setRemovals] = usePersistentState<Record<string, Removal>>(
-    storage && `${storage}.diagram.removals`,
-    {},
-  )
-  const [creations, setCreations] = usePersistentState<Record<string, Creation>>(
-    storage && `${storage}.diagram.creations`,
-    {},
-  )
-  const [cards, setCards] = usePersistentState<Record<string, CardCreation>>(storage && `${storage}.diagram.cards`, {})
+  const setAttachments = (update: SetStateAction<EditorDraft['attachments']>) =>
+    setDraftField('attachments', update)
+  const setCards = (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update)
+  const setCreations = (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update)
+  const setDrafts = (update: SetStateAction<EditorDraft['components']>) => setDraftField('components', update)
+  const setLabels = (update: SetStateAction<EditorDraft['labels']>) => setDraftField('labels', update)
+  const setPortCounts = (update: SetStateAction<EditorDraft['portCounts']>) => setDraftField('portCounts', update)
+  const setRemovals = (update: SetStateAction<EditorDraft['removals']>) => setDraftField('removals', update)
+  const setRoutes = (update: SetStateAction<EditorDraft['routes']>) => setDraftField('routes', update)
+  const setText = (update: SetStateAction<EditorDraft['text']>) => setDraftField('text', update)
 
   // Undo keeps whole snapshots rather than inverse operations, so a new kind of
   // edit is covered by adding its state to `EditorDraft` - and to `restore`,
@@ -266,12 +234,9 @@ export function useEditor(
   const checkpoint = useCallback(() => {
     if (gestureOpen.current) return
     gestureOpen.current = true
-    setPast((current) => [
-      ...current,
-      { attachments, cards, creations, drafts, labels, portCounts, removals, routes, text },
-    ])
+    setPast((current) => [...current, draft])
     setFuture([])
-  }, [cards, creations, drafts, portCounts, removals, routes, attachments, labels, text])
+  }, [draft])
 
   const closeGesture = () => {
     gestureOpen.current = false
@@ -282,30 +247,10 @@ export function useEditor(
    *
    * It took five maps and this put back three, so undoing a re-attached end or
    * a moved label reversed whatever drag surrounded it and left the edit itself
-   * standing. Destructuring names all five: adding a sixth to `EditorDraft` and
-   * not to this is at least visible here, where three silent omissions were not.
+   * standing. The whole envelope is restored atomically, so adding a field to
+   * `EditorDraft` cannot silently leave history or discard behind.
    */
-  const restore = ({
-    attachments,
-    cards,
-    creations,
-    drafts,
-    labels,
-    portCounts,
-    removals,
-    routes,
-    text,
-  }: EditorDraft) => {
-    setAttachments(attachments)
-    setCards(cards)
-    setCreations(creations)
-    setDrafts(drafts)
-    setLabels(labels)
-    setPortCounts(portCounts)
-    setRemovals(removals)
-    setRoutes(routes)
-    setText(text)
-  }
+  const restore = (snapshot: EditorDraft) => setStoredDraft(normaliseEditorDraft(snapshot))
 
   const offsets = useMemo<ReadonlyMap<string, Offset>>(
     () => new Map(Object.entries(drafts).map(([key, { dx, dy }]) => [key, { dx, dy }])),
@@ -419,7 +364,21 @@ export function useEditor(
           .filter(([, ends]) => Object.keys(ends).length > 0),
       ),
     )
-  }, [diagram, setAttachments, setCards, setCreations, setDrafts, setLabels, setPortCounts, setRoutes])
+    setText((current) => sweepEditorDraft({ ...draft, text: current }, diagram).text)
+    setRemovals((current) => sweepEditorDraft({ ...draft, removals: current }, diagram).removals)
+  }, [
+    diagram,
+    draft,
+    setAttachments,
+    setCards,
+    setCreations,
+    setDrafts,
+    setLabels,
+    setPortCounts,
+    setRemovals,
+    setRoutes,
+    setText,
+  ])
 
   const selectedHandle = selected ? diagram.handles().find((handle) => handle.key === selected) : undefined
   // Overlaid rather than chosen between: a component states a count for one side
@@ -552,36 +511,46 @@ export function useEditor(
      * a hand edit is worked out from what is already on screen - so it is the
      * one kept, and it keeps its own place in the list.
      */
-    const latest = new Map<string, PendingChange>()
-    for (const change of every) latest.set(`${change.key}|${change.field}`, change)
+    type OrderedPendingChange = PendingChange & SourceChangeOrder
+    const ordered = (change: PendingChange): OrderedPendingChange => {
+      const identity = diagram.identityOf(change.key)
+      const phase =
+        change.field === 'remove' ? 'remove' : change.field === 'create' || cards[change.key] ? 'create' : 'update'
+      const kind: ArtefactKind =
+        change.field === 'create' ||
+        change.field === 'family' ||
+        change.field === 'label' ||
+        change.field === 'points' ||
+        change.field === 'source' ||
+        change.field === 'target' ||
+        identity?.family !== undefined
+          ? 'flow'
+          : 'card'
+      const target: ArtefactSelection =
+        kind === 'flow'
+          ? { code: change.key, geometry: 'route', id: change.key, kind }
+          : { code: change.key, geometry: 'box', id: cards[change.key]?.id ?? change.key, kind }
+      const authoredIndex = Number(/(\d+)$/.exec(change.key)?.[1])
+      return {
+        ...change,
+        authoredIndex: Number.isFinite(authoredIndex) ? authoredIndex : undefined,
+        owner: kind === 'flow' ? creations[change.key]?.family ?? identity?.family : cards[change.key]?.group ?? identity?.group,
+        phase,
+        target,
+      }
+    }
+
+    const latest = new Map<string, OrderedPendingChange>()
+    for (const change of every) latest.set(`${change.key}|${change.field}`, ordered(change))
 
     // A draft that has come back round to what the model already says is not a
     // change. That happens as soon as a set is applied and the page reloads: the
     // draft persists, the model has caught up with it, and it would otherwise
     // sit in the list for ever describing a difference that no longer exists.
-    const kept = new Set(
+    return orderSourceChanges(
       [...latest.values()].filter((change) => change.source !== diagram.authored(change.key, change.field)),
     )
 
-    /*
-     * By code, and by number within a code's prefix, so the list reads the way
-     * the codes do: MS-2 before MS-10 rather than after it. Order of arrival
-     * put a change wherever the reader happened to make it, which is no order
-     * at all once there are forty of them.
-     */
-    const parts = (key: string) => {
-      const [, prefix = key, number = ''] = /^([A-Z]+)-(\d+)$/.exec(key) ?? []
-      return { number: Number(number), prefix }
-    }
-    const rank = (field: PendingField) => ['card', 'ports', 'source', 'target', 'points', 'label'].indexOf(field)
-
-    return every
-      .filter((change) => kept.has(change))
-      .sort((left, right) => {
-        const a = parts(left.key)
-        const b = parts(right.key)
-        return a.prefix.localeCompare(b.prefix) || a.number - b.number || rank(left.field) - rank(right.field)
-      })
   }, [attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
 
   return {
@@ -589,7 +558,7 @@ export function useEditor(
     // act on - ChangePane disables that button at count 0, so leaving routes
     // out here would make an edited waypoint undiscardable by anything but Undo.
     changeCount: pending.length,
-    hasChanges: changes.length > 0 || Object.keys(portCounts).length > 0 || Object.keys(routes).length > 0,
+    hasChanges: editorDraftHasChanges(draft),
     drafts: offsets,
     canRedo: future.length > 0,
     canUndo: past.length > 0,
@@ -608,9 +577,10 @@ export function useEditor(
      * compiler asking what discarding it looks like.
      */
     discard: () => {
+      if (!editorDraftHasChanges(draft)) return
       checkpoint()
       closeGesture()
-      restore(emptyDraft)
+      restore(emptyEditorDraft())
     },
     editing,
     guides,
@@ -637,6 +607,8 @@ export function useEditor(
 
         const along = diagram.alongFor(key, at)
         if (along !== undefined) {
+          const source = `${key}  ->  label: { along: ${along} },`
+          if (labels[key] === along || (labels[key] === undefined && source === diagram.authored(key, 'label'))) return
           checkpoint()
           setSelected(key)
           setLabels((current) => ({ ...current, [key]: along }))
@@ -649,15 +621,19 @@ export function useEditor(
       setGuides(snapped.guides)
       const offset = diagram.offsetFor(key, snapped.point)
       if (offset) {
+        const next = { ...offset, from: diagram.authored(key, 'card') }
+        if (sameValue(drafts[key], next)) return
         checkpoint()
         setSelected(key)
-        setDrafts((current) => ({ ...current, [key]: { ...offset, from: diagram.authored(key, 'card') } }))
+        setDrafts((current) => ({ ...current, [key]: next }))
       }
     },
     // Nudging works on the offset directly rather than through a point, so it is
     // exact: a unit is a unit, with no guide pulling it somewhere near instead.
     nudge: (dx: number, dy: number) => {
       if (!selected) return
+      const at = drafts[selected] ?? diagram.describe(selected, { dx: 0, dy: 0 })?.offset
+      if (!at || (dx === 0 && dy === 0)) return
       checkpoint()
       closeGesture()
       setDrafts((current) => {
@@ -670,11 +646,14 @@ export function useEditor(
     // Re-attaching an end is choosing a different port, not placing a point -
     // which is why it records a port id rather than a coordinate.
     attachTo: (code: string, end: 'source' | 'target', port: string, component: string) => {
+      const current = attachments[code]?.[end]
+      const from = diagram.authored(code, end)
+      if (current?.component === component && current.port === port && current.from === from) return
       checkpoint()
       closeGesture()
       setAttachments((current) => ({
         ...current,
-        [code]: { ...current[code], [end]: { component, port, from: diagram.authored(code, end) } },
+        [code]: { ...current[code], [end]: { component, port, from } },
       }))
     },
     /*
@@ -687,6 +666,7 @@ export function useEditor(
      * the reader to find it before they can do anything else with it.
      */
     create: (code: string, line: Creation) => {
+      if (sameValue(creations[code], line)) return
       checkpoint()
       closeGesture()
       setCreations((current) => ({ ...current, [code]: line }))
@@ -707,6 +687,7 @@ export function useEditor(
      * on.
      */
     createCard: (code: string, card: CardCreation) => {
+      if (sameValue(cards[code], card)) return
       checkpoint()
       closeGesture()
       setCards((current) => ({ ...current, [code]: card }))
@@ -746,6 +727,7 @@ export function useEditor(
     addWaypoint: (code: string, points: readonly Point[], at: Point) => {
       const wanted = view.grid ? toGrid(at) : at
       const next = waypoints.insertWaypoint(points, wanted)
+      if (sameValue(next, points)) return
       checkpoint()
       closeGesture()
       setRoutes((current) => ({ ...current, [code]: next }))
@@ -759,6 +741,8 @@ export function useEditor(
      * ports the line actually names.
      */
     setRoute: (code: string, points: readonly Point[]) => {
+      const source = `${code}  ->  points: [${points.map((point) => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}],`
+      if (sameValue(routes[code], points) || (!routes[code] && source === diagram.authored(code, 'points'))) return
       checkpoint()
       closeGesture()
       setRoutes((current) => ({ ...current, [code]: points }))
@@ -768,13 +752,16 @@ export function useEditor(
     moveWaypoint: (code: string, points: readonly Point[], index: number, to: Point) => {
       const wanted = view.grid ? toGrid(to) : to
       const next = waypoints.moveWaypoint(points, index, wanted)
+      if (sameValue(next, points)) return
       checkpoint()
       setRoutes((current) => ({ ...current, [code]: next }))
     },
     deleteWaypoint: (code: string, points: readonly Point[], index: number) => {
+      const next = waypoints.deleteWaypoint(points, index)
+      if (sameValue(next, points)) return
       checkpoint()
       closeGesture()
-      setRoutes((current) => ({ ...current, [code]: waypoints.deleteWaypoint(points, index) }))
+      setRoutes((current) => ({ ...current, [code]: next }))
     },
     // Also a drag, closed the same way moveWaypoint is.
     // An end anchored to no component has no ports to choose between, so it is
@@ -784,12 +771,14 @@ export function useEditor(
       const from = end === 'start' ? points[0] : points.at(-1)
       if (!from) return
       const next = normaliseRoute(moveRouteEnd(points, end, { dx: wanted.x - from.x, dy: wanted.y - from.y }))
+      if (sameValue(next, points)) return
       checkpoint()
       setRoutes((current) => ({ ...current, [code]: next }))
     },
     moveSegment: (code: string, points: readonly Point[], index: number, to: Point) => {
       const wanted = view.grid ? toGrid(to) : to
       const next = waypoints.moveSegment(points, index, wanted)
+      if (sameValue(next, points)) return
       checkpoint()
       setRoutes((current) => ({ ...current, [code]: next }))
     },
@@ -804,9 +793,12 @@ export function useEditor(
     // Port counts are a property of a component, so they are recorded against it
     // rather than against a drag.
     setPortCount: (code: string, side: Side, count: number) => {
+      const wanted = Math.max(0, count)
+      const current = portCounts[code]?.[side] ?? diagram.portCountsFor(code)?.[side]
+      if (current === wanted) return
       checkpoint()
       closeGesture()
-      const next = { ...portCounts[code], [side]: Math.max(0, count) }
+      const next = { ...portCounts[code], [side]: wanted }
       setPortCounts((current) => ({ ...current, [code]: next }))
 
       // The ends meeting this component keep their place, not their number.
@@ -833,7 +825,7 @@ export function useEditor(
       setFuture((current) => current.slice(0, -1))
       setPast((current) => [
         ...current,
-        { attachments, cards, creations, drafts, labels, portCounts, removals, routes, text },
+        draft,
       ])
       restore(next)
     },
@@ -845,9 +837,6 @@ export function useEditor(
      * keystroke put it back.
      */
     retext: (code: string, field: TextField, value: string) => {
-      checkpoint()
-      closeGesture()
-
       /*
        * A card that does not exist yet is edited in place, not described.
        *
@@ -864,15 +853,17 @@ export function useEditor(
           field as 'detail' | 'group' | 'name'
         ]
         if (property) {
+          const nextCard = {
+            ...cards[code],
+            [property]: value,
+            ...(property === 'group' ? { scopes: [value] } : {}),
+          }
+          if (sameValue(cards[code], nextCard)) return
+          checkpoint()
+          closeGesture()
           setCards((current) => ({
             ...current,
-            [code]: {
-              ...current[code],
-              [property]: value,
-              // A card's scope is also the list it appears under, and a created
-              // card belongs to exactly the one it was made in.
-              ...(property === 'group' ? { scopes: [value] } : {}),
-            },
+            [code]: nextCard,
           }))
         }
         return
@@ -880,6 +871,9 @@ export function useEditor(
 
       const authored = diagram.authored(code, field)
       const same = authored === `${code}  ->  ${textProperty[field]}: '${value}',`
+      if ((same && text[code]?.[field] === undefined) || (!same && text[code]?.[field] === value)) return
+      checkpoint()
+      closeGesture()
       setText((current) => {
         const fields = { ...current[code] }
         if (same) delete fields[field]
@@ -951,7 +945,7 @@ export function useEditor(
       setPast((current) => current.slice(0, -1))
       setFuture((current) => [
         ...current,
-        { attachments, cards, creations, drafts, labels, portCounts, removals, routes, text },
+        draft,
       ])
       restore(previous)
     },
@@ -960,6 +954,18 @@ export function useEditor(
     text,
     // Dropping one change rather than all of them. Undoable like any other edit.
     discardOne: (origin: PendingOrigin) => {
+      const exists = (() => {
+        if (origin.map === 'attachments') return origin.end ? attachments[origin.key]?.[origin.end] !== undefined : false
+        if (origin.map === 'cards') return cards[origin.key] !== undefined
+        if (origin.map === 'components') return drafts[origin.key] !== undefined
+        if (origin.map === 'creations') return creations[origin.key] !== undefined
+        if (origin.map === 'labels') return labels[origin.key] !== undefined
+        if (origin.map === 'ports') return portCounts[origin.key] !== undefined
+        if (origin.map === 'removals') return removals[origin.key] !== undefined
+        if (origin.map === 'routes') return routes[origin.key] !== undefined
+        return origin.property ? text[origin.key]?.[origin.property] !== undefined : false
+      })()
+      if (!exists) return
       checkpoint()
       closeGesture()
       const without = <T>(current: Record<string, T>) => {
