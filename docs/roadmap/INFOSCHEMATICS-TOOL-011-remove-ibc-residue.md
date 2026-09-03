@@ -4,7 +4,7 @@ area: TOOL
 title: Remove IBC residue
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 1ac734b31673cf2cdf6948be580fc6d31fea786e
@@ -98,11 +98,15 @@ The production builds retain existing toolchain advisories for compatibility opt
 
 ### Post-change review
 
-Ready for renewed human acceptance. The reusable-to-host ownership boundary is explicit, the original information is retained in serialisable IBC declarations and host renderers, and reusable source and documentation now state only the current host-neutral contract.
+Accepted by the user after the remedial review. The reusable-to-host ownership boundary is explicit, the original information is retained in serialisable IBC declarations and host renderers, and reusable source and documentation now state only the current host-neutral contract.
 
 ### Mini recap
 
 Infoschematics no longer embeds knowledge of the IBC 2026 diagram or compatibility names from its first realisation. The IBC project composes that realisation through configuration and host rendering.
+
+## Done
+
+Accepted on 2026-09-03 after the remaining documentation, persistence-key, comment and test residue was removed and both repositories passed their required verification.
 
 ## Discussion
 
