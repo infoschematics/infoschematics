@@ -98,6 +98,8 @@ renderInfoschematicSvg(config, {
 
 Output detail overrides affect only identity, stereotype, and description visibility. Shared corner geometry, notch padding, type scales, fallback colours, and Card compactness are not output-detail knobs.
 
+Static SVG hosts can additionally pass `renderInfoschematicSvg(config, { annotations: true })` to draw each visible Flow's code chip at the shared annotation placement; a Flow may pin its chip with `label: { along: 0.5 }`. Text ink over Card and Zone fills resolves automatically from each fill's luminance — author the fill and the renderers choose legible dark or light ink; there is no authored text-colour knob.
+
 ## Add presentation material
 
 Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschematic` field. A Scene focuses artefacts and Flows, reveals Graphics, and may carry one Callout.

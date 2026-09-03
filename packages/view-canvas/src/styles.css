@@ -42,6 +42,15 @@
   letter-spacing: 1.5px;
 }
 
+/* Ink follows the Zone fill's own luminance so both renderers agree. */
+.infoschematic-zone-label text[data-ink="dark"] {
+  fill: var(--infoschematic-canvas-output-text-muted);
+}
+
+.infoschematic-zone-label text[data-ink="light"] {
+  fill: var(--infoschematic-canvas-output-text-muted-inverse);
+}
+
 /* Fill stays separate from the shared frame path so a notched border does not
    punch a gap through the region surface. */
 .infoschematic-lane-fill {
@@ -197,6 +206,10 @@
   opacity: 0.75;
   stroke: var(--infoschematic-canvas-surfaces-flow-pipe);
   stroke-width: var(--infoschematic-canvas-flows-pipe-width);
+}
+
+.infoschematic-svg.surface-neutral .infoschematic-pipe {
+  stroke: var(--infoschematic-canvas-output-flow-pipe);
 }
 
 .infoschematic-route {
@@ -456,13 +469,32 @@
   font: 500 10px var(--infoschematic-canvas-text-body-family);
 }
 
+/* Ink follows the Card fill's own luminance so both renderers agree. */
+.infoschematic-service[data-ink="dark"] .infoschematic-service-label {
+  fill: var(--infoschematic-canvas-output-card-text);
+}
+
+.infoschematic-service[data-ink="light"] .infoschematic-service-label {
+  fill: var(--infoschematic-canvas-output-card-text-inverse);
+}
+
+.infoschematic-service[data-ink="dark"] .infoschematic-card-stereotype,
+.infoschematic-service[data-ink="dark"] .infoschematic-card-description {
+  fill: var(--infoschematic-canvas-output-text-muted);
+}
+
+.infoschematic-service[data-ink="light"] .infoschematic-card-stereotype,
+.infoschematic-service[data-ink="light"] .infoschematic-card-description {
+  fill: var(--infoschematic-canvas-output-text-muted-inverse);
+}
+
 .infoschematic-audit {
   pointer-events: none;
 }
 
 .audit-component-code-bg,
 .audit-flow rect {
-  fill: #06101ee8;
+  fill: var(--infoschematic-canvas-output-annotation-fill);
   stroke: #79c9ffaa;
   stroke-width: 1px;
 }
@@ -612,7 +644,7 @@
 }
 
 .audit-flow rect {
-  stroke: #ffffff44;
+  stroke: var(--infoschematic-canvas-output-annotation-stroke);
 }
 
 /*

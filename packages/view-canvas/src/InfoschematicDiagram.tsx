@@ -4,6 +4,7 @@ import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import {
   type CardDetailOverrides,
   resolveCardDomain,
+  resolveReadableInk,
   resolveRegionTreatment,
   resolveVisualTreatment,
 } from '@infoschematics/view-model/appearance'
@@ -1375,6 +1376,7 @@ export function InfoschematicDiagram({
                 className={`${editing && (onSelect || onArtefactSelect) ? 'zone-selectable' : ''}${
                   artefactSelected(selection, legacyKey) ? ' selected' : ''
                 }${hovered === legacyKey ? ' pointed' : ''}`}
+                data-ink={resolveReadableInk(zone.fill)}
                 dominantBaseline={label.dominantBaseline}
                 key={`${lane.id}-${zone.id}`}
                 onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
@@ -1751,6 +1753,7 @@ export function InfoschematicDiagram({
               data-artefact-kind={selection.kind}
               data-card-compact={visualTreatment.card.compact || undefined}
               data-domain={domain?.id}
+              data-ink={resolveReadableInk(appearance.fill)}
               key={card.id}
               onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
               /*

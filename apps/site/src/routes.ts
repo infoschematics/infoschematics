@@ -1,5 +1,6 @@
 export const blankExamplePath = '/examples/blank/'
 export const infoschematicsExamplePath = '/examples/infoschematics/'
+export const systemExamplePath = '/examples/system/'
 
 export const documentationRoutes = [
   {
@@ -27,6 +28,10 @@ export function isBlankExamplePath(pathname: string) {
 
 export function isInfoschematicsExamplePath(pathname: string) {
   return pathname === infoschematicsExamplePath || pathname === infoschematicsExamplePath.slice(0, -1)
+}
+
+export function isSystemExamplePath(pathname: string) {
+  return pathname === systemExamplePath || pathname === systemExamplePath.slice(0, -1)
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {

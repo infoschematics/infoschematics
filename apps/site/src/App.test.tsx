@@ -8,6 +8,8 @@ import {
   infoschematicsExamplePath,
   isBlankExamplePath,
   isInfoschematicsExamplePath,
+  isSystemExamplePath,
+  systemExamplePath,
 } from './routes.ts'
 
 describe('website routes', () => {
@@ -29,8 +31,13 @@ describe('website routes', () => {
     expect(page).not.toContain('Preview online')
     expect(page).toContain('rendered through shared SVG output')
     expect(page).toContain('src="data:image/svg+xml;charset=utf-8,%3Csvg')
-    expect(page).toContain('viewBox%3D%220%200%201400%20920%22')
+    expect(page).toContain('viewBox%3D%220%200%201400%20600%22')
+    expect(page).toContain('%3EOBS-01%3C')
+    expect(page).toContain('%3ESELECT%3C')
+    expect(page).toContain('%3ECONNECT%3C')
+    expect(page).toContain('%3EREVEAL%3C')
     expect(page).toContain(`href="${infoschematicsExamplePath}"`)
+    expect(page).toContain(`href="${systemExamplePath}"`)
     expect(page).toContain('href="/examples/blank/"')
     expect(page).toContain('href="/guides/authoring/"')
     expect(page).toContain('href="/reference/vocabulary/"')
@@ -62,5 +69,12 @@ describe('website routes', () => {
     expect(isInfoschematicsExamplePath('/examples/infoschematics')).toBe(true)
     expect(isInfoschematicsExamplePath('/examples/infoschematic/')).toBe(false)
     expect(isInfoschematicsExamplePath('/')).toBe(false)
+  })
+
+  it('resolves the hosted system example with or without a trailing slash', () => {
+    expect(isSystemExamplePath('/examples/system/')).toBe(true)
+    expect(isSystemExamplePath('/examples/system')).toBe(true)
+    expect(isSystemExamplePath('/examples/systems/')).toBe(false)
+    expect(isSystemExamplePath('/')).toBe(false)
   })
 })

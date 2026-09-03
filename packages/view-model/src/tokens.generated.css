@@ -21,8 +21,16 @@
   --infoschematic-canvas-geometry-grid-minor-stroke-width: 0.5;
   --infoschematic-canvas-geometry-grid-size: 10;
   --infoschematic-canvas-geometry-point-radius: 6;
+  --infoschematic-canvas-output-annotation-fill: #06101ee8;
+  --infoschematic-canvas-output-annotation-font-size: 9;
+  --infoschematic-canvas-output-annotation-height: 20;
+  --infoschematic-canvas-output-annotation-radius: 4;
+  --infoschematic-canvas-output-annotation-stroke: #ffffff44;
+  --infoschematic-canvas-output-annotation-width: 48;
   --infoschematic-canvas-output-backdrop: #ffffff;
   --infoschematic-canvas-output-card-text: #18212a;
+  --infoschematic-canvas-output-card-text-inverse: #f2f7ff;
+  --infoschematic-canvas-output-code-font-family: ui-monospace, Menlo, monospace;
   --infoschematic-canvas-output-component-font-size: 13;
   --infoschematic-canvas-output-fallback-family: #52606d;
   --infoschematic-canvas-output-flow-pipe: #ffffff;
@@ -34,6 +42,7 @@
   --infoschematic-canvas-output-surface: #f2f5f7;
   --infoschematic-canvas-output-text: #27313a;
   --infoschematic-canvas-output-text-muted: #46515d;
+  --infoschematic-canvas-output-text-muted-inverse: #9fb3c8;
   --infoschematic-canvas-output-unfocused-opacity: 0.2;
   --infoschematic-canvas-selection-focused-stroke: #cfe9ff;
   --infoschematic-canvas-selection-pointed: #79c9ff;

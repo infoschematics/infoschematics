@@ -11,6 +11,7 @@ import { routeEndpoints, routePath } from './geometry.ts'
 import { placeLabels } from './placement.ts'
 import { auditPorts, minimumPortGap, type PortCounts } from './ports.ts'
 import { moveRouteEnd, normaliseRoute, routeBetweenPorts } from './routing.ts'
+import { visualTokens } from './tokens.ts'
 
 export type RuntimeCard = InfoschematicConfig['infoschematic']['cards'][number] & {
   bounds: Box
@@ -420,7 +421,10 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     placeLabels({
       candidates: [0.5, 0.4, 0.6, 0.3, 0.7, 0.25, 0.75, 0.2, 0.8, 0.15, 0.85],
       drafts,
-      label: { height: 20, width: 48 },
+      label: {
+        height: visualTokens.canvas.output.annotationHeight,
+        width: visualTokens.canvas.output.annotationWidth,
+      },
       obstacles: cards.filter((card) => membershipVisible(card, visibleScopes)).map((card) => card.bounds),
       routes: shownFlows.map((flow) => ({ d: flow.d, id: flow.id, key: flow.code, along: flow.label?.along })),
     })

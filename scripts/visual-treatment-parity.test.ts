@@ -80,6 +80,7 @@ const regionPaths = (output: string) =>
 
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
+  dataInks: values(output, 'data-ink'),
   description: output.includes('class="infoschematic-card-description"'),
   domainColour: output.includes('fill="#063b35"') && output.includes('stroke="#22c3a6"'),
   domains: values(output, 'data-domain'),
@@ -111,6 +112,70 @@ describe('visual treatment renderer parity', () => {
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
     expect(canvas).toContain('PLT-001 · Gateway · service · Accepts work')
     expect(svg).toContain('PLT-001 · Gateway · service · Accepts work')
+  })
+
+  it('resolves the same readable ink from the same fills in both renderers', () => {
+    const inks = defineInfoschematic({
+      title: 'Readable ink reference',
+      infoschematic: {
+        appearance: {
+          card: { compact: true, description: true, identity: true, stereotype: true },
+          surface: 'blueprint',
+        },
+        domains: [
+          { color: '#22c3a6', fill: '#063b35', id: 'dark', label: 'Dark' },
+          { color: '#13579b', fill: '#dceeff', id: 'light', label: 'Light' },
+        ],
+        scopes: [
+          {
+            color: '#ff0055',
+            description: 'Controls applicability only',
+            fill: '#330011',
+            id: 'delivery-scope',
+            label: 'Delivery scope',
+            prefix: 'DEL',
+          },
+        ],
+        lanes: [
+          {
+            height: 180,
+            id: 'delivery',
+            label: 'Delivery',
+            labelY: 20,
+            panel: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
+            y: 20,
+            zones: [{ fill: '#071e2d', id: 'runtime', label: 'Runtime', width: 380, x: 10 }],
+          },
+        ],
+        cards: [
+          {
+            code: 'DRK-001',
+            detail: 'Dark fill takes light ink',
+            domain: 'dark',
+            id: 'dark-card',
+            label: 'Dark card',
+            placement: { box: { height: 60, width: 150, x: 30, y: 70 }, ports: {} },
+            scope: 'delivery-scope',
+            scopes: ['delivery-scope'],
+          },
+          {
+            code: 'LGT-001',
+            detail: 'Light fill takes dark ink',
+            domain: 'light',
+            id: 'light-card',
+            label: 'Light card',
+            placement: { box: { height: 60, width: 150, x: 220, y: 70 }, ports: {} },
+            scope: 'delivery-scope',
+            scopes: ['delivery-scope'],
+          },
+        ],
+      },
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: inks }))
+    const svg = renderInfoschematicSvg(inks)
+
+    expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
+    expect(values(canvas, 'data-ink')).toEqual(['dark', 'light', 'light'])
   })
 
   it('keeps omitted and hidden region treatments equivalent with redundant legacy bounds', () => {

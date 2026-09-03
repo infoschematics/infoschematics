@@ -1,6 +1,11 @@
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import { describe, expect, it } from 'vitest'
-import { resolveCardDomain, resolveRegionTreatment, resolveVisualTreatment } from './appearance.ts'
+import {
+  resolveCardDomain,
+  resolveReadableInk,
+  resolveRegionTreatment,
+  resolveVisualTreatment,
+} from './appearance.ts'
 
 describe('visual treatment resolution', () => {
   it('preserves the label-only legacy treatment when appearance is absent', () => {
@@ -69,6 +74,34 @@ describe('region treatment resolution', () => {
         labelTreatment: 'notched',
       }),
     ).toEqual({ frame: 'dotted', label: 'south', labelTreatment: 'notched' })
+  })
+})
+
+describe('readable ink resolution', () => {
+  it.each([
+    ['#0d1b2a', 'light'],
+    ['#063b35', 'light'],
+    ['#18212a', 'light'],
+    ['#e8f0ff', 'dark'],
+    ['#f2f5f7', 'dark'],
+    ['#ffffff', 'dark'],
+    ['#000000', 'light'],
+  ] as const)('resolves %s to %s ink by relative luminance', (fill, ink) => {
+    expect(resolveReadableInk(fill)).toBe(ink)
+  })
+
+  it('reads short and alpha hex forms and ignores surrounding space', () => {
+    expect(resolveReadableInk('#fff')).toBe('dark')
+    expect(resolveReadableInk('#012')).toBe('light')
+    expect(resolveReadableInk('#0D1B2Ae8')).toBe('light')
+    expect(resolveReadableInk('  #e8f0ff  ')).toBe('dark')
+  })
+
+  it('falls back to dark ink for non-hex fills', () => {
+    expect(resolveReadableInk('transparent')).toBe('dark')
+    expect(resolveReadableInk('rgb(4, 8, 12)')).toBe('dark')
+    expect(resolveReadableInk('')).toBe('dark')
+    expect(resolveReadableInk('#12345')).toBe('dark')
   })
 })
 

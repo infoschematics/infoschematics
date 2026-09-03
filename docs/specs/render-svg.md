@@ -52,6 +52,18 @@ Signalled emphasis MUST leave the normal Flow route, direction, accessible label
 
 _Verification: `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output._
 
+### SVG-009 — Flow annotations are opt-in and deterministic
+
+The `annotations` render option MAY request a code chip for each visible Flow. When enabled, each chip MUST render the authored Flow code verbatim at the shared annotation placement from View Model, so static output and Canvas agree on position without a second placement algorithm. An authored `label.along` fraction MUST be honoured. Chips MUST use the shared annotation output tokens, MUST dim with Scene focus alongside their Flow, and MUST NOT change output for hidden Flows. Omitting the option MUST leave output free of annotation markup.
+
+_Verification: `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming._
+
+### SVG-010 — Ink resolves from the fill it sits on
+
+Card and Zone-label text colour MUST resolve through View Model's readable-ink resolution against the fill the text is drawn over, not against the surface treatment. Output MUST expose the resolved ink as a `data-ink` attribute on Card groups and Zone labels so Canvas and static SVG can be compared without browser CSS, and Canvas MUST resolve the same ink from the same fills. Lane labels and the Flow pipe underlay MAY remain surface-conditional because they sit on the surface itself.
+
+_Verification: `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers._
+
 ## Dependency boundary
 
 `@infoschematics/render-svg` MUST NOT depend on React, React DOM, browser globals, or any interactive View package. Shared derivation belongs in View Model.

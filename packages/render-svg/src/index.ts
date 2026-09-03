@@ -3,6 +3,7 @@ import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import {
   type CardDetailOverrides,
   resolveCardDomain,
+  resolveReadableInk,
   resolveRegionTreatment,
   resolveVisualTreatment,
 } from '@infoschematics/view-model/appearance'
@@ -27,6 +28,8 @@ export type SvgVisibilityOptions = {
 }
 
 export type RenderInfoschematicSvgOptions = {
+  /** Emit each visible Flow's code chip at the shared annotation placement. Defaults to off. */
+  annotations?: boolean
   /** Override authored Card metadata visibility without removing authored data. */
   cardDetails?: CardDetailOverrides
   /** An authored Scene to render without introducing playback or other motion. */
@@ -355,14 +358,16 @@ export const renderInfoschematicSvg = (
         )
       }
       if (geometry.label) {
+        const zoneInk = resolveReadableInk(zone.fill)
         content.push(
           line(
             2,
             'text',
             [
               ['class', 'infoschematic-zone-label'],
+              ['data-ink', zoneInk],
               ['dominant-baseline', geometry.label.dominantBaseline],
-              ['fill', canvasTokens.output.textMuted],
+              ['fill', zoneInk === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted],
               ['font-family', canvasTokens.output.fontFamily],
               ['font-size', canvasTokens.output.metadataFontSize],
               ['text-anchor', geometry.label.textAnchor],
@@ -422,7 +427,7 @@ export const renderInfoschematicSvg = (
           [
             ['class', 'infoschematic-lane-label'],
             ['dominant-baseline', geometry.label.dominantBaseline],
-            ['fill', canvasTokens.output.textMuted],
+            ['fill', visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted],
             ['font-family', canvasTokens.output.fontFamily],
             ['font-size', canvasTokens.output.metadataFontSize],
             ['text-anchor', geometry.label.textAnchor],
@@ -495,6 +500,7 @@ export const renderInfoschematicSvg = (
     )
   }
 
+  const flowPipe = visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
@@ -506,7 +512,7 @@ export const renderInfoschematicSvg = (
       line(2, 'path', [
         ['d', flow.d],
         ['fill', 'none'],
-        ['stroke', canvasTokens.output.flowPipe],
+        ['stroke', flowPipe],
         ['stroke-linecap', canvasTokens.flows.lineCap],
         ['stroke-linejoin', canvasTokens.flows.lineJoin],
         ['stroke-width', canvasTokens.flows.pipeWidth],
@@ -551,14 +557,59 @@ export const renderInfoschematicSvg = (
     )
   }
 
+  if (options.annotations && flows.length > 0) {
+    const positions = runtime.infoschematicAnnotationLabelPositions(flows, visibleScopes)
+    for (const flow of flows) {
+      const at = positions.get(flow.id)
+      if (!at) continue
+      const dimmed = focusClass(flow.id, focus?.flows, unfocused)
+      body.push(
+        group(
+          1,
+          [
+            ['class', `infoschematic-flow-annotation${dimmed}`],
+            ['data-code', flow.code],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+          ],
+          [
+            line(2, 'rect', [
+              ['fill', canvasTokens.output.annotationFill],
+              ['height', canvasTokens.output.annotationHeight],
+              ['rx', canvasTokens.output.annotationRadius],
+              ['stroke', canvasTokens.output.annotationStroke],
+              ['width', canvasTokens.output.annotationWidth],
+              ['x', at.x - canvasTokens.output.annotationWidth / 2],
+              ['y', at.y - canvasTokens.output.annotationHeight / 2],
+            ]),
+            line(
+              2,
+              'text',
+              [
+                ['fill', canvasTokens.text.strong],
+                ['font-family', canvasTokens.output.codeFontFamily],
+                ['font-size', canvasTokens.output.annotationFontSize],
+                ['font-weight', 700],
+                ['text-anchor', 'middle'],
+                ['x', at.x],
+                ['y', at.y + 4],
+              ],
+              xmlText(flow.code),
+            ),
+          ],
+        ).join('\n'),
+      )
+    }
+  }
+
   for (const card of cards) {
     const box = card.bounds
     const scope = scopes.get(card.scope)
     const domain = resolveCardDomain(card, domains)
     const appearance = domain ?? scope
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
-    const metadataColor =
-      visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted
+    const fill = appearance?.fill ?? canvasTokens.output.surface
+    const ink = resolveReadableInk(fill)
+    const metadataColor = ink === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
     const compactLabelX = 10
     const compactLabelY = visualTreatment.card.stereotype && card.stereotype ? 38 : 28
@@ -566,7 +617,7 @@ export const renderInfoschematicSvg = (
     const content = [
       line(2, 'title', [], xmlText(accessibleDetail)),
       line(2, 'rect', [
-        ['fill', appearance?.fill ?? canvasTokens.output.surface],
+        ['fill', fill],
         ['height', box.height],
         ['rx', canvasTokens.geometry.cornerRadius],
         ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
@@ -601,7 +652,7 @@ export const renderInfoschematicSvg = (
           ],
           [
             line(3, 'rect', [
-              ['fill', canvasTokens.output.backdrop],
+              ['fill', ink === 'light' ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop],
               ['height', 20],
               ['rx', 4],
               ['stroke', metadataColor],
@@ -635,7 +686,7 @@ export const renderInfoschematicSvg = (
         [
           ['class', 'infoschematic-card-label'],
           ['dominant-baseline', 'middle'],
-          ['fill', canvasTokens.output.cardText],
+          ['fill', ink === 'light' ? canvasTokens.output.cardTextInverse : canvasTokens.output.cardText],
           ['font-family', canvasTokens.output.fontFamily],
           [
             'font-size',
@@ -685,6 +736,7 @@ export const renderInfoschematicSvg = (
           ['data-code', card.code],
           ['data-domain', domain?.id],
           ['data-id', card.id],
+          ['data-ink', ink],
           ['data-stereotype', card.stereotype],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
           ['transform', `translate(${number(box.x)} ${number(box.y)})`],

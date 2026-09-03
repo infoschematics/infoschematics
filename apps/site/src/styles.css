@@ -249,7 +249,7 @@ a:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1400 / 920;
+  aspect-ratio: 1400 / 600;
   object-fit: contain;
   background: #f7f9fc;
 }

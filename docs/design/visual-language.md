@@ -54,6 +54,8 @@ Domain and Scope communicate separate facts. Domain classifies a Card and suppli
 
 Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
 
+Ink is invariant behaviour, not an authored knob. Card and Zone-label text resolves dark or light ink from the relative luminance of the fill it sits on, so an author choosing a dark fill gets legible text in every renderer without recording a text colour. Flow-code annotation chips are a render option for hosts — deterministic output detail at the shared placement — and are likewise never part of the authored definition.
+
 ## Visual token ownership
 
 Reusable visual values belong in the framework-neutral `visualTokens` manifest when they express the same product meaning in more than one renderer path, or when TypeScript geometry and rendered output must remain aligned. The manifest groups Canvas values by semantic role under `canvas.geometry`, `canvas.surfaces`, `canvas.text`, `canvas.flows`, `canvas.focus`, `canvas.selection`, and `canvas.output`. Names describe the role a value serves rather than its current literal colour or measurement.

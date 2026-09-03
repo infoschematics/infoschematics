@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { infoschematicsExample } from '@infoschematics/is-infoschematics'
+import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import './styles.css'
 
 const sharedPreviewSource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  renderInfoschematicSvg(infoschematicsExample),
+  renderInfoschematicSvg(systemExample, { annotations: true }),
 )}`
 
 const stages = [
@@ -159,7 +159,7 @@ export function App() {
 
             <div className="shared-preview">
               <img
-                alt={`${infoschematicsExample.title} rendered through shared SVG output`}
+                alt={`${systemExample.title} rendered through shared SVG output`}
                 className="shared-preview__image"
                 src={sharedPreviewSource}
               />
@@ -176,6 +176,9 @@ export function App() {
         <p className="page-footer__links">
           <a className="page-footer__link" href="/examples/infoschematics/">
             Infoschematics · Hosted example
+          </a>
+          <a className="page-footer__link" href="/examples/system/">
+            A system, explained · Hosted example
           </a>
           <a className="page-footer__link" href="/examples/blank/">
             Blank Infoschematic · Empty canvas

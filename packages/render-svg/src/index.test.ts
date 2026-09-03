@@ -263,6 +263,69 @@ describe('renderInfoschematicSvg', () => {
     expect(signalled).not.toContain('missing')
   })
 
+  it('emits Flow code annotations only when requested, at the shared placement', () => {
+    expect(renderInfoschematicSvg(representative)).not.toContain('infoschematic-flow-annotation')
+
+    const annotated = renderInfoschematicSvg(representative, { annotations: true })
+    expect(renderInfoschematicSvg(representative, { annotations: true })).toBe(annotated)
+    expect(annotated).toContain('class="infoschematic-flow-annotation"')
+    expect(annotated).toContain('>CALL-001</text>')
+    expect(annotated).toContain(`fill="${visualTokens.canvas.output.annotationFill}"`)
+    expect(annotated).toContain(`font-family="${visualTokens.canvas.output.codeFontFamily}"`)
+    expect(annotated).toContain(`width="${visualTokens.canvas.output.annotationWidth}"`)
+    expect(annotated).toContain('x="200" y="114"')
+
+    const placed = renderInfoschematicSvg(
+      {
+        ...representative,
+        infoschematic: {
+          ...representative.infoschematic,
+          flows: representative.infoschematic.flows.map((flow) => ({ ...flow, label: { along: 0.25 } })),
+        },
+      },
+      { annotations: true },
+    )
+    expect(placed).toContain('x="180" y="114"')
+
+    const dimmed = renderInfoschematicSvg(representative, {
+      annotations: true,
+      scene: { kind: 'standalone', sceneId: 'source-only' },
+    })
+    expect(dimmed).toContain('class="infoschematic-flow-annotation is-unfocused"')
+  })
+
+  it('resolves readable ink from each fill and marks it for treatment parity', () => {
+    const light = renderInfoschematicSvg(representative)
+    expect(light).toContain('data-ink="dark"')
+    expect(light).not.toContain('data-ink="light"')
+    expect(light).toContain('class="infoschematic-zone-label" data-ink="dark"')
+
+    const dark = renderInfoschematicSvg({
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        appearance: {
+          card: { compact: true, description: true, identity: true, stereotype: true },
+          surface: 'blueprint',
+        },
+        domains: [{ color: '#9673a6', fill: '#0d1b2a', id: 'observe', label: 'Observe' }],
+        cards: representative.infoschematic.cards.map((card, index) =>
+          index === 0 ? { ...card, domain: 'observe', stereotype: 'stage' } : card,
+        ),
+        lanes: representative.infoschematic.lanes.map((lane) => ({
+          ...lane,
+          zones: lane.zones.map((zone) => ({ ...zone, fill: '#071e2d' })),
+        })),
+      },
+    })
+    expect(dark).toContain('data-ink="light"')
+    expect(dark).toContain('data-ink="dark"')
+    expect(dark).toContain('class="infoschematic-zone-label" data-ink="light"')
+    expect(dark).toContain(`fill="${visualTokens.canvas.output.cardTextInverse}"`)
+    expect(dark).toContain(`fill="${visualTokens.canvas.output.textMutedInverse}"`)
+    expect(dark).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}" height="20"`)
+  })
+
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
     expect(renderInfoschematicSvg(representative)).not.toContain('data-renderer=')
 
