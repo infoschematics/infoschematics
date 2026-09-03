@@ -24,3 +24,6 @@ jobs:
 
       - name: Verify
         run: bun run check
+
+      - name: Build and verify packed release packages
+        run: bun run release:verify

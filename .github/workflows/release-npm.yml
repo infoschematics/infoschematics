@@ -1,0 +1,117 @@
+name: Release npm packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing coordinated release tag, for example v0.1.0
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish coordinated package set
+    environment: npm
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.tag }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Set up Node and npm
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify tag and coordinated versions
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$RELEASE_TAG" =~ ^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z][0-9A-Za-z.-]*)?$ ]]; then
+            echo "Release tag must be v-prefixed SemVer." >&2
+            exit 1
+          fi
+
+          tag_commit="$(git rev-parse --verify "refs/tags/${RELEASE_TAG}^{commit}")"
+          if [[ "$tag_commit" != "$(git rev-parse HEAD)" ]]; then
+            echo "Checked-out commit does not match $RELEASE_TAG." >&2
+            exit 1
+          fi
+
+          release_version="${RELEASE_TAG#v}"
+          package_manifests=(
+            packages/domain-model/package.json
+            packages/domain-core/package.json
+            packages/view-model/package.json
+            packages/render-svg/package.json
+            packages/view-canvas/package.json
+            packages/view-present/package.json
+            packages/view-studio/package.json
+          )
+
+          for package_manifest in "${package_manifests[@]}"; do
+            package_version="$(node -p "require('./${package_manifest}').version")"
+            if [[ "$package_version" != "$release_version" ]]; then
+              echo "$package_manifest has version $package_version; expected $release_version." >&2
+              exit 1
+            fi
+          done
+
+      - name: Verify repository and release candidates
+        run: |
+          bun run check
+          bun run release:verify
+
+      - name: Publish dependency-first package set
+        env:
+          RELEASE_VERSION: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          release_version="${RELEASE_VERSION#v}"
+          package_directories=(
+            packages/domain-model
+            packages/domain-core
+            packages/view-model
+            packages/render-svg
+            packages/view-canvas
+            packages/view-present
+            packages/view-studio
+          )
+
+          for package_directory in "${package_directories[@]}"; do
+            package_name="$(node -p "require('./${package_directory}/package.json').name")"
+            if npm view "$package_name@$release_version" version >/dev/null 2>&1; then
+              echo "$package_name@$release_version already exists; refusing to overwrite a release." >&2
+              exit 1
+            fi
+          done
+
+          for package_directory in "${package_directories[@]}"; do
+            npm publish "$package_directory" --access public --provenance
+          done

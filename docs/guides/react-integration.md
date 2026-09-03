@@ -154,4 +154,4 @@ The website runs from `apps/site`. The root verification gate runs all tests and
 bun run check
 ```
 
-External source checkouts currently require local package overrides until the packages are published. Package publication is separate release work; do not vendor source into a host.
+External consumers install compiled package entry points and import package stylesheet subpaths explicitly; they do not compile or vendor repository source. Maintainers coordinate every public package version and protected npm publication through the [package release guide](releasing-packages.md).
