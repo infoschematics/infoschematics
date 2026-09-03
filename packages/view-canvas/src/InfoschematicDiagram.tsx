@@ -17,6 +17,7 @@ import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
+import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
@@ -156,6 +157,7 @@ export function InfoschematicDiagram({
   portCounts,
   selected,
   selectedArtefact,
+  signals = [],
   flows: suppliedFlows,
   annotated,
   cardDetails,
@@ -222,6 +224,8 @@ export function InfoschematicDiagram({
   portCounts?: Readonly<Record<string, PortCounts>>
   selected?: string | null
   selectedArtefact?: ArtefactSelection | null
+  /** Transient host-owned Flow occurrences; stable keys prevent accidental replay. */
+  signals?: readonly FlowSignal[]
   flows: readonly InfoschematicFlow[]
   annotated?: boolean
   /** Output-only Card metadata visibility; authored data remains unchanged. */
@@ -1032,6 +1036,22 @@ export function InfoschematicDiagram({
           markerStart={flow.bidirectional ? `url(#infoschematic-arrow-${flow.family})` : undefined}
           stroke={family.color}
         />
+        {signals
+          .filter((signal) => signal.flowId === flow.id)
+          .map((signal) => (
+            <g
+              aria-hidden="true"
+              className="infoschematic-flow-signal"
+              data-occurrence-key={signal.occurrenceKey}
+              key={`${signal.flowId}:${signal.occurrenceKey}`}
+            >
+              <path className="infoschematic-flow-signal-still" d={flow.d} />
+              <circle className="infoschematic-flow-signal-pulse" r={visualTokens.canvas.flows.signalRadius}>
+                <animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0" />
+                <animateMotion dur="900ms" fill="freeze" path={flow.d} />
+              </circle>
+            </g>
+          ))}
         {/* Twelve units of transparent stroke, so a line can be pointed at
             without having to be hit exactly. Present whether or not the editor
             is open: the tooltip and the highlight are for a reader, and only

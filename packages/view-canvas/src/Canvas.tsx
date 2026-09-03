@@ -20,7 +20,14 @@ export type CanvasProps = Omit<DiagramProps, 'flows' | 'visibleScopes'> & {
   visibleScopes?: DiagramProps['visibleScopes']
 }
 
-function CanvasContent({ children, className, flows, visibleScopes, ...diagram }: Omit<CanvasProps, 'config' | 'renderers'>) {
+function CanvasContent({
+  children,
+  className,
+  flows,
+  signals = [],
+  visibleScopes,
+  ...diagram
+}: Omit<CanvasProps, 'config' | 'renderers'>) {
   const runtime = useInfoschematic()
   const allScopes = useMemo(
     () => new Set(runtime.infoschematicScopes.map((scope) => scope.id)),
@@ -38,7 +45,19 @@ function CanvasContent({ children, className, flows, visibleScopes, ...diagram }
       aria-label={`${runtime.config.title} Infoschematic`}
       className={className ? `infoschematic ${className}` : 'infoschematic'}
     >
-      <InfoschematicDiagram {...diagram} flows={shownFlows} visibleScopes={scopes} />
+      <InfoschematicDiagram {...diagram} flows={shownFlows} signals={signals} visibleScopes={scopes} />
+      <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
+        {signals
+          .map((signal) => {
+            const flow = shownFlows.find((candidate) => candidate.id === signal.flowId)
+            if (!flow) return null
+            const source = runtime.infoschematicEndpointLabels.get(flow.source) ?? flow.source
+            const target = runtime.infoschematicEndpointLabels.get(flow.target) ?? flow.target
+            return `Flow ${flow.code}, ${source} to ${target}, signalled.`
+          })
+          .filter(Boolean)
+          .join(' ')}
+      </p>
       {children}
     </section>
   )

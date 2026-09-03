@@ -209,6 +209,56 @@
   stroke-dasharray: var(--infoschematic-canvas-flows-dash);
 }
 
+.infoschematic-flow-signal {
+  color: inherit;
+  pointer-events: none;
+}
+
+.infoschematic-flow-signal-pulse {
+  fill: currentColor;
+  opacity: 0;
+}
+
+.infoschematic-flow-signal-still {
+  fill: none;
+  opacity: 0;
+  stroke: currentColor;
+  stroke-linecap: var(--infoschematic-canvas-flows-line-cap);
+  stroke-linejoin: var(--infoschematic-canvas-flows-line-join);
+  stroke-width: var(--infoschematic-canvas-flows-signal-still-width);
+}
+
+.infoschematic-signal-announcement {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infoschematic-flow-signal-pulse {
+    display: none;
+  }
+
+  .infoschematic-flow-signal-still {
+    animation: infoschematic-signal-emphasis 900ms ease-out both;
+  }
+}
+
+@keyframes infoschematic-signal-emphasis {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  20%,
+  70% {
+    opacity: 0.9;
+  }
+}
+
 /* Selecting a published contract lights the lines that carry it and drops
    everything else back, so the Infoschematic answers "where does this API live?". */
 .infoschematic-svg.highlighting .infoschematic-flows > g,

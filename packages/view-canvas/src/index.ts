@@ -29,6 +29,7 @@ export type {
   ScopeIconRenderer,
 } from './renderers.tsx'
 export type { CardDetailOverrides } from '@infoschematics/view-model/appearance'
+export type { FlowSignal } from '@infoschematics/view-model/signals'
 export type {
   InfoschematicRuntime,
   RuntimeCard,
