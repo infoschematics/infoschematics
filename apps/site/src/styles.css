@@ -142,9 +142,9 @@ a:focus-visible {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(250px, 0.78fr) minmax(640px, 1.8fr);
-  align-items: center;
-  gap: clamp(36px, 5vw, 88px);
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: clamp(40px, 5vw, 72px);
   min-width: 0;
   padding: clamp(48px, 8vh, 100px) 0;
 }
@@ -223,6 +223,72 @@ a:focus-visible {
   border-radius: 4px;
   background: #79c9ff;
   font-size: 14px;
+}
+
+.comparison-lane {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: clamp(16px, 2vw, 28px);
+  min-width: 0;
+}
+
+.comparison-treatment {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+
+.comparison-treatment__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 54px;
+  padding: 0 4px 13px;
+}
+
+.comparison-treatment__header > p:last-child {
+  max-width: 250px;
+  margin: 0;
+  color: #617a91;
+  font: 500 9px/1.45 'DM Mono', monospace;
+  letter-spacing: 0.06em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.shared-preview {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #ffffff1c;
+  border-radius: 15px;
+  background: #f7f9fc;
+  box-shadow:
+    0 38px 90px #02071191,
+    inset 0 1px 0 #ffffff0b;
+}
+
+.shared-preview__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1400 / 920;
+  object-fit: contain;
+  background: #f7f9fc;
+}
+
+.shared-preview__caption {
+  margin: 0;
+  padding: 14px 18px;
+  border-top: 1px solid #d7dee8;
+  color: #52606d;
+  background: #eef2f7;
+  font: 600 9px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
 .instrument {
@@ -794,6 +860,11 @@ a:focus-visible {
   .hero__lede {
     max-width: 650px;
   }
+
+  .comparison-lane {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 38px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -817,6 +888,17 @@ a:focus-visible {
   .hero h1 {
     margin-top: 18px;
     font-size: clamp(46px, 15vw, 70px);
+  }
+
+  .comparison-treatment__header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .comparison-treatment__header > p:last-child {
+    max-width: none;
+    text-align: left;
   }
 
   .instrument__header,

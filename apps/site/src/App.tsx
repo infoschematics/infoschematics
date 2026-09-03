@@ -1,5 +1,11 @@
 import { useState } from 'react'
+import { infoschematicsExample } from '@infoschematics/is-infoschematics'
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import './styles.css'
+
+const sharedPreviewSource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+  renderInfoschematicSvg(infoschematicsExample),
+)}`
 
 const stages = [
   {
@@ -96,51 +102,78 @@ export function App() {
           </span>
         </div>
 
-        <section className="instrument" aria-label="The infoschematic process">
-          <div className="instrument__header">
-            <div>
-              <p className="eyebrow">Front of house / preview</p>
-              <h2>A system, explained</h2>
-            </div>
-            <p className="instrument__readout">
-              <span>4 components</span>
-              <span>3 connections</span>
-            </p>
-          </div>
+        <section aria-label="Homepage treatment comparison" className="comparison-lane">
+          <article className="comparison-treatment" data-treatment="bespoke">
+            <header className="comparison-treatment__header">
+              <p className="eyebrow">Bespoke homepage treatment</p>
+              <p>Editorial composition for the front door</p>
+            </header>
 
-          <div className="stage">
-            <fieldset aria-hidden="true" className="stage__lane">
-              <legend>Infoschematic</legend>
-            </fieldset>
-            <div aria-hidden="true" className="stage__ambient stage__ambient--left" />
-            <div aria-hidden="true" className="stage__ambient stage__ambient--right" />
-            <p className="stage__axis stage__axis--input">Information</p>
-            <p className="stage__axis stage__axis--output">Understanding</p>
-
-            <div className="flow-map">
-              {stages.map((stage, index) => (
-                <div className="flow-map__segment" key={stage.code}>
-                  <article className="system-card" data-tone={stage.tone}>
-                    <span className="system-card__tag">{stage.code}</span>
-                    <p>{stage.step}</p>
-                    <h3>{stage.title}</h3>
-                    <small>{stage.detail}</small>
-                  </article>
-                  {index < connectorLabels.length ? (
-                    <FlowConnector label={connectorLabels[index]} signalKey={signalKey} />
-                  ) : null}
+            <section className="instrument" aria-label="The infoschematic process">
+              <div className="instrument__header">
+                <div>
+                  <p className="eyebrow">Front of house / preview</p>
+                  <h2>A system, explained</h2>
                 </div>
-              ))}
-            </div>
-          </div>
+                <p className="instrument__readout">
+                  <span>4 components</span>
+                  <span>3 connections</span>
+                </p>
+              </div>
 
-          <div className="instrument__footer">
-            <p>
-              <span className="legend-line" />
-              One idea, routed end to end
-            </p>
-            <p className="instrument__mode">Release / holding page 01</p>
-          </div>
+              <div className="stage">
+                <fieldset aria-hidden="true" className="stage__lane">
+                  <legend>Infoschematic</legend>
+                </fieldset>
+                <div aria-hidden="true" className="stage__ambient stage__ambient--left" />
+                <div aria-hidden="true" className="stage__ambient stage__ambient--right" />
+                <p className="stage__axis stage__axis--input">Information</p>
+                <p className="stage__axis stage__axis--output">Understanding</p>
+
+                <div className="flow-map">
+                  {stages.map((stage, index) => (
+                    <div className="flow-map__segment" key={stage.code}>
+                      <article className="system-card" data-tone={stage.tone}>
+                        <span className="system-card__tag">{stage.code}</span>
+                        <p>{stage.step}</p>
+                        <h3>{stage.title}</h3>
+                        <small>{stage.detail}</small>
+                      </article>
+                      {index < connectorLabels.length ? (
+                        <FlowConnector label={connectorLabels[index]} signalKey={signalKey} />
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="instrument__footer">
+                <p>
+                  <span className="legend-line" />
+                  One idea, routed end to end
+                </p>
+                <p className="instrument__mode">Release / holding page 01</p>
+              </div>
+            </section>
+          </article>
+
+          <article className="comparison-treatment" data-treatment="shared-renderer">
+            <header className="comparison-treatment__header">
+              <p className="eyebrow">Shared renderer treatment</p>
+              <p>One authored example through framework-neutral SVG</p>
+            </header>
+
+            <div className="shared-preview">
+              <img
+                alt={`${infoschematicsExample.title} rendered through shared SVG output`}
+                className="shared-preview__image"
+                src={sharedPreviewSource}
+              />
+              <p className="shared-preview__caption">
+                Same serialisable definition as the hosted interactive example
+              </p>
+            </div>
+          </article>
         </section>
       </section>
 
