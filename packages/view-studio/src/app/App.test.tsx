@@ -32,6 +32,26 @@ describe('App', () => {
     expect(sessionStorage.getItem).not.toHaveBeenCalled()
   })
 
+  it('starts each Studio session in explicit Present mode with Producer controls available', () => {
+    const localStorage = {
+      getItem: vi.fn((key: string) => (key.endsWith('.presentation.mode') ? '"direct"' : null)),
+      setItem: vi.fn(),
+    }
+    const sessionStorage = { getItem: vi.fn(), setItem: vi.fn() }
+    vi.stubGlobal('window', { localStorage, sessionStorage })
+
+    const markup = renderToStaticMarkup(
+      <App config={defineInfoschematic({ id: 'mode-session', title: 'Mode session' })} />,
+    )
+
+    expect(markup).toContain('data-production-mode="present"')
+    expect(markup).toContain('aria-label="Infoschematic controls"')
+    expect(markup).toContain('aria-label="Present mode"')
+    expect(markup).toContain('aria-label="Design mode"')
+    expect(markup).toContain('aria-label="Direct mode"')
+    expect(localStorage.getItem).not.toHaveBeenCalledWith('mode-session.presentation.mode')
+  })
+
   it('renders structural data supplied by the host configuration', () => {
     const config = defineInfoschematic({
       id: 'example',

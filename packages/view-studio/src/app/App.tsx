@@ -21,6 +21,7 @@ import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { type Attachment, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
+import { useThemeComposition } from './editor/use-theme-composition.ts'
 import { usePersistentState } from './hooks/use-persistent-state.ts'
 import { usePresentation } from './hooks/use-presentation.ts'
 import { DetailsPanel } from './panels/DetailsPanel.tsx'
@@ -185,8 +186,83 @@ function AppContent() {
   const editor = useEditor(buildEditable)
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
-  const sceneList = useSceneList(presentation.playing)
+  const sceneList = useSceneList()
   const sceneLibrary = useSceneLibrary()
+  const themeComposition = useThemeComposition()
+  const directTarget = presentation.directTarget
+  const directUsesStandalone = directTarget?.kind === 'standalone-scene'
+  const directUsesTheme =
+    directTarget?.kind === 'theme' || (directTarget?.kind === 'callout' && directTarget.owner === 'theme')
+  const directUsesStory =
+    directTarget?.kind === 'story' ||
+    directTarget?.kind === 'storyboard' ||
+    (directTarget?.kind === 'callout' && directTarget.owner === 'story')
+  const directLit = directUsesStandalone
+    ? sceneLibrary.lit
+    : directUsesTheme
+      ? themeComposition.lit
+      : directUsesStory
+        ? sceneList.lit
+        : undefined
+  const directToggle = directUsesStandalone
+    ? sceneLibrary.toggle
+    : directUsesTheme
+      ? themeComposition.toggle
+      : directUsesStory
+        ? sceneList.toggle
+        : undefined
+  const canvasMode =
+    presentation.mode === 'design'
+      ? 'design'
+      : presentation.mode === 'direct'
+        ? directUsesStory
+          ? 'stories'
+          : directUsesStandalone || directUsesTheme
+            ? 'scenes'
+            : null
+        : null
+
+  /*
+   * A Direct target owns its editor selection. Present focus is deliberately
+   * absent from this synchronisation, so showing one Scene can never move the
+   * producer's cursor through another draft.
+   */
+  const directTargetKey = JSON.stringify(directTarget)
+  useEffect(() => {
+    if (presentation.mode !== 'direct' || !directTarget) return
+
+    if (directTarget.kind === 'standalone-scene') {
+      sceneLibrary.choose(directTarget.sceneId)
+      return
+    }
+    if (directTarget.kind === 'theme') {
+      themeComposition.chooseTheme(directTarget.themeId)
+      return
+    }
+    if (directTarget.kind === 'story' || directTarget.kind === 'storyboard') {
+      sceneList.choose(directTarget.storyId)
+      return
+    }
+    if (directTarget.owner === 'theme') {
+      themeComposition.chooseTheme(directTarget.ownerId)
+      const theme = themeComposition.themes.find((entry) => entry.id === directTarget.ownerId)
+      const at = theme?.scenes.findIndex((entry) => entry.id === directTarget.sceneId) ?? -1
+      if (at >= 0) themeComposition.chooseScene(at)
+      return
+    }
+
+    sceneList.choose(directTarget.ownerId)
+    const story = sceneList.stories.find((entry) => entry.id === directTarget.ownerId)
+    const at =
+      story?.steps.findIndex(
+        (entry, index) =>
+          (entry.authored.id ?? entry.scene ?? `${story.id}-scene-${index + 1}`) === directTarget.sceneId,
+      ) ?? -1
+    if (at >= 0) sceneList.select(at)
+    // The target is the dependency: editor callbacks are intentionally
+    // transient facades over stable React setters.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: Direct target identity owns this synchronisation
+  }, [directTargetKey, presentation.mode])
   const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
   const storyCallout = playing
     ? runtime.config.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
@@ -425,6 +501,10 @@ function AppContent() {
         return
       }
 
+      // Audience stepping never leaks into Design or Direct, including the
+      // brief render before their editor panel has synchronised its own mode.
+      if (presentation.mode !== 'present') return
+
       // A chosen Thematic Scene steps the same way a Story does, minus the
       // hold: there is nothing running to pause. Stepping is by hand either way,
       // so the keys mean the same thing whichever card is open.
@@ -469,6 +549,7 @@ function AppContent() {
     editor.redo,
     shortcuts,
     presentation.lightNothing,
+    presentation.mode,
     presentation.stepThematicScene,
     presentation.thematicScene,
     drawnFlows,
@@ -509,6 +590,7 @@ function AppContent() {
   }, [collapsed])
 
   function playStory(story: RuntimeStory) {
+    if (presentation.mode !== 'present') return
     if (playing?.id === story.id) {
       presentation.stopStory()
       return
@@ -548,7 +630,7 @@ function AppContent() {
   }
 
   return (
-    <main>
+    <main data-production-mode={presentation.mode}>
       {shortcuts ? <ShortcutOverlay onClose={() => setShortcuts(false)} /> : null}
       <TitleBar
         collapsed={collapsed}
@@ -595,9 +677,9 @@ function AppContent() {
                  * harmless and removing them would mean two prop sets to keep in
                  * step.
                  */
-                mode={editor.mode}
-                litByScene={editor.mode === 'scenes' ? sceneLibrary.lit : sceneList.lit}
-                onLight={editor.mode === 'scenes' ? sceneLibrary.toggle : sceneList.toggle}
+                mode={canvasMode}
+                litByScene={presentation.mode === 'direct' ? directLit : undefined}
+                onLight={presentation.mode === 'direct' ? directToggle : undefined}
                 createdCards={editor.createdCards}
                 onCreateLine={editor.editing ? proposeLine : undefined}
                 onFreeEnd={editor.editing ? editor.moveFreeEnd : undefined}
@@ -694,6 +776,7 @@ function AppContent() {
           <DetailsPanel
             scenes={sceneLibrary}
             stories={sceneList}
+            themes={themeComposition}
             editor={{
               ...editor,
               canRoute: Boolean(selectedRoute),
