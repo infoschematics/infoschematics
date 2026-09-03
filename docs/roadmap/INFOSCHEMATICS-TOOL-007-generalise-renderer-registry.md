@@ -4,10 +4,10 @@ area: TOOL
 title: Generalise renderer registry
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 6fbbeb13c5db5c08a8f022fdc355ce133a50580a
 ---
 
 ## Goal
@@ -28,15 +28,15 @@ Studio already accepts an `InfoschematicRenderers` prop and supplies it through 
 
 ## Steps
 
-- [ ] Define the public registry as an immutable application prop, with context remaining an internal delivery mechanism and no process-global mutable registration.
-- [ ] Add a typed `RendererDefinition` carrying a stable key, positive schema version, runtime property validator and React implementation, plus a `defineInfoschematicRenderers` helper that preserves inference.
-- [ ] Cover Fabric, Graphic and Callout definitions in the same registry contract while retaining SVG definitions and Scope icons as host-level supporting renderers.
-- [ ] Validate serialisable properties before invoking a renderer and expose structured diagnostics for unknown keys, unsupported schema versions and invalid properties through an optional host callback.
-- [ ] Define deterministic fallbacks: generic labelled bounds for Fabrics, accessible labelled placeholders for Graphics and standard Callout presentation for unknown or invalid custom definitions.
-- [ ] Guarantee that fallback geometry, selection and accessibility remain available independently of renderer success.
-- [ ] Export the registry types, helper and diagnostics from the public View surface and retain compatibility re-exports when the implementation moves from Studio to Canvas.
-- [ ] Add host-integration tests for successful registration, each diagnostic, every fallback, duplicate keys, immutable input and server rendering.
-- [ ] Document the key and schema-version compatibility policy, including how hosts evolve properties without changing authored configuration into executable state.
+- [x] Define the public registry as an immutable application prop, with context remaining an internal delivery mechanism and no process-global mutable registration.
+- [x] Add a typed `RendererDefinition` carrying a stable key, positive schema version, runtime property validator and React implementation, plus a `defineInfoschematicRenderers` helper that preserves inference.
+- [x] Cover Fabric, Graphic and Callout definitions in the same registry contract while retaining SVG definitions and Scope icons as host-level supporting renderers.
+- [x] Validate serialisable properties before invoking a renderer and expose structured diagnostics for unknown keys, unsupported schema versions and invalid properties through an optional host callback.
+- [x] Define deterministic fallbacks: generic labelled bounds for Fabrics, accessible labelled placeholders for Graphics and standard Callout presentation for unknown or invalid custom definitions.
+- [x] Guarantee that fallback geometry, selection and accessibility remain available independently of renderer success.
+- [x] Export the registry types, helper and diagnostics from the public View surface and retain compatibility re-exports when the implementation moves from Studio to Canvas.
+- [x] Add host-integration tests for successful registration, each diagnostic, every fallback, duplicate keys, immutable input and server rendering.
+- [x] Document the key and schema-version compatibility policy, including how hosts evolve properties without changing authored configuration into executable state.
 
 ## Files touched
 
@@ -71,6 +71,39 @@ Add a host renderer guide with one Fabric, Graphic and Callout example and a ver
 ### Roadmap
 
 Keep renderer package extraction in `INFOSCHEMATICS-TOOL-008` and visual-token ownership in `INFOSCHEMATICS-TOOL-009`; custom domain renderers remain host work.
+
+## Review
+
+### Delivered
+
+Delivered an immutable, versioned host renderer registry across Canvas, Present and Studio, with validation, structured diagnostics and deterministic accessible fallbacks for authored Fabric, Graphic and Callout renderer keys.
+
+### Summary of changes
+
+- Added typed renderer definitions, inference-preserving registry construction and deterministic resolution to `@infoschematics/view-canvas`.
+- Added Canvas validation, diagnostics and labelled Fabric and Graphic fallbacks while retaining legacy renderer-map compatibility.
+- Added authored Callout renderer support to Present and Studio without transferring layout, actions or accessibility ownership to custom components.
+- Documented the registry boundary, schema compatibility policy, diagnostics and fallback requirements in ADR 009, specifications, design guidance and the React integration guide.
+
+### Verification
+
+- Baseline: `6fbbeb13c5db5c08a8f022fdc355ce133a50580a`.
+- Delivery commits: `ab494adb`, `cad9e803`, `5040b5f3` and `bf9d76a9`.
+- Focused Canvas, Present and Studio renderer tests passed, including server rendering, duplicate keys, diagnostics and fallbacks.
+- Canvas, Present and Studio TypeScript checks passed.
+- `bun run check` passed on 2026-09-03 after the integrated delivery.
+
+### Outstanding concerns
+
+Authored configuration does not yet select a renderer schema version, so the delivered contract resolves version 1. A breaking renderer-property change therefore requires a new stable renderer key until Domain Model deliberately adds an explicit serialisable version selector. Legacy component maps remain available as a compatibility bridge.
+
+### Post-change review
+
+The implementation preserves the architecture boundary: authored data contains only serialisable keys and properties, hosts provide executable renderers, and View packages retain geometry, selection, actions and accessibility. No process-global registry or mutable registration path was introduced.
+
+### Mini recap
+
+TOOL-007 is ready for human review. Acceptance, pruning, pushing and releasing remain outside this delivery run.
 
 ## Discussion
 
