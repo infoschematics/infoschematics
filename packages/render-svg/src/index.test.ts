@@ -249,14 +249,17 @@ describe('renderInfoschematicSvg', () => {
   it('renders explicit Flow signals as deterministic still emphasis and ignores unknown ids', () => {
     const baseline = renderInfoschematicSvg(representative)
     const signalled = renderInfoschematicSvg(representative, {
-      signals: ['call', 'missing'],
+      signals: ['call', 'call', 'missing'],
     })
 
-    expect(renderInfoschematicSvg(representative, { signals: ['call', 'missing'] })).toBe(signalled)
+    expect(renderInfoschematicSvg(representative, { signals: ['call', 'call', 'missing'] })).toBe(
+      signalled,
+    )
     expect(baseline).not.toContain('data-signalled=')
     expect(baseline).not.toContain('infoschematic-flow-signal')
     expect(signalled).toContain('data-id="call" data-signalled="true"')
     expect(signalled).toContain('class="infoschematic-flow-signal"')
+    expect(signalled.match(/class="infoschematic-flow-signal"/g)).toHaveLength(1)
     expect(signalled).toContain(`stroke-width="${visualTokens.canvas.flows.signalStillWidth}"`)
     expect(signalled).not.toContain('<animate')
     expect(signalled).not.toContain('missing')

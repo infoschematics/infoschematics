@@ -227,6 +227,31 @@ describe("presentation state", () => {
     );
   });
 
+  it("does not replay Scene signals when audience filters change", () => {
+    const source = runtime();
+    const entered = reducePresentation(createPresentationState(source), {
+      type: "toggle-standalone-scene",
+      scene: source.standaloneScenes[0]!,
+    });
+    const filtered = reducePresentation(entered, {
+      type: "toggle-scope",
+      id: "two",
+    });
+    const restored = reducePresentation(filtered, {
+      type: "toggle-scope",
+      id: "two",
+    });
+
+    expect(filtered.sceneOccurrence).toBe(entered.sceneOccurrence);
+    expect(restored.sceneOccurrence).toBe(entered.sceneOccurrence);
+    expect(derivePresentation(source, filtered).signals).toEqual(
+      derivePresentation(source, entered).signals,
+    );
+    expect(derivePresentation(source, restored).signals).toEqual(
+      derivePresentation(source, entered).signals,
+    );
+  });
+
   it("cancels obsolete signals and assigns a fresh key on re-entry", () => {
     const source = runtime();
     const entered = reducePresentation(createPresentationState(source), {
