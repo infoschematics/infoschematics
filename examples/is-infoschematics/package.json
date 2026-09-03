@@ -1,0 +1,14 @@
+{
+  "name": "@infoschematics/is-infoschematics",
+  "description": "A self-describing authored Infoschematic of the Infoschematics package architecture.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/domain-core": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "license": "MIT",
+  "private": true,
+  "type": "module"
+}
