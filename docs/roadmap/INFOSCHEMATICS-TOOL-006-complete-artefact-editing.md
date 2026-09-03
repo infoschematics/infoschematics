@@ -4,7 +4,7 @@ area: TOOL
 title: Complete artefact editing
 theme: tool
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: fb2da8f1d1fb4631b804e2fe68eecc5b0a8bff7f
@@ -28,19 +28,19 @@ Cards can be created, selected, moved, renamed, assigned scope, given ports and 
 
 ## Steps
 
-- [ ] Add a capability-matrix test fixture covering create, select, move, resize, edit properties, remove and reorder for Lane, Zone, Fabric, Card, Flow and Graphic.
-- [ ] Replace stringly selected handles with a discriminated artefact selection that retains kind, stable identity and geometry role through Canvas, View Model and Studio.
-- [ ] Extend the common draft snapshot, persistence, undo, redo, discard and change ordering model before adding any new mutation so every later capability inherits the same session guarantees.
-- [ ] Add Lane creation, bounds editing and within-kind ordering while preserving the full-width and geographic constraints declared by the model.
-- [ ] Add Zone creation, bounds editing, containment and ordering within its owning Lane, rejecting geometry outside the Lane.
-- [ ] Bring Fabrics through common box movement, resizing, property editing, port editing, removal and within-kind ordering without coupling Design to a renderer implementation.
-- [ ] Complete Card resizing and within-kind ordering while preserving existing creation, movement, port and adapter behaviour.
-- [ ] Add Graphic creation, box placement, resizing, renderer-key properties, removal and within-kind ordering for authored overlays.
-- [ ] Complete Flow ordering, endpoint, port, route, waypoint, label and family operations while preserving valid attachment and orthogonal-route invariants.
-- [ ] Add Card, Fabric and Flow Library template contracts and controls; instantiation copies serialisable values into a new independent artefact with a newly allocated stable identity and no template provenance.
-- [ ] Consolidate every new operation into deterministic source-oriented change output in dependency-safe order, including cascades such as removing a Lane, Zone or endpoint.
-- [ ] Add keyboard and pointer interaction tests for selection, constrained movement, resizing handles, creation, removal, reordering and one-step undo per gesture.
-- [ ] Update Domain and Studio specifications with the supported capability matrix and explicitly retained non-goals.
+- [x] Add a capability-matrix test fixture covering create, select, move, resize, edit properties, remove and reorder for Lane, Zone, Fabric, Card, Flow and Graphic.
+- [x] Replace stringly selected handles with a discriminated artefact selection that retains kind, stable identity and geometry role through Canvas, View Model and Studio.
+- [x] Extend the common draft snapshot, persistence, undo, redo, discard and change ordering model before adding any new mutation so every later capability inherits the same session guarantees.
+- [x] Add Lane creation, bounds editing and within-kind ordering while preserving the full-width and geographic constraints declared by the model.
+- [x] Add Zone creation, bounds editing, containment and ordering within its owning Lane, rejecting geometry outside the Lane.
+- [x] Bring Fabrics through common box movement, resizing, property editing, port editing, removal and within-kind ordering without coupling Design to a renderer implementation.
+- [x] Complete Card resizing and within-kind ordering while preserving existing creation, movement, port and adapter behaviour.
+- [x] Add Graphic creation, box placement, resizing, renderer-key properties, removal and within-kind ordering for authored overlays.
+- [x] Complete Flow ordering, endpoint, port, route, waypoint, label and family operations while preserving valid attachment and orthogonal-route invariants.
+- [x] Add Card, Fabric and Flow Library template contracts and controls; instantiation copies serialisable values into a new independent artefact with a newly allocated stable identity and no template provenance.
+- [x] Consolidate every new operation into deterministic source-oriented change output in dependency-safe order, including cascades such as removing a Lane, Zone or endpoint.
+- [x] Add keyboard and pointer interaction tests for selection, constrained movement, resizing handles, creation, removal, reordering and one-step undo per gesture.
+- [x] Update Domain and Studio specifications with the supported capability matrix and explicitly retained non-goals.
 
 ## Files touched
 
@@ -75,6 +75,45 @@ Update authoring guidance for the resulting Design operations and the distinctio
 ### Roadmap
 
 Keep Direct Scene, Theme and Story composition in `INFOSCHEMATICS-TOOL-005`; split only a newly discovered contract decision that cannot be resolved inside this boundary.
+
+## Review
+
+### Delivered
+
+Delivered a six-kind Design capability model and end-to-end draft workflow for Lane, Zone, Fabric, Card, Flow and Graphic creation, selection, type-appropriate geometry, property editing, removal and within-kind ordering.
+
+### Summary of changes
+
+- Added a discriminated six-kind selection contract, capability matrix, constrained immutable operations, deterministic dependency ordering and a framework-neutral materialiser in View Model.
+- Added full-shape keyboard and pointer selection, constrained movement and resizing, reorder/remove affordances, authored Graphic Design rendering and non-mutating draft preview to Canvas.
+- Replaced Studio's independent draft maps with one versioned, backward-compatible serialisable envelope whose persistence, undo, redo, discard, sweep and change detection cover every field.
+- Added typed Studio operation coalescing, property replacement, safe dependency cascades, source-oriented review rows and blocked-reference feedback.
+- Added capability-driven Design controls and valid Lane, Zone and Graphic factories alongside Card, Fabric and Flow Library templates that allocate fresh identities and retain no provenance.
+- Wired all six kinds through Studio pointer and keyboard interaction while retaining specialised Flow endpoints, routes, waypoints and Card port behavior.
+
+### Verification
+
+- Baseline: `fb2da8f1d1fb4631b804e2fe68eecc5b0a8bff7f`.
+- Delivery commits: `9c0d0b10`, `90ed45e0`, `4803abe1`, `66a9aee2`, `3283031b`, `4e2cadf5`, `e27f8e1f`, `573983f7`, `531db583`, `13dbb85a`, `c43080f2`, `fe3dd49c` and `0f22e5ce`.
+- View Model capability/materialisation suites, Canvas interaction/preview suites and Studio editor/App/panel suites passed, including all-six, cascade, stale-draft, Library and one-gesture undo coverage.
+- View Model, Canvas and Studio TypeScript and dependency-boundary checks passed during focused integration.
+- `bun run check` passed on 2026-09-03 after the integrated delivery.
+
+### Outstanding concerns
+
+Legacy string selection remains only for auxiliary Flow labels, ports and waypoints while the six authored artefact kinds use the discriminated contract. Studio blocks removal of a Graphic referenced by a Story and reports the reason; the lower-level materialiser also guarantees valid output by clearing references when invoked directly. Property bags use validated structured JSON until kind-specific forms are justified.
+
+### Post-change review
+
+The implementation preserves fixed kind depth and only reorders within authored kind arrays. Lane and Zone edits preserve their constrained axes, adapter geometry remains derived from the wrapped Card, Flow generic move/resize stays disabled, and Scope/Flow-family or renderer data remains serialisable authored content.
+
+### Mini recap
+
+TOOL-006 is ready for human review. Acceptance, pruning, pushing and releasing remain outside this delivery run.
+
+## Done
+
+Pending human acceptance.
 
 ## Discussion
 
