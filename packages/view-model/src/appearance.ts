@@ -68,7 +68,14 @@ export const resolveRegionTreatment = (
   appearance?: RegionAppearanceConfig,
   legend: RegionLegendEdge = 'top',
 ): ResolvedRegionTreatment => {
-  const fallbackLabel: RegionLabelPlacement = legend === 'bottom' ? 'south-west' : 'north-west'
+  const fallbackLabel: RegionLabelPlacement =
+    legend === 'bottom'
+      ? kind === 'lane'
+        ? 'south-west'
+        : 'south-east'
+      : kind === 'lane'
+        ? 'north-west'
+        : 'north-east'
   const resolvedLabel = label.trim().length === 0 || appearance?.label === 'none' ? null : appearance?.label ?? fallbackLabel
   const requestedFrame = appearance?.frame ?? (kind === 'lane' ? 'plain' : 'none')
   return {

@@ -1282,7 +1282,7 @@ export function InfoschematicDiagram({
             const legacyKey = `zone:${lane.id}:${zone.id}`
             const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
             const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
-            const geometry = regionGeometry({ box: bounds, label: zone.label, radius: lane.panel.radius, treatment })
+            const geometry = regionGeometry({ box: bounds, label: zone.label, treatment })
             return (
               // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Zone is keyboard operable in Design.
               <g
@@ -1306,7 +1306,7 @@ export function InfoschematicDiagram({
                   className="infoschematic-region-fill"
                   fill={zone.fill}
                   height={lane.height}
-                  rx={treatment.frame === 'none' ? undefined : lane.panel.radius}
+                  rx={treatment.frame === 'none' ? undefined : cornerRadius}
                   width={zone.width}
                   x={zone.x}
                   y={lane.y}
@@ -1337,7 +1337,7 @@ export function InfoschematicDiagram({
             const legacyKey = `zone:${lane.id}:${zone.id}`
             const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
             const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
-            const label = regionGeometry({ box: bounds, label: zone.label, radius: lane.panel.radius, treatment }).label
+            const label = regionGeometry({ box: bounds, label: zone.label, treatment }).label
             if (!label) return null
             return (
               <text
@@ -1370,7 +1370,7 @@ export function InfoschematicDiagram({
         const legacyKey = `lane:${lane.id}`
         const bounds = { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y }
         const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
-        const geometry = regionGeometry({ box: bounds, label: lane.label, radius: lane.panel.radius, treatment })
+        const geometry = regionGeometry({ box: bounds, label: lane.label, treatment })
         return (
           // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the Lane outline is keyboard operable in Design.
           <g

@@ -310,7 +310,6 @@ export const renderInfoschematicSvg = (
       const geometry = regionGeometry({
         box,
         label: zone.label,
-        radius: lane.panel.radius,
         treatment,
       })
       body.push(
@@ -358,9 +357,8 @@ export const renderInfoschematicSvg = (
     }
     const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
     const geometry = regionGeometry({
-      box: lane.panel,
+      box: { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y },
       label: lane.label,
-      radius: lane.panel.radius,
       treatment,
     })
     if (geometry.outline) {

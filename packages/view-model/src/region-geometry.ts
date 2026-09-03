@@ -27,7 +27,6 @@ export type RegionGeometry = Readonly<{
 export type RegionGeometryInput = Readonly<{
   box: Box
   label: string
-  radius?: number
   treatment: ResolvedRegionTreatment
 }>
 
@@ -142,8 +141,11 @@ const notchedFrame = (box: Box, radius: number, notch: RegionNotchGeometry) => {
 }
 
 /** Resolve renderer-neutral label coordinates and one deterministic frame path. */
-export const regionGeometry = ({ box, label, radius, treatment }: RegionGeometryInput): RegionGeometry => {
-  const resolvedRadius = Math.max(0, Math.min(radius ?? visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2))
+export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): RegionGeometry => {
+  const resolvedRadius = Math.max(
+    0,
+    Math.min(visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2),
+  )
   const resolvedLabel = treatment.label && label.trim().length > 0 ? labelGeometry(box, treatment.label) : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
   if (treatment.frame !== 'notched' || !resolvedLabel) {

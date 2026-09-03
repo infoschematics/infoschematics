@@ -63,11 +63,10 @@ describe('region outline geometry', () => {
     expect(centered.outline?.endsWith(' Z')).toBe(true)
   })
 
-  it('is byte-stable and clamps the radius to the region bounds', () => {
+  it('is byte-stable and clamps the invariant radius to the region bounds', () => {
     const input = {
       box: { height: 12, width: 20, x: 1, y: 2 },
       label: 'A',
-      radius: 99,
       treatment: { frame: 'plain' as const, label: 'north' as const },
     }
     expect(regionGeometry(input).outline).toBe(regionGeometry(input).outline)

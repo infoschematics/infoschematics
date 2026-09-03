@@ -33,8 +33,8 @@ describe('region treatment resolution', () => {
   it.each([
     ['lane', 'top', { frame: 'plain', label: 'north-west' }],
     ['lane', 'bottom', { frame: 'plain', label: 'south-west' }],
-    ['zone', 'top', { frame: 'none', label: 'north-west' }],
-    ['zone', 'bottom', { frame: 'none', label: 'south-west' }],
+    ['zone', 'top', { frame: 'none', label: 'north-east' }],
+    ['zone', 'bottom', { frame: 'none', label: 'south-east' }],
   ] as const)('keeps the %s %s legacy default independent', (kind, legend, expected) => {
     expect(resolveRegionTreatment(kind, 'Region', undefined, legend)).toEqual(expected)
   })
