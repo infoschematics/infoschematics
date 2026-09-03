@@ -19,8 +19,21 @@
   width: 100%;
 }
 
+.infoschematic-svg.surface-neutral .infoschematic-backdrop {
+  fill: var(--infoschematic-canvas-output-backdrop);
+}
+
 .infoschematic-svg.surface-blueprint .infoschematic-backdrop {
   fill: var(--infoschematic-canvas-surfaces-backdrop);
+}
+
+.infoschematic-svg.surface-neutral .infoschematic-region-frame {
+  stroke: var(--infoschematic-canvas-output-lane-stroke);
+}
+
+.infoschematic-svg.surface-neutral .infoschematic-zone-label,
+.infoschematic-svg.surface-neutral .infoschematic-group text {
+  fill: var(--infoschematic-canvas-output-text-muted);
 }
 
 .infoschematic-zone-label {
@@ -563,13 +576,16 @@
 
 .infoschematic-grid-line {
   fill: none;
-  stroke: #79c9ff59;
-  stroke-width: 0.7;
+  stroke: var(--infoschematic-canvas-output-lane-stroke);
+  stroke-width: var(--infoschematic-canvas-geometry-grid-minor-stroke-width);
 }
 
 .infoschematic-grid-line.major {
-  stroke: #79c9ffa6;
-  stroke-width: 1.1;
+  stroke-width: var(--infoschematic-canvas-geometry-grid-major-stroke-width);
+}
+
+.infoschematic-svg.surface-blueprint .infoschematic-grid-line {
+  stroke: var(--infoschematic-canvas-surfaces-lane-stroke);
 }
 
 .infoschematic-authored-grid {

@@ -16,6 +16,8 @@
   --infoschematic-canvas-geometry-corner-radius: 10;
   --infoschematic-canvas-geometry-drag-threshold: 4;
   --infoschematic-canvas-geometry-grid-major-size: 50;
+  --infoschematic-canvas-geometry-grid-major-stroke-width: 1;
+  --infoschematic-canvas-geometry-grid-minor-stroke-width: 0.5;
   --infoschematic-canvas-geometry-grid-size: 10;
   --infoschematic-canvas-geometry-point-radius: 6;
   --infoschematic-canvas-output-backdrop: #ffffff;

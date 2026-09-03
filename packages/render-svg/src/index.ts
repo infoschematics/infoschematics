@@ -251,7 +251,7 @@ export const renderInfoschematicSvg = (
         ],
         ['fill', 'none'],
         ['stroke', gridStroke],
-        ['stroke-width', 0.5],
+          ['stroke-width', canvasTokens.geometry.gridMinorStrokeWidth],
       ]),
       '    </pattern>',
     ]
@@ -279,7 +279,7 @@ export const renderInfoschematicSvg = (
         ],
         ['fill', 'none'],
         ['stroke', gridStroke],
-        ['stroke-width', 1],
+          ['stroke-width', canvasTokens.geometry.gridMajorStrokeWidth],
       ]),
       '    </pattern>',
     ]

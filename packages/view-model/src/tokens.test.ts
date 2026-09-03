@@ -33,6 +33,8 @@ const temporaryOutput = async () => {
 describe('visual tokens', () => {
   it('keeps semantic names, representative values and the scalar compatibility export', () => {
     expect(visualTokens.canvas.geometry.gridSize).toBe(10)
+    expect(visualTokens.canvas.geometry.gridMinorStrokeWidth).toBe(0.5)
+    expect(visualTokens.canvas.geometry.gridMajorStrokeWidth).toBe(1)
     expect(visualTokens.canvas.surfaces.backdrop).toBe('#081725')
     expect(visualTokens.canvas.flows.routeWidth).toBe(4)
     expect(visualTokens.canvas.flows.lineCap).toBe('round')

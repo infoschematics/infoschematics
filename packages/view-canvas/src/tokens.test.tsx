@@ -36,6 +36,16 @@ describe('Canvas visual tokens', () => {
     expect(styles).toContain(
       'stroke-width: var(--infoschematic-canvas-flows-route-width);',
     )
+    expect(styles).toContain(
+      'stroke-width: var(--infoschematic-canvas-geometry-grid-minor-stroke-width);',
+    )
+    expect(styles).toContain(
+      'stroke-width: var(--infoschematic-canvas-geometry-grid-major-stroke-width);',
+    )
+    expect(styles).toContain(
+      '.infoschematic-svg.surface-neutral .infoschematic-backdrop',
+    )
+    expect(styles).toContain('fill: var(--infoschematic-canvas-output-backdrop);')
   })
 
   it('uses the manifest for component and editing-grid geometry', async () => {
