@@ -1,6 +1,6 @@
 {
   "name": "infoschematics",
-  "description": "The Infoschematics domain model, derived view model, Studio view, examples, guidance, and public website.",
+  "description": "The Infoschematic domain model, framework-neutral view model, interactive views, authored examples, guidance, and public website.",
   "version": "0.1.0",
   "author": "Infoschematics",
   "bugs": {
@@ -37,7 +37,6 @@
   ],
   "license": "MIT",
   "packageManager": "bun@1.4.0",
-  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/infoschematics/infoschematics.git"

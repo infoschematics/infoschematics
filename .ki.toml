@@ -1,3 +1,6 @@
+# Knowledge Islands repository configuration.
+# Its presence declares conformance with the Knowledge Islands repository standard.
+
 [repo]
 harnesses = ["knowledgeislands/ki-agentic-harness"]
 
@@ -9,6 +12,24 @@ repo_code = "INFOSCHEMATICS"
 supported_runtimes = ["claude-code", "chatgpt-codex"]
 visibility = "public"
 license = "MIT"
+
+[skills.ki-repo.checks]
+# The standard topic set (mcp, model-context-protocol, claude) describes MCP servers,
+# not this diagramming product; accurate topics are set directly on GitHub instead.
+topics = false
+# The KI engineering toolchain (Biome, knip, syncpack, compiled root build) conflicts
+# with the delivered per-package release build; adopt it through a roadmap item first.
+coverage-engineering = false
+
+[skills.ki-repo-project]
+
+[skills.ki-housekeeping-claude]
+
+[skills.ki-tokenomics]
+
+[skills.ki-tokenomics-claude]
+
+[skills.ki-tokenomics-codex]
 
 [skills.ki-authoring]
 
