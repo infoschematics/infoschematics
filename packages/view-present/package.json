@@ -1,0 +1,23 @@
+{
+  "name": "@infoschematics/view-present",
+  "description": "The audience-facing Infoschematic view: presentation controls, scene focus and Story playback over Canvas.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-canvas": "0.1.0",
+    "@infoschematics/view-model": "0.1.0"
+  },
+  "devDependencies": {
+    "@infoschematics/domain-core": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "type": "module"
+}

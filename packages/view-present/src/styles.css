@@ -1,0 +1,401 @@
+@import "@infoschematics/view-canvas/styles.css";
+
+.infoschematic-present {
+  --isp-accent: #79c9ff;
+  --isp-border: #ffffff24;
+  --isp-panel: #0b1d2d;
+  background: #07111e;
+  color: #f5f8ff;
+  display: grid;
+  font-family: Manrope, Arial, sans-serif;
+  gap: 10px;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 480px;
+  padding: 10px;
+}
+
+.infoschematic-present:fullscreen {
+  height: 100dvh;
+}
+
+.infoschematic-present button {
+  font: inherit;
+}
+
+.isp-title-bar {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.isp-title-bar hgroup {
+  min-width: 0;
+}
+
+.isp-title-bar h1 {
+  font-size: 24px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+
+.isp-title-bar p {
+  color: #9db4c9;
+  font-size: 11px;
+  margin: 4px 0 0;
+}
+
+.isp-title-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.isp-title-actions button,
+.isp-callout-actions button,
+.isp-controls button,
+.isp-tabs button {
+  background: #10263b;
+  border: 1px solid var(--isp-border);
+  border-radius: 6px;
+  color: #cde8fb;
+  cursor: pointer;
+  padding: 5px 8px;
+}
+
+.isp-title-actions button:hover,
+.isp-callout-actions button:hover,
+.isp-controls button:hover:not(:disabled),
+.isp-tabs button:hover {
+  border-color: var(--isp-accent);
+  color: white;
+}
+
+.isp-title-actions button[aria-pressed="true"],
+.isp-controls button[aria-pressed="true"] {
+  background: #173653;
+  border-color: var(--isp-accent);
+  color: white;
+}
+
+.isp-room {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 24%);
+  min-height: 0;
+}
+
+.isp-room-wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.isp-stage {
+  display: grid;
+  gap: 10px;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+.isp-canvas {
+  min-height: 0;
+  position: relative;
+}
+
+.isp-controls,
+.isp-details {
+  background: var(--isp-panel);
+  border: 1px solid var(--isp-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px #00000024;
+}
+
+.isp-controls {
+  display: grid;
+  gap: 7px;
+  padding: 9px 11px;
+}
+
+.isp-control-bank {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.isp-control-bank > span:first-child {
+  color: #d7e6f8;
+  flex: 0 0 62px;
+  font:
+    500 9px "DM Mono",
+    monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.isp-control-bank > span:not(:first-child) button[aria-pressed="true"] {
+  border-color: var(--isp-accent);
+  box-shadow: inset 0 0 0 1px var(--isp-accent);
+}
+
+.isp-controls button {
+  font-size: 10px;
+  min-height: 28px;
+}
+
+.isp-controls button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.isp-details {
+  min-height: 0;
+  overflow: auto;
+}
+
+.isp-tabs {
+  border-bottom: 1px solid var(--isp-border);
+  display: flex;
+  gap: 4px;
+  padding: 8px 10px 0;
+}
+
+.isp-tabs button {
+  background: transparent;
+  border-color: transparent;
+  border-radius: 5px 5px 0 0;
+  font-size: 11px;
+}
+
+.isp-tabs button[aria-selected="true"] {
+  border-bottom-color: var(--isp-accent);
+  color: white;
+}
+
+.isp-details-body {
+  padding: 12px;
+}
+
+.isp-details-body > p {
+  color: #cde8fb;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.isp-details-body .isp-muted {
+  color: #7f9bb3;
+}
+
+.isp-register {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+}
+
+.isp-register > div {
+  align-items: baseline;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 60px minmax(0, 1fr);
+}
+
+.isp-register dt {
+  color: var(--isp-accent);
+  font:
+    600 9px "DM Mono",
+    monospace;
+}
+
+.isp-register dd {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+
+.isp-register strong {
+  color: #dff0ff;
+  font-size: 11px;
+}
+
+.isp-register span {
+  color: #7f9bb3;
+  font-size: 10px;
+}
+
+.isp-specification-group + .isp-specification-group {
+  margin-top: 14px;
+}
+
+.isp-specification-group h2 {
+  color: #d7e6f8;
+  font:
+    500 10px "DM Mono",
+    monospace;
+  margin: 0 0 7px;
+  text-transform: uppercase;
+}
+
+.isp-specification-group ul {
+  display: grid;
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.isp-specification-group li {
+  display: grid;
+  gap: 2px;
+}
+
+.isp-specification-group a,
+.isp-specification-group li > span {
+  color: #cde8fb;
+  font-size: 11px;
+}
+
+.isp-specification-group small {
+  color: #7f9bb3;
+  line-height: 1.35;
+}
+
+.isp-callout-layer {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 5;
+}
+
+.isp-callout {
+  background: #071624f2;
+  border: 1px solid #79c9ff66;
+  border-radius: 10px;
+  box-shadow: 0 10px 34px #00000066;
+  color: #f2f8ff;
+  max-width: min(400px, 74%);
+  padding: 13px 17px;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  transition:
+    left 260ms ease,
+    top 260ms ease;
+  width: max-content;
+}
+
+.isp-callout-wide {
+  max-width: min(760px, 84%);
+}
+
+.isp-callout-sided {
+  max-width: min(640px, 88%);
+}
+
+.isp-callout-heading {
+  align-items: center;
+  color: var(--isp-accent);
+  display: flex;
+  font:
+    600 10px "DM Mono",
+    monospace;
+  justify-content: space-between;
+  letter-spacing: 0.08em;
+  margin: 0 0 9px;
+  text-transform: uppercase;
+}
+
+.isp-callout-heading em {
+  color: #8fa8c1;
+  font-style: normal;
+}
+
+.isp-callout-title {
+  color: #cfe6ff;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 5px;
+}
+
+.isp-callout-body {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.isp-callout-takeaways {
+  color: #a9c4dc;
+  display: grid;
+  font-size: 11px;
+  gap: 4px;
+  list-style: none;
+  margin: 9px 0 0;
+  padding: 0;
+}
+
+.isp-callout-takeaways li::before {
+  color: var(--isp-accent);
+  content: "— ";
+}
+
+.isp-callout-sides {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+}
+
+.isp-callout-sides > div + div {
+  border-left: 1px solid #ffffff1a;
+  padding-left: 16px;
+}
+
+.isp-callout-aside {
+  align-content: start;
+  display: grid;
+  gap: 9px;
+}
+
+.isp-callout-aside img {
+  height: 30px;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.isp-callout-aside p {
+  color: #a9c4dc;
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.isp-callout-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+  margin-top: 11px;
+  pointer-events: auto;
+}
+
+@media (width <= 800px) {
+  .isp-room {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .isp-details {
+    max-height: 240px;
+  }
+
+  .isp-callout-sides {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .isp-callout-sides > div + div {
+    border-left: 0;
+    border-top: 1px solid #ffffff1a;
+    padding-left: 0;
+    padding-top: 12px;
+  }
+}

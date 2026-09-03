@@ -1,0 +1,22 @@
+{
+  "name": "@infoschematics/view-canvas",
+  "description": "The interactive Infoschematic Canvas view for React hosts.",
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-model": "0.1.0"
+  },
+  "devDependencies": {
+    "@infoschematics/domain-core": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "type": "module"
+}

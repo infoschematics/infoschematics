@@ -1,0 +1,667 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+.infoschematic {
+  aspect-ratio: 3 / 2;
+  background: #081725;
+  margin-inline: auto;
+  max-height: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.infoschematic-svg {
+  aspect-ratio: 3 / 2;
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.infoschematic-zone-label {
+  fill: #ffffff65;
+  font:
+    600 12px "DM Mono",
+    monospace;
+  letter-spacing: 1.5px;
+}
+
+/* The outline is a path with a gap rather than a rect, so the lane's name can
+   sit on the border like a legend. */
+.infoschematic-group path {
+  fill: #12273b24;
+  stroke: #b5c4d54d;
+  stroke-width: 1.5px;
+}
+
+/* The lane outline is a filled path drawn over the zones, so it swallowed every
+   click meant for the zone beneath it. Only its legend is interactive. */
+.infoschematic-group path {
+  pointer-events: none;
+}
+
+.infoschematic-group text {
+  fill: #9ed9ff;
+  font:
+    600 13px "DM Mono",
+    monospace;
+  letter-spacing: 1.6px;
+}
+
+.fabric-shell {
+  fill: #102638b8;
+  stroke: #83b2d2c4;
+  stroke-width: 3px;
+}
+
+/* The authored bounds remain visible while editing even when a host renderer
+   draws an irregular shape within them. */
+.fabric-frame {
+  fill: none;
+  stroke: #6f8ba3a8;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+  stroke-width: 1.5px;
+}
+
+.fabric-title {
+  fill: #b9cde0;
+  font:
+    600 13px "DM Mono",
+    monospace;
+  letter-spacing: 1.5px;
+  text-anchor: middle;
+}
+
+.fabric-detail {
+  fill: #7f9bb3;
+  font:
+    500 9px "DM Mono",
+    monospace;
+  letter-spacing: 1.2px;
+  text-anchor: middle;
+}
+
+/* A Fabric remains selectable regardless of the host renderer it uses. */
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
+  stroke: #dff3ff;
+  stroke-width: 2.5px;
+}
+
+.infoschematic-svg.editing .infoschematic-fabric.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.infoschematic-graphic {
+  pointer-events: none;
+}
+
+/* The layer ignores the pointer so a line drawn across a card never takes a
+   click meant for it. Each line's own hit path opts back in, which is how a
+   line can be hovered without the layer blocking anything. */
+.infoschematic-flows {
+  pointer-events: none;
+}
+
+.infoschematic-pipe,
+.infoschematic-route {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.infoschematic-pipe {
+  opacity: 0.75;
+  stroke: #06101c;
+  stroke-width: 9px;
+}
+
+.infoschematic-route {
+  filter: drop-shadow(0 0 4px #000000cc);
+  opacity: 0.95;
+  stroke-width: 4px;
+}
+
+.infoschematic-route.dashed {
+  stroke-dasharray: 13 11;
+}
+
+/* Selecting a published contract lights the lines that carry it and drops
+   everything else back, so the Infoschematic answers "where does this API live?". */
+.infoschematic-svg.highlighting .infoschematic-flows > g,
+.infoschematic-svg.highlighting .infoschematic-service {
+  transition: opacity 180ms ease-out;
+}
+
+.infoschematic-svg.highlighting .infoschematic-flows > g:not(.highlighted),
+.infoschematic-svg.highlighting .infoschematic-service:not(.highlighted),
+.infoschematic-svg.highlighting .infoschematic-fabric:not(.highlighted),
+.infoschematic-svg.highlighting .audit-flow:not(.highlighted) {
+  opacity: 0.14;
+}
+
+.infoschematic-svg.highlighting
+  .infoschematic-flows
+  > g.highlighted
+  .infoschematic-route {
+  filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 4px currentColor);
+  opacity: 1;
+  stroke-width: 5px;
+}
+
+/* The backing pipe under a lit line is what keeps it legible where it crosses a
+   dimmed one, so it brightens with the line rather than staying near-black. */
+.infoschematic-svg.highlighting
+  .infoschematic-flows
+  > g.highlighted
+  .infoschematic-pipe {
+  opacity: 1;
+  stroke: #06101ce6;
+  stroke-width: 11px;
+}
+
+.infoschematic-svg.highlighting .infoschematic-service.highlighted rect {
+  filter: drop-shadow(0 0 10px #79c9ff5c);
+  stroke-width: 3px;
+}
+
+.infoschematic-svg.highlighting .infoschematic-fabric {
+  transition: opacity 180ms ease-out;
+}
+
+.infoschematic-svg.highlighting
+  .infoschematic-fabric.highlighted
+  .fabric-shell {
+  filter: drop-shadow(0 0 12px #79c9ff4a);
+}
+
+/* One treatment for "this one", whichever kind of thing it is and whichever end
+   points at it - the pointer on the Infoschematic or a change in the panel. Pointing is
+   the lighter half: it says "this one" while the pointer rests and nothing once
+   it moves on. Selecting keeps the same glow in the selection's own colour, so
+   what has been chosen goes on saying so after the pointer leaves. */
+.infoschematic-svg .pointed {
+  --glow: #79c9ff;
+}
+
+.infoschematic-svg .selected {
+  --glow: #82b366;
+}
+
+.infoschematic-svg .infoschematic-service.pointed rect,
+.infoschematic-svg.editing .infoschematic-service.selected rect {
+  filter: drop-shadow(
+    0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
+  );
+}
+
+.infoschematic-svg .infoschematic-service.pointed rect {
+  stroke: #cfe9ff;
+}
+
+.infoschematic-svg .audit-flow.pointed rect,
+.infoschematic-svg.editing .audit-flow.selected rect {
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glow) 55%, transparent));
+}
+
+.infoschematic-svg .audit-flow.pointed rect {
+  stroke: #cfe9ff;
+  stroke-width: 1.5px;
+}
+
+.infoschematic-svg .infoschematic-fabric.pointed .fabric-shell,
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
+  filter: drop-shadow(
+    0 0 12px color-mix(in srgb, var(--glow) 40%, transparent)
+  );
+}
+
+/* A lane's legend and a zone's heading are text, so the glow is a text shadow.
+   Geography is pointed at the same way a component is; only dragging differs. */
+.infoschematic-svg .lane-selectable.pointed,
+.infoschematic-svg .zone-selectable.pointed,
+.infoschematic-svg.editing .lane-selectable.selected,
+.infoschematic-svg.editing .zone-selectable.selected {
+  text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
+}
+
+.infoschematic-svg .lane-selectable.pointed,
+.infoschematic-svg .zone-selectable.pointed {
+  fill: #dff3ff;
+}
+
+/* A port and a waypoint are small enough that the glow is most of what is seen,
+   so theirs is tighter and brighter than a card's. */
+.infoschematic-svg .audit-port.pointed circle,
+.infoschematic-svg .audit-port.selected circle,
+.infoschematic-svg .route-waypoint.pointed,
+.infoschematic-svg .route-waypoint.selected {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--glow) 85%, transparent));
+}
+
+.infoschematic-svg .route-waypoint.pointed {
+  stroke: #cfe9ff;
+}
+
+/* The socket the card drops into: the rim is what is seen, so the outline
+   carries it and the fill only separates the recess from the lane behind. */
+.adapter-socket {
+  fill: #1a1436c9;
+  stroke: #8062b4;
+  stroke-width: 2px;
+}
+
+.infoschematic-adapter.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.infoschematic-adapter.pointed .adapter-socket,
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
+  filter: drop-shadow(
+    0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
+  );
+}
+
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
+  stroke: #82b366;
+  stroke-width: 3px;
+}
+
+/* A card's own treatment: an adapter is a component and names itself the way
+   every other component does. It carried its own size and a scope tint that
+   nothing else on the Infoschematic uses - no card colours its name by scope. */
+.adapter-label {
+  fill: #f2f7ff;
+  font:
+    700 14px Manrope,
+    Arial,
+    sans-serif;
+  text-anchor: middle;
+}
+
+.infoschematic-svg.highlighting .infoschematic-adapter:not(.highlighted) {
+  opacity: 0.14;
+}
+
+.infoschematic-service rect {
+  filter: drop-shadow(0 8px 18px #00000038);
+  stroke-width: 2px;
+}
+
+.infoschematic-service-label {
+  fill: #f2f7ff;
+  font:
+    700 14px Manrope,
+    Arial,
+    sans-serif;
+  text-anchor: middle;
+}
+
+.infoschematic-audit {
+  pointer-events: none;
+}
+
+.audit-component-code-bg,
+.audit-flow rect {
+  fill: #06101ee8;
+  stroke: #79c9ffaa;
+  stroke-width: 1px;
+}
+
+.audit-component-code,
+.audit-flow text {
+  fill: #dff3ff;
+  font:
+    700 9px "DM Mono",
+    monospace;
+  paint-order: stroke;
+  stroke: #06101e;
+  stroke-width: 3px;
+}
+
+.infoschematic-svg.editing .audit-flow.editable {
+  cursor: grab;
+  pointer-events: auto;
+}
+
+/* Sits behind everything else on the Infoschematic, transparent rather than absent, so
+   a click only ever reaches it once every card, zone and line drawn above it
+   has been missed - which is what makes an empty Infoschematic clickable to clear the
+   selection without this having to know what else is on screen. */
+.infoschematic-backdrop {
+  fill: transparent;
+  pointer-events: none;
+}
+
+.infoschematic-svg.editing .infoschematic-backdrop {
+  cursor: default;
+  pointer-events: auto;
+}
+
+/* The last handle dragged is what the arrow keys nudge, so it says so. */
+/* A card is selectable while the editor is open, so its controls can be shown. */
+.infoschematic-svg.editing .infoschematic-service.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.infoschematic-svg.editing .infoschematic-service.selected rect {
+  stroke: #82b366;
+  stroke-width: 3px;
+}
+
+.lane-selectable {
+  cursor: pointer;
+}
+
+/* A zone is geography rather than a component - selectable so its position can
+   be read, never draggable, which is why there is no .selectable variant here. */
+.infoschematic-svg.editing .zone-selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+.infoschematic-svg.editing .audit-flow.selected rect {
+  stroke: #82b366;
+  stroke-width: 2px;
+}
+
+.infoschematic-svg.editing .audit-flow.editable:active {
+  cursor: grabbing;
+}
+
+/* Shown only while a handle is being dragged, and only for the guides it
+   actually snapped to, so the Infoschematic never fills with lines that mean nothing. */
+.infoschematic-guides line {
+  stroke: #79c9ff;
+  stroke-dasharray: 6 6;
+  stroke-width: 1;
+}
+
+.infoschematic-svg.editing .audit-flow.editable rect {
+  stroke: #79c9ff88;
+  stroke-width: 1px;
+}
+.audit-component-code,
+.audit-flow text {
+  text-anchor: middle;
+}
+
+.audit-port circle {
+  fill: #0b1d33;
+  stroke: #79c9ff;
+  stroke-width: 1.5;
+}
+
+/*
+ * A line being drawn between two ports, before it is one. Broken and in the
+ * port colour rather than a family's: it has no family yet, and borrowing one
+ * would say the line is something it has not been decided to be.
+ */
+.audit-new-flow {
+  fill: none;
+  pointer-events: none;
+  stroke: #79c9ff;
+  stroke-dasharray: 6 4;
+  stroke-width: 2;
+}
+
+.audit-port.selected circle {
+  fill: #79c9ff;
+  stroke: #dff3ff;
+  stroke-width: 2;
+}
+
+.audit-port.in-use circle {
+  fill: #57d9a3;
+  stroke: #06101e;
+  stroke-width: 1.5;
+}
+
+/* An invisible target, so a 3.5px dot is still easy to hover. */
+.audit-port .audit-port-target {
+  fill: transparent;
+  stroke: none;
+}
+
+/* The annotation layer is inert so codes never eat a click, which means every
+   control inside it has to ask for interaction back. A port is a control while
+   editing: clicking selects it, and dragging the one a selected flow
+   meets moves that end elsewhere. */
+.infoschematic-svg.editing .audit-port {
+  pointer-events: auto;
+}
+
+.infoschematic-svg.editing .audit-port.in-use {
+  cursor: grab;
+}
+
+.infoschematic-svg.editing .audit-port.in-use:active {
+  cursor: grabbing;
+}
+
+.audit-port text {
+  fill: #dff3ff;
+  font:
+    700 9px "DM Mono",
+    monospace;
+  opacity: 0;
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: #06101e;
+  stroke-width: 3px;
+  transition: opacity 100ms ease;
+}
+
+.audit-port:hover text {
+  opacity: 1;
+}
+
+.audit-flow rect {
+  stroke: #ffffff44;
+}
+
+/*
+/* The canvas's own edge, drawn whenever the editor is open regardless of
+   whether the grid is switched on, and distinct from the lane panels inside
+   it - a dragged card runs out of room here, not at a lane's rounded corner. */
+.canvas-edge {
+  fill: none;
+  pointer-events: none;
+  stroke: #79c9ffcc;
+  stroke-width: 1.5px;
+}
+
+/* Drawn only while editing: what components, waypoints and labels align to. */
+.edit-grid rect {
+  fill: url(#edit-grid-major);
+  pointer-events: none;
+}
+
+.edit-grid-line {
+  fill: none;
+  stroke: #79c9ff59;
+  stroke-width: 0.7;
+}
+
+.edit-grid-line.major {
+  stroke: #79c9ffa6;
+  stroke-width: 1.1;
+}
+
+/* A wide, invisible stroke over each route while editing, so a 4px line is
+   still an easy target - the first click on it selects the flow, the
+   next one adds a waypoint. Rendered only while editing, so it never needs a
+   .infoschematic-svg.editing prefix the way the always-present selectables do. */
+.infoschematic-route-hit {
+  cursor: pointer;
+  cursor: default;
+  fill: none;
+  pointer-events: stroke;
+  stroke: transparent;
+  stroke-width: 12px;
+}
+
+.infoschematic-svg.editing .infoschematic-route-hit {
+  cursor: pointer;
+}
+
+.infoschematic-flows > g.selected .infoschematic-route {
+  stroke-width: 5px;
+}
+
+/* An arrowhead is a marker, so it cannot inherit from the line the way a
+   stroke does - its fill is its own. `context-stroke` resolves to the stroke of
+   whatever references the marker, so the head follows the line into every state
+   it has rather than only the one it was authored in.
+
+   The fill attribute on the path stays as the fallback: where this value is not
+   understood the declaration is dropped and the family colour applies, which is
+   what the head looked like before. */
+.infoschematic-svg .arrow-head {
+  fill: context-stroke;
+}
+
+/* A line pointed at, from the Infoschematic or from the register. It cannot take the
+   drop-shadow a card takes - a glow around a two-unit stroke reads as a smudge
+   rather than emphasis - so it thickens and brightens instead, which is what
+   the eye follows along a line. */
+.infoschematic-svg .infoschematic-flows > g.pointed .infoschematic-route {
+  stroke: #cfe9ff;
+  stroke-width: 4px;
+}
+
+.route-free-end {
+  cursor: grab;
+  pointer-events: auto;
+  fill: #0b1d33;
+  stroke: #f0b357;
+  stroke-width: 2;
+}
+
+.route-free-end:active {
+  cursor: grabbing;
+}
+
+/* A selected flow's corners, shown only for that one flow so
+   fifty-eight lines do not turn into fifty-eight lines of dots. */
+.route-waypoint {
+  cursor: grab;
+  fill: #0b1d33;
+  pointer-events: auto;
+  stroke: #82b366;
+  stroke-width: 2px;
+}
+
+.route-waypoint.selected {
+  fill: #82b366;
+}
+
+.route-waypoint:active {
+  cursor: grabbing;
+}
+
+/* The grab target for the run between two waypoints - wider than the line
+   itself so a horizontal or vertical run is easy to catch precisely. */
+.route-segment-grip {
+  cursor: move;
+  fill: #79c9ff33;
+  pointer-events: auto;
+  stroke: #79c9ff;
+  stroke-width: 1px;
+}
+
+.route-segment-grip:active {
+  cursor: grabbing;
+}
+
+.waypoint-add {
+  cursor: copy;
+  pointer-events: auto;
+}
+
+.waypoint-add circle {
+  fill: #0b1d33e6;
+  stroke: #57d9a3;
+  stroke-width: 1.5;
+}
+
+.waypoint-add path {
+  stroke: #57d9a3;
+  stroke-width: 1.5;
+}
+
+/* Offset off the waypoint it belongs to, away from the nearest card, so it
+   never sits under the drag path of the dot it deletes. */
+.waypoint-delete {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.waypoint-delete circle {
+  fill: #2a0e14;
+  stroke: #ff647c;
+  stroke-width: 1.5px;
+}
+
+.waypoint-delete path {
+  fill: none;
+  stroke: #ff647c;
+  stroke-linecap: round;
+  stroke-width: 1.5px;
+}
+/* Marked for removal, and drawn as going rather than gone.
+   Nothing is destroyed by marking it - the change set says what to take out of
+   the model, and the model is the file - so the thing stays on the Infoschematic,
+   faded and struck through, until the reader applies the set or lifts the mark
+   with the same key. Showing it as already absent would claim an edit the
+   editor has not made. */
+.infoschematic-service.going,
+.infoschematic-flows .going {
+  opacity: 0.32;
+}
+
+.infoschematic-service.going rect {
+  stroke-dasharray: 4 3;
+}
+
+.infoschematic-service.going text {
+  text-decoration: line-through;
+}
+
+.infoschematic-flows .going path {
+  stroke-dasharray: 5 4;
+}
+.infoschematic-svg.focusing .infoschematic-service.lit rect {
+  stroke-dasharray: none;
+  stroke-width: 2.5;
+}
+
+.infoschematic-svg.focusing
+  .infoschematic-service.lit
+  .infoschematic-service-label {
+  fill: white;
+}
+
+.infoschematic-svg.focusing [class*="flow-family-"].lit .infoschematic-route {
+  stroke-width: 4;
+}
+
+/* Everything not in the scene recedes, so what is in it reads at a glance. */
+.infoschematic-svg.focusing .infoschematic-service:not(.lit),
+.infoschematic-svg.focusing [class*="flow-family-"]:not(.lit) {
+  opacity: 0.35;
+}
+
+/* In the scene editor a card is a thing to include, so it says so on hover. */
+.infoschematic-svg.focusing .infoschematic-service.selectable {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infoschematic-svg.highlighting .infoschematic-flows > g,
+  .infoschematic-svg.highlighting .infoschematic-service {
+    transition: none;
+  }
+}
