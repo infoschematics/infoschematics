@@ -1296,11 +1296,11 @@ export function InfoschematicDiagram({
         <g key={lane.id}>
           <rect
             className="infoschematic-lane-fill"
-            height={lane.height}
+            height={lane.panel.height}
             rx={lane.panel.radius}
             width={lane.panel.width}
             x={lane.panel.x}
-            y={lane.y}
+            y={lane.panel.y}
           />
           {lane.zones.map((zone) => {
             const selection = {
@@ -1311,7 +1311,7 @@ export function InfoschematicDiagram({
               laneId: lane.id,
             } as const satisfies ArtefactSelection
             const legacyKey = `zone:${lane.id}:${zone.id}`
-            const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+            const bounds = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
             const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
             const geometry = regionGeometry({ box: bounds, label: zone.label, treatment })
             return (
@@ -1328,7 +1328,7 @@ export function InfoschematicDiagram({
                 onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
                 onPointerDown={
                   editing
-                    ? dragArtefact(selection, legacyKey, { x: zone.x + zone.width / 2, y: lane.y + lane.height / 2 }, { x: true, y: false })
+                    ? dragArtefact(selection, legacyKey, { x: zone.x + zone.width / 2, y: lane.panel.y + lane.panel.height / 2 }, { x: true, y: false })
                     : undefined
                 }
                 role={editing ? 'button' : undefined}
@@ -1337,17 +1337,17 @@ export function InfoschematicDiagram({
                 <rect
                   className="infoschematic-region-fill"
                   fill={zone.fill}
-                  height={lane.height}
+                  height={lane.panel.height}
                   rx={treatment.frame === 'none' ? undefined : cornerRadius}
                   width={zone.width}
                   x={zone.x}
-                  y={lane.y}
+                  y={lane.panel.y}
                 />
                 {geometry.outline ? <path className="infoschematic-region-frame" d={geometry.outline} /> : null}
                 {editing && artefactSelected(selection, legacyKey) ? (
                   <>
                     <ResizeHandle axes={{ height: false, width: true }} bounds={bounds} label={zone.label} selection={selection} />
-                    <ArtefactActions at={{ x: zone.x + zone.width - 48, y: lane.y + 12 }} label={zone.label} selection={selection} />
+                    <ArtefactActions at={{ x: zone.x + zone.width - 48, y: lane.panel.y + 12 }} label={zone.label} selection={selection} />
                   </>
                 ) : null}
               </g>
@@ -1367,7 +1367,7 @@ export function InfoschematicDiagram({
               laneId: lane.id,
             } as const satisfies ArtefactSelection
             const legacyKey = `zone:${lane.id}:${zone.id}`
-            const bounds = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+            const bounds = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
             const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
             const label = regionGeometry({ box: bounds, label: zone.label, treatment }).label
             if (!label) return null
@@ -1401,7 +1401,7 @@ export function InfoschematicDiagram({
           kind: 'lane',
         } as const satisfies ArtefactSelection
         const legacyKey = `lane:${lane.id}`
-        const bounds = { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y }
+        const bounds = { height: lane.panel.height, width: lane.panel.width, x: lane.panel.x, y: lane.panel.y }
         const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
         const geometry = regionGeometry({ box: bounds, label: lane.label, treatment })
         return (
@@ -1418,7 +1418,7 @@ export function InfoschematicDiagram({
             onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
             onPointerDown={
               editing
-                ? dragArtefact(selection, legacyKey, { x: lane.panel.x + lane.panel.width / 2, y: lane.y + lane.height / 2 }, { x: false, y: true })
+                ? dragArtefact(selection, legacyKey, { x: lane.panel.x + lane.panel.width / 2, y: lane.panel.y + lane.panel.height / 2 }, { x: false, y: true })
                 : undefined
             }
             role={editing ? 'button' : undefined}
@@ -1446,7 +1446,7 @@ export function InfoschematicDiagram({
               <>
                 <ResizeHandle axes={{ height: true, width: false }} bounds={bounds} label={lane.label} selection={selection} />
                 <ArtefactActions
-                  at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.y + 12 }}
+                  at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.panel.y + 12 }}
                   label={lane.label}
                   selection={selection}
                 />
