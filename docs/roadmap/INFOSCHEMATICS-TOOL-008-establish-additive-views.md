@@ -109,6 +109,10 @@ The goal is met: consumers can import Canvas, Present, Studio or a framework-neu
 
 Additive Views are now physical public packages rather an architectural destination. Delegation isolated Canvas/runtime, Present and SVG work before coordinator integration; separate commits kept those lanes reviewable and avoided absorbing concurrent Site changes.
 
+## Done
+
+Pending human acceptance.
+
 ## Discussion
 
 ### Extraction order

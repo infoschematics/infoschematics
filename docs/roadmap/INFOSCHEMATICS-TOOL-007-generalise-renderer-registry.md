@@ -105,6 +105,10 @@ The implementation preserves the architecture boundary: authored data contains o
 
 TOOL-007 is ready for human review. Acceptance, pruning, pushing and releasing remain outside this delivery run.
 
+## Done
+
+Pending human acceptance.
+
 ## Discussion
 
 ### Extension seam
