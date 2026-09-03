@@ -17,6 +17,16 @@ export function Present({ className, config, renderers }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config]);
   const presentation = usePresentation(runtime);
   const { derived, dispatch, state } = presentation;
+  const storyCallout = state.playing
+    ? config.stories.find((story) => story.id === state.playing?.id)?.scenes[
+        state.playing.step
+      ]?.callout
+    : undefined;
+  const thematicCallout = derived.thematicScene
+    ? config.themes
+        .flatMap((theme) => theme.scenes)
+        .find((scene) => scene.id === derived.thematicScene?.id)?.callout
+    : undefined;
   const [detailsVisible, setDetailsVisible] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
   const root = useRef<HTMLElement>(null);
@@ -179,6 +189,7 @@ export function Present({ className, config, renderers }: PresentProps) {
               <SceneCallout
                 autoAdvance={state.autoAdvance}
                 body={derived.runningStoryScene.caption}
+                calloutConfig={storyCallout}
                 eyebrow={derived.runningStory.label}
                 onExit={() => dispatch({ type: "stop-story" })}
                 onStep={stepStory}
@@ -202,6 +213,7 @@ export function Present({ className, config, renderers }: PresentProps) {
             ) : derived.thematicScene ? (
               <SceneCallout
                 body={derived.thematicScene.description}
+                calloutConfig={thematicCallout}
                 eyebrow={derived.thematicScene.label}
                 logo={runtime.themeLogos[derived.thematicScene.id]}
                 onExit={() => dispatch({ type: "clear-focus" })}

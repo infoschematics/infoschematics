@@ -1,4 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import type { CalloutConfig } from "@infoschematics/domain-model/scene";
+import {
+  resolveInfoschematicRenderer,
+  useInfoschematicRenderers,
+} from "@infoschematics/view-canvas";
 import type { Box } from "@infoschematics/view-model/geometry";
 import {
   chooseSpot,
@@ -70,6 +75,7 @@ export const litObstacles = (
 export function SceneCallout({
   autoAdvance,
   body,
+  calloutConfig,
   eyebrow,
   logo,
   onExit,
@@ -86,6 +92,7 @@ export function SceneCallout({
 }: {
   autoAdvance?: boolean;
   body: string;
+  calloutConfig?: CalloutConfig;
   eyebrow: string;
   logo?: string;
   onExit: () => void;
@@ -101,10 +108,32 @@ export function SceneCallout({
   wide?: boolean;
 }) {
   const callout = useRef<HTMLDivElement>(null);
+  const renderers = useInfoschematicRenderers();
   const [position, setPosition] = useState(
     scene.callout ?? runtime.calloutPorts[0] ?? { x: 0.5, y: 0.5 },
   );
   const aside = Boolean(logo || profile?.length);
+  const resolved = calloutConfig
+    ? resolveInfoschematicRenderer(
+        renderers,
+        "callout",
+        calloutConfig.renderer,
+        calloutConfig.properties,
+      )
+    : undefined;
+  const standardContent = (
+    <>
+      {title ? <p className="isp-callout-title">{title}</p> : null}
+      <p className="isp-callout-body">{body}</p>
+      {takeaways?.length ? (
+        <ul className="isp-callout-takeaways">
+          {takeaways.map((takeaway) => (
+            <li key={takeaway}>{takeaway}</li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  );
 
   useLayoutEffect(() => {
     const element = callout.current;
@@ -166,15 +195,16 @@ export function SceneCallout({
             </div>
           ) : null}
           <div>
-            {title ? <p className="isp-callout-title">{title}</p> : null}
-            <p className="isp-callout-body">{body}</p>
-            {takeaways?.length ? (
-              <ul className="isp-callout-takeaways">
-                {takeaways.map((takeaway) => (
-                  <li key={takeaway}>{takeaway}</li>
-                ))}
-              </ul>
-            ) : null}
+            {resolved && calloutConfig ? (
+              <resolved.Component
+                callout={calloutConfig}
+                properties={resolved.properties}
+              >
+                {standardContent}
+              </resolved.Component>
+            ) : (
+              standardContent
+            )}
           </div>
         </div>
         <div className="isp-callout-actions">
