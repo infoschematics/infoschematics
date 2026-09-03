@@ -7,8 +7,13 @@ import {
   useInfoschematic,
 } from '@infoschematics/view-canvas'
 import type { PresentProps } from '@infoschematics/view-present'
-import type { CreatedComponent, CreatedFlow } from '@infoschematics/view-model/editable'
-import type { Box } from '@infoschematics/view-model/geometry'
+import type {
+  ArtefactGeometry,
+  ArtefactSelection,
+  CreatedComponent,
+  CreatedFlow,
+} from '@infoschematics/view-model/editable'
+import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { portsForBox } from '@infoschematics/view-model/ports'
 import { routeBetweenPorts } from '@infoschematics/view-model/routing'
 import {
@@ -32,6 +37,27 @@ import { ShortcutOverlay } from './panels/ShortcutOverlay.tsx'
 import { TitleBar } from './panels/TitleBar.tsx'
 
 type InfoschematicScopeId = string
+
+export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: number): Point | undefined {
+  const arrows = { ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1] } as const
+  const arrow = arrows[key as keyof typeof arrows]
+  if (!arrow || geometry.role === 'route') return undefined
+  if (geometry.role === 'lane') {
+    return arrow[1] === 0 ? undefined : { x: 0, y: geometry.y + geometry.height / 2 + arrow[1] * step }
+  }
+  if (geometry.role === 'zone') {
+    return arrow[0] === 0 ? undefined : { x: geometry.x + geometry.width / 2 + arrow[0] * step, y: 0 }
+  }
+  return {
+    x: geometry.box.x + geometry.box.width / 2 + arrow[0] * step,
+    y: geometry.box.y + geometry.box.height / 2 + arrow[1] * step,
+  }
+}
+
+const sameArtefact = (left: ArtefactSelection | null, right: ArtefactSelection) =>
+  left?.kind === right.kind &&
+  left.id === right.id &&
+  (left.kind !== 'zone' || (right.kind === 'zone' && left.laneId === right.laneId))
 
 // Flow Families remain visible controls whether or not their Flows reference a
 // published interface specification.
@@ -180,10 +206,16 @@ function AppContent() {
         labels,
         attached,
         createdCards,
+        {
+          fabrics: runtime.config.infoschematic.fabrics,
+          graphics: runtime.config.infoschematic.graphics,
+        },
       ),
     [flowsAfterCreations, presentation.visibleFlows, presentation.visibleScopes, runtime],
   )
   const editor = useEditor(buildEditable)
+  const editorRef = useRef(editor)
+  editorRef.current = editor
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
   const sceneList = useSceneList()
@@ -475,6 +507,12 @@ function AppContent() {
        * and a card takes the lines that meet it because a flow with one
        * end missing cannot be written down.
        */
+      if (editor.editing && editor.selectedArtefact && (event.key === 'Delete' || event.key === 'Backspace')) {
+        event.preventDefault()
+        editor.removeArtefact()
+        return
+      }
+
       if (editor.editing && editor.selected && (event.key === 'Delete' || event.key === 'Backspace')) {
         event.preventDefault()
         editor.remove(editor.selected, linesMeeting(editor.selected, drawnFlows, runtime))
@@ -491,6 +529,27 @@ function AppContent() {
       }
 
       const arrow = { ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1] }[event.key]
+
+      if (
+        editor.editing &&
+        editor.selectedArtefact &&
+        event.altKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        event.preventDefault()
+        editor.reorderArtefact(event.key === 'ArrowUp' ? -1 : 1)
+        return
+      }
+
+      if (arrow && editor.editing && editor.selectedArtefact && editor.artefactGeometry) {
+        const geometry = editor.artefactGeometry
+        if (geometry.role === 'route') return
+        event.preventDefault()
+        const step = event.shiftKey ? 10 : 1
+        const point = designArrowPoint(geometry, event.key, step)
+        if (point) editor.moveArtefact(point)
+        return
+      }
 
       // While a handle is being edited the arrows nudge it; otherwise they step
       // whatever Story is running.
@@ -539,8 +598,13 @@ function AppContent() {
     editor.editing,
     editor.nudge,
     editor.remove,
+    editor.removeArtefact,
+    editor.reorderArtefact,
+    editor.moveArtefact,
     editor.select,
     editor.selected,
+    editor.selectedArtefact,
+    editor.artefactGeometry,
     playing,
     presentation.stepStory,
     presentation.stopStory,
@@ -663,6 +727,7 @@ function AppContent() {
           <div className="infoschematic-panel" ref={infoschematicPanel}>
             <section className="infoschematic" aria-label={`${runtime.config.title} Infoschematic`}>
               <InfoschematicDiagram
+                artefactOperations={editor.artefactOperations}
                 componentOffsets={movedComponents}
                 removals={editor.removals}
                 highlight={highlight}
@@ -694,9 +759,32 @@ function AppContent() {
                 onHover={editor.hover}
                 hovered={editor.hovered}
                 onSelect={editor.select}
+                onArtefactMove={editor.editing ? (_selection, point) => editorRef.current.moveArtefact(point) : undefined}
+                onArtefactRelease={() => editorRef.current.releaseGuides()}
+                onArtefactRemove={
+                  editor.editing
+                    ? (selection) => {
+                        const current = editorRef.current
+                        if (sameArtefact(current.selectedArtefact, selection)) current.removeArtefact()
+                        else current.selectArtefact(selection)
+                      }
+                    : undefined
+                }
+                onArtefactReorder={
+                  editor.editing
+                    ? (selection, direction) => {
+                        const current = editorRef.current
+                        if (sameArtefact(current.selectedArtefact, selection)) current.reorderArtefact(direction)
+                        else current.selectArtefact(selection)
+                      }
+                    : undefined
+                }
+                onArtefactResize={editor.editing ? (_selection, size) => editorRef.current.resizeArtefact(size) : undefined}
+                onArtefactSelect={editor.editing ? (selection) => editorRef.current.selectArtefact(selection) : undefined}
                 portCounts={editor.portCounts}
                 flows={drawnFlows}
                 selected={editor.selected}
+                selectedArtefact={editor.selectedArtefact}
                 annotated={presentation.annotated}
                 grid={editor.view.grid}
                 graphic={runningStoryScene?.graphic}

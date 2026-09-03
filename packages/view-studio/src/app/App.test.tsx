@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises'
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -11,11 +12,48 @@ import {
   type RendererProperties,
 } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
-import { App } from './App.tsx'
+import { App, designArrowPoint } from './App.tsx'
 import { SceneCallout } from './panels/SceneCallout.tsx'
 
 describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
+
+  it('constrains typed Design arrow movement by artefact geometry', () => {
+    expect(designArrowPoint({ height: 100, role: 'lane', y: 40 }, 'ArrowUp', 10)).toEqual({ x: 0, y: 80 })
+    expect(designArrowPoint({ height: 100, role: 'lane', y: 40 }, 'ArrowLeft', 10)).toBeUndefined()
+    expect(designArrowPoint({ laneId: 'lane', role: 'zone', width: 200, x: 20 }, 'ArrowRight', 1)).toEqual({
+      x: 121,
+      y: 0,
+    })
+    expect(designArrowPoint({ laneId: 'lane', role: 'zone', width: 200, x: 20 }, 'ArrowDown', 1)).toBeUndefined()
+    expect(
+      designArrowPoint({ box: { height: 80, width: 120, x: 100, y: 60 }, role: 'box' }, 'ArrowDown', 10),
+    ).toEqual({ x: 160, y: 110 })
+    expect(
+      designArrowPoint({ points: [{ x: 0, y: 0 }, { x: 100, y: 0 }], role: 'route' }, 'ArrowRight', 10),
+    ).toBeUndefined()
+  })
+
+  it('wires all-six typed Design preview without replacing legacy handle callbacks', async () => {
+    const source = await readFile(new URL('./App.tsx', import.meta.url), 'utf8')
+
+    expect(source).toContain('fabrics: runtime.config.infoschematic.fabrics')
+    expect(source).toContain('graphics: runtime.config.infoschematic.graphics')
+    expect(source).toContain('artefactOperations={editor.artefactOperations}')
+    expect(source).toContain('selectedArtefact={editor.selectedArtefact}')
+    expect(source).toContain('editorRef.current.selectArtefact(selection)')
+    expect(source).toContain('editorRef.current.moveArtefact(point)')
+    expect(source).toContain('editorRef.current.resizeArtefact(size)')
+    expect(source).toContain('editorRef.current.releaseGuides()')
+    expect(source).toContain('sameArtefact(current.selectedArtefact, selection)')
+    expect(source).toContain('current.removeArtefact()')
+    expect(source).toContain('current.reorderArtefact(direction)')
+    expect(source).toContain('onSelect={editor.select}')
+    expect(source).toContain('onMoveWaypoint={editor.editing ? editor.moveWaypoint : undefined}')
+    expect(source).toContain("presentation.mode === 'design'")
+    expect(source).toContain('presentation.visibleFlows')
+    expect(source).toContain('presentation.visibleScopes')
+  })
 
   it('renders a title-only configuration as a safe blank canvas', () => {
     const localStorage = { getItem: vi.fn(), setItem: vi.fn() }
