@@ -80,7 +80,7 @@ function CanvasContent({
         visibleScopes={scopes}
       />
       <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {signals
+        {activeSignals
           .map((signal) => {
             const flow = shownFlows.find((candidate) => candidate.id === signal.flowId)
             if (!flow) return null
