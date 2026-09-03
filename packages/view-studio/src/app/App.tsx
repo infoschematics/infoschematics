@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
+  defineInfoschematicRenderers,
   InfoschematicContext,
   InfoschematicDiagram,
   InfoschematicRenderersContext,
@@ -117,8 +118,9 @@ const roomForCard = (viewBox: Box, made: number): Box => ({
 
 export function Studio({ config, renderers }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
+  const rendererRegistry = useMemo(() => defineInfoschematicRenderers(renderers ?? {}), [renderers])
   return (
-    <InfoschematicRenderersContext value={renderers ?? {}}>
+    <InfoschematicRenderersContext value={rendererRegistry}>
       <InfoschematicContext value={runtime}>
         <AppContent />
       </InfoschematicContext>
@@ -186,6 +188,14 @@ function AppContent() {
   const sceneList = useSceneList(presentation.playing)
   const sceneLibrary = useSceneLibrary()
   const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
+  const storyCallout = playing
+    ? runtime.config.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
+    : undefined
+  const thematicCallout = presentation.thematicScene
+    ? runtime.config.themes
+        .flatMap((theme) => theme.scenes)
+        .find((scene) => scene.id === presentation.thematicScene?.id)?.callout
+    : undefined
   // A dragged card's routes have to redraw with it, and a hand-edited route
   // has to draw as edited, so the Infoschematic draws flows folded with both
   // rather than the authored ones while an edit is live.
@@ -628,6 +638,7 @@ function AppContent() {
                 <SceneCallout
                   autoAdvance={presentation.autoAdvance}
                   body={runningStoryScene.caption}
+                  calloutConfig={storyCallout}
                   eyebrow={runningStory?.label ?? ''}
                   onExit={presentation.stopStory}
                   onStep={presentation.stepStory}
@@ -644,6 +655,7 @@ function AppContent() {
                  its own. */
                 <SceneCallout
                   body={presentation.thematicScene.description}
+                  calloutConfig={thematicCallout}
                   eyebrow={presentation.thematicScene.label}
                   key={presentation.thematicScene.id}
                   logo={themeLogos[presentation.thematicScene.id]}

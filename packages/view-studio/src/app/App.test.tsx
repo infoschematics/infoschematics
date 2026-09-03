@@ -1,9 +1,18 @@
+import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import type { FabricRendererProps } from '@infoschematics/view-canvas'
+import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import {
+  defineInfoschematicRenderers,
+  type FabricRendererProps,
+  InfoschematicContext,
+  InfoschematicRenderersContext,
+  type RendererProperties,
+} from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { App } from './App.tsx'
+import { SceneCallout } from './panels/SceneCallout.tsx'
 
 describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
@@ -147,5 +156,99 @@ describe('App', () => {
     const runtime = createInfoschematicRuntime(defineInfoschematic({ title: 'Vocabulary' }))
 
     expect(runtime).toMatchObject({ standaloneScenes: [], stories: [], thematicScenes: [] })
+  })
+})
+
+const calloutRuntime = createInfoschematicRuntime(defineInfoschematic({ title: 'Studio Callout renderers' }))
+
+const renderSceneCallout = (
+  calloutConfig: CalloutConfig,
+  renderers = defineInfoschematicRenderers({}),
+) =>
+  renderToStaticMarkup(
+    <InfoschematicRenderersContext value={renderers}>
+      <InfoschematicContext value={calloutRuntime}>
+        <SceneCallout
+          body="Studio audience content"
+          calloutConfig={calloutConfig}
+          eyebrow="Story"
+          onExit={() => undefined}
+          onStep={() => undefined}
+          step={{ callout: { x: 0.5, y: 0.5 }, components: [], flows: [] }}
+          stepNumber={1}
+          stepTotal={2}
+          takeaways={['Keep the standard content']}
+          title="A Studio Callout"
+        />
+      </InfoschematicContext>
+    </InfoschematicRenderersContext>,
+  )
+
+describe('Studio SceneCallout renderers', () => {
+  it('renders a validated custom Callout inside the existing Studio panel', () => {
+    const renderers = defineInfoschematicRenderers({
+      callouts: [
+        {
+          key: 'emphasis',
+          schemaVersion: 1,
+          validateProperties: (properties: RendererProperties | undefined) =>
+            typeof properties?.tone === 'string'
+              ? { valid: true as const, properties: { tone: properties.tone } }
+              : { valid: false as const, reason: 'tone must be a string' },
+          component: ({ children, properties }: { children: ReactNode; properties: Readonly<{ tone: string }> }) => (
+            <div data-studio-callout={properties.tone}>{children}</div>
+          ),
+        },
+      ],
+    })
+
+    const markup = renderSceneCallout(
+      { body: 'Studio audience content', properties: { tone: 'urgent' }, renderer: 'emphasis' },
+      renderers,
+    )
+
+    expect(markup).toContain('data-studio-callout="urgent"')
+    expect(markup).toContain('class="scene-callout"')
+    expect(markup).toContain('Studio audience content')
+    expect(markup).toContain('aria-label="Next step"')
+  })
+
+  it('reports an unknown Callout and retains the standard Studio content', () => {
+    const onDiagnostic = vi.fn()
+    const markup = renderSceneCallout(
+      { body: 'Studio audience content', renderer: 'missing' },
+      defineInfoschematicRenderers({ callouts: [], onDiagnostic }),
+    )
+
+    expect(onDiagnostic).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'unknown-key', key: 'missing', kind: 'callout' }),
+    )
+    expect(markup).toContain('Studio audience content')
+    expect(markup).toContain('role="status"')
+  })
+
+  it('reports invalid Callout properties and retains the standard Studio content', () => {
+    const onDiagnostic = vi.fn()
+    const markup = renderSceneCallout(
+      { body: 'Studio audience content', properties: { tone: 3 }, renderer: 'emphasis' },
+      defineInfoschematicRenderers({
+        callouts: [
+          {
+            key: 'emphasis',
+            schemaVersion: 1,
+            validateProperties: () => ({ valid: false as const, reason: 'tone must be a string' }),
+            component: ({ children }: { children: ReactNode }) => <div data-studio-callout>{children}</div>,
+          },
+        ],
+        onDiagnostic,
+      }),
+    )
+
+    expect(onDiagnostic).toHaveBeenCalledWith(
+      expect.objectContaining({ code: 'invalid-properties', key: 'emphasis', kind: 'callout' }),
+    )
+    expect(markup).not.toContain('data-studio-callout')
+    expect(markup).toContain('Studio audience content')
+    expect(markup).toContain('Keep the standard content')
   })
 })

@@ -1,8 +1,14 @@
 import { ChevronLeft, ChevronRight, Pause, X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
+import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
-import { type InfoschematicRuntime, useInfoschematic } from '@infoschematics/view-canvas'
+import {
+  resolveInfoschematicRenderer,
+  type InfoschematicRuntime,
+  useInfoschematic,
+  useInfoschematicRenderers,
+} from '@infoschematics/view-canvas'
 
 /** Anything that focuses part of the Infoschematic: a Story Scene or Thematic Scene. */
 export type Lit = { components: readonly string[]; flows: readonly string[]; callout?: { x: number; y: number } }
@@ -80,6 +86,7 @@ export const litObstacles = (step: Lit, runtime: InfoschematicRuntime): Obstacle
 export function SceneCallout({
   autoAdvance,
   body,
+  calloutConfig,
   eyebrow,
   logo,
   onExit,
@@ -96,6 +103,7 @@ export function SceneCallout({
   /** Absent for anything that does not run itself. */
   autoAdvance?: boolean
   body: string
+  calloutConfig?: CalloutConfig
   eyebrow: string
   logo?: string
   onExit: () => void
@@ -112,12 +120,35 @@ export function SceneCallout({
   wide?: boolean
 }) {
   const runtime = useInfoschematic()
+  const renderers = useInfoschematicRenderers()
   const { calloutPorts, infoschematicViewBox } = runtime
   // A side of its own is worth having only where there is something to put in
   // it. A Thematic Scene with neither a mark nor a profile reads as a Story Scene does.
   const aside = Boolean(logo || profile?.length)
   const callout = useRef<HTMLDivElement>(null)
-  const [port, setPort] = useState(calloutPorts[0])
+  const [port, setPort] = useState(step.callout ?? calloutPorts[0] ?? { x: 0.5, y: 0.5 })
+  const resolved = calloutConfig
+    ? resolveInfoschematicRenderer(
+        renderers,
+        'callout',
+        calloutConfig.renderer,
+        calloutConfig.properties,
+        'id' in step && typeof step.id === 'string' ? step.id : undefined,
+      )
+    : undefined
+  const standardContent = (
+    <>
+      {title ? <p className="callout-title">{title}</p> : null}
+      <p className="callout-body">{body}</p>
+      {takeaways && takeaways.length > 0 ? (
+        <ul className="callout-takeaways">
+          {takeaways.map((takeaway) => (
+            <li key={takeaway}>{takeaway}</li>
+          ))}
+        </ul>
+      ) : null}
+    </>
+  )
 
   // Measured rather than estimated: the callout's size in diagram units depends
   // on the width the Infoschematic happens to have, which the panel can change.
@@ -179,15 +210,13 @@ export function SceneCallout({
           ) : null}
 
           <div>
-            {title ? <p className="callout-title">{title}</p> : null}
-            <p className="callout-body">{body}</p>
-            {takeaways && takeaways.length > 0 ? (
-              <ul className="callout-takeaways">
-                {takeaways.map((takeaway) => (
-                  <li key={takeaway}>{takeaway}</li>
-                ))}
-              </ul>
-            ) : null}
+            {resolved && calloutConfig ? (
+              <resolved.Component callout={calloutConfig} properties={resolved.properties}>
+                {standardContent}
+              </resolved.Component>
+            ) : (
+              standardContent
+            )}
           </div>
         </div>
         <div className="callout-actions">
