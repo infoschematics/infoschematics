@@ -356,7 +356,7 @@ a:focus-visible {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
   gap: 34px;
-  min-height: 190px;
+  min-height: 150px;
 }
 
 .flow-map__segment {
@@ -367,8 +367,8 @@ a:focus-visible {
 .system-card {
   position: relative;
   z-index: 4;
-  min-height: 158px;
-  padding: 15px 14px 16px;
+  min-height: 126px;
+  padding: 14px;
   border: 2px solid var(--tone);
   border-radius: 10px;
   background: #0a1929e8;
@@ -397,25 +397,25 @@ a:focus-visible {
   --tone-soft: #b2d49f;
 }
 
-.system-card__topline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #627c93;
-  font: 600 9px/1 'DM Mono', monospace;
-  letter-spacing: 0.08em;
-}
-
-.system-card__status {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #82b366;
-  box-shadow: 0 0 8px #82b36699;
+.system-card__tag {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  min-width: 56px;
+  height: 20px;
+  padding: 0 6px;
+  place-items: center;
+  border: 1px solid #79c9ffaa;
+  border-radius: 5px;
+  color: #dff3ff;
+  background: #06101ee8;
+  font: 700 9px/1 'DM Mono', monospace;
+  letter-spacing: 0.04em;
 }
 
 .system-card > p {
-  margin: 28px 0 7px;
+  margin: 2px 70px 8px 0;
   color: var(--tone-soft);
   font: 600 9px/1 'DM Mono', monospace;
   letter-spacing: 0.1em;
@@ -856,11 +856,11 @@ a:focus-visible {
   }
 
   .system-card {
-    min-height: 126px;
+    min-height: 118px;
   }
 
   .system-card > p {
-    margin-top: 20px;
+    margin-top: 2px;
   }
 
   .flow-connector {

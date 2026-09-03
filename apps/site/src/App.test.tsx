@@ -12,6 +12,8 @@ describe('website routes', () => {
     expect(page).toContain('A system, explained')
     expect(page).toContain('OBS-01')
     expect(page).toContain('SEE-04')
+    expect(page.match(/system-card__tag/g)).toHaveLength(4)
+    expect(page).not.toContain('system-card__status')
     expect(page).toContain('Preview online')
     expect(page).toContain('href="/examples/blank/"')
     expect(page).toContain('href="/guides/authoring/"')

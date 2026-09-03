@@ -118,10 +118,7 @@ export function App() {
               {stages.map((stage, index) => (
                 <div className="flow-map__segment" key={stage.code}>
                   <article className="system-card" data-tone={stage.tone}>
-                    <div className="system-card__topline">
-                      <span>{stage.code}</span>
-                      <span aria-hidden="true" className="system-card__status" />
-                    </div>
+                    <span className="system-card__tag">{stage.code}</span>
                     <p>{stage.step}</p>
                     <h3>{stage.title}</h3>
                     <small>{stage.detail}</small>
