@@ -43,10 +43,10 @@
     "url": "git+https://github.com/infoschematics/infoschematics.git"
   },
   "scripts": {
-    "build": "bun run --cwd apps/site build",
-    "check": "bun run ki:verify:visual-tokens && bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run build",
-    "clean": "bun run --cwd apps/site clean",
-    "dev": "bun run --cwd apps/site dev",
+    "build": "bun run packages:build && bun run --cwd apps/site build",
+    "check": "bun run packages:build && bun run ki:verify:visual-tokens && bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run --cwd apps/site build",
+    "clean": "bun run packages:clean && bun run --cwd apps/site clean",
+    "dev": "bun run packages:build && bun run --cwd apps/site dev",
     "generate:visual-tokens": "bun scripts/generate-visual-tokens.ts",
     "ki:site:build": "bun run --cwd apps/site build",
     "ki:site:clean": "bun run --cwd apps/site clean",
