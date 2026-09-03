@@ -1,12 +1,20 @@
 import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import {
+  createArtefactOperation,
   type ArtefactKind,
+  type ArtefactOperation,
   type ArtefactSelection,
+  type ArtefactValueByKind,
   type Change,
   type CreatedComponent,
   type CreatedFlow,
   type EditableDiagram,
+  moveArtefactOperation,
   orderChanges,
+  reorderArtefactOperation,
+  resizeArtefactOperation,
+  type ResizeMinimum,
 } from '@infoschematics/view-model/editable'
 import type { Offset, Point } from '@infoschematics/view-model/geometry'
 import { type Guide, snapToGuides } from '@infoschematics/view-model/guides'
@@ -32,6 +40,16 @@ import {
   type Creation,
 } from './editor-draft.ts'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
+import {
+  artefactIndex,
+  artefactOperationKey,
+  artefactSourceChanges,
+  createdArtefactDetails,
+  discardArtefactOperation,
+  planArtefactRemoval,
+  recordArtefactOperation,
+  recordArtefactOperations,
+} from './artefact-operations.ts'
 
 export type { Attachment, CardCreation, ComponentDraft, Creation, Removal, TextDraft, TextField } from './editor-draft.ts'
 
@@ -70,7 +88,17 @@ export type PendingOrigin = {
   key: string
   /** Which text property, where the draft holds several against one code. */
   property?: TextField
-  map: 'attachments' | 'cards' | 'components' | 'creations' | 'labels' | 'ports' | 'removals' | 'routes' | 'text'
+  map:
+    | 'artefactOperations'
+    | 'attachments'
+    | 'cards'
+    | 'components'
+    | 'creations'
+    | 'labels'
+    | 'ports'
+    | 'removals'
+    | 'routes'
+    | 'text'
 }
 
 /*
@@ -105,10 +133,17 @@ export type PendingOrigin = {
  * so a change and the thing it describes can point at each other, and the field
  * names which of its properties the line sets.
  */
-export type PendingChange = { field: PendingField; key: string; origin?: PendingOrigin; source: string }
+export type PendingChange = {
+  field: PendingField
+  key: string
+  ordering?: SourceChangeOrder
+  origin?: PendingOrigin
+  source: string
+}
 
 /** Which property of a component or flow a change line sets. */
 type PendingField =
+  | 'artefact-operation'
   | 'card'
   | 'create'
   | 'create-card'
@@ -145,6 +180,67 @@ const textProperty: Record<TextField, string> = {
 }
 
 const sameValue = (left: unknown, right: unknown) => left === right || JSON.stringify(left) === JSON.stringify(right)
+
+const selectionKey = (selection: ArtefactSelection): string => {
+  switch (selection.kind) {
+    case 'lane':
+      return `lane:${selection.id}`
+    case 'zone':
+      return `zone:${selection.laneId}:${selection.id}`
+    case 'graphic':
+      return `graphic:${selection.id}`
+    case 'fabric':
+    case 'card':
+    case 'flow':
+      return selection.code ?? selection.id
+  }
+}
+
+const selectionForCreation = <K extends ArtefactKind>(
+  kind: K,
+  value: ArtefactValueByKind[K],
+  ownerId?: string,
+): ArtefactSelection | undefined => {
+  const code = 'code' in value && typeof value.code === 'string' ? value.code : null
+  if (kind === 'zone') {
+    if (!ownerId) return undefined
+    return { code, geometry: 'zone', id: value.id, kind, laneId: ownerId }
+  }
+  if (kind === 'lane') return { code, geometry: 'lane', id: value.id, kind }
+  if (kind === 'flow') return { code, geometry: 'route', id: value.id, kind }
+  return { code, geometry: 'box', id: value.id, kind }
+}
+
+const artefactCount = (
+  config: InfoschematicConfig,
+  target: ArtefactSelection,
+) => {
+  switch (target.kind) {
+    case 'lane':
+      return config.infoschematic.lanes.length
+    case 'zone':
+      return (
+        config.infoschematic.lanes.find((entry) => entry.id === target.laneId)
+          ?.zones.length ?? 0
+      )
+    case 'fabric':
+      return config.infoschematic.fabrics.length
+    case 'card':
+      return config.infoschematic.cards.length
+    case 'flow':
+      return config.infoschematic.flows.length
+    case 'graphic':
+      return config.infoschematic.graphics.length
+  }
+}
+
+const sameArtefactCollection = (
+  left: ArtefactSelection,
+  right: ArtefactSelection,
+) =>
+  left.kind === right.kind &&
+  (left.kind !== 'zone' ||
+    (right.kind === 'zone' && left.laneId === right.laneId))
 
 /** Which port each end of a flow has been moved to, where either has. */
 /**
@@ -186,6 +282,8 @@ export function useEditor(
   // What a nudge acts on. Set by dragging, because the last thing touched is
   // what a presenter means by "this one" - there is no separate selection to make.
   const [selected, setSelected] = useState<string | null>(null)
+  const [selectedArtefact, setSelectedArtefact] = useState<ArtefactSelection | null>(null)
+  const [artefactIssue, setArtefactIssue] = useState<string | null>(null)
   // What the pointer is over, so a change and the thing on Infoschematic it describes
   // can light each other up. Not persisted and not checkpointed: hovering is
   // not an edit, and where the pointer was last session means nothing.
@@ -202,7 +300,18 @@ export function useEditor(
     previousDraft,
   )
   const draft = useMemo(() => normaliseEditorDraft(storedDraft), [storedDraft])
-  const { attachments, cards, components: drafts, creations, labels, portCounts, removals, routes, text } = draft
+  const {
+    artefactOperations,
+    attachments,
+    cards,
+    components: drafts,
+    creations,
+    labels,
+    portCounts,
+    removals,
+    routes,
+    text,
+  } = draft
 
   const setDraftField = useCallback(
     <K extends Exclude<keyof EditorDraft, 'version'>>(field: K, update: SetStateAction<EditorDraft[K]>) =>
@@ -211,6 +320,9 @@ export function useEditor(
   )
   const setAttachments = (update: SetStateAction<EditorDraft['attachments']>) =>
     setDraftField('attachments', update)
+  const setArtefactOperations = (
+    update: SetStateAction<EditorDraft['artefactOperations']>,
+  ) => setDraftField('artefactOperations', update)
   const setCards = (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update)
   const setCreations = (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update)
   const setDrafts = (update: SetStateAction<EditorDraft['components']>) => setDraftField('components', update)
@@ -276,6 +388,21 @@ export function useEditor(
     () => build(offsets, labelPositions, attached, created, createdCards),
     [attached, build, created, createdCards, labelPositions, offsets],
   )
+  const selectedArtefactDetails = useMemo(() => {
+    const authored = selected ? diagram.selectionFor(selected) : undefined
+    if (authored || !selectedArtefact) return authored
+    const created = [...artefactOperations]
+      .reverse()
+      .find(
+        (operation) =>
+          operation.operation === 'create' &&
+          operation.target.kind === selectedArtefact.kind &&
+          operation.target.id === selectedArtefact.id,
+      )
+    return created?.operation === 'create'
+      ? createdArtefactDetails(created)
+      : undefined
+  }, [artefactOperations, diagram, selected, selectedArtefact])
 
   /*
    * Drafts the model has overtaken, cleared as the editor comes up.
@@ -402,6 +529,16 @@ export function useEditor(
    */
   const pending = useMemo<readonly PendingChange[]>(() => {
     const every: PendingChange[] = [
+      ...artefactSourceChanges(artefactOperations).map((change) => ({
+        field: 'artefact-operation' as const,
+        key: change.key,
+        ordering: change,
+        origin: {
+          key: change.key,
+          map: 'artefactOperations' as const,
+        },
+        source: change.source,
+      })),
       ...changes.map((change) => ({
         field: 'card' as const,
         key: change.key,
@@ -513,6 +650,15 @@ export function useEditor(
      */
     type OrderedPendingChange = PendingChange & SourceChangeOrder
     const ordered = (change: PendingChange): OrderedPendingChange => {
+      if (change.ordering) {
+        return {
+          ...change,
+          authoredIndex: change.ordering.authoredIndex,
+          owner: change.ordering.owner,
+          phase: change.ordering.phase,
+          target: change.ordering.target,
+        }
+      }
       const identity = diagram.identityOf(change.key)
       const phase =
         change.field === 'remove' ? 'remove' : change.field === 'create' || cards[change.key] ? 'create' : 'update'
@@ -551,9 +697,155 @@ export function useEditor(
       [...latest.values()].filter((change) => change.source !== diagram.authored(change.key, change.field)),
     )
 
-  }, [attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
+  }, [artefactOperations, attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
+
+  const selectArtefact = (target: ArtefactSelection | null) => {
+    setSelectedArtefact(target)
+    setSelected(target ? selectionKey(target) : null)
+    setArtefactIssue(null)
+  }
+
+  const selectKey = (key: string | null) => {
+    setSelected(key)
+    setSelectedArtefact(key ? (diagram.selectionFor(key)?.selection ?? null) : null)
+    setArtefactIssue(null)
+  }
+
+  const recordOperation = (
+    operation: ArtefactOperation,
+    discrete: boolean,
+  ) => {
+    checkpoint()
+    if (discrete) closeGesture()
+    setArtefactOperations((current) =>
+      recordArtefactOperation(current, operation),
+    )
+  }
+
+  const moveSelectedArtefact = (point: Point) => {
+    if (!selectedArtefactDetails?.capabilities.move) return
+    const target = selectedArtefactDetails.movementTarget
+    const details =
+      target.kind === selectedArtefactDetails.selection.kind &&
+      target.id === selectedArtefactDetails.selection.id
+        ? selectedArtefactDetails
+        : diagram.selectionFor(selectionKey(target))
+    if (!details || !details.capabilities.move) return
+    const geometry = details.geometry
+    const offset = (() => {
+      switch (geometry.role) {
+        case 'lane':
+          return { dx: 0, dy: point.y - (geometry.y + geometry.height / 2) }
+        case 'zone':
+          return { dx: point.x - (geometry.x + geometry.width / 2), dy: 0 }
+        case 'box':
+          return {
+            dx: point.x - (geometry.box.x + geometry.box.width / 2),
+            dy: point.y - (geometry.box.y + geometry.box.height / 2),
+          }
+        case 'route':
+          return undefined
+      }
+    })()
+    if (!offset) return
+    const operation = moveArtefactOperation(target, geometry, offset)
+    if (operation) recordOperation(operation, false)
+  }
+
+  const resizeSelectedArtefact = (size: ResizeMinimum) => {
+    if (!selectedArtefactDetails?.capabilities.resize) return
+    const operation = resizeArtefactOperation(
+      selectedArtefactDetails.selection,
+      selectedArtefactDetails.geometry,
+      size,
+    )
+    if (operation) recordOperation(operation, false)
+  }
+
+  const reorderSelectedArtefact = (direction: -1 | 1) => {
+    if (!selectedArtefactDetails?.capabilities.reorder) return
+    const target = selectedArtefactDetails.selection
+    const previous = [...artefactOperations]
+      .reverse()
+      .find(
+        (operation) =>
+          operation.operation === 'reorder' &&
+          operation.target.kind === target.kind &&
+          operation.target.id === target.id,
+      )
+    const from =
+      previous?.operation === 'reorder'
+        ? previous.to
+        : artefactIndex(config, target)
+    if (from === undefined) return
+    const createdCount = artefactOperations.filter(
+      (operation) =>
+        operation.operation === 'create' &&
+        sameArtefactCollection(operation.target, target),
+    ).length
+    const removedCount = artefactOperations.filter(
+      (operation) =>
+        operation.operation === 'remove' &&
+        sameArtefactCollection(operation.target, target),
+    ).length
+    const length = artefactCount(config, target) + createdCount - removedCount
+    const operation = reorderArtefactOperation(
+      target,
+      from,
+      from + direction,
+      length,
+    )
+    if (operation && operation.from !== operation.to) {
+      recordOperation(operation, true)
+    }
+  }
+
+  const removeSelectedArtefact = (): string | undefined => {
+    if (!selectedArtefactDetails?.capabilities.remove) return undefined
+    const plan = planArtefactRemoval(
+      config,
+      selectedArtefactDetails.selection,
+      artefactOperations,
+    )
+    if (plan.blockedReason) {
+      setArtefactIssue(plan.blockedReason)
+      return plan.blockedReason
+    }
+    if (plan.operations.length === 0) return undefined
+    checkpoint()
+    closeGesture()
+    setArtefactOperations((current) =>
+      recordArtefactOperations(current, plan.operations),
+    )
+    selectArtefact(null)
+    return undefined
+  }
+
+  const createTypedArtefact = <K extends ArtefactKind>(
+    kind: K,
+    value: ArtefactValueByKind[K],
+    index: number,
+    ownerId?: string,
+  ) => {
+    const target = selectionForCreation(kind, value, ownerId)
+    if (!target) return undefined
+    const operation = createArtefactOperation(
+      target as never,
+      value as never,
+      index,
+    ) as ArtefactOperation | undefined
+    if (!operation) return undefined
+    recordOperation(operation, true)
+    selectArtefact(target)
+    return target
+  }
 
   return {
+    artefactCapabilities: selectedArtefactDetails?.capabilities,
+    artefactGeometry: selectedArtefactDetails?.geometry,
+    artefactIssue,
+    artefactOperations,
+    createArtefact: createTypedArtefact,
     // A route-only edit is still a change the Discard button has to be able to
     // act on - ChangePane disables that button at count 0, so leaving routes
     // out here would make an edited waypoint undiscardable by anything but Undo.
@@ -610,7 +902,7 @@ export function useEditor(
           const source = `${key}  ->  label: { along: ${along} },`
           if (labels[key] === along || (labels[key] === undefined && source === diagram.authored(key, 'label'))) return
           checkpoint()
-          setSelected(key)
+          selectKey(key)
           setLabels((current) => ({ ...current, [key]: along }))
         }
         return
@@ -624,10 +916,11 @@ export function useEditor(
         const next = { ...offset, from: diagram.authored(key, 'card') }
         if (sameValue(drafts[key], next)) return
         checkpoint()
-        setSelected(key)
+        selectKey(key)
         setDrafts((current) => ({ ...current, [key]: next }))
       }
     },
+    moveArtefact: moveSelectedArtefact,
     // Nudging works on the offset directly rather than through a point, so it is
     // exact: a unit is a unit, with no guide pulling it somewhere near instead.
     nudge: (dx: number, dy: number) => {
@@ -670,7 +963,7 @@ export function useEditor(
       checkpoint()
       closeGesture()
       setCreations((current) => ({ ...current, [code]: line }))
-      setSelected(code)
+      selectKey(code)
     },
     cards,
     created,
@@ -691,7 +984,7 @@ export function useEditor(
       checkpoint()
       closeGesture()
       setCards((current) => ({ ...current, [code]: card }))
-      setSelected(code)
+      selectKey(code)
     },
     hover: setHovered,
     hovered,
@@ -709,7 +1002,7 @@ export function useEditor(
       if (delta === 0) return
       checkpoint()
       closeGesture()
-      setSelected(key)
+      selectKey(key)
       setDrafts((current) => {
         const offset = current[key] ?? { dx: 0, dy: 0 }
         const from = diagram.authored(key, 'card')
@@ -786,7 +1079,15 @@ export function useEditor(
     // since it is wired through the same string-keyed onSelect every handle
     // uses - so an empty key is read here as "nothing", the one string no
     // handle is ever keyed by.
-    select: (key: string) => setSelected(key === '' ? null : key),
+    removeArtefact: removeSelectedArtefact,
+    reorderArtefact: reorderSelectedArtefact,
+    resizeArtefact: resizeSelectedArtefact,
+    select: (key: string) => {
+      const normalised = key === '' ? null : key
+      selectKey(normalised)
+    },
+    selectArtefact,
+    selectedArtefact,
     selectedComponent: selectedHandle?.kind === 'component' ? selected : null,
     selectedCounts,
     selected,
@@ -955,6 +1256,11 @@ export function useEditor(
     // Dropping one change rather than all of them. Undoable like any other edit.
     discardOne: (origin: PendingOrigin) => {
       const exists = (() => {
+        if (origin.map === 'artefactOperations') {
+          return artefactOperations.some(
+            (operation) => artefactOperationKey(operation) === origin.key,
+          )
+        }
         if (origin.map === 'attachments') return origin.end ? attachments[origin.key]?.[origin.end] !== undefined : false
         if (origin.map === 'cards') return cards[origin.key] !== undefined
         if (origin.map === 'components') return drafts[origin.key] !== undefined
@@ -971,6 +1277,11 @@ export function useEditor(
       const without = <T>(current: Record<string, T>) => {
         const { [origin.key]: _gone, ...rest } = current
         return rest
+      }
+      if (origin.map === 'artefactOperations') {
+        setArtefactOperations((current) =>
+          discardArtefactOperation(current, origin.key),
+        )
       }
       if (origin.map === 'components') setDrafts(without)
       if (origin.map === 'cards') setCards(without)
@@ -1012,7 +1323,9 @@ export function useEditor(
       if (next === editing) return
       setMode(next ? 'design' : null)
       setView(next ? openView : closedView)
-      if (!next) setSelected(null)
+      if (!next) {
+        selectKey(null)
+      }
     },
     /*
      * Switch editors. The selection does not survive it: what is selected in
@@ -1025,7 +1338,7 @@ export function useEditor(
       closeGesture()
       setMode(next)
       setView(next === 'design' ? openView : closedView)
-      setSelected(null)
+      selectKey(null)
     },
     mode,
     toggleView: (key: keyof EditorView) => setView((current) => ({ ...current, [key]: !current[key] })),
