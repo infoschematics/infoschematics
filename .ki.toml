@@ -17,11 +17,6 @@ visibility = "public"
 license = "MIT"
 supported_runtimes = ["claude-code", "chatgpt-codex"]
 
-[skills.ki-repo.checks]
-# The standard topic set (mcp, model-context-protocol, claude) describes MCP servers,
-# not this diagramming product; accurate topics are set directly on GitHub instead.
-topics = false
-
 [skills.ki-authoring]
 
 # -----------------------------------------------------------------------------
