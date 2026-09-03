@@ -6,6 +6,7 @@
 		"@infoschematics/domain-model": "0.1.0"
 	},
 	"exports": {
+		"./tokens.css": "./src/tokens.generated.css",
     "./*": "./src/*.ts"
   },
   "license": "MIT",
