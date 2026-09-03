@@ -4,7 +4,7 @@ area: SITE
 title: Explain Infoschematics visually
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 33000f301728f5b2669cb559fc38e5a87a71eb24
@@ -117,7 +117,7 @@ Implementation commits are `df5aea63`, `cb3f14f9`, `608cb9de`, `cecb106c`, and `
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate. Deferred browser parity and homepage default-switch work is retained in `INFOSCHEMATICS-TOOL-014`.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: TOOL
 title: Complete production modes
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 7925809c5af21241479d5ae2dfea0a83f1b2dc4f
@@ -111,7 +111,7 @@ TOOL-005 is ready for human review. Acceptance, pruning, pushing and releasing r
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate confirmed the stated goal and boundary.
 
 ## Discussion
 

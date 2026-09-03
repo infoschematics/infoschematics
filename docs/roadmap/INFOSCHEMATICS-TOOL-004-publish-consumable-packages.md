@@ -4,7 +4,7 @@ area: TOOL
 title: Publish consumable packages
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: c4849f2825bd4f79512b66de1e9bf05fc6e10207
@@ -110,7 +110,7 @@ Implementation commits are `0a9d91f8`, `a3b9912b`, `eddfc275`, and `c4cc7d57`, f
 
 ## Done
 
-Pending human acceptance of the local release candidate. Registry publication requires separate explicit authority.
+Accepted by the user on 2026-09-03, including the seven-package release-candidate interpretation. Registry publication still requires separate explicit authority and is retained in `INFOSCHEMATICS-TOOL-014`.
 
 ## Discussion
 

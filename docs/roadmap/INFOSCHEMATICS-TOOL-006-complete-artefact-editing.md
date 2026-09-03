@@ -4,7 +4,7 @@ area: TOOL
 title: Complete artefact editing
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: fb2da8f1d1fb4631b804e2fe68eecc5b0a8bff7f
@@ -113,7 +113,7 @@ TOOL-006 is ready for human review. Acceptance, pruning, pushing and releasing r
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate confirmed the stated goal and boundary.
 
 ## Discussion
 

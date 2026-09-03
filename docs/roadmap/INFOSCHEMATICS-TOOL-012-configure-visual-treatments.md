@@ -4,7 +4,7 @@ area: TOOL
 title: Configure visual treatments
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: fc68a970552877f417d6f9eb6ffac4141eb17144
@@ -120,7 +120,7 @@ Implementation commits are `cffe27e0`, `3c699a1a`, `1ac9fc84`, `bddb1145`, `dd8d
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate. Deferred browser comparison, narrow-width density, and long-text policy work is retained in `INFOSCHEMATICS-TOOL-014`.
 
 ## Discussion
 

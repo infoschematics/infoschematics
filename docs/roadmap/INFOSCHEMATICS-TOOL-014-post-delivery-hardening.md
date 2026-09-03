@@ -16,7 +16,7 @@ Consolidate the operational, compatibility, and visual follow-ups from the initi
 
 ## Context
 
-The initial roadmap delivery met its stated goals and passed the canonical repository gate. Review identified five worthwhile residuals that do not block acceptance: performing the first registry publication when external authority is available, selecting a serialisable renderer schema version, improving dense diagrams at narrow widths, switching the homepage to the approved shared treatment and removing its bespoke preview, and deciding how compact Cards handle long text.
+The initial roadmap delivery met its stated goals and passed the canonical repository gate. Review identified five worthwhile residuals that do not block acceptance: performing the first registry publication when external authority is available, selecting a serialisable renderer schema version, improving dense diagrams at narrow widths, switching the homepage to the approved shared treatment and removing its bespoke preview, and deciding how compact Cards handle long text. Browser observation of the accepted Site, visual-treatment, and normal and reduced-motion signalling work is deferred into the same visual hardening pass.
 
 The repository also needs a full audit and conform pass across its declared Knowledge Islands standards. That pass must assess and record the judgment criteria as well as running the mechanical commands; a mechanically clean CLI result alone is not completion evidence.
 
@@ -35,7 +35,7 @@ The intended pass will:
 - Establish and test an explicit compact-Card policy for long identity, stereotype, and description text.
 - Run repository-wide audit and conform for every declared applicable standard, evaluate each judgment rubric against concrete evidence, record exclusions and decisions, apply approved corrections, and finish with clean mechanical audits and `bun run check`.
 
-Known dependencies are npm scope ownership, trusted-publishing setup, explicit release authority, and human visual-parity decisions. Before promotion to Next, confirm which external conditions are available, capture the renderer compatibility decision, define visual acceptance fixtures for desktop and narrow layouts, and enumerate the applicable judgment rubrics and their evidence format.
+Known dependencies are npm scope ownership, trusted-publishing setup, explicit release authority, and human visual-parity decisions. Before promotion to Next, confirm which external conditions are available, capture the renderer compatibility decision, define visual acceptance fixtures for desktop and narrow layouts and normal and reduced-motion behaviour, and enumerate the applicable judgment rubrics and their evidence format.
 
 ## Discussion
 

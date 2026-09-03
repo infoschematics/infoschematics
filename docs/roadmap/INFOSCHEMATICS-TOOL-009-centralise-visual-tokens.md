@@ -4,7 +4,7 @@ area: TOOL
 title: Centralise visual tokens
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 432aecb66aa57513320f7017735327829fd7253b
@@ -108,7 +108,7 @@ TOOL-009 is ready for human review. Acceptance, pruning, pushing and releasing r
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate confirmed the stated goal and boundary.
 
 ## Discussion
 

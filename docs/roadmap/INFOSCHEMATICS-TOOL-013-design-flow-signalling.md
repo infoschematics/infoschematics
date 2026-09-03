@@ -4,7 +4,7 @@ area: TOOL
 title: Design Flow signalling
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 2c112fbcc5a38e9321f5a6311bf29cc3c7c32253
@@ -129,6 +129,10 @@ Authored Infoschematic data remains serialisable and contains no occurrence, tim
 ### Mini recap
 
 Implementation commits are `8c2e1845`, `9a0d95bf`, `3eeb76c3`, `481f7bed`, `7dd473bf`, `94da2fb0`, `1f80d809`, `31a925b2`, `3f335947`, `c8dc632b`, `b1df0c2d`, and `26cae53a`; baseline `2c112fbcc5a38e9321f5a6311bf29cc3c7c32253`. TOOL-013 is ready for human review.
+
+## Done
+
+Accepted by the user on 2026-09-03 after impartial review and a fresh canonical gate. Deferred browser observation of normal and reduced-motion signalling is retained in `INFOSCHEMATICS-TOOL-014`.
 
 ## Discussion
 
