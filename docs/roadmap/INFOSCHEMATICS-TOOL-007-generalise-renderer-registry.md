@@ -4,7 +4,7 @@ area: TOOL
 title: Generalise renderer registry
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6fbbeb13c5db5c08a8f022fdc355ce133a50580a
@@ -107,7 +107,7 @@ TOOL-007 is ready for human review. Acceptance, pruning, pushing and releasing r
 
 ## Done
 
-Pending human acceptance.
+Accepted by the user on 2026-09-03.
 
 ## Discussion
 
