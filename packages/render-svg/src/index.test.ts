@@ -246,6 +246,22 @@ describe('renderInfoschematicSvg', () => {
     expect(overridden).toContain('data-compact="true"')
   })
 
+  it('renders explicit Flow signals as deterministic still emphasis and ignores unknown ids', () => {
+    const baseline = renderInfoschematicSvg(representative)
+    const signalled = renderInfoschematicSvg(representative, {
+      signals: ['call', 'missing'],
+    })
+
+    expect(renderInfoschematicSvg(representative, { signals: ['call', 'missing'] })).toBe(signalled)
+    expect(baseline).not.toContain('data-signalled=')
+    expect(baseline).not.toContain('infoschematic-flow-signal')
+    expect(signalled).toContain('data-id="call" data-signalled="true"')
+    expect(signalled).toContain('class="infoschematic-flow-signal"')
+    expect(signalled).toContain(`stroke-width="${visualTokens.canvas.flows.signalStillWidth}"`)
+    expect(signalled).not.toContain('<animate')
+    expect(signalled).not.toContain('missing')
+  })
+
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
     expect(renderInfoschematicSvg(representative)).not.toContain('data-renderer=')
 

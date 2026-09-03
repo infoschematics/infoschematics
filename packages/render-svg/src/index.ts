@@ -31,6 +31,8 @@ export type RenderInfoschematicSvgOptions = {
   cardDetails?: CardDetailOverrides
   /** An authored Scene to render without introducing playback or other motion. */
   scene?: SvgSceneSelection
+  /** Flow ids to emphasise deterministically without serialising animation. */
+  signals?: readonly string[]
   visibility?: SvgVisibilityOptions
 }
 
@@ -150,6 +152,7 @@ export const renderInfoschematicSvg = (
   const runtime = createInfoschematicRuntime(config)
   const viewBox = definition.viewBox
   const visualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
+  const signalledFlows = new Set(options.signals ?? [])
   const backdrop =
     visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop
   const visibleScopes = new Set(options.visibility?.scopes ?? definition.scopes.map((scope) => scope.id))
@@ -497,6 +500,7 @@ export const renderInfoschematicSvg = (
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
     const marker = resolved ? `url(#infoschematic-arrow-${resolved.index})` : undefined
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
+    const signalled = signalledFlows.has(flow.id)
     const content = [
       line(2, 'title', [], xmlText(flow.code)),
       line(2, 'path', [
@@ -519,13 +523,27 @@ export const renderInfoschematicSvg = (
         ['stroke-width', canvasTokens.flows.routeWidth],
       ]),
     ]
+    if (signalled) {
+      content.push(
+        line(2, 'path', [
+          ['class', 'infoschematic-flow-signal'],
+          ['d', flow.d],
+          ['fill', 'none'],
+          ['stroke', color],
+          ['stroke-linecap', canvasTokens.flows.lineCap],
+          ['stroke-linejoin', canvasTokens.flows.lineJoin],
+          ['stroke-width', canvasTokens.flows.signalStillWidth],
+        ]),
+      )
+    }
     body.push(
       group(
         1,
         [
-          ['class', `infoschematic-flow${dimmed}`],
+          ['class', `infoschematic-flow${dimmed}${signalled ? ' is-signalled' : ''}`],
           ['data-code', flow.code],
           ['data-id', flow.id],
+          ['data-signalled', signalled || undefined],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
         ],
         content,
