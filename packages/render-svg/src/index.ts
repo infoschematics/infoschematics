@@ -492,6 +492,9 @@ export const renderInfoschematicSvg = (
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
     const metadataColor =
       visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted
+    const compactLabelX = 10
+    const compactLabelY = visualTreatment.card.stereotype && card.stereotype ? 38 : 28
+    const identityWidth = Math.max(42, card.code.length * 6.5 + 14)
     const content = [
       line(2, 'title', [], xmlText(`${card.code}: ${card.label} · ${card.detail}`)),
       line(2, 'rect', [
@@ -516,26 +519,45 @@ export const renderInfoschematicSvg = (
             ['x', 10],
             ['y', 16],
           ],
-          xmlText(card.stereotype.toUpperCase()),
+          xmlText(`«${card.stereotype}»`),
         ),
       )
     }
     if (visualTreatment.card.identity) {
       content.push(
-        line(
+        group(
           2,
-          'text',
           [
             ['class', 'infoschematic-card-identity'],
-            ['fill', metadataColor],
-            ['font-family', canvasTokens.output.fontFamily],
-            ['font-size', canvasTokens.output.metadataFontSize],
-            ['text-anchor', 'end'],
-            ['x', box.width - 10],
-            ['y', 16],
+            ['data-card-detail', 'identity'],
           ],
-          xmlText(card.code),
-        ),
+          [
+            line(3, 'rect', [
+              ['fill', canvasTokens.output.backdrop],
+              ['height', 20],
+              ['rx', 4],
+              ['stroke', metadataColor],
+              ['stroke-width', 1],
+              ['width', identityWidth],
+              ['x', box.width - identityWidth - 8],
+              ['y', 8],
+            ]),
+            line(
+              3,
+              'text',
+              [
+                ['dominant-baseline', 'middle'],
+                ['fill', metadataColor],
+                ['font-family', canvasTokens.output.fontFamily],
+                ['font-size', canvasTokens.output.metadataFontSize],
+                ['text-anchor', 'middle'],
+                ['x', box.width - identityWidth / 2 - 8],
+                ['y', 18],
+              ],
+              xmlText(card.code),
+            ),
+          ],
+        ).join('\n'),
       )
     }
     content.push(
@@ -553,9 +575,16 @@ export const renderInfoschematicSvg = (
               ? canvasTokens.output.metadataFontSize
               : canvasTokens.output.componentFontSize,
           ],
-          ['text-anchor', 'middle'],
-          ['x', box.width / 2],
-          ['y', visualTreatment.card.description ? box.height / 2 - 6 : box.height / 2],
+          ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
+          ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
+          [
+            'y',
+            visualTreatment.card.compact
+              ? compactLabelY
+              : visualTreatment.card.description
+                ? box.height / 2 - 6
+                : box.height / 2,
+          ],
         ],
         xmlText(card.label),
       ),
@@ -570,9 +599,9 @@ export const renderInfoschematicSvg = (
             ['fill', metadataColor],
             ['font-family', canvasTokens.output.fontFamily],
             ['font-size', canvasTokens.output.metadataFontSize],
-            ['text-anchor', 'middle'],
-            ['x', box.width / 2],
-            ['y', box.height / 2 + 14],
+            ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
+            ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
+            ['y', visualTreatment.card.compact ? Math.min(box.height - 10, compactLabelY + 18) : box.height / 2 + 14],
           ],
           xmlText(card.detail),
         ),

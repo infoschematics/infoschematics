@@ -211,7 +211,10 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('fill="#dceeff"')
     expect(svg).toContain('stroke="#13579b"')
     expect(svg).toContain('class="infoschematic-card-identity"')
+    expect(svg).toContain('data-card-detail="identity"')
+    expect(svg).toContain(`<rect fill="${visualTokens.canvas.output.backdrop}" height="20" rx="4"`)
     expect(svg).toContain('class="infoschematic-card-stereotype"')
+    expect(svg).toContain('«service»')
     expect(svg).toContain('class="infoschematic-card-description"')
 
     const overridden = renderInfoschematicSvg(config, {
