@@ -17,6 +17,7 @@ Ownership determines the top-level workspace root:
   - [Site](apps/site/) — the designed homepage, public documentation, examples, and Cloudflare deployment boundary.
 - **Examples** contain independently authored Infoschematic definitions:
   - [Blank Infoschematic](examples/is-blank/) — `@infoschematics/is-blank`, the minimum executable definition.
+  - [Infoschematics example](examples/is-infoschematics/) — `@infoschematics/is-infoschematics`, a substantial, self-describing definition.
 
 ## Use Studio View
 
@@ -38,9 +39,9 @@ A title-only definition renders a blank canvas safely. See [the authoring guide]
 
 ## Package direction
 
-Interactive views are additive. `@infoschematics/view-canvas` will own the reusable Infoschematic component, `@infoschematics/view-present` will wrap Canvas with Audience presentation, and `@infoschematics/view-studio` will wrap Present with Producer-facing Design and Direct capabilities. The existing Studio package temporarily contains all three layers while extraction proceeds.
+Interactive views are additive. `@infoschematics/view-canvas` owns the reusable Infoschematic component, `@infoschematics/view-present` wraps Canvas with Audience presentation, and `@infoschematics/view-studio` wraps Present with Producer-facing Design and Direct capabilities.
 
-`@infoschematics/render-svg` will sit beside the interactive views and render a deterministic `@infoschematics/view-model` snapshot without React. Authored Infoschematic examples use the `is-*` prefix, such as `examples/is-blank` and the forthcoming `examples/is-infoschematics`.
+`@infoschematics/render-svg` sits beside the interactive views and renders a deterministic `@infoschematics/view-model` snapshot without React. Authored Infoschematic examples use the `is-*` prefix: `examples/is-blank` demonstrates the minimum contract, while `examples/is-infoschematics` demonstrates substantial editable and static output from one definition.
 
 ## Understand the project
 

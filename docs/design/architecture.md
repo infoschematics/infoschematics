@@ -39,9 +39,14 @@ The reasons for this direction are recorded in [the framework-neutral library de
 @infoschematics/is-blank
 └── @infoschematics/domain-core
 
+@infoschematics/is-infoschematics
+└── @infoschematics/domain-core
+
 @infoschematics/site
+├── @infoschematics/render-svg
 ├── @infoschematics/view-studio
-└── @infoschematics/is-blank
+├── @infoschematics/is-blank
+└── @infoschematics/is-infoschematics
 ```
 
 Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it; neither imports an interactive view, authored Infoschematic, or site. Authored Infoschematics do not import interactive views. Site consumes public package exports rather than package internals.
@@ -64,6 +69,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
+- `examples/is-infoschematics` owns the independently authored, serialisable self-description used by interactive and static hosts and depends only on Domain Core.
 - `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 
 Authored Infoschematic examples use the `is-` prefix. Reusable packages and host applications use role-based names. Published package names retain the `@infoschematics/*` namespace.
@@ -128,4 +134,4 @@ This boundary covers values that must agree across renderers or between TypeScri
 
 [ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
 
-The blank example and future self-describing example remain separate authored definitions so they can be tested and reused independently. The former standalone website repository is outside this monorepo.
+The blank and self-describing examples remain separate authored definitions that can be tested and reused independently. The Site mounts the self-describing definition through Studio and renders the same value through the framework-neutral SVG renderer; that composition does not move View or host ownership into the authored package. The former standalone website repository remains outside the monorepo.

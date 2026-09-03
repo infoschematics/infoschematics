@@ -135,7 +135,9 @@ The host owns:
 - selection of the authored Infoschematic definition.
 - React implementations for any renderer or Scope icon keys used by that definition.
 
-Studio View owns generic rendering, Producer controls, and runtime state derived from configuration. It must not import a particular authored Infoschematic or its visual implementations.
+Studio View owns generic rendering, Producer controls, and runtime state derived from the configuration. It must not import a particular authored Infoschematic or its visual implementations.
+
+The public website demonstrates this boundary with two examples. `/examples/blank/` mounts the minimum title-only contract, while `/examples/infoschematics/` mounts the substantial [`@infoschematics/is-infoschematics`](../../examples/is-infoschematics/) definition through Studio so its Present, Design, and Direct controls remain available. The homepage consumes the same definition through `renderInfoschematicSvg`; the authored package imports neither React View nor Site code.
 
 ## Monorepo development
 

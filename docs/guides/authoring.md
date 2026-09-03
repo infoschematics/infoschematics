@@ -49,4 +49,4 @@ Removing a Card or Fabric also removes Flows that would lose an endpoint; removi
 - Keep React components, browser APIs, fetched documents, and derived maps out of configuration.
 - Let the host own contract files and other static assets addressed by configuration URLs.
 
-The [`examples/is-blank`](../../examples/is-blank/) package is the minimum executable reference. The public website consumes it at `/examples/blank/`.
+The [`examples/is-blank`](../../examples/is-blank/) package is the minimum executable reference, hosted at `/examples/blank/`. The [`examples/is-infoschematics`](../../examples/is-infoschematics/) package is a substantial self-describing reference: its Lanes, Zones, Cards, Flows, Scenes, and Story explain the repository's ownership and dependency direction. The website hosts that same serialisable definition in Studio at `/examples/infoschematics/` and renders it as deterministic SVG on the homepage.
