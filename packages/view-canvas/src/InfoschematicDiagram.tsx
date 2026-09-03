@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import {
+  applyArtefactOperations,
+  type ArtefactDraftOperation,
+} from '@infoschematics/view-model/artefact-draft'
 import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
@@ -9,7 +13,10 @@ import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-mo
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
-import type { RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
+import {
+  createInfoschematicRuntime,
+  type RuntimeFlow as InfoschematicFlow,
+} from '@infoschematics/view-model/runtime'
 import { useInfoschematic } from './runtime-context.tsx'
 import {
   type FabricRendererProps,
@@ -112,6 +119,7 @@ const {
 } = visualTokens.canvas.geometry
 
 export function InfoschematicDiagram({
+  artefactOperations = [],
   componentOffsets,
   removals = {},
   guides,
@@ -145,12 +153,14 @@ export function InfoschematicDiagram({
   portCounts,
   selected,
   selectedArtefact,
-  flows,
+  flows: suppliedFlows,
   annotated,
   grid,
   graphic,
   visibleScopes,
 }: {
+  /** Authored Design operations previewed without changing the host configuration. */
+  artefactOperations?: readonly ArtefactDraftOperation[]
   /** Codes marked for removal, drawn as going rather than gone. */
   removals?: Record<string, unknown>
   /** Component positions dragged in the editor but not yet written into the model. */
@@ -215,6 +225,17 @@ export function InfoschematicDiagram({
   graphic?: GraphicConfig
   visibleScopes: ReadonlySet<string>
 }) {
+  const hostRuntime = useInfoschematic()
+  const previewing = artefactOperations.length > 0
+  const runtime = useMemo(
+    () =>
+      previewing
+        ? createInfoschematicRuntime(
+            applyArtefactOperations(hostRuntime.config, artefactOperations).config,
+          )
+        : hostRuntime,
+    [artefactOperations, hostRuntime, previewing],
+  )
   const {
     adapterFloor,
     config,
@@ -224,6 +245,8 @@ export function InfoschematicDiagram({
     infoschematicFabricIsVisible,
     infoschematicFabrics,
     infoschematicFamilies,
+    infoschematicFlowIsVisible,
+    infoschematicFlows,
     infoschematicInterfaceById,
     infoschematicLaneLabelX,
     infoschematicLaneLabelY,
@@ -235,7 +258,58 @@ export function InfoschematicDiagram({
     infoschematicRegisterWith,
     infoschematicScopes,
     infoschematicViewBox,
-  } = useInfoschematic()
+  } = runtime
+  const flows = useMemo(() => {
+    if (!previewing || mode !== 'design') return suppliedFlows
+
+    const families = new Set(infoschematicFamilies.map((family) => family.id))
+    const suppliedById = new Map(suppliedFlows.map((flow) => [flow.id, flow]))
+    const authoredById = new Map(
+      hostRuntime.infoschematicFlows.map((flow) => [flow.id, flow]),
+    )
+    const effective = infoschematicFlows
+      .filter((flow) => infoschematicFlowIsVisible(flow, families, visibleScopes))
+      .map((flow) => {
+        const draft = suppliedById.get(flow.id)
+        const authored = authoredById.get(flow.id)
+        const hasRouteDraft =
+          draft &&
+          authored &&
+          (draft.d !== authored.d ||
+            draft.source !== authored.source ||
+            draft.sourcePort !== authored.sourcePort ||
+            draft.target !== authored.target ||
+            draft.targetPort !== authored.targetPort)
+        return hasRouteDraft
+          ? {
+              ...flow,
+              d: draft.d,
+              points: draft.points,
+              source: draft.source,
+              sourcePort: draft.sourcePort,
+              target: draft.target,
+              targetPort: draft.targetPort,
+            }
+          : flow
+      })
+    const effectiveIds = new Set(effective.map((flow) => flow.id))
+    const authoredIds = new Set(
+      hostRuntime.config.infoschematic.flows.map((flow) => flow.id),
+    )
+    const legacyDrafts = suppliedFlows.filter(
+      (flow) => !authoredIds.has(flow.id) && !effectiveIds.has(flow.id),
+    )
+    return [...effective, ...legacyDrafts]
+  }, [
+    hostRuntime.config.infoschematic.flows,
+    infoschematicFamilies,
+    infoschematicFlowIsVisible,
+    infoschematicFlows,
+    mode,
+    previewing,
+    suppliedFlows,
+    visibleScopes,
+  ])
   const renderers = useInfoschematicRenderers()
   const Definitions = renderers.definitions
   const activeGraphicRenderer =
