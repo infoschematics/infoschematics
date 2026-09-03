@@ -320,7 +320,7 @@ export const renderInfoschematicSvg = (
 
   for (const lane of runtime.infoschematicLanes) {
     for (const zone of lane.zones) {
-      const box = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+      const box = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
       const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
       const geometry = regionGeometry({
         box,
@@ -395,7 +395,7 @@ export const renderInfoschematicSvg = (
     }
     const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
     const geometry = regionGeometry({
-      box: { height: lane.height, width: lane.panel.width, x: lane.panel.x, y: lane.y },
+      box: { height: lane.panel.height, width: lane.panel.width, x: lane.panel.x, y: lane.panel.y },
       label: lane.label,
       treatment,
     })

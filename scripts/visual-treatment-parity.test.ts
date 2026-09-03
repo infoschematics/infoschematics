@@ -213,7 +213,7 @@ describe('visual treatment renderer parity', () => {
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
     expect(regionPaths(canvas)).toEqual(regionPaths(svg))
     expect(values(canvas, 'data-label-placement')).toEqual(['none', 'north-east', 'north-west'])
-    expect(values(canvas, 'data-label-treatment')).toEqual(['plain', 'plain', 'plain'])
+    expect(values(canvas, 'data-label-treatment')).toEqual(['notched', 'plain', 'plain'])
     expect(canvas).not.toContain('>HIDDEN LANE</text>')
     expect(svg).not.toContain('>HIDDEN LANE</text>')
   })

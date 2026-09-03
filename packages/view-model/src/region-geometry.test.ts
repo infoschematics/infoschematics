@@ -9,9 +9,9 @@ describe('region label geometry', () => {
     ['north-west', 26, 36, 'start'],
     ['north', 100, 36, 'middle'],
     ['north-east', 174, 36, 'end'],
-    ['west', 10, 70, 'start'],
+    ['west', 26, 70, 'start'],
     ['center', 100, 70, 'middle'],
-    ['east', 190, 70, 'end'],
+    ['east', 174, 70, 'end'],
     ['south-west', 26, 104, 'start'],
     ['south', 100, 104, 'middle'],
     ['south-east', 174, 104, 'end'],
@@ -22,6 +22,16 @@ describe('region label geometry', () => {
       treatment: { frame: 'solid', label: placement as RegionLabelPlacement, labelTreatment: 'plain' },
     })
     expect(geometry.label).toEqual({ dominantBaseline: 'middle', placement, textAnchor, x, y })
+  })
+
+  it('mounts a notched label on the frame line instead of setting it down inside', () => {
+    const geometry = regionGeometry({
+      box,
+      label: 'Region',
+      treatment: { frame: 'solid', label: 'north-west', labelTreatment: 'notched' },
+    })
+    expect(geometry.label?.y).toBe(20)
+    expect(geometry.notch).not.toBeNull()
   })
 
   it('returns neither label nor notch for an absent label and closes the fallback frame', () => {

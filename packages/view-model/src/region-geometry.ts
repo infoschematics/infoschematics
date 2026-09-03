@@ -58,29 +58,36 @@ const roundedFrame = (box: Box, radius: number) => {
   ].join(' ')
 }
 
-const labelGeometry = (box: Box, placement: RegionLabelPlacement): RegionLabelGeometry => {
+const labelGeometry = (
+  box: Box,
+  placement: RegionLabelPlacement,
+  mounted: boolean,
+): RegionLabelGeometry => {
   const { x, y, width, height } = box
   const east = placement.endsWith('east') || placement === 'east'
   const west = placement.endsWith('west') || placement === 'west'
   const north = placement.startsWith('north')
   const south = placement.startsWith('south')
+  // A border-mounted label sits on the frame line the notch breaks; only a
+  // plain label sets down inside the region by the inset.
+  const edgeInset = mounted ? 0 : regionGeometryDefaults.labelInset
   return {
     dominantBaseline: 'middle',
     placement,
     textAnchor: east ? 'end' : west ? 'start' : 'middle',
     x: east
       ? placement === 'east'
-        ? x + width
+        ? x + width - edgeInset
         : x + width - regionGeometryDefaults.labelInset
       : west
         ? placement === 'west'
-          ? x
+          ? x + edgeInset
           : x + regionGeometryDefaults.labelInset
         : x + width / 2,
     y: north
-      ? y + regionGeometryDefaults.labelInset
+      ? y + edgeInset
       : south
-        ? y + height - regionGeometryDefaults.labelInset
+        ? y + height - edgeInset
         : y + height / 2,
   }
 }
@@ -150,7 +157,10 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
     0,
     Math.min(visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2),
   )
-  const resolvedLabel = treatment.label && label.trim().length > 0 ? labelGeometry(box, treatment.label) : null
+  const resolvedLabel =
+    treatment.label && label.trim().length > 0
+      ? labelGeometry(box, treatment.label, treatment.labelTreatment === 'notched')
+      : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
   if (treatment.labelTreatment !== 'notched' || !resolvedLabel) {
     return { label: resolvedLabel, notch: null, outline: roundedFrame(box, resolvedRadius) }

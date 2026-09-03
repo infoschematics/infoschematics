@@ -36,8 +36,8 @@ describe('visual treatment resolution', () => {
 
 describe('region treatment resolution', () => {
   it.each([
-    ['lane', 'top', { frame: 'solid', label: 'north-west', labelTreatment: 'plain' }],
-    ['lane', 'bottom', { frame: 'solid', label: 'south-west', labelTreatment: 'plain' }],
+    ['lane', 'top', { frame: 'solid', label: 'north-west', labelTreatment: 'notched' }],
+    ['lane', 'bottom', { frame: 'solid', label: 'south-west', labelTreatment: 'notched' }],
     ['zone', 'top', { frame: 'none', label: 'north-east', labelTreatment: 'plain' }],
     ['zone', 'bottom', { frame: 'none', label: 'south-east', labelTreatment: 'plain' }],
   ] as const)('keeps the %s %s legacy default independent', (kind, legend, expected) => {

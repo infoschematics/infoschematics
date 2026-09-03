@@ -80,11 +80,14 @@ export const resolveRegionTreatment = (
         : 'north-east'
   const resolvedLabel = label.trim().length === 0 || appearance?.label === 'none' ? null : appearance?.label ?? fallbackLabel
   const requestedFrame = appearance?.frame ?? (kind === 'lane' ? 'solid' : 'none')
-  const requestedLabelTreatment = appearance?.labelTreatment ?? 'plain'
+  const requestedLabelTreatment = appearance?.labelTreatment ?? (kind === 'lane' ? 'notched' : 'plain')
   return {
     frame: requestedFrame,
     label: resolvedLabel,
-    labelTreatment: requestedLabelTreatment === 'notched' && resolvedLabel === null ? 'plain' : requestedLabelTreatment,
+    labelTreatment:
+      requestedLabelTreatment === 'notched' && (resolvedLabel === null || requestedFrame === 'none')
+        ? 'plain'
+        : requestedLabelTreatment,
   }
 }
 
