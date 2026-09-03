@@ -35,7 +35,7 @@ const treatmentConfig = defineInfoschematic({
       {
         id: 'lane',
         label: 'Delivery',
-        appearance: { frame: 'notched', label: 'south-east' },
+        appearance: { frame: 'dashed', label: 'south-east', labelTreatment: 'notched' },
         y: 20,
         height: 240,
         labelY: 20,
@@ -45,7 +45,7 @@ const treatmentConfig = defineInfoschematic({
           {
             id: 'zone',
             label: 'Runtime',
-            appearance: { frame: 'plain', label: 'center' },
+            appearance: { frame: 'dotted', label: 'center', labelTreatment: 'plain' },
             x: 10,
             width: 620,
             fill: '#071e2d',
@@ -76,9 +76,11 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-surface-treatment="blueprint"')
     expect(markup).toContain('data-grid-treatment="major-plus-minor"')
     expect(markup).toContain('fill="url(#infoschematic-grid-major-plus-minor)"')
-    expect(markup).toContain('data-frame-treatment="notched"')
+    expect(markup).toContain('data-frame-treatment="dashed"')
     expect(markup).toContain('data-label-placement="south-east"')
-    expect(markup).toContain('data-frame-treatment="plain"')
+    expect(markup).toContain('data-frame-treatment="dotted"')
+    expect(markup).toContain('data-label-treatment="notched"')
+    expect(markup).toContain('data-label-treatment="plain"')
     expect(markup).toContain('data-label-placement="center"')
     expect(markup).toContain('class="infoschematic-region-frame"')
 
@@ -158,7 +160,7 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-surface-treatment="neutral"')
     expect(markup).toContain('data-grid-treatment="none"')
     expect(markup).not.toContain('class="infoschematic-authored-grid"')
-    expect(markup).toContain('data-frame-treatment="plain"')
+    expect(markup).toContain('data-frame-treatment="solid"')
     expect(markup).toContain('data-frame-treatment="none"')
     expect(markup).toContain('data-label-placement="north-west"')
     expect(markup).toContain('data-label-placement="north-east"')
@@ -198,7 +200,7 @@ describe('Canvas visual treatments', () => {
           {
             id: 'lane',
             label: 'Private geography',
-            appearance: { frame: 'notched', label: 'none' },
+            appearance: { frame: 'dashed', label: 'none', labelTreatment: 'notched' },
             y: 10,
             height: 100,
             labelY: 10,
@@ -211,7 +213,8 @@ describe('Canvas visual treatments', () => {
     const markup = renderToStaticMarkup(<Canvas config={config} />)
 
     expect(markup).toContain('aria-label="Lane Private geography"')
-    expect(markup).toContain('data-frame-treatment="plain"')
+    expect(markup).toContain('data-frame-treatment="dashed"')
+    expect(markup).toContain('data-label-treatment="plain"')
     expect(markup).toContain('data-label-placement="none"')
     expect(markup).not.toContain('>PRIVATE GEOGRAPHY</text>')
   })

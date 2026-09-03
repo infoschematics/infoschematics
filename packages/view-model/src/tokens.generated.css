@@ -46,6 +46,8 @@
   --infoschematic-canvas-surfaces-graphic-fallback-stroke: #8062b4;
   --infoschematic-canvas-surfaces-lane-fill: #12273b24;
   --infoschematic-canvas-surfaces-lane-stroke: #b5c4d54d;
+  --infoschematic-canvas-surfaces-region-dash: 8 6;
+  --infoschematic-canvas-surfaces-region-dot: 1.5 5;
   --infoschematic-canvas-text-body-family: Manrope, Arial, sans-serif;
   --infoschematic-canvas-text-code-family: "DM Mono", monospace;
   --infoschematic-canvas-text-fabric: #b9cde0;

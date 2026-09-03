@@ -5,6 +5,7 @@ import type {
   InfoschematicAppearanceConfig,
   RegionAppearanceConfig,
   RegionFrameTreatment,
+  RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
   SurfaceTreatment,
@@ -46,6 +47,7 @@ type PublicContracts = [
   SurfaceTreatment,
   GridTreatment,
   RegionFrameTreatment,
+  RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
   RegionAppearanceConfig,
@@ -84,7 +86,7 @@ type PublicContracts = [
 
 describe("public model modules", () => {
   it("resolves every explicit contract subpath", () => {
-    const contractCount: PublicContracts["length"] = 37;
-    expect(contractCount).toBe(37);
+    const contractCount: PublicContracts["length"] = 38;
+    expect(contractCount).toBe(38);
   });
 });

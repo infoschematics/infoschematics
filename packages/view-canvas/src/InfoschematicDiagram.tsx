@@ -1299,6 +1299,7 @@ export function InfoschematicDiagram({
                 data-artefact-kind={selection.kind}
                 data-frame-treatment={treatment.frame}
                 data-label-placement={treatment.label ?? 'none'}
+                data-label-treatment={treatment.labelTreatment}
                 key={zone.id}
                 onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
                 onPointerDown={
@@ -1387,6 +1388,7 @@ export function InfoschematicDiagram({
             data-artefact-kind={selection.kind}
             data-frame-treatment={treatment.frame}
             data-label-placement={treatment.label ?? 'none'}
+            data-label-treatment={treatment.labelTreatment}
             key={`panel-${lane.id}`}
             onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
             onPointerDown={

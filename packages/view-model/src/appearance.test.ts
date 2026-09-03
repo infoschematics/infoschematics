@@ -31,34 +31,44 @@ describe('visual treatment resolution', () => {
 
 describe('region treatment resolution', () => {
   it.each([
-    ['lane', 'top', { frame: 'plain', label: 'north-west' }],
-    ['lane', 'bottom', { frame: 'plain', label: 'south-west' }],
-    ['zone', 'top', { frame: 'none', label: 'north-east' }],
-    ['zone', 'bottom', { frame: 'none', label: 'south-east' }],
+    ['lane', 'top', { frame: 'solid', label: 'north-west', labelTreatment: 'plain' }],
+    ['lane', 'bottom', { frame: 'solid', label: 'south-west', labelTreatment: 'plain' }],
+    ['zone', 'top', { frame: 'none', label: 'north-east', labelTreatment: 'plain' }],
+    ['zone', 'bottom', { frame: 'none', label: 'south-east', labelTreatment: 'plain' }],
   ] as const)('keeps the %s %s legacy default independent', (kind, legend, expected) => {
     expect(resolveRegionTreatment(kind, 'Region', undefined, legend)).toEqual(expected)
   })
 
   it('suppresses both hidden labels and their requested notch', () => {
-    expect(resolveRegionTreatment('lane', 'Region', { frame: 'notched', label: 'none' })).toEqual({
-      frame: 'plain',
-      label: null,
-    })
-    expect(resolveRegionTreatment('lane', '', { frame: 'notched', label: 'north' })).toEqual({
-      frame: 'plain',
-      label: null,
-    })
+    expect(
+      resolveRegionTreatment('lane', 'Region', {
+        frame: 'dashed',
+        label: 'none',
+        labelTreatment: 'notched',
+      }),
+    ).toEqual({ frame: 'dashed', label: null, labelTreatment: 'plain' })
+    expect(
+      resolveRegionTreatment('lane', '', {
+        frame: 'dotted',
+        label: 'north',
+        labelTreatment: 'notched',
+      }),
+    ).toEqual({ frame: 'dotted', label: null, labelTreatment: 'plain' })
   })
 
   it('keeps authored Lane and Zone choices independent', () => {
     expect(resolveRegionTreatment('lane', 'Lane', { frame: 'none', label: 'east' })).toEqual({
       frame: 'none',
       label: 'east',
+      labelTreatment: 'plain',
     })
-    expect(resolveRegionTreatment('zone', 'Zone', { frame: 'notched', label: 'south' })).toEqual({
-      frame: 'notched',
-      label: 'south',
-    })
+    expect(
+      resolveRegionTreatment('zone', 'Zone', {
+        frame: 'dotted',
+        label: 'south',
+        labelTreatment: 'notched',
+      }),
+    ).toEqual({ frame: 'dotted', label: 'south', labelTreatment: 'notched' })
   })
 })
 

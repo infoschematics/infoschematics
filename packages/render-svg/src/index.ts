@@ -339,6 +339,15 @@ export const renderInfoschematicSvg = (
             ['d', geometry.outline],
             ['fill', 'none'],
             ['stroke', canvasTokens.output.laneStroke],
+            [
+              'stroke-dasharray',
+              treatment.frame === 'dashed'
+                ? canvasTokens.surfaces.regionDash
+                : treatment.frame === 'dotted'
+                  ? canvasTokens.surfaces.regionDot
+                  : undefined,
+            ],
+            ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
           ]),
         )
       }
@@ -370,6 +379,7 @@ export const renderInfoschematicSvg = (
             ['data-frame-treatment', treatment.frame],
             ['data-id', zone.id],
             ['data-label-placement', treatment.label ?? 'none'],
+            ['data-label-treatment', treatment.labelTreatment],
           ],
           content,
         ).join('\n'),
@@ -389,6 +399,15 @@ export const renderInfoschematicSvg = (
           ['d', geometry.outline],
           ['fill', 'none'],
           ['stroke', canvasTokens.output.laneStroke],
+          [
+            'stroke-dasharray',
+            treatment.frame === 'dashed'
+              ? canvasTokens.surfaces.regionDash
+              : treatment.frame === 'dotted'
+                ? canvasTokens.surfaces.regionDot
+                : undefined,
+          ],
+          ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
         ]),
       )
     }
@@ -420,6 +439,7 @@ export const renderInfoschematicSvg = (
           ['data-frame-treatment', treatment.frame],
           ['data-id', lane.id],
           ['data-label-placement', treatment.label ?? 'none'],
+          ['data-label-treatment', treatment.labelTreatment],
         ],
         content,
       ).join('\n'),

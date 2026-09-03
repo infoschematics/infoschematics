@@ -46,6 +46,8 @@ describe('Canvas visual tokens', () => {
       '.infoschematic-svg.surface-neutral .infoschematic-backdrop',
     )
     expect(styles).toContain('fill: var(--infoschematic-canvas-output-backdrop);')
+    expect(styles).toContain('stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dash);')
+    expect(styles).toContain('stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dot);')
   })
 
   it('uses the manifest for component and editing-grid geometry', async () => {

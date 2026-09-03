@@ -2,7 +2,9 @@ export type SurfaceTreatment = 'neutral' | 'blueprint'
 
 export type GridTreatment = 'none' | 'major' | 'major-plus-minor'
 
-export type RegionFrameTreatment = 'none' | 'plain' | 'notched'
+export type RegionFrameTreatment = 'none' | 'solid' | 'dashed' | 'dotted'
+
+export type RegionLabelFrameTreatment = 'plain' | 'notched'
 
 export type RegionLabelPlacement =
   | 'north-west'
@@ -20,6 +22,7 @@ export type RegionLabelTreatment = 'none' | RegionLabelPlacement
 export type RegionAppearanceConfig = {
   frame?: RegionFrameTreatment
   label?: RegionLabelTreatment
+  labelTreatment?: RegionLabelFrameTreatment
 }
 
 export type CardDetailDefaults = {

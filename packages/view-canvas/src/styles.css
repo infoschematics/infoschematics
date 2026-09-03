@@ -55,6 +55,15 @@
   stroke-width: 1.5px;
 }
 
+[data-frame-treatment="dashed"] .infoschematic-region-frame {
+  stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dash);
+}
+
+[data-frame-treatment="dotted"] .infoschematic-region-frame {
+  stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dot);
+  stroke-linecap: round;
+}
+
 /* Region frames never swallow clicks intended for content beneath them. Design
    selection opts a Lane frame back in through the more-specific rule below. */
 .infoschematic-group .infoschematic-region-frame {

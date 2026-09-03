@@ -148,7 +148,7 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
   )
   const resolvedLabel = treatment.label && label.trim().length > 0 ? labelGeometry(box, treatment.label) : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
-  if (treatment.frame !== 'notched' || !resolvedLabel) {
+  if (treatment.labelTreatment !== 'notched' || !resolvedLabel) {
     return { label: resolvedLabel, notch: null, outline: roundedFrame(box, resolvedRadius) }
   }
   const fitted = fitNotch(box, resolvedRadius, resolvedLabel, label)

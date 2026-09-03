@@ -4,6 +4,7 @@ import type {
   InfoschematicAppearanceConfig,
   RegionAppearanceConfig,
   RegionFrameTreatment,
+  RegionLabelFrameTreatment,
   RegionLabelPlacement,
   SurfaceTreatment,
 } from '@infoschematics/domain-model/appearance'
@@ -33,6 +34,7 @@ export type RegionLegendEdge = 'top' | 'bottom'
 export type ResolvedRegionTreatment = Readonly<{
   frame: RegionFrameTreatment
   label: RegionLabelPlacement | null
+  labelTreatment: RegionLabelFrameTreatment
 }>
 
 const defaultCardTreatment: ResolvedCardTreatment = Object.freeze({
@@ -77,10 +79,12 @@ export const resolveRegionTreatment = (
         ? 'north-west'
         : 'north-east'
   const resolvedLabel = label.trim().length === 0 || appearance?.label === 'none' ? null : appearance?.label ?? fallbackLabel
-  const requestedFrame = appearance?.frame ?? (kind === 'lane' ? 'plain' : 'none')
+  const requestedFrame = appearance?.frame ?? (kind === 'lane' ? 'solid' : 'none')
+  const requestedLabelTreatment = appearance?.labelTreatment ?? 'plain'
   return {
-    frame: requestedFrame === 'notched' && resolvedLabel === null ? 'plain' : requestedFrame,
+    frame: requestedFrame,
     label: resolvedLabel,
+    labelTreatment: requestedLabelTreatment === 'notched' && resolvedLabel === null ? 'plain' : requestedLabelTreatment,
   }
 }
 

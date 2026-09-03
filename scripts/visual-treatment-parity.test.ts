@@ -33,7 +33,7 @@ const config = defineInfoschematic({
     ],
     lanes: [
       {
-        appearance: { frame: 'notched', label: 'north' },
+        appearance: { frame: 'dashed', label: 'north', labelTreatment: 'notched' },
         height: 180,
         id: 'delivery',
         label: 'Delivery',
@@ -42,7 +42,7 @@ const config = defineInfoschematic({
         y: 20,
         zones: [
           {
-            appearance: { frame: 'plain', label: 'south-east' },
+            appearance: { frame: 'dotted', label: 'south-east', labelTreatment: 'plain' },
             fill: '#071e2d',
             id: 'runtime',
             label: 'Runtime',
@@ -87,6 +87,7 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
   grid: values(output, 'data-grid-treatment'),
   identity: output.includes('class="infoschematic-card-identity"'),
   labels: values(output, 'data-label-placement'),
+  labelTreatments: values(output, 'data-label-treatment'),
   stereotype: output.includes('class="infoschematic-card-stereotype"'),
   surface: values(output, 'data-surface-treatment'),
 })
@@ -129,7 +130,7 @@ describe('visual treatment renderer parity', () => {
             ],
           },
           {
-            appearance: { frame: 'notched', label: 'none' },
+            appearance: { frame: 'dashed', label: 'none', labelTreatment: 'notched' },
             height: 80,
             id: 'hidden',
             label: 'Hidden lane',
@@ -147,6 +148,7 @@ describe('visual treatment renderer parity', () => {
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
     expect(regionPaths(canvas)).toEqual(regionPaths(svg))
     expect(values(canvas, 'data-label-placement')).toEqual(['none', 'north-east', 'north-west'])
+    expect(values(canvas, 'data-label-treatment')).toEqual(['plain', 'plain', 'plain'])
     expect(canvas).not.toContain('>HIDDEN LANE</text>')
     expect(svg).not.toContain('>HIDDEN LANE</text>')
   })

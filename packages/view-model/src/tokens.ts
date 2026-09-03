@@ -33,6 +33,8 @@ export const visualTokens = Object.freeze({
       graphicFallbackFill: '#1a1436c9',
       graphicFallbackStroke: '#8062b4',
       laneFill: '#12273b24',
+      regionDash: '8 6',
+      regionDot: '1.5 5',
       laneStroke: '#b5c4d54d',
     }),
     text: tokenGroup({

@@ -5,6 +5,7 @@ import type {
   InfoschematicAppearanceConfig,
   RegionAppearanceConfig,
   RegionFrameTreatment,
+  RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
   SurfaceTreatment,
@@ -18,7 +19,8 @@ describe('authored appearance contracts', () => {
   it('keeps every treatment a closed serialisable value', () => {
     expectTypeOf<GridTreatment>().toEqualTypeOf<'none' | 'major' | 'major-plus-minor'>()
     expectTypeOf<SurfaceTreatment>().toEqualTypeOf<'neutral' | 'blueprint'>()
-    expectTypeOf<RegionFrameTreatment>().toEqualTypeOf<'none' | 'plain' | 'notched'>()
+    expectTypeOf<RegionFrameTreatment>().toEqualTypeOf<'none' | 'solid' | 'dashed' | 'dotted'>()
+    expectTypeOf<RegionLabelFrameTreatment>().toEqualTypeOf<'plain' | 'notched'>()
     expectTypeOf<RegionLabelPlacement>().toEqualTypeOf<
       | 'north-west'
       | 'north'
@@ -37,7 +39,11 @@ describe('authored appearance contracts', () => {
       grid: 'major-plus-minor',
       card: { compact: true, identity: false, stereotype: true, description: false },
     } satisfies InfoschematicAppearanceConfig
-    const region = { frame: 'notched', label: 'north-east' } satisfies RegionAppearanceConfig
+    const region = {
+      frame: 'dashed',
+      label: 'north-east',
+      labelTreatment: 'notched',
+    } satisfies RegionAppearanceConfig
 
     expect(JSON.parse(JSON.stringify({ appearance, region }))).toEqual({ appearance, region })
   })
@@ -49,7 +55,7 @@ describe('authored appearance contracts', () => {
       x: 0,
       width: 320,
       fill: '#eef',
-      appearance: { frame: 'plain', label: 'south' },
+      appearance: { frame: 'dotted', label: 'south', labelTreatment: 'plain' },
     } satisfies ZoneConfig
     const lane = {
       id: 'software',
@@ -59,7 +65,7 @@ describe('authored appearance contracts', () => {
       labelY: 20,
       panel: { x: 0, y: 0, width: 320, height: 180, radius: 12 },
       zones: [zone],
-      appearance: { frame: 'notched', label: 'north-west' },
+      appearance: { frame: 'solid', label: 'north-west', labelTreatment: 'notched' },
     } satisfies LaneConfig
     const domain = {
       id: 'platform',

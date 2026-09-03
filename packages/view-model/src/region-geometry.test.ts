@@ -19,13 +19,17 @@ describe('region label geometry', () => {
     const geometry = regionGeometry({
       box,
       label: 'Region',
-      treatment: { frame: 'plain', label: placement as RegionLabelPlacement },
+      treatment: { frame: 'solid', label: placement as RegionLabelPlacement, labelTreatment: 'plain' },
     })
     expect(geometry.label).toEqual({ dominantBaseline: 'middle', placement, textAnchor, x, y })
   })
 
   it('returns neither label nor notch for an absent label and closes the fallback frame', () => {
-    const geometry = regionGeometry({ box, label: '', treatment: { frame: 'notched', label: null } })
+    const geometry = regionGeometry({
+      box,
+      label: '',
+      treatment: { frame: 'solid', label: null, labelTreatment: 'notched' },
+    })
     expect(geometry.label).toBeNull()
     expect(geometry.notch).toBeNull()
     expect(geometry.outline?.endsWith(' Z')).toBe(true)
@@ -46,7 +50,11 @@ describe('region outline geometry', () => {
     const geometry = regionGeometry({
       box,
       label: 'ABCD',
-      treatment: { frame: 'notched', label: placement as RegionLabelPlacement },
+        treatment: {
+          frame: 'solid',
+          label: placement as RegionLabelPlacement,
+          labelTreatment: 'notched',
+        },
     })
     expect(geometry.notch?.edge).toBe(edge)
     expect(((geometry.notch?.start ?? 0) + (geometry.notch?.end ?? 0)) / 2).toBe(midpoint)
@@ -57,8 +65,18 @@ describe('region outline geometry', () => {
   })
 
   it('uses no outline for an unframed Zone and keeps center labels from cutting the frame', () => {
-    expect(regionGeometry({ box, label: 'Zone', treatment: { frame: 'none', label: 'north-west' } }).outline).toBeNull()
-    const centered = regionGeometry({ box, label: 'Lane', treatment: { frame: 'notched', label: 'center' } })
+    expect(
+      regionGeometry({
+        box,
+        label: 'Zone',
+        treatment: { frame: 'none', label: 'north-west', labelTreatment: 'plain' },
+      }).outline,
+    ).toBeNull()
+    const centered = regionGeometry({
+      box,
+      label: 'Lane',
+      treatment: { frame: 'solid', label: 'center', labelTreatment: 'notched' },
+    })
     expect(centered.notch).toBeNull()
     expect(centered.outline?.endsWith(' Z')).toBe(true)
   })
@@ -67,7 +85,7 @@ describe('region outline geometry', () => {
     const input = {
       box: { height: 12, width: 20, x: 1, y: 2 },
       label: 'A',
-      treatment: { frame: 'plain' as const, label: 'north' as const },
+      treatment: { frame: 'solid' as const, label: 'north' as const, labelTreatment: 'plain' as const },
     }
     expect(regionGeometry(input).outline).toBe(regionGeometry(input).outline)
     expect(regionGeometry(input).outline).toContain('A6 6')

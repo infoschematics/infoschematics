@@ -187,10 +187,18 @@ describe('renderInfoschematicSvg', () => {
         ],
         lanes: representative.infoschematic.lanes.map((lane) => ({
           ...lane,
-          appearance: { frame: 'notched' as const, label: 'north' as const },
+          appearance: {
+            frame: 'dashed' as const,
+            label: 'north' as const,
+            labelTreatment: 'notched' as const,
+          },
           zones: lane.zones.map((zone) => ({
             ...zone,
-            appearance: { frame: 'plain' as const, label: 'south-east' as const },
+            appearance: {
+              frame: 'dotted' as const,
+              label: 'south-east' as const,
+              labelTreatment: 'plain' as const,
+            },
           })),
         })),
         cards: representative.infoschematic.cards.map((card, index) =>
@@ -204,7 +212,13 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('data-surface-treatment="blueprint"')
     expect(svg).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}"`)
     expect(svg).toContain('id="infoschematic-grid-major-plus-minor"')
-    expect(svg).toContain('data-frame-treatment="notched"')
+    expect(svg).toContain('data-frame-treatment="dashed"')
+    expect(svg).toContain('data-frame-treatment="dotted"')
+    expect(svg).toContain('data-label-treatment="notched"')
+    expect(svg).toContain('data-label-treatment="plain"')
+    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.surfaces.regionDash}"`)
+    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.surfaces.regionDot}"`)
+    expect(svg).toContain('stroke-linecap="round"')
     expect(svg).toContain('data-label-placement="south-east"')
     expect(svg).toContain('data-domain="platform"')
     expect(svg).toContain('data-stereotype="service"')
