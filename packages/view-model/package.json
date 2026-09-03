@@ -18,12 +18,14 @@
     "clean": "node build.mjs --clean"
   },
   "exports": {
+    "./appearance": { "types": "./dist/appearance.d.ts", "import": "./dist/appearance.js" },
     "./artefact-draft": { "types": "./dist/artefact-draft.d.ts", "import": "./dist/artefact-draft.js" },
     "./editable": { "types": "./dist/editable.d.ts", "import": "./dist/editable.js" },
     "./geometry": { "types": "./dist/geometry.d.ts", "import": "./dist/geometry.js" },
     "./guides": { "types": "./dist/guides.d.ts", "import": "./dist/guides.js" },
     "./placement": { "types": "./dist/placement.d.ts", "import": "./dist/placement.js" },
     "./ports": { "types": "./dist/ports.d.ts", "import": "./dist/ports.js" },
+    "./region-geometry": { "types": "./dist/region-geometry.d.ts", "import": "./dist/region-geometry.js" },
     "./routing": { "types": "./dist/routing.d.ts", "import": "./dist/routing.js" },
     "./runtime": { "types": "./dist/runtime.d.ts", "import": "./dist/runtime.js" },
     "./tokens": { "types": "./dist/tokens.d.ts", "import": "./dist/tokens.js" },
