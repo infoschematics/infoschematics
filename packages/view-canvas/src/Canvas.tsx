@@ -2,7 +2,11 @@ import { useMemo, type ComponentProps, type ReactNode } from 'react'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
-import { InfoschematicRenderersContext, type InfoschematicRenderers } from './renderers.tsx'
+import {
+  defineInfoschematicRenderers,
+  InfoschematicRenderersContext,
+  type InfoschematicRenderers,
+} from './renderers.tsx'
 import { InfoschematicContext, useInfoschematic } from './runtime-context.tsx'
 
 type DiagramProps = ComponentProps<typeof InfoschematicDiagram>
@@ -42,8 +46,9 @@ function CanvasContent({ children, className, flows, visibleScopes, ...diagram }
 
 export function Canvas({ config, renderers, ...props }: CanvasProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
+  const rendererRegistry = useMemo(() => defineInfoschematicRenderers(renderers ?? {}), [renderers])
   return (
-    <InfoschematicRenderersContext value={renderers ?? {}}>
+    <InfoschematicRenderersContext value={rendererRegistry}>
       <InfoschematicContext value={runtime}>
         <CanvasContent {...props} />
       </InfoschematicContext>

@@ -11,7 +11,11 @@ import { segmentAt } from '@infoschematics/view-model/waypoints'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 import type { RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
 import { useInfoschematic } from './runtime-context.tsx'
-import { type FabricRendererProps, useInfoschematicRenderers } from './renderers.tsx'
+import {
+  type FabricRendererProps,
+  resolveInfoschematicRenderer,
+  useInfoschematicRenderers,
+} from './renderers.tsx'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -62,6 +66,23 @@ function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
           {detail}
         </text>
       ) : null}
+    </>
+  )
+}
+
+function DefaultGraphic({ graphic, viewBox }: { graphic: GraphicConfig; viewBox: Box }) {
+  const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
+  const height = graphic.placement?.height ?? 80
+  const x = graphic.placement?.x ?? viewBox.x + (viewBox.width - width) / 2
+  const y = graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2
+  const label = graphic.label ?? graphic.id
+
+  return (
+    <>
+      <rect className="fabric-shell" height={height} rx={cornerRadius} width={width} x={x} y={y} />
+      <text className="fabric-title" x={x + width / 2} y={y + height / 2 + 5}>
+        {label}
+      </text>
     </>
   )
 }
@@ -188,7 +209,9 @@ export function InfoschematicDiagram({
   } = useInfoschematic()
   const renderers = useInfoschematicRenderers()
   const Definitions = renderers.definitions
-  const GraphicRenderer = graphic ? renderers.graphics?.[graphic.renderer] : undefined
+  const graphicRenderer = graphic
+    ? resolveInfoschematicRenderer(renderers, 'graphic', graphic.renderer, graphic.properties, graphic.id)
+    : undefined
   const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
   const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
   const scopeAppearance = Object.fromEntries(
@@ -943,7 +966,14 @@ export function InfoschematicDiagram({
         .map((fabric) => {
           const bounds = movedBox(fabric.bounds, fabric.code)
           const rendererKey = fabric.appearance?.renderer
-          const Renderer = rendererKey ? renderers.fabrics?.[rendererKey] : undefined
+          const renderer = resolveInfoschematicRenderer(
+            renderers,
+            'fabric',
+            rendererKey,
+            fabric.appearance?.properties,
+            fabric.id,
+          )
+          const Renderer = renderer?.Component
           return (
             <g
               aria-label={fabric.label}
@@ -954,7 +984,11 @@ export function InfoschematicDiagram({
               onPointerLeave={onHover ? () => onHover(null) : undefined}
             >
               <title>{fabricTitle(fabric)}</title>
-              {Renderer ? <Renderer bounds={bounds} fabric={fabric} /> : <DefaultFabric bounds={bounds} fabric={fabric} />}
+              {Renderer ? (
+                <Renderer bounds={bounds} fabric={fabric} properties={renderer.properties} />
+              ) : (
+                <DefaultFabric bounds={bounds} fabric={fabric} />
+              )}
               {editing ? (
                 <rect
                   className="fabric-frame"
@@ -1276,9 +1310,18 @@ export function InfoschematicDiagram({
         </g>
       ) : null}
 
-      {graphic && GraphicRenderer ? (
-        <g className="infoschematic-graphic">
-          <GraphicRenderer graphic={graphic} viewBox={infoschematicViewBox} />
+      {graphic ? (
+        <g aria-label={graphic.label ?? graphic.id} className="infoschematic-graphic" role="img">
+          <title>{graphic.label ?? graphic.id}</title>
+          {graphicRenderer ? (
+            <graphicRenderer.Component
+              graphic={graphic}
+              properties={graphicRenderer.properties}
+              viewBox={infoschematicViewBox}
+            />
+          ) : (
+            <DefaultGraphic graphic={graphic} viewBox={infoschematicViewBox} />
+          )}
         </g>
       ) : null}
     </svg>
