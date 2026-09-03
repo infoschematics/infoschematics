@@ -5,6 +5,8 @@ import { visualTokens } from './tokens.ts'
 
 export type RegionLabelGeometry = Readonly<{
   dominantBaseline: 'middle'
+  /** Pinned rendered extent for a notched label, so text and notch agree; null for plain labels. */
+  length: number | null
   placement: RegionLabelPlacement
   textAnchor: 'end' | 'middle' | 'start'
   x: number
@@ -31,7 +33,9 @@ export type RegionGeometryInput = Readonly<{
 }>
 
 export const regionGeometryDefaults = Object.freeze({
-  characterWidth: 8,
+  // Matches the canvas lane-label metrics (13px/600 code face + 1.6px tracking);
+  // notched text is pinned to this via textLength so the notch stays symmetric.
+  characterWidth: 9.4,
   labelHeight: 14,
   labelInset: 16,
   notchPadding: 10,
@@ -73,6 +77,7 @@ const labelGeometry = (
   const edgeInset = mounted ? 0 : regionGeometryDefaults.labelInset
   return {
     dominantBaseline: 'middle',
+    length: null,
     placement,
     textAnchor: east ? 'end' : west ? 'start' : 'middle',
     x: east
@@ -127,7 +132,9 @@ const fitNotch = (
   start += shift
   end += shift
   return {
-    label: horizontal ? { ...label, x: label.x + shift } : { ...label, y: label.y + shift },
+    label: horizontal
+      ? { ...label, length: Number(extent.toFixed(3)), x: label.x + shift }
+      : { ...label, y: label.y + shift },
     notch: { edge, end, padding, start },
   }
 }

@@ -21,7 +21,7 @@ describe('region label geometry', () => {
       label: 'Region',
       treatment: { frame: 'solid', label: placement as RegionLabelPlacement, labelTreatment: 'plain' },
     })
-    expect(geometry.label).toEqual({ dominantBaseline: 'middle', placement, textAnchor, x, y })
+    expect(geometry.label).toEqual({ dominantBaseline: 'middle', length: null, placement, textAnchor, x, y })
   })
 
   it('mounts a notched label on the frame line instead of setting it down inside', () => {
@@ -48,12 +48,12 @@ describe('region label geometry', () => {
 
 describe('region outline geometry', () => {
   it.each([
-    ['north', 'north', 100, 32],
-    ['north-west', 'north', 46, 32],
-    ['north-east', 'north', 154, 32],
-    ['south', 'south', 100, 32],
-    ['south-west', 'south', 46, 32],
-    ['south-east', 'south', 154, 32],
+    ['north', 'north', 100, 37.6],
+    ['north-west', 'north', 48.8, 37.6],
+    ['north-east', 'north', 151.2, 37.6],
+    ['south', 'south', 100, 37.6],
+    ['south-west', 'south', 48.8, 37.6],
+    ['south-east', 'south', 151.2, 37.6],
     ['west', 'west', 70, regionGeometryDefaults.labelHeight],
     ['east', 'east', 70, regionGeometryDefaults.labelHeight],
   ] as const)('keeps %s notch padding symmetric', (placement, edge, midpoint, labelExtent) => {
@@ -67,9 +67,10 @@ describe('region outline geometry', () => {
         },
     })
     expect(geometry.notch?.edge).toBe(edge)
-    expect(((geometry.notch?.start ?? 0) + (geometry.notch?.end ?? 0)) / 2).toBe(midpoint)
-    expect((geometry.notch?.end ?? 0) - (geometry.notch?.start ?? 0)).toBe(
+    expect(((geometry.notch?.start ?? 0) + (geometry.notch?.end ?? 0)) / 2).toBeCloseTo(midpoint, 9)
+    expect((geometry.notch?.end ?? 0) - (geometry.notch?.start ?? 0)).toBeCloseTo(
       labelExtent + regionGeometryDefaults.notchPadding * 2,
+      9,
     )
     expect(geometry.outline?.endsWith(' Z')).toBe(false)
   })

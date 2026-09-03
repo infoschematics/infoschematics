@@ -1379,10 +1379,12 @@ export function InfoschematicDiagram({
                 data-ink={resolveReadableInk(zone.fill)}
                 dominantBaseline={label.dominantBaseline}
                 key={`${lane.id}-${zone.id}`}
+                lengthAdjust={label.length === null ? undefined : 'spacingAndGlyphs'}
                 onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
                 onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
                 textAnchor={label.textAnchor}
+                textLength={label.length ?? undefined}
                 x={label.x}
                 y={label.y}
               >
@@ -1433,9 +1435,11 @@ export function InfoschematicDiagram({
                   artefactSelected(selection, legacyKey) ? ' selected' : ''
                 }${hovered === legacyKey ? ' pointed' : ''}`}
                 dominantBaseline={geometry.label.dominantBaseline}
+                lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
                 onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
                 textAnchor={geometry.label.textAnchor}
+                textLength={geometry.label.length ?? undefined}
                 x={geometry.label.x}
                 y={geometry.label.y}
               >
