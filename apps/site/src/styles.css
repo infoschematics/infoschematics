@@ -114,32 +114,6 @@ a:focus-visible {
   stroke: #82b366;
 }
 
-.build-status {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
-  column-gap: 8px;
-  color: #718aa1;
-  font: 500 10px/1.3 'DM Mono', monospace;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.build-status strong {
-  grid-column: 2;
-  color: #c7d8e8;
-  font-weight: 500;
-}
-
-.build-status__light {
-  grid-row: 1 / 3;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: #82b366;
-  box-shadow: 0 0 10px #82b366a8;
-}
-
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -876,10 +850,6 @@ a:focus-visible {
     align-items: flex-start;
   }
 
-  .build-status {
-    margin-top: 2px;
-  }
-
   .hero {
     gap: 36px;
     padding: 48px 0 38px;
@@ -976,10 +946,6 @@ a:focus-visible {
 
   .brand-mark {
     width: 34px;
-  }
-
-  .build-status > span:not(.build-status__light) {
-    display: none;
   }
 
   .instrument__readout {

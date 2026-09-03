@@ -72,12 +72,6 @@ export function App() {
           <BrandMark />
           <span>infoschematic</span>
         </a>
-
-        <div className="build-status" role="status">
-          <span aria-hidden="true" className="build-status__light" />
-          <span>Backstage</span>
-          <strong>Preview online</strong>
-        </div>
       </header>
 
       <section className="hero" aria-labelledby="hero-title">
