@@ -1,4 +1,4 @@
-import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, Tags } from 'lucide-react'
+import { Clapperboard, List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PenTool, Presentation as PresentIcon, Tags } from 'lucide-react'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ProductionMode } from '@infoschematics/view-present'
 import type { Presentation } from '../hooks/use-presentation.ts'
@@ -7,6 +7,12 @@ const modes: readonly ProductionMode[] = ['present', 'design', 'direct']
 
 const modeLabel = (mode: ProductionMode) =>
   `${mode[0]?.toUpperCase()}${mode.slice(1)}`
+
+const modeIcons: Record<ProductionMode, typeof PresentIcon> = {
+  design: PenTool,
+  direct: Clapperboard,
+  present: PresentIcon,
+}
 
 /* Product identity and production mode remain stable across panel layouts. */
 export function TitleBar({
@@ -64,6 +70,7 @@ export function TitleBar({
         >
           {modes.map((mode) => {
             const label = modeLabel(mode)
+            const Icon = modeIcons[mode]
             return (
               <button
                 aria-label={`${label} mode`}
@@ -74,7 +81,7 @@ export function TitleBar({
                 title={`${label} mode`}
                 type="button"
               >
-                {label}
+                <Icon aria-hidden="true" size={14} />
               </button>
             )
           })}
