@@ -4,10 +4,10 @@ area: TOOL
 title: Design Flow signalling
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 2c112fbcc5a38e9321f5a6311bf29cc3c7c32253
 ---
 
 ## Goal
