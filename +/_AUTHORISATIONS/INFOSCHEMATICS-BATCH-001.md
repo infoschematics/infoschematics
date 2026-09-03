@@ -82,4 +82,6 @@ Progress every ready local roadmap item through its approved plan as far as the 
 
 | INFOSCHEMATICS-SITE-001 | ready | awaiting-review | `33000f30` to `61b0c0fa`; `bun run check` passed | Review Studio example and homepage comparison |
 
-The run continues with the remaining independent items. Records accepted by separate human-review threads remain outside this run's closure authority; this run has not pruned, pushed or released anything.
+| INFOSCHEMATICS-TOOL-004 | ready | awaiting-review | `c4849f28` to `c4cc7d57`; clean `bun run check` and `bun run release:verify` passed | Review local release candidate and confirm external gates |
+
+The run has reached the local review target for every selected item. Records accepted by separate human-review threads remain outside this run's closure authority; this run has not pruned, pushed or released anything. TOOL-004 stopped before npm scope verification, trusted-publisher configuration, tag creation, or publication as required.
