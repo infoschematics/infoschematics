@@ -4,10 +4,10 @@ area: TOOL
 title: Centralise visual tokens
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 432aecb66aa57513320f7017735327829fd7253b
 ---
 
 ## Goal
