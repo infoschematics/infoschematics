@@ -147,6 +147,9 @@ export function App() {
       <footer className="page-footer">
         <p>infoschematics.info</p>
         <p className="page-footer__links">
+          <a className="page-footer__link" href="/examples/infoschematics/">
+            Infoschematics · Hosted example
+          </a>
           <a className="page-footer__link" href="/examples/blank/">
             Blank Infoschematic · Empty canvas
           </a>

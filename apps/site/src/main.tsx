@@ -1,6 +1,6 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { getDocumentationRoute, isBlankExamplePath } from './routes.ts'
+import { getDocumentationRoute, isBlankExamplePath, isInfoschematicsExamplePath } from './routes.ts'
 
 async function resolvePage(pathname: string): Promise<ReactNode> {
   const documentationRoute = getDocumentationRoute(pathname)
@@ -14,6 +14,11 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
   if (isBlankExamplePath(pathname)) {
     const { BlankInfoschematic } = await import('./BlankInfoschematic.tsx')
     return <BlankInfoschematic />
+  }
+
+  if (isInfoschematicsExamplePath(pathname)) {
+    const { InfoschematicsExample } = await import('./InfoschematicsExample.tsx')
+    return <InfoschematicsExample />
   }
 
   const { App } = await import('./App.tsx')

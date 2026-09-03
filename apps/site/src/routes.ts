@@ -1,4 +1,5 @@
 export const blankExamplePath = '/examples/blank/'
+export const infoschematicsExamplePath = '/examples/infoschematics/'
 
 export const documentationRoutes = [
   {
@@ -22,6 +23,10 @@ export type DocumentationRoute = (typeof documentationRoutes)[number]
 
 export function isBlankExamplePath(pathname: string) {
   return pathname === blankExamplePath || pathname === blankExamplePath.slice(0, -1)
+}
+
+export function isInfoschematicsExamplePath(pathname: string) {
+  return pathname === infoschematicsExamplePath || pathname === infoschematicsExamplePath.slice(0, -1)
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {

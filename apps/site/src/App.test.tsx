@@ -2,7 +2,13 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
 import { BlankInfoschematic } from './BlankInfoschematic.tsx'
-import { documentationRoutes, getDocumentationRoute, isBlankExamplePath } from './routes.ts'
+import {
+  documentationRoutes,
+  getDocumentationRoute,
+  infoschematicsExamplePath,
+  isBlankExamplePath,
+  isInfoschematicsExamplePath,
+} from './routes.ts'
 
 describe('website routes', () => {
   it('keeps the designed Infoschematics homepage at the root route', () => {
@@ -16,6 +22,7 @@ describe('website routes', () => {
     expect(page.match(/system-card__tag/g)).toHaveLength(4)
     expect(page).not.toContain('system-card__status')
     expect(page).toContain('Preview online')
+    expect(page).toContain(`href="${infoschematicsExamplePath}"`)
     expect(page).toContain('href="/examples/blank/"')
     expect(page).toContain('href="/guides/authoring/"')
     expect(page).toContain('href="/reference/vocabulary/"')
@@ -40,5 +47,12 @@ describe('website routes', () => {
 
     expect(getDocumentationRoute('/')).toBeUndefined()
     expect(getDocumentationRoute('/guides/unknown/')).toBeUndefined()
+  })
+
+  it('resolves the hosted Infoschematics example with or without a trailing slash', () => {
+    expect(isInfoschematicsExamplePath('/examples/infoschematics/')).toBe(true)
+    expect(isInfoschematicsExamplePath('/examples/infoschematics')).toBe(true)
+    expect(isInfoschematicsExamplePath('/examples/infoschematic/')).toBe(false)
+    expect(isInfoschematicsExamplePath('/')).toBe(false)
   })
 })
