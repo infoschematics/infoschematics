@@ -28,6 +28,7 @@
     "./region-geometry": { "types": "./dist/region-geometry.d.ts", "import": "./dist/region-geometry.js" },
     "./routing": { "types": "./dist/routing.d.ts", "import": "./dist/routing.js" },
     "./runtime": { "types": "./dist/runtime.d.ts", "import": "./dist/runtime.js" },
+    "./signals": { "types": "./dist/signals.d.ts", "import": "./dist/signals.js" },
     "./tokens": { "types": "./dist/tokens.d.ts", "import": "./dist/tokens.js" },
     "./waypoints": { "types": "./dist/waypoints.d.ts", "import": "./dist/waypoints.js" },
     "./tokens.css": "./dist/tokens.generated.css"
