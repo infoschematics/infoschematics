@@ -44,15 +44,15 @@ Use lighter variants for text and restrained emphasis, darker variants for trans
 
 ## Authored appearance and output policy
 
-Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, compact Cards and default Card metadata visibility, and standard Lane or Zone frame and label treatments. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
+Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, compact Cards and default Card metadata visibility, and standard Lane or Zone frame style, label placement, and label treatment. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
 
 Output policy can reduce optional Card detail for the available space. Canvas and static SVG may override identity, stereotype, and description visibility without changing the authored definition. Compactness remains authored because it changes the Card's composition rather than merely revealing or hiding metadata.
 
-Region geometry is shared View Model behaviour. Labels use nine compass placements. A notched frame leaves equal padding either side of its label; when a label is empty, hidden, centred away from an edge, or cannot fit safely, the outline remains continuous. Standard corner geometry comes from invariant tokens rather than each definition choosing a radius.
+Region geometry is shared View Model behaviour. A frame is independently absent, solid, dashed, or dotted. Its label uses one of nine compass placements and selects plain or notched treatment separately. A notched label leaves equal padding either side; when the label is empty, hidden, centred away from an edge, or cannot fit safely, the frame remains continuous. Standard corner geometry comes from invariant tokens rather than each definition choosing a radius.
 
 Domain and Scope communicate separate facts. Domain classifies a Card and supplies semantic colour. Scope controls applicability and filtering. A Card may use both, and changing the visible Scope set must not silently reclassify its Domain treatment. Colour must still be paired with labels and other non-colour evidence.
 
-Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, plain labelled Lanes, and unframed labelled Zones. Homepage-like blueprint treatment remains explicit authored intent.
+Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
 
 ## Visual token ownership
 

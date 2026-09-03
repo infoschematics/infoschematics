@@ -18,7 +18,7 @@ Scope and Domain introduce a related distinction. Scope controls whether an arte
 
 ## Decision
 
-Authored appearance is narrow, typed, serialisable presentation intent. It may select the neutral or blueprint surface, no grid or one of the standard grid treatments, Card compactness and default metadata visibility, and Lane or Zone frame and label treatments. Region labels use one of nine compass placements rather than free coordinates. Notched frames and label positions are resolved into deterministic geometry in View Model; a missing or hidden label suppresses its notch, and notch padding remains symmetric.
+Authored appearance is narrow, typed, serialisable presentation intent. It may select the neutral or blueprint surface, no grid or one of the standard grid treatments, Card compactness and default metadata visibility, and Lane or Zone frame, label-placement, and label treatments. A Region frame is absent, solid, dashed, or dotted. Its label independently selects plain or notched treatment and one of nine compass placements rather than free coordinates. Label treatments and positions are resolved into deterministic geometry in View Model; a missing or hidden label suppresses its notch, and notch padding remains symmetric.
 
 An output may override only the visibility of Card identity, stereotype, and description. These overrides do not mutate or remove authored data and do not replace authored compactness, region treatments, semantic colours, or geometry. Canvas and static SVG consume the same View Model treatment and region-geometry resolvers.
 
@@ -26,7 +26,7 @@ Reusable measurements and fallback colours remain invariant renderer tokens. The
 
 Domain is an authored Card classification with its own catalogue, label, colour, and fill. Scope remains an independent applicability reference. A resolved Domain supplies Card semantic colour when present; the existing Scope treatment remains the compatibility fallback for a Card without Domain classification. Domain identifiers must be unique and Card references must resolve.
 
-Omitted appearance retains the existing readable result: neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, plain labelled Lanes, and unframed labelled Zones. Region labels follow the Lane legend edge when no explicit placement is authored.
+Omitted appearance retains the existing readable result: neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels. Region labels follow the Lane legend edge when no explicit placement is authored.
 
 ## Consequences
 

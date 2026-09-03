@@ -84,9 +84,9 @@ _Implementation surface: `packages/domain-model/src/card.ts`, `packages/domain-m
 
 ### DOMAIN-016 — Authored appearance is serialisable intent
 
-An Infoschematic MAY author a neutral or blueprint surface, no grid or one of the standard grid treatments, and Card compactness and metadata-visibility defaults. A Lane or Zone MAY author a frame treatment and an optional label at one of nine compass placements. Appearance MUST remain typed serialisable data and MUST NOT contain CSS, callbacks, renderer components, free coordinates, or derived geometry.
+An Infoschematic MAY author a neutral or blueprint surface, no grid or one of the standard grid treatments, and Card compactness and metadata-visibility defaults. A Lane or Zone MAY author an absent, solid, dashed, or dotted frame; an optional label at one of nine compass placements; and a plain or notched label treatment. Frame style, label placement, and label treatment MUST remain independent fields. Appearance MUST remain typed serialisable data and MUST NOT contain CSS, callbacks, renderer components, free coordinates, or derived geometry.
 
-Omitted appearance MUST normalise to a neutral surface, no authored grid, non-compact Cards, and hidden optional Card identity, stereotype, and description. Region defaults are resolved by View Model so every renderer receives the same treatment.
+Omitted appearance MUST normalise to a neutral surface, no authored grid, non-compact Cards, and hidden optional Card identity, stereotype, and description. A Lane MUST default to a solid frame with a plain label; a Zone MUST default to no frame with a plain label. Region placement defaults are resolved by View Model so every renderer receives the same treatment.
 
 _Implementation surface: `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/lane.ts`, `packages/domain-model/src/zone.ts`, and `packages/domain-core/src/index.ts`._
 

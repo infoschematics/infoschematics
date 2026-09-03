@@ -34,7 +34,7 @@ Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and 
 
 ### SVG-007 — Static output honours resolved visual treatments
 
-Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface, grid, Lane and Zone frames and labels, Card compactness, optional Card metadata, and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, plain labelled Lanes, and unframed labelled Zones.
+Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface and grid; absent, solid, dashed, and dotted Lane and Zone frames; independently plain or notched Region labels and their placement; Card compactness; optional Card metadata; and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels.
 
 The `cardDetails` option MAY override identity, stereotype, and description visibility without mutating authored data. It MUST NOT override Card compactness. Domain colour MUST remain independent of Scope visibility, with existing Scope treatment available as the fallback for an unclassified Card.
 

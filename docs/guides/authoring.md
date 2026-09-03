@@ -46,16 +46,17 @@ infoschematic: {
 }
 ```
 
-A Lane or Zone can select `none`, `plain`, or `notched` framing and hide its label or place it at one of nine compass positions:
+A Lane or Zone can select an absent, solid, dashed, or dotted frame independently of its label placement and label treatment:
 
 ```ts
 appearance: {
-  frame: 'notched',
-  label: 'north-east'
+  frame: 'dashed',
+  label: 'north-east',
+  labelTreatment: 'notched'
 }
 ```
 
-Use `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`. Use `label: 'none'` to hide a region label. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Lanes remain plain and labelled, Zones remain unframed and labelled, Cards remain non-compact, and no authored grid is shown.
+Use `frame: 'none'`, `'solid'`, `'dashed'`, or `'dotted'`. Use `labelTreatment: 'plain'` or `'notched'` independently. Place the label at `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`; use `label: 'none'` to hide it. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Lanes retain solid frames and plain labels, Zones remain unframed with plain labels, Cards remain non-compact, and no authored grid is shown.
 
 Classify Cards with a Domain independently of their Scope:
 
