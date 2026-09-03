@@ -1806,7 +1806,7 @@ export function InfoschematicDiagram({
               ) : null}
               {visualTreatment.card.stereotype && card.stereotype ? (
                 <text className="infoschematic-card-stereotype" data-card-detail="stereotype" x="14" y="18">
-                  {`«${card.stereotype}»`}
+                  {card.stereotype.toUpperCase()}
                 </text>
               ) : null}
               <text

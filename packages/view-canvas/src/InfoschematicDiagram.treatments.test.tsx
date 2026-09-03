@@ -92,7 +92,7 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-card-detail="identity"')
     expect(markup).toContain('data-card-detail="stereotype"')
     expect(markup).toContain('data-card-detail="description"')
-    expect(markup).toContain('«service»')
+    expect(markup).toContain('>SERVICE<')
     expect(markup).toContain('Accepts external requests')
     expect(markup).toContain('aria-label="DEL-001 · Gateway · service · Accepts external requests"')
     expect(markup).toContain('<title>DEL-001 · Gateway · service · Accepts external requests</title>')

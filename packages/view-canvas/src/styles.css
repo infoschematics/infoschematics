@@ -459,7 +459,7 @@
 }
 
 .infoschematic-card-stereotype {
-  fill: var(--infoschematic-canvas-text-muted);
+  fill: currentColor;
   font: 500 9px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 0.4px;
 }
@@ -478,12 +478,10 @@
   fill: var(--infoschematic-canvas-output-card-text-inverse);
 }
 
-.infoschematic-service[data-ink="dark"] .infoschematic-card-stereotype,
 .infoschematic-service[data-ink="dark"] .infoschematic-card-description {
   fill: var(--infoschematic-canvas-output-text-muted);
 }
 
-.infoschematic-service[data-ink="light"] .infoschematic-card-stereotype,
 .infoschematic-service[data-ink="light"] .infoschematic-card-description {
   fill: var(--infoschematic-canvas-output-text-muted-inverse);
 }

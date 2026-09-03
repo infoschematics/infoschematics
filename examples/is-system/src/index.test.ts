@@ -32,7 +32,7 @@ describe('systemExample', () => {
 
   it('authors the blueprint treatment with every Card detail on', () => {
     expect(diagram.appearance).toEqual({
-      card: { compact: true, description: true, identity: true, stereotype: true },
+      card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
       surface: 'blueprint',
     })

@@ -621,6 +621,7 @@ export const renderInfoschematicSvg = (
         ['height', box.height],
         ['rx', canvasTokens.geometry.cornerRadius],
         ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
+        ['stroke-width', 2],
         ['width', box.width],
       ]),
     ]
@@ -631,14 +632,16 @@ export const renderInfoschematicSvg = (
           'text',
           [
             ['class', 'infoschematic-card-stereotype'],
-            ['fill', metadataColor],
-            ['font-family', canvasTokens.output.fontFamily],
-            ['font-size', canvasTokens.output.metadataFontSize],
+            ['fill', appearance?.color ?? canvasTokens.output.fallbackFamily],
+            ['font-family', canvasTokens.text.codeFamily],
+            ['font-size', 9],
+            ['font-weight', 500],
+            ['letter-spacing', '0.4px'],
             ['text-anchor', 'start'],
             ['x', 10],
             ['y', 16],
           ],
-          xmlText(`«${card.stereotype}»`),
+          xmlText(card.stereotype.toUpperCase()),
         ),
       )
     }
@@ -652,10 +655,10 @@ export const renderInfoschematicSvg = (
           ],
           [
             line(3, 'rect', [
-              ['fill', ink === 'light' ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop],
+              ['fill', canvasTokens.surfaces.backdrop],
               ['height', 20],
               ['rx', 4],
-              ['stroke', metadataColor],
+              ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
               ['stroke-width', 1],
               ['width', identityWidth],
               ['x', box.width - identityWidth - 8],
@@ -666,9 +669,11 @@ export const renderInfoschematicSvg = (
               'text',
               [
                 ['dominant-baseline', 'middle'],
-                ['fill', metadataColor],
-                ['font-family', canvasTokens.output.fontFamily],
-                ['font-size', canvasTokens.output.metadataFontSize],
+                ['fill', canvasTokens.text.strong],
+                ['font-family', canvasTokens.text.codeFamily],
+                ['font-size', 9],
+                ['font-weight', 600],
+                ['letter-spacing', '0.5px'],
                 ['text-anchor', 'middle'],
                 ['x', box.width - identityWidth / 2 - 8],
                 ['y', 18],
@@ -687,13 +692,9 @@ export const renderInfoschematicSvg = (
           ['class', 'infoschematic-card-label'],
           ['dominant-baseline', 'middle'],
           ['fill', ink === 'light' ? canvasTokens.output.cardTextInverse : canvasTokens.output.cardText],
-          ['font-family', canvasTokens.output.fontFamily],
-          [
-            'font-size',
-            visualTreatment.card.compact
-              ? canvasTokens.output.metadataFontSize
-              : canvasTokens.output.componentFontSize,
-          ],
+          ['font-family', canvasTokens.text.bodyFamily],
+          ['font-size', visualTreatment.card.compact ? 13 : 14],
+          ['font-weight', 700],
           ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
           ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
           [
@@ -716,8 +717,8 @@ export const renderInfoschematicSvg = (
           [
             ['class', 'infoschematic-card-description'],
             ['fill', metadataColor],
-            ['font-family', canvasTokens.output.fontFamily],
-            ['font-size', canvasTokens.output.metadataFontSize],
+            ['font-family', canvasTokens.text.bodyFamily],
+            ['font-size', 10],
             ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
             ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
             ['y', visualTreatment.card.compact ? Math.min(box.height - 10, compactLabelY + 18) : box.height / 2 + 14],

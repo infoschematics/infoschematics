@@ -157,7 +157,6 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain(`stroke-linejoin="${visualTokens.canvas.flows.lineJoin}"`)
     expect(svg).toContain(`opacity="${visualTokens.canvas.output.unfocusedOpacity}"`)
     expect(svg).toContain(`font-family="${visualTokens.canvas.output.fontFamily}"`)
-    expect(svg).toContain(`font-size="${visualTokens.canvas.output.componentFontSize}"`)
     expect(svg).toContain(`font-size="${visualTokens.canvas.output.metadataFontSize}"`)
     expect(svg).toContain(`fill="${visualTokens.canvas.output.cardText}"`)
 
@@ -232,9 +231,9 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('stroke="#13579b"')
     expect(svg).toContain('class="infoschematic-card-identity"')
     expect(svg).toContain('data-card-detail="identity"')
-    expect(svg).toContain(`<rect fill="${visualTokens.canvas.output.backdrop}" height="20" rx="4"`)
+    expect(svg).toContain(`<rect fill="${visualTokens.canvas.surfaces.backdrop}" height="20" rx="4"`)
     expect(svg).toContain('class="infoschematic-card-stereotype"')
-    expect(svg).toContain('«service»')
+    expect(svg).toContain('>SERVICE<')
     expect(svg).toContain('class="infoschematic-card-description"')
 
     const overridden = renderInfoschematicSvg(config, {

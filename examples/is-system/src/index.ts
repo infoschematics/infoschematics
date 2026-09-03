@@ -49,7 +49,7 @@ export const systemExample = defineInfoschematic({
   infoschematic: {
     viewBox: { height: 600, width: 1400, x: 0, y: 0 },
     appearance: {
-      card: { compact: true, description: true, identity: true, stereotype: true },
+      card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
       surface: 'blueprint',
     },
