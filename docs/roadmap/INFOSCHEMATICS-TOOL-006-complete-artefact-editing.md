@@ -4,10 +4,10 @@ area: TOOL
 title: Complete artefact editing
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: fb2da8f1d1fb4631b804e2fe68eecc5b0a8bff7f
 ---
 
 ## Goal
