@@ -1,9 +1,13 @@
+import {
+  type RuntimeStory,
+  useInfoschematic,
+  useInfoschematicRenderers,
+} from '@infoschematics/view-canvas'
+import { storyCanActivate, storyForEditing } from '../editor/scenes.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
-import { useInfoschematicRenderers } from '@infoschematics/view-canvas'
+import { ThemeStrip } from './ThemeStrip.tsx'
 
-// Everything the control surface offers, folded into 48px for the maximised
-// diagram, so switching a dimension off never needs the panels back.
+/* Present controls folded into 48px for a maximised diagram. */
 export function PanelRail({
   onPlay,
   presentation,
@@ -11,19 +15,17 @@ export function PanelRail({
   onPlay: (story: RuntimeStory) => void
   presentation: Presentation
 }) {
-  const { infoschematicFamilies, infoschematicScopes, stories, thematicScenes, themeLogos } = useInfoschematic()
+  const { config, infoschematicFamilies, infoschematicScopes, stories } =
+    useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
+  const standaloneSceneIds = new Set(
+    config.standaloneScenes.map((scene) => scene.id),
+  )
+
+  if (presentation.mode !== 'present') return null
+
   return (
     <div className="panel-rail">
-      {/*
-       * No expand, no annotate, no takeaways, no fullscreen.
-       *
-       * All four are in the title bar, which does not move when the panels
-       * collapse - so having them here too meant the same control appeared in
-       * two places and jumped between them as the panel opened and shut. What
-       * is left is what only the rail has: the filters, small enough to sit in
-       * a column and useless anywhere else.
-       */}
       <section className="rail-group" aria-label="Scopes">
         {infoschematicScopes.map((scope) => {
           const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
@@ -37,14 +39,24 @@ export function PanelRail({
               title={`${scope.label} — ${scope.description}`}
               type="button"
             >
-              {ScopeIcon ? <ScopeIcon aria-hidden={true} size={16} /> : scope.prefix}
+              {ScopeIcon ? (
+                <ScopeIcon aria-hidden={true} size={16} />
+              ) : (
+                scope.prefix
+              )}
             </button>
           )
         })}
         <button
           className="rail-toggle"
-          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
-          title={presentation.hasVisibleScopes ? 'Hide all components' : 'Show all components'}
+          onClick={() =>
+            presentation.showAllScopes(!presentation.hasVisibleScopes)
+          }
+          title={
+            presentation.hasVisibleScopes
+              ? 'Hide all components'
+              : 'Show all components'
+          }
           type="button"
         >
           {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
@@ -66,8 +78,14 @@ export function PanelRail({
         ))}
         <button
           className="rail-toggle"
-          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
-          title={presentation.hasVisibleFamilies ? 'Hide all flows' : 'Show all flows'}
+          onClick={() =>
+            presentation.showAllFamilies(!presentation.hasVisibleFamilies)
+          }
+          title={
+            presentation.hasVisibleFamilies
+              ? 'Hide all flows'
+              : 'Show all flows'
+          }
           type="button"
         >
           {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
@@ -75,51 +93,49 @@ export function PanelRail({
       </section>
 
       <section className="rail-group" aria-label="Stories">
-        {stories.map((story) => (
-          <button
-            aria-label={story.label}
-            aria-pressed={presentation.playing?.id === story.id}
-            className="rail-pathway"
-            key={story.id}
-            onClick={() => onPlay(story)}
-            title={`${story.label} — ${story.question}`}
-            type="button"
-          >
-            {story.short ?? story.code}
-          </button>
-        ))}
+        {stories.map((story) => {
+          const authored = config.stories.find(
+            (candidate) => candidate.id === story.id,
+          )
+          const enabled = authored
+            ? storyCanActivate(
+                storyForEditing(authored, config.standaloneScenes),
+                standaloneSceneIds,
+              )
+            : false
+          return (
+            <button
+              aria-label={story.label}
+              aria-pressed={presentation.playing?.id === story.id}
+              className="rail-pathway"
+              disabled={!enabled}
+              key={story.id}
+              onClick={() => onPlay(story)}
+              title={`${story.label} — ${story.question}`}
+              type="button"
+            >
+              {story.short ?? story.code}
+            </button>
+          )
+        })}
         <button
           className="rail-toggle"
           disabled={!presentation.playing}
-          onClick={() => presentation.stopStory()}
-          title="Stop the story"
+          onClick={presentation.stopStory}
+          title="Stop the Story"
           type="button"
         >
           Clear
         </button>
       </section>
 
-      {/* Theme scenes use compact codes here because the collapsed rail has no
-          room for their full labels. */}
       <section className="rail-group" aria-label="Themes">
-        {thematicScenes.map((entry) => (
-          <button
-            aria-label={entry.label}
-            aria-pressed={presentation.thematicScene?.id === entry.id}
-            className="rail-pathway rail-theme"
-            key={entry.id}
-            onClick={() => presentation.toggleThematicScene(entry)}
-            title={`${entry.label} — ${entry.headline}`}
-            type="button"
-          >
-            {themeLogos[entry.id] ? <img alt="" src={themeLogos[entry.id]} /> : entry.code}
-          </button>
-        ))}
+        <ThemeStrip compact presentation={presentation} />
         <button
           className="rail-toggle"
           disabled={!presentation.thematicScene}
-          onClick={() => presentation.lightNothing()}
-          title="Clear the Theme"
+          onClick={presentation.lightNothing}
+          title="Clear Theme"
           type="button"
         >
           Clear

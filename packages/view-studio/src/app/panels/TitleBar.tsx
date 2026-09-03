@@ -1,8 +1,14 @@
-import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PencilRuler, Tags } from 'lucide-react'
-import type { Presentation } from '../hooks/use-presentation.ts'
+import { List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, Tags } from 'lucide-react'
 import { useInfoschematic } from '@infoschematics/view-canvas'
+import type { ProductionMode } from '@infoschematics/view-present'
+import type { Presentation } from '../hooks/use-presentation.ts'
 
-/* Product identity and controls remain stable across panel layouts. */
+const modes: readonly ProductionMode[] = ['present', 'design', 'direct']
+
+const modeLabel = (mode: ProductionMode) =>
+  `${mode[0]?.toUpperCase()}${mode.slice(1)}`
+
+/* Product identity and production mode remain stable across panel layouts. */
 export function TitleBar({
   collapsed,
   fullscreen,
@@ -17,22 +23,15 @@ export function TitleBar({
   presentation: Presentation
 }) {
   const { config } = useInfoschematic()
-  // The same header remains available whether the panels are open or collapsed.
+
   return (
     <header className="title-bar">
       <hgroup>
         <h1>{config.title}</h1>
         <p>{config.subtitle}</p>
       </hgroup>
-
       <div className="title-bar-actions">
-        {/*
-         * Two groups, divided. Annotating and takeaways are options for
-         * whatever view is up, so they sit apart from the three that apply
-         * whatever anyone is doing - and they leave with the performance,
-         * which is why the divider has to say which side it is on.
-         */}
-        {presentation.designing ? null : (
+        {presentation.mode === 'present' ? (
           <>
             <button
               aria-label="Annotate"
@@ -56,31 +55,50 @@ export function TitleBar({
             </button>
             <span className="tool-divider" />
           </>
-        )}
-        <button
-          aria-label={presentation.designing ? 'Leave the editors' : 'Open the editors'}
-          aria-pressed={presentation.designing}
-          className="icon-button"
-          onClick={() => presentation.setDesigning(!presentation.designing)}
-          title={presentation.designing ? 'Present — what an audience sees' : 'Design — the editors'}
-          type="button"
+        ) : null}
+
+        <div
+          aria-label="Production mode"
+          className="title-bar-actions"
+          role="group"
         >
-          <PencilRuler aria-hidden="true" size={14} />
-        </button>
+          {modes.map((mode) => {
+            const label = modeLabel(mode)
+            return (
+              <button
+                aria-label={`${label} mode`}
+                aria-pressed={presentation.mode === mode}
+                className="icon-button"
+                key={mode}
+                onClick={() => presentation.setMode(mode)}
+                title={`${label} mode`}
+                type="button"
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+
         <button
+          aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
           className="icon-button"
           onClick={onToggleFullscreen}
           title={fullscreen ? 'Exit full screen' : 'Full screen'}
           type="button"
         >
-          {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
+          {fullscreen ? (
+            <Minimize2 aria-hidden="true" size={14} />
+          ) : (
+            <Maximize2 aria-hidden="true" size={14} />
+          )}
         </button>
-        {/* The icon and label describe the panel action rather than its current state. */}
+
         <button
-          aria-label={collapsed ? 'Show the panels' : 'Collapse the panels'}
+          aria-label={collapsed ? 'Show panels' : 'Collapse panels'}
           className="icon-button"
           onClick={onToggleCollapsed}
-          title={collapsed ? 'Show the panels' : 'Collapse the panels'}
+          title={collapsed ? 'Show panels' : 'Collapse panels'}
           type="button"
         >
           {collapsed ? (

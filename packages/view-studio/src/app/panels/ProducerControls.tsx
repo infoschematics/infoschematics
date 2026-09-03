@@ -1,13 +1,13 @@
 import type { Ref } from 'react'
+import {
+  type RuntimeStory,
+  useInfoschematic,
+  useInfoschematicRenderers,
+} from '@infoschematics/view-canvas'
+import { storyCanActivate, storyForEditing } from '../editor/scenes.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { type RuntimeStory, useInfoschematic } from '@infoschematics/view-canvas'
-import { useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import { ThemeStrip } from './ThemeStrip.tsx'
 
-// Four banks in two rows: what is on Infoschematic and what its lines carry above, what
-// to play and whose work to light below. The top two filter and the bottom two
-// light, which is the same division the Infoschematic makes internally between what is
-// present and what is lit.
 export function ProducerControls({
   onPlay,
   ref,
@@ -17,20 +17,24 @@ export function ProducerControls({
   ref: Ref<HTMLElement>
   presentation: Presentation
 }) {
-  const { infoschematicFamilies, infoschematicScopes, stories } = useInfoschematic()
+  const { config, infoschematicFamilies, infoschematicScopes, stories } =
+    useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
+  const standaloneSceneIds = new Set(
+    config.standaloneScenes.map((scene) => scene.id),
+  )
+
+  if (presentation.mode !== 'present') return null
+
   return (
-    <section className="producer-controls legend" aria-label="Infoschematic controls" ref={ref}>
-      {/* Named for the taxonomy each bank toggles rather than for what it
-          filters. Component now means anything on the Infoschematic, so a bank called
-          Components that leaves the flows out would be the one word this
-          vocabulary just widened, used narrowly. Scope and family are what the
-          buttons actually are. */}
+    <section
+      aria-label="Infoschematic controls"
+      className="producer-controls legend"
+      ref={ref}
+    >
       <section className="producer-bank" aria-label="Scopes">
         <span className="producer-label">Scopes</span>
         {infoschematicScopes.map((scope) => {
-          // The same mark the collapsed rail uses, so a scope is recognised by
-          // one thing however the panel is showing it.
           const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
           return (
             <button
@@ -50,7 +54,9 @@ export function ProducerControls({
         })}
         <button
           className="action-button"
-          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
+          onClick={() =>
+            presentation.showAllScopes(!presentation.hasVisibleScopes)
+          }
           type="button"
         >
           {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
@@ -61,8 +67,8 @@ export function ProducerControls({
         <span className="producer-label">Families</span>
         {infoschematicFamilies.map((family) => (
           <button
-            aria-pressed={presentation.visibleFamilies.has(family.id)}
             aria-label={family.label}
+            aria-pressed={presentation.visibleFamilies.has(family.id)}
             className="flow-family-button"
             key={family.id}
             onClick={() => presentation.toggleFamily(family.id)}
@@ -76,7 +82,9 @@ export function ProducerControls({
         ))}
         <button
           className="action-button"
-          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
+          onClick={() =>
+            presentation.showAllFamilies(!presentation.hasVisibleFamilies)
+          }
           type="button"
         >
           {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
@@ -85,38 +93,47 @@ export function ProducerControls({
 
       <section className="producer-bank" aria-label="Stories">
         <span className="producer-label">Stories</span>
-        {stories.map((story) => (
-          <button
-            aria-pressed={presentation.playing?.id === story.id}
-            className="toggle-button"
-            key={story.id}
-            onClick={() => onPlay(story)}
-            title={`${story.code} — ${story.question}`}
-            type="button"
-          >
-            {story.label}
-          </button>
-        ))}
+        {stories.map((story) => {
+          const authored = config.stories.find(
+            (candidate) => candidate.id === story.id,
+          )
+          const enabled = authored
+            ? storyCanActivate(
+                storyForEditing(authored, config.standaloneScenes),
+                standaloneSceneIds,
+              )
+            : false
+          return (
+            <button
+              aria-pressed={presentation.playing?.id === story.id}
+              className="toggle-button"
+              disabled={!enabled}
+              key={story.id}
+              onClick={() => onPlay(story)}
+              title={`${story.code} — ${story.question}`}
+              type="button"
+            >
+              {story.label}
+            </button>
+          )
+        })}
         <button
           className="action-button"
           disabled={!presentation.playing}
-          onClick={() => presentation.stopStory()}
+          onClick={presentation.stopStory}
           type="button"
         >
           Clear
         </button>
       </section>
 
-      {/* The fourth bank, and the fourth thing that focuses the Infoschematic. Themes
-          use the same mechanism as other Scenes: a named
-          set of components and flows, lit together, dimming the rest. */}
       <section className="producer-bank" aria-label="Themes">
         <span className="producer-label">Themes</span>
         <ThemeStrip presentation={presentation} />
         <button
           className="action-button"
           disabled={!presentation.thematicScene}
-          onClick={() => presentation.lightNothing()}
+          onClick={presentation.lightNothing}
           type="button"
         >
           Clear
