@@ -22,10 +22,80 @@ Populate the structural `infoschematic` field:
 - `fabrics` and `cards` establish focusable artefacts;
 - `flows` connect Cards and Fabrics through named ports and points;
 - `graphics` register visual material that Scenes may reveal;
-- `scopes` and `flowFamilies` provide filtering and visual identity;
+- `scopes` provide applicability, `domains` provide Card classification, and `flowFamilies` provide Flow identity;
 - `interfaces` and `specificationGroups` describe technical contracts.
 
 Coordinates use the `Box` and `Point` shapes exposed through Domain Model configuration types. Placement and routing algorithms remain View Model behaviour; authored output remains plain data.
+
+## Configure visual treatments
+
+Appearance is optional serialisable presentation intent. This fragment opts into the blueprint treatment, uses a visible grid, and asks every renderer for compact Cards with authored metadata defaults:
+
+```ts
+infoschematic: {
+  appearance: {
+    surface: 'blueprint',
+    grid: 'major-plus-minor',
+    card: {
+      compact: true,
+      identity: true,
+      stereotype: true,
+      description: true
+    }
+  }
+}
+```
+
+A Lane or Zone can select `none`, `plain`, or `notched` framing and hide its label or place it at one of nine compass positions:
+
+```ts
+appearance: {
+  frame: 'notched',
+  label: 'north-east'
+}
+```
+
+Use `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`. Use `label: 'none'` to hide a region label. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Lanes remain plain and labelled, Zones remain unframed and labelled, Cards remain non-compact, and no authored grid is shown.
+
+Classify Cards with a Domain independently of their Scope:
+
+```ts
+domains: [
+  {
+    id: 'platform',
+    label: 'Platform',
+    description: 'Shared platform capability',
+    color: '#5eead4',
+    fill: '#123b3a'
+  }
+],
+cards: [
+  {
+    // Other required Card fields omitted here.
+    domain: 'platform',
+    stereotype: 'service'
+  }
+]
+```
+
+Domain controls semantic Card colour; Scope continues to control applicability and filtering. Domain identifiers must be unique and every Card Domain reference must resolve.
+
+Hosts can hide optional metadata for one output without changing the definition:
+
+```tsx
+<Canvas
+  config={config}
+  cardDetails={{ identity: false, stereotype: true, description: false }}
+/>
+```
+
+```ts
+renderInfoschematicSvg(config, {
+  cardDetails: { identity: false, stereotype: true, description: false }
+})
+```
+
+Output detail overrides affect only identity, stereotype, and description visibility. Shared corner geometry, notch padding, type scales, fallback colours, and Card compactness are not output-detail knobs.
 
 ## Add presentation material
 

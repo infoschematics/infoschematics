@@ -42,6 +42,18 @@ Colour belongs to authored or themed meaning. A Flow family can own a hue, a sco
 
 Use lighter variants for text and restrained emphasis, darker variants for translucent fills, and strong saturation only where it changes how the Infoschematic is read. Colour must remain configurable: a particular product palette is not part of the library's visual contract.
 
+## Authored appearance and output policy
+
+Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, compact Cards and default Card metadata visibility, and standard Lane or Zone frame and label treatments. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
+
+Output policy can reduce optional Card detail for the available space. Canvas and static SVG may override identity, stereotype, and description visibility without changing the authored definition. Compactness remains authored because it changes the Card's composition rather than merely revealing or hiding metadata.
+
+Region geometry is shared View Model behaviour. Labels use nine compass placements. A notched frame leaves equal padding either side of its label; when a label is empty, hidden, centred away from an edge, or cannot fit safely, the outline remains continuous. Standard corner geometry comes from invariant tokens rather than each definition choosing a radius.
+
+Domain and Scope communicate separate facts. Domain classifies a Card and supplies semantic colour. Scope controls applicability and filtering. A Card may use both, and changing the visible Scope set must not silently reclassify its Domain treatment. Colour must still be paired with labels and other non-colour evidence.
+
+Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, plain labelled Lanes, and unframed labelled Zones. Homepage-like blueprint treatment remains explicit authored intent.
+
 ## Visual token ownership
 
 Reusable visual values belong in the framework-neutral `visualTokens` manifest when they express the same product meaning in more than one renderer path, or when TypeScript geometry and rendered output must remain aligned. The manifest groups Canvas values by semantic role under `canvas.geometry`, `canvas.surfaces`, `canvas.text`, `canvas.flows`, `canvas.focus`, `canvas.selection`, and `canvas.output`. Names describe the role a value serves rather than its current literal colour or measurement.
@@ -149,6 +161,8 @@ Controls should read as compact instrument controls rather than promotional call
 - Preserve access to essential Present controls when surrounding panels are collapsed.
 
 ## Accessibility and presentation resilience
+
+Reducing visible Card detail must preserve useful accessible metadata. Canvas and static SVG should expose the same authored identity and description through SVG labelling even when an output hides the corresponding visual rows. Surface, grid, frame, and Domain colour decisions need semantic attributes and text evidence so renderer parity can be reviewed without treating pixel equality as the contract.
 
 Colour is never the only differentiator. Pair it with labels, line styles, direction and textual evidence.
 

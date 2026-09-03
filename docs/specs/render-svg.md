@@ -32,6 +32,16 @@ Placed Graphics MUST resolve from authored configuration. The framework-neutral 
 
 Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and output-default values directly from View Model's readonly `visualTokens` manifest. It MUST NOT duplicate those literals or import generated CSS. Equivalent built-in Canvas artefacts MUST retain the same semantic treatment across interactive and static output, while authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig`.
 
+### SVG-007 — Static output honours resolved visual treatments
+
+Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface, grid, Lane and Zone frames and labels, Card compactness, optional Card metadata, and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, plain labelled Lanes, and unframed labelled Zones.
+
+The `cardDetails` option MAY override identity, stereotype, and description visibility without mutating authored data. It MUST NOT override Card compactness. Domain colour MUST remain independent of Scope visibility, with existing Scope treatment available as the fallback for an unclassified Card.
+
+The standalone SVG root MUST retain its accessible role, title, and whole-diagram label. Each Card's `<title>` MUST retain useful authored detail even when optional visual rows are hidden. Output MUST expose stable semantic treatment attributes sufficient to compare representative Canvas and SVG fixtures without relying on browser CSS.
+
+_Verification: `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`._
+
 ## Dependency boundary
 
 `@infoschematics/render-svg` MUST NOT depend on React, React DOM, browser globals, or any interactive View package. Shared derivation belongs in View Model.

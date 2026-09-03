@@ -80,6 +80,30 @@ Cards and fabrics MUST carry explicit placement within the Infoschematic coordin
 
 _Implementation surface: `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/infoschematic.ts`._
 
+## Appearance
+
+### DOMAIN-016 — Authored appearance is serialisable intent
+
+An Infoschematic MAY author a neutral or blueprint surface, no grid or one of the standard grid treatments, and Card compactness and metadata-visibility defaults. A Lane or Zone MAY author a frame treatment and an optional label at one of nine compass placements. Appearance MUST remain typed serialisable data and MUST NOT contain CSS, callbacks, renderer components, free coordinates, or derived geometry.
+
+Omitted appearance MUST normalise to a neutral surface, no authored grid, non-compact Cards, and hidden optional Card identity, stereotype, and description. Region defaults are resolved by View Model so every renderer receives the same treatment.
+
+_Implementation surface: `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/lane.ts`, `packages/domain-model/src/zone.ts`, and `packages/domain-core/src/index.ts`._
+
+### DOMAIN-017 — Domain classification is independent of Scope applicability
+
+An Infoschematic MAY declare Domains with stable identifiers, labels, semantic colours, and fills. A Card MAY reference one Domain and MAY carry a stereotype. Domain classifies the Card for semantic presentation; Scope controls applicability and filtering. A renderer or filter MUST NOT infer either relationship from the other.
+
+Domain identifiers MUST be unique within an Infoschematic. A Card Domain reference MUST identify a declared Domain. Normalisation MUST reject duplicate Domain identifiers and unresolved Card Domain references independently of Scope validation.
+
+_Implementation surface: `packages/domain-model/src/domain.ts`, `packages/domain-model/src/card.ts`, `packages/domain-model/src/infoschematic.ts`, and `packages/domain-core/src/index.ts`._
+
+### DOMAIN-018 — Renderer invariants are not authored options
+
+Shared corner geometry, notch padding, type scales, line widths, fallback colours, and similar renderer invariants MUST NOT be added to authored appearance merely to theme one output. Values whose meaning must agree across renderers belong to View Model visual tokens or renderer-neutral geometry calculations.
+
+An output MAY override whether Card identity, stereotype, and description are visible. Such an override MUST NOT alter the authored data or become part of `InfoschematicConfig`.
+
 ## Relationships
 
 ### DOMAIN-009 — Relationship semantics and geometry are separate facts
