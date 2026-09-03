@@ -42,6 +42,32 @@ Colour belongs to authored or themed meaning. A Flow family can own a hue, a sco
 
 Use lighter variants for text and restrained emphasis, darker variants for translucent fills, and strong saturation only where it changes how the Infoschematic is read. Colour must remain configurable: a particular product palette is not part of the library's visual contract.
 
+## Visual token ownership
+
+Reusable visual values belong in the framework-neutral `visualTokens` manifest when they express the same product meaning in more than one renderer path, or when TypeScript geometry and rendered output must remain aligned. The manifest groups Canvas values by semantic role under `canvas.geometry`, `canvas.surfaces`, `canvas.text`, `canvas.flows`, `canvas.focus`, `canvas.selection`, and `canvas.output`. Names describe the role a value serves rather than its current literal colour or measurement.
+
+The shared product-language inventory covers:
+
+- **Canvas geometry** — component corner shape and other measurements that both calculations and output must interpret identically.
+- **Canvas surfaces and text** — the base Canvas, geography, Fabric, Card, Point, and Graphic fallback treatments that identify the same artefact across interactive and static output.
+- **Canvas Flows** — rail and semantic-line widths, line caps, dashes, and neutral fallback treatment. An authored Flow family's colour remains product data.
+- **Canvas focus and selection** — stable dimmed, highlighted, and selected treatments owned by Canvas rather than by a host shell.
+- **Canvas output defaults** — motion-independent values a deterministic renderer needs when no interactive state exists.
+
+Interactive hit targets, drag handles, editing guides, transient motion, and other Canvas-only behaviours remain in Canvas unless a calculation also needs their value. Present owns navigation, details, controls, and Callout chrome. Studio owns application shell, panel, form, tool, resizer, and Producer-overlay chrome. Those View-local values can use local custom properties for clarity, but repetition inside one View does not make them framework-neutral product tokens. Isolated optical corrections and composition-specific offsets remain intentional one-offs.
+
+Authored Scope fills and Flow-family colours remain serialisable `InfoschematicConfig` data. They must not be copied into the manifest, generated stylesheet, or host theme configuration. Centralising the built-in visual language does not create a general theming API.
+
+The TypeScript manifest is the source of truth. `bun scripts/generate-visual-tokens.ts` deterministically emits `packages/view-model/src/tokens.generated.css`, with CSS custom properties named `--infoschematic-canvas-<group>-<token>` in lexical order. Generated CSS is never edited by hand; `bun scripts/generate-visual-tokens.ts --check` compares it with fresh output so stale or colliding names fail before commit. Interactive renderers consume the generated properties; framework-neutral renderers consume the same manifest directly.
+
+Add a token only when its name states a stable semantic role and at least one of these conditions holds:
+
+- more than one renderer must agree on the value;
+- TypeScript geometry and CSS must agree on the value;
+- changing the value independently would change the meaning of the same Canvas artefact or state.
+
+Refuse a shared token when the value is authored data, belongs only to Present or Studio chrome, is a transient interaction detail with no cross-renderer contract, or is an isolated composition adjustment.
+
 ## Surfaces and depth
 
 The default surface is dark and low contrast, with depth established by borders, restrained fills and small shadows rather than broad glow.

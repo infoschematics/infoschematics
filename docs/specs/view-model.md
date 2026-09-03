@@ -10,6 +10,22 @@ Reusable registers, resolved Scenes and Stories, visibility predicates, routed F
 
 _Verification: `packages/view-model/src/runtime.test.ts` exercises representative register, visibility, routing and Scene derivation through `createInfoschematicRuntime`._
 
+## Visual tokens
+
+### VIEW-017 — Shared visual semantics have one source
+
+View Model MUST export a deeply readonly `visualTokens` manifest for visual values that must agree across renderer paths or between TypeScript geometry and rendered output. The manifest MUST group Canvas values by geometry, surfaces, text, Flows, focus, selection, and motion-independent output defaults. Token names MUST describe stable semantic roles rather than literal colours or measurements.
+
+Authored Scope fills and Flow-family colours MUST remain `InfoschematicConfig` data. Present chrome, Studio chrome, and intentional one-off composition values MUST NOT be promoted solely because they repeat within one View.
+
+### VIEW-018 — CSS projection is deterministic
+
+`scripts/generate-visual-tokens.ts` MUST project every manifest leaf to one CSS custom property named `--infoschematic-canvas-<group>-<token>` in `packages/view-model/src/tokens.generated.css`. Output MUST use deterministic lexical ordering, MUST reject colliding generated names, and MUST expose a check mode that fails when committed generated output differs from fresh output. Generated CSS MUST NOT become a second source of truth.
+
+### VIEW-019 — Renderer values remain consistent
+
+Interactive Canvas output MUST consume the generated CSS projection for shared values. Framework-neutral renderers MUST consume the TypeScript manifest directly without importing CSS or an interactive View. Representative tests MUST prove matching semantic names and values across TypeScript, generated CSS, interactive Canvas output, and static output.
+
 ## Routes
 
 ### VIEW-001 — Routes are orthogonal

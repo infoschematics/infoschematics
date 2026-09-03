@@ -116,6 +116,14 @@ React context distributes one application's supplied registry internally; it is 
 
 Unknown keys, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, a Graphic receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry.
 
+## Visual token boundary
+
+View Model's readonly `visualTokens` manifest is the source of truth for reusable Canvas visual semantics. It groups semantic values beneath `canvas.geometry`, `canvas.surfaces`, `canvas.text`, `canvas.flows`, `canvas.focus`, `canvas.selection`, and `canvas.output`; token names describe product roles rather than literal colours or measurements.
+
+Canvas consumes the deterministic `packages/view-model/src/tokens.generated.css` projection, whose custom properties use the `--infoschematic-canvas-<group>-<token>` namespace. `scripts/generate-visual-tokens.ts` sorts output lexically, rejects name collisions, and provides a check mode so repository verification fails when generated CSS is stale. Framework-neutral renderers such as SVG import the TypeScript manifest directly and do not depend on generated CSS or an interactive View.
+
+This boundary covers values that must agree across renderers or between TypeScript geometry and rendered output. Canvas-only interaction details remain with Canvas. Present navigation, details, controls, and Callout chrome remain with Present. Studio shell, panel, form, tool, resizer, and Producer-overlay chrome remain with Studio. Authored Scope fills and Flow-family colours remain serialisable Domain Model data. The manifest does not introduce host styling in `InfoschematicConfig` or a general theming API.
+
 ## Website role
 
 [ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.

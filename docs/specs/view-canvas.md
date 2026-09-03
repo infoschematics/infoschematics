@@ -30,6 +30,14 @@ Renderer keys MUST be treated as durable authored identifiers. The current defin
 
 Shared SVG definitions and Scope icons MAY remain unversioned host-level support because authored renderer properties do not select their implementation contract directly.
 
+## Visual tokens
+
+### CANVAS-005 — Shared Canvas semantics use generated tokens
+
+Canvas MUST consume the generated CSS projection of View Model's `visualTokens` manifest for shared geometry, surfaces, text, Flow, focus, selection, and output-default values. Generated custom properties MUST use the `--infoschematic-canvas-<group>-<token>` namespace and MUST NOT be edited as an independent styling source.
+
+Canvas-only hit targets, drag handles, editing guides, and transient motion MAY remain local when no framework-neutral calculation or renderer must agree on their value. Authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig` rather than the generated token set.
+
 ## Dependency boundary
 
 Canvas MAY depend on Domain Model and View Model. It MUST NOT depend on Present, Studio, a particular authored Infoschematic, or a host's renderer implementations.
