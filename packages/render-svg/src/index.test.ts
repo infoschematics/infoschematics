@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { renderInfoschematicSvg } from './index.ts'
 
 const blank = (title: string): InfoschematicConfig => ({
@@ -114,7 +115,7 @@ describe('renderInfoschematicSvg', () => {
       [
         '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
-        '  <rect class="infoschematic-backdrop" fill="#ffffff" height="80" width="120" x="0" y="0" />',
+        `  <rect class="infoschematic-backdrop" fill="${visualTokens.canvas.output.backdrop}" height="80" width="120" x="0" y="0" />`,
         '</svg>',
       ].join('\n'),
     )
@@ -132,6 +133,38 @@ describe('renderInfoschematicSvg', () => {
     expect(first).toContain('data-renderer="note&quot;renderer"')
     expect(first).toContain('d="M160 110 H240"')
     expect(first).not.toContain('Source <entry>')
+  })
+
+  it('uses shared static tokens while preserving authored colours', () => {
+    const config: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        flows: representative.infoschematic.flows.map((flow) => ({ ...flow, dashed: true })),
+      },
+    }
+    const svg = renderInfoschematicSvg(config, {
+      scene: { kind: 'standalone', sceneId: 'source-only' },
+      visibility: { graphics: 'all' },
+    })
+
+    expect(svg).toContain(`fill="${visualTokens.canvas.output.backdrop}"`)
+    expect(svg).toContain(`rx="${visualTokens.canvas.geometry.cornerRadius}"`)
+    expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.pipeWidth}"`)
+    expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.routeWidth}"`)
+    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.flows.dash}"`)
+    expect(svg).toContain(`stroke-linecap="${visualTokens.canvas.flows.lineCap}"`)
+    expect(svg).toContain(`stroke-linejoin="${visualTokens.canvas.flows.lineJoin}"`)
+    expect(svg).toContain(`opacity="${visualTokens.canvas.output.unfocusedOpacity}"`)
+    expect(svg).toContain(`font-family="${visualTokens.canvas.output.fontFamily}"`)
+    expect(svg).toContain(`font-size="${visualTokens.canvas.output.componentFontSize}"`)
+    expect(svg).toContain(`font-size="${visualTokens.canvas.output.metadataFontSize}"`)
+    expect(svg).toContain(`fill="${visualTokens.canvas.output.cardText}"`)
+
+    expect(svg).toContain('fill="#f8fafc"')
+    expect(svg).toContain('fill="#dbeafe"')
+    expect(svg).toContain('stroke="#2463eb"')
+    expect(svg).toContain('fill="#7c3aed"')
   })
 
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {

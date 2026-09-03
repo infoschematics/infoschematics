@@ -1,7 +1,9 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
-import { cornerRadius } from '@infoschematics/view-model/tokens'
+import { visualTokens } from '@infoschematics/view-model/tokens'
+
+const canvasTokens = visualTokens.canvas
 
 export type SvgSceneSelection =
   | { kind: 'standalone'; sceneId: string }
@@ -181,7 +183,7 @@ export const renderInfoschematicSvg = (
   body.push(
     line(1, 'rect', [
       ['class', 'infoschematic-backdrop'],
-      ['fill', '#ffffff'],
+      ['fill', canvasTokens.output.backdrop],
       ['height', viewBox.height],
       ['width', viewBox.width],
       ['x', viewBox.x],
@@ -236,9 +238,9 @@ export const renderInfoschematicSvg = (
           'text',
           [
             ['class', 'infoschematic-zone-label'],
-            ['fill', '#46515d'],
-            ['font-family', 'system-ui, sans-serif'],
-            ['font-size', 12],
+            ['fill', canvasTokens.output.textMuted],
+            ['font-family', canvasTokens.output.fontFamily],
+            ['font-size', canvasTokens.output.metadataFontSize],
             ['x', Math.max(zone.x + 16, 58)],
             ['y', lane.labelY],
           ],
@@ -252,7 +254,7 @@ export const renderInfoschematicSvg = (
         ['data-id', lane.id],
         ['d', runtime.infoschematicLanePanelOutline(lane)],
         ['fill', 'none'],
-        ['stroke', '#83909d'],
+        ['stroke', canvasTokens.output.laneStroke],
       ]),
     )
     body.push(
@@ -261,9 +263,9 @@ export const renderInfoschematicSvg = (
         'text',
         [
           ['class', 'infoschematic-lane-label'],
-          ['fill', '#46515d'],
-          ['font-family', 'system-ui, sans-serif'],
-          ['font-size', 12],
+          ['fill', canvasTokens.output.textMuted],
+          ['font-family', canvasTokens.output.fontFamily],
+          ['font-size', canvasTokens.output.metadataFontSize],
           ['x', runtime.infoschematicLaneLabelX(lane)],
           ['y', runtime.infoschematicLaneLabelY(lane) + 5],
         ],
@@ -277,10 +279,10 @@ export const renderInfoschematicSvg = (
     const content = [
       line(2, 'title', [], xmlText(`${fabric.code}: ${fabric.label} · ${fabric.detail}`)),
       line(2, 'rect', [
-        ['fill', '#f2f5f7'],
+        ['fill', canvasTokens.output.surface],
         ['height', box.height],
-        ['rx', cornerRadius],
-        ['stroke', '#687684'],
+        ['rx', canvasTokens.geometry.cornerRadius],
+        ['stroke', canvasTokens.output.stroke],
         ['width', box.width],
         ['x', box.x],
         ['y', box.y],
@@ -289,9 +291,9 @@ export const renderInfoschematicSvg = (
         2,
         'text',
         [
-          ['fill', '#27313a'],
-          ['font-family', 'system-ui, sans-serif'],
-          ['font-size', 13],
+          ['fill', canvasTokens.output.text],
+          ['font-family', canvasTokens.output.fontFamily],
+          ['font-size', canvasTokens.output.componentFontSize],
           ['text-anchor', 'middle'],
           ['x', box.x + box.width / 2],
           ['y', box.y + box.height / 2 + 4],
@@ -306,7 +308,12 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-fabric${focusClass(fabric.id, focus?.artefacts, unfocused)}`],
           ['data-code', fabric.code],
           ['data-id', fabric.id],
-          ['opacity', focusClass(fabric.id, focus?.artefacts, unfocused) ? 0.2 : undefined],
+          [
+            'opacity',
+            focusClass(fabric.id, focus?.artefacts, unfocused)
+              ? canvasTokens.output.unfocusedOpacity
+              : undefined,
+          ],
         ],
         content,
       ).join('\n'),
@@ -315,7 +322,7 @@ export const renderInfoschematicSvg = (
 
   for (const flow of flows) {
     const resolved = families.get(flow.family)
-    const color = resolved?.family.color ?? '#52606d'
+    const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
     const marker = resolved ? `url(#infoschematic-arrow-${resolved.index})` : undefined
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
     const content = [
@@ -323,10 +330,10 @@ export const renderInfoschematicSvg = (
       line(2, 'path', [
         ['d', flow.d],
         ['fill', 'none'],
-        ['stroke', '#ffffff'],
-        ['stroke-linecap', 'round'],
-        ['stroke-linejoin', 'round'],
-        ['stroke-width', 8],
+        ['stroke', canvasTokens.output.flowPipe],
+        ['stroke-linecap', canvasTokens.flows.lineCap],
+        ['stroke-linejoin', canvasTokens.flows.lineJoin],
+        ['stroke-width', canvasTokens.flows.pipeWidth],
       ]),
       line(2, 'path', [
         ['d', flow.d],
@@ -334,10 +341,10 @@ export const renderInfoschematicSvg = (
         ['marker-end', flow.bidirectional ? undefined : marker],
         ['marker-start', flow.bidirectional ? marker : undefined],
         ['stroke', color],
-        ['stroke-dasharray', flow.dashed ? '8 6' : undefined],
-        ['stroke-linecap', 'round'],
-        ['stroke-linejoin', 'round'],
-        ['stroke-width', 3],
+        ['stroke-dasharray', flow.dashed ? canvasTokens.flows.dash : undefined],
+        ['stroke-linecap', canvasTokens.flows.lineCap],
+        ['stroke-linejoin', canvasTokens.flows.lineJoin],
+        ['stroke-width', canvasTokens.flows.routeWidth],
       ]),
     ]
     body.push(
@@ -347,7 +354,7 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-flow${dimmed}`],
           ['data-code', flow.code],
           ['data-id', flow.id],
-          ['opacity', dimmed ? 0.2 : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
         ],
         content,
       ).join('\n'),
@@ -365,16 +372,16 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-card${dimmed}`],
           ['data-code', card.code],
           ['data-id', card.id],
-          ['opacity', dimmed ? 0.2 : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
           ['transform', `translate(${number(box.x)} ${number(box.y)})`],
         ],
         [
           line(2, 'title', [], xmlText(`${card.code}: ${card.label} · ${card.detail}`)),
           line(2, 'rect', [
-            ['fill', scope?.fill ?? '#f2f5f7'],
+            ['fill', scope?.fill ?? canvasTokens.output.surface],
             ['height', box.height],
-            ['rx', cornerRadius],
-            ['stroke', scope?.color ?? '#52606d'],
+            ['rx', canvasTokens.geometry.cornerRadius],
+            ['stroke', scope?.color ?? canvasTokens.output.fallbackFamily],
             ['width', box.width],
           ]),
           line(
@@ -382,9 +389,9 @@ export const renderInfoschematicSvg = (
             'text',
             [
               ['dominant-baseline', 'middle'],
-              ['fill', '#18212a'],
-              ['font-family', 'system-ui, sans-serif'],
-              ['font-size', 13],
+              ['fill', canvasTokens.output.cardText],
+              ['font-family', canvasTokens.output.fontFamily],
+              ['font-size', canvasTokens.output.componentFontSize],
               ['text-anchor', 'middle'],
               ['x', box.width / 2],
               ['y', box.height / 2],
@@ -406,16 +413,16 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-point${dimmed}`],
           ['data-code', point.code],
           ['data-id', point.id],
-          ['opacity', dimmed ? 0.2 : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
         ],
         [
           line(2, 'title', [], xmlText(`${point.code}: ${point.label}`)),
           line(2, 'circle', [
             ['cx', point.point.x],
             ['cy', point.point.y],
-            ['fill', scope?.fill ?? '#ffffff'],
-            ['r', 6],
-            ['stroke', scope?.color ?? '#52606d'],
+            ['fill', scope?.fill ?? canvasTokens.output.backdrop],
+            ['r', canvasTokens.geometry.pointRadius],
+            ['stroke', scope?.color ?? canvasTokens.output.fallbackFamily],
             ['stroke-width', 2],
           ]),
         ],
@@ -434,13 +441,13 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-graphic${dimmed}`],
           ['data-id', graphic.id],
           ['data-renderer', graphic.renderer],
-          ['opacity', dimmed ? 0.2 : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
         ],
         [
           line(2, 'rect', [
-            ['fill', '#f7f8f9'],
+            ['fill', canvasTokens.output.graphicFill],
             ['height', box.height],
-            ['stroke', '#687684'],
+            ['stroke', canvasTokens.output.stroke],
             ['stroke-dasharray', '6 4'],
             ['width', box.width],
             ['x', box.x],
@@ -451,9 +458,9 @@ export const renderInfoschematicSvg = (
             'text',
             [
               ['dominant-baseline', 'middle'],
-              ['fill', '#46515d'],
-              ['font-family', 'system-ui, sans-serif'],
-              ['font-size', 12],
+              ['fill', canvasTokens.output.textMuted],
+              ['font-family', canvasTokens.output.fontFamily],
+              ['font-size', canvasTokens.output.metadataFontSize],
               ['text-anchor', 'middle'],
               ['x', box.x + box.width / 2],
               ['y', box.y + box.height / 2],
