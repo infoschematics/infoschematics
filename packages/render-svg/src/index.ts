@@ -1,5 +1,12 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
+import {
+  type CardDetailOverrides,
+  resolveCardDomain,
+  resolveRegionTreatment,
+  resolveVisualTreatment,
+} from '@infoschematics/view-model/appearance'
+import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 
@@ -20,6 +27,8 @@ export type SvgVisibilityOptions = {
 }
 
 export type RenderInfoschematicSvgOptions = {
+  /** Override authored Card metadata visibility without removing authored data. */
+  cardDetails?: CardDetailOverrides
   /** An authored Scene to render without introducing playback or other motion. */
   scene?: SvgSceneSelection
   visibility?: SvgVisibilityOptions
@@ -140,11 +149,15 @@ export const renderInfoschematicSvg = (
   const definition = config.infoschematic
   const runtime = createInfoschematicRuntime(config)
   const viewBox = definition.viewBox
+  const visualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
+  const backdrop =
+    visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop
   const visibleScopes = new Set(options.visibility?.scopes ?? definition.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
   const graphicVisibility = options.visibility?.graphics ?? 'scene'
   const focus = resolveFocus(config, options.scene)
   const scopes = new Map(definition.scopes.map((scope) => [scope.id, scope]))
+  const domains = definition.domains ?? []
   const families = new Map(definition.flowFamilies.map((family, index) => [family.id, { family, index }]))
 
   const cards = runtime.infoschematicCards.filter(
@@ -183,7 +196,7 @@ export const renderInfoschematicSvg = (
   body.push(
     line(1, 'rect', [
       ['class', 'infoschematic-backdrop'],
-      ['fill', canvasTokens.output.backdrop],
+      ['fill', backdrop],
       ['height', viewBox.height],
       ['width', viewBox.width],
       ['x', viewBox.x],
@@ -219,59 +232,169 @@ export const renderInfoschematicSvg = (
     body.push(['  <defs>', ...markers, '  </defs>'].join('\n'))
   }
 
+  if (visualTreatment.grid !== 'none') {
+    const gridStroke =
+      visualTreatment.surface === 'blueprint'
+        ? canvasTokens.surfaces.laneStroke
+        : canvasTokens.output.laneStroke
+    const minorPattern = [
+      `    <pattern${attributes([
+        ['height', canvasTokens.geometry.gridSize],
+        ['id', 'infoschematic-grid-minor'],
+        ['patternUnits', 'userSpaceOnUse'],
+        ['width', canvasTokens.geometry.gridSize],
+      ])}>`,
+      line(3, 'path', [
+        [
+          'd',
+          `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`,
+        ],
+        ['fill', 'none'],
+        ['stroke', gridStroke],
+        ['stroke-width', 0.5],
+      ]),
+      '    </pattern>',
+    ]
+    const patternId = `infoschematic-grid-${visualTreatment.grid}`
+    const pattern = [
+      `    <pattern${attributes([
+        ['height', canvasTokens.geometry.gridMajorSize],
+        ['id', patternId],
+        ['patternUnits', 'userSpaceOnUse'],
+        ['width', canvasTokens.geometry.gridMajorSize],
+      ])}>`,
+      ...(visualTreatment.grid === 'major-plus-minor'
+        ? [
+            line(3, 'rect', [
+              ['fill', 'url(#infoschematic-grid-minor)'],
+              ['height', canvasTokens.geometry.gridMajorSize],
+              ['width', canvasTokens.geometry.gridMajorSize],
+            ]),
+          ]
+        : []),
+      line(3, 'path', [
+        [
+          'd',
+          `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`,
+        ],
+        ['fill', 'none'],
+        ['stroke', gridStroke],
+        ['stroke-width', 1],
+      ]),
+      '    </pattern>',
+    ]
+    body.push(
+      [
+        '  <defs>',
+        ...(visualTreatment.grid === 'major-plus-minor' ? minorPattern : []),
+        ...pattern,
+        '  </defs>',
+      ].join('\n'),
+    )
+    body.push(
+      line(1, 'rect', [
+        ['class', 'infoschematic-grid'],
+        ['fill', `url(#${patternId})`],
+        ['height', viewBox.height],
+        ['width', viewBox.width],
+        ['x', viewBox.x],
+        ['y', viewBox.y],
+      ]),
+    )
+  }
+
   for (const lane of runtime.infoschematicLanes) {
     for (const zone of lane.zones) {
+      const box = { height: lane.height, width: zone.width, x: zone.x, y: lane.y }
+      const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
+      const geometry = regionGeometry({
+        box,
+        label: zone.label,
+        radius: lane.panel.radius,
+        treatment,
+      })
       body.push(
         line(1, 'rect', [
           ['class', 'infoschematic-zone'],
           ['data-id', zone.id],
           ['fill', zone.fill],
-          ['height', lane.height],
-          ['width', zone.width],
-          ['x', zone.x],
-          ['y', lane.y],
+          ['height', box.height],
+          ['width', box.width],
+          ['x', box.x],
+          ['y', box.y],
         ]),
       )
+      if (geometry.outline) {
+        body.push(
+          line(1, 'path', [
+            ['class', 'infoschematic-zone-frame'],
+            ['d', geometry.outline],
+            ['data-frame-treatment', treatment.frame],
+            ['fill', 'none'],
+            ['stroke', canvasTokens.output.laneStroke],
+          ]),
+        )
+      }
+      if (geometry.label) {
+        body.push(
+          line(
+            1,
+            'text',
+            [
+              ['class', 'infoschematic-zone-label'],
+              ['data-label-placement', geometry.label.placement],
+              ['dominant-baseline', geometry.label.dominantBaseline],
+              ['fill', canvasTokens.output.textMuted],
+              ['font-family', canvasTokens.output.fontFamily],
+              ['font-size', canvasTokens.output.metadataFontSize],
+              ['text-anchor', geometry.label.textAnchor],
+              ['x', geometry.label.x],
+              ['y', geometry.label.y],
+            ],
+            xmlText(zone.label.toUpperCase()),
+          ),
+        )
+      }
+    }
+    const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
+    const geometry = regionGeometry({
+      box: lane.panel,
+      label: lane.label,
+      radius: lane.panel.radius,
+      treatment,
+    })
+    if (geometry.outline) {
+      body.push(
+        line(1, 'path', [
+          ['class', 'infoschematic-lane'],
+          ['data-frame-treatment', treatment.frame],
+          ['data-id', lane.id],
+          ['d', geometry.outline],
+          ['fill', 'none'],
+          ['stroke', canvasTokens.output.laneStroke],
+        ]),
+      )
+    }
+    if (geometry.label) {
       body.push(
         line(
           1,
           'text',
           [
-            ['class', 'infoschematic-zone-label'],
+            ['class', 'infoschematic-lane-label'],
+            ['data-label-placement', geometry.label.placement],
+            ['dominant-baseline', geometry.label.dominantBaseline],
             ['fill', canvasTokens.output.textMuted],
             ['font-family', canvasTokens.output.fontFamily],
             ['font-size', canvasTokens.output.metadataFontSize],
-            ['x', Math.max(zone.x + 16, 58)],
-            ['y', lane.labelY],
+            ['text-anchor', geometry.label.textAnchor],
+            ['x', geometry.label.x],
+            ['y', geometry.label.y],
           ],
-          xmlText(zone.label.toUpperCase()),
+          xmlText(lane.label.toUpperCase()),
         ),
       )
     }
-    body.push(
-      line(1, 'path', [
-        ['class', 'infoschematic-lane'],
-        ['data-id', lane.id],
-        ['d', runtime.infoschematicLanePanelOutline(lane)],
-        ['fill', 'none'],
-        ['stroke', canvasTokens.output.laneStroke],
-      ]),
-    )
-    body.push(
-      line(
-        1,
-        'text',
-        [
-          ['class', 'infoschematic-lane-label'],
-          ['fill', canvasTokens.output.textMuted],
-          ['font-family', canvasTokens.output.fontFamily],
-          ['font-size', canvasTokens.output.metadataFontSize],
-          ['x', runtime.infoschematicLaneLabelX(lane)],
-          ['y', runtime.infoschematicLaneLabelY(lane) + 5],
-        ],
-        xmlText(lane.label.toUpperCase()),
-      ),
-    )
   }
 
   for (const fabric of fabrics) {
@@ -364,41 +487,111 @@ export const renderInfoschematicSvg = (
   for (const card of cards) {
     const box = card.bounds
     const scope = scopes.get(card.scope)
+    const domain = resolveCardDomain(card, domains)
+    const appearance = domain ?? scope
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
+    const metadataColor =
+      visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted
+    const content = [
+      line(2, 'title', [], xmlText(`${card.code}: ${card.label} · ${card.detail}`)),
+      line(2, 'rect', [
+        ['fill', appearance?.fill ?? canvasTokens.output.surface],
+        ['height', box.height],
+        ['rx', canvasTokens.geometry.cornerRadius],
+        ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
+        ['width', box.width],
+      ]),
+    ]
+    if (visualTreatment.card.stereotype && card.stereotype) {
+      content.push(
+        line(
+          2,
+          'text',
+          [
+            ['class', 'infoschematic-card-stereotype'],
+            ['fill', metadataColor],
+            ['font-family', canvasTokens.output.fontFamily],
+            ['font-size', canvasTokens.output.metadataFontSize],
+            ['text-anchor', 'start'],
+            ['x', 10],
+            ['y', 16],
+          ],
+          xmlText(card.stereotype.toUpperCase()),
+        ),
+      )
+    }
+    if (visualTreatment.card.identity) {
+      content.push(
+        line(
+          2,
+          'text',
+          [
+            ['class', 'infoschematic-card-identity'],
+            ['fill', metadataColor],
+            ['font-family', canvasTokens.output.fontFamily],
+            ['font-size', canvasTokens.output.metadataFontSize],
+            ['text-anchor', 'end'],
+            ['x', box.width - 10],
+            ['y', 16],
+          ],
+          xmlText(card.code),
+        ),
+      )
+    }
+    content.push(
+      line(
+        2,
+        'text',
+        [
+          ['class', 'infoschematic-card-label'],
+          ['dominant-baseline', 'middle'],
+          ['fill', canvasTokens.output.cardText],
+          ['font-family', canvasTokens.output.fontFamily],
+          [
+            'font-size',
+            visualTreatment.card.compact
+              ? canvasTokens.output.metadataFontSize
+              : canvasTokens.output.componentFontSize,
+          ],
+          ['text-anchor', 'middle'],
+          ['x', box.width / 2],
+          ['y', visualTreatment.card.description ? box.height / 2 - 6 : box.height / 2],
+        ],
+        xmlText(card.label),
+      ),
+    )
+    if (visualTreatment.card.description) {
+      content.push(
+        line(
+          2,
+          'text',
+          [
+            ['class', 'infoschematic-card-description'],
+            ['fill', metadataColor],
+            ['font-family', canvasTokens.output.fontFamily],
+            ['font-size', canvasTokens.output.metadataFontSize],
+            ['text-anchor', 'middle'],
+            ['x', box.width / 2],
+            ['y', box.height / 2 + 14],
+          ],
+          xmlText(card.detail),
+        ),
+      )
+    }
     body.push(
       group(
         1,
         [
           ['class', `infoschematic-card${dimmed}`],
+          ['data-compact', visualTreatment.card.compact],
           ['data-code', card.code],
+          ['data-domain', domain?.id],
           ['data-id', card.id],
+          ['data-stereotype', card.stereotype],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
           ['transform', `translate(${number(box.x)} ${number(box.y)})`],
         ],
-        [
-          line(2, 'title', [], xmlText(`${card.code}: ${card.label} · ${card.detail}`)),
-          line(2, 'rect', [
-            ['fill', scope?.fill ?? canvasTokens.output.surface],
-            ['height', box.height],
-            ['rx', canvasTokens.geometry.cornerRadius],
-            ['stroke', scope?.color ?? canvasTokens.output.fallbackFamily],
-            ['width', box.width],
-          ]),
-          line(
-            2,
-            'text',
-            [
-              ['dominant-baseline', 'middle'],
-              ['fill', canvasTokens.output.cardText],
-              ['font-family', canvasTokens.output.fontFamily],
-              ['font-size', canvasTokens.output.componentFontSize],
-              ['text-anchor', 'middle'],
-              ['x', box.width / 2],
-              ['y', box.height / 2],
-            ],
-            xmlText(card.label),
-          ),
-        ],
+        content,
       ).join('\n'),
     )
   }
@@ -474,8 +667,10 @@ export const renderInfoschematicSvg = (
 
   return [
     `<svg${attributes([
-      ['xmlns', 'http://www.w3.org/2000/svg'],
-      ['aria-label', `${config.title} structural Infoschematic`],
+        ['xmlns', 'http://www.w3.org/2000/svg'],
+        ['aria-label', `${config.title} structural Infoschematic`],
+        ['data-grid-treatment', visualTreatment.grid],
+        ['data-surface-treatment', visualTreatment.surface],
       ['height', viewBox.height],
       ['preserveAspectRatio', 'xMidYMid meet'],
       ['role', 'img'],

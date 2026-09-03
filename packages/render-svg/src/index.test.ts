@@ -113,7 +113,7 @@ describe('renderInfoschematicSvg', () => {
   it('renders a title-only Infoschematic as stable standalone SVG', () => {
     expect(renderInfoschematicSvg(blank('A & <B> "quoted"'))).toBe(
       [
-        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
         `  <rect class="infoschematic-backdrop" fill="${visualTokens.canvas.output.backdrop}" height="80" width="120" x="0" y="0" />`,
         '</svg>',
@@ -165,6 +165,62 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('fill="#dbeafe"')
     expect(svg).toContain('stroke="#2463eb"')
     expect(svg).toContain('fill="#7c3aed"')
+  })
+
+  it('renders authored treatments and output-only Card detail overrides', () => {
+    const config: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        appearance: {
+          card: { compact: true, description: true, identity: true, stereotype: true },
+          grid: 'major-plus-minor',
+          surface: 'blueprint',
+        },
+        domains: [
+          {
+            color: '#13579b',
+            fill: '#dceeff',
+            id: 'platform',
+            label: 'Platform',
+          },
+        ],
+        lanes: representative.infoschematic.lanes.map((lane) => ({
+          ...lane,
+          appearance: { frame: 'notched' as const, label: 'north' as const },
+          zones: lane.zones.map((zone) => ({
+            ...zone,
+            appearance: { frame: 'plain' as const, label: 'south-east' as const },
+          })),
+        })),
+        cards: representative.infoschematic.cards.map((card, index) =>
+          index === 0 ? { ...card, domain: 'platform', stereotype: 'service' } : card,
+        ),
+      },
+    }
+
+    const svg = renderInfoschematicSvg(config)
+    expect(svg).toContain('data-grid-treatment="major-plus-minor"')
+    expect(svg).toContain('data-surface-treatment="blueprint"')
+    expect(svg).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}"`)
+    expect(svg).toContain('id="infoschematic-grid-major-plus-minor"')
+    expect(svg).toContain('data-frame-treatment="notched"')
+    expect(svg).toContain('data-label-placement="south-east"')
+    expect(svg).toContain('data-domain="platform"')
+    expect(svg).toContain('data-stereotype="service"')
+    expect(svg).toContain('fill="#dceeff"')
+    expect(svg).toContain('stroke="#13579b"')
+    expect(svg).toContain('class="infoschematic-card-identity"')
+    expect(svg).toContain('class="infoschematic-card-stereotype"')
+    expect(svg).toContain('class="infoschematic-card-description"')
+
+    const overridden = renderInfoschematicSvg(config, {
+      cardDetails: { description: false, identity: false, stereotype: false },
+    })
+    expect(overridden).not.toContain('class="infoschematic-card-identity"')
+    expect(overridden).not.toContain('class="infoschematic-card-stereotype"')
+    expect(overridden).not.toContain('class="infoschematic-card-description"')
+    expect(overridden).toContain('data-compact="true"')
   })
 
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
