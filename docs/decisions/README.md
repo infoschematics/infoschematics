@@ -16,3 +16,4 @@ Decision records explain why Infoschematics is shaped as it is. They state the c
 12. [ADR-INFOSCHEMATICS-006](ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) — interactive views are additive and static renderers consume the same derived View Model.
 13. [ADR-INFOSCHEMATICS-007](ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) — the site publishes canonical repository documentation and examples without owning reusable behaviour.
 14. [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md) — consumable packages, deployable applications, and authored examples use distinct monorepo roots.
+15. [ADR-INFOSCHEMATICS-009](ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) — hosts provide immutable, versioned renderer definitions while authored Infoschematics remain serialisable.

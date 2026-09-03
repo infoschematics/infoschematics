@@ -107,7 +107,7 @@ Direct uses the same Canvas to edit the product's presentation composition.
 
 Direct should distinguish editing the current Scene from merely navigating Present. Changing one Scene must not inherit accidental visibility or focus from whichever Scene was previously active.
 
-Graphics and Callouts remain serialisable authored material selected by renderer keys and properties. Studio may preview their interactive rendering without embedding those implementations in the configuration.
+Graphics and Callouts remain serialisable authored material selected by renderer keys and properties. Studio previews them through the host registry owned by Canvas and Present, including the same validation, diagnostics and accessible fallbacks. It does not embed implementations in configuration or create a Studio-only registration seam.
 
 ## Authored-source handoff
 

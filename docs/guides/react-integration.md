@@ -27,24 +27,102 @@ Each package owns a stylesheet entry at `@infoschematics/<package>/styles.css`. 
 
 ## Host renderers
 
-Authored Fabrics and Graphics carry stable renderer keys and serialisable properties. React implementations stay in the host and are supplied separately:
+Authored Fabrics, Graphics, and Callouts carry stable renderer keys and serialisable properties. React implementations, property validators, diagnostics, shared SVG definitions, and Scope icons stay in the host. Supply them through the `renderers` application prop rather than a process-global registry:
 
 ```tsx
-import type { InfoschematicRenderers } from '@infoschematics/view-studio'
-import { Network } from 'lucide-react'
-import { FabricArtwork, GraphicArtwork, SharedDefinitions } from './renderers.tsx'
+import {
+  type CalloutRendererProps,
+  defineInfoschematicRenderers,
+  type FabricRendererProps,
+  type GraphicRendererProps,
+  type RendererProperties,
+} from '@infoschematics/view-canvas'
 
-export const renderers = {
-  definitions: SharedDefinitions,
-  fabrics: { 'example-fabric': FabricArtwork },
-  graphics: { 'example-graphic': GraphicArtwork },
-  scopeIcons: { network: Network },
-} satisfies InfoschematicRenderers
+type Tone = Readonly<{ tone: string }>
+
+const validateTone = (properties: RendererProperties | undefined) => {
+  const tone = properties?.tone
+  return typeof tone === 'string'
+    ? ({ valid: true, properties: { tone } } as const)
+    : ({ valid: false, reason: 'tone must be a string' } as const)
+}
+
+function FabricArtwork({ bounds, fabric, properties }: FabricRendererProps & { properties: Tone }) {
+  return (
+    <g aria-label={fabric.label} data-tone={properties.tone}>
+      <rect {...bounds} />
+      <text x={bounds.x + 8} y={bounds.y + 20}>{fabric.label}</text>
+    </g>
+  )
+}
+
+function GraphicArtwork({ graphic, properties }: GraphicRendererProps & { properties: Tone }) {
+  return <g aria-label={graphic.label ?? graphic.id} data-tone={properties.tone} />
+}
+
+function CalloutArtwork({
+  callout,
+  children,
+  properties,
+}: CalloutRendererProps & { properties: Tone }) {
+  return (
+    <section aria-label={callout.title ?? 'Story Callout'} data-tone={properties.tone}>
+      {children}
+    </section>
+  )
+}
+
+export const renderers = defineInfoschematicRenderers({
+  fabrics: [
+    {
+      key: 'example.fabric.network',
+      schemaVersion: 1,
+      validateProperties: validateTone,
+      component: FabricArtwork,
+    },
+  ],
+  graphics: [
+    {
+      key: 'example.graphic.network',
+      schemaVersion: 1,
+      validateProperties: validateTone,
+      component: GraphicArtwork,
+    },
+  ],
+  callouts: [
+    {
+      key: 'example.callout.emphasis',
+      schemaVersion: 1,
+      validateProperties: validateTone,
+      component: CalloutArtwork,
+    },
+  ],
+  onDiagnostic: (diagnostic) => reportRendererDiagnostic(diagnostic),
+})
 ```
 
-A Fabric renderer receives the authored Fabric and its effective `bounds`, including an in-progress Studio move. A Graphic renderer receives the resolved authored Graphic and the Infoschematic `viewBox`. Studio owns selection, pointer behaviour, editing frames, and a generic Fabric fallback. An unresolved Story Graphic reference produces no invented visual content.
+A Fabric implementation receives the authored Fabric, its effective `bounds`, and validated properties. A Graphic implementation receives the resolved authored Graphic, the Infoschematic `viewBox`, and validated properties. A Callout implementation receives the authored Callout, validated properties, and the standard Audience content as `children`. Present keeps the positioned `role="status"` frame and Story actions outside the custom component, so custom presentation cannot remove navigation or announcements.
 
-The renderer object is host runtime configuration, not part of `InfoschematicConfig`: do not place React components, callbacks, or shared SVG definitions in authored data.
+`defineInfoschematicRenderers` snapshots and freezes the supplied definition arrays. Every definition needs a stable key, schema version `1`, validator, and component. The first duplicate key wins. The `onDiagnostic` callback receives a `RendererDiagnostic` containing `code`, `kind`, `key`, `message`, and the available `schemaVersion` or `artefactId`. Its codes are `duplicate-key`, `unsupported-version`, `unknown-key`, and `invalid-properties`. Unknown or invalid Fabrics keep labelled generic bounds, Graphics receive labelled placeholders, and Callouts retain their standard title, body, and takeaways.
+
+Component-only Fabric and Graphic maps remain a compatibility bridge, but new integrations should use definition arrays so properties are validated and failures are diagnosable. Shared SVG `definitions` and `scopeIcons` remain host-level supporting renderers.
+
+### Evolve renderer properties
+
+Treat renderer keys as authored compatibility identifiers. A backwards-compatible property addition can keep the same key and schema version when its validator supplies a default:
+
+```tsx
+const validateTone = (properties: RendererProperties | undefined) => ({
+  valid: true as const,
+  properties: {
+    tone: typeof properties?.tone === 'string' ? properties.tone : 'neutral',
+  },
+})
+```
+
+The current authored renderer reference does not carry a separate schema version, and the registry supports definition schema version `1`. For an incompatible property change, register a new stable key such as `example.fabric.network-v2`, keep the old definition while supported Infoschematics still refer to it, migrate authored definitions deliberately, and remove the old definition only after those references are gone. Do not reinterpret old properties under the same key or put a migration callback in authored data.
+
+The renderer object is host runtime configuration, not part of `InfoschematicConfig`: do not place React components, callbacks, validators, diagnostic handlers, or shared SVG definitions in authored data.
 
 ## Host responsibilities
 

@@ -29,6 +29,8 @@ Presentation changes emphasis, not geometry. Card and Fabric placement, Flow rou
 
 A Callout is the exception only in the sense that it floats over the composition. Its position is selected from authored candidates according to the content in focus, or may be explicitly authored. It does not move the content beneath it.
 
+A host may provide a versioned Callout renderer through the immutable View registry. The custom component receives validated properties and the standard Audience content, while Present retains the positioned live-status frame and Story actions. Unknown or invalid renderers therefore change treatment, not placement, navigation, or access to the explanation.
+
 ## Details and Info
 
 The Details panel explains the current presentation and offers a way to inspect the model. Its Info view is a derived register rather than a second authored description: Cards, Fabrics and Flows are grouped and labelled from the same runtime model used by the Infoschematic panel.

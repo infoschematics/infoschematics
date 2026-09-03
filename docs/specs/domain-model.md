@@ -42,6 +42,14 @@ A fabric MUST have authored identity and placement and MUST be available as a fl
 
 _Implementation surface: `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/flow.ts`._
 
+### DOMAIN-013 — Renderer references remain serialisable
+
+An authored Fabric, Graphic, or Callout MAY select a host visual implementation by stable renderer key. Its properties MUST remain serialisable scalar data. Authored configuration MUST NOT contain React components, JSX, callbacks, validators, runtime stores, or derived registries.
+
+Renderer availability MUST NOT determine an artefact's identity, relationships, placement, or Audience content. A host or output that does not implement a compatible renderer MUST retain the product fallback.
+
+_Implementation surface: renderer references in `packages/domain-model/src/fabric.ts`, `packages/domain-model/src/graphic.ts`, and `packages/domain-model/src/scene.ts`._
+
 ## Geography
 
 ### DOMAIN-007 — Lanes and zones state geography
@@ -89,4 +97,4 @@ _Implementation surface: `scopes` and `scopeRule` in `packages/domain-model/src/
 - The package exposes the required data shapes but does not yet validate uniqueness of identifiers or codes, the existence of relationship targets, port availability, lane and zone continuity, or placement within geography.
 - Code-family policies are intentionally host-defined; a reusable validator extension point has not yet been specified.
 - The relationship between a Card's singular `scope` and plural `scopes` is not yet explicit and needs a deliberate contract decision.
-- Serialisability and stable renderer-key properties are architectural requirements but do not yet have a dedicated automated test.
+- Renderer references have an explicit serialisability contract; source-boundary verification must continue to prevent executable host values entering authored examples.

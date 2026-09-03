@@ -42,6 +42,16 @@ _Verification: `packages/view-model/src/placement.test.ts` covers candidate orde
 
 _Implementation surface: `chooseSpot` in `packages/view-model/src/placement.ts`; focused-content obstacles and authored override in `packages/view-studio/src/app/panels/SceneCallout.tsx`._
 
+### PRESENT-010 — Custom Callouts retain the Audience contract
+
+Present MUST resolve a Callout renderer through the immutable host registry and MUST validate its serialisable properties before invoking it. An unknown key or invalid property value MUST emit the corresponding structured host diagnostic and use the standard Callout presentation. An unsupported renderer-definition version MUST be diagnosed and rejected before use.
+
+A custom implementation MAY replace the Callout's visual content, but Present MUST retain deterministic placement, the accessible live-status frame, Story navigation, automatic-advance controls, and exit action. The fallback MUST retain the authored title, body, and takeaways rather than hide explanatory content.
+
+_Implementation surface: renderer resolution in `packages/view-canvas/src/renderers.tsx` and Callout composition in `packages/view-present/src/SceneCallout.tsx`._
+
+_Verification: `packages/view-present/src/SceneCallout.test.tsx` covers standard, custom, unknown and invalid Callouts through server rendering._
+
 ## Details
 
 ### PRESENT-006 — Info is derived from the model

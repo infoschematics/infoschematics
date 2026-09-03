@@ -6,6 +6,7 @@ These specifications define the reusable contracts owned by Infoschematics. They
 
 - [Domain Model](domain-model.md) defines authored identity, data, geography and relationship rules.
 - [View Model](view-model.md) defines geometry, routes, ports, guides and placement calculations.
+- [Canvas View](view-canvas.md) defines the interactive surface, host renderer registry, validation, diagnostics, and fallbacks.
 - [Present View](view-present.md) defines audience-facing filtering, Scene focus, Story playback and presentation controls.
 - [Studio View](view-studio.md) defines generic editing sessions, selection, drafts, change consolidation and creation or removal behaviour.
 - [Static SVG renderer](render-svg.md) defines deterministic, framework-neutral SVG output and visibility options.

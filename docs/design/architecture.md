@@ -108,9 +108,13 @@ Hosts choose the narrowest surface that provides the behaviour they need. Canvas
 
 ## Renderer boundary
 
-Authored Fabrics, Graphics, and Callouts may carry renderer keys and serialisable properties. A renderer maps those keys to visual implementations. Configuration never carries JSX, component constructors, callbacks, or runtime stores.
+[ADR-INFOSCHEMATICS-009](../decisions/ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Graphics, and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.
 
-Current built-in Fabric keys are provisional implementation capability. A stable public renderer requires a documented key, property contract, and fallback behaviour before examples rely on it.
+Canvas owns immutable, host-provided Fabric and Graphic renderer definitions, runtime property validation, structured diagnostics, and deterministic accessible fallbacks. Present extends the same contract for Callout definitions while retaining ownership of Callout placement, Audience content, and navigation controls. Studio passes the registry through the lower Views and retains compatibility re-exports rather than defining a second contract.
+
+React context distributes one application's supplied registry internally; it is not a mutable public registration surface. Shared SVG definitions and Scope icons remain host-level supporting renderers. They do not change the versioned property contract.
+
+Unknown keys, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, a Graphic receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry.
 
 ## Website role
 
