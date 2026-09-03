@@ -4,10 +4,10 @@ area: TOOL
 title: Configure visual treatments
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: fc68a970552877f417d6f9eb6ffac4141eb17144
 ---
 
 ## Goal
