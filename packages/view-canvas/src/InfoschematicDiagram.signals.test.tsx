@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import { Canvas } from './Canvas.tsx'
+import { Canvas, reconcileFlowSignals } from './Canvas.tsx'
 
 const config = defineInfoschematic({
   title: 'Signal reference',
@@ -91,5 +91,19 @@ describe('Canvas Flow signals', () => {
     expect(styles).toContain('.infoschematic-flow-signal-pulse')
     expect(styles).toContain('display: none;')
     expect(styles).toContain('animation: infoschematic-signal-emphasis 900ms ease-out both;')
+  })
+
+  it('does not replay a consumed occurrence when filtering hides then restores its Flow', () => {
+    const first = { flowId: 'request-flow', occurrenceKey: 'scene:1' }
+    const replay = { flowId: 'request-flow', occurrenceKey: 'scene:2' }
+    const seen = new Set(['request-flow:scene:1'])
+
+    const hidden = reconcileFlowSignals([first], [first], new Set(), seen)
+    const restored = reconcileFlowSignals(hidden, [first], new Set(['request-flow']), seen)
+    const newOccurrence = reconcileFlowSignals(restored, [replay], new Set(['request-flow']), seen)
+
+    expect(hidden).toEqual([])
+    expect(restored).toEqual([])
+    expect(newOccurrence).toEqual([replay])
   })
 })
