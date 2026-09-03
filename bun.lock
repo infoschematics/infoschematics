@@ -28,6 +28,8 @@
       "version": "0.1.0",
       "dependencies": {
         "@infoschematics/is-blank": "0.1.0",
+        "@infoschematics/is-infoschematics": "0.1.0",
+        "@infoschematics/render-svg": "0.1.0",
         "@infoschematics/view-studio": "0.1.0",
         "marked": "^18.0.11",
         "react": "^19.2.0",
@@ -46,6 +48,13 @@
     },
     "examples/is-blank": {
       "name": "@infoschematics/is-blank",
+      "version": "0.1.0",
+      "dependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+      },
+    },
+    "examples/is-infoschematics": {
+      "name": "@infoschematics/is-infoschematics",
       "version": "0.1.0",
       "dependencies": {
         "@infoschematics/domain-core": "0.1.0",
@@ -116,6 +125,7 @@
         "@infoschematics/domain-model": "0.1.0",
         "@infoschematics/view-canvas": "0.1.0",
         "@infoschematics/view-model": "0.1.0",
+        "@infoschematics/view-present": "0.1.0",
         "@scalar/api-reference-react": "^0.9.65",
         "lucide-react": "^1.31.0",
         "zod": "^4.1.12",
@@ -338,6 +348,8 @@
     "@infoschematics/domain-model": ["@infoschematics/domain-model@workspace:packages/domain-model"],
 
     "@infoschematics/is-blank": ["@infoschematics/is-blank@workspace:examples/is-blank"],
+
+    "@infoschematics/is-infoschematics": ["@infoschematics/is-infoschematics@workspace:examples/is-infoschematics"],
 
     "@infoschematics/render-svg": ["@infoschematics/render-svg@workspace:packages/render-svg"],
 
