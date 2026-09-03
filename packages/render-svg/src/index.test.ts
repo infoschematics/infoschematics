@@ -252,9 +252,7 @@ describe('renderInfoschematicSvg', () => {
       signals: ['call', 'call', 'missing'],
     })
 
-    expect(renderInfoschematicSvg(representative, { signals: ['call', 'call', 'missing'] })).toBe(
-      signalled,
-    )
+    expect(renderInfoschematicSvg(representative, { signals: ['call', 'missing'] })).toBe(signalled)
     expect(baseline).not.toContain('data-signalled=')
     expect(baseline).not.toContain('infoschematic-flow-signal')
     expect(signalled).toContain('data-id="call" data-signalled="true"')
