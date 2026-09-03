@@ -1,6 +1,12 @@
 import type { Box, Offset, Point } from './geometry.ts'
 import type { Guide } from './guides.ts'
 import type { PortCounts } from './ports.ts'
+import type { CardConfig } from '@infoschematics/domain-model/card'
+import type { FabricConfig } from '@infoschematics/domain-model/fabric'
+import type { FlowConfig } from '@infoschematics/domain-model/flow'
+import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { LaneConfig } from '@infoschematics/domain-model/lane'
+import type { ZoneConfig } from '@infoschematics/domain-model/zone'
 
 // What a diagram must provide to become editable. Nothing here knows what the
 // diagram is of: the editor asks for handles, asks what a drop means, and asks
@@ -75,6 +81,372 @@ export type CreatedComponent = {
   /** The card this is drawn around, where it is an adapter rather than a card. */
   wraps?: string
 }
+
+export type ArtefactKind = 'lane' | 'zone' | 'fabric' | 'card' | 'flow' | 'graphic'
+
+type SelectionIdentity = Readonly<{
+  /** Null where the authored kind has no code field. */
+  code: string | null
+  id: string
+}>
+
+export type ArtefactSelection =
+  | (SelectionIdentity & Readonly<{ geometry: 'lane'; kind: 'lane' }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'zone'; kind: 'zone'; laneId: string }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'fabric' }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'card' }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'graphic' }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'route'; kind: 'flow' }>)
+
+export type ArtefactCapability =
+  | 'create'
+  | 'select'
+  | 'move'
+  | 'resize'
+  | 'edit-properties'
+  | 'remove'
+  | 'reorder'
+
+export type ArtefactCapabilities = Readonly<Record<ArtefactCapability, boolean>>
+
+const capabilities = (
+  move: boolean,
+  resize: boolean,
+): ArtefactCapabilities =>
+  Object.freeze({
+    create: true,
+    'edit-properties': true,
+    move,
+    remove: true,
+    reorder: true,
+    resize,
+    select: true,
+  })
+
+/** Type-appropriate Design operations; Flow geometry stays with endpoint and waypoint tools. */
+export const artefactCapabilities: Readonly<
+  Record<ArtefactKind, ArtefactCapabilities>
+> = Object.freeze({
+  card: capabilities(true, true),
+  fabric: capabilities(true, true),
+  flow: capabilities(false, false),
+  graphic: capabilities(true, true),
+  lane: capabilities(true, true),
+  zone: capabilities(true, true),
+})
+
+export const artefactCan = (
+  kind: ArtefactKind,
+  capability: ArtefactCapability,
+): boolean => artefactCapabilities[kind][capability]
+
+export const defineArtefactSelection = <T extends ArtefactSelection>(
+  selection: T,
+): T => Object.freeze({ ...selection }) as T
+
+export type LaneGeometry = Readonly<{
+  height: number
+  /** A Lane spans the complete Infoschematic width; only its vertical axes vary. */
+  role: 'lane'
+  y: number
+}>
+
+export type ZoneGeometry = Readonly<{
+  /** A Zone inherits its Lane's y and height; only its horizontal axes vary. */
+  laneId: string
+  role: 'zone'
+  width: number
+  x: number
+}>
+
+export type BoxGeometry = Readonly<{ box: Box; role: 'box' }>
+export type RouteGeometry = Readonly<{
+  points: readonly Point[]
+  role: 'route'
+}>
+export type ArtefactGeometry =
+  | LaneGeometry
+  | ZoneGeometry
+  | BoxGeometry
+  | RouteGeometry
+
+export type ArtefactValueByKind = Readonly<{
+  card: CardConfig
+  fabric: FabricConfig
+  flow: FlowConfig
+  graphic: GraphicConfig
+  lane: LaneConfig
+  zone: ZoneConfig
+}>
+
+type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
+
+export type CreateArtefactOperation<K extends ArtefactKind = ArtefactKind> = Readonly<{
+  at: number
+  operation: 'create'
+  target: SelectionFor<K>
+  value: ArtefactValueByKind[K]
+}>
+
+export type MoveArtefactOperation = Readonly<{
+  geometry: Exclude<ArtefactGeometry, RouteGeometry>
+  operation: 'move'
+  target: Exclude<ArtefactSelection, { kind: 'flow' }>
+}>
+
+export type ResizeArtefactOperation = Readonly<{
+  geometry: Exclude<ArtefactGeometry, RouteGeometry>
+  operation: 'resize'
+  target: Exclude<ArtefactSelection, { kind: 'flow' }>
+}>
+
+export type ReorderArtefactOperation = Readonly<{
+  from: number
+  operation: 'reorder'
+  target: ArtefactSelection
+  to: number
+}>
+
+export type RemoveArtefactOperation = Readonly<{
+  operation: 'remove'
+  target: ArtefactSelection
+}>
+
+export type ArtefactOperation =
+  | CreateArtefactOperation
+  | MoveArtefactOperation
+  | ResizeArtefactOperation
+  | ReorderArtefactOperation
+  | RemoveArtefactOperation
+
+export type ResizeMinimum = Readonly<{ height?: number; width?: number }>
+
+export const artefactResizeMinimums: Readonly<
+  Record<Exclude<ArtefactKind, 'flow'>, ResizeMinimum>
+> = Object.freeze({
+  card: Object.freeze({ height: 40, width: 40 }),
+  fabric: Object.freeze({ height: 40, width: 40 }),
+  graphic: Object.freeze({ height: 20, width: 20 }),
+  lane: Object.freeze({ height: 20 }),
+  zone: Object.freeze({ width: 20 }),
+})
+
+const cloneFrozen = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return Object.freeze(value.map((entry) => cloneFrozen(entry))) as T
+  }
+  if (value && typeof value === 'object') {
+    return Object.freeze(
+      Object.fromEntries(
+        Object.entries(value).flatMap(([key, entry]) =>
+          entry === undefined ? [] : [[key, cloneFrozen(entry)]],
+        ),
+      ),
+    ) as T
+  }
+  return value
+}
+
+const validNumber = (value: number) => Number.isFinite(value)
+
+const selectionMatchesValue = <K extends ArtefactKind>(
+  target: SelectionFor<K>,
+  value: ArtefactValueByKind[K],
+) => {
+  if (target.id !== value.id) return false
+  if (target.code === null) return true
+  return 'code' in value && value.code === target.code
+}
+
+export const createArtefactOperation = <K extends ArtefactKind>(
+  target: SelectionFor<K>,
+  value: ArtefactValueByKind[K],
+  at: number,
+): CreateArtefactOperation<K> | undefined => {
+  if (!selectionMatchesValue(target, value) || !validNumber(at)) return undefined
+  return cloneFrozen({
+    at: Math.max(0, Math.trunc(at)),
+    operation: 'create' as const,
+    target,
+    value,
+  })
+}
+
+const clamp = (value: number, minimum: number, maximum: number) =>
+  Math.min(Math.max(value, minimum), Math.max(minimum, maximum))
+
+const moveGeometry = (
+  geometry: Exclude<ArtefactGeometry, RouteGeometry>,
+  offset: Offset,
+  bounds?: Box,
+): Exclude<ArtefactGeometry, RouteGeometry> | undefined => {
+  if (!validNumber(offset.dx) || !validNumber(offset.dy)) return undefined
+
+  switch (geometry.role) {
+    case 'lane': {
+      const y = geometry.y + offset.dy
+      return cloneFrozen({
+        ...geometry,
+        y: bounds
+          ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.height)
+          : y,
+      })
+    }
+    case 'zone': {
+      const x = geometry.x + offset.dx
+      return cloneFrozen({
+        ...geometry,
+        x: bounds
+          ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.width)
+          : x,
+      })
+    }
+    case 'box': {
+      const x = geometry.box.x + offset.dx
+      const y = geometry.box.y + offset.dy
+      return cloneFrozen({
+        box: {
+          ...geometry.box,
+          x: bounds
+            ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.box.width)
+            : x,
+          y: bounds
+            ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.box.height)
+            : y,
+        },
+        role: 'box' as const,
+      })
+    }
+  }
+}
+
+export const moveArtefactOperation = (
+  target: ArtefactSelection,
+  geometry: ArtefactGeometry,
+  offset: Offset,
+  bounds?: Box,
+): MoveArtefactOperation | undefined => {
+  if (
+    !artefactCan(target.kind, 'move') ||
+    target.kind === 'flow' ||
+    geometry.role === 'route' ||
+    target.geometry !== geometry.role
+  ) {
+    return undefined
+  }
+  const moved = moveGeometry(geometry, offset, bounds)
+  return moved
+    ? cloneFrozen({ geometry: moved, operation: 'move' as const, target })
+    : undefined
+}
+
+const boundedSize = (
+  wanted: number,
+  minimum: number,
+  available?: number,
+) => {
+  const floor = Math.max(1, minimum)
+  if (available === undefined) return Math.max(floor, wanted)
+  const ceiling = Math.max(1, available)
+  return Math.min(Math.max(Math.min(floor, ceiling), wanted), ceiling)
+}
+
+export const resizeArtefactOperation = (
+  target: ArtefactSelection,
+  geometry: ArtefactGeometry,
+  size: ResizeMinimum,
+  bounds?: Box,
+  minimum: ResizeMinimum =
+    target.kind === 'flow' ? {} : artefactResizeMinimums[target.kind],
+): ResizeArtefactOperation | undefined => {
+  if (
+    !artefactCan(target.kind, 'resize') ||
+    target.kind === 'flow' ||
+    geometry.role === 'route' ||
+    target.geometry !== geometry.role ||
+    (size.height !== undefined && !validNumber(size.height)) ||
+    (size.width !== undefined && !validNumber(size.width))
+  ) {
+    return undefined
+  }
+
+  let resized: Exclude<ArtefactGeometry, RouteGeometry>
+  switch (geometry.role) {
+    case 'lane':
+      resized = {
+        ...geometry,
+        height: boundedSize(
+          size.height ?? geometry.height,
+          minimum.height ?? 1,
+          bounds ? bounds.y + bounds.height - geometry.y : undefined,
+        ),
+      }
+      break
+    case 'zone':
+      resized = {
+        ...geometry,
+        width: boundedSize(
+          size.width ?? geometry.width,
+          minimum.width ?? 1,
+          bounds ? bounds.x + bounds.width - geometry.x : undefined,
+        ),
+      }
+      break
+    case 'box':
+      resized = {
+        box: {
+          ...geometry.box,
+          height: boundedSize(
+            size.height ?? geometry.box.height,
+            minimum.height ?? 1,
+            bounds ? bounds.y + bounds.height - geometry.box.y : undefined,
+          ),
+          width: boundedSize(
+            size.width ?? geometry.box.width,
+            minimum.width ?? 1,
+            bounds ? bounds.x + bounds.width - geometry.box.x : undefined,
+          ),
+        },
+        role: 'box',
+      }
+      break
+  }
+
+  return cloneFrozen({
+    geometry: resized,
+    operation: 'resize' as const,
+    target,
+  })
+}
+
+export const reorderArtefactOperation = (
+  target: ArtefactSelection,
+  from: number,
+  to: number,
+  length: number,
+): ReorderArtefactOperation | undefined => {
+  if (
+    !artefactCan(target.kind, 'reorder') ||
+    !validNumber(from) ||
+    !validNumber(to) ||
+    !validNumber(length) ||
+    length <= 0
+  ) {
+    return undefined
+  }
+  const last = Math.max(0, Math.trunc(length) - 1)
+  return cloneFrozen({
+    from: clamp(Math.trunc(from), 0, last),
+    operation: 'reorder' as const,
+    target,
+    to: clamp(Math.trunc(to), 0, last),
+  })
+}
+
+export const removeArtefactOperation = (
+  target: ArtefactSelection,
+): RemoveArtefactOperation =>
+  cloneFrozen({ operation: 'remove' as const, target })
 
 export type HandleKind = 'component' | 'label' | 'lane' | 'port' | 'waypoint' | 'zone'
 
@@ -191,3 +563,59 @@ export const orderChanges = (diagram: EditableDiagram, changes: ReadonlyMap<stri
     .filter((change): change is Change => Boolean(change))
   return ordered.length === changes.size ? ordered : [...changes.values()]
 }
+
+const kindDependencyOrder: Readonly<Record<ArtefactKind, number>> = {
+  lane: 0,
+  zone: 1,
+  fabric: 2,
+  card: 3,
+  graphic: 4,
+  flow: 5,
+}
+
+const operationOrder: Readonly<Record<ArtefactOperation['operation'], number>> = {
+  create: 0,
+  move: 1,
+  resize: 2,
+  reorder: 3,
+  remove: 4,
+}
+
+/**
+ * Orders creates from containers to dependants and removals in reverse. Other
+ * edits retain fixed kind depth, then stable authored identity and operation.
+ */
+export const orderArtefactOperations = (
+  operations: readonly ArtefactOperation[],
+): readonly ArtefactOperation[] =>
+  Object.freeze(
+    operations
+      .map((operation, arrival) => ({ arrival, operation }))
+      .sort((left, right) => {
+      const leftPhase = operationOrder[left.operation.operation]
+      const rightPhase = operationOrder[right.operation.operation]
+      if (leftPhase !== rightPhase) return leftPhase - rightPhase
+
+      const leftKind = kindDependencyOrder[left.operation.target.kind]
+      const rightKind = kindDependencyOrder[right.operation.target.kind]
+      const dependencyOrder =
+        left.operation.operation === 'remove'
+          ? rightKind - leftKind
+          : leftKind - rightKind
+      if (dependencyOrder !== 0) return dependencyOrder
+
+      const leftIdentity = left.operation.target.code ?? left.operation.target.id
+      const rightIdentity = right.operation.target.code ?? right.operation.target.id
+      const byIdentity =
+        leftIdentity < rightIdentity ? -1 : leftIdentity > rightIdentity ? 1 : 0
+      if (byIdentity !== 0) return byIdentity
+
+      const leftId = left.operation.target.id
+      const rightId = right.operation.target.id
+      const byId = leftId < rightId ? -1 : leftId > rightId ? 1 : 0
+      if (byId !== 0) return byId
+
+      return left.arrival - right.arrival
+      })
+      .map(({ operation }) => operation),
+  )
