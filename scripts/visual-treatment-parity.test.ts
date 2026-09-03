@@ -71,6 +71,13 @@ const config = defineInfoschematic({
 const values = (output: string, attribute: string) =>
   [...output.matchAll(new RegExp(`${attribute}="([^"]+)"`, 'g'))].map((match) => match[1]).sort()
 
+const regionPaths = (output: string) =>
+  [
+    ...output.matchAll(
+      /<path class="infoschematic-(?:lane|region-frame|zone-frame)" d="([^"]+)"/g,
+    ),
+  ].map((match) => match[1])
+
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
   description: output.includes('class="infoschematic-card-description"'),
@@ -92,6 +99,7 @@ describe('visual treatment renderer parity', () => {
     expect(renderToStaticMarkup(createElement(Canvas, { config }))).toBe(canvas)
     expect(renderInfoschematicSvg(config)).toBe(svg)
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
+    expect(regionPaths(canvas)).toEqual(regionPaths(svg))
   })
 
   it('applies the same output-only Card detail overrides without removing accessible authored text', () => {
@@ -101,6 +109,45 @@ describe('visual treatment renderer parity', () => {
 
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
     expect(canvas).toContain('PLT-001 · Gateway · service · Accepts work')
-    expect(svg).toContain('PLT-001: Gateway · Accepts work')
+    expect(svg).toContain('PLT-001 · Gateway · service · Accepts work')
+  })
+
+  it('keeps omitted and hidden region treatments equivalent with redundant legacy bounds', () => {
+    const legacy = defineInfoschematic({
+      title: 'Legacy region treatment',
+      infoschematic: {
+        lanes: [
+          {
+            height: 100,
+            id: 'legacy',
+            label: 'Legacy lane',
+            labelY: 30,
+            panel: { height: 80, radius: 2, width: 300, x: 10, y: 10 },
+            y: 30,
+            zones: [
+              { fill: '#eeeeee', id: 'legacy-zone', label: 'Legacy zone', width: 300, x: 10 },
+            ],
+          },
+          {
+            appearance: { frame: 'notched', label: 'none' },
+            height: 80,
+            id: 'hidden',
+            label: 'Hidden lane',
+            labelY: 150,
+            panel: { height: 80, radius: 30, width: 300, x: 10, y: 150 },
+            y: 150,
+            zones: [],
+          },
+        ],
+      },
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: legacy }))
+    const svg = renderInfoschematicSvg(legacy)
+
+    expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
+    expect(regionPaths(canvas)).toEqual(regionPaths(svg))
+    expect(values(canvas, 'data-label-placement')).toEqual(['none', 'north-east', 'north-west'])
+    expect(canvas).not.toContain('>HIDDEN LANE</text>')
+    expect(svg).not.toContain('>HIDDEN LANE</text>')
   })
 })

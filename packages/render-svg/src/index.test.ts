@@ -208,6 +208,12 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('data-label-placement="south-east"')
     expect(svg).toContain('data-domain="platform"')
     expect(svg).toContain('data-stereotype="service"')
+    expect(svg).toContain(
+      'aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"',
+    )
+    expect(svg).toContain(
+      'Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;',
+    )
     expect(svg).toContain('fill="#dceeff"')
     expect(svg).toContain('stroke="#13579b"')
     expect(svg).toContain('class="infoschematic-card-identity"')

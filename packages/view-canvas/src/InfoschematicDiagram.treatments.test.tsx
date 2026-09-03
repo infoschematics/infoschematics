@@ -92,8 +92,11 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-card-detail="description"')
     expect(markup).toContain('«service»')
     expect(markup).toContain('Accepts external requests')
-    expect(markup).toContain('aria-label="Card Gateway"')
+    expect(markup).toContain('aria-label="DEL-001 · Gateway · service · Accepts external requests"')
     expect(markup).toContain('<title>DEL-001 · Gateway · service · Accepts external requests</title>')
+    expect(markup).toContain(
+      '<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>',
+    )
   })
 
   it('keeps hidden Card metadata accessible when output detail overrides hide its visual rows', () => {
@@ -106,7 +109,10 @@ describe('Canvas visual treatments', () => {
 
     expect(markup).not.toContain('data-card-detail=')
     expect(markup).toContain('<title>DEL-001 · Gateway · service · Accepts external requests</title>')
-    expect(markup).toContain('aria-label="Card Gateway"')
+    expect(markup).toContain('aria-label="DEL-001 · Gateway · service · Accepts external requests"')
+    expect(markup).toContain(
+      '<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>',
+    )
   })
 
   it('retains neutral, label-only backward defaults and Scope appearance without a Domain', () => {

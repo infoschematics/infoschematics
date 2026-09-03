@@ -247,6 +247,7 @@ export function InfoschematicDiagram({
     adapterFloor,
     config,
     infoschematicAnnotationLabelPositions,
+    infoschematicCardIsVisible,
     infoschematicCards,
     infoschematicEndpointCodes,
     infoschematicEndpointLabels,
@@ -329,6 +330,10 @@ export function InfoschematicDiagram({
     infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }]),
   ) as Record<string, { fill: string; stroke: string }>
   const cardById = new Map(infoschematicCards.map((card) => [card.id, card]))
+  const accessibleSummary = infoschematicCards
+    .filter((card) => infoschematicCardIsVisible(card, visibleScopes))
+    .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
+    .join('; ')
   const _audit = infoschematicPortAudit(flows)
   // Every port a card offers is shown; the ones a route already meets are drawn
   // solid and named, so a reader can see what is taken and what is free.
@@ -1301,8 +1306,10 @@ export function InfoschematicDiagram({
                 }
                 role={editing ? 'button' : undefined}
                 tabIndex={editing ? 0 : undefined}
-              >
-                <rect
+    >
+      <title>{config.title}</title>
+      {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
+      <rect
                   className="infoschematic-region-fill"
                   fill={zone.fill}
                   height={lane.height}
@@ -1709,7 +1716,7 @@ export function InfoschematicDiagram({
 
           return (
             <g
-              aria-label={`Card ${card.label}`}
+              aria-label={accessibleDetail}
               className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
                 editing || focusing ? ' selectable' : ''
               }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${

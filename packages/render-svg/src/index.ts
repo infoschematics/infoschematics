@@ -188,11 +188,20 @@ export const renderInfoschematicSvg = (
         : Boolean(focus?.graphics.has(graphic.id))),
   )
 
+  const accessibleSummary = [
+    config.subtitle,
+    config.synopsis,
+    cards.length > 0
+      ? `Cards: ${cards
+          .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
+          .join('; ')}`
+      : undefined,
+  ]
+    .filter(Boolean)
+    .join(' — ')
   const body: string[] = []
   body.push(line(1, 'title', [], xmlText(config.title)))
-  if (config.subtitle || config.synopsis) {
-    body.push(line(1, 'desc', [], xmlText([config.subtitle, config.synopsis].filter(Boolean).join(' — '))))
-  }
+  if (accessibleSummary) body.push(line(1, 'desc', [], xmlText(accessibleSummary)))
   body.push(
     line(1, 'rect', [
       ['class', 'infoschematic-backdrop'],
@@ -312,8 +321,8 @@ export const renderInfoschematicSvg = (
         label: zone.label,
         treatment,
       })
-      body.push(
-        line(1, 'rect', [
+      const content = [
+        line(2, 'rect', [
           ['class', 'infoschematic-zone'],
           ['data-id', zone.id],
           ['fill', zone.fill],
@@ -322,26 +331,24 @@ export const renderInfoschematicSvg = (
           ['x', box.x],
           ['y', box.y],
         ]),
-      )
+      ]
       if (geometry.outline) {
-        body.push(
-          line(1, 'path', [
+        content.push(
+          line(2, 'path', [
             ['class', 'infoschematic-zone-frame'],
             ['d', geometry.outline],
-            ['data-frame-treatment', treatment.frame],
             ['fill', 'none'],
             ['stroke', canvasTokens.output.laneStroke],
           ]),
         )
       }
       if (geometry.label) {
-        body.push(
+        content.push(
           line(
-            1,
+            2,
             'text',
             [
               ['class', 'infoschematic-zone-label'],
-              ['data-label-placement', geometry.label.placement],
               ['dominant-baseline', geometry.label.dominantBaseline],
               ['fill', canvasTokens.output.textMuted],
               ['font-family', canvasTokens.output.fontFamily],
@@ -354,6 +361,19 @@ export const renderInfoschematicSvg = (
           ),
         )
       }
+      body.push(
+        group(
+          1,
+          [
+            ['aria-label', `Zone ${zone.label}`],
+            ['class', 'infoschematic-zone-region'],
+            ['data-frame-treatment', treatment.frame],
+            ['data-id', zone.id],
+            ['data-label-placement', treatment.label ?? 'none'],
+          ],
+          content,
+        ).join('\n'),
+      )
     }
     const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
     const geometry = regionGeometry({
@@ -361,12 +381,11 @@ export const renderInfoschematicSvg = (
       label: lane.label,
       treatment,
     })
+    const content: string[] = []
     if (geometry.outline) {
-      body.push(
-        line(1, 'path', [
+      content.push(
+        line(2, 'path', [
           ['class', 'infoschematic-lane'],
-          ['data-frame-treatment', treatment.frame],
-          ['data-id', lane.id],
           ['d', geometry.outline],
           ['fill', 'none'],
           ['stroke', canvasTokens.output.laneStroke],
@@ -374,13 +393,12 @@ export const renderInfoschematicSvg = (
       )
     }
     if (geometry.label) {
-      body.push(
+      content.push(
         line(
-          1,
+          2,
           'text',
           [
             ['class', 'infoschematic-lane-label'],
-            ['data-label-placement', geometry.label.placement],
             ['dominant-baseline', geometry.label.dominantBaseline],
             ['fill', canvasTokens.output.textMuted],
             ['font-family', canvasTokens.output.fontFamily],
@@ -393,6 +411,19 @@ export const renderInfoschematicSvg = (
         ),
       )
     }
+    body.push(
+      group(
+        1,
+        [
+          ['aria-label', `Lane ${lane.label}`],
+          ['class', 'infoschematic-lane-region'],
+          ['data-frame-treatment', treatment.frame],
+          ['data-id', lane.id],
+          ['data-label-placement', treatment.label ?? 'none'],
+        ],
+        content,
+      ).join('\n'),
+    )
   }
 
   for (const fabric of fabrics) {
@@ -490,11 +521,12 @@ export const renderInfoschematicSvg = (
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
     const metadataColor =
       visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted
+    const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
     const compactLabelX = 10
     const compactLabelY = visualTreatment.card.stereotype && card.stereotype ? 38 : 28
     const identityWidth = Math.max(42, card.code.length * 6.5 + 14)
     const content = [
-      line(2, 'title', [], xmlText(`${card.code}: ${card.label} · ${card.detail}`)),
+      line(2, 'title', [], xmlText(accessibleDetail)),
       line(2, 'rect', [
         ['fill', appearance?.fill ?? canvasTokens.output.surface],
         ['height', box.height],
@@ -609,8 +641,9 @@ export const renderInfoschematicSvg = (
       group(
         1,
         [
+          ['aria-label', accessibleDetail],
           ['class', `infoschematic-card${dimmed}`],
-          ['data-compact', visualTreatment.card.compact],
+          ['data-compact', visualTreatment.card.compact || undefined],
           ['data-code', card.code],
           ['data-domain', domain?.id],
           ['data-id', card.id],
