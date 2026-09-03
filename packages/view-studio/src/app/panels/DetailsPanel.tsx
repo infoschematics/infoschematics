@@ -1,11 +1,35 @@
 import { type SetStateAction, useEffect, useMemo, useState } from 'react'
+import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import type { DirectTarget } from '@infoschematics/view-present'
-import type { Placement } from '@infoschematics/view-model/editable'
-import type { PortCounts, Side } from '@infoschematics/view-model/ports'
+import type {
+  ArtefactCapabilities,
+  ArtefactGeometry,
+  ArtefactKind,
+  ArtefactSelection,
+  ArtefactValueByKind,
+  Placement,
+} from '@infoschematics/view-model/editable'
+import { portsForBox, type PortCounts, type Side } from '@infoschematics/view-model/ports'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
+import {
+  ArtefactControls,
+  type ArtefactControlsEditor,
+} from '../editor/ArtefactControls.tsx'
+import {
+  createFactoryIdentityAllocator,
+  type ArtefactFactoryContext,
+} from '../editor/artefact-factories.ts'
+import type { ArtefactPropertiesPatch } from '../editor/artefact-operations.ts'
 import { ChangePane } from '../editor/ChangePane.tsx'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
 import { EditorTools } from '../editor/EditorTools.tsx'
+import {
+  createLibraryIdentityAllocator,
+  isValidLibraryFlowContext,
+  type LibraryContext,
+  type LibraryFlowContext,
+} from '../editor/library.ts'
 import { SceneLibraryPanel } from '../editor/SceneLibraryPanel.tsx'
 import { SceneListPanel } from '../editor/SceneListPanel.tsx'
 import { ThemeCompositionPanel } from '../editor/ThemeCompositionPanel.tsx'
@@ -61,6 +85,269 @@ const directTargetKey = (target: DirectTarget): string => {
 const resolveStateAction = <Value,>(action: SetStateAction<Value>, current: Value): Value =>
   typeof action === 'function' ? (action as (value: Value) => Value)(current) : action
 
+type EffectiveArtefactValue = ArtefactValueByKind[ArtefactKind]
+type EditablePlaceable =
+  | InfoschematicConfig['infoschematic']['cards'][number]
+  | InfoschematicConfig['infoschematic']['fabrics'][number]
+
+export type DetailsPanelEditor = {
+  artefactCapabilities?: ArtefactCapabilities
+  artefactGeometry?: ArtefactGeometry
+  artefactIssue: string | null
+  artefactOperation?: ArtefactDraftOperation
+  artefactOperations: readonly ArtefactDraftOperation[]
+  artefactValue?: EffectiveArtefactValue
+  canRedo: boolean
+  canRoute: boolean
+  canUndo: boolean
+  canWrap: boolean
+  changeCount: number
+  createArtefact: <K extends ArtefactKind>(
+    kind: K,
+    value: ArtefactValueByKind[K],
+    index: number,
+    ownerId?: string,
+  ) => ArtefactSelection | undefined
+  discard: () => void
+  discardOne: (origin: PendingOrigin) => void
+  hover: (code: string | null) => void
+  hovered: string | null
+  identity: Readonly<Partial<Record<string, string>>> | undefined
+  mode: EditorMode
+  pending: readonly PendingChange[]
+  placeAt: (code: string, axis: 'x' | 'y', value: number) => void
+  placement: Placement | undefined
+  redo: () => void
+  removeArtefact: () => string | undefined
+  reorderArtefact: (direction: -1 | 1) => void
+  replaceArtefactProperties: (patch: ArtefactPropertiesPatch) => string | undefined
+  retext: (code: string, field: TextField, value: string) => void
+  select: (code: string) => void
+  selected: string | null
+  selectedArtefact: ArtefactSelection | null
+  selectedComponent: string | null
+  selectedCounts: PortCounts
+  /** Whether the Infoschematic selection is a Flow, so a Scene gets the right list. */
+  selectedIsFlow?: boolean
+  setEditing: (editing: boolean) => void
+  setMode: (next: EditorMode) => void
+  setPortCount: (code: string, side: Side, count: number) => void
+  source: string
+  text: Readonly<Record<string, TextDraft>>
+  toggleView: (key: keyof EditorView) => void
+  undo: () => void
+  view: EditorView
+}
+
+type ArtefactContexts = Readonly<{
+  factory: ArtefactFactoryContext
+  library: LibraryContext
+}>
+
+const effectivePlaceable = (
+  config: InfoschematicConfig,
+  selection: ArtefactSelection | null,
+  value: EffectiveArtefactValue | undefined,
+): EditablePlaceable | undefined => {
+  if (selection?.kind !== 'card' && selection?.kind !== 'fabric') return undefined
+  const effective = value as EditablePlaceable | undefined
+  if (effective?.placement?.box) return effective
+  return selection.kind === 'card'
+    ? config.infoschematic.cards.find((candidate) => candidate.id === selection.id)
+    : config.infoschematic.fabrics.find((candidate) => candidate.id === selection.id)
+}
+
+const flowContextFor = (
+  config: InfoschematicConfig,
+  selection: ArtefactSelection | null,
+  value: EffectiveArtefactValue | undefined,
+  selectedCounts: PortCounts,
+): LibraryFlowContext | undefined => {
+  const source = effectivePlaceable(config, selection, value)
+  const family = config.infoschematic.flowFamilies[0]?.id
+  if (!source || !family) return undefined
+  const candidates = [
+    ...config.infoschematic.cards,
+    ...config.infoschematic.fabrics,
+  ].filter((candidate) => candidate.id !== source.id)
+
+  for (const sourcePort of portsForBox(
+    source.placement.box,
+    { ...source.placement.ports, ...selectedCounts },
+  )) {
+    for (const candidate of candidates) {
+      for (const targetPort of portsForBox(
+        candidate.placement.box,
+        candidate.placement.ports,
+      )) {
+        const context: LibraryFlowContext = {
+          family,
+          source: {
+            component: source.id,
+            point: sourcePort.at,
+            port: sourcePort.id,
+          },
+          target: {
+            component: candidate.id,
+            point: targetPort.at,
+            port: targetPort.id,
+          },
+        }
+        if (isValidLibraryFlowContext(context)) return context
+      }
+    }
+  }
+  return undefined
+}
+
+export const detailsArtefactContexts = (
+  config: InfoschematicConfig,
+  editor: Pick<
+    DetailsPanelEditor,
+    | 'artefactGeometry'
+    | 'artefactOperations'
+    | 'artefactValue'
+    | 'selectedArtefact'
+    | 'selectedCounts'
+  >,
+): ArtefactContexts => {
+  const definition = config.infoschematic
+  const allAuthored = [
+    ...definition.cards,
+    ...definition.fabrics,
+    ...definition.flows,
+    ...definition.graphics,
+    ...definition.lanes,
+    ...definition.lanes.flatMap((lane) => lane.zones),
+  ]
+  const usedIds = [
+    ...allAuthored.map((value) => value.id),
+    ...editor.artefactOperations.map((operation) => operation.target.id),
+  ]
+  const usedCodes = [
+    ...allAuthored.flatMap((value) => ('code' in value ? [value.code] : [])),
+    ...editor.artefactOperations.flatMap((operation) =>
+      operation.target.code ? [operation.target.code] : [],
+    ),
+  ]
+  const view = definition.viewBox
+  const width = Math.min(240, view.width)
+  const height = Math.min(120, view.height)
+  const selectedBox =
+    editor.artefactGeometry?.role === 'box'
+      ? editor.artefactGeometry.box
+      : undefined
+  const box = {
+    height,
+    width,
+    x: Math.max(
+      view.x,
+      Math.min(view.x + view.width - width, (selectedBox?.x ?? view.x + 16) + 24),
+    ),
+    y: Math.max(
+      view.y,
+      Math.min(
+        view.y + view.height - height,
+        (selectedBox?.y ?? view.y + 16) + 24,
+      ),
+    ),
+  }
+  const selectedLane = (() => {
+    const selected = editor.selectedArtefact
+    if (selected?.kind === 'lane') {
+      const value = editor.artefactValue
+      if (value && 'zones' in value) {
+        return { height: value.height, id: selected.id, y: value.y }
+      }
+      const lane = definition.lanes.find((candidate) => candidate.id === selected.id)
+      return lane ? { height: lane.height, id: lane.id, y: lane.y } : undefined
+    }
+    if (selected?.kind === 'zone') {
+      const lane = definition.lanes.find(
+        (candidate) => candidate.id === selected.laneId,
+      )
+      return lane ? { height: lane.height, id: lane.id, y: lane.y } : undefined
+    }
+    return undefined
+  })()
+  const at = allAuthored.length + editor.artefactOperations.length
+  const selectedPlaceable = effectivePlaceable(
+    config,
+    editor.selectedArtefact,
+    editor.artefactValue,
+  )
+
+  return {
+    factory: {
+      allocate: createFactoryIdentityAllocator(usedIds),
+      at,
+      box,
+      lane: selectedLane,
+    },
+    library: {
+      allocate: createLibraryIdentityAllocator({ codes: usedCodes, ids: usedIds }),
+      at,
+      box,
+      flow: flowContextFor(
+        config,
+        editor.selectedArtefact,
+        editor.artefactValue,
+        editor.selectedCounts,
+      ),
+      scope:
+        selectedPlaceable && 'scope' in selectedPlaceable
+          ? selectedPlaceable.scope
+          : (definition.scopes[0]?.id ?? ''),
+    },
+  }
+}
+
+export const artefactControlsEditorFor = (
+  editor: DetailsPanelEditor,
+): ArtefactControlsEditor => ({
+  artefactCapabilities: editor.artefactCapabilities,
+  artefactGeometry: editor.artefactGeometry,
+  artefactIssue: editor.artefactIssue,
+  createArtefact: editor.createArtefact,
+  removeArtefact: editor.removeArtefact,
+  reorderArtefact: editor.reorderArtefact,
+  replaceArtefactProperties: (properties) => {
+    const selected = editor.selectedArtefact
+    if (!selected) return
+    editor.replaceArtefactProperties({
+      kind: selected.kind,
+      value: properties,
+    } as ArtefactPropertiesPatch)
+  },
+  selectedArtefact: editor.selectedArtefact,
+})
+
+export function DesignDetails({
+  contexts,
+  editor,
+}: Readonly<{ contexts: ArtefactContexts; editor: DetailsPanelEditor }>) {
+  return (
+    <>
+      <ArtefactControls
+        editor={artefactControlsEditorFor(editor)}
+        factoryContext={contexts.factory}
+        libraryContext={contexts.library}
+      />
+      <EditorPanel
+        onPlace={editor.placeAt}
+        code={editor.selected}
+        identity={editor.identity}
+        onPortCount={editor.setPortCount}
+        onRetext={editor.retext}
+        placement={editor.placement}
+        selected={editor.selectedComponent}
+        selectedCounts={editor.selectedCounts}
+        textDraft={editor.selected ? editor.text[editor.selected] : undefined}
+      />
+    </>
+  )
+}
+
 // What is currently showing, and what the published pack says about it.
 export function DetailsPanel({
   editor,
@@ -82,7 +369,7 @@ export function DetailsPanel({
   /** Both need the Infoschematic: where there is room on a route, and where its ports are. */
   onAddWaypoint: () => void
   onResetRoute: () => void
-  editor: {
+  editor: DetailsPanelEditor & {
     canRedo: boolean
     canUndo: boolean
     canRoute: boolean
@@ -125,6 +412,17 @@ export function DetailsPanel({
     infoschematicUnroutedInterfaces,
   } = useInfoschematic()
   const unroutedInterfaceIds = new Set(infoschematicUnroutedInterfaces.map((entry) => entry.id))
+  const artefactContexts = useMemo(
+    () => detailsArtefactContexts(config, editor),
+    [
+      config,
+      editor.artefactGeometry,
+      editor.artefactOperations,
+      editor.artefactValue,
+      editor.selectedArtefact,
+      editor.selectedCounts,
+    ],
+  )
   // Present remembers reading state; Producer modes are selected explicitly by
   // the transient production state rather than masquerading as panel tabs.
   const [presentTab, setPresentTab] = useSessionState<'showing' | 'specifications'>(
@@ -498,17 +796,7 @@ export function DetailsPanel({
                 editing showed a story. */}
             <div className="editor-panes">
               {presentation.mode === 'design' ? (
-                <EditorPanel
-                  onPlace={editor.placeAt}
-                  code={editor.selected}
-                  identity={editor.identity}
-                  onPortCount={editor.setPortCount}
-                  onRetext={editor.retext}
-                  placement={editor.placement}
-                  selected={editor.selectedComponent}
-                  selectedCounts={editor.selectedCounts}
-                  textDraft={editor.selected ? editor.text[editor.selected] : undefined}
-                />
+                <DesignDetails contexts={artefactContexts} editor={editor} />
               ) : directUsesThemes ? (
                 <>
                   <p className="eyebrow pane-heading">THEMES</p>
