@@ -45,6 +45,8 @@ export const visualTokens = Object.freeze({
     flows: tokenGroup({
       dash: '13 11',
       highlightedWidth: 5,
+      lineCap: 'round',
+      lineJoin: 'round',
       pipeWidth: 9,
       routeOpacity: 0.95,
       routeWidth: 4,
@@ -63,10 +65,14 @@ export const visualTokens = Object.freeze({
     /** Defaults for deterministic output that never depend on UI motion. */
     output: tokenGroup({
       backdrop: '#ffffff',
+      cardText: '#18212a',
+      componentFontSize: 13,
       fallbackFamily: '#52606d',
       flowPipe: '#ffffff',
+      fontFamily: 'system-ui, sans-serif',
       graphicFill: '#f7f8f9',
       laneStroke: '#83909d',
+      metadataFontSize: 12,
       stroke: '#687684',
       surface: '#f2f5f7',
       text: '#27313a',

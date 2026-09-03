@@ -2,6 +2,8 @@
 :root {
   --infoschematic-canvas-flows-dash: 13 11;
   --infoschematic-canvas-flows-highlighted-width: 5;
+  --infoschematic-canvas-flows-line-cap: round;
+  --infoschematic-canvas-flows-line-join: round;
   --infoschematic-canvas-flows-pipe-width: 9;
   --infoschematic-canvas-flows-route-opacity: 0.95;
   --infoschematic-canvas-flows-route-width: 4;
@@ -17,10 +19,14 @@
   --infoschematic-canvas-geometry-grid-size: 10;
   --infoschematic-canvas-geometry-point-radius: 6;
   --infoschematic-canvas-output-backdrop: #ffffff;
+  --infoschematic-canvas-output-card-text: #18212a;
+  --infoschematic-canvas-output-component-font-size: 13;
   --infoschematic-canvas-output-fallback-family: #52606d;
   --infoschematic-canvas-output-flow-pipe: #ffffff;
+  --infoschematic-canvas-output-font-family: system-ui, sans-serif;
   --infoschematic-canvas-output-graphic-fill: #f7f8f9;
   --infoschematic-canvas-output-lane-stroke: #83909d;
+  --infoschematic-canvas-output-metadata-font-size: 12;
   --infoschematic-canvas-output-stroke: #687684;
   --infoschematic-canvas-output-surface: #f2f5f7;
   --infoschematic-canvas-output-text: #27313a;
