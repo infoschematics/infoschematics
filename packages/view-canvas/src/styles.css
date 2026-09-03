@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "@infoschematics/view-model/tokens.css";
 
 .infoschematic {
   aspect-ratio: 3 / 2;
-  background: #081725;
+  background: var(--infoschematic-canvas-surfaces-backdrop);
   margin-inline: auto;
   max-height: 100%;
   max-width: 100%;
@@ -19,18 +20,16 @@
 }
 
 .infoschematic-zone-label {
-  fill: #ffffff65;
-  font:
-    600 12px "DM Mono",
-    monospace;
+  fill: var(--infoschematic-canvas-text-zone);
+  font: 600 12px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.5px;
 }
 
 /* The outline is a path with a gap rather than a rect, so the lane's name can
    sit on the border like a legend. */
 .infoschematic-group path {
-  fill: #12273b24;
-  stroke: #b5c4d54d;
+  fill: var(--infoschematic-canvas-surfaces-lane-fill);
+  stroke: var(--infoschematic-canvas-surfaces-lane-stroke);
   stroke-width: 1.5px;
 }
 
@@ -42,15 +41,13 @@
 
 .infoschematic-group text {
   fill: #9ed9ff;
-  font:
-    600 13px "DM Mono",
-    monospace;
+  font: 600 13px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.6px;
 }
 
 .fabric-shell {
-  fill: #102638b8;
-  stroke: #83b2d2c4;
+  fill: var(--infoschematic-canvas-surfaces-fabric-fill);
+  stroke: var(--infoschematic-canvas-surfaces-fabric-stroke);
   stroke-width: 3px;
 }
 
@@ -58,33 +55,29 @@
    draws an irregular shape within them. */
 .fabric-frame {
   fill: none;
-  stroke: #6f8ba3a8;
+  stroke: var(--infoschematic-canvas-surfaces-fabric-frame);
   stroke-dasharray: 2 6;
   stroke-linecap: round;
   stroke-width: 1.5px;
 }
 
 .fabric-title {
-  fill: #b9cde0;
-  font:
-    600 13px "DM Mono",
-    monospace;
+  fill: var(--infoschematic-canvas-text-fabric);
+  font: 600 13px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.5px;
   text-anchor: middle;
 }
 
 .fabric-detail {
-  fill: #7f9bb3;
-  font:
-    500 9px "DM Mono",
-    monospace;
+  fill: var(--infoschematic-canvas-text-muted);
+  font: 500 9px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.2px;
   text-anchor: middle;
 }
 
 /* A Fabric remains selectable regardless of the host renderer it uses. */
 .infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
-  stroke: #dff3ff;
+  stroke: var(--infoschematic-canvas-text-strong);
   stroke-width: 2.5px;
 }
 
@@ -107,38 +100,39 @@
 .infoschematic-pipe,
 .infoschematic-route {
   fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-linecap: var(--infoschematic-canvas-flows-line-cap);
+  stroke-linejoin: var(--infoschematic-canvas-flows-line-join);
 }
 
 .infoschematic-pipe {
   opacity: 0.75;
-  stroke: #06101c;
-  stroke-width: 9px;
+  stroke: var(--infoschematic-canvas-surfaces-flow-pipe);
+  stroke-width: var(--infoschematic-canvas-flows-pipe-width);
 }
 
 .infoschematic-route {
   filter: drop-shadow(0 0 4px #000000cc);
-  opacity: 0.95;
-  stroke-width: 4px;
+  opacity: var(--infoschematic-canvas-flows-route-opacity);
+  stroke-width: var(--infoschematic-canvas-flows-route-width);
 }
 
 .infoschematic-route.dashed {
-  stroke-dasharray: 13 11;
+  stroke-dasharray: var(--infoschematic-canvas-flows-dash);
 }
 
 /* Selecting a published contract lights the lines that carry it and drops
    everything else back, so the Infoschematic answers "where does this API live?". */
 .infoschematic-svg.highlighting .infoschematic-flows > g,
 .infoschematic-svg.highlighting .infoschematic-service {
-  transition: opacity 180ms ease-out;
+  transition: opacity var(--infoschematic-canvas-focus-transition-duration)
+    var(--infoschematic-canvas-focus-transition-timing);
 }
 
 .infoschematic-svg.highlighting .infoschematic-flows > g:not(.highlighted),
 .infoschematic-svg.highlighting .infoschematic-service:not(.highlighted),
 .infoschematic-svg.highlighting .infoschematic-fabric:not(.highlighted),
 .infoschematic-svg.highlighting .audit-flow:not(.highlighted) {
-  opacity: 0.14;
+  opacity: var(--infoschematic-canvas-focus-dimmed-opacity);
 }
 
 .infoschematic-svg.highlighting
@@ -146,8 +140,8 @@
   > g.highlighted
   .infoschematic-route {
   filter: drop-shadow(0 0 9px currentColor) drop-shadow(0 0 4px currentColor);
-  opacity: 1;
-  stroke-width: 5px;
+  opacity: var(--infoschematic-canvas-focus-focused-opacity);
+  stroke-width: var(--infoschematic-canvas-flows-highlighted-width);
 }
 
 /* The backing pipe under a lit line is what keeps it legible where it crosses a
@@ -167,7 +161,8 @@
 }
 
 .infoschematic-svg.highlighting .infoschematic-fabric {
-  transition: opacity 180ms ease-out;
+  transition: opacity var(--infoschematic-canvas-focus-transition-duration)
+    var(--infoschematic-canvas-focus-transition-timing);
 }
 
 .infoschematic-svg.highlighting
@@ -182,11 +177,11 @@
    it moves on. Selecting keeps the same glow in the selection's own colour, so
    what has been chosen goes on saying so after the pointer leaves. */
 .infoschematic-svg .pointed {
-  --glow: #79c9ff;
+  --glow: var(--infoschematic-canvas-selection-pointed);
 }
 
 .infoschematic-svg .selected {
-  --glow: #82b366;
+  --glow: var(--infoschematic-canvas-selection-selected);
 }
 
 .infoschematic-svg .infoschematic-service.pointed rect,
@@ -197,7 +192,7 @@
 }
 
 .infoschematic-svg .infoschematic-service.pointed rect {
-  stroke: #cfe9ff;
+  stroke: var(--infoschematic-canvas-selection-focused-stroke);
 }
 
 .infoschematic-svg .audit-flow.pointed rect,
@@ -206,7 +201,7 @@
 }
 
 .infoschematic-svg .audit-flow.pointed rect {
-  stroke: #cfe9ff;
+  stroke: var(--infoschematic-canvas-selection-focused-stroke);
   stroke-width: 1.5px;
 }
 
@@ -228,7 +223,7 @@
 
 .infoschematic-svg .lane-selectable.pointed,
 .infoschematic-svg .zone-selectable.pointed {
-  fill: #dff3ff;
+  fill: var(--infoschematic-canvas-text-strong);
 }
 
 /* A port and a waypoint are small enough that the glow is most of what is seen,
@@ -241,14 +236,14 @@
 }
 
 .infoschematic-svg .route-waypoint.pointed {
-  stroke: #cfe9ff;
+  stroke: var(--infoschematic-canvas-selection-focused-stroke);
 }
 
 /* The socket the card drops into: the rim is what is seen, so the outline
    carries it and the fill only separates the recess from the lane behind. */
 .adapter-socket {
-  fill: #1a1436c9;
-  stroke: #8062b4;
+  fill: var(--infoschematic-canvas-surfaces-graphic-fallback-fill);
+  stroke: var(--infoschematic-canvas-surfaces-graphic-fallback-stroke);
   stroke-width: 2px;
 }
 
@@ -265,7 +260,7 @@
 }
 
 .infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
-  stroke: #82b366;
+  stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
 
@@ -273,16 +268,13 @@
    every other component does. It carried its own size and a scope tint that
    nothing else on the Infoschematic uses - no card colours its name by scope. */
 .adapter-label {
-  fill: #f2f7ff;
-  font:
-    700 14px Manrope,
-    Arial,
-    sans-serif;
+  fill: var(--infoschematic-canvas-text-label);
+  font: 700 14px var(--infoschematic-canvas-text-body-family);
   text-anchor: middle;
 }
 
 .infoschematic-svg.highlighting .infoschematic-adapter:not(.highlighted) {
-  opacity: 0.14;
+  opacity: var(--infoschematic-canvas-focus-dimmed-opacity);
 }
 
 .infoschematic-service rect {
@@ -291,11 +283,8 @@
 }
 
 .infoschematic-service-label {
-  fill: #f2f7ff;
-  font:
-    700 14px Manrope,
-    Arial,
-    sans-serif;
+  fill: var(--infoschematic-canvas-text-label);
+  font: 700 14px var(--infoschematic-canvas-text-body-family);
   text-anchor: middle;
 }
 
@@ -312,10 +301,8 @@
 
 .audit-component-code,
 .audit-flow text {
-  fill: #dff3ff;
-  font:
-    700 9px "DM Mono",
-    monospace;
+  fill: var(--infoschematic-canvas-text-strong);
+  font: 700 9px var(--infoschematic-canvas-text-code-family);
   paint-order: stroke;
   stroke: #06101e;
   stroke-width: 3px;
@@ -348,7 +335,7 @@
 }
 
 .infoschematic-svg.editing .infoschematic-service.selected rect {
-  stroke: #82b366;
+  stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
 
@@ -363,7 +350,7 @@
   pointer-events: auto;
 }
 .infoschematic-svg.editing .audit-flow.selected rect {
-  stroke: #82b366;
+  stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 2px;
 }
 
@@ -374,7 +361,7 @@
 /* Shown only while a handle is being dragged, and only for the guides it
    actually snapped to, so the Infoschematic never fills with lines that mean nothing. */
 .infoschematic-guides line {
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-dasharray: 6 6;
   stroke-width: 1;
 }
@@ -390,7 +377,7 @@
 
 .audit-port circle {
   fill: #0b1d33;
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-width: 1.5;
 }
 
@@ -402,14 +389,14 @@
 .audit-new-flow {
   fill: none;
   pointer-events: none;
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-dasharray: 6 4;
   stroke-width: 2;
 }
 
 .audit-port.selected circle {
-  fill: #79c9ff;
-  stroke: #dff3ff;
+  fill: var(--infoschematic-canvas-selection-pointed);
+  stroke: var(--infoschematic-canvas-text-strong);
   stroke-width: 2;
 }
 
@@ -442,10 +429,8 @@
 }
 
 .audit-port text {
-  fill: #dff3ff;
-  font:
-    700 9px "DM Mono",
-    monospace;
+  fill: var(--infoschematic-canvas-text-strong);
+  font: 700 9px var(--infoschematic-canvas-text-code-family);
   opacity: 0;
   paint-order: stroke;
   pointer-events: none;
@@ -508,7 +493,7 @@
 }
 
 .infoschematic-flows > g.selected .infoschematic-route {
-  stroke-width: 5px;
+  stroke-width: var(--infoschematic-canvas-flows-highlighted-width);
 }
 
 /* An arrowhead is a marker, so it cannot inherit from the line the way a
@@ -528,8 +513,8 @@
    rather than emphasis - so it thickens and brightens instead, which is what
    the eye follows along a line. */
 .infoschematic-svg .infoschematic-flows > g.pointed .infoschematic-route {
-  stroke: #cfe9ff;
-  stroke-width: 4px;
+  stroke: var(--infoschematic-canvas-selection-focused-stroke);
+  stroke-width: var(--infoschematic-canvas-flows-route-width);
 }
 
 .route-free-end {
@@ -550,12 +535,12 @@
   cursor: grab;
   fill: #0b1d33;
   pointer-events: auto;
-  stroke: #82b366;
+  stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 2px;
 }
 
 .route-waypoint.selected {
-  fill: #82b366;
+  fill: var(--infoschematic-canvas-selection-selected);
 }
 
 .route-waypoint:active {
@@ -568,7 +553,7 @@
   cursor: move;
   fill: #79c9ff33;
   pointer-events: auto;
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-width: 1px;
 }
 
@@ -645,7 +630,7 @@
 }
 
 .infoschematic-svg.focusing [class*="flow-family-"].lit .infoschematic-route {
-  stroke-width: 4;
+  stroke-width: var(--infoschematic-canvas-flows-route-width);
 }
 
 /* Everything not in the scene recedes, so what is in it reads at a glance. */

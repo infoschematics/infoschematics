@@ -6,7 +6,7 @@ import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
-import { cornerRadius } from '@infoschematics/view-model/tokens'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 import type { RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
@@ -87,17 +87,14 @@ function DefaultGraphic({ graphic, viewBox }: { graphic: GraphicConfig; viewBox:
   )
 }
 
-/** How far a pointer travels before a click becomes a drag, in screen pixels. */
-const dragThreshold = 4
-
-/** How near a drop has to land before it counts as choosing that port. */
-const attachmentReach = 40
-
-/** How near the pointer has to be to a run before the add control appears. */
-const addReach = 14
-
-/** The grid the add control snaps its offer to, matching the editor's own. */
-const gridSize = 10
+const {
+  addReach,
+  attachmentReach,
+  cornerRadius,
+  dragThreshold,
+  gridMajorSize,
+  gridSize,
+} = visualTokens.canvas.geometry
 
 export function InfoschematicDiagram({
   componentOffsets,
@@ -858,12 +855,22 @@ export function InfoschematicDiagram({
         y={infoschematicViewBox.y}
       />
       <defs>
-        <pattern height="10" id="edit-grid-minor" patternUnits="userSpaceOnUse" width="10" x="0" y="0">
-          <path className="edit-grid-line" d="M 10 0 V 10 M 0 10 H 10" />
+        <pattern height={gridSize} id="edit-grid-minor" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
+          <path className="edit-grid-line" d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`} />
         </pattern>
-        <pattern height="50" id="edit-grid-major" patternUnits="userSpaceOnUse" width="50" x="0" y="0">
-          <rect fill="url(#edit-grid-minor)" height="50" width="50" x="0" y="0" />
-          <path className="edit-grid-line major" d="M 50 0 V 50 M 0 50 H 50" />
+        <pattern
+          height={gridMajorSize}
+          id="edit-grid-major"
+          patternUnits="userSpaceOnUse"
+          width={gridMajorSize}
+          x="0"
+          y="0"
+        >
+          <rect fill="url(#edit-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
+          <path
+            className="edit-grid-line major"
+            d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
+          />
         </pattern>
         {Definitions ? <Definitions /> : null}
         {infoschematicFamilies.map((family) => (
