@@ -4,7 +4,7 @@ area: TOOL
 title: Configure visual treatments
 theme: tool
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: fc68a970552877f417d6f9eb6ffac4141eb17144
@@ -32,17 +32,17 @@ The shared visual-token manifest now keeps invariant geometry and colours aligne
 
 ## Steps
 
-- [ ] Add narrowly typed, serialisable appearance modules to Domain Model for Canvas grid treatment, Lane and Zone frames, and region-label placement; use closed string unions and booleans rather than CSS property bags.
-- [ ] Extend the Infoschematic definition with optional appearance defaults that distinguish no grid, major lines and major-plus-minor lines, with neutral and blueprint treatments resolved through shared semantic tokens.
-- [ ] Extend Lane and Zone configuration with optional frame treatment covering visible, solid, dashed, dotted or absent borders; standard rounded geometry; optional label; nine-position compass placement; and plain or notched label treatment.
-- [ ] Make an absent region label suppress its notch automatically, keep notch padding symmetric, and derive rounded/notched outline geometry in View Model so Canvas and static SVG cannot disagree.
-- [ ] Add serialisable Card stereotype and Domain classification, introduce a Domain catalogue with semantic colour and fill, and keep Scope applicability independent from Domain appearance.
-- [ ] Define framework-neutral render-detail options for Card identity tag, stereotype and description visibility. Let authored appearance provide defaults while an explicit Canvas or SVG render option may override visibility without removing authored data.
-- [ ] Add View Model resolvers that normalise omitted appearance fields to backward-compatible defaults and expose one resolved treatment shape to every renderer.
-- [ ] Update Canvas to render configurable blueprint grids, region frames and labels, compact Standard Cards, top-right bordered identity tags, optional stereotype and description, and Domain treatment without reintroducing decorative status dots.
-- [ ] Update `renderInfoschematicSvg` to consume the same resolved treatment contract and emit deterministic accessible SVG for every supported combination without React, DOM state or page-specific CSS.
-- [ ] Add representative fixtures and table-driven tests for defaults, configuration combinations, invalid references, symmetric notches, label placement, Card detail overrides, Scope/Domain independence and byte-stable Canvas-versus-SVG semantics.
-- [ ] Update the architecture decision, Domain and renderer specifications, visual-language guidance and authoring guide with the boundary between authored meaning, output visibility and invariant tokens.
+- [x] Add narrowly typed, serialisable appearance modules to Domain Model for Canvas grid treatment, Lane and Zone frames, and region-label placement; use closed string unions and booleans rather than CSS property bags.
+- [x] Extend the Infoschematic definition with optional appearance defaults that distinguish no grid, major lines and major-plus-minor lines, with neutral and blueprint treatments resolved through shared semantic tokens.
+- [x] Extend Lane and Zone configuration with optional frame treatment covering visible, solid, dashed, dotted or absent borders; standard rounded geometry; optional label; nine-position compass placement; and plain or notched label treatment.
+- [x] Make an absent region label suppress its notch automatically, keep notch padding symmetric, and derive rounded/notched outline geometry in View Model so Canvas and static SVG cannot disagree.
+- [x] Add serialisable Card stereotype and Domain classification, introduce a Domain catalogue with semantic colour and fill, and keep Scope applicability independent from Domain appearance.
+- [x] Define framework-neutral render-detail options for Card identity tag, stereotype and description visibility. Let authored appearance provide defaults while an explicit Canvas or SVG render option may override visibility without removing authored data.
+- [x] Add View Model resolvers that normalise omitted appearance fields to backward-compatible defaults and expose one resolved treatment shape to every renderer.
+- [x] Update Canvas to render configurable blueprint grids, region frames and labels, compact Standard Cards, top-right bordered identity tags, optional stereotype and description, and Domain treatment without reintroducing decorative status dots.
+- [x] Update `renderInfoschematicSvg` to consume the same resolved treatment contract and emit deterministic accessible SVG for every supported combination without React, DOM state or page-specific CSS.
+- [x] Add representative fixtures and table-driven tests for defaults, configuration combinations, invalid references, symmetric notches, label placement, Card detail overrides, Scope/Domain independence and byte-stable Canvas-versus-SVG semantics.
+- [x] Update the architecture decision, Domain and renderer specifications, visual-language guidance and authoring guide with the boundary between authored meaning, output visibility and invariant tokens.
 
 ## Files touched
 
@@ -82,6 +82,45 @@ Update authoring guidance with concise examples for blueprint grids, Lane and Zo
 ### Roadmap
 
 Record any visual gap discovered by the SITE-001 comparison against this item only when it fits the approved configuration boundary. Keep Flow motion and signal authority in TOOL-013.
+
+## Review
+
+### Delivered
+
+Authored Infoschematics now carry a serialisable visual-treatment contract shared by Canvas and static SVG: neutral or blueprint surfaces, standard grids, independent region frame and label treatments, compact Card detail, and Domain-based semantic colour. Output-only Card detail overrides preserve authored and accessible information.
+
+### Summary of changes
+
+- Added Domain Model appearance and Domain modules, Card stereotype and Domain references, normalisation, duplicate/reference validation, and public exports.
+- Added View Model treatment, Domain and region-geometry resolvers with invariant radius, symmetric notch padding, backward-readable defaults, and separate `none | solid | dashed | dotted` frames from `plain | notched` label treatment.
+- Updated Canvas and static SVG to share surface, grid, frame, label, compact Card, identity, stereotype, description, Domain colour, and accessible labelling decisions. The legacy Design grid remains an independent editor overlay.
+- Updated the self-describing Infoschematic to exercise blueprint, grid, Domain, Scope, solid, dashed, dotted, plain and notched combinations.
+- Added ADR-INFOSCHEMATICS-011 and updated Domain, Canvas, static SVG, visual-language and authoring documentation.
+
+### Verification
+
+- `bun run check` passed: 46 test files and 300 tests, all package and example builds, TypeScript workspaces, visual-token drift, dependency boundaries and production Site build.
+- `bun run release:verify` passed: all seven public packages packed and consumed from isolated tarballs, including CSS, Canvas, static SVG and Studio server rendering.
+- Focused tests cover closed serialisable unions, invalid Domain references, all frame and label treatments, compass placement, symmetric notches, omitted/hidden labels, redundant legacy bounds, Domain/Scope independence, output overrides and accessible metadata.
+- A shared-fixture integration test proves deterministic Canvas and static-SVG treatment attributes and region paths, including omitted and hidden treatments.
+- `rumdl check` and the `ki-authoring` audit passed for the decision, specification and guide updates.
+
+### Outstanding concerns
+
+- The in-app browser blocks loopback URLs, so the requested live desktop and narrow SITE-001 comparison could not be recorded locally. The production build and renderer tests pass; human review should include that visual comparison.
+- Compact Cards intentionally retain authored bounds. Very long identity, stereotype or description text can crowd a narrow Card and remains an authoring/layout concern rather than an automatic truncation policy.
+
+### Post-change review
+
+The independent audit found and prompted fixes for default label overlap, divergent Lane bounds, ineffective Canvas surface selection, hard-coded grid styling, authored radius leakage, accessible Card detail and missing frame-style separation. Those gaps now have focused regression coverage. Authored configuration remains data-only; View Model owns resolution and geometry; renderers consume the shared decisions without page-specific branches.
+
+### Mini recap
+
+Implementation commits are `cffe27e0`, `3c699a1a`, `1ac9fc84`, `bddb1145`, `dd8dd5c9`, `9d2af365`, `eda8f2f2`, `226fe395`, `88e0f2f3`, `294c6797`, `5273e8a6`, `3b15f7e9`, `e81ac056`, `ad45ec27`, `45aa89ad`, `fbccdf1b`; baseline `fc68a970552877f417d6f9eb6ffac4141eb17144`. TOOL-012 is ready for human review.
+
+## Done
+
+Pending human acceptance.
 
 ## Discussion
 

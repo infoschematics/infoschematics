@@ -47,5 +47,6 @@ Progress the remaining ready local roadmap items through their approved plans wh
 
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-TOOL-012 | ready | awaiting-review | `fc68a970` to `45aa89ad`; `bun run check` and `bun run release:verify` passed | Review the item delivery packet and desktop/narrow visual comparison |
 
 The run is active. It has not pruned, pushed, published, or released anything.
