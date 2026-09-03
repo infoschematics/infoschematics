@@ -3,7 +3,11 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { Canvas } from './Canvas.tsx'
-import { flowSignalKey, reconcileFlowSignals } from './flow-signals.ts'
+import {
+  advanceFlowSignalAnnouncement,
+  flowSignalKey,
+  reconcileFlowSignals,
+} from './flow-signals.ts'
 
 const config = defineInfoschematic({
   title: 'Signal reference',
@@ -149,6 +153,25 @@ describe('Canvas Flow signals', () => {
       activeSignals: [replay, simultaneous],
     })
     expect(cancelled).toEqual({ acceptedSignals: [], activeSignals: [] })
+  })
+
+  it('announces only newly accepted occurrences and revises same-Flow replay messages', () => {
+    const first = { flowId: 'request-flow', occurrenceKey: 'scene:1' }
+    const replay = { flowId: 'request-flow', occurrenceKey: 'scene:2' }
+    const added = { flowId: 'secondary-flow', occurrenceKey: 'scene:2' }
+
+    const initial = advanceFlowSignalAnnouncement(undefined, [first], [first])
+    const retained = advanceFlowSignalAnnouncement(initial, [], [first])
+    const replayed = advanceFlowSignalAnnouncement(retained, [replay], [replay])
+    const extended = advanceFlowSignalAnnouncement(replayed, [added], [replay, added])
+    const cancelled = advanceFlowSignalAnnouncement(extended, [], [])
+
+    expect(initial).toEqual({ revision: 1, signals: [first] })
+    expect(retained).toBe(initial)
+    expect(replayed).toEqual({ revision: 2, signals: [replay] })
+    expect(replayed).not.toEqual(initial)
+    expect(extended).toEqual({ revision: 3, signals: [added] })
+    expect(cancelled).toBeUndefined()
   })
 
   it('preserves Flow highlighting, hover, and selection while signalling', () => {

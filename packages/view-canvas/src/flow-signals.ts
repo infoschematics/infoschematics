@@ -21,6 +21,27 @@ export type FlowSignalReconciliation = Readonly<{
   acceptedSignals: readonly FlowSignal[]
 }>
 
+export type FlowSignalAnnouncement = Readonly<{
+  revision: number
+  signals: readonly FlowSignal[]
+}>
+
+/**
+ * Advances the live-region input only for newly accepted occurrences. The
+ * revision makes a same-Flow replay a distinct text mutation for assistive
+ * technology, while cancellation clears stale status content.
+ */
+export const advanceFlowSignalAnnouncement = (
+  current: FlowSignalAnnouncement | undefined,
+  acceptedSignals: readonly FlowSignal[],
+  activeSignals: readonly FlowSignal[],
+): FlowSignalAnnouncement | undefined => {
+  if (acceptedSignals.length > 0) {
+    return { revision: (current?.revision ?? 0) + 1, signals: acceptedSignals }
+  }
+  return activeSignals.length > 0 ? current : undefined
+}
+
 /**
  * Reconciles host-owned occurrences without allowing a consumed occurrence to
  * restart when visibility changes. `seenSignals` deliberately records hidden

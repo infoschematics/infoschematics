@@ -9,7 +9,11 @@ import {
   type InfoschematicRenderers,
 } from './renderers.tsx'
 import { InfoschematicContext, useInfoschematic } from './runtime-context.tsx'
-import { reconcileFlowSignals } from './flow-signals.ts'
+import {
+  advanceFlowSignalAnnouncement,
+  type FlowSignalAnnouncement,
+  reconcileFlowSignals,
+} from './flow-signals.ts'
 
 type DiagramProps = ComponentProps<typeof InfoschematicDiagram>
 
@@ -63,9 +67,7 @@ function CanvasContent({
   const initialAnnouncement = useRef(initialSignals.current.acceptedSignals)
   const announcedInitialSignals = useRef(false)
   const [activeSignals, setActiveSignals] = useState<readonly FlowSignal[]>(initialSignals.current.activeSignals)
-  const [announcement, setAnnouncement] = useState<
-    Readonly<{ revision: number; signals: readonly FlowSignal[] }> | undefined
-  >()
+  const [announcement, setAnnouncement] = useState<FlowSignalAnnouncement>()
   useEffect(() => {
     const next = reconcileFlowSignals(activeSignalsRef.current, signals, shownFlowIds, seenSignals.current)
     activeSignalsRef.current = next.activeSignals
@@ -73,11 +75,7 @@ function CanvasContent({
 
     const newlyAccepted = announcedInitialSignals.current ? next.acceptedSignals : initialAnnouncement.current
     announcedInitialSignals.current = true
-    if (newlyAccepted.length > 0) {
-      setAnnouncement((current) => ({ revision: (current?.revision ?? 0) + 1, signals: newlyAccepted }))
-    } else if (next.activeSignals.length === 0) {
-      setAnnouncement(undefined)
-    }
+    setAnnouncement((current) => advanceFlowSignalAnnouncement(current, newlyAccepted, next.activeSignals))
   }, [shownFlowIds, signals])
 
   return (
