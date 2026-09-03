@@ -118,7 +118,7 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(markup.match(/tabindex="0"/g)?.length).toBeGreaterThanOrEqual(selections.length)
     expect(markup).toContain('aria-label="Lane Delivery"')
     expect(markup).toContain('aria-label="Zone Live"')
-    expect(markup).toContain('aria-label="Card Card"')
+    expect(markup).toContain('aria-label="SYS-002 · Card · Card detail"')
     expect(markup).toContain('aria-label="Flow REQ-001"')
     expect(markup).toContain('aria-label="Annotation"')
   })

@@ -1180,6 +1180,8 @@ export function InfoschematicDiagram({
       viewBox={`${infoschematicViewBox.x} ${infoschematicViewBox.y} ${infoschematicViewBox.width} ${infoschematicViewBox.height}`}
       width={infoschematicViewBox.width}
     >
+      <title>{config.title}</title>
+      {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
       {/* Sits behind everything else drawn onto the Infoschematic, so it is only ever
           reached once a click has missed every card, zone, and line above it -
           which is what makes "clicking empty Infoschematic clears the selection" true
@@ -1306,10 +1308,8 @@ export function InfoschematicDiagram({
                 }
                 role={editing ? 'button' : undefined}
                 tabIndex={editing ? 0 : undefined}
-    >
-      <title>{config.title}</title>
-      {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
-      <rect
+              >
+                <rect
                   className="infoschematic-region-fill"
                   fill={zone.fill}
                   height={lane.height}
