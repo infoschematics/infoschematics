@@ -4,7 +4,7 @@ area: SITE
 title: Same-content treatment comparison on the homepage
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 5a7a708c345677a48c914f94a9366f18e3079395
@@ -47,10 +47,34 @@ This item does not switch the homepage default treatment or remove the bespoke p
 
 Per-workspace tests, `bun run ki:verify:visual-tokens`, and the full `bun run check` gate must pass. Browser observation must confirm the homepage comparison shows the same story twice, `/examples/system/` explores the example through Studio, and `/examples/infoschematics/` light-fill blueprint Cards keep dark ink.
 
+## Review
+
+### Delivered
+
+All four Steps landed in one commit, `e274628d` ("feat(site): compare the same story across both homepage treatments"): `resolveReadableInk` shared-ink annotation in View Model plus regenerated token CSS; `renderInfoschematicSvg`'s opt-in `annotations` option drawing Flow code chips at the shared placement, plus surface-conditional Zone-label ink and Flow pipe; the `examples/is-system` workspace hosted through Studio at `/examples/system/`, with the homepage panel switched to the annotated static rendering of that same definition; extended renderer, parity, example, and Site tests, `SVG-009`/`SVG-010` recorded in `docs/specs/render-svg.md`, and `docs/guides/authoring.md` updated.
+
+### Summary of changes
+
+29 files, +627/−22: `packages/view-model` (appearance, tokens, generated CSS), `packages/render-svg` (renderer and tests), `packages/view-canvas` (markup and styles), `scripts/visual-treatment-parity.test.ts`, the new `examples/is-system` workspace, `apps/site` (routes, `SystemExample`, homepage, styles, tests), and the three docs above.
+
+### Verification
+
+`bun run ki:verify:visual-tokens` passes (generated CSS in sync). `scripts/visual-treatment-parity.test.ts` passes (4/4) on the current tree. Browser observation of the homepage, `/examples/system/`, and `/examples/infoschematics/` behaviour described in Verify was not re-run in this closure session.
+
+### Outstanding concerns
+
+None from this item's own delivery. `visual-treatment-parity.test.ts` was separately observed failing on `main` CI as of `42f74b47` due to unrelated in-flight region-geometry work from another session; resolved locally by commit `012579ff` (unrelated to this item).
+
+### Post-change review
+
+Contract-first placement holds: ink resolution is invariant behaviour derived from authored fills; annotations are a render option; no per-definition text-colour or chip knobs entered the domain contract. Matches the item's Boundary — no homepage-default switch, no bespoke-panel removal, both deferred to `TOOL-014`.
+
+### Mini recap
+
+Closed a homepage content mismatch by rendering the same four-stage story through both the bespoke and shared-renderer panels from one serialisable definition, surfacing and fixing two genuine renderer gaps (Flow annotations, ink-on-fill resolution) along the way.
+
 ## Discussion
 
 ### Contract-first placement
 
 Appearance stays authored intent and output stays renderer policy: ink resolution is invariant behaviour derived from authored fills, and annotations are a render option, so no per-definition text-colour or chip knobs entered the domain contract.
-
-Pending human acceptance.
