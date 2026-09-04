@@ -116,11 +116,17 @@ a:focus-visible {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
   gap: clamp(40px, 5vw, 72px);
   min-width: 0;
   padding: clamp(48px, 8vh, 100px) 0;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .hero > * {
@@ -181,7 +187,7 @@ a:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1400 / 600;
+  aspect-ratio: 1268 / 248;
   object-fit: contain;
   background: #f7f9fc;
 }

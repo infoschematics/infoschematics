@@ -23,7 +23,7 @@ const expectSerialisable = (value: unknown): void => {
 describe('systemExample', () => {
   it('tells the four-stage journey with three named connectors', () => {
     expect(systemExample.title).toBe('A system, explained')
-    expect(diagram.viewBox).toEqual({ height: 600, width: 1400, x: 0, y: 0 })
+    expect(diagram.viewBox).toEqual({ height: 248, width: 1268, x: 0, y: 0 })
     expect(diagram.cards).toHaveLength(4)
     expect(diagram.flows).toHaveLength(3)
     expect(diagram.cards.map((card) => card.code)).toEqual(['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'])

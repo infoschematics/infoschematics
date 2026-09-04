@@ -19,7 +19,7 @@ describe('website routes', () => {
     expect(page).toContain('See how it')
     expect(page).toContain('rendered through shared SVG output')
     expect(page).toContain('src="data:image/svg+xml;charset=utf-8,%3Csvg')
-    expect(page).toContain('viewBox%3D%220%200%201400%20600%22')
+    expect(page).toContain('viewBox%3D%220%200%201268%20248%22')
     expect(page).toContain('%3EOBS-01%3C')
     expect(page).toContain('%3ESELECT%3C')
     expect(page).toContain('%3ECONNECT%3C')

@@ -17,7 +17,7 @@ const stageCard = (
   id,
   label,
   placement: {
-    box: { height: 120, width: 240, x, y: 230 },
+    box: { height: 120, width: 240, x, y: 64 },
     ports: { east: 1, west: 1 },
   },
   scope: 'system',
@@ -31,8 +31,8 @@ const connector = (code: string, id: string, source: string, target: string, x: 
   id,
   label: { along: 0.5 },
   points: [
-    { x, y: 290 },
-    { x: x + 100, y: 290 },
+    { x, y: 124 },
+    { x: x + 60, y: 124 },
   ],
   source,
   sourcePort: 'E1' as const,
@@ -47,7 +47,7 @@ export const systemExample = defineInfoschematic({
   synopsis:
     'Observation gathers signals, arrangement gives them structure, illumination draws out meaning, and the result is a view a whole team can share.',
   infoschematic: {
-    viewBox: { height: 600, width: 1400, x: 0, y: 0 },
+    viewBox: { height: 248, width: 1268, x: 0, y: 0 },
     appearance: {
       card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
@@ -80,7 +80,7 @@ export const systemExample = defineInfoschematic({
     ],
     regions: [
       {
-        box: { height: 300, radius: 12, width: 1360, x: 20, y: 140 },
+        box: { height: 200, radius: 12, width: 1220, x: 24, y: 24 },
         fill: '#12273b24',
         frame: { style: 'solid' },
         id: 'journey',
@@ -90,15 +90,15 @@ export const systemExample = defineInfoschematic({
       },
     ],
     cards: [
-      stageCard('OBS-01', 'signals', 'Signals', 'Facts, events and relationships', 'observe', 'Observe', 70),
-      stageCard('MAP-02', 'structure', 'Structure', 'Systems, boundaries and flow', 'arrange', 'Arrange', 410),
-      stageCard('LIT-03', 'meaning', 'Meaning', 'Stories, scenes and evidence', 'illuminate', 'Illuminate', 750),
-      stageCard('SEE-04', 'shared-view', 'Shared view', 'Complexity made legible', 'understand', 'Understand', 1090),
+      stageCard('OBS-01', 'signals', 'Signals', 'Facts, events and relationships', 'observe', 'Observe', 64),
+      stageCard('MAP-02', 'structure', 'Structure', 'Systems, boundaries and flow', 'arrange', 'Arrange', 364),
+      stageCard('LIT-03', 'meaning', 'Meaning', 'Stories, scenes and evidence', 'illuminate', 'Illuminate', 664),
+      stageCard('SEE-04', 'shared-view', 'Shared view', 'Complexity made legible', 'understand', 'Understand', 964),
     ],
     flows: [
-      connector('SELECT', 'select', 'signals', 'structure', 310),
-      connector('CONNECT', 'connect', 'structure', 'meaning', 650),
-      connector('REVEAL', 'reveal', 'meaning', 'shared-view', 990),
+      connector('SELECT', 'select', 'signals', 'structure', 304),
+      connector('CONNECT', 'connect', 'structure', 'meaning', 604),
+      connector('REVEAL', 'reveal', 'meaning', 'shared-view', 904),
     ],
   },
 })
