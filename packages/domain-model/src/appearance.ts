@@ -1,6 +1,6 @@
 export type SurfaceTreatment = 'neutral' | 'blueprint'
 
-export type GridTreatment = 'none' | 'major' | 'major-plus-minor'
+export type GridTreatment = 'none' | 'major' | 'major-plus-minor' | 'dots'
 
 export type RegionLabelFrameTreatment = 'plain' | 'notched'
 

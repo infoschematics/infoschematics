@@ -252,60 +252,72 @@ export const renderInfoschematicSvg = (
       visualTreatment.surface === 'blueprint'
         ? canvasTokens.surfaces.regionStroke
         : canvasTokens.output.regionStroke
-    const minorPattern = [
-      `    <pattern${attributes([
-        ['height', canvasTokens.geometry.gridSize],
-        ['id', 'infoschematic-grid-minor'],
-        ['patternUnits', 'userSpaceOnUse'],
-        ['width', canvasTokens.geometry.gridSize],
-      ])}>`,
-      line(3, 'path', [
-        [
-          'd',
-          `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`,
-        ],
-        ['fill', 'none'],
-        ['stroke', gridStroke],
-          ['stroke-width', canvasTokens.geometry.gridMinorStrokeWidth],
-      ]),
-      '    </pattern>',
-    ]
     const patternId = `infoschematic-grid-${visualTreatment.grid}`
-    const pattern = [
-      `    <pattern${attributes([
-        ['height', canvasTokens.geometry.gridMajorSize],
-        ['id', patternId],
-        ['patternUnits', 'userSpaceOnUse'],
-        ['width', canvasTokens.geometry.gridMajorSize],
-      ])}>`,
-      ...(visualTreatment.grid === 'major-plus-minor'
+    const defs: string[] =
+      visualTreatment.grid === 'dots'
         ? [
-            line(3, 'rect', [
-              ['fill', 'url(#infoschematic-grid-minor)'],
-              ['height', canvasTokens.geometry.gridMajorSize],
-              ['width', canvasTokens.geometry.gridMajorSize],
+            `    <pattern${attributes([
+              ['height', canvasTokens.geometry.gridSize],
+              ['id', patternId],
+              ['patternUnits', 'userSpaceOnUse'],
+              ['width', canvasTokens.geometry.gridSize],
+            ])}>`,
+            line(3, 'circle', [
+              ['cx', 0],
+              ['cy', 0],
+              ['fill', gridStroke],
+              ['r', canvasTokens.geometry.gridMinorStrokeWidth * 3],
             ]),
+            '    </pattern>',
           ]
-        : []),
-      line(3, 'path', [
-        [
-          'd',
-          `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`,
-        ],
-        ['fill', 'none'],
-        ['stroke', gridStroke],
-          ['stroke-width', canvasTokens.geometry.gridMajorStrokeWidth],
-      ]),
-      '    </pattern>',
-    ]
-    body.push(
-      [
-        '  <defs>',
-        ...(visualTreatment.grid === 'major-plus-minor' ? minorPattern : []),
-        ...pattern,
-        '  </defs>',
-      ].join('\n'),
-    )
+        : [
+            ...(visualTreatment.grid === 'major-plus-minor'
+              ? [
+                  `    <pattern${attributes([
+                    ['height', canvasTokens.geometry.gridSize],
+                    ['id', 'infoschematic-grid-minor'],
+                    ['patternUnits', 'userSpaceOnUse'],
+                    ['width', canvasTokens.geometry.gridSize],
+                  ])}>`,
+                  line(3, 'path', [
+                    [
+                      'd',
+                      `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`,
+                    ],
+                    ['fill', 'none'],
+                    ['stroke', gridStroke],
+                    ['stroke-width', canvasTokens.geometry.gridMinorStrokeWidth],
+                  ]),
+                  '    </pattern>',
+                ]
+              : []),
+            `    <pattern${attributes([
+              ['height', canvasTokens.geometry.gridMajorSize],
+              ['id', patternId],
+              ['patternUnits', 'userSpaceOnUse'],
+              ['width', canvasTokens.geometry.gridMajorSize],
+            ])}>`,
+            ...(visualTreatment.grid === 'major-plus-minor'
+              ? [
+                  line(3, 'rect', [
+                    ['fill', 'url(#infoschematic-grid-minor)'],
+                    ['height', canvasTokens.geometry.gridMajorSize],
+                    ['width', canvasTokens.geometry.gridMajorSize],
+                  ]),
+                ]
+              : []),
+            line(3, 'path', [
+              [
+                'd',
+                `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`,
+              ],
+              ['fill', 'none'],
+              ['stroke', gridStroke],
+              ['stroke-width', canvasTokens.geometry.gridMajorStrokeWidth],
+            ]),
+            '    </pattern>',
+          ]
+    body.push(['  <defs>', ...defs, '  </defs>'].join('\n'))
     body.push(
       line(1, 'rect', [
         ['class', 'infoschematic-grid'],

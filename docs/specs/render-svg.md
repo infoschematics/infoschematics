@@ -64,6 +64,12 @@ Card and Zone-label text colour MUST resolve through View Model's readable-ink r
 
 _Verification: `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers._
 
+### SVG-011 — A dots grid treatment renders intersection marks
+
+Authored `grid: 'dots'` MUST render a mark at each grid intersection, sized from the same `gridSize` token as the line grids, as a deterministic alternative to `major` and `major-plus-minor`. It MUST use the shared `data-grid-treatment` attribute and MUST NOT change output for any other authored grid value.
+
+_Verification: `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers._
+
 ## Dependency boundary
 
 `@infoschematics/render-svg` MUST NOT depend on React, React DOM, browser globals, or any interactive View package. Shared derivation belongs in View Model.

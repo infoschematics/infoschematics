@@ -175,7 +175,7 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('<title>SCP-001 · Default Card · Accessible only by default</title>')
   })
 
-  it.each(['major', 'major-plus-minor'] as const satisfies readonly GridTreatment[])(
+  it.each(['major', 'major-plus-minor', 'dots'] as const satisfies readonly GridTreatment[])(
     'renders authored %s grid independently of the legacy Design overlay',
     (grid) => {
       const config = defineInfoschematic({ title: grid, infoschematic: { appearance: { grid } } })

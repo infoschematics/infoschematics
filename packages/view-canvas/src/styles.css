@@ -664,8 +664,16 @@
   stroke-width: var(--infoschematic-canvas-geometry-grid-major-stroke-width);
 }
 
+.infoschematic-grid-dot {
+  fill: var(--infoschematic-canvas-output-region-stroke);
+}
+
 .infoschematic-svg.surface-blueprint .infoschematic-grid-line {
   stroke: var(--infoschematic-canvas-surfaces-region-stroke);
+}
+
+.infoschematic-svg.surface-blueprint .infoschematic-grid-dot {
+  fill: var(--infoschematic-canvas-surfaces-region-stroke);
 }
 
 .infoschematic-authored-grid {

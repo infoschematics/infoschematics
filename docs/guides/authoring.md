@@ -58,6 +58,8 @@ appearance: {
 
 Use `frame: 'none'`, `'solid'`, `'dashed'`, or `'dotted'`. Use `labelTreatment: 'plain'` or `'notched'` independently. Place the label at `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`; use `label: 'none'` to hide it. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Lanes retain solid frames and plain labels, Zones remain unframed with plain labels, Cards remain non-compact, and no authored grid is shown.
 
+Use `grid: 'none'`, `'major'`, `'major-plus-minor'`, or `'dots'`. The `dots` treatment marks each grid intersection instead of drawing line strokes, at the same `gridSize` spacing as the line grids.
+
 Classify Cards with a Domain independently of their Scope:
 
 ```ts

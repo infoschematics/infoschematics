@@ -119,6 +119,7 @@ const {
   cornerRadius,
   dragThreshold,
   gridMajorSize,
+  gridMinorStrokeWidth,
   gridSize,
 } = visualTokens.canvas.geometry
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
@@ -1253,6 +1254,9 @@ export function InfoschematicDiagram({
             className="infoschematic-grid-line major"
             d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
           />
+        </pattern>
+        <pattern height={gridSize} id="infoschematic-grid-dots" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
+          <circle className="infoschematic-grid-dot" cx="0" cy="0" r={gridMinorStrokeWidth * 3} />
         </pattern>
         {Definitions ? <Definitions /> : null}
         {infoschematicFamilies.map((family) => (

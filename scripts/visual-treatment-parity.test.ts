@@ -212,4 +212,18 @@ describe('visual treatment renderer parity', () => {
     expect(canvas).not.toContain('>HIDDEN LANE</text>')
     expect(svg).not.toContain('>HIDDEN LANE</text>')
   })
+
+  it('keeps the dots grid treatment equivalent across renderers', () => {
+    const dotted = defineInfoschematic({
+      title: 'Dotted grid reference',
+      infoschematic: { appearance: { grid: 'dots' } },
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: dotted }))
+    const svg = renderInfoschematicSvg(dotted)
+
+    expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
+    expect(values(canvas, 'data-grid-treatment')).toEqual(['dots'])
+    expect(canvas).toContain('fill="url(#infoschematic-grid-dots)"')
+    expect(svg).toContain('fill="url(#infoschematic-grid-dots)"')
+  })
 })

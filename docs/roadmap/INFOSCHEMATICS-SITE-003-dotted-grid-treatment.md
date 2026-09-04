@@ -4,10 +4,10 @@ area: SITE
 title: Dotted grid treatment
 theme: site-experience
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: d9b8c2dabbabb4eae900738e9f3a67d65ee30d6f
 ---
 
 ## Goal
@@ -28,10 +28,10 @@ This item does not change the default treatment, remove `major` or `major-plus-m
 
 ## Steps
 
-- [ ] Add a `dots` member to `GridTreatment` (`packages/domain-model/src/appearance.ts`) and carry it through the View Model resolver (`packages/view-model/src/appearance.ts`).
-- [ ] Render a dot pattern (a mark at each grid intersection, sized from the existing `gridSize` token) in `packages/render-svg/src/index.ts`.
-- [ ] Mirror the same pattern in `packages/view-canvas/src/InfoschematicDiagram.tsx` for canvas/editor parity with the static renderer.
-- [ ] Extend `InfoschematicDiagram.treatments.test.tsx`, `packages/render-svg/src/index.test.ts`, and `scripts/visual-treatment-parity.test.ts` to cover the new value.
+- [x] Add a `dots` member to `GridTreatment` (`packages/domain-model/src/appearance.ts`) and carry it through the View Model resolver (`packages/view-model/src/appearance.ts`).
+- [x] Render a dot pattern (a mark at each grid intersection, sized from the existing `gridSize` token) in `packages/render-svg/src/index.ts`.
+- [x] Mirror the same pattern in `packages/view-canvas/src/InfoschematicDiagram.tsx` for canvas/editor parity with the static renderer.
+- [x] Extend `InfoschematicDiagram.treatments.test.tsx`, `packages/render-svg/src/index.test.ts`, and `scripts/visual-treatment-parity.test.ts` to cover the new value.
 
 ## Files touched
 
@@ -66,6 +66,45 @@ Update `docs/guides/authoring.md`'s grid example/reference to list `dots` alongs
 ### Roadmap
 
 None beyond this item.
+
+## Review
+
+### Delivered
+
+Added `dots` as a third `GridTreatment` member, rendered as a mark at each grid intersection (sized from the existing `gridSize` token) in both the static SVG renderer and the interactive Canvas renderer, with matching parity coverage and documentation updates.
+
+### Summary of changes
+
+- `packages/domain-model/src/appearance.ts`: added `dots` to the `GridTreatment` union.
+- `packages/domain-model/src/appearance.test.ts`: extended the closed-type assertion to include `dots`.
+- `packages/render-svg/src/index.ts`: added a `dots` SVG pattern (`infoschematic-grid-dots`) alongside the existing `major`/`major-plus-minor` line patterns.
+- `packages/render-svg/src/index.test.ts`: added coverage for the `dots` pattern output.
+- `packages/view-canvas/src/InfoschematicDiagram.tsx`: mirrored the same dot pattern for canvas/editor parity.
+- `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx`: extended the existing `it.each` grid-treatment case (`major`, `major-plus-minor`, `dots`) to cover the new value.
+- `packages/view-canvas/src/styles.css`: added `.infoschematic-grid-dot` fill rules for neutral and blueprint surfaces.
+- `scripts/visual-treatment-parity.test.ts`: added a dedicated Canvas/static-SVG parity test for the `dots` grid.
+- `docs/specs/render-svg.md`: added `SVG-011` documenting the dots grid treatment.
+- `docs/guides/authoring.md`: documented `grid: 'dots'` alongside the existing grid values.
+- `packages/view-model/src/appearance.ts` needed no change — its grid resolver is generic over `GridTreatment` and already carries any authored value through unchanged.
+
+### Verification
+
+- `bunx vitest run scripts/visual-treatment-parity.test.ts packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx packages/render-svg/src/index.test.ts` — 3 files, 24 tests passed.
+- `bun run test` — 51 files, 334 tests passed.
+- `bun run ki:verify:typecheck` — clean across all eleven workspaces.
+- `bun run check` — clean (tests, every TypeScript workspace, dependency boundaries, and the production website build).
+
+### Outstanding concerns
+
+None. This delivery is additive only — it does not change default treatment, remove existing grid options, or touch the Studio editor's independent snap-to-grid overlay, matching the stated Boundary.
+
+### Post-change review
+
+The change stays inside the contract-first shape SITE-002 established: the domain declares the option, both renderers implement it as an SVG pattern fill sharing the `gridSize` token, and parity between Canvas and static SVG is verified the same way as the existing `major`/`major-plus-minor` treatments. No new abstractions were introduced.
+
+### Mini recap
+
+Delivered `INFOSCHEMATICS-SITE-003` end to end in one pass: domain type, both renderers, parity and unit test coverage, and the two documented spec/guide updates, all verified clean by `bun run check`. No blockers encountered.
 
 ## Discussion
 

@@ -233,6 +233,24 @@ describe('renderInfoschematicSvg', () => {
     expect(overridden).toContain('data-compact="true"')
   })
 
+  it('renders the dots grid treatment as a point pattern at each grid intersection', () => {
+    const config: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        appearance: { grid: 'dots' },
+      },
+    }
+
+    const svg = renderInfoschematicSvg(config)
+    expect(svg).toContain('data-grid-treatment="dots"')
+    expect(svg).toContain('id="infoschematic-grid-dots"')
+    expect(svg).toContain('<circle')
+    expect(svg).toContain('fill="url(#infoschematic-grid-dots)"')
+    expect(svg).not.toContain('id="infoschematic-grid-major"')
+    expect(svg).not.toContain('id="infoschematic-grid-minor"')
+  })
+
   it('renders explicit Flow signals as deterministic still emphasis and ignores unknown ids', () => {
     const baseline = renderInfoschematicSvg(representative)
     const signalled = renderInfoschematicSvg(representative, {

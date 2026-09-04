@@ -14,7 +14,7 @@ import type { RegionConfig, RegionFrameStyle, RegionLabelMount } from '@infosche
 
 describe('authored appearance contracts', () => {
   it('keeps every treatment a closed serialisable value', () => {
-    expectTypeOf<GridTreatment>().toEqualTypeOf<'none' | 'major' | 'major-plus-minor'>()
+    expectTypeOf<GridTreatment>().toEqualTypeOf<'none' | 'major' | 'major-plus-minor' | 'dots'>()
     expectTypeOf<SurfaceTreatment>().toEqualTypeOf<'neutral' | 'blueprint'>()
     expectTypeOf<RegionFrameStyle>().toEqualTypeOf<'solid' | 'dashed' | 'dotted'>()
     expectTypeOf<RegionLabelMount>().toEqualTypeOf<'boundary' | 'internal'>()
