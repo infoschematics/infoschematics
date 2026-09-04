@@ -19,13 +19,12 @@ describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('constrains typed Design arrow movement by artefact geometry', () => {
-    expect(designArrowPoint({ height: 100, role: 'lane', y: 40 }, 'ArrowUp', 10)).toEqual({ x: 0, y: 80 })
-    expect(designArrowPoint({ height: 100, role: 'lane', y: 40 }, 'ArrowLeft', 10)).toBeUndefined()
-    expect(designArrowPoint({ laneId: 'lane', role: 'zone', width: 200, x: 20 }, 'ArrowRight', 1)).toEqual({
-      x: 121,
-      y: 0,
-    })
-    expect(designArrowPoint({ laneId: 'lane', role: 'zone', width: 200, x: 20 }, 'ArrowDown', 1)).toBeUndefined()
+    expect(
+      designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowUp', 10),
+    ).toEqual({ x: 120, y: 80 })
+    expect(
+      designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowRight', 1),
+    ).toEqual({ x: 121, y: 90 })
     expect(
       designArrowPoint({ box: { height: 80, width: 120, x: 100, y: 60 }, role: 'box' }, 'ArrowDown', 10),
     ).toEqual({ x: 160, y: 110 })

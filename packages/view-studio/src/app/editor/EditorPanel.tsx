@@ -61,8 +61,8 @@ export function EditorPanel({
        * a card offers ports and a line lands on two of them - so both read the
        * same way down the panel rather than each having its own arrangement.
        *
-       * Everything else on the Infoschematic answers only the middle one. A lane, a
-       * zone, a port and a waypoint get the single panel they always had, and
+       * Everything else on the Infoschematic answers only the middle one. A region,
+       * a port and a waypoint get the single panel they always had, and
        * it keeps saying which of those it is, since no identity set will.
        */}
       {code && identity ? (
@@ -103,7 +103,7 @@ export function EditorPanel({
       ) : null}
       {!placement && !selected ? (
         <p className="contract-empty editor-empty">
-          Select a component, a lane, a zone, or a flow label to see where it sits.
+          Select a component, a region, or a flow label to see where it sits.
         </p>
       ) : null}
     </div>

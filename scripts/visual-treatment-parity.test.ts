@@ -31,25 +31,22 @@ const config = defineInfoschematic({
         prefix: 'DEL',
       },
     ],
-    lanes: [
+    regions: [
       {
-        appearance: { frame: 'dashed', label: 'north', labelTreatment: 'notched' },
-        height: 180,
+        box: { height: 180, width: 380, x: 10, y: 20 },
+        fill: '#071e2d',
+        frame: { style: 'dotted' },
+        id: 'runtime',
+        label: 'Runtime',
+        labelPlacement: 'south-east',
+      },
+      {
+        box: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
+        frame: { style: 'dashed' },
         id: 'delivery',
         label: 'Delivery',
-        labelY: 20,
-        panel: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
-        y: 20,
-        zones: [
-          {
-            appearance: { frame: 'dotted', label: 'south-east', labelTreatment: 'plain' },
-            fill: '#071e2d',
-            id: 'runtime',
-            label: 'Runtime',
-            width: 380,
-            x: 10,
-          },
-        ],
+        labelMount: 'boundary',
+        labelPlacement: 'north',
       },
     ],
     cards: [
@@ -74,7 +71,7 @@ const values = (output: string, attribute: string) =>
 const regionPaths = (output: string) =>
   [
     ...output.matchAll(
-      /<path class="infoschematic-(?:lane|region-frame|zone-frame)" d="([^"]+)"/g,
+      /<path class="infoschematic-region-frame" d="([^"]+)"/g,
     ),
   ].map((match) => match[1])
 
@@ -136,15 +133,12 @@ describe('visual treatment renderer parity', () => {
             prefix: 'DEL',
           },
         ],
-        lanes: [
+        regions: [
           {
-            height: 180,
-            id: 'delivery',
-            label: 'Delivery',
-            labelY: 20,
-            panel: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
-            y: 20,
-            zones: [{ fill: '#071e2d', id: 'runtime', label: 'Runtime', width: 380, x: 10 }],
+            box: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
+            fill: '#071e2d',
+            id: 'runtime',
+            label: 'Runtime',
           },
         ],
         cards: [
@@ -178,31 +172,32 @@ describe('visual treatment renderer parity', () => {
     expect(values(canvas, 'data-ink')).toEqual(['dark', 'light', 'light'])
   })
 
-  it('keeps omitted and hidden region treatments equivalent with redundant legacy bounds', () => {
+  it('keeps omitted and hidden region treatments equivalent across renderers', () => {
     const legacy = defineInfoschematic({
-      title: 'Legacy region treatment',
+      title: 'Quiet region treatment',
       infoschematic: {
-        lanes: [
+        regions: [
           {
-            height: 100,
-            id: 'legacy',
-            label: 'Legacy lane',
-            labelY: 30,
-            panel: { height: 80, radius: 2, width: 300, x: 10, y: 10 },
-            y: 30,
-            zones: [
-              { fill: '#eeeeee', id: 'legacy-zone', label: 'Legacy zone', width: 300, x: 10 },
-            ],
+            box: { height: 80, width: 300, x: 10, y: 10 },
+            fill: '#eeeeee',
+            id: 'legacy-zone',
+            label: 'Legacy zone',
+            labelPlacement: 'north-east',
           },
           {
-            appearance: { frame: 'dashed', label: 'none', labelTreatment: 'notched' },
-            height: 80,
+            box: { height: 80, radius: 2, width: 300, x: 10, y: 10 },
+            frame: { style: 'solid' },
+            id: 'legacy',
+            label: 'Legacy lane',
+            labelMount: 'boundary',
+          },
+          {
+            box: { height: 80, radius: 30, width: 300, x: 10, y: 150 },
+            frame: { style: 'dashed' },
             id: 'hidden',
             label: 'Hidden lane',
-            labelY: 150,
-            panel: { height: 80, radius: 30, width: 300, x: 10, y: 150 },
-            y: 150,
-            zones: [],
+            labelMount: 'boundary',
+            labelPlacement: 'none',
           },
         ],
       },

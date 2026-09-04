@@ -31,26 +31,22 @@ const treatmentConfig = defineInfoschematic({
         fill: '#053c35',
       },
     ],
-    lanes: [
+    regions: [
+      {
+        id: 'zone',
+        label: 'Runtime',
+        box: { x: 10, y: 20, width: 620, height: 240 },
+        fill: '#071e2d',
+        frame: { style: 'dotted' },
+        labelPlacement: 'center',
+      },
       {
         id: 'lane',
         label: 'Delivery',
-        appearance: { frame: 'dashed', label: 'south-east', labelTreatment: 'notched' },
-        y: 20,
-        height: 240,
-        labelY: 20,
-        legend: 'bottom',
-        panel: { x: 10, y: 20, width: 620, height: 240, radius: 8 },
-        zones: [
-          {
-            id: 'zone',
-            label: 'Runtime',
-            appearance: { frame: 'dotted', label: 'center', labelTreatment: 'plain' },
-            x: 10,
-            width: 620,
-            fill: '#071e2d',
-          },
-        ],
+        box: { x: 10, y: 20, width: 620, height: 240, radius: 8 },
+        frame: { style: 'dashed' },
+        labelMount: 'boundary',
+        labelPlacement: 'south-east',
       },
     ],
     cards: [
@@ -131,15 +127,20 @@ describe('Canvas visual treatments', () => {
             fill: '#123456',
           },
         ],
-        lanes: [
+        regions: [
+          {
+            id: 'zone',
+            label: 'Legacy zone',
+            box: { x: 10, y: 20, width: 420, height: 180 },
+            fill: '#081522',
+            labelPlacement: 'north-east',
+          },
           {
             id: 'lane',
             label: 'Legacy lane',
-            y: 20,
-            height: 180,
-            labelY: 20,
-            panel: { x: 10, y: 20, width: 420, height: 180, radius: 8 },
-            zones: [{ id: 'zone', label: 'Legacy zone', x: 10, width: 420, fill: '#081522' }],
+            box: { x: 10, y: 20, width: 420, height: 180, radius: 8 },
+            frame: { style: 'solid' },
+            labelMount: 'boundary',
           },
         ],
         cards: [
@@ -165,7 +166,7 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-label-placement="north-west"')
     expect(markup).toContain('data-label-placement="north-east"')
     expect(markup).toMatch(/text-anchor="end" x="414" y="36">LEGACY ZONE<\/text>/)
-    expect(markup).toMatch(/text-anchor="start" textLength="103.4" x="30" y="20">LEGACY LANE<\/text>/)
+    expect(markup).toMatch(/text-anchor="start" textLength="103.4" x="28" y="20">LEGACY LANE<\/text>/)
     expect(markup).toContain('data-label-treatment="notched"')
     expect(markup).not.toContain('data-card-compact=')
     expect(markup).not.toContain('data-card-detail=')
@@ -197,23 +198,21 @@ describe('Canvas visual treatments', () => {
     const config = defineInfoschematic({
       title: 'Hidden label',
       infoschematic: {
-        lanes: [
+        regions: [
           {
             id: 'lane',
             label: 'Private geography',
-            appearance: { frame: 'dashed', label: 'none', labelTreatment: 'notched' },
-            y: 10,
-            height: 100,
-            labelY: 10,
-            panel: { x: 10, y: 10, width: 300, height: 100, radius: 8 },
-            zones: [],
+            box: { x: 10, y: 10, width: 300, height: 100, radius: 8 },
+            frame: { style: 'dashed' },
+            labelMount: 'boundary',
+            labelPlacement: 'none',
           },
         ],
       },
     })
     const markup = renderToStaticMarkup(<Canvas config={config} />)
 
-    expect(markup).toContain('aria-label="Lane Private geography"')
+    expect(markup).toContain('aria-label="Region Private geography"')
     expect(markup).toContain('data-frame-treatment="dashed"')
     expect(markup).toContain('data-label-treatment="plain"')
     expect(markup).toContain('data-label-placement="none"')

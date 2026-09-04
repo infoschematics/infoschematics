@@ -2,51 +2,44 @@ import { describe, expect, it } from 'vitest'
 import { defineArtefactSelection } from '@infoschematics/view-model/editable'
 import { orderSourceChanges } from './source-changes.ts'
 
-const lane = defineArtefactSelection({ code: null, geometry: 'lane', id: 'lane', kind: 'lane' })
-const zone = defineArtefactSelection({ code: null, geometry: 'zone', id: 'zone', kind: 'zone', laneId: 'lane' })
+const region = defineArtefactSelection({ code: null, geometry: 'box', id: 'region', kind: 'region' })
 const card = defineArtefactSelection({ code: 'STD-01', geometry: 'box', id: 'card', kind: 'card' })
 const flow = defineArtefactSelection({ code: 'TEL-01', geometry: 'route', id: 'flow', kind: 'flow' })
 
 describe('source change ordering', () => {
-  it('creates owners and endpoints before dependants, then removes in reverse', () => {
+  it('creates geography and endpoints before dependants, then removes in reverse', () => {
     const changes = [
       { field: 'create', phase: 'create', source: 'flow', target: flow },
-      { field: 'remove', phase: 'remove', source: 'lane', target: lane },
-      { field: 'create', phase: 'create', source: 'zone', target: zone },
+      { field: 'remove', phase: 'remove', source: 'region', target: region },
       { field: 'remove', phase: 'remove', source: 'card', target: card },
       { field: 'create', phase: 'create', source: 'card', target: card },
       { field: 'remove', phase: 'remove', source: 'flow', target: flow },
-      { field: 'create', phase: 'create', source: 'lane', target: lane },
-      { field: 'remove', phase: 'remove', source: 'zone', target: zone },
+      { field: 'create', phase: 'create', source: 'region', target: region },
     ] as const
 
     expect(orderSourceChanges(changes).map((change) => change.source)).toEqual([
-      'lane',
-      'zone',
+      'region',
       'card',
       'flow',
       'flow',
       'card',
-      'zone',
-      'lane',
+      'region',
     ])
   })
 
-  it('orders updates by kind, owner, authored index, field and identity', () => {
+  it('orders updates by kind, authored index, field and identity', () => {
     const changes = [
-      { authoredIndex: 2, field: 'width', owner: 'lane-b', phase: 'update', source: 'late zone', target: zone },
-      { authoredIndex: 0, field: 'y', owner: 'lane-a', phase: 'update', source: 'lane', target: lane },
-      { authoredIndex: 1, field: 'x', owner: 'lane-a', phase: 'update', source: 'zone x', target: zone },
-      { authoredIndex: 1, field: 'fill', owner: 'lane-a', phase: 'update', source: 'zone fill', target: zone },
+      { authoredIndex: 2, field: 'box', phase: 'update', source: 'late region', target: region },
+      { authoredIndex: 1, field: 'fill', phase: 'update', source: 'region fill', target: region },
+      { authoredIndex: 1, field: 'label', phase: 'update', source: 'region label', target: region },
       { field: 'name', phase: 'update', source: 'card', target: card },
       { field: 'points', phase: 'update', source: 'flow', target: flow },
     ] as const
 
     expect(orderSourceChanges(changes).map((change) => change.source)).toEqual([
-      'lane',
-      'zone fill',
-      'zone x',
-      'late zone',
+      'region fill',
+      'region label',
+      'late region',
       'card',
       'flow',
     ])

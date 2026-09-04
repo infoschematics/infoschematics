@@ -75,7 +75,7 @@ describe('Canvas visual tokens', () => {
     )
   })
 
-  it('keeps authored Scope, Flow-family and Zone colours in rendered data', () => {
+  it('keeps authored Scope, Flow-family and Region colours in rendered data', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={defineInfoschematic({
@@ -104,23 +104,12 @@ describe('Canvas visual tokens', () => {
                 prefix: 'FAM',
               },
             ],
-            lanes: [
+            regions: [
               {
-                height: 120,
-                id: 'lane',
-                label: 'Lane',
-                labelY: 18,
-                panel: { height: 120, radius: 8, width: 180, x: 0, y: 0 },
-                y: 0,
-                zones: [
-                  {
-                    fill: '#c1d2e3',
-                    id: 'zone',
-                    label: 'Zone',
-                    width: 180,
-                    x: 0,
-                  },
-                ],
+                box: { height: 120, radius: 8, width: 180, x: 0, y: 0 },
+                fill: '#c1d2e3',
+                id: 'region',
+                label: 'Region',
               },
             ],
             scopes: [

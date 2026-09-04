@@ -35,45 +35,51 @@ describe('visual treatment resolution', () => {
 })
 
 describe('region treatment resolution', () => {
-  it.each([
-    ['lane', 'top', { frame: 'solid', label: 'north-west', labelTreatment: 'notched' }],
-    ['lane', 'bottom', { frame: 'solid', label: 'south-west', labelTreatment: 'notched' }],
-    ['zone', 'top', { frame: 'none', label: 'north-east', labelTreatment: 'plain' }],
-    ['zone', 'bottom', { frame: 'none', label: 'south-east', labelTreatment: 'plain' }],
-  ] as const)('keeps the %s %s legacy default independent', (kind, legend, expected) => {
-    expect(resolveRegionTreatment(kind, 'Region', undefined, legend)).toEqual(expected)
+  it('defaults to a north-west internal label with no frame', () => {
+    expect(resolveRegionTreatment({ label: 'Region' })).toEqual({
+      frame: 'none',
+      frameOpacity: 1,
+      label: 'north-west',
+      labelOffset: null,
+      labelTreatment: 'plain',
+    })
   })
 
   it('suppresses both hidden labels and their requested notch', () => {
     expect(
-      resolveRegionTreatment('lane', 'Region', {
-        frame: 'dashed',
-        label: 'none',
-        labelTreatment: 'notched',
+      resolveRegionTreatment({
+        frame: { style: 'dashed' },
+        label: 'Region',
+        labelMount: 'boundary',
+        labelPlacement: 'none',
       }),
-    ).toEqual({ frame: 'dashed', label: null, labelTreatment: 'plain' })
+    ).toEqual({ frame: 'dashed', frameOpacity: 1, label: null, labelOffset: null, labelTreatment: 'plain' })
     expect(
-      resolveRegionTreatment('lane', '', {
-        frame: 'dotted',
-        label: 'north',
-        labelTreatment: 'notched',
+      resolveRegionTreatment({
+        frame: { style: 'dotted' },
+        label: '',
+        labelMount: 'boundary',
+        labelPlacement: 'north',
       }),
-    ).toEqual({ frame: 'dotted', label: null, labelTreatment: 'plain' })
+    ).toEqual({ frame: 'dotted', frameOpacity: 1, label: null, labelOffset: null, labelTreatment: 'plain' })
   })
 
-  it('keeps authored Lane and Zone choices independent', () => {
-    expect(resolveRegionTreatment('lane', 'Lane', { frame: 'none', label: 'east' })).toEqual({
-      frame: 'none',
-      label: 'east',
-      labelTreatment: 'plain',
-    })
+  it('notches only where a boundary mount meets a visible frame and label', () => {
     expect(
-      resolveRegionTreatment('zone', 'Zone', {
-        frame: 'dotted',
-        label: 'south',
-        labelTreatment: 'notched',
+      resolveRegionTreatment({
+        frame: { opacity: 0.4, style: 'dotted' },
+        label: 'Region',
+        labelMount: 'boundary',
+        labelOffset: 32,
+        labelPlacement: 'south',
       }),
-    ).toEqual({ frame: 'dotted', label: 'south', labelTreatment: 'notched' })
+    ).toEqual({ frame: 'dotted', frameOpacity: 0.4, label: 'south', labelOffset: 32, labelTreatment: 'notched' })
+    expect(
+      resolveRegionTreatment({ label: 'Region', labelMount: 'boundary', labelPlacement: 'east' }),
+    ).toEqual({ frame: 'none', frameOpacity: 1, label: 'east', labelOffset: null, labelTreatment: 'plain' })
+    expect(
+      resolveRegionTreatment({ frame: { style: 'solid' }, label: 'Region', labelPlacement: 'east' }),
+    ).toEqual({ frame: 'solid', frameOpacity: 1, label: 'east', labelOffset: null, labelTreatment: 'plain' })
   })
 })
 

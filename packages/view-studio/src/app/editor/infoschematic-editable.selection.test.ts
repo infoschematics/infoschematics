@@ -80,23 +80,13 @@ const config = defineInfoschematic({
         renderer: 'illustration',
       },
     ],
-    lanes: [
+    regions: [
       {
-        height: 200,
-        id: 'lane-one',
-        label: 'Lane one',
-        labelY: 80,
-        panel: { height: 200, radius: 10, width: 700, x: 20, y: 60 },
-        y: 60,
-        zones: [
-          {
-            fill: '#112233',
-            id: 'zone-one',
-            label: 'Zone one',
-            width: 220,
-            x: 40,
-          },
-        ],
+        box: { height: 200, radius: 10, width: 700, x: 20, y: 60 },
+        fill: '#112233',
+        frame: { style: 'solid' },
+        id: 'region-one',
+        label: 'Region one',
       },
     ],
     scopes: [
@@ -128,20 +118,10 @@ const diagram = infoschematicEditable(
 )
 
 describe('Infoschematic editable selection adapter', () => {
-  it('resolves all six kinds with stable identity and geometry', () => {
-    expect(diagram.selectionFor('lane:lane-one')).toMatchObject({
-      geometry: { height: 200, role: 'lane', y: 60 },
-      selection: { code: null, geometry: 'lane', id: 'lane-one', kind: 'lane' },
-    })
-    expect(diagram.selectionFor('zone:lane-one:zone-one')).toMatchObject({
-      geometry: { laneId: 'lane-one', role: 'zone', width: 220, x: 40 },
-      selection: {
-        code: null,
-        geometry: 'zone',
-        id: 'zone-one',
-        kind: 'zone',
-        laneId: 'lane-one',
-      },
+  it('resolves all five kinds with stable identity and geometry', () => {
+    expect(diagram.selectionFor('region:region-one')).toMatchObject({
+      geometry: { box: { height: 200, width: 700, x: 20, y: 60 }, role: 'box' },
+      selection: { code: null, geometry: 'box', id: 'region-one', kind: 'region' },
     })
     expect(diagram.selectionFor('FABRIC-01')).toMatchObject({
       geometry: { box: { height: 100, width: 180, x: 300, y: 90 }, role: 'box' },
@@ -167,10 +147,10 @@ describe('Infoschematic editable selection adapter', () => {
   })
 
   it('returns kind capabilities and refuses generic Flow move or resize', () => {
-    const lane = diagram.selectionFor('lane:lane-one')
+    const region = diagram.selectionFor('region:region-one')
     const flow = diagram.selectionFor('FLOW-01')
 
-    expect(lane?.capabilities).toMatchObject({ move: true, resize: true, reorder: true })
+    expect(region?.capabilities).toMatchObject({ move: true, resize: true, reorder: true })
     expect(flow?.capabilities).toMatchObject({ move: false, resize: false, reorder: true })
     expect(
       flow && moveArtefactOperation(flow.selection, flow.geometry, { dx: 10, dy: 10 }),

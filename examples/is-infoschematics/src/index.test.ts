@@ -28,8 +28,8 @@ const expectSerialisable = (value: unknown): void => {
 
 describe('infoschematicsInfoschematic', () => {
   it('models the repository as four architectural layers', () => {
-    expect(diagram.lanes).toHaveLength(4)
-    expect(diagram.lanes.flatMap((lane) => lane.zones)).toHaveLength(7)
+    expect(diagram.regions).toHaveLength(11)
+    expect(diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')).toHaveLength(4)
     expect(diagram.cards).toHaveLength(9)
     expect(diagram.flows).toHaveLength(17)
 
@@ -72,34 +72,14 @@ describe('infoschematicsInfoschematic', () => {
       new Set(['renderer-output', 'authored-examples', 'application-hosts']),
     )
 
-    expect(diagram.lanes.map(({ appearance }) => appearance?.frame)).toEqual([
-      'solid',
-      'dashed',
-      'dotted',
-      'solid',
-    ])
-    expect(diagram.lanes.map(({ appearance }) => appearance?.labelTreatment)).toEqual([
-      'notched',
-      'notched',
-      'notched',
-      'notched',
-    ])
-    expect(
-      diagram.lanes
-        .flatMap(({ zones }) => zones)
-        .every(({ appearance }) => appearance?.labelTreatment === 'plain'),
-    ).toBe(true)
-    expect(
-      new Set(
-        diagram.lanes.flatMap(({ zones }) => zones).map(({ appearance }) => appearance?.frame),
-      ),
-    ).toEqual(new Set(['solid', 'dashed', 'dotted']))
-    expect(diagram.lanes.every(({ appearance }) => appearance?.label !== undefined)).toBe(true)
-    expect(
-      diagram.lanes
-        .flatMap(({ zones }) => zones)
-        .every(({ appearance }) => appearance?.label !== undefined),
-    ).toBe(true)
+    const panels = diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')
+    const fills = diagram.regions.filter(({ labelMount }) => labelMount !== 'boundary')
+    expect(panels.map(({ frame }) => frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
+    expect(new Set(fills.map(({ frame }) => frame?.style))).toEqual(
+      new Set(['solid', 'dashed', 'dotted']),
+    )
+    expect(fills.every(({ fill }) => fill !== undefined)).toBe(true)
+    expect(diagram.regions.every(({ labelPlacement }) => labelPlacement !== undefined)).toBe(true)
   })
 
   it('expresses only the allowed dependency direction', () => {
@@ -129,14 +109,13 @@ describe('infoschematicsInfoschematic', () => {
   })
 
   it('uses stable unique identities and valid authored references', () => {
-    const laneIds = diagram.lanes.map((lane) => lane.id)
-    const zoneIds = diagram.lanes.flatMap((lane) => lane.zones.map((zone) => zone.id))
+    const regionIds = diagram.regions.map((region) => region.id)
     const cardIds = diagram.cards.map((card) => card.id)
     const flowIds = diagram.flows.map((flow) => flow.id)
     const sceneIds = infoschematicsInfoschematic.standaloneScenes.map((scene) => scene.id)
     const storyIds = infoschematicsInfoschematic.stories.map((story) => story.id)
 
-    for (const ids of [laneIds, zoneIds, cardIds, flowIds, sceneIds, storyIds]) {
+    for (const ids of [regionIds, cardIds, flowIds, sceneIds, storyIds]) {
       expectUnique(ids)
     }
     expectUnique(diagram.cards.map((card) => card.code))

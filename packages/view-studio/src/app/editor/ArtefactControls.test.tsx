@@ -13,7 +13,6 @@ const factoryContext: ArtefactFactoryContext = {
   allocate: createFactoryIdentityAllocator(),
   at: 0,
   box: { height: 120, width: 240, x: 40, y: 60 },
-  lane: { height: 120, id: 'lane-one', y: 60 },
 }
 
 const editor = (
@@ -34,14 +33,9 @@ const editor = (
 
 const matrix: readonly [ArtefactSelection, ArtefactGeometry, string][] = [
   [
-    defineArtefactSelection({ code: null, geometry: 'lane', id: 'lane-one', kind: 'lane' }),
-    { height: 120, role: 'lane', y: 60 },
-    'Lane at y 60, height 120',
-  ],
-  [
-    defineArtefactSelection({ code: null, geometry: 'zone', id: 'zone-one', kind: 'zone', laneId: 'lane-one' }),
-    { laneId: 'lane-one', role: 'zone', width: 220, x: 50 },
-    'Zone at x 50, width 220, in Lane lane-one',
+    defineArtefactSelection({ code: null, geometry: 'box', id: 'region-one', kind: 'region' }),
+    { box: { height: 120, width: 700, x: 20, y: 60 }, role: 'box' },
+    'Box at 20, 60; 700 × 120',
   ],
   [
     defineArtefactSelection({ code: 'FAB-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' }),
@@ -105,16 +99,14 @@ describe('ArtefactControls', () => {
     expect(html).toContain('Card is still referenced by a Flow.')
   })
 
-  it('makes Zone creation unavailable without a Lane owner', () => {
+  it('offers Region and Graphic creation with nothing selected', () => {
     const html = renderToStaticMarkup(
-      <ArtefactControls
-        editor={editor(null)}
-        factoryContext={{ ...factoryContext, lane: undefined }}
-      />,
+      <ArtefactControls editor={editor(null)} factoryContext={factoryContext} />,
     )
 
-    expect(html).toContain('aria-label="Create Zone" disabled=""')
-    expect(html).toContain('Select a Lane, Zone, Fabric, Card, Flow, or Graphic')
+    expect(html).toContain('aria-label="Create Region"')
+    expect(html).toContain('aria-label="Create Graphic"')
+    expect(html).toContain('Select a Region, Fabric, Card, Flow, or Graphic')
   })
 })
 

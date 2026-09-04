@@ -5,8 +5,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
-import type { ZoneConfig } from '@infoschematics/domain-model/zone'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 
 import {
   applyArtefactOperations,
@@ -14,22 +13,12 @@ import {
 } from './artefact-draft.ts'
 import type { ArtefactSelection } from './editable.ts'
 
-const zone = (id: string, x: number): ZoneConfig => ({
+const region = (id: string, x: number): RegionConfig => ({
+  box: { height: 160, radius: 8, width: 80, x, y: 40 },
   fill: '#eef',
+  frame: { style: 'solid' },
   id,
   label: id,
-  width: 80,
-  x,
-})
-
-const lane = (id: string, zones: readonly ZoneConfig[]): LaneConfig => ({
-  height: 160,
-  id,
-  label: id,
-  labelY: 24,
-  panel: { height: 160, radius: 8, width: 900, x: 40, y: 40 },
-  y: 40,
-  zones,
 })
 
 const card = (id: string, code: string, x: number, wraps?: string): CardConfig => ({
@@ -108,10 +97,7 @@ const config = (): InfoschematicConfig => ({
     ],
     graphics: [graphic('graphic-one', 100), graphic('graphic-two', 300)],
     interfaces: [],
-    lanes: [
-      lane('lane-one', [zone('zone-one', 80), zone('zone-two', 220)]),
-      lane('lane-two', []),
-    ],
+    regions: [region('region-one', 80), region('region-two', 220)],
     points: [],
     scopes: [
       {
@@ -191,32 +177,24 @@ const selections = {
     id: 'graphic-one',
     kind: 'graphic',
   },
-  lane: {
+  region: {
     code: null,
-    geometry: 'lane',
-    id: 'lane-one',
-    kind: 'lane',
-  },
-  zone: {
-    code: null,
-    geometry: 'zone',
-    id: 'zone-one',
-    kind: 'zone',
-    laneId: 'lane-one',
+    geometry: 'box',
+    id: 'region-one',
+    kind: 'region',
   },
 } as const satisfies Record<string, ArtefactSelection>
 
 describe('applyArtefactOperations', () => {
-  it('creates all six kinds in authored order and deep-copies operation values', () => {
+  it('creates all five kinds in authored order and deep-copies operation values', () => {
     const initial = config()
-    initial.infoschematic.lanes = [] as never
+    initial.infoschematic.regions = [] as never
     initial.infoschematic.cards = [] as never
     initial.infoschematic.fabrics = [] as never
     initial.infoschematic.flows = [] as never
     initial.infoschematic.graphics = [] as never
     const before = structuredClone(initial)
-    const createdLane = lane('lane-created', [])
-    const createdZone = zone('zone-created', 120)
+    const createdRegion = region('region-created', 120)
     const createdFabric = fabric('fabric-created', 'FC', 140)
     const createdCard = card('card-created', 'CC', 180)
     const createdFlow = flow('flow-created', 'LC', 'fabric-created', 'card-created')
@@ -227,23 +205,11 @@ describe('applyArtefactOperations', () => {
         operation: 'create',
         target: {
           code: null,
-          geometry: 'lane',
-          id: 'lane-created',
-          kind: 'lane',
+          geometry: 'box',
+          id: 'region-created',
+          kind: 'region',
         },
-        value: createdLane,
-      },
-      {
-        at: 0,
-        operation: 'create',
-        target: {
-          code: null,
-          geometry: 'zone',
-          id: 'zone-created',
-          kind: 'zone',
-          laneId: 'lane-created',
-        },
-        value: createdZone,
+        value: createdRegion,
       },
       {
         at: 0,
@@ -293,33 +259,28 @@ describe('applyArtefactOperations', () => {
 
     const result = applyArtefactOperations(initial, operations)
     ;(createdGraphic.properties as { caption: string }).caption = 'mutated after apply'
-    createdZone.fill = 'mutated after apply'
+    createdRegion.fill = 'mutated after apply'
 
     expect(result.rejected).toEqual([])
-    expect(result.config.infoschematic.lanes[0]?.zones[0]?.id).toBe('zone-created')
+    expect(result.config.infoschematic.regions[0]?.id).toBe('region-created')
     expect(result.config.infoschematic.fabrics[0]?.id).toBe('fabric-created')
     expect(result.config.infoschematic.cards[0]?.id).toBe('card-created')
     expect(result.config.infoschematic.flows[0]?.id).toBe('flow-created')
     expect(result.config.infoschematic.graphics[0]?.properties?.caption).toBe(
       'graphic-created caption',
     )
-    expect(result.config.infoschematic.lanes[0]?.zones[0]?.fill).toBe('#eef')
+    expect(result.config.infoschematic.regions[0]?.fill).toBe('#eef')
     expect(initial).toEqual(before)
     expect(result.config).not.toBe(initial)
   })
 
-  it('moves and resizes axis-appropriate geometry without losing authored data', () => {
+  it('moves and resizes box geometry without losing authored data', () => {
     const initial = config()
     const operations: readonly ArtefactDraftOperation[] = [
       {
-        geometry: { height: 190, role: 'lane', y: 55 },
+        geometry: { box: { height: 190, width: 120, x: 95, y: 55 }, role: 'box' },
         operation: 'move',
-        target: selections.lane,
-      },
-      {
-        geometry: { laneId: 'lane-one', role: 'zone', width: 120, x: 95 },
-        operation: 'resize',
-        target: selections.zone,
+        target: selections.region,
       },
       {
         geometry: {
@@ -348,15 +309,13 @@ describe('applyArtefactOperations', () => {
     ]
 
     const result = applyArtefactOperations(initial, operations)
-    const movedLane = result.config.infoschematic.lanes[0]
 
     expect(result.rejected).toEqual([])
-    expect(movedLane).toMatchObject({
-      height: 190,
-      panel: { height: 190, radius: 8, width: 900, x: 40, y: 55 },
-      y: 55,
+    // The authored corner radius survives a geometry rewrite of the box.
+    expect(result.config.infoschematic.regions[0]).toMatchObject({
+      box: { height: 190, radius: 8, width: 120, x: 95, y: 55 },
+      fill: '#eef',
     })
-    expect(movedLane?.zones[0]).toMatchObject({ width: 120, x: 95 })
     expect(result.config.infoschematic.fabrics[0]).toMatchObject({
       appearance: {
         properties: { emphasis: true, rank: 2 },
@@ -379,20 +338,14 @@ describe('applyArtefactOperations', () => {
     )
   })
 
-  it('replaces all six authored values, including Flow route properties', () => {
+  it('replaces all five authored values, including Flow route properties', () => {
     const initial = config()
-    const originalLane = initial.infoschematic.lanes[0]
-    const originalZone = originalLane?.zones[0]
+    const originalRegion = initial.infoschematic.regions[0]
     const operations: readonly ArtefactDraftOperation[] = [
       {
         operation: 'replace-properties',
-        target: selections.lane,
-        value: { ...originalLane!, label: 'Lane replaced' },
-      },
-      {
-        operation: 'replace-properties',
-        target: selections.zone,
-        value: { ...originalZone!, fill: '#abc', label: 'Zone replaced' },
+        target: selections.region,
+        value: { ...originalRegion!, fill: '#abc', label: 'Region replaced' },
       },
       {
         operation: 'replace-properties',
@@ -435,10 +388,9 @@ describe('applyArtefactOperations', () => {
     const result = applyArtefactOperations(initial, operations)
 
     expect(result.rejected).toEqual([])
-    expect(result.config.infoschematic.lanes[0]?.label).toBe('Lane replaced')
-    expect(result.config.infoschematic.lanes[0]?.zones[0]).toMatchObject({
+    expect(result.config.infoschematic.regions[0]).toMatchObject({
       fill: '#abc',
-      label: 'Zone replaced',
+      label: 'Region replaced',
     })
     expect(result.config.infoschematic.fabrics[0]?.appearance).toEqual({
       properties: { emphasis: false, rank: 3 },
@@ -461,15 +413,14 @@ describe('applyArtefactOperations', () => {
     })
   })
 
-  it('reorders only inside each fixed authored kind and owning Lane', () => {
+  it('reorders only inside each fixed authored kind', () => {
     const initial = config()
     const secondSelections = {
       card: { ...selections.card, code: 'C2', id: 'card-two' },
       fabric: { ...selections.fabric, code: 'F2', id: 'fabric-two' },
       flow: { ...selections.flow, code: 'L2', id: 'flow-two' },
       graphic: { ...selections.graphic, id: 'graphic-two' },
-      lane: { ...selections.lane, id: 'lane-two' },
-      zone: { ...selections.zone, id: 'zone-two' },
+      region: { ...selections.region, id: 'region-two' },
     } as const satisfies Record<string, ArtefactSelection>
     const operations = Object.values(secondSelections).map((target) => ({
       from: 1,
@@ -481,12 +432,10 @@ describe('applyArtefactOperations', () => {
     const result = applyArtefactOperations(initial, operations)
 
     expect(result.rejected).toEqual([])
-    expect(result.config.infoschematic.lanes.map(({ id }) => id)).toEqual([
-      'lane-two',
-      'lane-one',
+    expect(result.config.infoschematic.regions.map(({ id }) => id)).toEqual([
+      'region-two',
+      'region-one',
     ])
-    const laneOne = result.config.infoschematic.lanes.find(({ id }) => id === 'lane-one')
-    expect(laneOne?.zones.map(({ id }) => id)).toEqual(['zone-two', 'zone-one'])
     expect(result.config.infoschematic.fabrics.map(({ id }) => id)).toEqual([
       'fabric-two',
       'fabric-one',
@@ -521,7 +470,7 @@ describe('applyArtefactOperations', () => {
       { operation: 'remove', target: selections.card },
       { operation: 'remove', target: selections.fabric },
       { operation: 'remove', target: selections.graphic },
-      { operation: 'remove', target: selections.lane },
+      { operation: 'remove', target: selections.region },
     ]
 
     const result = applyArtefactOperations(initial, operations)
@@ -537,7 +486,7 @@ describe('applyArtefactOperations', () => {
     expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual([
       'graphic-two',
     ])
-    expect(result.config.infoschematic.lanes.map(({ id }) => id)).toEqual(['lane-two'])
+    expect(result.config.infoschematic.regions.map(({ id }) => id)).toEqual(['region-two'])
     expect(result.config.standaloneScenes[0]?.focus.graphics).toEqual(['graphic-two'])
     expect(result.config.themes[0]?.scenes[0]?.focus.graphics).toEqual(['graphic-two'])
     expect(result.config.stories[0]?.scenes[0]).toEqual({

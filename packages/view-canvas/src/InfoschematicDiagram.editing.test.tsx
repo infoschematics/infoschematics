@@ -28,15 +28,14 @@ const config = defineInfoschematic({
         prefix: 'REQ',
       },
     ],
-    lanes: [
+    regions: [
+      { box: { height: 280, width: 620, x: 10, y: 20 }, fill: '#102638', id: 'live', label: 'Live' },
       {
-        height: 280,
+        box: { height: 280, radius: 8, width: 620, x: 10, y: 20 },
+        frame: { style: 'solid' },
         id: 'delivery',
         label: 'Delivery',
-        labelY: 20,
-        panel: { height: 280, radius: 8, width: 620, x: 10, y: 20 },
-        y: 20,
-        zones: [{ fill: '#102638', id: 'live', label: 'Live', width: 620, x: 10 }],
+        labelMount: 'boundary',
       },
     ],
     fabrics: [
@@ -99,8 +98,7 @@ const config = defineInfoschematic({
 })
 
 const selections = [
-  { code: null, geometry: 'lane', id: 'delivery', kind: 'lane' },
-  { code: null, geometry: 'zone', id: 'live', kind: 'zone', laneId: 'delivery' },
+  { code: null, geometry: 'box', id: 'delivery', kind: 'region' },
   { code: 'SYS-001', geometry: 'box', id: 'fabric', kind: 'fabric' },
   { code: 'SYS-002', geometry: 'box', id: 'card', kind: 'card' },
   { code: 'REQ-001', geometry: 'route', id: 'request-flow', kind: 'flow' },
@@ -116,8 +114,8 @@ describe('InfoschematicDiagram Design editing', () => {
       expect(markup).toContain(`data-artefact-id="${selection.id}"`)
     }
     expect(markup.match(/tabindex="0"/g)?.length).toBeGreaterThanOrEqual(selections.length)
-    expect(markup).toContain('aria-label="Lane Delivery"')
-    expect(markup).toContain('aria-label="Zone Live"')
+    expect(markup).toContain('aria-label="Region Delivery"')
+    expect(markup).toContain('aria-label="Region Live"')
     expect(markup).toContain('aria-label="SYS-002 · Card · Card detail"')
     expect(markup).toContain('aria-label="Flow REQ-001"')
     expect(markup).toContain('aria-label="Annotation"')
@@ -138,15 +136,13 @@ describe('InfoschematicDiagram Design editing', () => {
         />,
       )
       const label =
-        selection.kind === 'lane'
+        selection.kind === 'region'
           ? 'Delivery'
-          : selection.kind === 'zone'
-            ? 'Live'
-            : selection.kind === 'fabric'
-              ? 'Fabric'
-              : selection.kind === 'card'
-                ? 'Card'
-                : 'Annotation'
+          : selection.kind === 'fabric'
+            ? 'Fabric'
+            : selection.kind === 'card'
+              ? 'Card'
+              : 'Annotation'
 
       expect(markup).toContain(`aria-label="Resize ${label}"`)
       expect(markup).toContain(`aria-label="Move ${label} earlier"`)
@@ -182,10 +178,10 @@ describe('InfoschematicDiagram Design editing', () => {
       source.indexOf('{/* Geometry from the placeables', adapterStart),
     )
 
-    expect(source).toContain('{ x: false, y: true }')
-    expect(source).toContain('{ x: true, y: false }')
-    expect(source).toContain('axes={{ height: true, width: false }}')
-    expect(source).toContain('axes={{ height: false, width: true }}')
+    expect(source).toContain('{ x: true, y: true }')
+    expect(source).toContain('axes={{ height: true, width: true }}')
+    expect(source).not.toContain('{ x: false, y: true }')
+    expect(source).not.toContain('{ x: true, y: false }')
     expect(source).toContain("event.key === 'Enter' || event.key === ' '")
     expect(source).toContain("event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')")
     expect(flowSection).not.toContain('ResizeHandle')

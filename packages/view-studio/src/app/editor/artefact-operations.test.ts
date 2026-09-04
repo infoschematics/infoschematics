@@ -61,18 +61,11 @@ const graphic = defineArtefactSelection({
   id: 'graphic-one',
   kind: 'graphic' as const,
 })
-const lane = defineArtefactSelection({
+const region = defineArtefactSelection({
   code: null,
-  geometry: 'lane' as const,
-  id: 'lane-one',
-  kind: 'lane' as const,
-})
-const zone = defineArtefactSelection({
-  code: null,
-  geometry: 'zone' as const,
-  id: 'zone-one',
-  kind: 'zone' as const,
-  laneId: 'lane-one',
+  geometry: 'box' as const,
+  id: 'region-one',
+  kind: 'region' as const,
 })
 
 const config = defineInfoschematic({
@@ -128,15 +121,13 @@ const config = defineInfoschematic({
         renderer: 'graphic-special',
       },
     ],
-    lanes: [
+    regions: [
       {
-        height: 100,
-        id: 'lane-one',
-        label: 'Lane',
-        labelY: 10,
-        panel: { height: 100, radius: 4, width: 500, x: 0, y: 0 },
-        y: 0,
-        zones: [{ fill: '#000', id: 'zone-one', label: 'Zone', width: 200, x: 0 }],
+        box: { height: 100, radius: 4, width: 500, x: 0, y: 0 },
+        fill: '#000',
+        frame: { style: 'solid' },
+        id: 'region-one',
+        label: 'Region',
       },
     ],
   },
@@ -170,14 +161,13 @@ describe('typed artefact operation lifecycle', () => {
     ).toBeUndefined()
   })
 
-  it('creates serialisable operations for all six artefact kinds', () => {
+  it('creates serialisable operations for all five artefact kinds', () => {
     const operations = [
       createArtefactOperation(card, config.infoschematic.cards[0]!, 0),
       createArtefactOperation(fabric, config.infoschematic.fabrics[0]!, 0),
       createArtefactOperation(flow, config.infoschematic.flows[0]!, 0),
       createArtefactOperation(graphic, config.infoschematic.graphics[0]!, 0),
-      createArtefactOperation(lane, config.infoschematic.lanes[0]!, 0),
-      createArtefactOperation(zone, config.infoschematic.lanes[0]!.zones[0]!, 0),
+      createArtefactOperation(region, config.infoschematic.regions[0]!, 0),
     ]
 
     expect(operations.every(Boolean)).toBe(true)
@@ -186,8 +176,7 @@ describe('typed artefact operation lifecycle', () => {
       'fabric',
       'flow',
       'graphic',
-      'lane',
-      'zone',
+      'region',
     ])
     expect(
       operations.map((operation) =>
@@ -195,16 +184,16 @@ describe('typed artefact operation lifecycle', () => {
           ? createdArtefactDetails(operation)?.geometry.role
           : undefined,
       ),
-    ).toEqual(['box', 'box', 'route', 'box', 'lane', 'zone'])
+    ).toEqual(['box', 'box', 'route', 'box', 'box'])
     expect(JSON.parse(JSON.stringify(operations))).toEqual(operations)
     expect(
-      [card, fabric, flow, graphic, lane, zone].map((target) =>
+      [card, fabric, flow, graphic, region].map((target) =>
         artefactIndex(config, target),
       ),
-    ).toEqual([0, 0, 0, 0, 0, 0])
+    ).toEqual([0, 0, 0, 0, 0])
   })
 
-  it('replaces partial properties for all six kinds without losing authored fields', () => {
+  it('replaces partial properties for all five kinds without losing authored fields', () => {
     const replacements = [
       replaceArtefactPropertiesOperation(config, [], card, {
         kind: 'card',
@@ -222,13 +211,9 @@ describe('typed artefact operation lifecycle', () => {
         kind: 'graphic',
         value: { properties: { opacity: 1 } },
       }),
-      replaceArtefactPropertiesOperation(config, [], lane, {
-        kind: 'lane',
-        value: { label: 'Lane replaced' },
-      }),
-      replaceArtefactPropertiesOperation(config, [], zone, {
-        kind: 'zone',
-        value: { fill: '#abc' },
+      replaceArtefactPropertiesOperation(config, [], region, {
+        kind: 'region',
+        value: { fill: '#abc', label: 'Region replaced' },
       }),
     ]
     expect(replacements.every(Boolean)).toBe(true)
@@ -269,20 +254,16 @@ describe('typed artefact operation lifecycle', () => {
       properties: { caption: 'Graphic caption', opacity: 1 },
       renderer: 'graphic-special',
     })
-    expect(materialised.config.infoschematic.lanes[0]).toMatchObject({
-      label: 'Lane replaced',
-      panel: config.infoschematic.lanes[0]!.panel,
-      zones: [{ ...config.infoschematic.lanes[0]!.zones[0], fill: '#abc' }],
-    })
-    expect(materialised.config.infoschematic.lanes[0]!.zones[0]).toEqual({
-      ...config.infoschematic.lanes[0]!.zones[0],
+    expect(materialised.config.infoschematic.regions[0]).toEqual({
+      ...config.infoschematic.regions[0],
       fill: '#abc',
+      label: 'Region replaced',
     })
     expect(JSON.parse(JSON.stringify(operations))).toEqual(operations)
     expect(operations.every(Object.isFrozen)).toBe(true)
     expect(
       artefactSourceChanges(operations).map((change) => change.target.kind),
-    ).toEqual(['lane', 'zone', 'fabric', 'card', 'graphic', 'flow'])
+    ).toEqual(['region', 'fabric', 'card', 'graphic', 'flow'])
   })
 
   it('coalesces property edits and keeps them undoable, discardable and ordered', () => {
@@ -409,10 +390,10 @@ describe('typed artefact operation lifecycle', () => {
     expect(recordArtefactOperations([], [first, next, back])).toEqual([])
   })
 
-  it('cascades endpoint Flows before owners and Lane Zones before Lane', () => {
+  it('cascades endpoint Flows before owners and removes a Region alone', () => {
     const cardPlan = planArtefactRemoval(config, card)
     const fabricPlan = planArtefactRemoval(config, fabric)
-    const lanePlan = planArtefactRemoval(config, lane)
+    const regionPlan = planArtefactRemoval(config, region)
 
     expect(
       cardPlan.operations.map((entry) => `${entry.operation}:${entry.target.kind}`),
@@ -423,8 +404,8 @@ describe('typed artefact operation lifecycle', () => {
       ),
     ).toEqual(['remove:flow', 'remove:fabric'])
     expect(
-      lanePlan.operations.map((entry) => `${entry.operation}:${entry.target.kind}`),
-    ).toEqual(['remove:zone', 'remove:lane'])
+      regionPlan.operations.map((entry) => `${entry.operation}:${entry.target.kind}`),
+    ).toEqual(['remove:region'])
   })
 
   it('blocks a Graphic referenced by Story with an explicit reason', () => {

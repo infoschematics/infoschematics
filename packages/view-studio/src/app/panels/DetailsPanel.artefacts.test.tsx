@@ -54,15 +54,12 @@ const config = defineInfoschematic({
         prefix: 'REQ',
       },
     ],
-    lanes: [
+    regions: [
       {
-        height: 160,
-        id: 'lane-one',
-        label: 'Lane',
-        labelY: 28,
-        panel: { height: 160, radius: 8, width: 640, x: 0, y: 0 },
-        y: 0,
-        zones: [],
+        box: { height: 160, radius: 8, width: 640, x: 0, y: 0 },
+        frame: { style: 'solid' },
+        id: 'region-one',
+        label: 'Region',
       },
     ],
     scopes: [
@@ -85,11 +82,11 @@ const card = defineArtefactSelection({
   id: 'card-one',
   kind: 'card' as const,
 })
-const lane = defineArtefactSelection({
+const region = defineArtefactSelection({
   code: null,
-  geometry: 'lane' as const,
-  id: 'lane-one',
-  kind: 'lane' as const,
+  geometry: 'box' as const,
+  id: 'region-one',
+  kind: 'region' as const,
 })
 const graphic = defineArtefactSelection({
   code: null,
@@ -198,9 +195,8 @@ describe('DetailsPanel typed Design controls', () => {
       </InfoschematicContext.Provider>,
     )
 
-    expect(html).toContain('aria-label="Create Lane"')
+    expect(html).toContain('aria-label="Create Region"')
     expect(html).toContain('aria-label="Create Graphic"')
-    expect(html).toContain('aria-label="Create Zone" disabled=""')
     expect(html).toContain('aria-label="Add Service card"')
     expect(html).toContain('aria-label="Add Platform fabric"')
     expect(html).not.toContain('aria-label="Add Directed flow"')
@@ -208,14 +204,14 @@ describe('DetailsPanel typed Design controls', () => {
     expect(html).toContain('PROPERTIES')
   })
 
-  it('enables Zone creation for a selected Lane and adapts property patches by kind', () => {
+  it('adapts property patches to the selected Region', () => {
     const replaceArtefactProperties = vi.fn()
     const selected = editor({
-      artefactCapabilities: artefactCapabilities.lane,
-      artefactGeometry: { height: 160, role: 'lane', y: 0 },
-      artefactValue: config.infoschematic.lanes[0],
+      artefactCapabilities: artefactCapabilities.region,
+      artefactGeometry: { box: { height: 160, width: 640, x: 0, y: 0 }, role: 'box' },
+      artefactValue: config.infoschematic.regions[0],
       replaceArtefactProperties,
-      selectedArtefact: lane,
+      selectedArtefact: region,
     })
     const contexts = detailsArtefactContexts(config, selected)
     const html = renderToStaticMarkup(
@@ -224,19 +220,13 @@ describe('DetailsPanel typed Design controls', () => {
       </InfoschematicContext.Provider>,
     )
 
-    expect(contexts.factory.lane).toEqual({
-      height: 160,
-      id: 'lane-one',
-      y: 0,
-    })
-    expect(html).toContain('aria-label="Create Zone"')
-    expect(html).not.toContain('aria-label="Create Zone" disabled=""')
+    expect(html).toContain('aria-label="Create Region"')
     artefactControlsEditorFor(selected).replaceArtefactProperties({
-      label: 'Renamed lane',
+      label: 'Renamed region',
     })
     expect(replaceArtefactProperties).toHaveBeenCalledWith({
-      kind: 'lane',
-      value: { label: 'Renamed lane' },
+      kind: 'region',
+      value: { label: 'Renamed region' },
     })
   })
 })

@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
-import type { ZoneConfig } from '@infoschematics/domain-model/zone'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import {
   artefactCan,
   artefactCapabilities,
@@ -18,18 +17,11 @@ import {
   type ArtefactSelection,
 } from './editable.ts'
 
-const laneSelection = defineArtefactSelection({
+const regionSelection = defineArtefactSelection({
   code: null,
-  geometry: 'lane',
-  id: 'lane-one',
-  kind: 'lane',
-})
-const zoneSelection = defineArtefactSelection({
-  code: null,
-  geometry: 'zone',
-  id: 'zone-one',
-  kind: 'zone',
-  laneId: 'lane-one',
+  geometry: 'box',
+  id: 'region-one',
+  kind: 'region',
 })
 const cardSelection = defineArtefactSelection({
   code: 'CARD-01',
@@ -56,21 +48,11 @@ const graphicSelection = defineArtefactSelection({
   kind: 'graphic',
 })
 
-const lane: LaneConfig = {
-  height: 80,
-  id: 'lane-one',
-  label: 'Lane one',
-  labelY: 20,
-  panel: { height: 80, radius: 8, width: 400, x: 0, y: 10 },
-  y: 10,
-  zones: [],
-}
-const zone: ZoneConfig = {
-  fill: '#112233',
-  id: 'zone-one',
-  label: 'Zone one',
-  width: 100,
-  x: 20,
+const region: RegionConfig = {
+  box: { height: 80, radius: 8, width: 400, x: 0, y: 10 },
+  frame: { style: 'solid' },
+  id: 'region-one',
+  label: 'Region one',
 }
 const card: CardConfig = {
   code: 'CARD-01',
@@ -97,15 +79,14 @@ const flow: FlowConfig = {
 
 describe('artefact capability matrix', () => {
   const kinds: readonly ArtefactKind[] = [
-    'lane',
-    'zone',
+    'region',
     'fabric',
     'card',
     'flow',
     'graphic',
   ]
 
-  it('covers every supported operation for all six kinds', () => {
+  it('covers every supported operation for all five kinds', () => {
     expect(Object.keys(artefactCapabilities)).toEqual(
       expect.arrayContaining([...kinds]),
     )
@@ -116,14 +97,15 @@ describe('artefact capability matrix', () => {
       expect(artefactCan(kind, 'remove')).toBe(true)
       expect(artefactCan(kind, 'reorder')).toBe(true)
     }
+    expect(artefactCan('region', 'move')).toBe(true)
+    expect(artefactCan('region', 'resize')).toBe(true)
     expect(artefactCan('flow', 'move')).toBe(false)
     expect(artefactCan('flow', 'resize')).toBe(false)
   })
 
   it('retains stable identity and kind-specific geometry role', () => {
     const selections: readonly ArtefactSelection[] = [
-      laneSelection,
-      zoneSelection,
+      regionSelection,
       fabricSelection,
       cardSelection,
       flowSelection,
@@ -131,8 +113,7 @@ describe('artefact capability matrix', () => {
     ]
 
     expect(selections.map(({ kind, geometry, id, code }) => ({ kind, geometry, id, code }))).toEqual([
-      { code: null, geometry: 'lane', id: 'lane-one', kind: 'lane' },
-      { code: null, geometry: 'zone', id: 'zone-one', kind: 'zone' },
+      { code: null, geometry: 'box', id: 'region-one', kind: 'region' },
       { code: 'FABRIC-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' },
       { code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' },
       { code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' },
@@ -160,18 +141,12 @@ describe('serialisable immutable operations', () => {
     ).toBeUndefined()
   })
 
-  it('moves only axes represented by each geometry role and clamps bounds', () => {
+  it('moves boxes on both axes, clamps bounds, and refuses routes', () => {
     const bounds = { height: 200, width: 300, x: 0, y: 0 }
-    const movedLane = moveArtefactOperation(
-      laneSelection,
-      { height: 50, role: 'lane', y: 20 },
-      { dx: 100, dy: 180 },
-      bounds,
-    )
-    const movedZone = moveArtefactOperation(
-      zoneSelection,
-      { laneId: 'lane-one', role: 'zone', width: 50, x: 20 },
-      { dx: 280, dy: 100 },
+    const movedRegion = moveArtefactOperation(
+      regionSelection,
+      { box: { height: 50, width: 50, x: 20, y: 20 }, role: 'box' },
+      { dx: 280, dy: 180 },
       bounds,
     )
     const movedCard = moveArtefactOperation(
@@ -181,12 +156,9 @@ describe('serialisable immutable operations', () => {
       bounds,
     )
 
-    expect(movedLane?.geometry).toEqual({ height: 50, role: 'lane', y: 150 })
-    expect(movedZone?.geometry).toEqual({
-      laneId: 'lane-one',
-      role: 'zone',
-      width: 50,
-      x: 250,
+    expect(movedRegion?.geometry).toEqual({
+      box: { height: 50, width: 50, x: 250, y: 150 },
+      role: 'box',
     })
     expect(movedCard?.geometry).toEqual({
       box: { height: 40, width: 60, x: 240, y: 0 },
@@ -201,16 +173,11 @@ describe('serialisable immutable operations', () => {
     ).toBeUndefined()
   })
 
-  it('enforces kind minima while fixed Lane and Zone axes stay absent', () => {
-    const resizedLane = resizeArtefactOperation(
-      laneSelection,
-      { height: 80, role: 'lane', y: 10 },
-      { height: 2, width: 999 },
-    )
-    const resizedZone = resizeArtefactOperation(
-      zoneSelection,
-      { laneId: 'lane-one', role: 'zone', width: 100, x: 20 },
-      { height: 999, width: 2 },
+  it('enforces kind minima on both region axes', () => {
+    const resizedRegion = resizeArtefactOperation(
+      regionSelection,
+      { box: { height: 80, width: 100, x: 20, y: 10 }, role: 'box' },
+      { height: 2, width: 2 },
     )
     const resizedCard = resizeArtefactOperation(
       cardSelection,
@@ -218,15 +185,10 @@ describe('serialisable immutable operations', () => {
       { height: 1, width: 1 },
     )
 
-    expect(resizedLane?.geometry).toEqual({ height: 20, role: 'lane', y: 10 })
-    expect(resizedLane?.geometry).not.toHaveProperty('width')
-    expect(resizedZone?.geometry).toEqual({
-      laneId: 'lane-one',
-      role: 'zone',
-      width: 20,
-      x: 20,
+    expect(resizedRegion?.geometry).toEqual({
+      box: { height: 20, width: 20, x: 20, y: 10 },
+      role: 'box',
     })
-    expect(resizedZone?.geometry).not.toHaveProperty('height')
     expect(resizedCard?.geometry).toMatchObject({
       box: { height: 40, width: 40 },
       role: 'box',
@@ -248,20 +210,17 @@ describe('serialisable immutable operations', () => {
 })
 
 describe('dependency-safe operation ordering', () => {
-  it('creates containers and endpoints first, then removes dependants first', () => {
-    const createLane = createArtefactOperation(laneSelection, lane, 0)
-    const createZone = createArtefactOperation(zoneSelection, zone, 0)
+  it('creates geography and endpoints first, then removes dependants first', () => {
+    const createRegion = createArtefactOperation(regionSelection, region, 0)
     const createCard = createArtefactOperation(cardSelection, card, 0)
     const createFlow = createArtefactOperation(flowSelection, flow, 0)
     const operations: ArtefactOperation[] = [
       createFlow!,
-      createZone!,
       createCard!,
-      createLane!,
-      removeArtefactOperation(laneSelection),
+      createRegion!,
+      removeArtefactOperation(regionSelection),
       removeArtefactOperation(cardSelection),
       removeArtefactOperation(flowSelection),
-      removeArtefactOperation(zoneSelection),
     ]
 
     expect(
@@ -269,14 +228,12 @@ describe('dependency-safe operation ordering', () => {
         (operation) => `${operation.operation}:${operation.target.kind}`,
       ),
     ).toEqual([
-      'create:lane',
-      'create:zone',
+      'create:region',
       'create:card',
       'create:flow',
       'remove:flow',
       'remove:card',
-      'remove:zone',
-      'remove:lane',
+      'remove:region',
     ])
     expect(orderArtefactOperations(operations)).not.toBe(operations)
     expect(Object.isFrozen(orderArtefactOperations(operations))).toBe(true)

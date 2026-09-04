@@ -9,7 +9,7 @@ const blank = (title: string): InfoschematicConfig => ({
     viewBox: { height: 80, width: 120, x: 0, y: 0 },
     scopes: [],
     flowFamilies: [],
-    lanes: [],
+    regions: [],
     cards: [],
     fabrics: [],
     points: [],
@@ -36,15 +36,14 @@ const representative: InfoschematicConfig = {
     flowFamilies: [
       { color: '#7c3aed', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' },
     ],
-    lanes: [
+    regions: [
+      { box: { height: 200, width: 380, x: 10, y: 20 }, fill: '#f8fafc', id: 'runtime', label: 'Runtime' },
       {
-        height: 200,
+        box: { height: 200, radius: 8, width: 380, x: 10, y: 20 },
+        frame: { style: 'solid' },
         id: 'delivery',
         label: 'Delivery',
-        labelY: 24,
-        panel: { height: 200, radius: 8, width: 380, x: 10, y: 20 },
-        y: 20,
-        zones: [{ fill: '#f8fafc', id: 'runtime', label: 'Runtime', width: 380, x: 10 }],
+        labelMount: 'boundary',
       },
     ],
     cards: [
@@ -184,22 +183,11 @@ describe('renderInfoschematicSvg', () => {
             label: 'Platform',
           },
         ],
-        lanes: representative.infoschematic.lanes.map((lane) => ({
-          ...lane,
-          appearance: {
-            frame: 'dashed' as const,
-            label: 'north' as const,
-            labelTreatment: 'notched' as const,
-          },
-          zones: lane.zones.map((zone) => ({
-            ...zone,
-            appearance: {
-              frame: 'dotted' as const,
-              label: 'south-east' as const,
-              labelTreatment: 'plain' as const,
-            },
-          })),
-        })),
+        regions: representative.infoschematic.regions.map((region) =>
+          region.id === 'delivery'
+            ? { ...region, frame: { style: 'dashed' as const }, labelPlacement: 'north' as const }
+            : { ...region, frame: { style: 'dotted' as const }, labelPlacement: 'south-east' as const },
+        ),
         cards: representative.infoschematic.cards.map((card, index) =>
           index === 0 ? { ...card, domain: 'platform', stereotype: 'service' } : card,
         ),
@@ -297,7 +285,7 @@ describe('renderInfoschematicSvg', () => {
     const light = renderInfoschematicSvg(representative)
     expect(light).toContain('data-ink="dark"')
     expect(light).not.toContain('data-ink="light"')
-    expect(light).toContain('class="infoschematic-zone-label" data-ink="dark"')
+    expect(light).toContain('class="infoschematic-region-label" data-ink="dark"')
 
     const dark = renderInfoschematicSvg({
       ...representative,
@@ -311,15 +299,14 @@ describe('renderInfoschematicSvg', () => {
         cards: representative.infoschematic.cards.map((card, index) =>
           index === 0 ? { ...card, domain: 'observe', stereotype: 'stage' } : card,
         ),
-        lanes: representative.infoschematic.lanes.map((lane) => ({
-          ...lane,
-          zones: lane.zones.map((zone) => ({ ...zone, fill: '#071e2d' })),
-        })),
+        regions: representative.infoschematic.regions.map((region) =>
+          region.fill ? { ...region, fill: '#071e2d' } : region,
+        ),
       },
     })
     expect(dark).toContain('data-ink="light"')
     expect(dark).toContain('data-ink="dark"')
-    expect(dark).toContain('class="infoschematic-zone-label" data-ink="light"')
+    expect(dark).toContain('class="infoschematic-region-label" data-ink="light"')
     expect(dark).toContain(`fill="${visualTokens.canvas.output.cardTextInverse}"`)
     expect(dark).toContain(`fill="${visualTokens.canvas.output.textMutedInverse}"`)
     expect(dark).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}" height="20"`)

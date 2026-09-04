@@ -94,23 +94,14 @@ const config = (): InfoschematicConfig =>
           renderer: 'graphic-preview',
         },
       ],
-      lanes: [
+      regions: [
         {
-          height: 280,
-          id: 'lane-a',
-          label: 'Lane A',
-          labelY: 20,
-          panel: { height: 280, radius: 8, width: 620, x: 10, y: 20 },
-          y: 20,
-          zones: [
-            {
-              fill: '#eef',
-              id: 'zone-a',
-              label: 'Zone A',
-              width: 620,
-              x: 10,
-            },
-          ],
+          box: { height: 280, radius: 8, width: 620, x: 10, y: 20 },
+          fill: '#eef',
+          frame: { style: 'solid' },
+          id: 'region-a',
+          label: 'Region A',
+          labelMount: 'boundary',
         },
       ],
       scopes: [
@@ -164,18 +155,11 @@ const selection = {
     id: 'graphic-b',
     kind: 'graphic',
   },
-  lane: {
+  region: {
     code: null,
-    geometry: 'lane',
-    id: 'lane-a',
-    kind: 'lane',
-  },
-  zone: {
-    code: null,
-    geometry: 'zone',
-    id: 'zone-a',
-    kind: 'zone',
-    laneId: 'lane-a',
+    geometry: 'box',
+    id: 'region-a',
+    kind: 'region',
   },
 } as const satisfies Record<string, ArtefactSelection>
 
@@ -201,36 +185,16 @@ describe('InfoschematicDiagram draft preview', () => {
         operation: 'create',
         target: {
           code: null,
-          geometry: 'lane',
-          id: 'lane-created',
-          kind: 'lane',
+          geometry: 'box',
+          id: 'region-created',
+          kind: 'region',
         },
         value: {
-          height: 60,
-          id: 'lane-created',
-          label: 'Lane Created',
-          labelY: 310,
-          panel: { height: 60, radius: 8, width: 620, x: 10, y: 250 },
-          y: 250,
-          zones: [],
-        },
-      },
-      {
-        at: 0,
-        operation: 'create',
-        target: {
-          code: null,
-          geometry: 'zone',
-          id: 'zone-created',
-          kind: 'zone',
-          laneId: 'lane-created',
-        },
-        value: {
+          box: { height: 60, radius: 8, width: 620, x: 10, y: 250 },
           fill: '#ffe',
-          id: 'zone-created',
-          label: 'Zone Created',
-          width: 300,
-          x: 20,
+          frame: { style: 'solid' },
+          id: 'region-created',
+          label: 'Region Created',
         },
       },
       {
@@ -321,8 +285,7 @@ describe('InfoschematicDiagram draft preview', () => {
     )
 
     for (const id of [
-      'lane-created',
-      'zone-created',
+      'region-created',
       'fabric-created',
       'card-created',
       'flow-created',
@@ -330,7 +293,7 @@ describe('InfoschematicDiagram draft preview', () => {
     ]) {
       expect(markup).toContain(`data-artefact-id="${id}"`)
     }
-    expect(initial.infoschematic.lanes).toHaveLength(1)
+    expect(initial.infoschematic.regions).toHaveLength(1)
     expect(initial.infoschematic.cards).toHaveLength(2)
     expect(initial.infoschematic.flows).toHaveLength(1)
   })
@@ -339,14 +302,9 @@ describe('InfoschematicDiagram draft preview', () => {
     const initial = config()
     const operations: readonly ArtefactDraftOperation[] = [
       {
-        geometry: { height: 260, role: 'lane', y: 35 },
+        geometry: { box: { height: 260, width: 500, x: 30, y: 35 }, role: 'box' },
         operation: 'move',
-        target: selection.lane,
-      },
-      {
-        geometry: { laneId: 'lane-a', role: 'zone', width: 500, x: 30 },
-        operation: 'resize',
-        target: selection.zone,
+        target: selection.region,
       },
       {
         geometry: {
@@ -417,7 +375,7 @@ describe('InfoschematicDiagram draft preview', () => {
     expect(markup.indexOf('data-artefact-id="graphic-b"')).toBeLessThan(
       markup.indexOf('data-artefact-id="graphic-a"'),
     )
-    expect(markup).toContain('aria-label="Lane Lane A"')
+    expect(markup).toContain('aria-label="Region Region A"')
     expect(initial.infoschematic.fabrics[0]?.label).toBe('Fabric A')
   })
 
