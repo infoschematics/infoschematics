@@ -27,7 +27,7 @@ export type RegionGeometry = Readonly<{
 }>
 
 export type RegionGeometryInput = Readonly<{
-  box: Box
+  box: Box & { radius?: number }
   label: string
   treatment: ResolvedRegionTreatment
 }>
@@ -66,14 +66,16 @@ const labelGeometry = (
   box: Box,
   placement: RegionLabelPlacement,
   mounted: boolean,
+  offset: number,
 ): RegionLabelGeometry => {
   const { x, y, width, height } = box
   const east = placement.endsWith('east') || placement === 'east'
   const west = placement.endsWith('west') || placement === 'west'
   const north = placement.startsWith('north')
   const south = placement.startsWith('south')
-  // A border-mounted label sits on the frame line the notch breaks; only a
-  // plain label sets down inside the region by the inset.
+  // A boundary-mounted label sits on the frame line the notch breaks; only a
+  // plain label sets down inside the region by the inset. The authored offset
+  // pulls the label in along its edge; the set-down depth stays standard.
   const edgeInset = mounted ? 0 : regionGeometryDefaults.labelInset
   return {
     dominantBaseline: 'middle',
@@ -83,11 +85,11 @@ const labelGeometry = (
     x: east
       ? placement === 'east'
         ? x + width - edgeInset
-        : x + width - regionGeometryDefaults.labelInset
+        : x + width - offset
       : west
         ? placement === 'west'
           ? x + edgeInset
-          : x + regionGeometryDefaults.labelInset
+          : x + offset
         : x + width / 2,
     y: north
       ? y + edgeInset
@@ -162,11 +164,16 @@ const notchedFrame = (box: Box, radius: number, notch: RegionNotchGeometry) => {
 export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): RegionGeometry => {
   const resolvedRadius = Math.max(
     0,
-    Math.min(visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2),
+    Math.min(box.radius ?? visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2),
   )
   const resolvedLabel =
     treatment.label && label.trim().length > 0
-      ? labelGeometry(box, treatment.label, treatment.labelTreatment === 'notched')
+      ? labelGeometry(
+          box,
+          treatment.label,
+          treatment.labelTreatment === 'notched',
+          treatment.labelOffset ?? regionGeometryDefaults.labelInset,
+        )
       : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
   if (treatment.labelTreatment !== 'notched' || !resolvedLabel) {

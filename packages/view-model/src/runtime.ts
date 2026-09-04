@@ -1,7 +1,6 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
 import type { ThematicSceneConfig } from '@infoschematics/domain-model/theme'
@@ -127,42 +126,6 @@ const membershipVisible = (
   entry.scopeRule === 'all'
     ? entry.scopes.every((scope) => visibleScopes.has(scope))
     : entry.scopes.some((scope) => visibleScopes.has(scope))
-
-const laneLabelX = (lane: LaneConfig) => lane.panel.x + 30
-const laneLabelY = (lane: LaneConfig) => (lane.legend === 'bottom' ? lane.panel.y + lane.panel.height : lane.panel.y)
-
-const lanePanelOutline = (lane: LaneConfig) => {
-  const { x, y, width, height, radius } = lane.panel
-  const label = laneLabelX(lane)
-  const gapStart = Math.max(x + radius, label - 10)
-  const gapEnd = label + lane.label.length * 10.4 + 10
-  const bottom = y + height
-  return lane.legend === 'bottom'
-    ? [
-        `M${gapStart} ${bottom}`,
-        `H${x + radius}`,
-        `A${radius} ${radius} 0 0 1 ${x} ${bottom - radius}`,
-        `V${y + radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + radius} ${y}`,
-        `H${x + width - radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + width} ${y + radius}`,
-        `V${bottom - radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + width - radius} ${bottom}`,
-        `H${gapEnd}`,
-      ].join(' ')
-    : [
-        `M${gapEnd} ${y}`,
-        `H${x + width - radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + width} ${y + radius}`,
-        `V${bottom - radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + width - radius} ${bottom}`,
-        `H${x + radius}`,
-        `A${radius} ${radius} 0 0 1 ${x} ${bottom - radius}`,
-        `V${y + radius}`,
-        `A${radius} ${radius} 0 0 1 ${x + radius} ${y}`,
-        `H${gapStart}`,
-      ].join(' ')
-}
 
 export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const definition = config.infoschematic
@@ -448,7 +411,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     infoschematicViewBox: definition.viewBox,
     infoschematicScopes: definition.scopes,
     infoschematicFamilies: definition.flowFamilies,
-    infoschematicLanes: definition.lanes,
+    infoschematicRegions: definition.regions,
     infoschematicCards: cards,
     infoschematicFabrics: fabrics,
     infoschematicFlows: flows,
@@ -468,7 +431,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
       ),
       endpointCodes,
       flowCodes: new Set(flows.map((flow) => flow.code)),
-      lanes: definition.lanes,
+      regions: definition.regions,
       layout,
       register,
       registerWith,
@@ -481,9 +444,6 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     infoschematicFabricIsVisible: (fabric: RuntimeFabric, scopes: ReadonlySet<string>) =>
       membershipVisible(fabric, scopes),
     infoschematicAnnotationLabelPositions: annotationLabelPositions,
-    infoschematicLaneLabelX: laneLabelX,
-    infoschematicLaneLabelY: laneLabelY,
-    infoschematicLanePanelOutline: lanePanelOutline,
     infoschematicPortAudit: (shownFlows: readonly RuntimeFlow[]) => {
       const ports = shownFlows.flatMap((flow) => {
         const { start, end } = routeEndpoints(flow.d)

@@ -5,8 +5,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
-import type { ZoneConfig } from '@infoschematics/domain-model/zone'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 
 // What a diagram must provide to become editable. Nothing here knows what the
 // diagram is of: the editor asks for handles, asks what a drop means, and asks
@@ -82,7 +81,7 @@ export type CreatedComponent = {
   wraps?: string
 }
 
-export type ArtefactKind = 'lane' | 'zone' | 'fabric' | 'card' | 'flow' | 'graphic'
+export type ArtefactKind = 'region' | 'fabric' | 'card' | 'flow' | 'graphic'
 
 type SelectionIdentity = Readonly<{
   /** Null where the authored kind has no code field. */
@@ -91,8 +90,7 @@ type SelectionIdentity = Readonly<{
 }>
 
 export type ArtefactSelection =
-  | (SelectionIdentity & Readonly<{ geometry: 'lane'; kind: 'lane' }>)
-  | (SelectionIdentity & Readonly<{ geometry: 'zone'; kind: 'zone'; laneId: string }>)
+  | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'region' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'fabric' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'card' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'graphic' }>)
@@ -131,8 +129,7 @@ export const artefactCapabilities: Readonly<
   fabric: capabilities(true, true),
   flow: capabilities(false, false),
   graphic: capabilities(true, true),
-  lane: capabilities(true, true),
-  zone: capabilities(true, true),
+  region: capabilities(true, true),
 })
 
 export const artefactCan = (
@@ -144,39 +141,19 @@ export const defineArtefactSelection = <T extends ArtefactSelection>(
   selection: T,
 ): T => Object.freeze({ ...selection }) as T
 
-export type LaneGeometry = Readonly<{
-  height: number
-  /** A Lane spans the complete Infoschematic width; only its vertical axes vary. */
-  role: 'lane'
-  y: number
-}>
-
-export type ZoneGeometry = Readonly<{
-  /** A Zone inherits its Lane's y and height; only its horizontal axes vary. */
-  laneId: string
-  role: 'zone'
-  width: number
-  x: number
-}>
-
 export type BoxGeometry = Readonly<{ box: Box; role: 'box' }>
 export type RouteGeometry = Readonly<{
   points: readonly Point[]
   role: 'route'
 }>
-export type ArtefactGeometry =
-  | LaneGeometry
-  | ZoneGeometry
-  | BoxGeometry
-  | RouteGeometry
+export type ArtefactGeometry = BoxGeometry | RouteGeometry
 
 export type ArtefactValueByKind = Readonly<{
   card: CardConfig
   fabric: FabricConfig
   flow: FlowConfig
   graphic: GraphicConfig
-  lane: LaneConfig
-  zone: ZoneConfig
+  region: RegionConfig
 }>
 
 type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
@@ -235,8 +212,7 @@ export const artefactResizeMinimums: Readonly<
   card: Object.freeze({ height: 40, width: 40 }),
   fabric: Object.freeze({ height: 40, width: 40 }),
   graphic: Object.freeze({ height: 20, width: 20 }),
-  lane: Object.freeze({ height: 20 }),
-  zone: Object.freeze({ width: 20 }),
+  region: Object.freeze({ height: 20, width: 20 }),
 })
 
 const cloneFrozen = <T>(value: T): T => {
@@ -290,42 +266,20 @@ const moveGeometry = (
 ): Exclude<ArtefactGeometry, RouteGeometry> | undefined => {
   if (!validNumber(offset.dx) || !validNumber(offset.dy)) return undefined
 
-  switch (geometry.role) {
-    case 'lane': {
-      const y = geometry.y + offset.dy
-      return cloneFrozen({
-        ...geometry,
-        y: bounds
-          ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.height)
-          : y,
-      })
-    }
-    case 'zone': {
-      const x = geometry.x + offset.dx
-      return cloneFrozen({
-        ...geometry,
-        x: bounds
-          ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.width)
-          : x,
-      })
-    }
-    case 'box': {
-      const x = geometry.box.x + offset.dx
-      const y = geometry.box.y + offset.dy
-      return cloneFrozen({
-        box: {
-          ...geometry.box,
-          x: bounds
-            ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.box.width)
-            : x,
-          y: bounds
-            ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.box.height)
-            : y,
-        },
-        role: 'box' as const,
-      })
-    }
-  }
+  const x = geometry.box.x + offset.dx
+  const y = geometry.box.y + offset.dy
+  return cloneFrozen({
+    box: {
+      ...geometry.box,
+      x: bounds
+        ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.box.width)
+        : x,
+      y: bounds
+        ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.box.height)
+        : y,
+    },
+    role: 'box' as const,
+  })
 }
 
 export const moveArtefactOperation = (
@@ -378,46 +332,21 @@ export const resizeArtefactOperation = (
     return undefined
   }
 
-  let resized: Exclude<ArtefactGeometry, RouteGeometry>
-  switch (geometry.role) {
-    case 'lane':
-      resized = {
-        ...geometry,
-        height: boundedSize(
-          size.height ?? geometry.height,
-          minimum.height ?? 1,
-          bounds ? bounds.y + bounds.height - geometry.y : undefined,
-        ),
-      }
-      break
-    case 'zone':
-      resized = {
-        ...geometry,
-        width: boundedSize(
-          size.width ?? geometry.width,
-          minimum.width ?? 1,
-          bounds ? bounds.x + bounds.width - geometry.x : undefined,
-        ),
-      }
-      break
-    case 'box':
-      resized = {
-        box: {
-          ...geometry.box,
-          height: boundedSize(
-            size.height ?? geometry.box.height,
-            minimum.height ?? 1,
-            bounds ? bounds.y + bounds.height - geometry.box.y : undefined,
-          ),
-          width: boundedSize(
-            size.width ?? geometry.box.width,
-            minimum.width ?? 1,
-            bounds ? bounds.x + bounds.width - geometry.box.x : undefined,
-          ),
-        },
-        role: 'box',
-      }
-      break
+  const resized: Exclude<ArtefactGeometry, RouteGeometry> = {
+    box: {
+      ...geometry.box,
+      height: boundedSize(
+        size.height ?? geometry.box.height,
+        minimum.height ?? 1,
+        bounds ? bounds.y + bounds.height - geometry.box.y : undefined,
+      ),
+      width: boundedSize(
+        size.width ?? geometry.box.width,
+        minimum.width ?? 1,
+        bounds ? bounds.x + bounds.width - geometry.box.x : undefined,
+      ),
+    },
+    role: 'box',
   }
 
   return cloneFrozen({
@@ -456,14 +385,13 @@ export const removeArtefactOperation = (
 ): RemoveArtefactOperation =>
   cloneFrozen({ operation: 'remove' as const, target })
 
-export type HandleKind = 'component' | 'label' | 'lane' | 'port' | 'waypoint' | 'zone'
+export type HandleKind = 'component' | 'label' | 'port' | 'region' | 'waypoint'
 
 // What the position panel reads for a selection. Every box states all four
-// numbers in the same order, whether or not each is editable - a lane spans
-// its full width and a zone its lane's height, so those axes are fixed rather
-// than absent, and the panel reads them against the geography they sit in
-// rather than working them out. A route has no single point at all, only its
-// endpoints and how many points its path runs through.
+// numbers in the same order, whether or not each is editable, and the panel
+// reads them against the geography they sit in rather than working them out.
+// A route has no single point at all, only its endpoints and how many points
+// its path runs through.
 export type PlacementAxis = 'height' | 'width' | 'x' | 'y'
 
 export type Placement =
@@ -575,12 +503,11 @@ export const orderChanges = (diagram: EditableDiagram, changes: ReadonlyMap<stri
 }
 
 const kindDependencyOrder: Readonly<Record<ArtefactKind, number>> = {
-  lane: 0,
-  zone: 1,
-  fabric: 2,
-  card: 3,
-  graphic: 4,
-  flow: 5,
+  region: 0,
+  fabric: 1,
+  card: 2,
+  graphic: 3,
+  flow: 4,
 }
 
 const operationOrder: Readonly<Record<ArtefactOperation['operation'], number>> = {

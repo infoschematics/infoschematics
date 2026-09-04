@@ -2,14 +2,13 @@ import type {
   CardDetailDefaults,
   GridTreatment,
   InfoschematicAppearanceConfig,
-  RegionAppearanceConfig,
-  RegionFrameTreatment,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
   SurfaceTreatment,
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
+import type { RegionConfig, RegionFrameStyle } from '@infoschematics/domain-model/region'
 
 export type CardDetailOverrides = Readonly<
   Partial<Pick<CardDetailDefaults, 'description' | 'identity' | 'stereotype'>>
@@ -28,12 +27,12 @@ export type ResolvedVisualTreatment = Readonly<{
   surface: SurfaceTreatment
 }>
 
-export type RegionKind = 'lane' | 'zone'
-export type RegionLegendEdge = 'top' | 'bottom'
-
 export type ResolvedRegionTreatment = Readonly<{
-  frame: RegionFrameTreatment
+  frame: RegionFrameStyle | 'none'
+  frameOpacity: number
   label: RegionLabelPlacement | null
+  /** Along-edge pull-in; null takes the geometry's standard inset. */
+  labelOffset: number | null
   labelTreatment: RegionLabelFrameTreatment
 }>
 
@@ -60,34 +59,25 @@ export const resolveVisualTreatment = (
 })
 
 /**
- * Resolve Lane and Zone treatment without making either inherit the other's
- * visual defaults. Empty or hidden labels always turn a requested notch into
- * a continuous plain frame.
+ * Resolve one Region's treatment from its authored record. A boundary-mounted
+ * label notches the frame; an empty or hidden label, or an absent frame,
+ * always resolves to a continuous plain treatment instead.
  */
 export const resolveRegionTreatment = (
-  kind: RegionKind,
-  label: string,
-  appearance?: RegionAppearanceConfig,
-  legend: RegionLegendEdge = 'top',
+  region: Pick<RegionConfig, 'label' | 'frame' | 'labelPlacement' | 'labelMount' | 'labelOffset'>,
 ): ResolvedRegionTreatment => {
-  const fallbackLabel: RegionLabelPlacement =
-    legend === 'bottom'
-      ? kind === 'lane'
-        ? 'south-west'
-        : 'south-east'
-      : kind === 'lane'
-        ? 'north-west'
-        : 'north-east'
-  const resolvedLabel = label.trim().length === 0 || appearance?.label === 'none' ? null : appearance?.label ?? fallbackLabel
-  const requestedFrame = appearance?.frame ?? (kind === 'lane' ? 'solid' : 'none')
-  const requestedLabelTreatment = appearance?.labelTreatment ?? (kind === 'lane' ? 'notched' : 'plain')
+  const placement = region.labelPlacement ?? 'north-west'
+  const resolvedLabel = region.label.trim().length === 0 || placement === 'none' ? null : placement
+  const frame = region.frame?.style ?? 'none'
   return {
-    frame: requestedFrame,
+    frame,
+    frameOpacity: region.frame?.opacity ?? 1,
     label: resolvedLabel,
+    labelOffset: region.labelOffset ?? null,
     labelTreatment:
-      requestedLabelTreatment === 'notched' && (resolvedLabel === null || requestedFrame === 'none')
-        ? 'plain'
-        : requestedLabelTreatment,
+      (region.labelMount ?? 'internal') === 'boundary' && resolvedLabel !== null && frame !== 'none'
+        ? 'notched'
+        : 'plain',
   }
 }
 

@@ -36,8 +36,8 @@
   --infoschematic-canvas-output-flow-pipe: #ffffff;
   --infoschematic-canvas-output-font-family: system-ui, sans-serif;
   --infoschematic-canvas-output-graphic-fill: #f7f8f9;
-  --infoschematic-canvas-output-lane-stroke: #83909d;
   --infoschematic-canvas-output-metadata-font-size: 12;
+  --infoschematic-canvas-output-region-stroke: #83909d;
   --infoschematic-canvas-output-stroke: #687684;
   --infoschematic-canvas-output-surface: #f2f5f7;
   --infoschematic-canvas-output-text: #27313a;
@@ -54,15 +54,15 @@
   --infoschematic-canvas-surfaces-flow-pipe: #06101c;
   --infoschematic-canvas-surfaces-graphic-fallback-fill: #1a1436c9;
   --infoschematic-canvas-surfaces-graphic-fallback-stroke: #8062b4;
-  --infoschematic-canvas-surfaces-lane-fill: #12273b24;
-  --infoschematic-canvas-surfaces-lane-stroke: #b5c4d54d;
   --infoschematic-canvas-surfaces-region-dash: 8 6;
   --infoschematic-canvas-surfaces-region-dot: 1.5 5;
+  --infoschematic-canvas-surfaces-region-fill: #12273b24;
+  --infoschematic-canvas-surfaces-region-stroke: #b5c4d54d;
   --infoschematic-canvas-text-body-family: Manrope, Arial, sans-serif;
   --infoschematic-canvas-text-code-family: "DM Mono", monospace;
   --infoschematic-canvas-text-fabric: #b9cde0;
   --infoschematic-canvas-text-label: #f2f7ff;
   --infoschematic-canvas-text-muted: #7f9bb3;
+  --infoschematic-canvas-text-region: #ffffff65;
   --infoschematic-canvas-text-strong: #dff3ff;
-  --infoschematic-canvas-text-zone: #ffffff65;
 }

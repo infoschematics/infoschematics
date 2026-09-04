@@ -3,10 +3,9 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import type { StorySceneConfig } from '@infoschematics/domain-model/story'
-import type { ZoneConfig } from '@infoschematics/domain-model/zone'
 
 import type {
   ArtefactKind,
@@ -14,8 +13,6 @@ import type {
   ArtefactSelection,
   ArtefactValueByKind,
   BoxGeometry,
-  LaneGeometry,
-  ZoneGeometry,
 } from './editable.ts'
 
 type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
@@ -98,12 +95,6 @@ const matchesReplacement = (operation: AnyReplaceOperation): boolean =>
 
 const finite = (...values: readonly number[]): boolean => values.every(Number.isFinite)
 
-const validLaneGeometry = (geometry: LaneGeometry): boolean =>
-  finite(geometry.y, geometry.height) && geometry.height > 0
-
-const validZoneGeometry = (geometry: ZoneGeometry): boolean =>
-  finite(geometry.x, geometry.width) && geometry.width > 0
-
 const validBoxGeometry = (geometry: BoxGeometry): boolean =>
   finite(
     geometry.box.x,
@@ -119,18 +110,13 @@ const withDefinition = (
   infoschematic: InfoschematicConfig['infoschematic'],
 ): InfoschematicConfig => ({ ...config, infoschematic })
 
-const allZones = (config: InfoschematicConfig): readonly ZoneConfig[] =>
-  config.infoschematic.lanes.flatMap((lane) => lane.zones)
-
 const valuesForKind = (
   config: InfoschematicConfig,
   kind: ArtefactKind,
 ): readonly { id: string; code?: string }[] => {
   switch (kind) {
-    case 'lane':
-      return config.infoschematic.lanes
-    case 'zone':
-      return allZones(config)
+    case 'region':
+      return config.infoschematic.regions
     case 'fabric':
       return config.infoschematic.fabrics
     case 'card':
@@ -162,35 +148,15 @@ const createArtefact = (
 
   const definition = config.infoschematic
   switch (operation.target.kind) {
-    case 'lane':
+    case 'region':
       return withDefinition(config, {
         ...definition,
-        lanes: insertAt(
-          definition.lanes,
-          cloneSerialisable(operation.value as LaneConfig),
+        regions: insertAt(
+          definition.regions,
+          cloneSerialisable(operation.value as RegionConfig),
           operation.at,
         ),
       })
-    case 'zone': {
-      const target = operation.target as SelectionFor<'zone'>
-      const laneIndex = definition.lanes.findIndex(
-        (lane) => lane.id === target.laneId,
-      )
-      if (laneIndex < 0) return undefined
-      const lane = definition.lanes[laneIndex]
-      if (!lane) return undefined
-      return withDefinition(config, {
-        ...definition,
-        lanes: replaceAt(definition.lanes, laneIndex, {
-          ...lane,
-          zones: insertAt(
-            lane.zones,
-            cloneSerialisable(operation.value as ZoneConfig),
-            operation.at,
-          ),
-        }),
-      })
-    }
     case 'fabric':
       return withDefinition(config, {
         ...definition,
@@ -236,59 +202,21 @@ const applyGeometry = (
 ): InfoschematicConfig | undefined => {
   const definition = config.infoschematic
   switch (operation.target.kind) {
-    case 'lane': {
-      if (operation.geometry.role !== 'lane' || !validLaneGeometry(operation.geometry)) {
+    case 'region': {
+      if (operation.geometry.role !== 'box' || !validBoxGeometry(operation.geometry)) {
         return undefined
       }
-      const index = definition.lanes.findIndex((lane) =>
-        matchesTarget(lane, operation.target),
+      const index = definition.regions.findIndex((region) =>
+        matchesTarget(region, operation.target),
       )
-      const lane = definition.lanes[index]
-      if (!lane) return undefined
-      const geometry = operation.geometry
+      const region = definition.regions[index]
+      if (!region) return undefined
       return withDefinition(config, {
         ...definition,
-        lanes: replaceAt(definition.lanes, index, {
-          ...lane,
-          height: geometry.height,
-          panel: {
-            ...lane.panel,
-            height: geometry.height,
-            y: geometry.y,
-          },
-          y: geometry.y,
-        }),
-      })
-    }
-    case 'zone': {
-      const target = operation.target as SelectionFor<'zone'>
-      if (
-        operation.geometry.role !== 'zone' ||
-        !validZoneGeometry(operation.geometry) ||
-        operation.geometry.laneId !== target.laneId
-      ) {
-        return undefined
-      }
-      const laneIndex = definition.lanes.findIndex(
-        (lane) => lane.id === target.laneId,
-      )
-      const lane = definition.lanes[laneIndex]
-      if (!lane) return undefined
-      const zoneIndex = lane.zones.findIndex((zone) =>
-        matchesTarget(zone, operation.target),
-      )
-      const zone = lane.zones[zoneIndex]
-      if (!zone) return undefined
-      const geometry = operation.geometry
-      return withDefinition(config, {
-        ...definition,
-        lanes: replaceAt(definition.lanes, laneIndex, {
-          ...lane,
-          zones: replaceAt(lane.zones, zoneIndex, {
-            ...zone,
-            width: geometry.width,
-            x: geometry.x,
-          }),
+        regions: replaceAt(definition.regions, index, {
+          ...region,
+          // The authored radius travels with the region; only the extent moves.
+          box: { ...region.box, ...cloneSerialisable(operation.geometry.box) },
         }),
       })
     }
@@ -346,33 +274,15 @@ const reorderArtefact = (
   if (!Number.isFinite(operation.from) || !Number.isFinite(operation.to)) return undefined
   const definition = config.infoschematic
 
-  if (operation.target.kind === 'zone') {
-    const target = operation.target as SelectionFor<'zone'>
-    const laneIndex = definition.lanes.findIndex(
-      (lane) => lane.id === target.laneId,
-    )
-    const lane = definition.lanes[laneIndex]
-    if (!lane) return undefined
-    const actual = lane.zones.findIndex((zone) => matchesTarget(zone, operation.target))
-    if (actual < 0 || actual !== Math.trunc(operation.from)) return undefined
-    return withDefinition(config, {
-      ...definition,
-      lanes: replaceAt(definition.lanes, laneIndex, {
-        ...lane,
-        zones: moveAt(lane.zones, actual, operation.to),
-      }),
-    })
-  }
-
   switch (operation.target.kind) {
-    case 'lane': {
-      const lanes = reordered(
-        definition.lanes,
+    case 'region': {
+      const regions = reordered(
+        definition.regions,
         operation.target,
         operation.from,
         operation.to,
       )
-      return lanes ? withDefinition(config, { ...definition, lanes }) : undefined
+      return regions ? withDefinition(config, { ...definition, regions }) : undefined
     }
     case 'fabric': {
       const fabrics = reordered(
@@ -440,33 +350,14 @@ const removeArtefact = (
 ): InfoschematicConfig | undefined => {
   const definition = config.infoschematic
   switch (operation.target.kind) {
-    case 'lane': {
-      const index = definition.lanes.findIndex((lane) =>
-        matchesTarget(lane, operation.target),
+    case 'region': {
+      const index = definition.regions.findIndex((region) =>
+        matchesTarget(region, operation.target),
       )
       if (index < 0) return undefined
       return withDefinition(config, {
         ...definition,
-        lanes: definition.lanes.filter((_, candidate) => candidate !== index),
-      })
-    }
-    case 'zone': {
-      const target = operation.target as SelectionFor<'zone'>
-      const laneIndex = definition.lanes.findIndex(
-        (lane) => lane.id === target.laneId,
-      )
-      const lane = definition.lanes[laneIndex]
-      if (!lane) return undefined
-      const zoneIndex = lane.zones.findIndex((zone) =>
-        matchesTarget(zone, operation.target),
-      )
-      if (zoneIndex < 0) return undefined
-      return withDefinition(config, {
-        ...definition,
-        lanes: replaceAt(definition.lanes, laneIndex, {
-          ...lane,
-          zones: lane.zones.filter((_, candidate) => candidate !== zoneIndex),
-        }),
+        regions: definition.regions.filter((_, candidate) => candidate !== index),
       })
     }
     case 'fabric': {
@@ -558,34 +449,16 @@ const replaceProperties = (
   const definition = config.infoschematic
   const replacement = cloneSerialisable(operation.value)
 
-  if (operation.target.kind === 'zone') {
-    const target = operation.target as SelectionFor<'zone'>
-    const laneIndex = definition.lanes.findIndex(
-      (lane) => lane.id === target.laneId,
-    )
-    const lane = definition.lanes[laneIndex]
-    if (!lane) return undefined
-    const index = lane.zones.findIndex((zone) => matchesTarget(zone, operation.target))
-    if (index < 0) return undefined
-    return withDefinition(config, {
-      ...definition,
-      lanes: replaceAt(definition.lanes, laneIndex, {
-        ...lane,
-        zones: replaceAt(lane.zones, index, replacement as ZoneConfig),
-      }),
-    })
-  }
-
   switch (operation.target.kind) {
-    case 'lane': {
-      const index = definition.lanes.findIndex((value) =>
+    case 'region': {
+      const index = definition.regions.findIndex((value) =>
         matchesTarget(value, operation.target),
       )
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            lanes: replaceAt(definition.lanes, index, replacement as LaneConfig),
+            regions: replaceAt(definition.regions, index, replacement as RegionConfig),
           })
     }
     case 'fabric': {
