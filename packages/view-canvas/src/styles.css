@@ -28,39 +28,42 @@
 }
 
 .infoschematic-svg.surface-neutral .infoschematic-region-frame {
-  stroke: var(--infoschematic-canvas-output-lane-stroke);
+  stroke: var(--infoschematic-canvas-output-region-stroke);
 }
 
-.infoschematic-svg.surface-neutral .infoschematic-zone-label,
-.infoschematic-svg.surface-neutral .infoschematic-group text {
+.infoschematic-svg.surface-neutral .infoschematic-region-label {
   fill: var(--infoschematic-canvas-output-text-muted);
 }
 
-.infoschematic-zone-label {
-  fill: var(--infoschematic-canvas-text-zone);
+/* An internal label sets down inside the region and reads quietly against its
+   fill; a boundary-mounted label sits on the frame line over the backdrop the
+   notch exposes, so it takes the frame's brighter voice. */
+.infoschematic-region-label {
+  fill: var(--infoschematic-canvas-text-region);
   font: 600 12px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.5px;
 }
 
-/* Ink follows the Zone fill's own luminance so both renderers agree. */
-.infoschematic-zone-label text[data-ink="dark"] {
+[data-label-treatment="notched"] .infoschematic-region-label {
+  fill: #9ed9ff;
+  font: 600 13px var(--infoschematic-canvas-text-code-family);
+  letter-spacing: 1.6px;
+}
+
+/* Ink follows the Region fill's own luminance so both renderers agree. */
+.infoschematic-svg .infoschematic-region-label[data-ink="dark"] {
   fill: var(--infoschematic-canvas-output-text-muted);
 }
 
-.infoschematic-zone-label text[data-ink="light"] {
+.infoschematic-svg .infoschematic-region-label[data-ink="light"] {
   fill: var(--infoschematic-canvas-output-text-muted-inverse);
 }
 
 /* Fill stays separate from the shared frame path so a notched border does not
    punch a gap through the region surface. */
-.infoschematic-lane-fill {
-  fill: var(--infoschematic-canvas-surfaces-lane-fill);
-  pointer-events: none;
-}
-
 .infoschematic-region-frame {
   fill: none;
-  stroke: var(--infoschematic-canvas-surfaces-lane-stroke);
+  stroke: var(--infoschematic-canvas-surfaces-region-stroke);
   stroke-width: 1.5px;
 }
 
@@ -74,15 +77,9 @@
 }
 
 /* Region frames never swallow clicks intended for content beneath them. Design
-   selection opts a Lane frame back in through the more-specific rule below. */
-.infoschematic-group .infoschematic-region-frame {
+   selection opts a Region frame back in through the more-specific rule below. */
+.infoschematic-region .infoschematic-region-frame {
   pointer-events: none;
-}
-
-.infoschematic-group text {
-  fill: #9ed9ff;
-  font: 600 13px var(--infoschematic-canvas-text-code-family);
-  letter-spacing: 1.6px;
 }
 
 .fabric-shell {
@@ -136,12 +133,11 @@
   pointer-events: auto;
 }
 
-.infoschematic-svg.editing .infoschematic-group.artefact-selectable,
-.infoschematic-svg.editing .infoschematic-zone.artefact-selectable {
+.infoschematic-svg.editing .infoschematic-region.artefact-selectable {
   pointer-events: auto;
 }
 
-.infoschematic-svg.editing .infoschematic-group.artefact-selectable > path {
+.infoschematic-svg.editing .infoschematic-region.artefact-selectable > path {
   pointer-events: stroke;
 }
 
@@ -157,7 +153,7 @@
   filter: drop-shadow(0 0 7px color-mix(in srgb, var(--infoschematic-canvas-selection-selected) 75%, transparent));
 }
 
-.infoschematic-svg.editing .infoschematic-zone.selected > rect,
+.infoschematic-svg.editing .infoschematic-region.selected > rect,
 .infoschematic-svg.editing .infoschematic-graphic.selected .fabric-shell {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
@@ -363,17 +359,14 @@
   );
 }
 
-/* A lane's legend and a zone's heading are text, so the glow is a text shadow.
+/* A region's heading is text, so the glow is a text shadow.
    Geography is pointed at the same way a component is; only dragging differs. */
-.infoschematic-svg .lane-selectable.pointed,
-.infoschematic-svg .zone-selectable.pointed,
-.infoschematic-svg.editing .lane-selectable.selected,
-.infoschematic-svg.editing .zone-selectable.selected {
+.infoschematic-svg .region-selectable.pointed,
+.infoschematic-svg.editing .region-selectable.selected {
   text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
 }
 
-.infoschematic-svg .lane-selectable.pointed,
-.infoschematic-svg .zone-selectable.pointed {
+.infoschematic-svg .region-selectable.pointed {
   fill: var(--infoschematic-canvas-text-strong);
 }
 
@@ -391,7 +384,7 @@
 }
 
 /* The socket the card drops into: the rim is what is seen, so the outline
-   carries it and the fill only separates the recess from the lane behind. */
+   carries it and the fill only separates the recess from the region behind. */
 .adapter-socket {
   fill: var(--infoschematic-canvas-surfaces-graphic-fallback-fill);
   stroke: var(--infoschematic-canvas-surfaces-graphic-fallback-stroke);
@@ -512,7 +505,7 @@
 }
 
 /* Sits behind everything else on the Infoschematic, transparent rather than absent, so
-   a click only ever reaches it once every card, zone and line drawn above it
+   a click only ever reaches it once every card, region and line drawn above it
    has been missed - which is what makes an empty Infoschematic clickable to clear the
    selection without this having to know what else is on screen. */
 .infoschematic-backdrop {
@@ -537,14 +530,13 @@
   stroke-width: 3px;
 }
 
-.lane-selectable {
+/* A region is geography rather than a component - its label is selectable so
+   the region can be picked without aiming at its frame line. */
+.region-selectable {
   cursor: pointer;
 }
 
-/* A zone is geography rather than a component - selectable so its position can
-   be read, never draggable, which is why there is no .selectable variant here. */
-.infoschematic-svg.editing .zone-selectable {
-  cursor: pointer;
+.infoschematic-svg.editing .region-selectable {
   pointer-events: auto;
 }
 .infoschematic-svg.editing .audit-flow.selected rect {
@@ -647,8 +639,8 @@
 
 /*
 /* The canvas's own edge, drawn whenever the editor is open regardless of
-   whether the grid is switched on, and distinct from the lane panels inside
-   it - a dragged card runs out of room here, not at a lane's rounded corner. */
+   whether the grid is switched on, and distinct from the region panels inside
+   it - a dragged card runs out of room here, not at a region's rounded corner. */
 .canvas-edge {
   fill: none;
   pointer-events: none;
@@ -664,7 +656,7 @@
 
 .infoschematic-grid-line {
   fill: none;
-  stroke: var(--infoschematic-canvas-output-lane-stroke);
+  stroke: var(--infoschematic-canvas-output-region-stroke);
   stroke-width: var(--infoschematic-canvas-geometry-grid-minor-stroke-width);
 }
 
@@ -673,7 +665,7 @@
 }
 
 .infoschematic-svg.surface-blueprint .infoschematic-grid-line {
-  stroke: var(--infoschematic-canvas-surfaces-lane-stroke);
+  stroke: var(--infoschematic-canvas-surfaces-region-stroke);
 }
 
 .infoschematic-authored-grid {

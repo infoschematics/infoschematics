@@ -250,8 +250,8 @@ export const renderInfoschematicSvg = (
   if (visualTreatment.grid !== 'none') {
     const gridStroke =
       visualTreatment.surface === 'blueprint'
-        ? canvasTokens.surfaces.laneStroke
-        : canvasTokens.output.laneStroke
+        ? canvasTokens.surfaces.regionStroke
+        : canvasTokens.output.regionStroke
     const minorPattern = [
       `    <pattern${attributes([
         ['height', canvasTokens.geometry.gridSize],
@@ -318,97 +318,36 @@ export const renderInfoschematicSvg = (
     )
   }
 
-  for (const lane of runtime.infoschematicLanes) {
-    for (const zone of lane.zones) {
-      const box = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
-      const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
-      const geometry = regionGeometry({
-        box,
-        label: zone.label,
-        treatment,
-      })
-      const content = [
+  for (const region of runtime.infoschematicRegions) {
+    const treatment = resolveRegionTreatment(region)
+    const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+    // A boundary-mounted label sits over the backdrop the notch exposes,
+    // not the fill, so only a plain label takes its ink from the fill.
+    const ink =
+      region.fill && geometry.label && treatment.labelTreatment === 'plain'
+        ? resolveReadableInk(region.fill)
+        : null
+    const content: string[] = []
+    if (region.fill) {
+      content.push(
         line(2, 'rect', [
-          ['class', 'infoschematic-zone'],
-          ['data-id', zone.id],
-          ['fill', zone.fill],
-          ['height', box.height],
-          ['width', box.width],
-          ['x', box.x],
-          ['y', box.y],
+          ['class', 'infoschematic-region-fill'],
+          ['fill', region.fill],
+          ['height', region.box.height],
+          ['rx', region.box.radius ?? canvasTokens.geometry.cornerRadius],
+          ['width', region.box.width],
+          ['x', region.box.x],
+          ['y', region.box.y],
         ]),
-      ]
-      if (geometry.outline) {
-        content.push(
-          line(2, 'path', [
-            ['class', 'infoschematic-zone-frame'],
-            ['d', geometry.outline],
-            ['fill', 'none'],
-            ['stroke', canvasTokens.output.laneStroke],
-            [
-              'stroke-dasharray',
-              treatment.frame === 'dashed'
-                ? canvasTokens.surfaces.regionDash
-                : treatment.frame === 'dotted'
-                  ? canvasTokens.surfaces.regionDot
-                  : undefined,
-            ],
-            ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
-          ]),
-        )
-      }
-      if (geometry.label) {
-        const zoneInk = resolveReadableInk(zone.fill)
-        content.push(
-          line(
-            2,
-            'text',
-            [
-              ['class', 'infoschematic-zone-label'],
-              ['data-ink', zoneInk],
-              ['dominant-baseline', geometry.label.dominantBaseline],
-              ['fill', zoneInk === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted],
-              ['font-family', canvasTokens.output.fontFamily],
-              ['font-size', canvasTokens.output.metadataFontSize],
-              ['lengthAdjust', geometry.label.length === null ? undefined : 'spacingAndGlyphs'],
-              ['text-anchor', geometry.label.textAnchor],
-              ['textLength', geometry.label.length ?? undefined],
-              ['x', geometry.label.x],
-              ['y', geometry.label.y],
-            ],
-            xmlText(zone.label.toUpperCase()),
-          ),
-        )
-      }
-      body.push(
-        group(
-          1,
-          [
-            ['aria-label', `Zone ${zone.label}`],
-            ['class', 'infoschematic-zone-region'],
-            ['data-frame-treatment', treatment.frame],
-            ['data-id', zone.id],
-            ['data-label-placement', treatment.label ?? 'none'],
-            ['data-label-treatment', treatment.labelTreatment],
-          ],
-          content,
-        ).join('\n'),
       )
     }
-    const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
-    const geometry = regionGeometry({
-      box: { height: lane.panel.height, width: lane.panel.width, x: lane.panel.x, y: lane.panel.y },
-      label: lane.label,
-      treatment,
-    })
-    const content: string[] = []
     if (geometry.outline) {
       content.push(
         line(2, 'path', [
-          ['class', 'infoschematic-lane'],
+          ['class', 'infoschematic-region-frame'],
           ['d', geometry.outline],
           ['fill', 'none'],
-          ['stroke', canvasTokens.output.laneStroke],
+          ['stroke', canvasTokens.output.regionStroke],
           [
             'stroke-dasharray',
             treatment.frame === 'dashed'
@@ -418,6 +357,7 @@ export const renderInfoschematicSvg = (
                 : undefined,
           ],
           ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
+          ['stroke-opacity', treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity],
         ]),
       )
     }
@@ -427,9 +367,19 @@ export const renderInfoschematicSvg = (
           2,
           'text',
           [
-            ['class', 'infoschematic-lane-label'],
+            ['class', 'infoschematic-region-label'],
+            ['data-ink', ink ?? undefined],
+            [
+              'fill',
+              ink !== null
+                ? ink === 'light'
+                  ? canvasTokens.output.textMutedInverse
+                  : canvasTokens.output.textMuted
+                : visualTreatment.surface === 'blueprint'
+                  ? canvasTokens.text.muted
+                  : canvasTokens.output.textMuted,
+            ],
             ['dominant-baseline', geometry.label.dominantBaseline],
-            ['fill', visualTreatment.surface === 'blueprint' ? canvasTokens.text.muted : canvasTokens.output.textMuted],
             ['font-family', canvasTokens.output.fontFamily],
             ['font-size', canvasTokens.output.metadataFontSize],
             ['lengthAdjust', geometry.label.length === null ? undefined : 'spacingAndGlyphs'],
@@ -438,7 +388,7 @@ export const renderInfoschematicSvg = (
             ['x', geometry.label.x],
             ['y', geometry.label.y],
           ],
-          xmlText(lane.label.toUpperCase()),
+          xmlText(region.label.toUpperCase()),
         ),
       )
     }
@@ -446,10 +396,10 @@ export const renderInfoschematicSvg = (
       group(
         1,
         [
-          ['aria-label', `Lane ${lane.label}`],
-          ['class', 'infoschematic-lane-region'],
+          ['aria-label', `Region ${region.label}`],
+          ['class', 'infoschematic-region'],
           ['data-frame-treatment', treatment.frame],
-          ['data-id', lane.id],
+          ['data-id', region.id],
           ['data-label-placement', treatment.label ?? 'none'],
           ['data-label-treatment', treatment.labelTreatment],
         ],

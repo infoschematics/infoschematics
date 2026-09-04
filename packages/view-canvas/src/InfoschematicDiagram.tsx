@@ -40,9 +40,7 @@ type MovableArtefactSelection = Exclude<ArtefactSelection, { kind: 'flow' }>
 type ResizeAxes = Readonly<{ height: boolean; width: boolean }>
 
 const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
-  left?.kind === right.kind &&
-  left.id === right.id &&
-  (left.kind !== 'zone' || (right.kind === 'zone' && left.laneId === right.laneId))
+  left?.kind === right.kind && left.id === right.id
 
 const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
   const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
@@ -265,10 +263,10 @@ export function InfoschematicDiagram({
     infoschematicFlowIsVisible,
     infoschematicFlows,
     infoschematicInterfaceById,
-    infoschematicLanes,
     infoschematicLayout,
     infoschematicPlaceables,
     infoschematicPortAudit,
+    infoschematicRegions,
     infoschematicRegisterWith,
     infoschematicScopes,
     infoschematicViewBox,
@@ -1207,7 +1205,7 @@ export function InfoschematicDiagram({
       <title>{config.title}</title>
       {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
       {/* Sits behind everything else drawn onto the Infoschematic, so it is only ever
-          reached once a click has missed every card, zone, and line above it -
+          reached once a click has missed every card, region, and line above it -
           which is what makes "clicking empty Infoschematic clears the selection" true
           without this having to know what else is on screen. */}
       <rect
@@ -1292,148 +1290,66 @@ export function InfoschematicDiagram({
         />
       ) : null}
 
-      {infoschematicLanes.map((lane) => (
-        <g key={lane.id}>
-          <rect
-            className="infoschematic-lane-fill"
-            height={lane.panel.height}
-            rx={lane.panel.radius}
-            width={lane.panel.width}
-            x={lane.panel.x}
-            y={lane.panel.y}
-          />
-          {lane.zones.map((zone) => {
-            const selection = {
-              code: null,
-              geometry: 'zone',
-              id: zone.id,
-              kind: 'zone',
-              laneId: lane.id,
-            } as const satisfies ArtefactSelection
-            const legacyKey = `zone:${lane.id}:${zone.id}`
-            const bounds = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
-            const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
-            const geometry = regionGeometry({ box: bounds, label: zone.label, treatment })
-            return (
-              // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Zone is keyboard operable in Design.
-              <g
-                aria-label={`Zone ${zone.label}`}
-                className={`infoschematic-zone artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
-                data-artefact-id={selection.id}
-                data-artefact-kind={selection.kind}
-                data-frame-treatment={treatment.frame}
-                data-label-placement={treatment.label ?? 'none'}
-                data-label-treatment={treatment.labelTreatment}
-                key={zone.id}
-                onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
-                onPointerDown={
-                  editing
-                    ? dragArtefact(selection, legacyKey, { x: zone.x + zone.width / 2, y: lane.panel.y + lane.panel.height / 2 }, { x: true, y: false })
-                    : undefined
-                }
-                role={editing ? 'button' : undefined}
-                tabIndex={editing ? 0 : undefined}
-              >
-                <rect
-                  className="infoschematic-region-fill"
-                  fill={zone.fill}
-                  height={lane.panel.height}
-                  rx={treatment.frame === 'none' ? undefined : cornerRadius}
-                  width={zone.width}
-                  x={zone.x}
-                  y={lane.panel.y}
-                />
-                {geometry.outline ? <path className="infoschematic-region-frame" d={geometry.outline} /> : null}
-                {editing && artefactSelected(selection, legacyKey) ? (
-                  <>
-                    <ResizeHandle axes={{ height: false, width: true }} bounds={bounds} label={zone.label} selection={selection} />
-                    <ArtefactActions at={{ x: zone.x + zone.width - 48, y: lane.panel.y + 12 }} label={zone.label} selection={selection} />
-                  </>
-                ) : null}
-              </g>
-            )
-          })}
-        </g>
-      ))}
-
-      <g className="infoschematic-zone-label">
-        {infoschematicLanes.flatMap((lane) =>
-          lane.zones.map((zone) => {
-            const selection = {
-              code: null,
-              geometry: 'zone',
-              id: zone.id,
-              kind: 'zone',
-              laneId: lane.id,
-            } as const satisfies ArtefactSelection
-            const legacyKey = `zone:${lane.id}:${zone.id}`
-            const bounds = { height: lane.panel.height, width: zone.width, x: zone.x, y: lane.panel.y }
-            const treatment = resolveRegionTreatment('zone', zone.label, zone.appearance, lane.legend)
-            const label = regionGeometry({ box: bounds, label: zone.label, treatment }).label
-            if (!label) return null
-            return (
-              <text
-                className={`${editing && (onSelect || onArtefactSelect) ? 'zone-selectable' : ''}${
-                  artefactSelected(selection, legacyKey) ? ' selected' : ''
-                }${hovered === legacyKey ? ' pointed' : ''}`}
-                data-ink={resolveReadableInk(zone.fill)}
-                dominantBaseline={label.dominantBaseline}
-                key={`${lane.id}-${zone.id}`}
-                lengthAdjust={label.length === null ? undefined : 'spacingAndGlyphs'}
-                onPointerDown={editing ? () => selectArtefact(selection, legacyKey) : undefined}
-                onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
-                onPointerLeave={onHover ? () => onHover(null) : undefined}
-                textAnchor={label.textAnchor}
-                textLength={label.length ?? undefined}
-                x={label.x}
-                y={label.y}
-              >
-                {zone.label.toUpperCase()}
-              </text>
-            )
-          }),
-        )}
-      </g>
-
-      {infoschematicLanes.map((lane) => {
+      {infoschematicRegions.map((region) => {
         const selection = {
           code: null,
-          geometry: 'lane',
-          id: lane.id,
-          kind: 'lane',
+          geometry: 'box',
+          id: region.id,
+          kind: 'region',
         } as const satisfies ArtefactSelection
-        const legacyKey = `lane:${lane.id}`
-        const bounds = { height: lane.panel.height, width: lane.panel.width, x: lane.panel.x, y: lane.panel.y }
-        const treatment = resolveRegionTreatment('lane', lane.label, lane.appearance, lane.legend)
-        const geometry = regionGeometry({ box: bounds, label: lane.label, treatment })
+        const legacyKey = `region:${region.id}`
+        const treatment = resolveRegionTreatment(region)
+        const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+        // A boundary-mounted label sits over the backdrop the notch exposes,
+        // not the fill, so only a plain label takes its ink from the fill.
+        const ink =
+          region.fill && geometry.label && treatment.labelTreatment === 'plain'
+            ? resolveReadableInk(region.fill)
+            : null
         return (
-          // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the Lane outline is keyboard operable in Design.
+          // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Region is keyboard operable in Design.
           <g
-            aria-label={`Lane ${lane.label}`}
-            className={`infoschematic-group lane-${lane.id} artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+            aria-label={`Region ${region.label}`}
+            className={`infoschematic-region artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
             data-artefact-id={selection.id}
             data-artefact-kind={selection.kind}
             data-frame-treatment={treatment.frame}
             data-label-placement={treatment.label ?? 'none'}
             data-label-treatment={treatment.labelTreatment}
-            key={`panel-${lane.id}`}
+            key={region.id}
             onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
             onPointerDown={
               editing
-                ? dragArtefact(selection, legacyKey, { x: lane.panel.x + lane.panel.width / 2, y: lane.panel.y + lane.panel.height / 2 }, { x: false, y: true })
+                ? dragArtefact(selection, legacyKey, { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 }, { x: true, y: true })
                 : undefined
             }
             role={editing ? 'button' : undefined}
             tabIndex={editing ? 0 : undefined}
           >
-            {geometry.outline ? <path className="infoschematic-region-frame" d={geometry.outline} /> : null}
-            {/* The zones tile their lane completely, so the legend is the only
-                part of a lane a reader can aim at without hitting a zone. */}
+            {region.fill ? (
+              <rect
+                className="infoschematic-region-fill"
+                fill={region.fill}
+                height={region.box.height}
+                rx={region.box.radius ?? cornerRadius}
+                width={region.box.width}
+                x={region.box.x}
+                y={region.box.y}
+              />
+            ) : null}
+            {geometry.outline ? (
+              <path
+                className="infoschematic-region-frame"
+                d={geometry.outline}
+                strokeOpacity={treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity}
+              />
+            ) : null}
             {geometry.label ? (
               <text
-                className={`${editing && (onSelect || onArtefactSelect) ? 'lane-selectable' : ''}${
+                className={`infoschematic-region-label${editing && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
                   artefactSelected(selection, legacyKey) ? ' selected' : ''
                 }${hovered === legacyKey ? ' pointed' : ''}`}
+                data-ink={ink ?? undefined}
                 dominantBaseline={geometry.label.dominantBaseline}
                 lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
                 onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
@@ -1443,15 +1359,15 @@ export function InfoschematicDiagram({
                 x={geometry.label.x}
                 y={geometry.label.y}
               >
-                {lane.label.toUpperCase()}
+                {region.label.toUpperCase()}
               </text>
             ) : null}
             {editing && artefactSelected(selection, legacyKey) ? (
               <>
-                <ResizeHandle axes={{ height: true, width: false }} bounds={bounds} label={lane.label} selection={selection} />
+                <ResizeHandle axes={{ height: true, width: true }} bounds={region.box} label={region.label} selection={selection} />
                 <ArtefactActions
-                  at={{ x: lane.panel.x + lane.panel.width - 48, y: lane.panel.y + 12 }}
-                  label={lane.label}
+                  at={{ x: region.box.x + region.box.width - 48, y: region.box.y + 12 }}
+                  label={region.label}
                   selection={selection}
                 />
               </>
@@ -1462,7 +1378,7 @@ export function InfoschematicDiagram({
 
       {/* The canvas states its own edge, present whenever the editor is open
           regardless of whether the grid is switched on, so a card dragged
-          towards it has something other than the lane panels to read against. */}
+          towards it has something other than the region panels to read against. */}
       {editing ? (
         <rect
           className="canvas-edge"
