@@ -4,10 +4,10 @@ area: SITE
 title: Homepage real rendering
 theme: site-experience
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 11d6a0692eb215649375199c5409291565e11f55
 ---
 
 ## Goal
@@ -28,10 +28,10 @@ The homepage renders both treatments side by side under `.comparison-lane` for c
 
 ## Steps
 
-- [ ] Replace the `.comparison-lane` markup in `apps/site/src/App.tsx` with the shared-renderer output as the sole hero visual; drop the `bespoke` `<article>`, the now-unused `stages`/`connectorLabels`/`FlowConnector`/`BrandMark`-adjacent bespoke pieces, and the `data-treatment` comparison scaffolding.
-- [ ] Decide the fate of the "Trace the idea" `signal-button` and its `aria-live` announcement now that there is no bespoke flow-map to pulse — remove it or repoint it at a no-animation acknowledgement consistent with the Boundary.
-- [ ] Remove the dead CSS selectors listed in Current state from `apps/site/src/styles.css`.
-- [ ] Update `apps/site/src/App.test.tsx` to assert the single real-rendered hero (drop the bespoke/`data-treatment` assertions, keep the shared-SVG assertions).
+- [x] Replace the `.comparison-lane` markup in `apps/site/src/App.tsx` with the shared-renderer output as the sole hero visual; drop the `bespoke` `<article>`, the now-unused `stages`/`connectorLabels`/`FlowConnector`/`BrandMark`-adjacent bespoke pieces, and the `data-treatment` comparison scaffolding.
+- [x] Decide the fate of the "Trace the idea" `signal-button` and its `aria-live` announcement now that there is no bespoke flow-map to pulse — remove it or repoint it at a no-animation acknowledgement consistent with the Boundary.
+- [x] Remove the dead CSS selectors listed in Current state from `apps/site/src/styles.css`.
+- [x] Update `apps/site/src/App.test.tsx` to assert the single real-rendered hero (drop the bespoke/`data-treatment` assertions, keep the shared-SVG assertions).
 
 ## Files touched
 
@@ -64,6 +64,40 @@ None.
 ### Roadmap
 
 Removes the homepage-default-switch bullet from `TOOL-014`'s Shaping once this item lands, so that item no longer bundles it.
+
+## Review
+
+### Delivered
+
+All four steps delivered within the stated boundary: no homepage animation added, the "Trace the idea" signal button was removed rather than repointed (there is no bespoke flow-map left to pulse), the `examples/is-system` definition is unchanged, and `/examples/system/` / `/examples/infoschematics/` are untouched. Baseline: `11d6a0692eb215649375199c5409291565e11f55`.
+
+### Summary of changes
+
+- `apps/site/src/App.tsx` — removed the bespoke `<article>` panel (`stages`, `connectorLabels`, `FlowConnector`, the `signal-button` and its `aria-live` announcement, the `useState` import) and the `.comparison-lane`/`data-treatment` scaffolding. The shared-renderer `<img>` is now the sole hero visual, placed directly inside `.hero` alongside `.hero__copy`.
+- `apps/site/src/App.test.tsx` — dropped the bespoke/`data-treatment` assertions; added negative assertions (`comparison-lane`, `data-treatment`, `system-card`, `flow-connector` absent) alongside the retained shared-SVG assertions.
+- `apps/site/src/styles.css` — removed `.signal-button*`, `.comparison-lane`, `.comparison-treatment*`, `.instrument*`, `.stage*`, `.flow-map*`, `.system-card*`, `.flow-connector*`, `.legend-line`, the `trace-signal`/`reduced-signal` keyframes, and their responsive-media-query variants (502 lines removed). `.shared-preview*` rules and the `prefers-reduced-motion` scroll-behaviour rule were kept.
+
+No deviations from the approved plan.
+
+### Verification
+
+- `bunx vitest run apps/site/src/App.test.tsx` — 5/5 passed (scoped, before the full run).
+- `bun run test` — 331/331 passed across all 51 test files.
+- `bun run ki:verify:typecheck` — clean across every workspace, including `apps/site`.
+- `bun run --cwd apps/site build` — production build succeeds (pre-existing, unrelated chunk-size advisory only).
+- `grep` confirmed no remaining references to any removed CSS selector.
+
+### Outstanding concerns
+
+A live rendered-pixel visual check of `/` could not be performed this session: the sandboxed browser tool refuses all `localhost` and private-IP navigation (`Access to private/internal IP address ... is not allowed`), and no headless-browser tooling (Playwright/Puppeteer) is installed in the repo to work around it. The SSR-equivalent markup is asserted byte-for-byte by `App.test.tsx`, and the production build succeeds, but nobody has looked at the rendered page. A human visual check of `/` before acceptance is recommended.
+
+### Post-change review
+
+Goal met: the homepage hero is now the real shared-renderer output of `examples/is-system`, with the bespoke comparison panel fully retired. Scope stayed within the stated boundary — no animation, no signal wiring, no changes to the interactive example routes. Regression risk is low: the change is a deletion-heavy simplification with full test and typecheck coverage; the one gap is the unverified visual render, called out above. Ready for review pending that visual check.
+
+### Mini recap
+
+Delivered: `apps/site` homepage now renders only the shared-renderer SVG hero; the bespoke instrument/flow-map panel and its CSS are gone. Verification: full test suite (331/331), full typecheck (clean), production build (succeeds). Outstanding: no live visual check possible in this sandboxed session — recommend a human check of `/` before closing. No learnings proposed for promotion beyond this record.
 
 ## Discussion
 
