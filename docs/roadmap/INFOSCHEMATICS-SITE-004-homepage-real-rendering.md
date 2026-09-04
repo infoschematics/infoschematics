@@ -4,7 +4,7 @@ area: SITE
 title: Homepage real rendering
 theme: site-experience
 horizon: next
-status: draft
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
