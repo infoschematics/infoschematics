@@ -3,7 +3,7 @@ import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import './styles.css'
 
 const sharedPreviewSource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  renderInfoschematicSvg(systemExample, { annotations: true }),
+  renderInfoschematicSvg(systemExample, { annotations: true })
 )}`
 
 function BrandMark() {

@@ -1,19 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react'
-import type { FlowSignal } from '@infoschematics/view-model/signals'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import type { FlowSignal } from '@infoschematics/view-model/signals'
+import { type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { advanceFlowSignalAnnouncement, type FlowSignalAnnouncement, reconcileFlowSignals } from './flow-signals.ts'
 import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
 import {
   defineInfoschematicRenderers,
-  InfoschematicRenderersContext,
   type InfoschematicRenderers,
+  InfoschematicRenderersContext
 } from './renderers.tsx'
 import { InfoschematicContext, useInfoschematic } from './runtime-context.tsx'
-import {
-  advanceFlowSignalAnnouncement,
-  type FlowSignalAnnouncement,
-  reconcileFlowSignals,
-} from './flow-signals.ts'
 
 type DiagramProps = ComponentProps<typeof InfoschematicDiagram>
 
@@ -41,7 +37,7 @@ function CanvasContent({
   const runtime = useInfoschematic()
   const allScopes = useMemo(
     () => new Set(runtime.infoschematicScopes.map((scope) => scope.id)),
-    [runtime.infoschematicScopes],
+    [runtime.infoschematicScopes]
   )
   const scopes = visibleScopes ?? allScopes
   const shownFlows = useMemo(() => {
@@ -59,7 +55,7 @@ function CanvasContent({
     const seenSignals = new Set<string>()
     initialSignals.current = {
       ...reconcileFlowSignals([], signals, shownFlowIds, seenSignals),
-      seenSignals,
+      seenSignals
     }
   }
   const seenSignals = useRef(initialSignals.current.seenSignals)
@@ -83,12 +79,7 @@ function CanvasContent({
       aria-label={`${runtime.config.title} Infoschematic`}
       className={className ? `infoschematic ${className}` : 'infoschematic'}
     >
-      <InfoschematicDiagram
-        {...diagram}
-        flows={shownFlows}
-        signals={activeSignals}
-        visibleScopes={scopes}
-      />
+      <InfoschematicDiagram {...diagram} flows={shownFlows} signals={activeSignals} visibleScopes={scopes} />
       <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
         {announcement ? `Signal update ${announcement.revision}. ` : ''}
         {announcement?.signals

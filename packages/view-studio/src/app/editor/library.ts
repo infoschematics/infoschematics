@@ -4,10 +4,10 @@ import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { Box, Point } from '@infoschematics/domain-model/geometry'
 import type { PortCounts, PortId } from '@infoschematics/domain-model/ports'
 import {
-  createArtefactOperation,
-  defineArtefactSelection,
   type ArtefactKind,
   type CreateArtefactOperation,
+  createArtefactOperation,
+  defineArtefactSelection
 } from '@infoschematics/view-model/editable'
 
 export type LibraryTemplateMetadata = Readonly<{
@@ -54,7 +54,7 @@ export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
     metadata: {
       description: 'A service-shaped Card with ports on both horizontal sides.',
       key: 'service-card',
-      label: 'Service card',
+      label: 'Service card'
     },
     seed: {
       kind: 'card',
@@ -62,15 +62,15 @@ export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
         detail: 'A service boundary',
         label: 'New service',
         placement: { box: { height: 80, width: 160 }, ports: { east: 1, west: 1 } },
-        services: ['service'],
-      },
-    },
+        services: ['service']
+      }
+    }
   },
   {
     metadata: {
       description: 'A bounded Fabric for infrastructure or platform detail.',
       key: 'platform-fabric',
-      label: 'Platform fabric',
+      label: 'Platform fabric'
     },
     seed: {
       kind: 'fabric',
@@ -78,22 +78,22 @@ export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
         appearance: {
           caption: 'Platform',
           properties: { emphasis: true },
-          renderer: 'fabric',
+          renderer: 'fabric'
         },
         detail: 'A platform boundary',
         label: 'New platform',
-        placement: { box: { height: 140, width: 240 }, ports: { east: 1, west: 1 } },
-      },
-    },
+        placement: { box: { height: 140, width: 240 }, ports: { east: 1, west: 1 } }
+      }
+    }
   },
   {
     metadata: {
       description: 'A directed orthogonal Flow between the selected endpoints.',
       key: 'directed-flow',
-      label: 'Directed flow',
+      label: 'Directed flow'
     },
-    seed: { kind: 'flow', value: { bidirectional: false, dashed: false } },
-  },
+    seed: { kind: 'flow', value: { bidirectional: false, dashed: false } }
+  }
 ])
 
 export type LibraryIdentity = Readonly<{ code: string; id: string }>
@@ -164,7 +164,9 @@ export const isValidLibraryFlowContext = (context: LibraryFlowContext | undefine
   }
   const points = routeFor(context)
   return (
-    isOrthogonalRoute(points) && samePoint(points[0] as Point, context.source.point) && samePoint(points.at(-1) as Point, context.target.point)
+    isOrthogonalRoute(points) &&
+    samePoint(points[0] as Point, context.source.point) &&
+    samePoint(points.at(-1) as Point, context.target.point)
   )
 }
 
@@ -173,9 +175,10 @@ const validIdentity = (identity: LibraryIdentity) => identity.code.trim() !== ''
 /** Materialises one domain-shaped value and its single committed View Model create operation. */
 export const instantiateLibraryTemplate = (
   template: LibraryTemplate,
-  context: LibraryContext,
+  context: LibraryContext
 ): LibraryCreateOperation | undefined => {
-  if (!Number.isFinite(context.at) || !Number.isFinite(context.box.x) || !Number.isFinite(context.box.y)) return undefined
+  if (!Number.isFinite(context.at) || !Number.isFinite(context.box.x) || !Number.isFinite(context.box.y))
+    return undefined
   if (template.seed.kind === 'flow' ? !isValidLibraryFlowContext(context.flow) : !context.scope.trim()) return undefined
   if (
     template.seed.kind !== 'flow' &&
@@ -199,7 +202,7 @@ export const instantiateLibraryTemplate = (
       source: flow.source.component,
       sourcePort: flow.source.port,
       target: flow.target.component,
-      targetPort: flow.target.port,
+      targetPort: flow.target.port
     }
     const target = defineArtefactSelection({ code: identity.code, geometry: 'route', id: identity.id, kind: 'flow' })
     return createArtefactOperation(target, value, context.at)
@@ -212,7 +215,7 @@ export const instantiateLibraryTemplate = (
       ...identity,
       placement: { ...seed.placement, box: { ...seed.placement.box, ...copy(context.box) } },
       scope: context.scope,
-      scopes: [context.scope],
+      scopes: [context.scope]
     }
     const target = defineArtefactSelection({ code: identity.code, geometry: 'box', id: identity.id, kind: 'card' })
     return createArtefactOperation(target, value, context.at)
@@ -224,14 +227,14 @@ export const instantiateLibraryTemplate = (
     ...identity,
     placement: { ...seed.placement, box: { ...seed.placement.box, ...copy(context.box) } },
     scope: context.scope,
-    scopes: [context.scope],
+    scopes: [context.scope]
   }
   const target = defineArtefactSelection({ code: identity.code, geometry: 'box', id: identity.id, kind: 'fabric' })
   return createArtefactOperation(target, value, context.at)
 }
 
 export const createLibraryIdentityAllocator = (
-  used: Readonly<{ codes?: Iterable<string>; ids?: Iterable<string> }> = {},
+  used: Readonly<{ codes?: Iterable<string>; ids?: Iterable<string> }> = {}
 ): LibraryIdentityAllocator => {
   const codes = new Set(used.codes)
   const ids = new Set(used.ids)

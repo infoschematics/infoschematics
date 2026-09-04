@@ -34,7 +34,7 @@ export type FlowSignalAnnouncement = Readonly<{
 export const advanceFlowSignalAnnouncement = (
   current: FlowSignalAnnouncement | undefined,
   acceptedSignals: readonly FlowSignal[],
-  activeSignals: readonly FlowSignal[],
+  activeSignals: readonly FlowSignal[]
 ): FlowSignalAnnouncement | undefined => {
   if (acceptedSignals.length > 0) {
     return { revision: (current?.revision ?? 0) + 1, signals: acceptedSignals }
@@ -51,7 +51,7 @@ export const reconcileFlowSignals = (
   current: readonly FlowSignal[],
   suppliedSignals: readonly FlowSignal[],
   shownFlowIds: ReadonlySet<string>,
-  seenSignals: Set<string>,
+  seenSignals: Set<string>
 ): FlowSignalReconciliation => {
   const uniqueCurrent = uniqueFlowSignals(current)
   const uniqueSupplied = uniqueFlowSignals(suppliedSignals)

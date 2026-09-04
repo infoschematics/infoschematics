@@ -5,7 +5,7 @@ import {
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
-  resolveVisualTreatment,
+  resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -49,6 +49,7 @@ type ResolvedFocus = {
 
 const xmlText = (value: string) =>
   value
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: deliberately strips XML-illegal control characters
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '\uFFFD')
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -81,10 +82,13 @@ const group = (depth: number, values: Attributes, children: readonly string[]) =
 const focusOf = (focus: FocusConfig | undefined, graphic?: string): ResolvedFocus => ({
   artefacts: new Set(focus?.artefacts ?? []),
   flows: new Set(focus?.flows ?? []),
-  graphics: new Set([...(focus?.graphics ?? []), ...(graphic ? [graphic] : [])]),
+  graphics: new Set([...(focus?.graphics ?? []), ...(graphic ? [graphic] : [])])
 })
 
-const resolveFocus = (config: InfoschematicConfig, selection: SvgSceneSelection | undefined): ResolvedFocus | undefined => {
+const resolveFocus = (
+  config: InfoschematicConfig,
+  selection: SvgSceneSelection | undefined
+): ResolvedFocus | undefined => {
   if (!selection) return undefined
 
   if (selection.kind === 'standalone') {
@@ -113,15 +117,15 @@ const resolveFocus = (config: InfoschematicConfig, selection: SvgSceneSelection 
     {
       artefacts: scene.focus?.artefacts ?? source?.focus.artefacts,
       flows: scene.focus?.flows ?? source?.focus.flows,
-      graphics: scene.focus?.graphics ?? source?.focus.graphics,
+      graphics: scene.focus?.graphics ?? source?.focus.graphics
     },
-    scene.graphic,
+    scene.graphic
   )
 }
 
 const memberIsVisible = (
   entry: { scopes?: readonly string[]; scopeRule?: 'all' | 'any' },
-  visibleScopes: ReadonlySet<string>,
+  visibleScopes: ReadonlySet<string>
 ) => {
   if (!entry.scopes) return true
   return entry.scopeRule === 'all'
@@ -132,13 +136,13 @@ const memberIsVisible = (
 const focusClass = (
   id: string,
   focused: ReadonlySet<string> | undefined,
-  unfocused: NonNullable<SvgVisibilityOptions['unfocused']>,
+  unfocused: NonNullable<SvgVisibilityOptions['unfocused']>
 ) => (focused && !focused.has(id) && unfocused === 'dim' ? ' is-unfocused' : '')
 
 const includedByFocus = (
   id: string,
   focused: ReadonlySet<string> | undefined,
-  unfocused: NonNullable<SvgVisibilityOptions['unfocused']>,
+  unfocused: NonNullable<SvgVisibilityOptions['unfocused']>
 ) => !focused || focused.has(id) || unfocused !== 'hide'
 
 /**
@@ -149,7 +153,7 @@ const includedByFocus = (
  */
 export const renderInfoschematicSvg = (
   config: InfoschematicConfig,
-  options: RenderInfoschematicSvgOptions = {},
+  options: RenderInfoschematicSvgOptions = {}
 ): string => {
   const definition = config.infoschematic
   const runtime = createInfoschematicRuntime(config)
@@ -168,22 +172,21 @@ export const renderInfoschematicSvg = (
 
   const cards = runtime.infoschematicCards.filter(
     (card) =>
-      runtime.infoschematicCardIsVisible(card, visibleScopes) &&
-      includedByFocus(card.id, focus?.artefacts, unfocused),
+      runtime.infoschematicCardIsVisible(card, visibleScopes) && includedByFocus(card.id, focus?.artefacts, unfocused)
   )
   const fabrics = runtime.infoschematicFabrics.filter(
     (fabric) =>
       runtime.infoschematicFabricIsVisible(fabric, visibleScopes) &&
-      includedByFocus(fabric.id, focus?.artefacts, unfocused),
+      includedByFocus(fabric.id, focus?.artefacts, unfocused)
   )
   const points = definition.points.filter(
-    (point) => memberIsVisible(point, visibleScopes) && includedByFocus(point.id, focus?.artefacts, unfocused),
+    (point) => memberIsVisible(point, visibleScopes) && includedByFocus(point.id, focus?.artefacts, unfocused)
   )
   const visibleFamilies = new Set(definition.flowFamilies.map((family) => family.id))
   const flows = runtime.infoschematicFlows.filter(
     (flow) =>
       runtime.infoschematicFlowIsVisible(flow, visibleFamilies, visibleScopes) &&
-      includedByFocus(flow.id, focus?.flows, unfocused),
+      includedByFocus(flow.id, focus?.flows, unfocused)
   )
   const graphics = definition.graphics.filter(
     (graphic) =>
@@ -191,7 +194,7 @@ export const renderInfoschematicSvg = (
       memberIsVisible(graphic, visibleScopes) &&
       (graphicVisibility === 'all'
         ? includedByFocus(graphic.id, focus?.graphics, unfocused)
-        : Boolean(focus?.graphics.has(graphic.id))),
+        : Boolean(focus?.graphics.has(graphic.id)))
   )
 
   const accessibleSummary = [
@@ -201,7 +204,7 @@ export const renderInfoschematicSvg = (
       ? `Cards: ${cards
           .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
           .join('; ')}`
-      : undefined,
+      : undefined
   ]
     .filter(Boolean)
     .join(' — ')
@@ -215,8 +218,8 @@ export const renderInfoschematicSvg = (
       ['height', viewBox.height],
       ['width', viewBox.width],
       ['x', viewBox.x],
-      ['y', viewBox.y],
-    ]),
+      ['y', viewBox.y]
+    ])
   )
 
   if (flows.length > 0) {
@@ -230,28 +233,22 @@ export const renderInfoschematicSvg = (
           ['markerWidth', 16],
           ['orient', 'auto-start-reverse'],
           ['refX', 12],
-          ['refY', 6],
+          ['refY', 6]
         ],
         [
-          line(
-            4,
-            'path',
-            [
-              ['d', 'M0 0 L0 12 L12 6 z'],
-              ['fill', family.color],
-            ],
-          ),
-        ],
-      ).join('\n'),
+          line(4, 'path', [
+            ['d', 'M0 0 L0 12 L12 6 z'],
+            ['fill', family.color]
+          ])
+        ]
+      ).join('\n')
     )
     body.push(['  <defs>', ...markers, '  </defs>'].join('\n'))
   }
 
   if (visualTreatment.grid !== 'none') {
     const gridStroke =
-      visualTreatment.surface === 'blueprint'
-        ? canvasTokens.surfaces.regionStroke
-        : canvasTokens.output.regionStroke
+      visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
     const patternId = `infoschematic-grid-${visualTreatment.grid}`
     const defs: string[] =
       visualTreatment.grid === 'dots'
@@ -260,15 +257,15 @@ export const renderInfoschematicSvg = (
               ['height', canvasTokens.geometry.gridSize],
               ['id', patternId],
               ['patternUnits', 'userSpaceOnUse'],
-              ['width', canvasTokens.geometry.gridSize],
+              ['width', canvasTokens.geometry.gridSize]
             ])}>`,
             line(3, 'circle', [
               ['cx', 0],
               ['cy', 0],
               ['fill', gridStroke],
-              ['r', canvasTokens.geometry.gridMinorStrokeWidth * 3],
+              ['r', canvasTokens.geometry.gridMinorStrokeWidth * 3]
             ]),
-            '    </pattern>',
+            '    </pattern>'
           ]
         : [
             ...(visualTreatment.grid === 'major-plus-minor'
@@ -277,45 +274,45 @@ export const renderInfoschematicSvg = (
                     ['height', canvasTokens.geometry.gridSize],
                     ['id', 'infoschematic-grid-minor'],
                     ['patternUnits', 'userSpaceOnUse'],
-                    ['width', canvasTokens.geometry.gridSize],
+                    ['width', canvasTokens.geometry.gridSize]
                   ])}>`,
                   line(3, 'path', [
                     [
                       'd',
-                      `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`,
+                      `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`
                     ],
                     ['fill', 'none'],
                     ['stroke', gridStroke],
-                    ['stroke-width', canvasTokens.geometry.gridMinorStrokeWidth],
+                    ['stroke-width', canvasTokens.geometry.gridMinorStrokeWidth]
                   ]),
-                  '    </pattern>',
+                  '    </pattern>'
                 ]
               : []),
             `    <pattern${attributes([
               ['height', canvasTokens.geometry.gridMajorSize],
               ['id', patternId],
               ['patternUnits', 'userSpaceOnUse'],
-              ['width', canvasTokens.geometry.gridMajorSize],
+              ['width', canvasTokens.geometry.gridMajorSize]
             ])}>`,
             ...(visualTreatment.grid === 'major-plus-minor'
               ? [
                   line(3, 'rect', [
                     ['fill', 'url(#infoschematic-grid-minor)'],
                     ['height', canvasTokens.geometry.gridMajorSize],
-                    ['width', canvasTokens.geometry.gridMajorSize],
-                  ]),
+                    ['width', canvasTokens.geometry.gridMajorSize]
+                  ])
                 ]
               : []),
             line(3, 'path', [
               [
                 'd',
-                `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`,
+                `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`
               ],
               ['fill', 'none'],
               ['stroke', gridStroke],
-              ['stroke-width', canvasTokens.geometry.gridMajorStrokeWidth],
+              ['stroke-width', canvasTokens.geometry.gridMajorStrokeWidth]
             ]),
-            '    </pattern>',
+            '    </pattern>'
           ]
     body.push(['  <defs>', ...defs, '  </defs>'].join('\n'))
     body.push(
@@ -325,8 +322,8 @@ export const renderInfoschematicSvg = (
         ['height', viewBox.height],
         ['width', viewBox.width],
         ['x', viewBox.x],
-        ['y', viewBox.y],
-      ]),
+        ['y', viewBox.y]
+      ])
     )
   }
 
@@ -336,9 +333,7 @@ export const renderInfoschematicSvg = (
     // A boundary-mounted label sits over the backdrop the notch exposes,
     // not the fill, so only a plain label takes its ink from the fill.
     const ink =
-      region.fill && geometry.label && treatment.labelTreatment === 'plain'
-        ? resolveReadableInk(region.fill)
-        : null
+      region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
     const content: string[] = []
     if (region.fill) {
       content.push(
@@ -349,8 +344,8 @@ export const renderInfoschematicSvg = (
           ['rx', region.box.radius ?? canvasTokens.geometry.cornerRadius],
           ['width', region.box.width],
           ['x', region.box.x],
-          ['y', region.box.y],
-        ]),
+          ['y', region.box.y]
+        ])
       )
     }
     if (geometry.outline) {
@@ -366,11 +361,11 @@ export const renderInfoschematicSvg = (
               ? canvasTokens.surfaces.regionDash
               : treatment.frame === 'dotted'
                 ? canvasTokens.surfaces.regionDot
-                : undefined,
+                : undefined
           ],
           ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
-          ['stroke-opacity', treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity],
-        ]),
+          ['stroke-opacity', treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity]
+        ])
       )
     }
     if (geometry.label) {
@@ -389,7 +384,7 @@ export const renderInfoschematicSvg = (
                   : canvasTokens.output.textMuted
                 : visualTreatment.surface === 'blueprint'
                   ? canvasTokens.text.muted
-                  : canvasTokens.output.textMuted,
+                  : canvasTokens.output.textMuted
             ],
             ['dominant-baseline', geometry.label.dominantBaseline],
             ['font-family', canvasTokens.output.fontFamily],
@@ -398,10 +393,10 @@ export const renderInfoschematicSvg = (
             ['text-anchor', geometry.label.textAnchor],
             ['textLength', geometry.label.length ?? undefined],
             ['x', geometry.label.x],
-            ['y', geometry.label.y],
+            ['y', geometry.label.y]
           ],
-          xmlText(region.label.toUpperCase()),
-        ),
+          xmlText(region.label.toUpperCase())
+        )
       )
     }
     body.push(
@@ -413,10 +408,10 @@ export const renderInfoschematicSvg = (
           ['data-frame-treatment', treatment.frame],
           ['data-id', region.id],
           ['data-label-placement', treatment.label ?? 'none'],
-          ['data-label-treatment', treatment.labelTreatment],
+          ['data-label-treatment', treatment.labelTreatment]
         ],
-        content,
-      ).join('\n'),
+        content
+      ).join('\n')
     )
   }
 
@@ -431,7 +426,7 @@ export const renderInfoschematicSvg = (
         ['stroke', canvasTokens.output.stroke],
         ['width', box.width],
         ['x', box.x],
-        ['y', box.y],
+        ['y', box.y]
       ]),
       line(
         2,
@@ -442,10 +437,10 @@ export const renderInfoschematicSvg = (
           ['font-size', canvasTokens.output.componentFontSize],
           ['text-anchor', 'middle'],
           ['x', box.x + box.width / 2],
-          ['y', box.y + box.height / 2 + 4],
+          ['y', box.y + box.height / 2 + 4]
         ],
-        xmlText(fabric.appearance?.caption ?? fabric.label),
-      ),
+        xmlText(fabric.appearance?.caption ?? fabric.label)
+      )
     ]
     body.push(
       group(
@@ -456,17 +451,16 @@ export const renderInfoschematicSvg = (
           ['data-id', fabric.id],
           [
             'opacity',
-            focusClass(fabric.id, focus?.artefacts, unfocused)
-              ? canvasTokens.output.unfocusedOpacity
-              : undefined,
-          ],
+            focusClass(fabric.id, focus?.artefacts, unfocused) ? canvasTokens.output.unfocusedOpacity : undefined
+          ]
         ],
-        content,
-      ).join('\n'),
+        content
+      ).join('\n')
     )
   }
 
-  const flowPipe = visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
+  const flowPipe =
+    visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
@@ -481,7 +475,7 @@ export const renderInfoschematicSvg = (
         ['stroke', flowPipe],
         ['stroke-linecap', canvasTokens.flows.lineCap],
         ['stroke-linejoin', canvasTokens.flows.lineJoin],
-        ['stroke-width', canvasTokens.flows.pipeWidth],
+        ['stroke-width', canvasTokens.flows.pipeWidth]
       ]),
       line(2, 'path', [
         ['d', flow.d],
@@ -492,8 +486,8 @@ export const renderInfoschematicSvg = (
         ['stroke-dasharray', flow.dashed ? canvasTokens.flows.dash : undefined],
         ['stroke-linecap', canvasTokens.flows.lineCap],
         ['stroke-linejoin', canvasTokens.flows.lineJoin],
-        ['stroke-width', canvasTokens.flows.routeWidth],
-      ]),
+        ['stroke-width', canvasTokens.flows.routeWidth]
+      ])
     ]
     if (signalled) {
       content.push(
@@ -504,8 +498,8 @@ export const renderInfoschematicSvg = (
           ['stroke', color],
           ['stroke-linecap', canvasTokens.flows.lineCap],
           ['stroke-linejoin', canvasTokens.flows.lineJoin],
-          ['stroke-width', canvasTokens.flows.signalStillWidth],
-        ]),
+          ['stroke-width', canvasTokens.flows.signalStillWidth]
+        ])
       )
     }
     body.push(
@@ -516,10 +510,10 @@ export const renderInfoschematicSvg = (
           ['data-code', flow.code],
           ['data-id', flow.id],
           ['data-signalled', signalled || undefined],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
-        content,
-      ).join('\n'),
+        content
+      ).join('\n')
     )
   }
 
@@ -535,7 +529,7 @@ export const renderInfoschematicSvg = (
           [
             ['class', `infoschematic-flow-annotation${dimmed}`],
             ['data-code', flow.code],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
           ],
           [
             line(2, 'rect', [
@@ -545,7 +539,7 @@ export const renderInfoschematicSvg = (
               ['stroke', canvasTokens.output.annotationStroke],
               ['width', canvasTokens.output.annotationWidth],
               ['x', at.x - canvasTokens.output.annotationWidth / 2],
-              ['y', at.y - canvasTokens.output.annotationHeight / 2],
+              ['y', at.y - canvasTokens.output.annotationHeight / 2]
             ]),
             line(
               2,
@@ -557,12 +551,12 @@ export const renderInfoschematicSvg = (
                 ['font-weight', 700],
                 ['text-anchor', 'middle'],
                 ['x', at.x],
-                ['y', at.y + 4],
+                ['y', at.y + 4]
               ],
-              xmlText(flow.code),
-            ),
-          ],
-        ).join('\n'),
+              xmlText(flow.code)
+            )
+          ]
+        ).join('\n')
       )
     }
   }
@@ -588,8 +582,8 @@ export const renderInfoschematicSvg = (
         ['rx', canvasTokens.geometry.cornerRadius],
         ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
         ['stroke-width', 2],
-        ['width', box.width],
-      ]),
+        ['width', box.width]
+      ])
     ]
     if (visualTreatment.card.stereotype && card.stereotype) {
       content.push(
@@ -605,10 +599,10 @@ export const renderInfoschematicSvg = (
             ['letter-spacing', '0.4px'],
             ['text-anchor', 'start'],
             ['x', 10],
-            ['y', 16],
+            ['y', 16]
           ],
-          xmlText(card.stereotype.toUpperCase()),
-        ),
+          xmlText(card.stereotype.toUpperCase())
+        )
       )
     }
     if (visualTreatment.card.identity) {
@@ -617,7 +611,7 @@ export const renderInfoschematicSvg = (
           2,
           [
             ['class', 'infoschematic-card-identity'],
-            ['data-card-detail', 'identity'],
+            ['data-card-detail', 'identity']
           ],
           [
             line(3, 'rect', [
@@ -628,7 +622,7 @@ export const renderInfoschematicSvg = (
               ['stroke-width', 1],
               ['width', identityWidth],
               ['x', box.width - identityWidth - 8],
-              ['y', 8],
+              ['y', 8]
             ]),
             line(
               3,
@@ -642,12 +636,12 @@ export const renderInfoschematicSvg = (
                 ['letter-spacing', '0.5px'],
                 ['text-anchor', 'middle'],
                 ['x', box.width - identityWidth / 2 - 8],
-                ['y', 18],
+                ['y', 18]
               ],
-              xmlText(card.code),
-            ),
-          ],
-        ).join('\n'),
+              xmlText(card.code)
+            )
+          ]
+        ).join('\n')
       )
     }
     content.push(
@@ -669,11 +663,11 @@ export const renderInfoschematicSvg = (
               ? compactLabelY
               : visualTreatment.card.description
                 ? box.height / 2 - 6
-                : box.height / 2,
-          ],
+                : box.height / 2
+          ]
         ],
-        xmlText(card.label),
-      ),
+        xmlText(card.label)
+      )
     )
     if (visualTreatment.card.description) {
       content.push(
@@ -687,10 +681,10 @@ export const renderInfoschematicSvg = (
             ['font-size', 10],
             ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
             ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
-            ['y', visualTreatment.card.compact ? Math.min(box.height - 10, compactLabelY + 18) : box.height / 2 + 14],
+            ['y', visualTreatment.card.compact ? Math.min(box.height - 10, compactLabelY + 18) : box.height / 2 + 14]
           ],
-          xmlText(card.detail),
-        ),
+          xmlText(card.detail)
+        )
       )
     }
     body.push(
@@ -706,10 +700,10 @@ export const renderInfoschematicSvg = (
           ['data-ink', ink],
           ['data-stereotype', card.stereotype],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
-          ['transform', `translate(${number(box.x)} ${number(box.y)})`],
+          ['transform', `translate(${number(box.x)} ${number(box.y)})`]
         ],
-        content,
-      ).join('\n'),
+        content
+      ).join('\n')
     )
   }
 
@@ -723,7 +717,7 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-point${dimmed}`],
           ['data-code', point.code],
           ['data-id', point.id],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
         [
           line(2, 'title', [], xmlText(`${point.code}: ${point.label}`)),
@@ -733,10 +727,10 @@ export const renderInfoschematicSvg = (
             ['fill', scope?.fill ?? canvasTokens.output.backdrop],
             ['r', canvasTokens.geometry.pointRadius],
             ['stroke', scope?.color ?? canvasTokens.output.fallbackFamily],
-            ['stroke-width', 2],
-          ]),
-        ],
-      ).join('\n'),
+            ['stroke-width', 2]
+          ])
+        ]
+      ).join('\n')
     )
   }
 
@@ -751,7 +745,7 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-graphic${dimmed}`],
           ['data-id', graphic.id],
           ['data-renderer', graphic.renderer],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
         [
           line(2, 'rect', [
@@ -761,7 +755,7 @@ export const renderInfoschematicSvg = (
             ['stroke-dasharray', '6 4'],
             ['width', box.width],
             ['x', box.x],
-            ['y', box.y],
+            ['y', box.y]
           ]),
           line(
             2,
@@ -773,28 +767,28 @@ export const renderInfoschematicSvg = (
               ['font-size', canvasTokens.output.metadataFontSize],
               ['text-anchor', 'middle'],
               ['x', box.x + box.width / 2],
-              ['y', box.y + box.height / 2],
+              ['y', box.y + box.height / 2]
             ],
-            xmlText(graphic.label ?? graphic.renderer),
-          ),
-        ],
-      ).join('\n'),
+            xmlText(graphic.label ?? graphic.renderer)
+          )
+        ]
+      ).join('\n')
     )
   }
 
   return [
     `<svg${attributes([
-        ['xmlns', 'http://www.w3.org/2000/svg'],
-        ['aria-label', `${config.title} structural Infoschematic`],
-        ['data-grid-treatment', visualTreatment.grid],
-        ['data-surface-treatment', visualTreatment.surface],
+      ['xmlns', 'http://www.w3.org/2000/svg'],
+      ['aria-label', `${config.title} structural Infoschematic`],
+      ['data-grid-treatment', visualTreatment.grid],
+      ['data-surface-treatment', visualTreatment.surface],
       ['height', viewBox.height],
       ['preserveAspectRatio', 'xMidYMid meet'],
       ['role', 'img'],
       ['viewBox', `${number(viewBox.x)} ${number(viewBox.y)} ${number(viewBox.width)} ${number(viewBox.height)}`],
-      ['width', viewBox.width],
+      ['width', viewBox.width]
     ])}>`,
     ...body,
-    '</svg>',
+    '</svg>'
   ].join('\n')
 }

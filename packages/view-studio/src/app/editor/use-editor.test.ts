@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { EditableDiagram } from '@infoschematics/view-model/editable'
+import { describe, expect, it } from 'vitest'
 
 /*
  * A component draft is an offset, so it only means anything against the

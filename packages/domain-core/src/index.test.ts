@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { defineInfoschematic } from "@infoschematics/domain-core";
+import { defineInfoschematic } from '@infoschematics/domain-core'
+import { describe, expect, it } from 'vitest'
 
-describe("defineInfoschematic", () => {
-	it("normalises a title-only definition", () => {
-		expect(defineInfoschematic({ title: "Infoschematics" })).toEqual({
-			title: "Infoschematics",
+describe('defineInfoschematic', () => {
+  it('normalises a title-only definition', () => {
+    expect(defineInfoschematic({ title: 'Infoschematics' })).toEqual({
+      title: 'Infoschematics',
       infoschematic: {
         viewBox: { x: 0, y: 0, width: 1200, height: 800 },
         appearance: {
@@ -14,27 +14,27 @@ describe("defineInfoschematic", () => {
             compact: false,
             identity: false,
             stereotype: false,
-            description: false,
-          },
+            description: false
+          }
         },
         scopes: [],
         domains: [],
-				flowFamilies: [],
-				regions: [],
-				cards: [],
-				fabrics: [],
-				points: [],
-				flows: [],
-				graphics: [],
-				interfaces: [],
-				specificationGroups: [],
-			},
-			standaloneScenes: [],
-			themes: [],
-			stories: [],
-			calloutPositions: [],
-    });
-  });
+        flowFamilies: [],
+        regions: [],
+        cards: [],
+        fabrics: [],
+        points: [],
+        flows: [],
+        graphics: [],
+        interfaces: [],
+        specificationGroups: []
+      },
+      standaloneScenes: [],
+      themes: [],
+      stories: [],
+      calloutPositions: []
+    })
+  })
 
   it('merges authored appearance over backward-compatible defaults', () => {
     const config = defineInfoschematic({
@@ -43,9 +43,9 @@ describe("defineInfoschematic", () => {
         appearance: {
           surface: 'blueprint',
           grid: 'major-plus-minor',
-          card: { compact: true, identity: false },
-        },
-      },
+          card: { compact: true, identity: false }
+        }
+      }
     })
 
     expect(config.infoschematic.appearance).toEqual({
@@ -55,8 +55,8 @@ describe("defineInfoschematic", () => {
         compact: true,
         identity: false,
         stereotype: false,
-        description: false,
-      },
+        description: false
+      }
     })
   })
 
@@ -69,8 +69,8 @@ describe("defineInfoschematic", () => {
             id: 'platform',
             label: 'Platform',
             color: '#123456',
-            fill: '#abcdef',
-          },
+            fill: '#abcdef'
+          }
         ],
         scopes: [
           {
@@ -79,8 +79,8 @@ describe("defineInfoschematic", () => {
             label: 'Internal',
             description: 'Internal applicability',
             color: '#654321',
-            fill: '#fedcba',
-          },
+            fill: '#fedcba'
+          }
         ],
         cards: [
           {
@@ -92,16 +92,16 @@ describe("defineInfoschematic", () => {
             scopes: ['internal'],
             domain: 'platform',
             stereotype: 'package',
-            placement: { box: { x: 0, y: 0, width: 120, height: 80 } },
-          },
-        ],
-      },
+            placement: { box: { x: 0, y: 0, width: 120, height: 80 } }
+          }
+        ]
+      }
     })
 
     expect(config.infoschematic.cards[0]).toMatchObject({
       domain: 'platform',
       scope: 'internal',
-      stereotype: 'package',
+      stereotype: 'package'
     })
     expect(config.infoschematic.domains?.[0]?.color).toBe('#123456')
     expect(config.infoschematic.scopes[0]?.color).toBe('#654321')
@@ -115,10 +115,10 @@ describe("defineInfoschematic", () => {
         infoschematic: {
           domains: [
             { id: 'platform', label: 'One', color: '#111', fill: '#eee' },
-            { id: 'platform', label: 'Two', color: '#222', fill: '#ddd' },
-          ],
-        },
-      }),
+            { id: 'platform', label: 'Two', color: '#222', fill: '#ddd' }
+          ]
+        }
+      })
     ).toThrow('Duplicate Domain id: platform')
 
     expect(() =>
@@ -134,11 +134,11 @@ describe("defineInfoschematic", () => {
               scope: 'internal',
               scopes: ['internal'],
               domain: 'missing',
-              placement: { box: { x: 0, y: 0, width: 120, height: 80 } },
-            },
-          ],
-        },
-      }),
+              placement: { box: { x: 0, y: 0, width: 120, height: 80 } }
+            }
+          ]
+        }
+      })
     ).toThrow('Card runtime references unknown Domain: missing')
   })
-});
+})

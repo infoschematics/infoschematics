@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
 import type { ThematicSceneConfig, ThemeConfig } from '@infoschematics/domain-model/theme'
 import { useInfoschematic } from '@infoschematics/view-canvas'
+import { useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
 import {
   addTheme,
@@ -11,10 +11,10 @@ import {
   moveThemeScene,
   removeTheme,
   removeThemeScene,
+  type ThemeCollection,
   themeCanActivate,
   themesAsSource,
-  toggleThemeLit,
-  type ThemeCollection,
+  toggleThemeLit
 } from './theme-composition.ts'
 
 /** Persistent Theme drafts and transient Direct selection. */
@@ -33,13 +33,13 @@ export function useThemeComposition() {
       new Set([
         ...config.infoschematic.cards.map((entry) => entry.id),
         ...config.infoschematic.fabrics.map((entry) => entry.id),
-        ...config.infoschematic.points.map((entry) => entry.id),
+        ...config.infoschematic.points.map((entry) => entry.id)
       ]),
-    [config.infoschematic.cards, config.infoschematic.fabrics, config.infoschematic.points],
+    [config.infoschematic.cards, config.infoschematic.fabrics, config.infoschematic.points]
   )
   const validFlowIds = useMemo(
     () => new Set(config.infoschematic.flows.map((entry) => entry.id)),
-    [config.infoschematic.flows],
+    [config.infoschematic.flows]
   )
 
   const apply = (change: (current: ThemeCollection) => ThemeCollection) => setDraft(change(themes))
@@ -112,7 +112,7 @@ export function useThemeComposition() {
     toggle: (id: string, isFlow: boolean) => {
       if (!theme || !scene) return
       apply((current) => toggleThemeLit(current, theme.id, scene.id, id, isFlow))
-    },
+    }
   }
 }
 

@@ -1,25 +1,20 @@
-import { type SetStateAction, useEffect, useMemo, useState } from 'react'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
-import type { DirectTarget } from '@infoschematics/view-present'
 import type {
   ArtefactCapabilities,
   ArtefactGeometry,
   ArtefactKind,
   ArtefactSelection,
   ArtefactValueByKind,
-  Placement,
+  Placement
 } from '@infoschematics/view-model/editable'
-import { portsForBox, type PortCounts, type Side } from '@infoschematics/view-model/ports'
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import {
-  ArtefactControls,
-  type ArtefactControlsEditor,
-} from '../editor/ArtefactControls.tsx'
-import {
-  createFactoryIdentityAllocator,
-  type ArtefactFactoryContext,
-} from '../editor/artefact-factories.ts'
+import { type PortCounts, portsForBox, type Side } from '@infoschematics/view-model/ports'
+import type { DirectTarget } from '@infoschematics/view-present'
+import { type SetStateAction, useEffect, useMemo, useState } from 'react'
+import { ArtefactControls, type ArtefactControlsEditor } from '../editor/ArtefactControls.tsx'
+import { type ArtefactFactoryContext, createFactoryIdentityAllocator } from '../editor/artefact-factories.ts'
 import type { ArtefactPropertiesPatch } from '../editor/artefact-operations.ts'
 import { ChangePane } from '../editor/ChangePane.tsx'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
@@ -28,7 +23,7 @@ import {
   createLibraryIdentityAllocator,
   isValidLibraryFlowContext,
   type LibraryContext,
-  type LibraryFlowContext,
+  type LibraryFlowContext
 } from '../editor/library.ts'
 import { SceneLibraryPanel } from '../editor/SceneLibraryPanel.tsx'
 import { SceneListPanel } from '../editor/SceneListPanel.tsx'
@@ -39,14 +34,13 @@ import type {
   PendingChange,
   PendingOrigin,
   TextDraft,
-  TextField,
+  TextField
 } from '../editor/use-editor.ts'
 import type { SceneLibraryEditor } from '../editor/use-scene-library.ts'
 import type { SceneList } from '../editor/use-scene-list.ts'
 import type { ThemeComposition } from '../editor/use-theme-composition.ts'
 import { useSessionState } from '../hooks/use-persistent-state.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useContractDetail } from './contracts.ts'
 import { InterfaceLines } from './InterfaceLines.tsx'
 import { ModelRegister } from './ModelRegister.tsx'
@@ -65,7 +59,7 @@ const directKinds = [
   ['theme', 'Themes'],
   ['story', 'Stories'],
   ['callout', 'Callouts'],
-  ['storyboard', 'Storyboard'],
+  ['storyboard', 'Storyboard']
 ] as const satisfies readonly (readonly [DirectKind, string])[]
 
 const directTargetKey = (target: DirectTarget): string => {
@@ -106,7 +100,7 @@ export type DetailsPanelEditor = {
     kind: K,
     value: ArtefactValueByKind[K],
     index: number,
-    ownerId?: string,
+    ownerId?: string
   ) => ArtefactSelection | undefined
   discard: () => void
   discardOne: (origin: PendingOrigin) => void
@@ -147,7 +141,7 @@ type ArtefactContexts = Readonly<{
 const effectivePlaceable = (
   config: InfoschematicConfig,
   selection: ArtefactSelection | null,
-  value: EffectiveArtefactValue | undefined,
+  value: EffectiveArtefactValue | undefined
 ): EditablePlaceable | undefined => {
   if (selection?.kind !== 'card' && selection?.kind !== 'fabric') return undefined
   const effective = value as EditablePlaceable | undefined
@@ -161,37 +155,30 @@ const flowContextFor = (
   config: InfoschematicConfig,
   selection: ArtefactSelection | null,
   value: EffectiveArtefactValue | undefined,
-  selectedCounts: PortCounts,
+  selectedCounts: PortCounts
 ): LibraryFlowContext | undefined => {
   const source = effectivePlaceable(config, selection, value)
   const family = config.infoschematic.flowFamilies[0]?.id
   if (!source || !family) return undefined
-  const candidates = [
-    ...config.infoschematic.cards,
-    ...config.infoschematic.fabrics,
-  ].filter((candidate) => candidate.id !== source.id)
+  const candidates = [...config.infoschematic.cards, ...config.infoschematic.fabrics].filter(
+    (candidate) => candidate.id !== source.id
+  )
 
-  for (const sourcePort of portsForBox(
-    source.placement.box,
-    { ...source.placement.ports, ...selectedCounts },
-  )) {
+  for (const sourcePort of portsForBox(source.placement.box, { ...source.placement.ports, ...selectedCounts })) {
     for (const candidate of candidates) {
-      for (const targetPort of portsForBox(
-        candidate.placement.box,
-        candidate.placement.ports,
-      )) {
+      for (const targetPort of portsForBox(candidate.placement.box, candidate.placement.ports)) {
         const context: LibraryFlowContext = {
           family,
           source: {
             component: source.id,
             point: sourcePort.at,
-            port: sourcePort.id,
+            port: sourcePort.id
           },
           target: {
             component: candidate.id,
             point: targetPort.at,
-            port: targetPort.id,
-          },
+            port: targetPort.id
+          }
         }
         if (isValidLibraryFlowContext(context)) return context
       }
@@ -204,12 +191,8 @@ export const detailsArtefactContexts = (
   config: InfoschematicConfig,
   editor: Pick<
     DetailsPanelEditor,
-    | 'artefactGeometry'
-    | 'artefactOperations'
-    | 'artefactValue'
-    | 'selectedArtefact'
-    | 'selectedCounts'
-  >,
+    'artefactGeometry' | 'artefactOperations' | 'artefactValue' | 'selectedArtefact' | 'selectedCounts'
+  >
 ): ArtefactContexts => {
   const definition = config.infoschematic
   const allAuthored = [
@@ -217,74 +200,47 @@ export const detailsArtefactContexts = (
     ...definition.fabrics,
     ...definition.flows,
     ...definition.graphics,
-    ...definition.regions,
+    ...definition.regions
   ]
   const usedIds = [
     ...allAuthored.map((value) => value.id),
-    ...editor.artefactOperations.map((operation) => operation.target.id),
+    ...editor.artefactOperations.map((operation) => operation.target.id)
   ]
   const usedCodes = [
     ...allAuthored.flatMap((value) => ('code' in value ? [value.code] : [])),
-    ...editor.artefactOperations.flatMap((operation) =>
-      operation.target.code ? [operation.target.code] : [],
-    ),
+    ...editor.artefactOperations.flatMap((operation) => (operation.target.code ? [operation.target.code] : []))
   ]
   const view = definition.viewBox
   const width = Math.min(240, view.width)
   const height = Math.min(120, view.height)
-  const selectedBox =
-    editor.artefactGeometry?.role === 'box'
-      ? editor.artefactGeometry.box
-      : undefined
+  const selectedBox = editor.artefactGeometry?.role === 'box' ? editor.artefactGeometry.box : undefined
   const box = {
     height,
     width,
-    x: Math.max(
-      view.x,
-      Math.min(view.x + view.width - width, (selectedBox?.x ?? view.x + 16) + 24),
-    ),
-    y: Math.max(
-      view.y,
-      Math.min(
-        view.y + view.height - height,
-        (selectedBox?.y ?? view.y + 16) + 24,
-      ),
-    ),
+    x: Math.max(view.x, Math.min(view.x + view.width - width, (selectedBox?.x ?? view.x + 16) + 24)),
+    y: Math.max(view.y, Math.min(view.y + view.height - height, (selectedBox?.y ?? view.y + 16) + 24))
   }
   const at = allAuthored.length + editor.artefactOperations.length
-  const selectedPlaceable = effectivePlaceable(
-    config,
-    editor.selectedArtefact,
-    editor.artefactValue,
-  )
+  const selectedPlaceable = effectivePlaceable(config, editor.selectedArtefact, editor.artefactValue)
 
   return {
     factory: {
       allocate: createFactoryIdentityAllocator(usedIds),
       at,
-      box,
+      box
     },
     library: {
       allocate: createLibraryIdentityAllocator({ codes: usedCodes, ids: usedIds }),
       at,
       box,
-      flow: flowContextFor(
-        config,
-        editor.selectedArtefact,
-        editor.artefactValue,
-        editor.selectedCounts,
-      ),
+      flow: flowContextFor(config, editor.selectedArtefact, editor.artefactValue, editor.selectedCounts),
       scope:
-        selectedPlaceable && 'scope' in selectedPlaceable
-          ? selectedPlaceable.scope
-          : (definition.scopes[0]?.id ?? ''),
-    },
+        selectedPlaceable && 'scope' in selectedPlaceable ? selectedPlaceable.scope : (definition.scopes[0]?.id ?? '')
+    }
   }
 }
 
-export const artefactControlsEditorFor = (
-  editor: DetailsPanelEditor,
-): ArtefactControlsEditor => ({
+export const artefactControlsEditorFor = (editor: DetailsPanelEditor): ArtefactControlsEditor => ({
   artefactCapabilities: editor.artefactCapabilities,
   artefactGeometry: editor.artefactGeometry,
   artefactIssue: editor.artefactIssue,
@@ -296,15 +252,15 @@ export const artefactControlsEditorFor = (
     if (!selected) return
     editor.replaceArtefactProperties({
       kind: selected.kind,
-      value: properties,
+      value: properties
     } as ArtefactPropertiesPatch)
   },
-  selectedArtefact: editor.selectedArtefact,
+  selectedArtefact: editor.selectedArtefact
 })
 
 export function DesignDetails({
   contexts,
-  editor,
+  editor
 }: Readonly<{ contexts: ArtefactContexts; editor: DetailsPanelEditor }>) {
   return (
     <>
@@ -337,7 +293,7 @@ export function DetailsPanel({
   onAddWaypoint,
   onCreateCard,
   onResetRoute,
-  presentation,
+  presentation
 }: {
   /** Supplied by the app, which is the only place that can issue a code and find room for a card. */
   onCreateCard: (kind: 'adapter' | 'card') => void
@@ -389,9 +345,10 @@ export function DetailsPanel({
     infoschematicCardsOffering,
     infoschematicFlowsCarrying,
     infoschematicSpecificationSections,
-    infoschematicUnroutedInterfaces,
+    infoschematicUnroutedInterfaces
   } = useInfoschematic()
   const unroutedInterfaceIds = new Set(infoschematicUnroutedInterfaces.map((entry) => entry.id))
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const artefactContexts = useMemo(
     () => detailsArtefactContexts(config, editor),
     [
@@ -400,28 +357,28 @@ export function DetailsPanel({
       editor.artefactOperations,
       editor.artefactValue,
       editor.selectedArtefact,
-      editor.selectedCounts,
-    ],
+      editor.selectedCounts
+    ]
   )
   // Present remembers reading state; Producer modes are selected explicitly by
   // the transient production state rather than masquerading as panel tabs.
   const [presentTab, setPresentTab] = useSessionState<'showing' | 'specifications'>(
     config.id && `${config.id}.panel.tab.present`,
-    'showing',
+    'showing'
   )
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
   const directOptions = useMemo<readonly DirectOption[]>(() => {
     const standaloneScenes = scenes.library.map((scene) => ({
       label: scene.label,
-      target: { kind: 'standalone-scene', sceneId: scene.id } as const,
+      target: { kind: 'standalone-scene', sceneId: scene.id } as const
     }))
     const themeTargets = themes.themes.map((theme) => ({
       label: theme.title,
-      target: { kind: 'theme', themeId: theme.id } as const,
+      target: { kind: 'theme', themeId: theme.id } as const
     }))
     const storyTargets = stories.stories.map((story) => ({
       label: story.label,
-      target: { kind: 'story', storyId: story.id } as const,
+      target: { kind: 'story', storyId: story.id } as const
     }))
     const themeCallouts = themes.themes.flatMap((theme) =>
       theme.scenes.map((scene) => ({
@@ -430,9 +387,9 @@ export function DetailsPanel({
           kind: 'callout',
           owner: 'theme',
           ownerId: theme.id,
-          sceneId: scene.id,
-        } as const,
-      })),
+          sceneId: scene.id
+        } as const
+      }))
     )
     const storyCallouts = stories.stories.flatMap((story) =>
       story.steps.map((scene, index) => ({
@@ -441,13 +398,13 @@ export function DetailsPanel({
           kind: 'callout',
           owner: 'story',
           ownerId: story.id,
-          sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-${index + 1}`,
-        } as const,
-      })),
+          sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-${index + 1}`
+        } as const
+      }))
     )
     const storyboards = stories.stories.map((story) => ({
       label: story.label,
-      target: { kind: 'storyboard', storyId: story.id } as const,
+      target: { kind: 'storyboard', storyId: story.id } as const
     }))
 
     return [...standaloneScenes, ...themeTargets, ...storyTargets, ...themeCallouts, ...storyCallouts, ...storyboards]
@@ -471,19 +428,21 @@ export function DetailsPanel({
   const { detail: contractDetail, failed: contractError } = useContractDetail(selectedContract)
   const contractFlows = useMemo(
     () => (selectedContract ? infoschematicFlowsCarrying(selectedContract.id) : []),
-    [infoschematicFlowsCarrying, selectedContract],
+    [infoschematicFlowsCarrying, selectedContract]
   )
   // What a card offers, which is the other half of the same question and the
   // only answer there is for a specification no flow carries.
   const contractCards = useMemo(
     () => (selectedContract ? infoschematicCardsOffering(selectedContract.id) : []),
-    [infoschematicCardsOffering, selectedContract],
+    [infoschematicCardsOffering, selectedContract]
   )
   const { runningStory, standaloneScene, thematicScene } = presentation
 
   const { mode, setMode } = editor
   const directUsesStories =
-    directKind === 'story' || directKind === 'storyboard' || (directKind === 'callout' && activeCalloutOwner === 'story')
+    directKind === 'story' ||
+    directKind === 'storyboard' ||
+    (directKind === 'callout' && activeCalloutOwner === 'story')
   const directUsesThemes = directKind === 'theme' || (directKind === 'callout' && activeCalloutOwner === 'theme')
   const directUsesStandaloneScenes = directKind === 'standalone-scene'
 
@@ -511,7 +470,7 @@ export function DetailsPanel({
           const at =
             story?.steps.findIndex(
               (scene, index) =>
-                (scene.authored.id ?? scene.scene ?? `${story.id}-scene-${index + 1}`) === target.sceneId,
+                (scene.authored.id ?? scene.scene ?? `${story.id}-scene-${index + 1}`) === target.sceneId
             ) ?? -1
           if (at >= 0) stories.select(at)
         }
@@ -532,7 +491,7 @@ export function DetailsPanel({
     choose: (action) => {
       const id = resolveStateAction(action, scenes.chosen)
       chooseDirectTarget({ kind: 'standalone-scene', sceneId: id })
-    },
+    }
   }
   const themeEditor: ThemeComposition = {
     ...themes,
@@ -547,7 +506,7 @@ export function DetailsPanel({
           kind: 'callout',
           owner: 'theme',
           ownerId: theme.id,
-          sceneId: scene.id,
+          sceneId: scene.id
         })
       }
     },
@@ -562,12 +521,12 @@ export function DetailsPanel({
           kind: 'callout',
           owner: 'theme',
           ownerId: id,
-          sceneId: theme.scenes[0].id,
+          sceneId: theme.scenes[0].id
         })
       } else if (directKind === 'callout') {
         presentation.setDirectTarget(null)
       }
-    },
+    }
   }
   const storyEditor: SceneList = {
     ...stories,
@@ -587,7 +546,7 @@ export function DetailsPanel({
             kind: 'callout',
             owner: 'story',
             ownerId: story.id,
-            sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-1`,
+            sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-1`
           })
         } else presentation.setDirectTarget(null)
       }
@@ -603,10 +562,10 @@ export function DetailsPanel({
           kind: 'callout',
           owner: 'story',
           ownerId: story.id,
-          sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-${at + 1}`,
+          sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-${at + 1}`
         })
       }
-    },
+    }
   }
   /*
    * Each editor's own changes, as the one entry each is.
@@ -685,7 +644,7 @@ export function DetailsPanel({
         {(presentation.mode === 'present'
           ? ([
               ['showing', 'Info'],
-              ['specifications', 'Specifications'],
+              ['specifications', 'Specifications']
             ] as const)
           : presentation.mode === 'design'
             ? ([['design', 'Design']] as const)
@@ -732,7 +691,7 @@ export function DetailsPanel({
                 disabled={directOptionsForKind.length === 0}
                 onChange={(event) => {
                   const option = directOptionsForKind.find(
-                    (candidate) => directTargetKey(candidate.target) === event.target.value,
+                    (candidate) => directTargetKey(candidate.target) === event.target.value
                   )
                   if (option) chooseDirectTarget(option.target)
                   else presentation.setDirectTarget(null)
@@ -854,8 +813,8 @@ export function DetailsPanel({
               control, and was quoted to a visitor as though it were the point
               of the panel. */}
           <p className="register-note specification-lead">
-            What the Infoschematic conforms to, grouped by whose specification it is and whether there is a document to read.
-            Choose one to see what carries or offers it.
+            What the Infoschematic conforms to, grouped by whose specification it is and whether there is a document to
+            read. Choose one to see what carries or offers it.
           </p>
 
           {/* A group per state rather than one flat list. The list was six

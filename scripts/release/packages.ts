@@ -16,7 +16,7 @@ export const releasePackages: readonly ReleasePackage[] = Object.freeze([
   { cssExports: [], directory: 'packages/render-svg', name: '@infoschematics/render-svg' },
   { cssExports: ['./styles.css'], directory: 'packages/view-canvas', name: '@infoschematics/view-canvas' },
   { cssExports: ['./styles.css'], directory: 'packages/view-present', name: '@infoschematics/view-present' },
-  { cssExports: ['./styles.css'], directory: 'packages/view-studio', name: '@infoschematics/view-studio' },
+  { cssExports: ['./styles.css'], directory: 'packages/view-studio', name: '@infoschematics/view-studio' }
 ])
 
 export const releasePackageNames = new Set(releasePackages.map(({ name }) => name))
@@ -49,7 +49,7 @@ export async function readReleaseManifests(root = repositoryRoot) {
       const path = resolve(root, entry.directory, 'package.json')
       const manifest = JSON.parse(await readFile(path, 'utf8')) as PackageManifest
       return { entry, manifest, path }
-    }),
+    })
   )
 }
 
@@ -57,7 +57,7 @@ const semver = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/
 const dependencySections = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'] as const
 
 export function validateReleaseManifests(
-  packages: readonly Readonly<{ entry: ReleasePackage; manifest: PackageManifest; path?: string }>[],
+  packages: readonly Readonly<{ entry: ReleasePackage; manifest: PackageManifest; path?: string }>[]
 ): string[] {
   const errors: string[] = []
   const byName = new Map(packages.map((entry) => [entry.manifest.name, entry]))
@@ -93,7 +93,8 @@ export function validateReleaseManifests(
     if (manifest.publishConfig?.access !== 'public') errors.push(`${location}: publishConfig.access must be public.`)
   }
 
-  if (versions.size > 1) errors.push(`Release package versions must move together; found ${[...versions].sort().join(', ')}.`)
+  if (versions.size > 1)
+    errors.push(`Release package versions must move together; found ${[...versions].sort().join(', ')}.`)
   const coordinatedVersion = versions.size === 1 ? [...versions][0] : undefined
   const buildPosition = new Map(releasePackages.map(({ name }, index) => [name, index]))
 
@@ -106,7 +107,7 @@ export function validateReleaseManifests(
         }
         if (!coordinatedVersion || range !== coordinatedVersion) {
           errors.push(
-            `${path ?? entry.directory}: ${section}.${dependency} must equal coordinated version ${coordinatedVersion ?? '(unresolved)'}, received ${range}.`,
+            `${path ?? entry.directory}: ${section}.${dependency} must equal coordinated version ${coordinatedVersion ?? '(unresolved)'}, received ${range}.`
           )
         }
       }
@@ -116,9 +117,7 @@ export function validateReleaseManifests(
   return errors
 }
 
-export function coordinatedVersion(
-  packages: readonly Readonly<{ manifest: PackageManifest }>[],
-): string | undefined {
+export function coordinatedVersion(packages: readonly Readonly<{ manifest: PackageManifest }>[]): string | undefined {
   const versions = new Set(packages.map(({ manifest }) => manifest.version).filter((value): value is string => !!value))
   return versions.size === 1 ? [...versions][0] : undefined
 }

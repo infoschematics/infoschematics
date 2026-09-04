@@ -1,9 +1,9 @@
-import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { Canvas } from '@infoschematics/view-canvas'
+import { createElement } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
 
 const config = defineInfoschematic({
   title: 'Cross-renderer treatment reference',
@@ -11,15 +11,15 @@ const config = defineInfoschematic({
     appearance: {
       card: { compact: true, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint',
+      surface: 'blueprint'
     },
     domains: [
       {
         color: '#22c3a6',
         fill: '#063b35',
         id: 'platform',
-        label: 'Platform',
-      },
+        label: 'Platform'
+      }
     ],
     scopes: [
       {
@@ -28,8 +28,8 @@ const config = defineInfoschematic({
         fill: '#330011',
         id: 'delivery-scope',
         label: 'Delivery scope',
-        prefix: 'DEL',
-      },
+        prefix: 'DEL'
+      }
     ],
     regions: [
       {
@@ -38,7 +38,7 @@ const config = defineInfoschematic({
         frame: { style: 'dotted' },
         id: 'runtime',
         label: 'Runtime',
-        labelPlacement: 'south-east',
+        labelPlacement: 'south-east'
       },
       {
         box: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
@@ -46,8 +46,8 @@ const config = defineInfoschematic({
         id: 'delivery',
         label: 'Delivery',
         labelMount: 'boundary',
-        labelPlacement: 'north',
-      },
+        labelPlacement: 'north'
+      }
     ],
     cards: [
       {
@@ -59,21 +59,17 @@ const config = defineInfoschematic({
         placement: { box: { height: 80, width: 180, x: 110, y: 70 }, ports: {} },
         scope: 'delivery-scope',
         scopes: ['delivery-scope'],
-        stereotype: 'service',
-      },
-    ],
-  },
+        stereotype: 'service'
+      }
+    ]
+  }
 })
 
 const values = (output: string, attribute: string) =>
   [...output.matchAll(new RegExp(`${attribute}="([^"]+)"`, 'g'))].map((match) => match[1]).sort()
 
 const regionPaths = (output: string) =>
-  [
-    ...output.matchAll(
-      /<path class="infoschematic-region-frame" d="([^"]+)"/g,
-    ),
-  ].map((match) => match[1])
+  [...output.matchAll(/<path class="infoschematic-region-frame" d="([^"]+)"/g)].map((match) => match[1])
 
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
@@ -87,7 +83,7 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
   labels: values(output, 'data-label-placement'),
   labelTreatments: values(output, 'data-label-treatment'),
   stereotype: output.includes('class="infoschematic-card-stereotype"'),
-  surface: values(output, 'data-surface-treatment'),
+  surface: values(output, 'data-surface-treatment')
 })
 
 describe('visual treatment renderer parity', () => {
@@ -117,11 +113,11 @@ describe('visual treatment renderer parity', () => {
       infoschematic: {
         appearance: {
           card: { compact: true, description: true, identity: true, stereotype: true },
-          surface: 'blueprint',
+          surface: 'blueprint'
         },
         domains: [
           { color: '#22c3a6', fill: '#063b35', id: 'dark', label: 'Dark' },
-          { color: '#13579b', fill: '#dceeff', id: 'light', label: 'Light' },
+          { color: '#13579b', fill: '#dceeff', id: 'light', label: 'Light' }
         ],
         scopes: [
           {
@@ -130,16 +126,16 @@ describe('visual treatment renderer parity', () => {
             fill: '#330011',
             id: 'delivery-scope',
             label: 'Delivery scope',
-            prefix: 'DEL',
-          },
+            prefix: 'DEL'
+          }
         ],
         regions: [
           {
             box: { height: 180, radius: 8, width: 380, x: 10, y: 20 },
             fill: '#071e2d',
             id: 'runtime',
-            label: 'Runtime',
-          },
+            label: 'Runtime'
+          }
         ],
         cards: [
           {
@@ -150,7 +146,7 @@ describe('visual treatment renderer parity', () => {
             label: 'Dark card',
             placement: { box: { height: 60, width: 150, x: 30, y: 70 }, ports: {} },
             scope: 'delivery-scope',
-            scopes: ['delivery-scope'],
+            scopes: ['delivery-scope']
           },
           {
             code: 'LGT-001',
@@ -160,10 +156,10 @@ describe('visual treatment renderer parity', () => {
             label: 'Light card',
             placement: { box: { height: 60, width: 150, x: 220, y: 70 }, ports: {} },
             scope: 'delivery-scope',
-            scopes: ['delivery-scope'],
-          },
-        ],
-      },
+            scopes: ['delivery-scope']
+          }
+        ]
+      }
     })
     const canvas = renderToStaticMarkup(createElement(Canvas, { config: inks }))
     const svg = renderInfoschematicSvg(inks)
@@ -182,14 +178,14 @@ describe('visual treatment renderer parity', () => {
             fill: '#eeeeee',
             id: 'legacy-zone',
             label: 'Legacy zone',
-            labelPlacement: 'north-east',
+            labelPlacement: 'north-east'
           },
           {
             box: { height: 80, radius: 2, width: 300, x: 10, y: 10 },
             frame: { style: 'solid' },
             id: 'legacy',
             label: 'Legacy lane',
-            labelMount: 'boundary',
+            labelMount: 'boundary'
           },
           {
             box: { height: 80, radius: 30, width: 300, x: 10, y: 150 },
@@ -197,10 +193,10 @@ describe('visual treatment renderer parity', () => {
             id: 'hidden',
             label: 'Hidden lane',
             labelMount: 'boundary',
-            labelPlacement: 'none',
-          },
-        ],
-      },
+            labelPlacement: 'none'
+          }
+        ]
+      }
     })
     const canvas = renderToStaticMarkup(createElement(Canvas, { config: legacy }))
     const svg = renderInfoschematicSvg(legacy)
@@ -216,7 +212,7 @@ describe('visual treatment renderer parity', () => {
   it('keeps the dots grid treatment equivalent across renderers', () => {
     const dotted = defineInfoschematic({
       title: 'Dotted grid reference',
-      infoschematic: { appearance: { grid: 'dots' } },
+      infoschematic: { appearance: { grid: 'dots' } }
     })
     const canvas = renderToStaticMarkup(createElement(Canvas, { config: dotted }))
     const svg = renderInfoschematicSvg(dotted)

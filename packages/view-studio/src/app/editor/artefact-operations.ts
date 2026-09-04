@@ -1,18 +1,15 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import {
-  applyArtefactOperations,
-  type ArtefactDraftOperation,
-} from '@infoschematics/view-model/artefact-draft'
-import {
-  artefactCapabilities,
   type ArtefactOperation,
   type ArtefactSelection,
   type ArtefactValueByKind,
+  artefactCapabilities,
   type CreateArtefactOperation,
   defineArtefactSelection,
   type EditableArtefact,
   orderArtefactOperations,
-  removeArtefactOperation,
+  removeArtefactOperation
 } from '@infoschematics/view-model/editable'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
@@ -29,10 +26,7 @@ export type ArtefactPropertiesPatch = {
   }>
 }[keyof ArtefactValueByKind]
 
-type AnyReplaceArtefactPropertiesOperation = Extract<
-  ArtefactDraftOperation,
-  { operation: 'replace-properties' }
->
+type AnyReplaceArtefactPropertiesOperation = Extract<ArtefactDraftOperation, { operation: 'replace-properties' }>
 
 export const artefactOperationKey = (operation: ArtefactDraftOperation): string =>
   `${operation.target.kind}:${operation.target.id}:${operation.operation}`
@@ -45,80 +39,55 @@ const kindOrder: Readonly<Record<ArtefactSelection['kind'], number>> = {
   fabric: 1,
   card: 2,
   graphic: 3,
-  flow: 4,
+  flow: 4
 }
 
-const orderDraftOperations = (
-  operations: readonly ArtefactDraftOperation[],
-): readonly ArtefactDraftOperation[] => {
+const orderDraftOperations = (operations: readonly ArtefactDraftOperation[]): readonly ArtefactDraftOperation[] => {
   const ordinary = orderArtefactOperations(
-    operations.filter(
-      (operation): operation is ArtefactOperation =>
-        operation.operation !== 'replace-properties',
-    ),
+    operations.filter((operation): operation is ArtefactOperation => operation.operation !== 'replace-properties')
   )
   const replacements = operations
     .filter(
-      (
-        operation,
-      ): operation is AnyReplaceArtefactPropertiesOperation =>
-        operation.operation === 'replace-properties',
+      (operation): operation is AnyReplaceArtefactPropertiesOperation => operation.operation === 'replace-properties'
     )
     .sort(
       (left, right) =>
-        kindOrder[left.target.kind] - kindOrder[right.target.kind] ||
-        left.target.id.localeCompare(right.target.id),
+        kindOrder[left.target.kind] - kindOrder[right.target.kind] || left.target.id.localeCompare(right.target.id)
     )
 
-  const creates = ordinary.filter(
-    (operation) => operation.operation === 'create',
-  )
-  const changes = ordinary.filter(
-    (operation) =>
-      operation.operation !== 'create' && operation.operation !== 'remove',
-  )
-  const removals = ordinary.filter(
-    (operation) => operation.operation === 'remove',
-  )
+  const creates = ordinary.filter((operation) => operation.operation === 'create')
+  const changes = ordinary.filter((operation) => operation.operation !== 'create' && operation.operation !== 'remove')
+  const removals = ordinary.filter((operation) => operation.operation === 'remove')
   return Object.freeze([...creates, ...replacements, ...changes, ...removals])
 }
 
 /** Replace repeated geometry/order edits while retaining distinct operations. */
 export function recordArtefactOperation(
   current: readonly ArtefactOperation[],
-  next: ArtefactOperation,
+  next: ArtefactOperation
 ): readonly ArtefactOperation[]
 export function recordArtefactOperation(
   current: readonly ArtefactDraftOperation[],
-  next: ArtefactDraftOperation,
+  next: ArtefactDraftOperation
 ): readonly ArtefactDraftOperation[]
 export function recordArtefactOperation(
   current: readonly ArtefactDraftOperation[],
-  next: ArtefactDraftOperation,
+  next: ArtefactDraftOperation
 ): readonly ArtefactDraftOperation[] {
   const created = current.some(
-    (operation) =>
-      operation.operation === 'create' && sameTarget(operation.target, next.target),
+    (operation) => operation.operation === 'create' && sameTarget(operation.target, next.target)
   )
   if (next.operation === 'remove' && created) {
-    return orderDraftOperations(
-      current.filter((operation) => !sameTarget(operation.target, next.target)),
-    )
+    return orderDraftOperations(current.filter((operation) => !sameTarget(operation.target, next.target)))
   }
 
   const priorReorder = current.find(
-    (operation) =>
-      operation.operation === 'reorder' &&
-      sameTarget(operation.target, next.target),
+    (operation) => operation.operation === 'reorder' && sameTarget(operation.target, next.target)
   )
   if (next.operation === 'reorder' && priorReorder?.operation === 'reorder') {
     if (priorReorder.from === next.to) {
       return orderDraftOperations(
-        current.filter(
-          (operation) =>
-            operation.operation !== 'reorder' ||
-            !sameTarget(operation.target, next.target),
-        ),
+        current.filter((operation) => operation.operation !== 'reorder' || !sameTarget(operation.target, next.target))
       )
     }
     next = { ...next, from: priorReorder.from }
@@ -135,15 +104,15 @@ export function recordArtefactOperation(
 
 export function recordArtefactOperations(
   current: readonly ArtefactOperation[],
-  next: readonly ArtefactOperation[],
+  next: readonly ArtefactOperation[]
 ): readonly ArtefactOperation[]
 export function recordArtefactOperations(
   current: readonly ArtefactDraftOperation[],
-  next: readonly ArtefactDraftOperation[],
+  next: readonly ArtefactDraftOperation[]
 ): readonly ArtefactDraftOperation[]
 export function recordArtefactOperations(
   current: readonly ArtefactDraftOperation[],
-  next: readonly ArtefactDraftOperation[],
+  next: readonly ArtefactDraftOperation[]
 ): readonly ArtefactDraftOperation[] {
   let result = current
   for (const operation of next) result = recordArtefactOperation(result, operation)
@@ -152,15 +121,13 @@ export function recordArtefactOperations(
 
 export const discardArtefactOperation = <T extends ArtefactDraftOperation>(
   current: readonly T[],
-  key: string,
+  key: string
 ): readonly T[] =>
-  orderDraftOperations(
-    current.filter((operation) => artefactOperationKey(operation) !== key),
-  ) as readonly T[]
+  orderDraftOperations(current.filter((operation) => artefactOperationKey(operation) !== key)) as readonly T[]
 
 const valueForTarget = (
   config: InfoschematicConfig,
-  target: ArtefactSelection,
+  target: ArtefactSelection
 ): ArtefactValueByKind[ArtefactSelection['kind']] | undefined => {
   switch (target.kind) {
     case 'region':
@@ -179,26 +146,22 @@ const valueForTarget = (
 export const effectiveArtefactValue = (
   config: InfoschematicConfig,
   operations: readonly ArtefactDraftOperation[],
-  target: ArtefactSelection,
+  target: ArtefactSelection
 ): ArtefactValueByKind[ArtefactSelection['kind']] | undefined =>
   valueForTarget(applyArtefactOperations(config, operations).config, target)
 
 export const effectiveArtefactOperation = (
   operations: readonly ArtefactDraftOperation[],
-  target: ArtefactSelection,
+  target: ArtefactSelection
 ): ArtefactDraftOperation | undefined =>
-  operations.some(
-    (operation) =>
-      operation.operation === 'remove' && sameTarget(operation.target, target),
-  )
+  operations.some((operation) => operation.operation === 'remove' && sameTarget(operation.target, target))
     ? undefined
     : [...operations]
         .reverse()
         .find(
           (operation) =>
-            (operation.operation === 'create' ||
-              operation.operation === 'replace-properties') &&
-            sameTarget(operation.target, target),
+            (operation.operation === 'create' || operation.operation === 'replace-properties') &&
+            sameTarget(operation.target, target)
         )
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>
@@ -229,66 +192,53 @@ export const replaceArtefactPropertiesOperation = (
   config: InfoschematicConfig,
   operations: readonly ArtefactDraftOperation[],
   target: ArtefactSelection,
-  patch: ArtefactPropertiesPatch,
+  patch: ArtefactPropertiesPatch
 ): AnyReplaceArtefactPropertiesOperation | undefined => {
   if (patch.kind !== target.kind) return undefined
   const current = effectiveArtefactValue(config, operations, target)
   if (!current) return undefined
 
-  const value = mergePatch(
-    current,
-    patch.value,
-  ) as ArtefactValueByKind[ArtefactSelection['kind']]
+  const value = mergePatch(current, patch.value) as ArtefactValueByKind[ArtefactSelection['kind']]
   value.id = current.id
   if ('code' in current && 'code' in value) value.code = current.code
   const operation = freezeSerialisable({
     operation: 'replace-properties' as const,
     target,
-    value,
+    value
   }) as AnyReplaceArtefactPropertiesOperation
   const next = recordArtefactOperation(operations, operation)
   const result = applyArtefactOperations(config, next)
-  return result.rejected.some((rejection) => rejection.operation === operation)
-    ? undefined
-    : operation
+  return result.rejected.some((rejection) => rejection.operation === operation) ? undefined : operation
 }
 
 /** Supplies transient geometry for a newly-created artefact before runtime rebuild. */
-export const createdArtefactDetails = (
-  operation: CreateArtefactOperation,
-): EditableArtefact | undefined => {
+export const createdArtefactDetails = (operation: CreateArtefactOperation): EditableArtefact | undefined => {
   const { target } = operation
   const geometry = (() => {
     switch (target.kind) {
       case 'card':
         return {
-          box: (operation.value as InfoschematicConfig['infoschematic']['cards'][number])
-            .placement.box,
-          role: 'box' as const,
+          box: (operation.value as InfoschematicConfig['infoschematic']['cards'][number]).placement.box,
+          role: 'box' as const
         }
       case 'fabric':
         return {
-          box: (operation.value as InfoschematicConfig['infoschematic']['fabrics'][number])
-            .placement.box,
-          role: 'box' as const,
+          box: (operation.value as InfoschematicConfig['infoschematic']['fabrics'][number]).placement.box,
+          role: 'box' as const
         }
       case 'flow':
         return {
-          points: (operation.value as InfoschematicConfig['infoschematic']['flows'][number])
-            .points,
-          role: 'route' as const,
+          points: (operation.value as InfoschematicConfig['infoschematic']['flows'][number]).points,
+          role: 'route' as const
         }
       case 'graphic': {
-        const placement = (
-          operation.value as InfoschematicConfig['infoschematic']['graphics'][number]
-        ).placement
+        const placement = (operation.value as InfoschematicConfig['infoschematic']['graphics'][number]).placement
         return placement ? { box: placement, role: 'box' as const } : undefined
       }
       case 'region':
         return {
-          box: (operation.value as InfoschematicConfig['infoschematic']['regions'][number])
-            .box,
-          role: 'box' as const,
+          box: (operation.value as InfoschematicConfig['infoschematic']['regions'][number]).box,
+          role: 'box' as const
         }
     }
   })()
@@ -298,7 +248,7 @@ export const createdArtefactDetails = (
         capabilities: artefactCapabilities[target.kind],
         geometry,
         movementTarget: target,
-        selection: target,
+        selection: target
       }
     : undefined
 }
@@ -308,7 +258,7 @@ const flowSelection = (flow: InfoschematicConfig['infoschematic']['flows'][numbe
     code: flow.code,
     geometry: 'route' as const,
     id: flow.id,
-    kind: 'flow' as const,
+    kind: 'flow' as const
   })
 
 export type ArtefactRemovalPlan = Readonly<{
@@ -320,18 +270,16 @@ export type ArtefactRemovalPlan = Readonly<{
 export const planArtefactRemoval = (
   config: InfoschematicConfig,
   target: ArtefactSelection,
-  current: readonly ArtefactDraftOperation[] = [],
+  current: readonly ArtefactDraftOperation[] = []
 ): ArtefactRemovalPlan => {
   const effectiveConfig = applyArtefactOperations(config, current).config
   if (
     target.kind === 'graphic' &&
-    effectiveConfig.stories.some((story) =>
-      story.scenes.some((scene) => scene.graphic === target.id),
-    )
+    effectiveConfig.stories.some((story) => story.scenes.some((scene) => scene.graphic === target.id))
   ) {
     return {
       blockedReason: `Graphic ${target.id} is referenced by a Story`,
-      operations: [],
+      operations: []
     }
   }
 
@@ -345,39 +293,23 @@ export const planArtefactRemoval = (
     }
   }
   return {
-    operations: orderArtefactOperations([
-      ...cascades,
-      removeArtefactOperation(target),
-    ]),
+    operations: orderArtefactOperations([...cascades, removeArtefactOperation(target)])
   }
 }
 
-export const artefactIndex = (
-  config: InfoschematicConfig,
-  target: ArtefactSelection,
-): number | undefined => {
+export const artefactIndex = (config: InfoschematicConfig, target: ArtefactSelection): number | undefined => {
   const index = (() => {
     switch (target.kind) {
       case 'region':
-        return config.infoschematic.regions.findIndex(
-          (entry) => entry.id === target.id,
-        )
+        return config.infoschematic.regions.findIndex((entry) => entry.id === target.id)
       case 'fabric':
-        return config.infoschematic.fabrics.findIndex(
-          (entry) => entry.id === target.id,
-        )
+        return config.infoschematic.fabrics.findIndex((entry) => entry.id === target.id)
       case 'card':
-        return config.infoschematic.cards.findIndex(
-          (entry) => entry.id === target.id,
-        )
+        return config.infoschematic.cards.findIndex((entry) => entry.id === target.id)
       case 'flow':
-        return config.infoschematic.flows.findIndex(
-          (entry) => entry.id === target.id,
-        )
+        return config.infoschematic.flows.findIndex((entry) => entry.id === target.id)
       case 'graphic':
-        return config.infoschematic.graphics.findIndex(
-          (entry) => entry.id === target.id,
-        )
+        return config.infoschematic.graphics.findIndex((entry) => entry.id === target.id)
     }
   })()
   return index === undefined || index < 0 ? undefined : index
@@ -407,9 +339,7 @@ const sourceFor = (operation: ArtefactDraftOperation) => {
   }
 }
 
-export const artefactSourceChanges = (
-  operations: readonly ArtefactDraftOperation[],
-): readonly ArtefactSourceChange[] =>
+export const artefactSourceChanges = (operations: readonly ArtefactDraftOperation[]): readonly ArtefactSourceChange[] =>
   orderSourceChanges(
     operations.map((operation) => ({
       authoredIndex:
@@ -421,13 +351,8 @@ export const artefactSourceChanges = (
       field: operation.operation,
       key: artefactOperationKey(operation),
       owner: undefined,
-      phase:
-        operation.operation === 'create'
-          ? 'create'
-          : operation.operation === 'remove'
-            ? 'remove'
-            : 'update',
+      phase: operation.operation === 'create' ? 'create' : operation.operation === 'remove' ? 'remove' : 'update',
       source: sourceFor(operation),
-      target: operation.target,
-    })),
+      target: operation.target
+    }))
   )

@@ -1,17 +1,14 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { InfoschematicContext } from '@infoschematics/view-canvas'
-import {
-  artefactCapabilities,
-  defineArtefactSelection,
-} from '@infoschematics/view-model/editable'
+import { artefactCapabilities, defineArtefactSelection } from '@infoschematics/view-model/editable'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it, vi } from 'vitest'
 import {
   artefactControlsEditorFor,
   DesignDetails,
   type DetailsPanelEditor,
-  detailsArtefactContexts,
+  detailsArtefactContexts
 } from './DetailsPanel.tsx'
 
 const config = defineInfoschematic({
@@ -25,11 +22,11 @@ const config = defineInfoschematic({
         label: 'Card',
         placement: {
           box: { height: 80, width: 140, x: 40, y: 60 },
-          ports: { east: 1, north: 0, south: 0, west: 0 },
+          ports: { east: 1, north: 0, south: 0, west: 0 }
         },
         scope: 'inside',
-        scopes: ['inside'],
-      },
+        scopes: ['inside']
+      }
     ],
     fabrics: [
       {
@@ -39,11 +36,11 @@ const config = defineInfoschematic({
         label: 'Fabric',
         placement: {
           box: { height: 120, width: 220, x: 360, y: 60 },
-          ports: { east: 0, north: 0, south: 0, west: 1 },
+          ports: { east: 0, north: 0, south: 0, west: 1 }
         },
         scope: 'inside',
-        scopes: ['inside'],
-      },
+        scopes: ['inside']
+      }
     ],
     flowFamilies: [
       {
@@ -51,16 +48,16 @@ const config = defineInfoschematic({
         description: 'Requests',
         id: 'request',
         label: 'Request',
-        prefix: 'REQ',
-      },
+        prefix: 'REQ'
+      }
     ],
     regions: [
       {
         box: { height: 160, radius: 8, width: 640, x: 0, y: 0 },
         frame: { style: 'solid' },
         id: 'region-one',
-        label: 'Region',
-      },
+        label: 'Region'
+      }
     ],
     scopes: [
       {
@@ -69,35 +66,33 @@ const config = defineInfoschematic({
         fill: '#eee',
         id: 'inside',
         label: 'Inside',
-        prefix: 'IN',
-      },
+        prefix: 'IN'
+      }
     ],
-    viewBox: { height: 480, width: 720, x: 0, y: 0 },
-  },
+    viewBox: { height: 480, width: 720, x: 0, y: 0 }
+  }
 })
 
 const card = defineArtefactSelection({
   code: 'CARD-01',
   geometry: 'box' as const,
   id: 'card-one',
-  kind: 'card' as const,
+  kind: 'card' as const
 })
 const region = defineArtefactSelection({
   code: null,
   geometry: 'box' as const,
   id: 'region-one',
-  kind: 'region' as const,
+  kind: 'region' as const
 })
 const graphic = defineArtefactSelection({
   code: null,
   geometry: 'box' as const,
   id: 'graphic-one',
-  kind: 'graphic' as const,
+  kind: 'graphic' as const
 })
 
-const editor = (
-  overrides: Partial<DetailsPanelEditor> = {},
-): DetailsPanelEditor => ({
+const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor => ({
   artefactCapabilities: undefined,
   artefactGeometry: undefined,
   artefactIssue: null,
@@ -136,7 +131,7 @@ const editor = (
   toggleView: vi.fn(),
   undo: vi.fn(),
   view: { grid: true, snapping: true },
-  ...overrides,
+  ...overrides
 })
 
 describe('DetailsPanel typed Design controls', () => {
@@ -145,17 +140,17 @@ describe('DetailsPanel typed Design controls', () => {
       artefactCapabilities: artefactCapabilities.card,
       artefactGeometry: {
         box: config.infoschematic.cards[0]!.placement.box,
-        role: 'box',
+        role: 'box'
       },
       artefactValue: config.infoschematic.cards[0],
-      selectedArtefact: card,
+      selectedArtefact: card
     })
     const contexts = detailsArtefactContexts(config, selected)
 
     expect(contexts.library.flow).toMatchObject({
       family: 'request',
       source: { component: 'card-one', port: 'E1' },
-      target: { component: 'fabric-one', port: 'W1' },
+      target: { component: 'fabric-one', port: 'W1' }
     })
   })
 
@@ -168,15 +163,15 @@ describe('DetailsPanel typed Design controls', () => {
           ...fabric,
           placement: {
             ...fabric.placement,
-            ports: { east: 0, north: 0, south: 0, west: 0 },
-          },
-        })),
-      },
+            ports: { east: 0, north: 0, south: 0, west: 0 }
+          }
+        }))
+      }
     }
     const selected = editor({
       artefactCapabilities: artefactCapabilities.card,
       artefactValue: config.infoschematic.cards[0],
-      selectedArtefact: card,
+      selectedArtefact: card
     })
 
     expect(detailsArtefactContexts(withoutTargetPorts, selected).library.flow).toBeUndefined()
@@ -186,13 +181,13 @@ describe('DetailsPanel typed Design controls', () => {
     const selected = editor({
       artefactCapabilities: artefactCapabilities.graphic,
       artefactIssue: 'Graphic graphic-one is referenced by a Story',
-      selectedArtefact: graphic,
+      selectedArtefact: graphic
     })
     const contexts = detailsArtefactContexts(config, selected)
     const html = renderToStaticMarkup(
       <InfoschematicContext.Provider value={createInfoschematicRuntime(config)}>
         <DesignDetails contexts={contexts} editor={selected} />
-      </InfoschematicContext.Provider>,
+      </InfoschematicContext.Provider>
     )
 
     expect(html).toContain('aria-label="Create Region"')
@@ -211,22 +206,22 @@ describe('DetailsPanel typed Design controls', () => {
       artefactGeometry: { box: { height: 160, width: 640, x: 0, y: 0 }, role: 'box' },
       artefactValue: config.infoschematic.regions[0],
       replaceArtefactProperties,
-      selectedArtefact: region,
+      selectedArtefact: region
     })
     const contexts = detailsArtefactContexts(config, selected)
     const html = renderToStaticMarkup(
       <InfoschematicContext.Provider value={createInfoschematicRuntime(config)}>
         <DesignDetails contexts={contexts} editor={selected} />
-      </InfoschematicContext.Provider>,
+      </InfoschematicContext.Provider>
     )
 
     expect(html).toContain('aria-label="Create Region"')
     artefactControlsEditorFor(selected).replaceArtefactProperties({
-      label: 'Renamed region',
+      label: 'Renamed region'
     })
     expect(replaceArtefactProperties).toHaveBeenCalledWith({
       kind: 'region',
-      value: { label: 'Renamed region' },
+      value: { label: 'Renamed region' }
     })
   })
 })

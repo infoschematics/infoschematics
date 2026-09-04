@@ -1,6 +1,6 @@
+import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { InfoschematicsExample, infoschematicsExampleDocumentTitle } from './InfoschematicsExample.tsx'
 
 describe('hosted Infoschematics example', () => {

@@ -1,8 +1,11 @@
-import { describe, expect, it } from 'vitest'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
+import { describe, expect, it } from 'vitest'
 import {
+  type ArtefactKind,
+  type ArtefactOperation,
+  type ArtefactSelection,
   artefactCan,
   artefactCapabilities,
   createArtefactOperation,
@@ -11,48 +14,45 @@ import {
   orderArtefactOperations,
   removeArtefactOperation,
   reorderArtefactOperation,
-  resizeArtefactOperation,
-  type ArtefactKind,
-  type ArtefactOperation,
-  type ArtefactSelection,
+  resizeArtefactOperation
 } from './editable.ts'
 
 const regionSelection = defineArtefactSelection({
   code: null,
   geometry: 'box',
   id: 'region-one',
-  kind: 'region',
+  kind: 'region'
 })
 const cardSelection = defineArtefactSelection({
   code: 'CARD-01',
   geometry: 'box',
   id: 'card-one',
-  kind: 'card',
+  kind: 'card'
 })
 const fabricSelection = defineArtefactSelection({
   code: 'FABRIC-01',
   geometry: 'box',
   id: 'fabric-one',
-  kind: 'fabric',
+  kind: 'fabric'
 })
 const flowSelection = defineArtefactSelection({
   code: 'FLOW-01',
   geometry: 'route',
   id: 'flow-one',
-  kind: 'flow',
+  kind: 'flow'
 })
 const graphicSelection = defineArtefactSelection({
   code: null,
   geometry: 'box',
   id: 'graphic-one',
-  kind: 'graphic',
+  kind: 'graphic'
 })
 
 const region: RegionConfig = {
   box: { height: 80, radius: 8, width: 400, x: 0, y: 10 },
   frame: { style: 'solid' },
   id: 'region-one',
-  label: 'Region one',
+  label: 'Region one'
 }
 const card: CardConfig = {
   code: 'CARD-01',
@@ -61,7 +61,7 @@ const card: CardConfig = {
   label: 'Card one',
   placement: { box: { height: 80, width: 120, x: 30, y: 40 } },
   scope: 'scope-one',
-  scopes: ['scope-one'],
+  scopes: ['scope-one']
 }
 const flow: FlowConfig = {
   code: 'FLOW-01',
@@ -69,27 +69,19 @@ const flow: FlowConfig = {
   id: 'flow-one',
   points: [
     { x: 0, y: 0 },
-    { x: 100, y: 0 },
+    { x: 100, y: 0 }
   ],
   source: 'card-one',
   sourcePort: 'E1',
   target: 'card-two',
-  targetPort: 'W1',
+  targetPort: 'W1'
 }
 
 describe('artefact capability matrix', () => {
-  const kinds: readonly ArtefactKind[] = [
-    'region',
-    'fabric',
-    'card',
-    'flow',
-    'graphic',
-  ]
+  const kinds: readonly ArtefactKind[] = ['region', 'fabric', 'card', 'flow', 'graphic']
 
   it('covers every supported operation for all five kinds', () => {
-    expect(Object.keys(artefactCapabilities)).toEqual(
-      expect.arrayContaining([...kinds]),
-    )
+    expect(Object.keys(artefactCapabilities)).toEqual(expect.arrayContaining([...kinds]))
     for (const kind of kinds) {
       expect(artefactCan(kind, 'create')).toBe(true)
       expect(artefactCan(kind, 'select')).toBe(true)
@@ -109,7 +101,7 @@ describe('artefact capability matrix', () => {
       fabricSelection,
       cardSelection,
       flowSelection,
-      graphicSelection,
+      graphicSelection
     ]
 
     expect(selections.map(({ kind, geometry, id, code }) => ({ kind, geometry, id, code }))).toEqual([
@@ -117,7 +109,7 @@ describe('artefact capability matrix', () => {
       { code: 'FABRIC-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' },
       { code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' },
       { code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' },
-      { code: null, geometry: 'box', id: 'graphic-one', kind: 'graphic' },
+      { code: null, geometry: 'box', id: 'graphic-one', kind: 'graphic' }
     ])
     expect(selections.every(Object.isFrozen)).toBe(true)
   })
@@ -132,13 +124,7 @@ describe('serialisable immutable operations', () => {
     expect(Object.isFrozen(operation?.value)).toBe(true)
     expect(Object.isFrozen(operation?.value.scopes)).toBe(true)
     expect(JSON.parse(JSON.stringify(operation))).toEqual(operation)
-    expect(
-      createArtefactOperation(
-        cardSelection,
-        { ...card, id: 'different-card' },
-        2,
-      ),
-    ).toBeUndefined()
+    expect(createArtefactOperation(cardSelection, { ...card, id: 'different-card' }, 2)).toBeUndefined()
   })
 
   it('moves boxes on both axes, clamps bounds, and refuses routes', () => {
@@ -147,29 +133,25 @@ describe('serialisable immutable operations', () => {
       regionSelection,
       { box: { height: 50, width: 50, x: 20, y: 20 }, role: 'box' },
       { dx: 280, dy: 180 },
-      bounds,
+      bounds
     )
     const movedCard = moveArtefactOperation(
       cardSelection,
       { box: { height: 40, width: 60, x: 20, y: 20 }, role: 'box' },
       { dx: 400, dy: -100 },
-      bounds,
+      bounds
     )
 
     expect(movedRegion?.geometry).toEqual({
       box: { height: 50, width: 50, x: 250, y: 150 },
-      role: 'box',
+      role: 'box'
     })
     expect(movedCard?.geometry).toEqual({
       box: { height: 40, width: 60, x: 240, y: 0 },
-      role: 'box',
+      role: 'box'
     })
     expect(
-      moveArtefactOperation(
-        flowSelection,
-        { points: flow.points, role: 'route' },
-        { dx: 10, dy: 10 },
-      ),
+      moveArtefactOperation(flowSelection, { points: flow.points, role: 'route' }, { dx: 10, dy: 10 })
     ).toBeUndefined()
   })
 
@@ -177,21 +159,21 @@ describe('serialisable immutable operations', () => {
     const resizedRegion = resizeArtefactOperation(
       regionSelection,
       { box: { height: 80, width: 100, x: 20, y: 10 }, role: 'box' },
-      { height: 2, width: 2 },
+      { height: 2, width: 2 }
     )
     const resizedCard = resizeArtefactOperation(
       cardSelection,
       { box: card.placement.box, role: 'box' },
-      { height: 1, width: 1 },
+      { height: 1, width: 1 }
     )
 
     expect(resizedRegion?.geometry).toEqual({
       box: { height: 20, width: 20, x: 20, y: 10 },
-      role: 'box',
+      role: 'box'
     })
     expect(resizedCard?.geometry).toMatchObject({
       box: { height: 40, width: 40 },
-      role: 'box',
+      role: 'box'
     })
   })
 
@@ -199,12 +181,12 @@ describe('serialisable immutable operations', () => {
     expect(reorderArtefactOperation(cardSelection, -2, 8, 3)).toMatchObject({
       from: 0,
       operation: 'reorder',
-      to: 2,
+      to: 2
     })
     expect(reorderArtefactOperation(cardSelection, 0, 1, 0)).toBeUndefined()
     expect(removeArtefactOperation(cardSelection)).toEqual({
       operation: 'remove',
-      target: cardSelection,
+      target: cardSelection
     })
   })
 })
@@ -220,21 +202,12 @@ describe('dependency-safe operation ordering', () => {
       createRegion!,
       removeArtefactOperation(regionSelection),
       removeArtefactOperation(cardSelection),
-      removeArtefactOperation(flowSelection),
+      removeArtefactOperation(flowSelection)
     ]
 
     expect(
-      orderArtefactOperations(operations).map(
-        (operation) => `${operation.operation}:${operation.target.kind}`,
-      ),
-    ).toEqual([
-      'create:region',
-      'create:card',
-      'create:flow',
-      'remove:flow',
-      'remove:card',
-      'remove:region',
-    ])
+      orderArtefactOperations(operations).map((operation) => `${operation.operation}:${operation.target.kind}`)
+    ).toEqual(['create:region', 'create:card', 'create:flow', 'remove:flow', 'remove:card', 'remove:region'])
     expect(orderArtefactOperations(operations)).not.toBe(operations)
     expect(Object.isFrozen(orderArtefactOperations(operations))).toBe(true)
   })

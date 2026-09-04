@@ -5,12 +5,12 @@ import {
   defineInfoschematicRenderers,
   InfoschematicRenderersContext,
   resolveInfoschematicRenderer,
-  useInfoschematicRenderers,
+  useInfoschematicRenderers
 } from './renderers.tsx'
 
 const acceptsProperties = (properties: RendererProperties | undefined) => ({
   valid: true as const,
-  properties: properties ?? {},
+  properties: properties ?? {}
 })
 
 const FirstFabric = ({ properties }: FabricRendererProps & { properties: RendererProperties }) => (
@@ -32,9 +32,9 @@ describe('renderer registry', () => {
               : { valid: false as const, reason: 'label is required' },
           component: ({ properties }: FabricRendererProps & { properties: Readonly<{ label: string }> }) => (
             <text>{properties.label}</text>
-          ),
-        },
-      ],
+          )
+        }
+      ]
     })
 
     expectTypeOf(registry.fabrics[0].key).toEqualTypeOf<'typed-fabric'>()
@@ -50,21 +50,21 @@ describe('renderer registry', () => {
         key: 'same',
         schemaVersion: 1,
         validateProperties: acceptsProperties,
-        component: FirstFabric,
+        component: FirstFabric
       },
       {
         key: 'same',
         schemaVersion: 1,
         validateProperties: acceptsProperties,
-        component: SecondFabric,
-      },
+        component: SecondFabric
+      }
     ]
     const registry = defineInfoschematicRenderers({ fabrics: definitions, onDiagnostic })
 
     definitions[0] = { ...definitions[0], key: 'changed' }
 
     expect(onDiagnostic).toHaveBeenCalledWith(
-      expect.objectContaining({ code: 'duplicate-key', key: 'same', kind: 'fabric' }),
+      expect.objectContaining({ code: 'duplicate-key', key: 'same', kind: 'fabric' })
     )
     expect(resolveInfoschematicRenderer(registry, 'fabric', 'same', { label: 'kept' })?.Component).toBe(FirstFabric)
   })
@@ -77,13 +77,13 @@ describe('renderer registry', () => {
           key: 'future',
           schemaVersion: 2,
           validateProperties: acceptsProperties,
-          component: FirstFabric,
+          component: FirstFabric
         },
         {
           key: 'invalid',
           schemaVersion: 1,
           validateProperties: () => ({ valid: false as const, reason: 'expected label' }),
-          component: FirstFabric,
+          component: FirstFabric
         },
         {
           key: 'throws',
@@ -91,10 +91,10 @@ describe('renderer registry', () => {
           validateProperties: () => {
             throw new Error('bad validator')
           },
-          component: FirstFabric,
-        },
+          component: FirstFabric
+        }
       ],
-      onDiagnostic,
+      onDiagnostic
     })
 
     expect(resolveInfoschematicRenderer(registry, 'fabric', 'missing', undefined, 'fabric-1')).toBeUndefined()
@@ -106,7 +106,7 @@ describe('renderer registry', () => {
       'unknown-key',
       'unsupported-version',
       'invalid-properties',
-      'invalid-properties',
+      'invalid-properties'
     ])
     expect(onDiagnostic).toHaveBeenLastCalledWith(expect.objectContaining({ artefactId: 'fabric-4' }))
   })
@@ -119,6 +119,7 @@ describe('renderer registry', () => {
       const HostDefinitions = renderers.definitions
       const HostIcon = renderers.scopeIcons?.scope
       return (
+        // biome-ignore lint/a11y/noSvgWithoutTitle: test-only markup asserting server-rendered content, not user-facing
         <svg>
           {HostDefinitions ? <HostDefinitions /> : null}
           {HostIcon ? <HostIcon aria-hidden={true} size={12} /> : null}
@@ -130,7 +131,7 @@ describe('renderer registry', () => {
     const markup = renderToStaticMarkup(
       <InfoschematicRenderersContext value={registry}>
         <Consumer />
-      </InfoschematicRenderersContext>,
+      </InfoschematicRenderersContext>
     )
 
     expect(markup).toContain('id="definition"')

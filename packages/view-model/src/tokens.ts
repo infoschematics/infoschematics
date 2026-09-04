@@ -1,9 +1,7 @@
 export type VisualTokenValue = boolean | number | string
 
-const tokenGroup = <
-  const Tokens extends Readonly<Record<string, VisualTokenValue>>,
->(
-  tokens: Tokens,
+const tokenGroup = <const Tokens extends Readonly<Record<string, VisualTokenValue>>>(
+  tokens: Tokens
 ): Readonly<Tokens> => Object.freeze(tokens)
 
 /**
@@ -22,7 +20,7 @@ export const visualTokens = Object.freeze({
       gridMajorSize: 50,
       gridMinorStrokeWidth: 0.5,
       gridSize: 10,
-      pointRadius: 6,
+      pointRadius: 6
     }),
     surfaces: tokenGroup({
       backdrop: '#081725',
@@ -35,7 +33,7 @@ export const visualTokens = Object.freeze({
       regionDash: '8 6',
       regionDot: '1.5 5',
       regionFill: '#12273b24',
-      regionStroke: '#b5c4d54d',
+      regionStroke: '#b5c4d54d'
     }),
     text: tokenGroup({
       bodyFamily: 'Manrope, Arial, sans-serif',
@@ -44,7 +42,7 @@ export const visualTokens = Object.freeze({
       label: '#f2f7ff',
       muted: '#7f9bb3',
       region: '#ffffff65',
-      strong: '#dff3ff',
+      strong: '#dff3ff'
     }),
     flows: tokenGroup({
       dash: '13 11',
@@ -54,18 +52,18 @@ export const visualTokens = Object.freeze({
       pipeWidth: 9,
       routeOpacity: 0.95,
       routeWidth: 4,
-      signalStillWidth: 7,
+      signalStillWidth: 7
     }),
     focus: tokenGroup({
       dimmedOpacity: 0.14,
       focusedOpacity: 1,
       transitionDuration: '180ms',
-      transitionTiming: 'ease-out',
+      transitionTiming: 'ease-out'
     }),
     selection: tokenGroup({
       focusedStroke: '#cfe9ff',
       pointed: '#79c9ff',
-      selected: '#82b366',
+      selected: '#82b366'
     }),
     /** Defaults for deterministic output that never depend on UI motion. */
     output: tokenGroup({
@@ -91,9 +89,9 @@ export const visualTokens = Object.freeze({
       text: '#27313a',
       textMuted: '#46515d',
       textMutedInverse: '#9fb3c8',
-      unfocusedOpacity: 0.2,
-    }),
-  }),
+      unfocusedOpacity: 0.2
+    })
+  })
 })
 
 /** Preserved public scalar while consumers move to the semantic manifest. */

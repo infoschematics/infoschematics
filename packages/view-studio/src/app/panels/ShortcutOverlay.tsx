@@ -1,5 +1,5 @@
-import { X } from 'lucide-react'
 import { useInfoschematic } from '@infoschematics/view-canvas'
+import { X } from 'lucide-react'
 
 // What the keyboard does and what the Infoschematic is made of, side by side. The two
 // answer the questions a visitor arrives with - how do I drive this, and what
@@ -11,24 +11,24 @@ const groups = [
   {
     bindings: [
       ['?', 'Show and hide this'],
-      ['Esc', 'Close it'],
+      ['Esc', 'Close it']
     ],
-    label: 'Anywhere',
+    label: 'Anywhere'
   },
   {
     bindings: [
       ['←  →', 'Step back and forward'],
       ['Space', 'Hold and release the auto-advance'],
-      ['Esc', 'Stop the Story'],
+      ['Esc', 'Stop the Story']
     ],
-    label: 'While a Story runs',
+    label: 'While a Story runs'
   },
   {
     bindings: [
       ['←  →', 'Step to the previous or next Thematic Scene, wrapping at either end'],
-      ['Esc', 'Clear the Theme'],
+      ['Esc', 'Clear the Theme']
     ],
-    label: 'While a Theme is open',
+    label: 'While a Theme is open'
   },
   {
     bindings: [
@@ -39,10 +39,10 @@ const groups = [
       ['Shift, held', 'Offer to add or remove a waypoint on the selected flow'],
       ['Delete', 'Mark the selection for removal, and lines a card cannot lose'],
       ['Drag port to port', 'Make a flow between them, choosing its family at the drop'],
-      ['Esc', 'Clear the selection'],
+      ['Esc', 'Clear the selection']
     ],
-    label: 'In edit mode',
-  },
+    label: 'In edit mode'
+  }
 ] as const
 
 /*
@@ -56,12 +56,12 @@ const forms = [
   ['Card', 'An artefact that originates, transforms or consumes a Flow.'],
   [
     'Card held in a socket',
-    'An Adapter and the Card it adapts. Containment is the relationship, so no line is drawn between them.',
+    'An Adapter and the Card it adapts. Containment is the relationship, so no line is drawn between them.'
   ],
   ['Fabric', 'A background region that Flows cross rather than originate in.'],
   ['Line', 'A flow. Its colour is the family it carries, and its label is its code.'],
   ['Broken line', 'A logical relationship rather than a carried Flow.'],
-  ['Two arrowheads', 'The relationship runs both ways.'],
+  ['Two arrowheads', 'The relationship runs both ways.']
 ] as const
 
 export function ShortcutOverlay({ onClose }: { onClose: () => void }) {

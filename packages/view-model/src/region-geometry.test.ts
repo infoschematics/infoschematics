@@ -11,7 +11,7 @@ const treatment = (value: Partial<ResolvedRegionTreatment>): ResolvedRegionTreat
   label: null,
   labelOffset: null,
   labelTreatment: 'plain',
-  ...value,
+  ...value
 })
 
 describe('region label geometry', () => {
@@ -24,12 +24,12 @@ describe('region label geometry', () => {
     ['east', 174, 70, 'end'],
     ['south-west', 26, 104, 'start'],
     ['south', 100, 104, 'middle'],
-    ['south-east', 174, 104, 'end'],
+    ['south-east', 174, 104, 'end']
   ] as const)('places %s deterministically', (placement, x, y, textAnchor) => {
     const geometry = regionGeometry({
       box,
       label: 'Region',
-      treatment: treatment({ frame: 'solid', label: placement as RegionLabelPlacement }),
+      treatment: treatment({ frame: 'solid', label: placement as RegionLabelPlacement })
     })
     expect(geometry.label).toEqual({ dominantBaseline: 'middle', length: null, placement, textAnchor, x, y })
   })
@@ -38,7 +38,7 @@ describe('region label geometry', () => {
     const geometry = regionGeometry({
       box,
       label: 'Region',
-      treatment: treatment({ frame: 'solid', label: 'north-west', labelTreatment: 'notched' }),
+      treatment: treatment({ frame: 'solid', label: 'north-west', labelTreatment: 'notched' })
     })
     expect(geometry.label?.y).toBe(20)
     expect(geometry.notch).not.toBeNull()
@@ -48,7 +48,7 @@ describe('region label geometry', () => {
     const geometry = regionGeometry({
       box,
       label: '',
-      treatment: treatment({ frame: 'solid', labelTreatment: 'notched' }),
+      treatment: treatment({ frame: 'solid', labelTreatment: 'notched' })
     })
     expect(geometry.label).toBeNull()
     expect(geometry.notch).toBeNull()
@@ -65,7 +65,7 @@ describe('region outline geometry', () => {
     ['south-west', 'south', 48.8, 37.6],
     ['south-east', 'south', 151.2, 37.6],
     ['west', 'west', 70, regionGeometryDefaults.labelHeight],
-    ['east', 'east', 70, regionGeometryDefaults.labelHeight],
+    ['east', 'east', 70, regionGeometryDefaults.labelHeight]
   ] as const)('keeps %s notch padding symmetric', (placement, edge, midpoint, labelExtent) => {
     const geometry = regionGeometry({
       box,
@@ -73,14 +73,14 @@ describe('region outline geometry', () => {
       treatment: treatment({
         frame: 'solid',
         label: placement as RegionLabelPlacement,
-        labelTreatment: 'notched',
-      }),
+        labelTreatment: 'notched'
+      })
     })
     expect(geometry.notch?.edge).toBe(edge)
     expect(((geometry.notch?.start ?? 0) + (geometry.notch?.end ?? 0)) / 2).toBeCloseTo(midpoint, 9)
     expect((geometry.notch?.end ?? 0) - (geometry.notch?.start ?? 0)).toBeCloseTo(
       labelExtent + regionGeometryDefaults.notchPadding * 2,
-      9,
+      9
     )
     expect(geometry.outline?.endsWith(' Z')).toBe(false)
   })
@@ -90,13 +90,13 @@ describe('region outline geometry', () => {
       regionGeometry({
         box,
         label: 'Zone',
-        treatment: treatment({ label: 'north-west' }),
-      }).outline,
+        treatment: treatment({ label: 'north-west' })
+      }).outline
     ).toBeNull()
     const centered = regionGeometry({
       box,
       label: 'Lane',
-      treatment: treatment({ frame: 'solid', label: 'center', labelTreatment: 'notched' }),
+      treatment: treatment({ frame: 'solid', label: 'center', labelTreatment: 'notched' })
     })
     expect(centered.notch).toBeNull()
     expect(centered.outline?.endsWith(' Z')).toBe(true)
@@ -106,7 +106,7 @@ describe('region outline geometry', () => {
     const input = {
       box: { height: 12, width: 20, x: 1, y: 2 },
       label: 'A',
-      treatment: treatment({ frame: 'solid', label: 'north' }),
+      treatment: treatment({ frame: 'solid', label: 'north' })
     }
     expect(regionGeometry(input).outline).toBe(regionGeometry(input).outline)
     expect(regionGeometry(input).outline).toContain('A6 6')

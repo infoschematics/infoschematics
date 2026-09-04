@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
 
 const config = defineInfoschematic({
@@ -16,8 +16,8 @@ const config = defineInfoschematic({
         fill: '#dbeafe',
         id: 'system',
         label: 'System',
-        prefix: 'SYS',
-      },
+        prefix: 'SYS'
+      }
     ],
     flowFamilies: [
       {
@@ -25,8 +25,8 @@ const config = defineInfoschematic({
         description: 'Requests',
         id: 'request',
         label: 'Request',
-        prefix: 'REQ',
-      },
+        prefix: 'REQ'
+      }
     ],
     regions: [
       { box: { height: 280, width: 620, x: 10, y: 20 }, fill: '#102638', id: 'live', label: 'Live' },
@@ -35,8 +35,8 @@ const config = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'delivery',
         label: 'Delivery',
-        labelMount: 'boundary',
-      },
+        labelMount: 'boundary'
+      }
     ],
     fabrics: [
       {
@@ -47,8 +47,8 @@ const config = defineInfoschematic({
         label: 'Fabric',
         placement: { box: { height: 60, width: 180, x: 40, y: 60 } },
         scope: 'system',
-        scopes: ['system'],
-      },
+        scopes: ['system']
+      }
     ],
     cards: [
       {
@@ -58,7 +58,7 @@ const config = defineInfoschematic({
         label: 'Card',
         placement: { box: { height: 60, width: 120, x: 80, y: 160 }, ports: { east: 1 } },
         scope: 'system',
-        scopes: ['system'],
+        scopes: ['system']
       },
       {
         code: 'SYS-003',
@@ -67,8 +67,8 @@ const config = defineInfoschematic({
         label: 'Target',
         placement: { box: { height: 60, width: 120, x: 420, y: 160 }, ports: { west: 1 } },
         scope: 'system',
-        scopes: ['system'],
-      },
+        scopes: ['system']
+      }
     ],
     flows: [
       {
@@ -77,13 +77,13 @@ const config = defineInfoschematic({
         id: 'request-flow',
         points: [
           { x: 200, y: 190 },
-          { x: 420, y: 190 },
+          { x: 420, y: 190 }
         ],
         source: 'card',
         sourcePort: 'E1',
         target: 'target',
-        targetPort: 'W1',
-      },
+        targetPort: 'W1'
+      }
     ],
     graphics: [
       {
@@ -91,10 +91,10 @@ const config = defineInfoschematic({
         label: 'Annotation',
         placement: { height: 40, width: 100, x: 260, y: 70 },
         properties: { caption: 'Authored' },
-        renderer: 'graphic-renderer',
-      },
-    ],
-  },
+        renderer: 'graphic-renderer'
+      }
+    ]
+  }
 })
 
 const selections = [
@@ -102,7 +102,7 @@ const selections = [
   { code: 'SYS-001', geometry: 'box', id: 'fabric', kind: 'fabric' },
   { code: 'SYS-002', geometry: 'box', id: 'card', kind: 'card' },
   { code: 'REQ-001', geometry: 'route', id: 'request-flow', kind: 'flow' },
-  { code: null, geometry: 'box', id: 'annotation', kind: 'graphic' },
+  { code: null, geometry: 'box', id: 'annotation', kind: 'graphic' }
 ] as const satisfies readonly ArtefactSelection[]
 
 describe('InfoschematicDiagram Design editing', () => {
@@ -133,7 +133,7 @@ describe('InfoschematicDiagram Design editing', () => {
           onArtefactResize={() => undefined}
           onArtefactSelect={() => undefined}
           selectedArtefact={selection}
-        />,
+        />
       )
       const label =
         selection.kind === 'region'
@@ -148,7 +148,7 @@ describe('InfoschematicDiagram Design editing', () => {
       expect(markup).toContain(`aria-label="Move ${label} earlier"`)
       expect(markup).toContain(`aria-label="Move ${label} later"`)
       expect(markup).toContain(`aria-label="Remove ${label}"`)
-    },
+    }
   )
 
   it('keeps Flow movement and resizing on the existing route-specific controls', () => {
@@ -162,7 +162,7 @@ describe('InfoschematicDiagram Design editing', () => {
         onArtefactResize={() => undefined}
         onArtefactSelect={() => undefined}
         selectedArtefact={flow}
-      />,
+      />
     )
 
     expect(markup).toContain('aria-label="Move REQ-001 earlier"')
@@ -173,10 +173,7 @@ describe('InfoschematicDiagram Design editing', () => {
     const source = await readFile(new URL('./InfoschematicDiagram.tsx', import.meta.url), 'utf8')
     const flowSection = source.slice(source.indexOf('const renderFlow'), source.indexOf('return (\n    <svg'))
     const adapterStart = source.indexOf('const heldSelection')
-    const adapterSection = source.slice(
-      adapterStart,
-      source.indexOf('{/* Geometry from the placeables', adapterStart),
-    )
+    const adapterSection = source.slice(adapterStart, source.indexOf('{/* Geometry from the placeables', adapterStart))
 
     expect(source).toContain('{ x: true, y: true }')
     expect(source).toContain('axes={{ height: true, width: true }}')

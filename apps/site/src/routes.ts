@@ -35,7 +35,5 @@ export function isSystemExamplePath(pathname: string) {
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {
-  return documentationRoutes.find(
-    (route) => pathname === route.path || pathname === route.path.slice(0, -1)
-  )
+  return documentationRoutes.find((route) => pathname === route.path || pathname === route.path.slice(0, -1))
 }

@@ -20,3 +20,4 @@ Decision records explain why Infoschematics is shaped as it is. They state the c
 16. [ADR-INFOSCHEMATICS-010](ADR-INFOSCHEMATICS-010-coordinated-package-release-contract.md) — seven public packages share one compiled, dependency-closed, human-authorised release contract.
 17. [ADR-INFOSCHEMATICS-011](ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md) — authored presentation intent, output-specific Card detail, invariant tokens, Domain classification, and Scope applicability remain separate concerns.
 18. [ADR-INFOSCHEMATICS-012](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) — Flow signals are host- or Scene-owned runtime occurrences with deterministic accessible fallbacks.
+19. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — the root build tsconfig is a shared base file, not the standard's per-workspace shape marker.

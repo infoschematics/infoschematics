@@ -2,26 +2,6 @@
   "name": "@infoschematics/view-canvas",
   "description": "The interactive Infoschematic Canvas view for React hosts.",
   "version": "0.1.0",
-  "type": "module",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/infoschematics/infoschematics.git",
-    "directory": "packages/view-canvas"
-  },
-  "engines": { "node": ">=22" },
-  "publishConfig": { "access": "public" },
-  "files": ["dist"],
-  "sideEffects": ["./dist/styles.css"],
-  "scripts": {
-    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/styles.css dist/styles.css ../../LICENSE dist/LICENSE",
-    "clean": "node build.mjs --clean"
-  },
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./styles.css": "./dist/styles.css"
-  },
   "dependencies": {
     "@infoschematics/domain-model": "0.1.0",
     "@infoschematics/view-model": "0.1.0"
@@ -29,8 +9,39 @@
   "devDependencies": {
     "@infoschematics/domain-core": "0.1.0"
   },
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles.css": "./dist/styles.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
   "peerDependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
-  }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infoschematics/infoschematics.git",
+    "directory": "packages/view-canvas"
+  },
+  "scripts": {
+    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/styles.css dist/styles.css ../../LICENSE dist/LICENSE",
+    "clean": "node build.mjs --clean"
+  },
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

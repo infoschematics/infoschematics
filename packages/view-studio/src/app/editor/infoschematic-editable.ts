@@ -1,25 +1,25 @@
+import type { FabricConfig } from '@infoschematics/domain-model/fabric'
+import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type {
   ArtefactCapabilities,
-  ArtefactSelection,
   AttachedEnd,
   Change,
   CreatedComponent,
   EditableDiagram,
   Handle,
-  Placement,
+  Placement
 } from '@infoschematics/view-model/editable'
 import {
   artefactCapabilities,
   artefactResizeMinimums,
-  defineArtefactSelection,
+  defineArtefactSelection
 } from '@infoschematics/view-model/editable'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/view-model/geometry'
 import { guidesFrom } from '@infoschematics/view-model/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/view-model/ports'
-import type { RegionConfig } from '@infoschematics/domain-model/region'
-import type { FabricConfig } from '@infoschematics/domain-model/fabric'
-import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+
 type InfoschematicScopeId = string
 
 type AuthoredEditableArtefacts = Readonly<{
@@ -31,7 +31,7 @@ const adapterCapabilities = (canMove: boolean): ArtefactCapabilities =>
   Object.freeze({
     ...artefactCapabilities.card,
     move: canMove,
-    resize: false,
+    resize: false
   })
 
 type InfoschematicFlow = {
@@ -72,26 +72,26 @@ type EditableModel = {
   register: { byCode: (code: string) => unknown }
   registerWith: (created: readonly CreatedComponent[]) => {
     cardAt: (
-      code: string,
+      code: string
     ) => { code: string; detail?: string; group?: string; id: string; label: string; wraps?: string } | undefined
   }
   placeables: (
     scopes: ReadonlySet<string>,
-    drafts?: { created?: readonly CreatedComponent[]; offsets?: ReadonlyMap<string, Offset> },
+    drafts?: { created?: readonly CreatedComponent[]; offsets?: ReadonlyMap<string, Offset> }
   ) => readonly { box: Box; code: string; id: string; ports?: PortCounts }[]
   annotationLabelPositions: (
     flows: readonly InfoschematicFlow[],
     scopes: ReadonlySet<string>,
-    labels?: ReadonlyMap<string, number>,
+    labels?: ReadonlyMap<string, number>
   ) => ReadonlyMap<string, Point>
   flowsAfterAttachments: (
     flows: readonly InfoschematicFlow[],
     attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }>,
-    portAt: (endpoint: string, port: string) => Point | undefined,
+    portAt: (endpoint: string, port: string) => Point | undefined
   ) => readonly InfoschematicFlow[]
   flowsAfterMoves: (
     flows: readonly InfoschematicFlow[],
-    drafts: ReadonlyMap<string, Offset>,
+    drafts: ReadonlyMap<string, Offset>
   ) => readonly InfoschematicFlow[]
 }
 
@@ -106,7 +106,7 @@ export const infoschematicEditable = (
   // keeps working unchanged; supplied by the app, which is the only place that
   // holds drafts.
   createdCards: readonly CreatedComponent[] = [],
-  authoredArtefacts: AuthoredEditableArtefacts = {},
+  authoredArtefacts: AuthoredEditableArtefacts = {}
 ): EditableDiagram => {
   const register = model.registerWith(createdCards)
   /*
@@ -142,7 +142,7 @@ export const infoschematicEditable = (
   }
 
   const usedPorts = new Set(
-    flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`]),
+    flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`])
   )
 
   // Geometry from the placeables and kind from the register, which is the whole
@@ -158,7 +158,7 @@ export const infoschematicEditable = (
       code: card.code,
       geometry: 'box' as const,
       id: card.id,
-      kind: 'card' as const,
+      kind: 'card' as const
     })
 
   const componentSelectionFor = (code: string) => {
@@ -172,7 +172,7 @@ export const infoschematicEditable = (
           capabilities: artefactCapabilities.card,
           geometry: { box: boxFor(code, origin), role: 'box' as const },
           movementTarget: selection,
-          selection,
+          selection
         }
       }
 
@@ -183,16 +183,12 @@ export const infoschematicEditable = (
         capabilities: adapterCapabilities(Boolean(wrapped)),
         geometry: { box: boxFor(code, origin), role: 'box' as const },
         movementTarget,
-        selection,
+        selection
       }
     }
 
-    const authored = authoredArtefacts.fabrics?.find(
-      (fabric) => fabric.code === code,
-    )
-    const placeable = placeables(visibleScopes).find(
-      (candidate) => candidate.code === code,
-    )
+    const authored = authoredArtefacts.fabrics?.find((fabric) => fabric.code === code)
+    const placeable = placeables(visibleScopes).find((candidate) => candidate.code === code)
     if (!authored && !placeable) return undefined
     const box = authored?.placement.box ?? placeable?.box
     if (!box) return undefined
@@ -200,13 +196,13 @@ export const infoschematicEditable = (
       code: authored?.code ?? code,
       geometry: 'box' as const,
       id: authored?.id ?? placeable?.id ?? code,
-      kind: 'fabric' as const,
+      kind: 'fabric' as const
     })
     return {
       capabilities: artefactCapabilities.fabric,
       geometry: { box: boxFor(code, box), role: 'box' as const },
       movementTarget: selection,
-      selection,
+      selection
     }
   }
 
@@ -223,55 +219,51 @@ export const infoschematicEditable = (
         code: flow.code,
         geometry: 'route' as const,
         id: flow.id,
-        kind: 'flow' as const,
+        kind: 'flow' as const
       })
       return {
         capabilities: artefactCapabilities.flow,
         geometry: { points: flow.points, role: 'route' as const },
         movementTarget: selection,
-        selection,
+        selection
       }
     }
     if (key.startsWith('region:')) {
-      const region = model.regions.find(
-        (candidate) => candidate.id === key.slice('region:'.length),
-      )
+      const region = model.regions.find((candidate) => candidate.id === key.slice('region:'.length))
       if (!region) return undefined
       const selection = defineArtefactSelection({
         code: null,
         geometry: 'box' as const,
         id: region.id,
-        kind: 'region' as const,
+        kind: 'region' as const
       })
       return {
         capabilities: artefactCapabilities.region,
         geometry: { box: region.box, role: 'box' as const },
         movementTarget: selection,
-        selection,
+        selection
       }
     }
     if (key.startsWith('graphic:')) {
-      const graphic = authoredArtefacts.graphics?.find(
-        (candidate) => candidate.id === key.slice('graphic:'.length),
-      )
+      const graphic = authoredArtefacts.graphics?.find((candidate) => candidate.id === key.slice('graphic:'.length))
       if (!graphic) return undefined
       const selection = defineArtefactSelection({
         code: null,
         geometry: 'box' as const,
         id: graphic.id,
-        kind: 'graphic' as const,
+        kind: 'graphic' as const
       })
       const box = graphic.placement ?? {
         height: artefactResizeMinimums.graphic.height ?? 1,
         width: artefactResizeMinimums.graphic.width ?? 1,
         x: 0,
-        y: 0,
+        y: 0
       }
       return {
         capabilities: artefactCapabilities.graphic,
         geometry: { box, role: 'box' as const },
         movementTarget: selection,
-        selection,
+        selection
       }
     }
 
@@ -281,13 +273,13 @@ export const infoschematicEditable = (
         code: flow.code,
         geometry: 'route' as const,
         id: flow.id,
-        kind: 'flow' as const,
+        kind: 'flow' as const
       })
       return {
         capabilities: artefactCapabilities.flow,
         geometry: { points: flow.points, role: 'route' as const },
         movementTarget: selection,
-        selection,
+        selection
       }
     }
 
@@ -312,7 +304,7 @@ export const infoschematicEditable = (
         flows.flatMap((other) => {
           const at = positions.get(other.id)
           return at && other.code !== key ? [at] : []
-        }),
+        })
       )
 
       // Along a horizontal run only x can move, and the reverse on a vertical
@@ -333,7 +325,7 @@ export const infoschematicEditable = (
       ...placeables(visibleScopes).map((service) => ({
         at: boxCentreOf(boxFor(service.code, service.box)),
         key: service.code,
-        kind: 'component' as const,
+        kind: 'component' as const
       })),
       // Regions are geography, not components - they are handles only so the
       // panel can be told what a reader clicked, never so one can be dragged.
@@ -344,21 +336,21 @@ export const infoschematicEditable = (
         portsForBox(boxFor(placeable.code, placeable.box), placeable.ports).map((port) => ({
           at: port.at,
           key: `port:${placeable.code}:${port.id}`,
-          kind: 'port' as const,
-        })),
+          kind: 'port' as const
+        }))
       ),
       ...flows.flatMap((flow) =>
         flow.points.slice(1, -1).map((point, offset) => ({
           at: point,
           key: `waypoint:${flow.code}:${offset + 1}`,
-          kind: 'waypoint' as const,
-        })),
+          kind: 'waypoint' as const
+        }))
       ),
       ...model.regions.map((region) => ({
         at: boxCentreOf(region.box),
         key: `region:${region.id}`,
-        kind: 'region' as const,
-      })),
+        kind: 'region' as const
+      }))
     ],
 
     // A label lives on its line, so its drop is a distance along it rather than
@@ -438,11 +430,11 @@ export const infoschematicEditable = (
           const nearest = [...after].sort(
             (left, right) =>
               Math.hypot(left.at.x - was.at.x, left.at.y - was.at.y) -
-              Math.hypot(right.at.x - was.at.x, right.at.y - was.at.y),
+              Math.hypot(right.at.x - was.at.x, right.at.y - was.at.y)
           )[0]
           if (!nearest || nearest.id === flow[`${end}Port`]) return []
           return [{ code: flow.code, component: placeable.id, end, port: nearest.id }]
-        }),
+        })
       )
     },
 
@@ -523,8 +515,8 @@ export const infoschematicEditable = (
             key: flow.code,
             kind: 'label' as const,
             offset: { dx: 0, dy: 0 },
-            source: `${flow.code}  ->  points: [${list}],`,
-          },
+            source: `${flow.code}  ->  points: [${list}],`
+          }
         ]
       })
     },
@@ -555,7 +547,7 @@ export const infoschematicEditable = (
           at: port.at,
           side: sideNames[portId[0]] ?? portId[0],
           number: Number(portId.slice(1)),
-          used: usedPorts.has(`${placeable.id}:${portId}`),
+          used: usedPorts.has(`${placeable.id}:${portId}`)
         }
       }
 
@@ -575,7 +567,7 @@ export const infoschematicEditable = (
           kind: 'box',
           label: 'Region',
           box: { x: region.box.x, y: region.box.y, width: region.box.width, height: region.box.height },
-          editable: [],
+          editable: []
         }
       }
 
@@ -586,7 +578,7 @@ export const infoschematicEditable = (
           label: 'Flow',
           from: `${model.endpointCodes.get(flow.source) ?? flow.source}:${flow.sourcePort}`,
           to: `${model.endpointCodes.get(flow.target) ?? flow.target}:${flow.targetPort}`,
-          points: flow.points.length,
+          points: flow.points.length
         }
       }
 
@@ -606,6 +598,6 @@ export const infoschematicEditable = (
       return card.wraps
         ? { kind: 'box', label: 'Adapter', box, editable: [] }
         : { kind: 'box', label: 'Standard card', box, editable: ['x', 'y'] }
-    },
+    }
   }
 }

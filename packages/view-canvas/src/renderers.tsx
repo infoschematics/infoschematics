@@ -1,9 +1,9 @@
-import { createContext, useContext } from 'react'
-import type { ComponentType, ReactNode } from 'react'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import type { Box } from '@infoschematics/view-model/geometry'
+import type { ComponentType, ReactNode } from 'react'
+import { createContext, useContext } from 'react'
 
 export type RendererKind = 'fabric' | 'graphic' | 'callout'
 
@@ -13,10 +13,7 @@ export type RendererValidationResult<Properties extends RendererProperties = Ren
   | Readonly<{ valid: true; properties: Properties }>
   | Readonly<{ valid: false; reason: string }>
 
-export type RendererDefinition<
-  Props,
-  Properties extends RendererProperties = RendererProperties,
-> = Readonly<{
+export type RendererDefinition<Props, Properties extends RendererProperties = RendererProperties> = Readonly<{
   key: string
   schemaVersion: number
   validateProperties: (properties: RendererProperties | undefined) => RendererValidationResult<Properties>
@@ -55,11 +52,7 @@ export type CalloutRendererDefinition<Properties extends RendererProperties = Re
   Properties
 >
 
-export type RendererDiagnosticCode =
-  | 'unknown-key'
-  | 'unsupported-version'
-  | 'invalid-properties'
-  | 'duplicate-key'
+export type RendererDiagnosticCode = 'unknown-key' | 'unsupported-version' | 'invalid-properties' | 'duplicate-key'
 
 export type RendererDiagnostic = Readonly<{
   code: RendererDiagnosticCode
@@ -86,7 +79,7 @@ type RendererCollection<Props> =
   | Readonly<Record<string, ComponentType<Props>>>
 
 const isDefinitionCollection = <Props,>(
-  collection: RendererCollection<Props>,
+  collection: RendererCollection<Props>
 ): collection is readonly RendererDefinitionShape<Props>[] => Array.isArray(collection)
 
 /**
@@ -117,13 +110,13 @@ const emptyProperties: RendererProperties = Object.freeze({})
 
 const diagnosticMessage = (diagnostic: Omit<RendererDiagnostic, 'message'>, detail: string): RendererDiagnostic => ({
   ...diagnostic,
-  message: `${diagnostic.kind} renderer "${diagnostic.key}": ${detail}`,
+  message: `${diagnostic.kind} renderer "${diagnostic.key}": ${detail}`
 })
 
 const freezeCollection = <Props,>(
   collection: RendererCollection<Props> | undefined,
   kind: RendererKind,
-  onDiagnostic: RendererDiagnosticHandler | undefined,
+  onDiagnostic: RendererDiagnosticHandler | undefined
 ): RendererCollection<Props> | undefined => {
   if (!collection) return undefined
 
@@ -135,8 +128,8 @@ const freezeCollection = <Props,>(
       onDiagnostic?.(
         diagnosticMessage(
           { code: 'duplicate-key', kind, key: definition.key, schemaVersion: definition.schemaVersion },
-          'duplicate registration ignored; the first definition wins',
-        ),
+          'duplicate registration ignored; the first definition wins'
+        )
       )
     } else {
       keys.add(definition.key)
@@ -153,19 +146,22 @@ const freezeCollection = <Props,>(
  * retained in the returned type.
  */
 export function defineInfoschematicRenderers<const Renderers extends InfoschematicRenderers>(
-  renderers: Renderers,
+  renderers: Renderers
 ): Readonly<Renderers> {
   const frozen = {
     ...renderers,
     fabrics: freezeCollection(renderers.fabrics, 'fabric', renderers.onDiagnostic),
     graphics: freezeCollection(renderers.graphics, 'graphic', renderers.onDiagnostic),
     callouts: freezeCollection(renderers.callouts, 'callout', renderers.onDiagnostic),
-    scopeIcons: renderers.scopeIcons ? Object.freeze({ ...renderers.scopeIcons }) : undefined,
+    scopeIcons: renderers.scopeIcons ? Object.freeze({ ...renderers.scopeIcons }) : undefined
   }
   return Object.freeze(frozen) as Readonly<Renderers>
 }
 
-const collectionFor = (renderers: InfoschematicRenderers, kind: RendererKind): RendererCollection<unknown> | undefined => {
+const collectionFor = (
+  renderers: InfoschematicRenderers,
+  kind: RendererKind
+): RendererCollection<unknown> | undefined => {
   if (kind === 'fabric') return renderers.fabrics as RendererCollection<unknown> | undefined
   if (kind === 'graphic') return renderers.graphics as RendererCollection<unknown> | undefined
   return renderers.callouts as RendererCollection<unknown> | undefined
@@ -176,35 +172,35 @@ export function resolveInfoschematicRenderer(
   kind: 'fabric',
   key: string | undefined,
   properties: RendererProperties | undefined,
-  artefactId?: string,
+  artefactId?: string
 ): ResolvedRenderer<FabricRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'graphic',
   key: string | undefined,
   properties: RendererProperties | undefined,
-  artefactId?: string,
+  artefactId?: string
 ): ResolvedRenderer<GraphicRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'callout',
   key: string | undefined,
   properties: RendererProperties | undefined,
-  artefactId?: string,
+  artefactId?: string
 ): ResolvedRenderer<CalloutRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: RendererKind,
   key: string | undefined,
   properties: RendererProperties | undefined,
-  artefactId?: string,
+  artefactId?: string
 ): unknown {
   if (!key) return undefined
 
   const collection = collectionFor(renderers, kind)
   if (!collection) {
     renderers.onDiagnostic?.(
-      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered'),
+      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
     )
     return undefined
   }
@@ -213,7 +209,7 @@ export function resolveInfoschematicRenderer(
     const Component = collection[key]
     if (!Component) {
       renderers.onDiagnostic?.(
-        diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered'),
+        diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
       )
       return undefined
     }
@@ -221,14 +217,14 @@ export function resolveInfoschematicRenderer(
       Component: Component as ComponentType<unknown & { properties: RendererProperties }>,
       key,
       properties: properties ?? emptyProperties,
-      schemaVersion: supportedSchemaVersion,
+      schemaVersion: supportedSchemaVersion
     }
   }
 
   const definition = collection.find((candidate) => candidate.key === key)
   if (!definition) {
     renderers.onDiagnostic?.(
-      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered'),
+      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
     )
     return undefined
   }
@@ -237,8 +233,8 @@ export function resolveInfoschematicRenderer(
     renderers.onDiagnostic?.(
       diagnosticMessage(
         { artefactId, code: 'unsupported-version', kind, key, schemaVersion: definition.schemaVersion },
-        `schema version ${definition.schemaVersion} is unsupported; expected ${supportedSchemaVersion}`,
-      ),
+        `schema version ${definition.schemaVersion} is unsupported; expected ${supportedSchemaVersion}`
+      )
     )
     return undefined
   }
@@ -249,7 +245,7 @@ export function resolveInfoschematicRenderer(
   } catch (error) {
     validation = {
       valid: false,
-      reason: error instanceof Error ? error.message : 'validator threw a non-Error value',
+      reason: error instanceof Error ? error.message : 'validator threw a non-Error value'
     }
   }
 
@@ -257,8 +253,8 @@ export function resolveInfoschematicRenderer(
     renderers.onDiagnostic?.(
       diagnosticMessage(
         { artefactId, code: 'invalid-properties', kind, key, schemaVersion: definition.schemaVersion },
-        validation.reason,
-      ),
+        validation.reason
+      )
     )
     return undefined
   }
@@ -267,7 +263,7 @@ export function resolveInfoschematicRenderer(
     Component: definition.component as ComponentType<unknown & { properties: RendererProperties }>,
     key,
     properties: validation.properties,
-    schemaVersion: definition.schemaVersion,
+    schemaVersion: definition.schemaVersion
   }
 }
 

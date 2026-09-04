@@ -16,14 +16,55 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+      # Install the toolchain from mise.toml (pins node + bun); no version is
+      # hardcoded here — mise.toml is the single source of truth.
+      - uses: jdx/mise-action@v4
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify
-        run: bun run check
+      - name: Install and verify released KI
+        env:
+          KI_VERSION: v0.3.3
+          KI_CLI_INSTALL_DIR: ${{ runner.temp }}/ki/bin
+          KI_MAN_INSTALL_DIR: ${{ runner.temp }}/ki/man/man1
+          KI_DATA_HOME: ${{ runner.temp }}/ki/data
+          KI_CONFIG_HOME: ${{ runner.temp }}/ki/config
+          KI_CACHE_HOME: ${{ runner.temp }}/ki/cache
+          KI_STATE_HOME: ${{ runner.temp }}/ki/state
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --max-redirs 3 --proto '=https' --proto-redir '=https' \
+            --output "$RUNNER_TEMP/ki-install.sh" "https://raw.githubusercontent.com/knowledgeislands/tools-ki/$KI_VERSION/install.sh"
+          bash "$RUNNER_TEMP/ki-install.sh" "$KI_VERSION"
+          export PATH="$KI_CLI_INSTALL_DIR:$PATH"
+          test "$(command -v ki)" = "$KI_CLI_INSTALL_DIR/ki"
+          test "$(ki --version)" = "${KI_VERSION#v}"
+          ki diag | grep -F 'Installation  regular'
+          ki diag | grep -F "Executable    $KI_CLI_INSTALL_DIR/ki"
+          ki bootstrap
+          ki diag | grep -F 'Status        valid'
+          ki harness list | grep -F 'knowledgeislands/ki-agentic-harness'
+          {
+            printf 'KI_CLI_INSTALL_DIR=%s\n' "$KI_CLI_INSTALL_DIR"
+            printf 'KI_MAN_INSTALL_DIR=%s\n' "$KI_MAN_INSTALL_DIR"
+            printf 'KI_DATA_HOME=%s\n' "$KI_DATA_HOME"
+            printf 'KI_CONFIG_HOME=%s\n' "$KI_CONFIG_HOME"
+            printf 'KI_CACHE_HOME=%s\n' "$KI_CACHE_HOME"
+            printf 'KI_STATE_HOME=%s\n' "$KI_STATE_HOME"
+          } >> "$GITHUB_ENV"
+          printf '%s\n' "$KI_CLI_INSTALL_DIR" >> "$GITHUB_PATH"
+
+      # The native read-only gate resolves the repository's declared skills from the
+      # verified active harness collection and runs their registered operations.
+      - name: Audit
+        run: ki repo audit --repo .
+
+      - name: Test
+        run: bun run test
+
+      - name: Full local verification gate
+        run: bun run ki:check
 
       - name: Build and verify packed release packages
-        run: bun run release:verify
+        run: bun run ki:release:verify

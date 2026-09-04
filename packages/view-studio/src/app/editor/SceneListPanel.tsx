@@ -56,7 +56,12 @@ export function SceneListPanel({
         <span className="scene-run-time" title="Total run time, which follows every hold you set">
           <Timer aria-hidden="true" size={12} /> {minutes(editor.runTime)}
         </span>
-        <button aria-label="Move this scene earlier" disabled={!scene || editor.at === 0} onClick={() => editor.move(-1)} type="button">
+        <button
+          aria-label="Move this scene earlier"
+          disabled={!scene || editor.at === 0}
+          onClick={() => editor.move(-1)}
+          type="button"
+        >
           <ChevronUp aria-hidden="true" size={13} />
         </button>
         <button
@@ -67,15 +72,15 @@ export function SceneListPanel({
         >
           <ChevronDown aria-hidden="true" size={13} />
         </button>
-        <button aria-label="Add a scene after this one" disabled={!editor.story} onClick={() => editor.insert()} type="button">
-          <Plus aria-hidden="true" size={13} />
-        </button>
         <button
-          aria-label="Remove this scene"
-          disabled={!scene}
-          onClick={() => editor.remove()}
+          aria-label="Add a scene after this one"
+          disabled={!editor.story}
+          onClick={() => editor.insert()}
           type="button"
         >
+          <Plus aria-hidden="true" size={13} />
+        </button>
+        <button aria-label="Remove this scene" disabled={!scene} onClick={() => editor.remove()} type="button">
           <Trash2 aria-hidden="true" size={13} />
         </button>
         <button
@@ -99,7 +104,9 @@ export function SceneListPanel({
       </div>
 
       {editor.story && !editor.canActivate ? (
-        <p className="scene-following">This Story can be drafted empty, but it needs a valid Scene before it can start in Present.</p>
+        <p className="scene-following">
+          This Story can be drafted empty, but it needs a valid Scene before it can start in Present.
+        </p>
       ) : null}
 
       {editor.following ? (

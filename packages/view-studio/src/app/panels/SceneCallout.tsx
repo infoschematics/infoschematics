@@ -1,14 +1,14 @@
-import { ChevronLeft, ChevronRight, Pause, X } from 'lucide-react'
-import { useLayoutEffect, useRef, useState } from 'react'
 import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import {
+  type InfoschematicRuntime,
+  resolveInfoschematicRenderer,
+  useInfoschematic,
+  useInfoschematicRenderers
+} from '@infoschematics/view-canvas'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
-import {
-  resolveInfoschematicRenderer,
-  type InfoschematicRuntime,
-  useInfoschematic,
-  useInfoschematicRenderers,
-} from '@infoschematics/view-canvas'
+import { ChevronLeft, ChevronRight, Pause, X } from 'lucide-react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 /** Anything that focuses part of the Infoschematic: a Story Scene or Thematic Scene. */
 export type Lit = { components: readonly string[]; flows: readonly string[]; callout?: { x: number; y: number } }
@@ -25,7 +25,7 @@ const grown = (box: Box, by: number, weight: number): Obstacle => ({
   weight,
   width: box.width + by * 2,
   x: box.x - by,
-  y: box.y - by,
+  y: box.y - by
 })
 
 /**
@@ -61,11 +61,11 @@ export const litObstacles = (step: Lit, runtime: InfoschematicRuntime): Obstacle
             height: Math.abs(to.y - from.y),
             width: Math.abs(to.x - from.x),
             x: Math.min(from.x, to.x),
-            y: Math.min(from.y, to.y),
+            y: Math.min(from.y, to.y)
           },
           4,
-          1,
-        ),
+          1
+        )
       )
     }
   }
@@ -98,7 +98,7 @@ export function SceneCallout({
   profile,
   takeaways,
   title,
-  wide,
+  wide
 }: {
   /** Absent for anything that does not run itself. */
   autoAdvance?: boolean
@@ -133,7 +133,7 @@ export function SceneCallout({
         'callout',
         calloutConfig.renderer,
         calloutConfig.properties,
-        'id' in step && typeof step.id === 'string' ? step.id : undefined,
+        'id' in step && typeof step.id === 'string' ? step.id : undefined
       )
     : undefined
   const standardContent = (
@@ -168,8 +168,8 @@ export function SceneCallout({
           candidates: calloutPorts,
           label: { height: element.offsetHeight * unitsPerPixel, width: element.offsetWidth * unitsPerPixel },
           obstacles: litObstacles(step, runtime),
-          view: infoschematicViewBox,
-        }),
+          view: infoschematicViewBox
+        })
       )
     }
 

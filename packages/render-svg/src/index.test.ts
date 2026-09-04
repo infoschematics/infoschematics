@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { visualTokens } from '@infoschematics/view-model/tokens'
+import { describe, expect, it } from 'vitest'
 import { renderInfoschematicSvg } from './index.ts'
 
 const blank = (title: string): InfoschematicConfig => ({
@@ -16,12 +16,12 @@ const blank = (title: string): InfoschematicConfig => ({
     flows: [],
     graphics: [],
     interfaces: [],
-    specificationGroups: [],
+    specificationGroups: []
   },
   standaloneScenes: [],
   themes: [],
   stories: [],
-  calloutPositions: [],
+  calloutPositions: []
 })
 
 const representative: InfoschematicConfig = {
@@ -31,11 +31,9 @@ const representative: InfoschematicConfig = {
     viewBox: { height: 240, width: 400, x: 0, y: 0 },
     scopes: [
       { color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' },
-      { color: '#b45309', description: 'Two', fill: '#fef3c7', id: 'two', label: 'Two', prefix: 'TWO' },
+      { color: '#b45309', description: 'Two', fill: '#fef3c7', id: 'two', label: 'Two', prefix: 'TWO' }
     ],
-    flowFamilies: [
-      { color: '#7c3aed', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' },
-    ],
+    flowFamilies: [{ color: '#7c3aed', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
     regions: [
       { box: { height: 200, width: 380, x: 10, y: 20 }, fill: '#f8fafc', id: 'runtime', label: 'Runtime' },
       {
@@ -43,8 +41,8 @@ const representative: InfoschematicConfig = {
         frame: { style: 'solid' },
         id: 'delivery',
         label: 'Delivery',
-        labelMount: 'boundary',
-      },
+        labelMount: 'boundary'
+      }
     ],
     cards: [
       {
@@ -54,7 +52,7 @@ const representative: InfoschematicConfig = {
         label: 'Source & gateway',
         placement: { box: { height: 60, width: 120, x: 40, y: 80 }, ports: {} },
         scope: 'one',
-        scopes: ['one'],
+        scopes: ['one']
       },
       {
         code: 'TWO-001',
@@ -63,8 +61,8 @@ const representative: InfoschematicConfig = {
         label: 'Target',
         placement: { box: { height: 60, width: 120, x: 240, y: 80 }, ports: {} },
         scope: 'two',
-        scopes: ['two'],
-      },
+        scopes: ['two']
+      }
     ],
     fabrics: [],
     points: [],
@@ -75,24 +73,24 @@ const representative: InfoschematicConfig = {
         id: 'call',
         points: [
           { x: 160, y: 110 },
-          { x: 240, y: 110 },
+          { x: 240, y: 110 }
         ],
         source: 'source',
         sourcePort: 'E1',
         target: 'target',
-        targetPort: 'W1',
-      },
+        targetPort: 'W1'
+      }
     ],
     graphics: [
       {
         id: 'note',
         label: 'Note <safe>',
         placement: { height: 34, width: 90, x: 155, y: 170 },
-        renderer: 'note"renderer',
-      },
+        renderer: 'note"renderer'
+      }
     ],
     interfaces: [],
-    specificationGroups: [],
+    specificationGroups: []
   },
   standaloneScenes: [
     {
@@ -100,12 +98,12 @@ const representative: InfoschematicConfig = {
       description: 'Source only',
       focus: { artefacts: ['source'], flows: [], graphics: ['note'] },
       id: 'source-only',
-      label: 'Source only',
-    },
+      label: 'Source only'
+    }
   ],
   themes: [],
   stories: [],
-  calloutPositions: [],
+  calloutPositions: []
 }
 
 describe('renderInfoschematicSvg', () => {
@@ -115,8 +113,8 @@ describe('renderInfoschematicSvg', () => {
         '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
         `  <rect class="infoschematic-backdrop" fill="${visualTokens.canvas.output.backdrop}" height="80" width="120" x="0" y="0" />`,
-        '</svg>',
-      ].join('\n'),
+        '</svg>'
+      ].join('\n')
     )
   })
 
@@ -139,12 +137,12 @@ describe('renderInfoschematicSvg', () => {
       ...representative,
       infoschematic: {
         ...representative.infoschematic,
-        flows: representative.infoschematic.flows.map((flow) => ({ ...flow, dashed: true })),
-      },
+        flows: representative.infoschematic.flows.map((flow) => ({ ...flow, dashed: true }))
+      }
     }
     const svg = renderInfoschematicSvg(config, {
       scene: { kind: 'standalone', sceneId: 'source-only' },
-      visibility: { graphics: 'all' },
+      visibility: { graphics: 'all' }
     })
 
     expect(svg).toContain(`fill="${visualTokens.canvas.output.backdrop}"`)
@@ -173,25 +171,25 @@ describe('renderInfoschematicSvg', () => {
         appearance: {
           card: { compact: true, description: true, identity: true, stereotype: true },
           grid: 'major-plus-minor',
-          surface: 'blueprint',
+          surface: 'blueprint'
         },
         domains: [
           {
             color: '#13579b',
             fill: '#dceeff',
             id: 'platform',
-            label: 'Platform',
-          },
+            label: 'Platform'
+          }
         ],
         regions: representative.infoschematic.regions.map((region) =>
           region.id === 'delivery'
             ? { ...region, frame: { style: 'dashed' as const }, labelPlacement: 'north' as const }
-            : { ...region, frame: { style: 'dotted' as const }, labelPlacement: 'south-east' as const },
+            : { ...region, frame: { style: 'dotted' as const }, labelPlacement: 'south-east' as const }
         ),
         cards: representative.infoschematic.cards.map((card, index) =>
-          index === 0 ? { ...card, domain: 'platform', stereotype: 'service' } : card,
-        ),
-      },
+          index === 0 ? { ...card, domain: 'platform', stereotype: 'service' } : card
+        )
+      }
     }
 
     const svg = renderInfoschematicSvg(config)
@@ -209,12 +207,8 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('data-label-placement="south-east"')
     expect(svg).toContain('data-domain="platform"')
     expect(svg).toContain('data-stereotype="service"')
-    expect(svg).toContain(
-      'aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"',
-    )
-    expect(svg).toContain(
-      'Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;',
-    )
+    expect(svg).toContain('aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"')
+    expect(svg).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
     expect(svg).toContain('fill="#dceeff"')
     expect(svg).toContain('stroke="#13579b"')
     expect(svg).toContain('class="infoschematic-card-identity"')
@@ -225,7 +219,7 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('class="infoschematic-card-description"')
 
     const overridden = renderInfoschematicSvg(config, {
-      cardDetails: { description: false, identity: false, stereotype: false },
+      cardDetails: { description: false, identity: false, stereotype: false }
     })
     expect(overridden).not.toContain('class="infoschematic-card-identity"')
     expect(overridden).not.toContain('class="infoschematic-card-stereotype"')
@@ -238,8 +232,8 @@ describe('renderInfoschematicSvg', () => {
       ...representative,
       infoschematic: {
         ...representative.infoschematic,
-        appearance: { grid: 'dots' },
-      },
+        appearance: { grid: 'dots' }
+      }
     }
 
     const svg = renderInfoschematicSvg(config)
@@ -254,7 +248,7 @@ describe('renderInfoschematicSvg', () => {
   it('renders explicit Flow signals as deterministic still emphasis and ignores unknown ids', () => {
     const baseline = renderInfoschematicSvg(representative)
     const signalled = renderInfoschematicSvg(representative, {
-      signals: ['call', 'call', 'missing'],
+      signals: ['call', 'call', 'missing']
     })
 
     expect(renderInfoschematicSvg(representative, { signals: ['call', 'missing'] })).toBe(signalled)
@@ -285,16 +279,16 @@ describe('renderInfoschematicSvg', () => {
         ...representative,
         infoschematic: {
           ...representative.infoschematic,
-          flows: representative.infoschematic.flows.map((flow) => ({ ...flow, label: { along: 0.25 } })),
-        },
+          flows: representative.infoschematic.flows.map((flow) => ({ ...flow, label: { along: 0.25 } }))
+        }
       },
-      { annotations: true },
+      { annotations: true }
     )
     expect(placed).toContain('x="180" y="114"')
 
     const dimmed = renderInfoschematicSvg(representative, {
       annotations: true,
-      scene: { kind: 'standalone', sceneId: 'source-only' },
+      scene: { kind: 'standalone', sceneId: 'source-only' }
     })
     expect(dimmed).toContain('class="infoschematic-flow-annotation is-unfocused"')
   })
@@ -311,16 +305,16 @@ describe('renderInfoschematicSvg', () => {
         ...representative.infoschematic,
         appearance: {
           card: { compact: true, description: true, identity: true, stereotype: true },
-          surface: 'blueprint',
+          surface: 'blueprint'
         },
         domains: [{ color: '#9673a6', fill: '#0d1b2a', id: 'observe', label: 'Observe' }],
         cards: representative.infoschematic.cards.map((card, index) =>
-          index === 0 ? { ...card, domain: 'observe', stereotype: 'stage' } : card,
+          index === 0 ? { ...card, domain: 'observe', stereotype: 'stage' } : card
         ),
         regions: representative.infoschematic.regions.map((region) =>
-          region.fill ? { ...region, fill: '#071e2d' } : region,
-        ),
-      },
+          region.fill ? { ...region, fill: '#071e2d' } : region
+        )
+      }
     })
     expect(dark).toContain('data-ink="light"')
     expect(dark).toContain('data-ink="dark"')
@@ -335,7 +329,7 @@ describe('renderInfoschematicSvg', () => {
 
     const focused = renderInfoschematicSvg(representative, {
       scene: { kind: 'standalone', sceneId: 'source-only' },
-      visibility: { scopes: ['one', 'two'], unfocused: 'hide' },
+      visibility: { scopes: ['one', 'two'], unfocused: 'hide' }
     })
 
     expect(focused).toContain('data-id="source"')
@@ -352,8 +346,8 @@ describe('renderInfoschematicSvg', () => {
   it('fails explicitly when a selected Scene does not exist', () => {
     expect(() =>
       renderInfoschematicSvg(representative, {
-        scene: { kind: 'standalone', sceneId: 'missing' },
-      }),
+        scene: { kind: 'standalone', sceneId: 'missing' }
+      })
     ).toThrow('Unknown Standalone Scene: missing')
   })
 })

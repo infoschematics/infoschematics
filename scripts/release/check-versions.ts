@@ -9,7 +9,7 @@ export async function checkReleaseVersions() {
   return {
     buildOrder: releasePackages.map(({ name }) => name),
     packageCount: releasePackages.length,
-    version: coordinatedVersion(manifests),
+    version: coordinatedVersion(manifests)
   } as const
 }
 

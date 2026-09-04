@@ -4,15 +4,13 @@ import type {
   InfoschematicAppearanceConfig,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
-  SurfaceTreatment,
+  SurfaceTreatment
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import type { RegionConfig, RegionFrameStyle } from '@infoschematics/domain-model/region'
 
-export type CardDetailOverrides = Readonly<
-  Partial<Pick<CardDetailDefaults, 'description' | 'identity' | 'stereotype'>>
->
+export type CardDetailOverrides = Readonly<Partial<Pick<CardDetailDefaults, 'description' | 'identity' | 'stereotype'>>>
 
 export type ResolvedCardTreatment = Readonly<{
   compact: boolean
@@ -40,22 +38,22 @@ const defaultCardTreatment: ResolvedCardTreatment = Object.freeze({
   compact: false,
   description: false,
   identity: false,
-  stereotype: false,
+  stereotype: false
 })
 
 /** Resolve authored diagram treatment and output-only Card visibility overrides. */
 export const resolveVisualTreatment = (
   appearance?: InfoschematicAppearanceConfig,
-  output?: CardDetailOverrides,
+  output?: CardDetailOverrides
 ): ResolvedVisualTreatment => ({
   card: {
     compact: appearance?.card?.compact ?? defaultCardTreatment.compact,
     description: output?.description ?? appearance?.card?.description ?? defaultCardTreatment.description,
     identity: output?.identity ?? appearance?.card?.identity ?? defaultCardTreatment.identity,
-    stereotype: output?.stereotype ?? appearance?.card?.stereotype ?? defaultCardTreatment.stereotype,
+    stereotype: output?.stereotype ?? appearance?.card?.stereotype ?? defaultCardTreatment.stereotype
   },
   grid: appearance?.grid ?? 'none',
-  surface: appearance?.surface ?? 'neutral',
+  surface: appearance?.surface ?? 'neutral'
 })
 
 /**
@@ -64,7 +62,7 @@ export const resolveVisualTreatment = (
  * always resolves to a continuous plain treatment instead.
  */
 export const resolveRegionTreatment = (
-  region: Pick<RegionConfig, 'label' | 'frame' | 'labelPlacement' | 'labelMount' | 'labelOffset'>,
+  region: Pick<RegionConfig, 'label' | 'frame' | 'labelPlacement' | 'labelMount' | 'labelOffset'>
 ): ResolvedRegionTreatment => {
   const placement = region.labelPlacement ?? 'north-west'
   const resolvedLabel = region.label.trim().length === 0 || placement === 'none' ? null : placement
@@ -77,7 +75,7 @@ export const resolveRegionTreatment = (
     labelTreatment:
       (region.labelMount ?? 'internal') === 'boundary' && resolvedLabel !== null && frame !== 'none'
         ? 'notched'
-        : 'plain',
+        : 'plain'
   }
 }
 
@@ -102,5 +100,5 @@ export const resolveReadableInk = (fill: string): 'dark' | 'light' => {
 /** Domain classification is deliberately resolved without consulting Scope. */
 export const resolveCardDomain = (
   card: Pick<CardConfig, 'domain'>,
-  domains: readonly DomainConfig[],
+  domains: readonly DomainConfig[]
 ): DomainConfig | undefined => (card.domain ? domains.find(({ id }) => id === card.domain) : undefined)

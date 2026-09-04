@@ -157,13 +157,13 @@ Inside this repository, Bun resolves matching `0.1.0` package dependencies to lo
 
 ```bash
 bun install
-bun run dev
+bun run ki:dev
 ```
 
 The website runs from `apps/site`. The root verification gate runs all tests and type checks, checks dependency boundaries, and produces the site build:
 
 ```bash
-bun run check
+bun run ki:check
 ```
 
 External consumers install compiled package entry points and import package stylesheet subpaths explicitly; they do not compile or vendor repository source. Maintainers coordinate every public package version and protected npm publication through the [package release guide](releasing-packages.md).

@@ -1,6 +1,6 @@
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '@infoschematics/view-canvas'
 import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLit } from './scene-library.ts'
 
 /**
@@ -28,7 +28,7 @@ export function useSceneLibrary() {
    */
   const played = useMemo(
     () => new Set(stories.flatMap((story) => story.steps.flatMap((step) => (step.scene ? [step.scene] : [])))),
-    [stories],
+    [stories]
   )
 
   return {
@@ -57,7 +57,7 @@ export function useSceneLibrary() {
     revert: () => setDraft(null),
     scene,
     source: libraryAsSource(library),
-    toggle: (id: string, isFlow: boolean) => scene && setDraft(toggleLit(library, scene.id, id, isFlow)),
+    toggle: (id: string, isFlow: boolean) => scene && setDraft(toggleLit(library, scene.id, id, isFlow))
   }
 }
 

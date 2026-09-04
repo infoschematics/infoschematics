@@ -1,6 +1,6 @@
+import { systemExample } from '@infoschematics/is-system'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { systemExample } from '@infoschematics/is-system'
 import { SystemExample, systemExampleDocumentTitle } from './SystemExample.tsx'
 
 describe('hosted system example', () => {

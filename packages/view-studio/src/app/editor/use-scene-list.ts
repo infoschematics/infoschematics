@@ -1,6 +1,6 @@
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useCallback, useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '@infoschematics/view-canvas'
 import {
   clearScenes,
   editScene,
@@ -9,11 +9,11 @@ import {
   removeScene,
   runTime,
   type Scene,
-  scenesAsSource,
   type Story,
+  scenesAsSource,
   storyCanActivate,
   storyForEditing,
-  toggleLit,
+  toggleLit
 } from './scenes.ts'
 
 /**
@@ -32,7 +32,7 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
   const { config } = useInfoschematic()
   const authoredStories = useMemo(
     () => config.stories.map((story) => storyForEditing(story, config.standaloneScenes)),
-    [config.standaloneScenes, config.stories],
+    [config.standaloneScenes, config.stories]
   )
   const [drafts, setDrafts] = usePersistentState<Record<string, Story>>(config.id && `${config.id}.stories`, {})
   const [chosen, setChosen] = useState<string>(authoredStories[0]?.id ?? '')
@@ -41,10 +41,13 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
   // The authored story until it has been edited, and the draft after.
   const stories = useMemo(
     () => authoredStories.map((authored) => (drafts[authored.id]?.authored ? drafts[authored.id] : authored)),
-    [authoredStories, drafts],
+    [authoredStories, drafts]
   )
   const story = stories.find((entry) => entry.id === chosen) ?? stories[0]
-  const standaloneSceneIds = useMemo(() => new Set(config.standaloneScenes.map((entry) => entry.id)), [config.standaloneScenes])
+  const standaloneSceneIds = useMemo(
+    () => new Set(config.standaloneScenes.map((entry) => entry.id)),
+    [config.standaloneScenes]
+  )
 
   const apply = useCallback(
     (change: (current: Story) => Story) => {
@@ -54,7 +57,7 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
         return { ...current, [story.id]: change(stored?.authored ? stored : story) }
       })
     },
-    [setDrafts, story],
+    [setDrafts, story]
   )
 
   /*
@@ -122,7 +125,7 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
      */
     lit: new Set<string>([...(story?.steps[at]?.components ?? []), ...(story?.steps[at]?.flows ?? [])]),
     story,
-    stories,
+    stories
   }
 }
 

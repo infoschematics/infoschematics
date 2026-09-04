@@ -98,7 +98,7 @@ const adapterBoundsFor = (held: Box): Box => ({
   height: held.height * (1 - adapterReach) + adapterFloor,
   width: held.width + adapterGrip * 2,
   x: held.x - adapterGrip,
-  y: held.y + held.height * adapterReach,
+  y: held.y + held.height * adapterReach
 })
 
 const registerOf = (entries: readonly RuntimeIdentity[]) => {
@@ -115,13 +115,13 @@ const registerOf = (entries: readonly RuntimeIdentity[]) => {
     cardAt: (code: string) => {
       const found = byCode.get(code)
       return found?.kind === 'card' ? found : undefined
-    },
+    }
   }
 }
 
 const membershipVisible = (
   entry: { scopes: readonly string[]; scopeRule?: 'all' | 'any' },
-  visibleScopes: ReadonlySet<string>,
+  visibleScopes: ReadonlySet<string>
 ) =>
   entry.scopeRule === 'all'
     ? entry.scopes.every((scope) => visibleScopes.has(scope))
@@ -134,22 +134,22 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     bounds: card.placement.box,
     group: card.scope,
     kind: 'card',
-    ports: card.placement.ports,
+    ports: card.placement.ports
   }))
   const fabrics: RuntimeFabric[] = definition.fabrics.map((fabric) => ({
     ...fabric,
     bounds: fabric.placement.box,
     group: fabric.scope,
     kind: 'fabric',
-    ports: fabric.placement.ports,
+    ports: fabric.placement.ports
   }))
   const flows: RuntimeFlow[] = definition.flows.map((flow) => ({ ...flow, d: routePath(flow.points) }))
   const identities: RuntimeIdentity[] = [
     ...cards.map(({ placement: _placement, bounds: _bounds, ports: _ports, ...card }) => card),
     ...fabrics.map(
-      ({ placement: _placement, bounds: _bounds, ports: _ports, appearance: _appearance, ...fabric }) => fabric,
+      ({ placement: _placement, bounds: _bounds, ports: _ports, appearance: _appearance, ...fabric }) => fabric
     ),
-    ...definition.points.map((point) => ({ ...point, detail: undefined, kind: 'point' as const })),
+    ...definition.points.map((point) => ({ ...point, detail: undefined, kind: 'point' as const }))
   ]
   const register = registerOf(identities)
   const endpointCodes = new Map(identities.map(({ code, id }) => [id, code]))
@@ -160,7 +160,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const standaloneScenes: RuntimeStandaloneScene[] = config.standaloneScenes.map((scene) => ({
     ...scene,
     components: scene.focus.artefacts ?? [],
-    flows: scene.focus.flows ?? [],
+    flows: scene.focus.flows ?? []
   }))
   const standaloneById = new Map(standaloneScenes.map((scene) => [scene.id, scene]))
   const graphicById = new Map(definition.graphics.map((graphic) => [graphic.id, graphic]))
@@ -181,9 +181,9 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
         graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
         callout: scene.callout?.at,
         takeaways: scene.callout?.takeaways,
-        scene: scene.sourceScene,
+        scene: scene.sourceScene
       }
-    }),
+    })
   }))
   const thematicScenes: RuntimeThemeScene[] = config.themes.flatMap((theme) =>
     theme.scenes.map((scene) => {
@@ -207,9 +207,9 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
         takeaways: scene.callout?.takeaways,
         cover: properties?.wide === true ? true : undefined,
         logo: typeof properties?.logo === 'string' ? properties.logo : undefined,
-        callout: scene.callout?.at,
+        callout: scene.callout?.at
       }
-    }),
+    })
   )
 
   const registerWith = (created: readonly CreatedComponent[] = []) =>
@@ -217,16 +217,18 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
       ? register
       : registerOf([
           ...register.all,
-          ...created.map((card): RuntimeIdentity => ({
-            code: card.code,
-            detail: card.detail,
-            group: card.group,
-            id: card.id,
-            kind: 'card',
-            label: card.label,
-            scopes: card.scopes,
-            wraps: card.wraps,
-          })),
+          ...created.map(
+            (card): RuntimeIdentity => ({
+              code: card.code,
+              detail: card.detail,
+              group: card.group,
+              id: card.id,
+              kind: 'card',
+              label: card.label,
+              scopes: card.scopes,
+              wraps: card.wraps
+            })
+          )
         ])
 
   const placeables = (visibleScopes: ReadonlySet<string>, drafts?: RuntimeDrafts) => {
@@ -236,7 +238,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     }
     const visibleCards = cards.filter((card) => membershipVisible(card, visibleScopes))
     const ordinary = new Map(
-      visibleCards.filter((card) => !card.wraps).map((card) => [card.id, drafted(card.bounds, card.code)]),
+      visibleCards.filter((card) => !card.wraps).map((card) => [card.id, drafted(card.bounds, card.code)])
     )
     const authored = [
       ...visibleCards.flatMap((card) => {
@@ -247,8 +249,8 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
             box: held ? adapterBoundsFor(held) : (ordinary.get(card.id) ?? card.bounds),
             code: card.code,
             id: card.id,
-            ports: { ...card.ports, ...drafts?.portCounts?.[card.code] },
-          },
+            ports: { ...card.ports, ...drafts?.portCounts?.[card.code] }
+          }
         ]
       }),
       ...fabrics
@@ -257,8 +259,8 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
           box: drafted(fabric.bounds, fabric.code),
           code: fabric.code,
           id: fabric.id,
-          ports: { ...fabric.ports, ...drafts?.portCounts?.[fabric.code] },
-        })),
+          ports: { ...fabric.ports, ...drafts?.portCounts?.[fabric.code] }
+        }))
     ]
     const created: typeof authored = []
     for (const card of drafts?.created ?? []) {
@@ -270,7 +272,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
         box: held ? adapterBoundsFor(held.box) : drafted(card.box as Box, card.code),
         code: card.code,
         id: card.id,
-        ports: { ...card.ports, ...drafts?.portCounts?.[card.code] },
+        ports: { ...card.ports, ...drafts?.portCounts?.[card.code] }
       })
     }
     return [...authored, ...created]
@@ -301,7 +303,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const flowsAfterAttachments = (
     shownFlows: readonly RuntimeFlow[],
     attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }>,
-    portAt: (endpoint: string, port: string) => Point | undefined,
+    portAt: (endpoint: string, port: string) => Point | undefined
   ) => {
     if (attachments.size === 0) return shownFlows
     return shownFlows.map((flow) => {
@@ -348,7 +350,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const flowsAfterCreations = (
     shownFlows: readonly RuntimeFlow[],
     created: readonly CreatedFlow[],
-    portAt: (endpoint: string, port: string) => Point | undefined,
+    portAt: (endpoint: string, port: string) => Point | undefined
   ) => {
     if (created.length === 0) return shownFlows
     const made = created.flatMap((line) => {
@@ -366,7 +368,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     offsets: ReadonlyMap<string, Offset>,
     routeDrafts: Readonly<Record<string, readonly Point[]>>,
     attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }>,
-    portAt: (endpoint: string, port: string) => Point | undefined,
+    portAt: (endpoint: string, port: string) => Point | undefined
   ) => {
     const moved = flowsAfterAttachments(flowsAfterMoves(shownFlows, offsets), attachments, portAt)
     if (Object.keys(routeDrafts).length === 0) return moved
@@ -379,23 +381,23 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const annotationLabelPositions = (
     shownFlows: readonly RuntimeFlow[],
     visibleScopes: ReadonlySet<string>,
-    drafts?: ReadonlyMap<string, number>,
+    drafts?: ReadonlyMap<string, number>
   ) =>
     placeLabels({
       candidates: [0.5, 0.4, 0.6, 0.3, 0.7, 0.25, 0.75, 0.2, 0.8, 0.15, 0.85],
       drafts,
       label: {
         height: visualTokens.canvas.output.annotationHeight,
-        width: visualTokens.canvas.output.annotationWidth,
+        width: visualTokens.canvas.output.annotationWidth
       },
       obstacles: cards.filter((card) => membershipVisible(card, visibleScopes)).map((card) => card.bounds),
-      routes: shownFlows.map((flow) => ({ d: flow.d, id: flow.id, key: flow.code, along: flow.label?.along })),
+      routes: shownFlows.map((flow) => ({ d: flow.d, id: flow.id, key: flow.code, along: flow.label?.along }))
     })
 
   const specificationSections = definition.specificationGroups
     .map((group) => ({
       group,
-      within: definition.interfaces.filter((entry) => entry.owner === group.owner && entry.document === group.document),
+      within: definition.interfaces.filter((entry) => entry.owner === group.owner && entry.document === group.document)
     }))
     .filter((section) => section.within.length > 0)
 
@@ -403,7 +405,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
   const cardsOffering = (id: string) =>
     register.all.filter((entry) => entry.kind === 'card' && entry.conformsTo?.includes(id))
   const unroutedInterfaces = definition.interfaces.filter(
-    (entry) => flowsCarrying(entry.id).length === 0 && cardsOffering(entry.id).length === 0,
+    (entry) => flowsCarrying(entry.id).length === 0 && cardsOffering(entry.id).length === 0
   )
 
   return {
@@ -427,7 +429,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     flowsAfterEdits,
     editableModel: {
       componentLayout: Object.fromEntries(
-        [...definition.cards, ...definition.fabrics].map((entry) => [entry.code, entry.placement]),
+        [...definition.cards, ...definition.fabrics].map((entry) => [entry.code, entry.placement])
       ),
       endpointCodes,
       flowCodes: new Set(flows.map((flow) => flow.code)),
@@ -438,7 +440,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
       placeables,
       annotationLabelPositions,
       flowsAfterAttachments,
-      flowsAfterMoves,
+      flowsAfterMoves
     },
     infoschematicCardIsVisible: (card: RuntimeCard, scopes: ReadonlySet<string>) => membershipVisible(card, scopes),
     infoschematicFabricIsVisible: (fabric: RuntimeFabric, scopes: ReadonlySet<string>) =>
@@ -449,7 +451,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
         const { start, end } = routeEndpoints(flow.d)
         return [
           { flow: flow.code, endpoint: flow.source, point: start, port: flow.sourcePort, terminal: 'source' as const },
-          { flow: flow.code, endpoint: flow.target, point: end, port: flow.targetPort, terminal: 'target' as const },
+          { flow: flow.code, endpoint: flow.target, point: end, port: flow.targetPort, terminal: 'target' as const }
         ]
       })
       return { findings: auditPorts(ports, minimumPortGap), ports }
@@ -463,7 +465,7 @@ export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
     thematicScenes,
     calloutPorts: config.calloutPositions,
     themeLogos: Object.fromEntries(thematicScenes.flatMap((scene) => (scene.logo ? [[scene.id, scene.logo]] : []))),
-    adapterFloor,
+    adapterFloor
   }
 }
 

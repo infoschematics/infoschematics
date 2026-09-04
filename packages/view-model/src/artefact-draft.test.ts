@@ -1,16 +1,12 @@
-import { describe, expect, it } from 'vitest'
-
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
+import { describe, expect, it } from 'vitest'
 
-import {
-  applyArtefactOperations,
-  type ArtefactDraftOperation,
-} from './artefact-draft.ts'
+import { type ArtefactDraftOperation, applyArtefactOperations } from './artefact-draft.ts'
 import type { ArtefactSelection } from './editable.ts'
 
 const region = (id: string, x: number): RegionConfig => ({
@@ -18,7 +14,7 @@ const region = (id: string, x: number): RegionConfig => ({
   fill: '#eef',
   frame: { style: 'solid' },
   id,
-  label: id,
+  label: id
 })
 
 const card = (id: string, code: string, x: number, wraps?: string): CardConfig => ({
@@ -29,14 +25,14 @@ const card = (id: string, code: string, x: number, wraps?: string): CardConfig =
   placement: { box: { height: 60, width: 100, x, y: 80 }, ports: { east: 2 } },
   scope: 'scope-one',
   scopes: ['scope-one'],
-  ...(wraps ? { wraps } : {}),
+  ...(wraps ? { wraps } : {})
 })
 
 const fabric = (id: string, code: string, x: number): FabricConfig => ({
   appearance: {
     caption: `${id} caption`,
     properties: { emphasis: true, rank: 2 },
-    renderer: 'fabric-special',
+    renderer: 'fabric-special'
   },
   code,
   detail: `${id} detail`,
@@ -44,15 +40,10 @@ const fabric = (id: string, code: string, x: number): FabricConfig => ({
   label: id,
   placement: { box: { height: 100, width: 180, x, y: 260 } },
   scope: 'scope-one',
-  scopes: ['scope-one'],
+  scopes: ['scope-one']
 })
 
-const flow = (
-  id: string,
-  code: string,
-  source: string,
-  target: string,
-): FlowConfig => ({
+const flow = (id: string, code: string, source: string, target: string): FlowConfig => ({
   code,
   conformsTo: ['contract-one'],
   family: 'family-one',
@@ -60,12 +51,12 @@ const flow = (
   label: { along: 0.4 },
   points: [
     { x: 100, y: 110 },
-    { x: 240, y: 110 },
+    { x: 240, y: 110 }
   ],
   source,
   sourcePort: 'E1',
   target,
-  targetPort: 'W1',
+  targetPort: 'W1'
 })
 
 const graphic = (id: string, x: number): GraphicConfig => ({
@@ -74,7 +65,7 @@ const graphic = (id: string, x: number): GraphicConfig => ({
   placement: { height: 70, width: 90, x, y: 430 },
   properties: { caption: `${id} caption`, opacity: 0.8 },
   renderer: 'graphic-special',
-  scopes: ['scope-one'],
+  scopes: ['scope-one']
 })
 
 const config = (): InfoschematicConfig => ({
@@ -88,13 +79,10 @@ const config = (): InfoschematicConfig => ({
         description: 'Family',
         id: 'family-one',
         label: 'Family one',
-        prefix: 'F',
-      },
+        prefix: 'F'
+      }
     ],
-    flows: [
-      flow('flow-one', 'L1', 'card-one', 'card-two'),
-      flow('flow-two', 'L2', 'fabric-one', 'card-one'),
-    ],
+    flows: [flow('flow-one', 'L1', 'card-one', 'card-two'), flow('flow-two', 'L2', 'fabric-one', 'card-one')],
     graphics: [graphic('graphic-one', 100), graphic('graphic-two', 300)],
     interfaces: [],
     regions: [region('region-one', 80), region('region-two', 220)],
@@ -106,11 +94,11 @@ const config = (): InfoschematicConfig => ({
         fill: '#def',
         id: 'scope-one',
         label: 'Scope one',
-        prefix: 'S',
-      },
+        prefix: 'S'
+      }
     ],
     specificationGroups: [],
-    viewBox: { height: 600, width: 1000, x: 0, y: 0 },
+    viewBox: { height: 600, width: 1000, x: 0, y: 0 }
   },
   standaloneScenes: [
     {
@@ -118,8 +106,8 @@ const config = (): InfoschematicConfig => ({
       description: 'Standalone',
       focus: { artefacts: ['card-one'], graphics: ['graphic-one', 'graphic-two'] },
       id: 'standalone-one',
-      label: 'Standalone',
-    },
+      label: 'Standalone'
+    }
   ],
   stories: [
     {
@@ -129,11 +117,11 @@ const config = (): InfoschematicConfig => ({
         {
           focus: { graphics: ['graphic-one', 'graphic-two'] },
           graphic: 'graphic-one',
-          id: 'story-scene-one',
-        },
+          id: 'story-scene-one'
+        }
       ],
-      title: 'Story',
-    },
+      title: 'Story'
+    }
   ],
   themes: [
     {
@@ -143,13 +131,13 @@ const config = (): InfoschematicConfig => ({
           code: 'T1',
           focus: { graphics: ['graphic-one', 'graphic-two'] },
           id: 'theme-scene-one',
-          label: 'Theme scene',
-        },
+          label: 'Theme scene'
+        }
       ],
-      title: 'Theme',
-    },
+      title: 'Theme'
+    }
   ],
-  title: 'Draft materialiser',
+  title: 'Draft materialiser'
 })
 
 const selections = {
@@ -157,32 +145,32 @@ const selections = {
     code: 'C1',
     geometry: 'box',
     id: 'card-one',
-    kind: 'card',
+    kind: 'card'
   },
   fabric: {
     code: 'F1',
     geometry: 'box',
     id: 'fabric-one',
-    kind: 'fabric',
+    kind: 'fabric'
   },
   flow: {
     code: 'L1',
     geometry: 'route',
     id: 'flow-one',
-    kind: 'flow',
+    kind: 'flow'
   },
   graphic: {
     code: null,
     geometry: 'box',
     id: 'graphic-one',
-    kind: 'graphic',
+    kind: 'graphic'
   },
   region: {
     code: null,
     geometry: 'box',
     id: 'region-one',
-    kind: 'region',
-  },
+    kind: 'region'
+  }
 } as const satisfies Record<string, ArtefactSelection>
 
 describe('applyArtefactOperations', () => {
@@ -207,9 +195,9 @@ describe('applyArtefactOperations', () => {
           code: null,
           geometry: 'box',
           id: 'region-created',
-          kind: 'region',
+          kind: 'region'
         },
-        value: createdRegion,
+        value: createdRegion
       },
       {
         at: 0,
@@ -218,9 +206,9 @@ describe('applyArtefactOperations', () => {
           code: 'FC',
           geometry: 'box',
           id: 'fabric-created',
-          kind: 'fabric',
+          kind: 'fabric'
         },
-        value: createdFabric,
+        value: createdFabric
       },
       {
         at: 0,
@@ -229,9 +217,9 @@ describe('applyArtefactOperations', () => {
           code: 'CC',
           geometry: 'box',
           id: 'card-created',
-          kind: 'card',
+          kind: 'card'
         },
-        value: createdCard,
+        value: createdCard
       },
       {
         at: 0,
@@ -240,9 +228,9 @@ describe('applyArtefactOperations', () => {
           code: 'LC',
           geometry: 'route',
           id: 'flow-created',
-          kind: 'flow',
+          kind: 'flow'
         },
-        value: createdFlow,
+        value: createdFlow
       },
       {
         at: 0,
@@ -251,10 +239,10 @@ describe('applyArtefactOperations', () => {
           code: null,
           geometry: 'box',
           id: 'graphic-created',
-          kind: 'graphic',
+          kind: 'graphic'
         },
-        value: createdGraphic,
-      },
+        value: createdGraphic
+      }
     ]
 
     const result = applyArtefactOperations(initial, operations)
@@ -266,9 +254,7 @@ describe('applyArtefactOperations', () => {
     expect(result.config.infoschematic.fabrics[0]?.id).toBe('fabric-created')
     expect(result.config.infoschematic.cards[0]?.id).toBe('card-created')
     expect(result.config.infoschematic.flows[0]?.id).toBe('flow-created')
-    expect(result.config.infoschematic.graphics[0]?.properties?.caption).toBe(
-      'graphic-created caption',
-    )
+    expect(result.config.infoschematic.graphics[0]?.properties?.caption).toBe('graphic-created caption')
     expect(result.config.infoschematic.regions[0]?.fill).toBe('#eef')
     expect(initial).toEqual(before)
     expect(result.config).not.toBe(initial)
@@ -280,32 +266,32 @@ describe('applyArtefactOperations', () => {
       {
         geometry: { box: { height: 190, width: 120, x: 95, y: 55 }, role: 'box' },
         operation: 'move',
-        target: selections.region,
+        target: selections.region
       },
       {
         geometry: {
           box: { height: 110, width: 190, x: 90, y: 275 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'move',
-        target: selections.fabric,
+        target: selections.fabric
       },
       {
         geometry: {
           box: { height: 75, width: 130, x: 150, y: 120 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'resize',
-        target: selections.card,
+        target: selections.card
       },
       {
         geometry: {
           box: { height: 85, width: 105, x: 130, y: 450 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'move',
-        target: selections.graphic,
-      },
+        target: selections.graphic
+      }
     ]
 
     const result = applyArtefactOperations(initial, operations)
@@ -314,28 +300,26 @@ describe('applyArtefactOperations', () => {
     // The authored corner radius survives a geometry rewrite of the box.
     expect(result.config.infoschematic.regions[0]).toMatchObject({
       box: { height: 190, radius: 8, width: 120, x: 95, y: 55 },
-      fill: '#eef',
+      fill: '#eef'
     })
     expect(result.config.infoschematic.fabrics[0]).toMatchObject({
       appearance: {
         properties: { emphasis: true, rank: 2 },
-        renderer: 'fabric-special',
+        renderer: 'fabric-special'
       },
-      placement: { box: { height: 110, width: 190, x: 90, y: 275 } },
+      placement: { box: { height: 110, width: 190, x: 90, y: 275 } }
     })
     expect(result.config.infoschematic.cards[0]?.placement).toMatchObject({
       box: { height: 75, width: 130, x: 150, y: 120 },
-      ports: { east: 2 },
+      ports: { east: 2 }
     })
     expect(result.config.infoschematic.graphics[0]).toMatchObject({
       placement: { height: 85, width: 105, x: 130, y: 450 },
       properties: { caption: 'graphic-one caption', opacity: 0.8 },
-      renderer: 'graphic-special',
+      renderer: 'graphic-special'
     })
     expect(result.config.infoschematic.scopes).toEqual(initial.infoschematic.scopes)
-    expect(result.config.infoschematic.flowFamilies).toEqual(
-      initial.infoschematic.flowFamilies,
-    )
+    expect(result.config.infoschematic.flowFamilies).toEqual(initial.infoschematic.flowFamilies)
   })
 
   it('replaces all five authored values, including Flow route properties', () => {
@@ -345,7 +329,7 @@ describe('applyArtefactOperations', () => {
       {
         operation: 'replace-properties',
         target: selections.region,
-        value: { ...originalRegion!, fill: '#abc', label: 'Region replaced' },
+        value: { ...originalRegion!, fill: '#abc', label: 'Region replaced' }
       },
       {
         operation: 'replace-properties',
@@ -354,14 +338,14 @@ describe('applyArtefactOperations', () => {
           ...initial.infoschematic.fabrics[0]!,
           appearance: {
             properties: { emphasis: false, rank: 3 },
-            renderer: 'fabric-special',
-          },
-        },
+            renderer: 'fabric-special'
+          }
+        }
       },
       {
         operation: 'replace-properties',
         target: selections.card,
-        value: { ...initial.infoschematic.cards[0]!, detail: 'Card replaced' },
+        value: { ...initial.infoschematic.cards[0]!, detail: 'Card replaced' }
       },
       {
         operation: 'replace-properties',
@@ -371,18 +355,18 @@ describe('applyArtefactOperations', () => {
           dashed: true,
           points: [
             { x: 120, y: 130 },
-            { x: 260, y: 150 },
-          ],
-        },
+            { x: 260, y: 150 }
+          ]
+        }
       },
       {
         operation: 'replace-properties',
         target: selections.graphic,
         value: {
           ...initial.infoschematic.graphics[0]!,
-          properties: { caption: 'Graphic replaced', opacity: 1 },
-        },
-      },
+          properties: { caption: 'Graphic replaced', opacity: 1 }
+        }
+      }
     ]
 
     const result = applyArtefactOperations(initial, operations)
@@ -390,11 +374,11 @@ describe('applyArtefactOperations', () => {
     expect(result.rejected).toEqual([])
     expect(result.config.infoschematic.regions[0]).toMatchObject({
       fill: '#abc',
-      label: 'Region replaced',
+      label: 'Region replaced'
     })
     expect(result.config.infoschematic.fabrics[0]?.appearance).toEqual({
       properties: { emphasis: false, rank: 3 },
-      renderer: 'fabric-special',
+      renderer: 'fabric-special'
     })
     expect(result.config.infoschematic.cards[0]?.detail).toBe('Card replaced')
     expect(result.config.infoschematic.flows[0]).toMatchObject({
@@ -403,13 +387,13 @@ describe('applyArtefactOperations', () => {
       family: 'family-one',
       points: [
         { x: 120, y: 130 },
-        { x: 260, y: 150 },
-      ],
+        { x: 260, y: 150 }
+      ]
     })
     expect(result.config.infoschematic.graphics[0]).toMatchObject({
       properties: { caption: 'Graphic replaced', opacity: 1 },
       renderer: 'graphic-special',
-      scopes: ['scope-one'],
+      scopes: ['scope-one']
     })
   })
 
@@ -420,38 +404,23 @@ describe('applyArtefactOperations', () => {
       fabric: { ...selections.fabric, code: 'F2', id: 'fabric-two' },
       flow: { ...selections.flow, code: 'L2', id: 'flow-two' },
       graphic: { ...selections.graphic, id: 'graphic-two' },
-      region: { ...selections.region, id: 'region-two' },
+      region: { ...selections.region, id: 'region-two' }
     } as const satisfies Record<string, ArtefactSelection>
     const operations = Object.values(secondSelections).map((target) => ({
       from: 1,
       operation: 'reorder' as const,
       target,
-      to: 0,
+      to: 0
     }))
 
     const result = applyArtefactOperations(initial, operations)
 
     expect(result.rejected).toEqual([])
-    expect(result.config.infoschematic.regions.map(({ id }) => id)).toEqual([
-      'region-two',
-      'region-one',
-    ])
-    expect(result.config.infoschematic.fabrics.map(({ id }) => id)).toEqual([
-      'fabric-two',
-      'fabric-one',
-    ])
-    expect(result.config.infoschematic.cards.map(({ id }) => id)).toEqual([
-      'card-two',
-      'card-one',
-    ])
-    expect(result.config.infoschematic.flows.map(({ id }) => id)).toEqual([
-      'flow-two',
-      'flow-one',
-    ])
-    expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual([
-      'graphic-two',
-      'graphic-one',
-    ])
+    expect(result.config.infoschematic.regions.map(({ id }) => id)).toEqual(['region-two', 'region-one'])
+    expect(result.config.infoschematic.fabrics.map(({ id }) => id)).toEqual(['fabric-two', 'fabric-one'])
+    expect(result.config.infoschematic.cards.map(({ id }) => id)).toEqual(['card-two', 'card-one'])
+    expect(result.config.infoschematic.flows.map(({ id }) => id)).toEqual(['flow-two', 'flow-one'])
+    expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual(['graphic-two', 'graphic-one'])
   })
 
   it('cascades owned and referenced records while preserving unrelated content', () => {
@@ -459,39 +428,33 @@ describe('applyArtefactOperations', () => {
     initial.infoschematic.cards = [
       ...initial.infoschematic.cards,
       card('adapter-one', 'A1', 100, 'card-one'),
-      card('adapter-two', 'A2', 100, 'adapter-one'),
+      card('adapter-two', 'A2', 100, 'adapter-one')
     ]
     initial.infoschematic.flows = [
       ...initial.infoschematic.flows,
       flow('flow-adapter', 'LA', 'adapter-two', 'card-two'),
-      flow('flow-unrelated', 'LU', 'card-two', 'fabric-two'),
+      flow('flow-unrelated', 'LU', 'card-two', 'fabric-two')
     ]
     const operations: readonly ArtefactDraftOperation[] = [
       { operation: 'remove', target: selections.card },
       { operation: 'remove', target: selections.fabric },
       { operation: 'remove', target: selections.graphic },
-      { operation: 'remove', target: selections.region },
+      { operation: 'remove', target: selections.region }
     ]
 
     const result = applyArtefactOperations(initial, operations)
 
     expect(result.rejected).toEqual([])
     expect(result.config.infoschematic.cards.map(({ id }) => id)).toEqual(['card-two'])
-    expect(result.config.infoschematic.fabrics.map(({ id }) => id)).toEqual([
-      'fabric-two',
-    ])
-    expect(result.config.infoschematic.flows.map(({ id }) => id)).toEqual([
-      'flow-unrelated',
-    ])
-    expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual([
-      'graphic-two',
-    ])
+    expect(result.config.infoschematic.fabrics.map(({ id }) => id)).toEqual(['fabric-two'])
+    expect(result.config.infoschematic.flows.map(({ id }) => id)).toEqual(['flow-unrelated'])
+    expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual(['graphic-two'])
     expect(result.config.infoschematic.regions.map(({ id }) => id)).toEqual(['region-two'])
     expect(result.config.standaloneScenes[0]?.focus.graphics).toEqual(['graphic-two'])
     expect(result.config.themes[0]?.scenes[0]?.focus.graphics).toEqual(['graphic-two'])
     expect(result.config.stories[0]?.scenes[0]).toEqual({
       focus: { graphics: ['graphic-two'] },
-      id: 'story-scene-one',
+      id: 'story-scene-one'
     })
   })
 
@@ -500,33 +463,33 @@ describe('applyArtefactOperations', () => {
     const unsupportedFlowMove = {
       geometry: { box: { height: 10, width: 10, x: 0, y: 0 }, role: 'box' },
       operation: 'move',
-      target: selections.flow,
+      target: selections.flow
     } as unknown as ArtefactDraftOperation
     const result = applyArtefactOperations(initial, [
       {
         at: 0,
         operation: 'create',
         target: selections.card,
-        value: initial.infoschematic.cards[0]!,
+        value: initial.infoschematic.cards[0]!
       },
       {
         from: 0,
         operation: 'reorder',
         target: { ...selections.card, code: 'C2', id: 'card-two' },
-        to: 1,
+        to: 1
       },
       {
         operation: 'remove',
-        target: { ...selections.graphic, id: 'missing-graphic' },
+        target: { ...selections.graphic, id: 'missing-graphic' }
       },
-      unsupportedFlowMove,
+      unsupportedFlowMove
     ])
 
     expect(result.rejected.map(({ index, reason }) => ({ index, reason }))).toEqual([
       { index: 0, reason: 'duplicate-identity' },
       { index: 1, reason: 'stale-order' },
       { index: 2, reason: 'missing-target' },
-      { index: 3, reason: 'invalid-geometry' },
+      { index: 3, reason: 'invalid-geometry' }
     ])
     expect(result.config).toEqual(initial)
     expect(result.config).not.toBe(initial)

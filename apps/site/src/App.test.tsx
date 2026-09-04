@@ -9,7 +9,7 @@ import {
   isBlankExamplePath,
   isInfoschematicsExamplePath,
   isSystemExamplePath,
-  systemExamplePath,
+  systemExamplePath
 } from './routes.ts'
 
 describe('website routes', () => {

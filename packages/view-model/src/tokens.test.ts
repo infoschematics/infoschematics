@@ -8,24 +8,18 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   generateVisualTokenCss,
   generateVisualTokens,
-  visualTokenEntries,
+  visualTokenEntries
 } from '../../../scripts/generate-visual-tokens.ts'
 import { cornerRadius, visualTokens } from './tokens.ts'
 
 const temporaryDirectories: string[] = []
 
 afterEach(async () => {
-  await Promise.all(
-    temporaryDirectories
-      .splice(0)
-      .map((directory) => rm(directory, { force: true, recursive: true })),
-  )
+  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { force: true, recursive: true })))
 })
 
 const temporaryOutput = async () => {
-  const directory = await mkdtemp(
-    join(tmpdir(), 'infoschematics-visual-tokens-'),
-  )
+  const directory = await mkdtemp(join(tmpdir(), 'infoschematics-visual-tokens-'))
   temporaryDirectories.push(directory)
   return pathToFileURL(join(directory, 'tokens.css'))
 }
@@ -60,10 +54,10 @@ describe('visual tokens', () => {
     expect(entries).toContainEqual({
       cssName: '--infoschematic-canvas-geometry-corner-radius',
       path: 'canvas.geometry.cornerRadius',
-      value: cornerRadius,
+      value: cornerRadius
     })
     expect(generateVisualTokenCss()).toContain(
-      `--infoschematic-canvas-selection-pointed: ${visualTokens.canvas.selection.pointed};`,
+      `--infoschematic-canvas-selection-pointed: ${visualTokens.canvas.selection.pointed};`
     )
   })
 
@@ -72,11 +66,11 @@ describe('visual tokens', () => {
       visualTokenEntries({
         canvas: {
           focusRing: '#ffffff',
-          'focus-ring': '#000000',
-        },
-      }),
+          'focus-ring': '#000000'
+        }
+      })
     ).toThrowError(
-      'Visual token CSS name collision for --infoschematic-canvas-focus-ring: canvas.focusRing, canvas.focus-ring',
+      'Visual token CSS name collision for --infoschematic-canvas-focus-ring: canvas.focusRing, canvas.focus-ring'
     )
   })
 
@@ -86,13 +80,11 @@ describe('visual tokens', () => {
     await generateVisualTokens({ output })
     const generated = await readFile(output, 'utf8')
     expect(generated).toBe(generateVisualTokenCss())
-    await expect(
-      generateVisualTokens({ check: true, output }),
-    ).resolves.toBeUndefined()
+    await expect(generateVisualTokens({ check: true, output })).resolves.toBeUndefined()
 
     await writeFile(output, `${generated}/* hand edited */\n`)
-    await expect(
-      generateVisualTokens({ check: true, output }),
-    ).rejects.toThrowError('Generated visual tokens are stale')
+    await expect(generateVisualTokens({ check: true, output })).rejects.toThrowError(
+      'Generated visual tokens are stale'
+    )
   })
 })

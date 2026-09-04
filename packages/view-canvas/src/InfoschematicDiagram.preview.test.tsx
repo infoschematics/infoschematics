@@ -1,11 +1,10 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
-
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import type { ArtefactOperation, ArtefactSelection } from '@infoschematics/view-model/editable'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
 
 import { Canvas } from './Canvas.tsx'
 
@@ -21,10 +20,10 @@ const config = (): InfoschematicConfig =>
           label: 'Card A',
           placement: {
             box: { height: 50, width: 100, x: 80, y: 170 },
-            ports: { east: 1 },
+            ports: { east: 1 }
           },
           scope: 'scope',
-          scopes: ['scope'],
+          scopes: ['scope']
         },
         {
           code: 'CARD-B',
@@ -33,17 +32,17 @@ const config = (): InfoschematicConfig =>
           label: 'Card B',
           placement: {
             box: { height: 50, width: 100, x: 360, y: 170 },
-            ports: { west: 1 },
+            ports: { west: 1 }
           },
           scope: 'scope',
-          scopes: ['scope'],
-        },
+          scopes: ['scope']
+        }
       ],
       fabrics: [
         {
           appearance: {
             properties: { tone: 'base' },
-            renderer: 'fabric-preview',
+            renderer: 'fabric-preview'
           },
           code: 'FABRIC-A',
           detail: 'Fabric detail',
@@ -51,8 +50,8 @@ const config = (): InfoschematicConfig =>
           label: 'Fabric A',
           placement: { box: { height: 70, width: 160, x: 60, y: 70 } },
           scope: 'scope',
-          scopes: ['scope'],
-        },
+          scopes: ['scope']
+        }
       ],
       flowFamilies: [
         {
@@ -60,8 +59,8 @@ const config = (): InfoschematicConfig =>
           description: 'Requests',
           id: 'request',
           label: 'Request',
-          prefix: 'REQ',
-        },
+          prefix: 'REQ'
+        }
       ],
       flows: [
         {
@@ -70,13 +69,13 @@ const config = (): InfoschematicConfig =>
           id: 'flow-a',
           points: [
             { x: 180, y: 195 },
-            { x: 360, y: 195 },
+            { x: 360, y: 195 }
           ],
           source: 'card-a',
           sourcePort: 'E1',
           target: 'card-b',
-          targetPort: 'W1',
-        },
+          targetPort: 'W1'
+        }
       ],
       graphics: [
         {
@@ -84,15 +83,15 @@ const config = (): InfoschematicConfig =>
           label: 'Graphic A',
           placement: { height: 30, width: 80, x: 250, y: 80 },
           properties: { caption: 'base' },
-          renderer: 'graphic-preview',
+          renderer: 'graphic-preview'
         },
         {
           id: 'graphic-b',
           label: 'Graphic B',
           placement: { height: 30, width: 80, x: 350, y: 80 },
           properties: { caption: 'second' },
-          renderer: 'graphic-preview',
-        },
+          renderer: 'graphic-preview'
+        }
       ],
       regions: [
         {
@@ -101,8 +100,8 @@ const config = (): InfoschematicConfig =>
           frame: { style: 'solid' },
           id: 'region-a',
           label: 'Region A',
-          labelMount: 'boundary',
-        },
+          labelMount: 'boundary'
+        }
       ],
       scopes: [
         {
@@ -111,11 +110,11 @@ const config = (): InfoschematicConfig =>
           fill: '#dbeafe',
           id: 'scope',
           label: 'Scope',
-          prefix: 'S',
-        },
+          prefix: 'S'
+        }
       ],
-      viewBox: { height: 320, width: 640, x: 0, y: 0 },
-    },
+      viewBox: { height: 320, width: 640, x: 0, y: 0 }
+    }
   })
 
 const selection = {
@@ -123,57 +122,69 @@ const selection = {
     code: 'CARD-A',
     geometry: 'box',
     id: 'card-a',
-    kind: 'card',
+    kind: 'card'
   },
   cardB: {
     code: 'CARD-B',
     geometry: 'box',
     id: 'card-b',
-    kind: 'card',
+    kind: 'card'
   },
   fabric: {
     code: 'FABRIC-A',
     geometry: 'box',
     id: 'fabric-a',
-    kind: 'fabric',
+    kind: 'fabric'
   },
   flow: {
     code: 'FLOW-A',
     geometry: 'route',
     id: 'flow-a',
-    kind: 'flow',
+    kind: 'flow'
   },
   graphicA: {
     code: null,
     geometry: 'box',
     id: 'graphic-a',
-    kind: 'graphic',
+    kind: 'graphic'
   },
   graphicB: {
     code: null,
     geometry: 'box',
     id: 'graphic-b',
-    kind: 'graphic',
+    kind: 'graphic'
   },
   region: {
     code: null,
     geometry: 'box',
     id: 'region-a',
-    kind: 'region',
-  },
+    kind: 'region'
+  }
 } as const satisfies Record<string, ArtefactSelection>
 
 const renderers = {
   fabrics: {
-    'fabric-preview': ({ fabric, bounds }: { fabric: (ReturnType<typeof config>)['infoschematic']['fabrics'][number]; bounds: { height: number; width: number; x: number; y: number } }) => (
+    'fabric-preview': ({
+      fabric,
+      bounds
+    }: {
+      fabric: ReturnType<typeof config>['infoschematic']['fabrics'][number]
+      bounds: { height: number; width: number; x: number; y: number }
+    }) => (
       <text>{`${fabric.label}:${bounds.x},${bounds.y},${bounds.width},${bounds.height}:${fabric.appearance?.properties?.tone}`}</text>
-    ),
+    )
   },
   graphics: {
-    'graphic-preview': ({ graphic, bounds }: { graphic: (ReturnType<typeof config>)['infoschematic']['graphics'][number]; bounds: { height: number; width: number; x: number; y: number } }) => (
+    'graphic-preview': ({
+      graphic,
+      bounds
+    }: {
+      graphic: ReturnType<typeof config>['infoschematic']['graphics'][number]
+      bounds: { height: number; width: number; x: number; y: number }
+    }) => (
       <text>{`${graphic.label}:${bounds.x},${bounds.y},${bounds.width},${bounds.height}:${graphic.properties?.caption}`}</text>
-    ),
-  },
+    )
+  }
 }
 
 describe('InfoschematicDiagram draft preview', () => {
@@ -187,15 +198,15 @@ describe('InfoschematicDiagram draft preview', () => {
           code: null,
           geometry: 'box',
           id: 'region-created',
-          kind: 'region',
+          kind: 'region'
         },
         value: {
           box: { height: 60, radius: 8, width: 620, x: 10, y: 250 },
           fill: '#ffe',
           frame: { style: 'solid' },
           id: 'region-created',
-          label: 'Region Created',
-        },
+          label: 'Region Created'
+        }
       },
       {
         at: 1,
@@ -204,7 +215,7 @@ describe('InfoschematicDiagram draft preview', () => {
           code: 'FABRIC-C',
           geometry: 'box',
           id: 'fabric-created',
-          kind: 'fabric',
+          kind: 'fabric'
         },
         value: {
           code: 'FABRIC-C',
@@ -213,8 +224,8 @@ describe('InfoschematicDiagram draft preview', () => {
           label: 'Fabric Created',
           placement: { box: { height: 40, width: 100, x: 230, y: 120 } },
           scope: 'scope',
-          scopes: ['scope'],
-        },
+          scopes: ['scope']
+        }
       },
       {
         at: 2,
@@ -223,7 +234,7 @@ describe('InfoschematicDiagram draft preview', () => {
           code: 'CARD-C',
           geometry: 'box',
           id: 'card-created',
-          kind: 'card',
+          kind: 'card'
         },
         value: {
           code: 'CARD-C',
@@ -232,11 +243,11 @@ describe('InfoschematicDiagram draft preview', () => {
           label: 'Card Created',
           placement: {
             box: { height: 40, width: 90, x: 240, y: 230 },
-            ports: { east: 1 },
+            ports: { east: 1 }
           },
           scope: 'scope',
-          scopes: ['scope'],
-        },
+          scopes: ['scope']
+        }
       },
       {
         at: 1,
@@ -245,7 +256,7 @@ describe('InfoschematicDiagram draft preview', () => {
           code: 'FLOW-C',
           geometry: 'route',
           id: 'flow-created',
-          kind: 'flow',
+          kind: 'flow'
         },
         value: {
           code: 'FLOW-C',
@@ -254,13 +265,13 @@ describe('InfoschematicDiagram draft preview', () => {
           points: [
             { x: 330, y: 250 },
             { x: 330, y: 195 },
-            { x: 360, y: 195 },
+            { x: 360, y: 195 }
           ],
           source: 'card-created',
           sourcePort: 'E1',
           target: 'card-b',
-          targetPort: 'W1',
-        },
+          targetPort: 'W1'
+        }
       },
       {
         at: 2,
@@ -269,28 +280,20 @@ describe('InfoschematicDiagram draft preview', () => {
           code: null,
           geometry: 'box',
           id: 'graphic-created',
-          kind: 'graphic',
+          kind: 'graphic'
         },
         value: {
           id: 'graphic-created',
           label: 'Graphic Created',
           placement: { height: 20, width: 70, x: 450, y: 90 },
-          renderer: 'graphic-preview',
-        },
-      },
+          renderer: 'graphic-preview'
+        }
+      }
     ]
 
-    const markup = renderToStaticMarkup(
-      <Canvas artefactOperations={operations} config={initial} mode="design" />,
-    )
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
 
-    for (const id of [
-      'region-created',
-      'fabric-created',
-      'card-created',
-      'flow-created',
-      'graphic-created',
-    ]) {
+    for (const id of ['region-created', 'fabric-created', 'card-created', 'flow-created', 'graphic-created']) {
       expect(markup).toContain(`data-artefact-id="${id}"`)
     }
     expect(initial.infoschematic.regions).toHaveLength(1)
@@ -304,35 +307,35 @@ describe('InfoschematicDiagram draft preview', () => {
       {
         geometry: { box: { height: 260, width: 500, x: 30, y: 35 }, role: 'box' },
         operation: 'move',
-        target: selection.region,
+        target: selection.region
       },
       {
         geometry: {
           box: { height: 90, width: 190, x: 90, y: 60 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'resize',
-        target: selection.fabric,
+        target: selection.fabric
       },
       {
         geometry: {
           box: { height: 70, width: 120, x: 300, y: 180 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'move',
-        target: selection.cardB,
+        target: selection.cardB
       },
       {
         from: 1,
         operation: 'reorder',
         target: selection.cardB,
-        to: 0,
+        to: 0
       },
       {
         from: 1,
         operation: 'reorder',
         target: selection.graphicB,
-        to: 0,
+        to: 0
       },
       {
         operation: 'replace-properties',
@@ -341,11 +344,11 @@ describe('InfoschematicDiagram draft preview', () => {
           ...initial.infoschematic.fabrics[0]!,
           appearance: {
             properties: { tone: 'drafted' },
-            renderer: 'fabric-preview',
+            renderer: 'fabric-preview'
           },
           label: 'Fabric Replaced',
-          placement: { box: { height: 90, width: 190, x: 90, y: 60 } },
-        },
+          placement: { box: { height: 90, width: 190, x: 90, y: 60 } }
+        }
       },
       {
         operation: 'replace-properties',
@@ -353,28 +356,21 @@ describe('InfoschematicDiagram draft preview', () => {
         value: {
           ...initial.infoschematic.graphics[1]!,
           label: 'Graphic Replaced',
-          properties: { caption: 'drafted' },
-        },
+          properties: { caption: 'drafted' }
+        }
       },
-      { operation: 'remove', target: selection.cardA },
+      { operation: 'remove', target: selection.cardA }
     ]
 
     const markup = renderToStaticMarkup(
-      <Canvas
-        artefactOperations={operations}
-        config={initial}
-        mode="design"
-        renderers={renderers}
-      />,
+      <Canvas artefactOperations={operations} config={initial} mode="design" renderers={renderers} />
     )
 
     expect(markup).toContain('Fabric Replaced:90,60,190,90:drafted')
     expect(markup).toContain('Graphic Replaced:350,80,80,30:drafted')
     expect(markup).not.toContain('data-artefact-id="card-a"')
     expect(markup).not.toContain('data-artefact-id="flow-a"')
-    expect(markup.indexOf('data-artefact-id="graphic-b"')).toBeLessThan(
-      markup.indexOf('data-artefact-id="graphic-a"'),
-    )
+    expect(markup.indexOf('data-artefact-id="graphic-b"')).toBeLessThan(markup.indexOf('data-artefact-id="graphic-a"'))
     expect(markup).toContain('aria-label="Region Region A"')
     expect(initial.infoschematic.fabrics[0]?.label).toBe('Fabric A')
   })
@@ -387,18 +383,18 @@ describe('InfoschematicDiagram draft preview', () => {
       d: 'M200 210 H340',
       points: [
         { x: 200, y: 210 },
-        { x: 340, y: 210 },
-      ],
+        { x: 340, y: 210 }
+      ]
     }
     const operations: readonly ArtefactDraftOperation[] = [
       {
         geometry: {
           box: { height: 50, width: 100, x: 120, y: 180 },
-          role: 'box',
+          role: 'box'
         },
         operation: 'move',
-        target: selection.cardA,
-      },
+        target: selection.cardA
+      }
     ]
 
     const markup = renderToStaticMarkup(
@@ -408,7 +404,7 @@ describe('InfoschematicDiagram draft preview', () => {
         config={initial}
         flows={[draftedFlow]}
         mode="design"
-      />,
+      />
     )
 
     expect(markup).toContain('d="M200 210 H340"')
@@ -429,15 +425,13 @@ describe('InfoschematicDiagram draft preview', () => {
             { x: 180, y: 205 },
             { x: 280, y: 205 },
             { x: 280, y: 215 },
-            { x: 360, y: 215 },
-          ],
-        },
-      },
+            { x: 360, y: 215 }
+          ]
+        }
+      }
     ]
 
-    const markup = renderToStaticMarkup(
-      <Canvas artefactOperations={operations} config={initial} mode="design" />,
-    )
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
 
     expect(markup).toContain('d="M180 205 H280 V215 H360"')
     expect(markup).toContain('dashed')
@@ -449,17 +443,17 @@ describe('InfoschematicDiagram draft preview', () => {
       at: 0,
       operation: 'create',
       target: selection.cardA,
-      value: initial.infoschematic.cards[0]!,
+      value: initial.infoschematic.cards[0]!
     }
     const activeGraphic = {
       id: 'present-graphic',
       label: 'Present Graphic',
       properties: { caption: 'present' },
-      renderer: 'graphic-preview',
+      renderer: 'graphic-preview'
     }
     const baseMarkup = renderToStaticMarkup(<Canvas config={initial} mode="design" />)
     const rejectedMarkup = renderToStaticMarkup(
-      <Canvas artefactOperations={[duplicate]} config={initial} mode="design" />,
+      <Canvas artefactOperations={[duplicate]} config={initial} mode="design" />
     )
     const presentMarkup = renderToStaticMarkup(
       <Canvas
@@ -467,7 +461,7 @@ describe('InfoschematicDiagram draft preview', () => {
         config={initial}
         graphic={activeGraphic}
         renderers={renderers}
-      />,
+      />
     )
 
     expect(rejectedMarkup).toBe(baseMarkup)

@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type ArtefactFactoryContext,
   createDefaultArtefact,
   createDefaultGraphic,
   createDefaultRegion,
-  createFactoryIdentityAllocator,
-  type ArtefactFactoryContext,
+  createFactoryIdentityAllocator
 } from './artefact-factories.ts'
 
 const context = (overrides: Partial<ArtefactFactoryContext> = {}): ArtefactFactoryContext => ({
   allocate: createFactoryIdentityAllocator(),
   at: 1,
   box: { height: 160, width: 300, x: 40, y: 80 },
-  ...overrides,
+  ...overrides
 })
 
 describe('default artefact factories', () => {
@@ -33,8 +33,8 @@ describe('default artefact factories', () => {
       value: {
         box: { height: 160, radius: 12, width: 300, x: 40, y: 80 },
         frame: { style: 'solid' },
-        label: 'New region',
-      },
+        label: 'New region'
+      }
     })
     expect(operation?.value).not.toHaveProperty('template')
     expect(operation?.value).not.toHaveProperty('provenance')
@@ -59,7 +59,7 @@ describe('default artefact factories', () => {
         allocations += 1
         return { code: null, id: `${kind}-1` }
       },
-      box: { height: 0, width: 300, x: 40, y: 80 },
+      box: { height: 0, width: 300, x: 40, y: 80 }
     })
 
     expect(createDefaultGraphic(invalid)).toBeUndefined()

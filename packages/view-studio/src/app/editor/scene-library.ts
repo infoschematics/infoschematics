@@ -68,8 +68,8 @@ export const addScene = (library: SceneLibrary, label: string): SceneLibrary => 
       description: '',
       flows: [],
       id: identifierFrom(named),
-      label: named,
-    },
+      label: named
+    }
   ]
 }
 
@@ -117,7 +117,7 @@ export const libraryAsSource = (library: SceneLibrary): string => {
       scene.short ? `    short: ${quoted(scene.short)},` : undefined,
       `    description: ${quoted(scene.description)},`,
       `    components: ${list(scene.components)},`,
-      `    flows: ${list(scene.flows)}`,
+      `    flows: ${list(scene.flows)}`
     ].filter(Boolean)
     return `  {\n${rows.join('\n')}\n  }`
   })

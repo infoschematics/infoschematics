@@ -59,11 +59,11 @@ Interactive views are additive. `@infoschematics/view-canvas` owns the reusable 
 
 ```bash
 bun install
-bun run dev
-bun run check
+bun run ki:dev
+bun run ki:check
 ```
 
-`bun run check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
+`bun run ki:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
 
 Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
 

@@ -1,4 +1,4 @@
-import type { PortCounts, PortId, Side } from '@infoschematics/domain-model/ports'
+import type { PortCounts, PortId } from '@infoschematics/domain-model/ports'
 import type { Box, Point } from './geometry.ts'
 
 export type { PortCounts, PortId, Side } from '@infoschematics/domain-model/ports'

@@ -1,10 +1,7 @@
-import type {
-  InfoschematicConfig,
-  InfoschematicConfigInput,
-} from "@infoschematics/domain-model";
+import type { InfoschematicConfig, InfoschematicConfigInput } from '@infoschematics/domain-model'
 import type { InfoschematicAppearanceConfig } from '@infoschematics/domain-model/appearance'
 
-const defaultViewBox = { x: 0, y: 0, width: 1200, height: 800 } as const;
+const defaultViewBox = { x: 0, y: 0, width: 1200, height: 800 } as const
 
 export const defaultInfoschematicAppearance = {
   surface: 'neutral',
@@ -13,19 +10,17 @@ export const defaultInfoschematicAppearance = {
     compact: false,
     identity: false,
     stereotype: false,
-    description: false,
-  },
+    description: false
+  }
 } as const satisfies InfoschematicAppearanceConfig
 
-const normaliseAppearance = (
-  appearance: InfoschematicAppearanceConfig | undefined,
-): InfoschematicAppearanceConfig => ({
+const normaliseAppearance = (appearance: InfoschematicAppearanceConfig | undefined): InfoschematicAppearanceConfig => ({
   ...defaultInfoschematicAppearance,
   ...appearance,
   card: {
     ...defaultInfoschematicAppearance.card,
-    ...appearance?.card,
-  },
+    ...appearance?.card
+  }
 })
 
 const validateDomains = (input: InfoschematicConfigInput) => {
@@ -45,9 +40,7 @@ const validateDomains = (input: InfoschematicConfigInput) => {
 }
 
 /** Normalise a partial authored definition into a complete Infoschematic. */
-export const defineInfoschematic = (
-  input: InfoschematicConfigInput,
-): InfoschematicConfig => {
+export const defineInfoschematic = (input: InfoschematicConfigInput): InfoschematicConfig => {
   validateDomains(input)
 
   return {
@@ -65,11 +58,11 @@ export const defineInfoschematic = (
       flows: input.infoschematic?.flows ?? [],
       graphics: input.infoschematic?.graphics ?? [],
       interfaces: input.infoschematic?.interfaces ?? [],
-      specificationGroups: input.infoschematic?.specificationGroups ?? [],
+      specificationGroups: input.infoschematic?.specificationGroups ?? []
     },
     standaloneScenes: input.standaloneScenes ?? [],
     themes: input.themes ?? [],
     stories: input.stories ?? [],
-    calloutPositions: input.calloutPositions ?? [],
+    calloutPositions: input.calloutPositions ?? []
   }
 }

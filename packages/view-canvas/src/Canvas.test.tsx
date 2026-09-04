@@ -1,13 +1,8 @@
+import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { defineInfoschematic } from '@infoschematics/domain-core'
 import { Canvas } from './Canvas.tsx'
-import type {
-  FabricRendererProps,
-  GraphicRendererProps,
-  RendererDiagnostic,
-  RendererProperties,
-} from './renderers.tsx'
+import type { FabricRendererProps, GraphicRendererProps, RendererDiagnostic, RendererProperties } from './renderers.tsx'
 
 describe('Canvas', () => {
   it('renders a title-only configuration as a safe blank Canvas', () => {
@@ -30,8 +25,8 @@ describe('Canvas', () => {
             label: 'System',
             description: 'The configured system',
             color: '#6699cc',
-            fill: '#112233',
-          },
+            fill: '#112233'
+          }
         ],
         cards: [
           {
@@ -41,8 +36,8 @@ describe('Canvas', () => {
             detail: 'Supplied by host',
             scope: 'system',
             scopes: ['system'],
-            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} },
-          },
+            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} }
+          }
         ],
         fabrics: [
           {
@@ -53,7 +48,7 @@ describe('Canvas', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 100, y: 220, width: 300, height: 90 } },
-            appearance: { renderer: 'custom' },
+            appearance: { renderer: 'custom' }
           },
           {
             id: 'fallback',
@@ -63,10 +58,10 @@ describe('Canvas', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 500, y: 220, width: 240, height: 80 } },
-            appearance: { renderer: 'unknown' },
-          },
-        ],
-      },
+            appearance: { renderer: 'unknown' }
+          }
+        ]
+      }
     })
     const CustomFabric = ({ fabric, bounds }: FabricRendererProps) => (
       <circle data-fabric={fabric.id} cx={bounds.x + bounds.width / 2} cy={bounds.y + bounds.height / 2} r="20" />
@@ -93,8 +88,8 @@ describe('Canvas', () => {
             label: 'System',
             description: 'The configured system',
             color: '#6699cc',
-            fill: '#112233',
-          },
+            fill: '#112233'
+          }
         ],
         fabrics: [
           {
@@ -105,7 +100,7 @@ describe('Canvas', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 100, y: 100, width: 240, height: 80 } },
-            appearance: { renderer: 'badge', properties: { label: 'safe' } },
+            appearance: { renderer: 'badge', properties: { label: 'safe' } }
           },
           {
             id: 'invalid',
@@ -115,10 +110,10 @@ describe('Canvas', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 400, y: 100, width: 240, height: 80 } },
-            appearance: { renderer: 'badge', properties: { label: false } },
-          },
-        ],
-      },
+            appearance: { renderer: 'badge', properties: { label: false } }
+          }
+        ]
+      }
     })
     const Badge = ({ fabric, properties }: FabricRendererProps & { properties: RendererProperties }) => (
       <text
@@ -142,12 +137,12 @@ describe('Canvas', () => {
                 typeof properties?.label === 'string'
                   ? { valid: true, properties }
                   : { valid: false, reason: 'label must be a string' },
-              component: Badge,
-            },
+              component: Badge
+            }
           ],
-          onDiagnostic: (diagnostic) => diagnostics.push(diagnostic),
+          onDiagnostic: (diagnostic) => diagnostics.push(diagnostic)
         }}
-      />,
+      />
     )
 
     expect(markup).toContain('data-badge="safe"')
@@ -183,11 +178,11 @@ describe('Canvas', () => {
                 typeof properties?.caption === 'string'
                   ? { valid: true, properties: { caption: properties.caption.toUpperCase() } }
                   : { valid: false, reason: 'caption must be a string' },
-              component: Graphic,
-            },
-          ],
+              component: Graphic
+            }
+          ]
         }}
-      />,
+      />
     )
 
     expect(markup).toContain('data-graphic="custom-graphic"')

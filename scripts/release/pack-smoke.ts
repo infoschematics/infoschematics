@@ -9,7 +9,7 @@ import {
   type ReleasePackage,
   releasePackages,
   releaseRepositoryUrl,
-  repositoryRoot,
+  repositoryRoot
 } from './packages.ts'
 
 export type PackedPackage = Readonly<{
@@ -66,7 +66,12 @@ const targetValues = (value: unknown): string[] => {
 
 const targetPattern = (target: string) => target.replace(/^\.\//, '')
 const patternExpression = (pattern: string) =>
-  new RegExp(`^${pattern.split('*').map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('(.+)')}$`)
+  new RegExp(
+    `^${pattern
+      .split('*')
+      .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .join('(.+)')}$`
+  )
 
 const matchingFiles = (target: string, files: readonly string[]) => {
   const pattern = targetPattern(target)
@@ -80,14 +85,14 @@ const exportTargets = (value: unknown) => {
   return {
     runtime: all.filter((target) => /\.(?:c|m)?js$/.test(target)),
     styles: all.filter((target) => target.endsWith('.css')),
-    types: all.filter((target) => /\.d\.(?:c|m)?ts$/.test(target)),
+    types: all.filter((target) => /\.d\.(?:c|m)?ts$/.test(target))
   }
 }
 
 export function validatePackedPackage(
   entry: ReleasePackage,
   manifest: PackageManifest,
-  files: readonly string[],
+  files: readonly string[]
 ): string[] {
   const errors: string[] = []
   const exports = typeof manifest.exports === 'object' && manifest.exports ? manifest.exports : {}
@@ -176,12 +181,12 @@ export function publicEntrySpecifiers(packed: PackedPackage) {
 
 const packOne = async (entry: ReleasePackage, destination: string): Promise<PackedPackage> => {
   const sourceManifest = JSON.parse(
-    await readFile(resolve(repositoryRoot, entry.directory, 'package.json'), 'utf8'),
+    await readFile(resolve(repositoryRoot, entry.directory, 'package.json'), 'utf8')
   ) as PackageManifest
   const filename = `${entry.name.replace('@infoschematics/', 'infoschematics-')}-${sourceManifest.version}.tgz`
   await run(
     ['bun', 'pm', 'pack', '--destination', destination, '--ignore-scripts', '--quiet'],
-    resolve(repositoryRoot, entry.directory),
+    resolve(repositoryRoot, entry.directory)
   )
   const tarball = resolve(destination, filename)
   return { entry, files: await tarEntries(tarball), manifest: await packedManifest(tarball), tarball }
@@ -228,13 +233,13 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   const dependencies = Object.fromEntries([
     ...packed.map(({ entry, tarball }) => [entry.name, `file:${tarball}`]),
     ['react', '19.2.0'],
-    ['react-dom', '19.2.0'],
+    ['react-dom', '19.2.0']
   ])
   const overrides = Object.fromEntries(packed.map(({ entry, tarball }) => [entry.name, `file:${tarball}`]))
   await mkdir(directory, { recursive: true })
   await writeFile(
     join(directory, 'package.json'),
-    `${JSON.stringify({ name: 'infoschematics-release-smoke', private: true, type: 'module', dependencies, overrides }, null, 2)}\n`,
+    `${JSON.stringify({ name: 'infoschematics-release-smoke', private: true, type: 'module', dependencies, overrides }, null, 2)}\n`
   )
   await writeFile(join(directory, 'smoke.ts'), consumerSource(javascript, styles))
   await run(['bun', 'install', '--production', '--ignore-scripts'], directory)
@@ -250,13 +255,13 @@ export async function packAndSmoke() {
     const packed: PackedPackage[] = []
     for (const entry of releasePackages) packed.push(await packOne(entry, tarballDirectory))
     const errors = packed.flatMap((item) =>
-      validatePackedPackage(item.entry, item.manifest, item.files).map((error) => `${item.entry.name}: ${error}`),
+      validatePackedPackage(item.entry, item.manifest, item.files).map((error) => `${item.entry.name}: ${error}`)
     )
     if (errors.length > 0) throw new Error(`Packed package inspection failed:\n- ${errors.join('\n- ')}`)
     const smoke = await smokeConsumer(packed, join(temporary, 'consumer'))
     return {
       packages: packed.map(({ entry, tarball }) => ({ name: entry.name, tarball: basename(tarball) })),
-      smoke: JSON.parse(smoke) as unknown,
+      smoke: JSON.parse(smoke) as unknown
     }
   } finally {
     if (!process.argv.includes('--keep-temp')) await rm(temporary, { force: true, recursive: true })

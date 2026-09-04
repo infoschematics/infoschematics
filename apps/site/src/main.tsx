@@ -1,6 +1,11 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { getDocumentationRoute, isBlankExamplePath, isInfoschematicsExamplePath, isSystemExamplePath } from './routes.ts'
+import {
+  getDocumentationRoute,
+  isBlankExamplePath,
+  isInfoschematicsExamplePath,
+  isSystemExamplePath
+} from './routes.ts'
 
 async function resolvePage(pathname: string): Promise<ReactNode> {
   const documentationRoute = getDocumentationRoute(pathname)

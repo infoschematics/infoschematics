@@ -1,7 +1,4 @@
 import { readFile } from 'node:fs/promises'
-import type { ReactNode } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import {
@@ -9,9 +6,12 @@ import {
   type FabricRendererProps,
   InfoschematicContext,
   InfoschematicRenderersContext,
-  type RendererProperties,
+  type RendererProperties
 } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import type { ReactNode } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { App, designArrowPoint } from './App.tsx'
 import { SceneCallout } from './panels/SceneCallout.tsx'
 
@@ -19,17 +19,30 @@ describe('App', () => {
   afterEach(() => vi.unstubAllGlobals())
 
   it('constrains typed Design arrow movement by artefact geometry', () => {
+    expect(designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowUp', 10)).toEqual({
+      x: 120,
+      y: 80
+    })
+    expect(designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowRight', 1)).toEqual({
+      x: 121,
+      y: 90
+    })
+    expect(designArrowPoint({ box: { height: 80, width: 120, x: 100, y: 60 }, role: 'box' }, 'ArrowDown', 10)).toEqual({
+      x: 160,
+      y: 110
+    })
     expect(
-      designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowUp', 10),
-    ).toEqual({ x: 120, y: 80 })
-    expect(
-      designArrowPoint({ box: { height: 100, width: 200, x: 20, y: 40 }, role: 'box' }, 'ArrowRight', 1),
-    ).toEqual({ x: 121, y: 90 })
-    expect(
-      designArrowPoint({ box: { height: 80, width: 120, x: 100, y: 60 }, role: 'box' }, 'ArrowDown', 10),
-    ).toEqual({ x: 160, y: 110 })
-    expect(
-      designArrowPoint({ points: [{ x: 0, y: 0 }, { x: 100, y: 0 }], role: 'route' }, 'ArrowRight', 10),
+      designArrowPoint(
+        {
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 0 }
+          ],
+          role: 'route'
+        },
+        'ArrowRight',
+        10
+      )
     ).toBeUndefined()
   })
 
@@ -72,13 +85,13 @@ describe('App', () => {
   it('starts each Studio session in explicit Present mode with Producer controls available', () => {
     const localStorage = {
       getItem: vi.fn((key: string) => (key.endsWith('.presentation.mode') ? '"direct"' : null)),
-      setItem: vi.fn(),
+      setItem: vi.fn()
     }
     const sessionStorage = { getItem: vi.fn(), setItem: vi.fn() }
     vi.stubGlobal('window', { localStorage, sessionStorage })
 
     const markup = renderToStaticMarkup(
-      <App config={defineInfoschematic({ id: 'mode-session', title: 'Mode session' })} />,
+      <App config={defineInfoschematic({ id: 'mode-session', title: 'Mode session' })} />
     )
 
     expect(markup).toContain('data-production-mode="present"')
@@ -101,8 +114,8 @@ describe('App', () => {
             label: 'System',
             description: 'The configured system',
             color: '#6699cc',
-            fill: '#112233',
-          },
+            fill: '#112233'
+          }
         ],
         cards: [
           {
@@ -112,10 +125,10 @@ describe('App', () => {
             detail: 'Supplied by the host',
             scope: 'system',
             scopes: ['system'],
-            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} },
-          },
-        ],
-      },
+            placement: { box: { x: 100, y: 100, width: 160, height: 80 }, ports: {} }
+          }
+        ]
+      }
     })
 
     const markup = renderToStaticMarkup(<App config={config} />)
@@ -136,8 +149,8 @@ describe('App', () => {
             description: 'The configured system',
             color: '#6699cc',
             fill: '#112233',
-            icon: 'system',
-          },
+            icon: 'system'
+          }
         ],
         fabrics: [
           {
@@ -148,7 +161,7 @@ describe('App', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 100, y: 120, width: 300, height: 90 } },
-            appearance: { renderer: 'custom' },
+            appearance: { renderer: 'custom' }
           },
           {
             id: 'fallback',
@@ -158,10 +171,10 @@ describe('App', () => {
             scope: 'system',
             scopes: ['system'],
             placement: { box: { x: 500, y: 220, width: 240, height: 80 } },
-            appearance: { renderer: 'unknown' },
-          },
-        ],
-      },
+            appearance: { renderer: 'unknown' }
+          }
+        ]
+      }
     })
     const CustomFabric = ({ fabric, bounds }: FabricRendererProps) => (
       <circle data-fabric={fabric.id} cx={bounds.x + bounds.width / 2} cy={bounds.y + bounds.height / 2} r="20" />
@@ -175,9 +188,9 @@ describe('App', () => {
         renderers={{
           definitions: Definitions,
           fabrics: { custom: CustomFabric },
-          scopeIcons: { system: ScopeIcon },
+          scopeIcons: { system: ScopeIcon }
         }}
-      />,
+      />
     )
 
     expect(markup).toContain('id="host-gradient"')
@@ -199,10 +212,10 @@ describe('App', () => {
             id: 'story',
             code: 'STORY-01',
             title: 'Story',
-            scenes: [{ graphic: 'annotation' }, { graphic: 'missing' }],
-          },
-        ],
-      }),
+            scenes: [{ graphic: 'annotation' }, { graphic: 'missing' }]
+          }
+        ]
+      })
     )
 
     expect(resolved.stories[0]?.steps[0]?.graphic).toMatchObject({ id: 'annotation', renderer: 'custom' })
@@ -218,10 +231,7 @@ describe('App', () => {
 
 const calloutRuntime = createInfoschematicRuntime(defineInfoschematic({ title: 'Studio Callout renderers' }))
 
-const renderSceneCallout = (
-  calloutConfig: CalloutConfig,
-  renderers = defineInfoschematicRenderers({}),
-) =>
+const renderSceneCallout = (calloutConfig: CalloutConfig, renderers = defineInfoschematicRenderers({})) =>
   renderToStaticMarkup(
     <InfoschematicRenderersContext value={renderers}>
       <InfoschematicContext value={calloutRuntime}>
@@ -238,7 +248,7 @@ const renderSceneCallout = (
           title="A Studio Callout"
         />
       </InfoschematicContext>
-    </InfoschematicRenderersContext>,
+    </InfoschematicRenderersContext>
   )
 
 describe('Studio SceneCallout renderers', () => {
@@ -254,14 +264,14 @@ describe('Studio SceneCallout renderers', () => {
               : { valid: false as const, reason: 'tone must be a string' },
           component: ({ children, properties }: { children: ReactNode; properties: Readonly<{ tone: string }> }) => (
             <div data-studio-callout={properties.tone}>{children}</div>
-          ),
-        },
-      ],
+          )
+        }
+      ]
     })
 
     const markup = renderSceneCallout(
       { body: 'Studio audience content', properties: { tone: 'urgent' }, renderer: 'emphasis' },
-      renderers,
+      renderers
     )
 
     expect(markup).toContain('data-studio-callout="urgent"')
@@ -274,11 +284,11 @@ describe('Studio SceneCallout renderers', () => {
     const onDiagnostic = vi.fn()
     const markup = renderSceneCallout(
       { body: 'Studio audience content', renderer: 'missing' },
-      defineInfoschematicRenderers({ callouts: [], onDiagnostic }),
+      defineInfoschematicRenderers({ callouts: [], onDiagnostic })
     )
 
     expect(onDiagnostic).toHaveBeenCalledWith(
-      expect.objectContaining({ code: 'unknown-key', key: 'missing', kind: 'callout' }),
+      expect.objectContaining({ code: 'unknown-key', key: 'missing', kind: 'callout' })
     )
     expect(markup).toContain('Studio audience content')
     expect(markup).toContain('role="status"')
@@ -294,15 +304,15 @@ describe('Studio SceneCallout renderers', () => {
             key: 'emphasis',
             schemaVersion: 1,
             validateProperties: () => ({ valid: false as const, reason: 'tone must be a string' }),
-            component: ({ children }: { children: ReactNode }) => <div data-studio-callout>{children}</div>,
-          },
+            component: ({ children }: { children: ReactNode }) => <div data-studio-callout>{children}</div>
+          }
         ],
-        onDiagnostic,
-      }),
+        onDiagnostic
+      })
     )
 
     expect(onDiagnostic).toHaveBeenCalledWith(
-      expect.objectContaining({ code: 'invalid-properties', key: 'emphasis', kind: 'callout' }),
+      expect.objectContaining({ code: 'invalid-properties', key: 'emphasis', kind: 'callout' })
     )
     expect(markup).not.toContain('data-studio-callout')
     expect(markup).toContain('Studio audience content')

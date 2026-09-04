@@ -2,27 +2,36 @@
   "name": "@infoschematics/render-svg",
   "description": "Deterministic, framework-neutral SVG rendering for Infoschematics.",
   "version": "0.1.0",
-  "type": "module",
+  "dependencies": {
+    "@infoschematics/domain-model": "0.1.0",
+    "@infoschematics/view-model": "0.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/infoschematics/infoschematics.git",
     "directory": "packages/render-svg"
   },
-  "engines": { "node": ">=22" },
-  "publishConfig": { "access": "public" },
-  "files": ["dist"],
-  "sideEffects": false,
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs ../../LICENSE dist/LICENSE",
     "clean": "node build.mjs --clean"
   },
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
-  },
-  "dependencies": {
-    "@infoschematics/domain-model": "0.1.0",
-    "@infoschematics/view-model": "0.1.0"
-  }
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }

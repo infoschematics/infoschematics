@@ -100,11 +100,8 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
         </nav>
       </header>
       <main id="document-content">
-        <article
-          aria-label={route.title}
-          className="document-content"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown under docs/, not user input */}
+        <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
       </main>
       <footer className="document-footer">
         <a href="/">Return to Infoschematics</a>

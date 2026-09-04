@@ -1,5 +1,5 @@
-import { createContext, useContext } from 'react'
 import type { InfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import { createContext, useContext } from 'react'
 
 export const InfoschematicContext = createContext<InfoschematicRuntime | null>(null)
 

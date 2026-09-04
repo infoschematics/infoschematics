@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
+import { describe, expect, it } from 'vitest'
 import { createInfoschematicRuntime } from './runtime.ts'
 
 describe('createInfoschematicRuntime', () => {
@@ -13,7 +13,7 @@ describe('createInfoschematicRuntime', () => {
           label: 'Inside',
           description: 'Inside the system',
           color: '#6699cc',
-          fill: '#112233',
+          fill: '#112233'
         },
         {
           id: 'outside',
@@ -21,8 +21,8 @@ describe('createInfoschematicRuntime', () => {
           label: 'Outside',
           description: 'Outside the system',
           color: '#cc9966',
-          fill: '#332211',
-        },
+          fill: '#332211'
+        }
       ],
       flowFamilies: [
         {
@@ -30,8 +30,8 @@ describe('createInfoschematicRuntime', () => {
           prefix: 'REQ',
           label: 'Request',
           description: 'A request',
-          color: '#79c9ff',
-        },
+          color: '#79c9ff'
+        }
       ],
       cards: [
         {
@@ -43,8 +43,8 @@ describe('createInfoschematicRuntime', () => {
           scopes: ['inside'],
           placement: {
             box: { x: 100, y: 100, width: 160, height: 80 },
-            ports: { east: 1 },
-          },
+            ports: { east: 1 }
+          }
         },
         {
           id: 'target',
@@ -55,9 +55,9 @@ describe('createInfoschematicRuntime', () => {
           scopes: ['outside'],
           placement: {
             box: { x: 500, y: 100, width: 160, height: 80 },
-            ports: { west: 1 },
-          },
-        },
+            ports: { west: 1 }
+          }
+        }
       ],
       flows: [
         {
@@ -70,11 +70,11 @@ describe('createInfoschematicRuntime', () => {
           targetPort: 'W1',
           points: [
             { x: 260, y: 140 },
-            { x: 500, y: 140 },
-          ],
-        },
-      ],
-    },
+            { x: 500, y: 140 }
+          ]
+        }
+      ]
+    }
   })
 
   it('derives the register, routed geometry and visibility without React', () => {
@@ -88,20 +88,20 @@ describe('createInfoschematicRuntime', () => {
         box: { x: 100, y: 100, width: 160, height: 80 },
         code: 'IN-01',
         id: 'source',
-        ports: { east: 1 },
+        ports: { east: 1 }
       },
       {
         box: { x: 500, y: 100, width: 160, height: 80 },
         code: 'OUT-01',
         id: 'target',
-        ports: { west: 1 },
-      },
+        ports: { west: 1 }
+      }
     ])
     expect(runtime.infoschematicFlowIsVisible(runtime.infoschematicFlows[0]!, new Set(['request']), everyScope)).toBe(
-      true,
+      true
     )
     expect(
-      runtime.infoschematicFlowIsVisible(runtime.infoschematicFlows[0]!, new Set(['request']), new Set(['inside'])),
+      runtime.infoschematicFlowIsVisible(runtime.infoschematicFlows[0]!, new Set(['request']), new Set(['inside']))
     ).toBe(false)
   })
 
@@ -110,17 +110,17 @@ describe('createInfoschematicRuntime', () => {
       defineInfoschematic({
         title: 'Graphics',
         infoschematic: {
-          graphics: [{ id: 'annotation', label: 'A host annotation', renderer: 'custom' }],
+          graphics: [{ id: 'annotation', label: 'A host annotation', renderer: 'custom' }]
         },
         stories: [
           {
             id: 'story',
             code: 'STORY-01',
             title: 'Story',
-            scenes: [{ graphic: 'annotation' }, { graphic: 'missing' }],
-          },
-        ],
-      }),
+            scenes: [{ graphic: 'annotation' }, { graphic: 'missing' }]
+          }
+        ]
+      })
     )
 
     expect(runtime.stories[0]?.steps[0]?.graphic).toMatchObject({ id: 'annotation', renderer: 'custom' })

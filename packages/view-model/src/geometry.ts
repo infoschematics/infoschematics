@@ -1,4 +1,4 @@
-import type { Box, Point } from '@infoschematics/domain-model/geometry'
+import type { Point } from '@infoschematics/domain-model/geometry'
 
 export type { Box, Point } from '@infoschematics/domain-model/geometry'
 

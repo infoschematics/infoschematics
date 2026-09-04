@@ -1,5 +1,5 @@
-import type { Box } from '@infoschematics/domain-model/geometry'
 import type { RegionLabelPlacement } from '@infoschematics/domain-model/appearance'
+import type { Box } from '@infoschematics/domain-model/geometry'
 import type { ResolvedRegionTreatment } from './appearance.ts'
 import { visualTokens } from './tokens.ts'
 
@@ -38,7 +38,7 @@ export const regionGeometryDefaults = Object.freeze({
   characterWidth: 9.4,
   labelHeight: 14,
   labelInset: 16,
-  notchPadding: 10,
+  notchPadding: 10
 })
 
 const number = (value: number) => String(Number(value.toFixed(3)))
@@ -58,7 +58,7 @@ const roundedFrame = (box: Box, radius: number) => {
     `A${number(radius)} ${number(radius)} 0 0 1 ${point(x, bottom - radius)}`,
     `V${number(y + radius)}`,
     `A${number(radius)} ${number(radius)} 0 0 1 ${point(x + radius, y)}`,
-    'Z',
+    'Z'
   ].join(' ')
 }
 
@@ -66,7 +66,7 @@ const labelGeometry = (
   box: Box,
   placement: RegionLabelPlacement,
   mounted: boolean,
-  offset: number,
+  offset: number
 ): RegionLabelGeometry => {
   const { x, y, width, height } = box
   const east = placement.endsWith('east') || placement === 'east'
@@ -91,11 +91,7 @@ const labelGeometry = (
           ? x + edgeInset
           : x + offset
         : x + width / 2,
-    y: north
-      ? y + edgeInset
-      : south
-        ? y + height - edgeInset
-        : y + height / 2,
+    y: north ? y + edgeInset : south ? y + height - edgeInset : y + height / 2
   }
 }
 
@@ -111,12 +107,14 @@ const fitNotch = (
   box: Box,
   radius: number,
   label: RegionLabelGeometry,
-  labelText: string,
+  labelText: string
 ): { label: RegionLabelGeometry; notch: RegionNotchGeometry } | null => {
   const edge = notchEdge(label.placement)
   if (!edge) return null
   const horizontal = edge === 'north' || edge === 'south'
-  const extent = horizontal ? labelText.length * regionGeometryDefaults.characterWidth : regionGeometryDefaults.labelHeight
+  const extent = horizontal
+    ? labelText.length * regionGeometryDefaults.characterWidth
+    : regionGeometryDefaults.labelHeight
   const padding = regionGeometryDefaults.notchPadding
   const labelStart = horizontal
     ? label.textAnchor === 'start'
@@ -137,7 +135,7 @@ const fitNotch = (
     label: horizontal
       ? { ...label, length: Number(extent.toFixed(3)), x: label.x + shift }
       : { ...label, y: label.y + shift },
-    notch: { edge, end, padding, start },
+    notch: { edge, end, padding, start }
   }
 }
 
@@ -164,7 +162,7 @@ const notchedFrame = (box: Box, radius: number, notch: RegionNotchGeometry) => {
 export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): RegionGeometry => {
   const resolvedRadius = Math.max(
     0,
-    Math.min(box.radius ?? visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2),
+    Math.min(box.radius ?? visualTokens.canvas.geometry.cornerRadius, box.width / 2, box.height / 2)
   )
   const resolvedLabel =
     treatment.label && label.trim().length > 0
@@ -172,7 +170,7 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
           box,
           treatment.label,
           treatment.labelTreatment === 'notched',
-          treatment.labelOffset ?? regionGeometryDefaults.labelInset,
+          treatment.labelOffset ?? regionGeometryDefaults.labelInset
         )
       : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
@@ -184,6 +182,6 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
   return {
     label: fitted.label,
     notch: fitted.notch,
-    outline: notchedFrame(box, resolvedRadius, fitted.notch),
+    outline: notchedFrame(box, resolvedRadius, fitted.notch)
   }
 }

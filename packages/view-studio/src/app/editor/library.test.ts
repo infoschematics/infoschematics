@@ -4,9 +4,9 @@ import {
   instantiateLibraryTemplate,
   isOrthogonalRoute,
   isValidLibraryFlowContext,
-  libraryTemplates,
   type LibraryContext,
   type LibraryTemplate,
+  libraryTemplates
 } from './library.ts'
 
 const template = (kind: LibraryTemplate['seed']['kind']) => {
@@ -22,9 +22,9 @@ const context = (allocate = createLibraryIdentityAllocator()): LibraryContext =>
   flow: {
     family: 'request',
     source: { component: 'source-card', point: { x: 100, y: 120 }, port: 'E1' },
-    target: { component: 'target-card', point: { x: 320, y: 240 }, port: 'W1' },
+    target: { component: 'target-card', point: { x: 320, y: 240 }, port: 'W1' }
   },
-  scope: 'inside',
+  scope: 'inside'
 })
 
 describe('Library templates', () => {
@@ -55,8 +55,8 @@ describe('Library templates', () => {
       value: {
         placement: { box: { height: 80, width: 160, x: 320, y: 180 }, ports: { east: 1, west: 1 } },
         scope: 'inside',
-        scopes: ['inside'],
-      },
+        scopes: ['inside']
+      }
     })
     expect(first?.target.code).not.toBe(second?.target.code)
     expect(first?.target.id).not.toBe(second?.target.id)
@@ -94,12 +94,12 @@ describe('Library templates', () => {
       source: 'source-card',
       sourcePort: 'E1',
       target: 'target-card',
-      targetPort: 'W1',
+      targetPort: 'W1'
     })
     expect(operation.value.points).toEqual([
       { x: 100, y: 120 },
       { x: 320, y: 120 },
-      { x: 320, y: 240 },
+      { x: 320, y: 240 }
     ])
     expect(isOrthogonalRoute(operation.value.points)).toBe(true)
     expect(Object.isFrozen(operation)).toBe(true)
@@ -115,8 +115,8 @@ describe('Library templates', () => {
       ...invalid.flow,
       points: [
         { x: 100, y: 120 },
-        { x: 320, y: 240 },
-      ],
+        { x: 320, y: 240 }
+      ]
     } as NonNullable<LibraryContext['flow']>
     const malformed = { ...invalid, flow: { ...flow, source: { ...flow.source, port: 'east-1' as 'E1' } } }
 

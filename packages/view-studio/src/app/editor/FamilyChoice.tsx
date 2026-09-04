@@ -16,7 +16,7 @@ import { useInfoschematic } from '@infoschematics/view-canvas'
 export function FamilyChoice({
   at,
   onChoose,
-  onCancel,
+  onCancel
 }: {
   at: { x: number; y: number }
   onChoose: (family: string) => void

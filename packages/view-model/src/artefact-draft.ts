@@ -12,7 +12,7 @@ import type {
   ArtefactOperation,
   ArtefactSelection,
   ArtefactValueByKind,
-  BoxGeometry,
+  BoxGeometry
 } from './editable.ts'
 
 type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
@@ -22,9 +22,7 @@ type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K
  * authored-array position. Flow route and display properties are edited through
  * this operation because a Flow has no generic move or resize operation.
  */
-export type ReplaceArtefactPropertiesOperation<
-  K extends ArtefactKind = ArtefactKind,
-> = Readonly<{
+export type ReplaceArtefactPropertiesOperation<K extends ArtefactKind = ArtefactKind> = Readonly<{
   operation: 'replace-properties'
   target: SelectionFor<K>
   value: ArtefactValueByKind[K]
@@ -39,12 +37,7 @@ export type ArtefactDraftOperation = ArtefactOperation | AnyReplaceOperation
 export type ArtefactOperationRejection = Readonly<{
   index: number
   operation: ArtefactDraftOperation
-  reason:
-    | 'duplicate-identity'
-    | 'invalid-geometry'
-    | 'invalid-operation'
-    | 'missing-target'
-    | 'stale-order'
+  reason: 'duplicate-identity' | 'invalid-geometry' | 'invalid-operation' | 'missing-target' | 'stale-order'
 }>
 
 export type ApplyArtefactOperationsResult = Readonly<{
@@ -58,9 +51,7 @@ const cloneSerialisable = <T>(value: T): T => {
   }
 
   if (value !== null && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value).map(([key, entry]) => [key, cloneSerialisable(entry)]),
-    ) as T
+    return Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, cloneSerialisable(entry)])) as T
   }
 
   return value
@@ -83,37 +74,24 @@ const moveAt = <T>(values: readonly T[], from: number, to: number): readonly T[]
   return [...without.slice(0, destination), value, ...without.slice(destination)]
 }
 
-const matchesTarget = (
-  value: { id: string; code?: string },
-  target: ArtefactSelection,
-): boolean =>
-  value.id === target.id &&
-  (target.code === null || ('code' in value && value.code === target.code))
+const matchesTarget = (value: { id: string; code?: string }, target: ArtefactSelection): boolean =>
+  value.id === target.id && (target.code === null || ('code' in value && value.code === target.code))
 
-const matchesReplacement = (operation: AnyReplaceOperation): boolean =>
-  matchesTarget(operation.value, operation.target)
+const matchesReplacement = (operation: AnyReplaceOperation): boolean => matchesTarget(operation.value, operation.target)
 
 const finite = (...values: readonly number[]): boolean => values.every(Number.isFinite)
 
 const validBoxGeometry = (geometry: BoxGeometry): boolean =>
-  finite(
-    geometry.box.x,
-    geometry.box.y,
-    geometry.box.width,
-    geometry.box.height,
-  ) &&
+  finite(geometry.box.x, geometry.box.y, geometry.box.width, geometry.box.height) &&
   geometry.box.width > 0 &&
   geometry.box.height > 0
 
 const withDefinition = (
   config: InfoschematicConfig,
-  infoschematic: InfoschematicConfig['infoschematic'],
+  infoschematic: InfoschematicConfig['infoschematic']
 ): InfoschematicConfig => ({ ...config, infoschematic })
 
-const valuesForKind = (
-  config: InfoschematicConfig,
-  kind: ArtefactKind,
-): readonly { id: string; code?: string }[] => {
+const valuesForKind = (config: InfoschematicConfig, kind: ArtefactKind): readonly { id: string; code?: string }[] => {
   switch (kind) {
     case 'region':
       return config.infoschematic.regions
@@ -128,19 +106,14 @@ const valuesForKind = (
   }
 }
 
-const duplicatesIdentity = (
-  config: InfoschematicConfig,
-  target: ArtefactSelection,
-): boolean =>
+const duplicatesIdentity = (config: InfoschematicConfig, target: ArtefactSelection): boolean =>
   valuesForKind(config, target.kind).some(
-    (value) =>
-      value.id === target.id ||
-      (target.code !== null && 'code' in value && value.code === target.code),
+    (value) => value.id === target.id || (target.code !== null && 'code' in value && value.code === target.code)
   )
 
 const createArtefact = (
   config: InfoschematicConfig,
-  operation: Extract<ArtefactOperation, { operation: 'create' }>,
+  operation: Extract<ArtefactOperation, { operation: 'create' }>
 ): InfoschematicConfig | undefined => {
   if (!Number.isFinite(operation.at) || !matchesTarget(operation.value, operation.target)) {
     return undefined
@@ -151,54 +124,34 @@ const createArtefact = (
     case 'region':
       return withDefinition(config, {
         ...definition,
-        regions: insertAt(
-          definition.regions,
-          cloneSerialisable(operation.value as RegionConfig),
-          operation.at,
-        ),
+        regions: insertAt(definition.regions, cloneSerialisable(operation.value as RegionConfig), operation.at)
       })
     case 'fabric':
       return withDefinition(config, {
         ...definition,
-        fabrics: insertAt(
-          definition.fabrics,
-          cloneSerialisable(operation.value as FabricConfig),
-          operation.at,
-        ),
+        fabrics: insertAt(definition.fabrics, cloneSerialisable(operation.value as FabricConfig), operation.at)
       })
     case 'card':
       return withDefinition(config, {
         ...definition,
-        cards: insertAt(
-          definition.cards,
-          cloneSerialisable(operation.value as CardConfig),
-          operation.at,
-        ),
+        cards: insertAt(definition.cards, cloneSerialisable(operation.value as CardConfig), operation.at)
       })
     case 'flow':
       return withDefinition(config, {
         ...definition,
-        flows: insertAt(
-          definition.flows,
-          cloneSerialisable(operation.value as FlowConfig),
-          operation.at,
-        ),
+        flows: insertAt(definition.flows, cloneSerialisable(operation.value as FlowConfig), operation.at)
       })
     case 'graphic':
       return withDefinition(config, {
         ...definition,
-        graphics: insertAt(
-          definition.graphics,
-          cloneSerialisable(operation.value as GraphicConfig),
-          operation.at,
-        ),
+        graphics: insertAt(definition.graphics, cloneSerialisable(operation.value as GraphicConfig), operation.at)
       })
   }
 }
 
 const applyGeometry = (
   config: InfoschematicConfig,
-  operation: Extract<ArtefactOperation, { operation: 'move' | 'resize' }>,
+  operation: Extract<ArtefactOperation, { operation: 'move' | 'resize' }>
 ): InfoschematicConfig | undefined => {
   const definition = config.infoschematic
   switch (operation.target.kind) {
@@ -206,9 +159,7 @@ const applyGeometry = (
       if (operation.geometry.role !== 'box' || !validBoxGeometry(operation.geometry)) {
         return undefined
       }
-      const index = definition.regions.findIndex((region) =>
-        matchesTarget(region, operation.target),
-      )
+      const index = definition.regions.findIndex((region) => matchesTarget(region, operation.target))
       const region = definition.regions[index]
       if (!region) return undefined
       return withDefinition(config, {
@@ -216,8 +167,8 @@ const applyGeometry = (
         regions: replaceAt(definition.regions, index, {
           ...region,
           // The authored radius travels with the region; only the extent moves.
-          box: { ...region.box, ...cloneSerialisable(operation.geometry.box) },
-        }),
+          box: { ...region.box, ...cloneSerialisable(operation.geometry.box) }
+        })
       })
     }
     case 'fabric':
@@ -232,7 +183,7 @@ const applyGeometry = (
       if (!value) return undefined
       const updated = {
         ...value,
-        placement: { ...value.placement, box: cloneSerialisable(operation.geometry.box) },
+        placement: { ...value.placement, box: cloneSerialisable(operation.geometry.box) }
       }
       return withDefinition(config, { ...definition, [key]: replaceAt(values, index, updated) })
     }
@@ -240,17 +191,15 @@ const applyGeometry = (
       if (operation.geometry.role !== 'box' || !validBoxGeometry(operation.geometry)) {
         return undefined
       }
-      const index = definition.graphics.findIndex((graphic) =>
-        matchesTarget(graphic, operation.target),
-      )
+      const index = definition.graphics.findIndex((graphic) => matchesTarget(graphic, operation.target))
       const graphic = definition.graphics[index]
       if (!graphic) return undefined
       return withDefinition(config, {
         ...definition,
         graphics: replaceAt(definition.graphics, index, {
           ...graphic,
-          placement: cloneSerialisable(operation.geometry.box),
-        }),
+          placement: cloneSerialisable(operation.geometry.box)
+        })
       })
     }
   }
@@ -260,7 +209,7 @@ const reordered = <T extends { id: string; code?: string }>(
   values: readonly T[],
   target: ArtefactSelection,
   from: number,
-  to: number,
+  to: number
 ): readonly T[] | undefined => {
   const actual = values.findIndex((value) => matchesTarget(value, target))
   if (actual < 0 || actual !== Math.trunc(from)) return undefined
@@ -269,72 +218,39 @@ const reordered = <T extends { id: string; code?: string }>(
 
 const reorderArtefact = (
   config: InfoschematicConfig,
-  operation: Extract<ArtefactOperation, { operation: 'reorder' }>,
+  operation: Extract<ArtefactOperation, { operation: 'reorder' }>
 ): InfoschematicConfig | undefined => {
   if (!Number.isFinite(operation.from) || !Number.isFinite(operation.to)) return undefined
   const definition = config.infoschematic
 
   switch (operation.target.kind) {
     case 'region': {
-      const regions = reordered(
-        definition.regions,
-        operation.target,
-        operation.from,
-        operation.to,
-      )
+      const regions = reordered(definition.regions, operation.target, operation.from, operation.to)
       return regions ? withDefinition(config, { ...definition, regions }) : undefined
     }
     case 'fabric': {
-      const fabrics = reordered(
-        definition.fabrics,
-        operation.target,
-        operation.from,
-        operation.to,
-      )
+      const fabrics = reordered(definition.fabrics, operation.target, operation.from, operation.to)
       return fabrics ? withDefinition(config, { ...definition, fabrics }) : undefined
     }
     case 'card': {
-      const cards = reordered(
-        definition.cards,
-        operation.target,
-        operation.from,
-        operation.to,
-      )
+      const cards = reordered(definition.cards, operation.target, operation.from, operation.to)
       return cards ? withDefinition(config, { ...definition, cards }) : undefined
     }
     case 'flow': {
-      const flows = reordered(
-        definition.flows,
-        operation.target,
-        operation.from,
-        operation.to,
-      )
+      const flows = reordered(definition.flows, operation.target, operation.from, operation.to)
       return flows ? withDefinition(config, { ...definition, flows }) : undefined
     }
     case 'graphic': {
-      const graphics = reordered(
-        definition.graphics,
-        operation.target,
-        operation.from,
-        operation.to,
-      )
+      const graphics = reordered(definition.graphics, operation.target, operation.from, operation.to)
       return graphics ? withDefinition(config, { ...definition, graphics }) : undefined
     }
   }
 }
 
-const withoutGraphicInFocus = (
-  focus: FocusConfig | undefined,
-  graphicId: string,
-): FocusConfig | undefined =>
-  focus?.graphics?.includes(graphicId)
-    ? { ...focus, graphics: focus.graphics.filter((id) => id !== graphicId) }
-    : focus
+const withoutGraphicInFocus = (focus: FocusConfig | undefined, graphicId: string): FocusConfig | undefined =>
+  focus?.graphics?.includes(graphicId) ? { ...focus, graphics: focus.graphics.filter((id) => id !== graphicId) } : focus
 
-const withoutGraphicInStoryScene = (
-  scene: StorySceneConfig,
-  graphicId: string,
-): StorySceneConfig => {
+const withoutGraphicInStoryScene = (scene: StorySceneConfig, graphicId: string): StorySceneConfig => {
   const focus = withoutGraphicInFocus(scene.focus, graphicId)
   if (scene.graphic !== graphicId) {
     return focus === scene.focus ? scene : { ...scene, focus }
@@ -346,38 +262,30 @@ const withoutGraphicInStoryScene = (
 
 const removeArtefact = (
   config: InfoschematicConfig,
-  operation: Extract<ArtefactOperation, { operation: 'remove' }>,
+  operation: Extract<ArtefactOperation, { operation: 'remove' }>
 ): InfoschematicConfig | undefined => {
   const definition = config.infoschematic
   switch (operation.target.kind) {
     case 'region': {
-      const index = definition.regions.findIndex((region) =>
-        matchesTarget(region, operation.target),
-      )
+      const index = definition.regions.findIndex((region) => matchesTarget(region, operation.target))
       if (index < 0) return undefined
       return withDefinition(config, {
         ...definition,
-        regions: definition.regions.filter((_, candidate) => candidate !== index),
+        regions: definition.regions.filter((_, candidate) => candidate !== index)
       })
     }
     case 'fabric': {
-      const index = definition.fabrics.findIndex((fabric) =>
-        matchesTarget(fabric, operation.target),
-      )
+      const index = definition.fabrics.findIndex((fabric) => matchesTarget(fabric, operation.target))
       if (index < 0) return undefined
       const removedId = operation.target.id
       return withDefinition(config, {
         ...definition,
         fabrics: definition.fabrics.filter((_, candidate) => candidate !== index),
-        flows: definition.flows.filter(
-          (flow) => flow.source !== removedId && flow.target !== removedId,
-        ),
+        flows: definition.flows.filter((flow) => flow.source !== removedId && flow.target !== removedId)
       })
     }
     case 'card': {
-      const index = definition.cards.findIndex((card) =>
-        matchesTarget(card, operation.target),
-      )
+      const index = definition.cards.findIndex((card) => matchesTarget(card, operation.target))
       if (index < 0) return undefined
       const removedIds = new Set([operation.target.id])
       let added = true
@@ -393,49 +301,41 @@ const removeArtefact = (
       return withDefinition(config, {
         ...definition,
         cards: definition.cards.filter((card) => !removedIds.has(card.id)),
-        flows: definition.flows.filter(
-          (flow) => !removedIds.has(flow.source) && !removedIds.has(flow.target),
-        ),
+        flows: definition.flows.filter((flow) => !removedIds.has(flow.source) && !removedIds.has(flow.target))
       })
     }
     case 'flow': {
-      const index = definition.flows.findIndex((flow) =>
-        matchesTarget(flow, operation.target),
-      )
+      const index = definition.flows.findIndex((flow) => matchesTarget(flow, operation.target))
       if (index < 0) return undefined
       return withDefinition(config, {
         ...definition,
-        flows: definition.flows.filter((_, candidate) => candidate !== index),
+        flows: definition.flows.filter((_, candidate) => candidate !== index)
       })
     }
     case 'graphic': {
-      const index = definition.graphics.findIndex((graphic) =>
-        matchesTarget(graphic, operation.target),
-      )
+      const index = definition.graphics.findIndex((graphic) => matchesTarget(graphic, operation.target))
       if (index < 0) return undefined
       const graphicId = operation.target.id
       return {
         ...withDefinition(config, {
           ...definition,
-          graphics: definition.graphics.filter((_, candidate) => candidate !== index),
+          graphics: definition.graphics.filter((_, candidate) => candidate !== index)
         }),
         standaloneScenes: config.standaloneScenes.map((scene) => ({
           ...scene,
-          focus: withoutGraphicInFocus(scene.focus, graphicId) ?? scene.focus,
+          focus: withoutGraphicInFocus(scene.focus, graphicId) ?? scene.focus
         })),
         stories: config.stories.map((story) => ({
           ...story,
-          scenes: story.scenes.map((scene) =>
-            withoutGraphicInStoryScene(scene, graphicId),
-          ),
+          scenes: story.scenes.map((scene) => withoutGraphicInStoryScene(scene, graphicId))
         })),
         themes: config.themes.map((theme) => ({
           ...theme,
           scenes: theme.scenes.map((scene) => ({
             ...scene,
-            focus: withoutGraphicInFocus(scene.focus, graphicId) ?? scene.focus,
-          })),
-        })),
+            focus: withoutGraphicInFocus(scene.focus, graphicId) ?? scene.focus
+          }))
+        }))
       }
     }
   }
@@ -443,7 +343,7 @@ const removeArtefact = (
 
 const replaceProperties = (
   config: InfoschematicConfig,
-  operation: AnyReplaceOperation,
+  operation: AnyReplaceOperation
 ): InfoschematicConfig | undefined => {
   if (!matchesReplacement(operation)) return undefined
   const definition = config.infoschematic
@@ -451,66 +351,48 @@ const replaceProperties = (
 
   switch (operation.target.kind) {
     case 'region': {
-      const index = definition.regions.findIndex((value) =>
-        matchesTarget(value, operation.target),
-      )
+      const index = definition.regions.findIndex((value) => matchesTarget(value, operation.target))
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            regions: replaceAt(definition.regions, index, replacement as RegionConfig),
+            regions: replaceAt(definition.regions, index, replacement as RegionConfig)
           })
     }
     case 'fabric': {
-      const index = definition.fabrics.findIndex((value) =>
-        matchesTarget(value, operation.target),
-      )
+      const index = definition.fabrics.findIndex((value) => matchesTarget(value, operation.target))
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            fabrics: replaceAt(
-              definition.fabrics,
-              index,
-              replacement as FabricConfig,
-            ),
+            fabrics: replaceAt(definition.fabrics, index, replacement as FabricConfig)
           })
     }
     case 'card': {
-      const index = definition.cards.findIndex((value) =>
-        matchesTarget(value, operation.target),
-      )
+      const index = definition.cards.findIndex((value) => matchesTarget(value, operation.target))
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            cards: replaceAt(definition.cards, index, replacement as CardConfig),
+            cards: replaceAt(definition.cards, index, replacement as CardConfig)
           })
     }
     case 'flow': {
-      const index = definition.flows.findIndex((value) =>
-        matchesTarget(value, operation.target),
-      )
+      const index = definition.flows.findIndex((value) => matchesTarget(value, operation.target))
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            flows: replaceAt(definition.flows, index, replacement as FlowConfig),
+            flows: replaceAt(definition.flows, index, replacement as FlowConfig)
           })
     }
     case 'graphic': {
-      const index = definition.graphics.findIndex((value) =>
-        matchesTarget(value, operation.target),
-      )
+      const index = definition.graphics.findIndex((value) => matchesTarget(value, operation.target))
       return index < 0
         ? undefined
         : withDefinition(config, {
             ...definition,
-            graphics: replaceAt(
-              definition.graphics,
-              index,
-              replacement as GraphicConfig,
-            ),
+            graphics: replaceAt(definition.graphics, index, replacement as GraphicConfig)
           })
     }
   }
@@ -519,7 +401,7 @@ const replaceProperties = (
 /** Applies immutable Design operations in arrival order and reports stale input. */
 export const applyArtefactOperations = (
   config: InfoschematicConfig,
-  operations: readonly ArtefactDraftOperation[],
+  operations: readonly ArtefactDraftOperation[]
 ): ApplyArtefactOperationsResult => {
   let current = cloneSerialisable(config)
   const rejected: ArtefactOperationRejection[] = []
@@ -544,9 +426,7 @@ export const applyArtefactOperations = (
         break
       case 'reorder': {
         next = reorderArtefact(current, operation)
-        reason = valuesForKind(current, operation.target.kind).some((value) =>
-          matchesTarget(value, operation.target),
-        )
+        reason = valuesForKind(current, operation.target.kind).some((value) => matchesTarget(value, operation.target))
           ? 'stale-order'
           : 'missing-target'
         break

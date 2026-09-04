@@ -1,9 +1,5 @@
+import { type RuntimeStory, useInfoschematic, useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import type { Ref } from 'react'
-import {
-  type RuntimeStory,
-  useInfoschematic,
-  useInfoschematicRenderers,
-} from '@infoschematics/view-canvas'
 import { storyCanActivate, storyForEditing } from '../editor/scenes.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
 import { ThemeStrip } from './ThemeStrip.tsx'
@@ -11,27 +7,20 @@ import { ThemeStrip } from './ThemeStrip.tsx'
 export function ProducerControls({
   onPlay,
   ref,
-  presentation,
+  presentation
 }: {
   onPlay: (story: RuntimeStory) => void
   ref: Ref<HTMLElement>
   presentation: Presentation
 }) {
-  const { config, infoschematicFamilies, infoschematicScopes, stories } =
-    useInfoschematic()
+  const { config, infoschematicFamilies, infoschematicScopes, stories } = useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
-  const standaloneSceneIds = new Set(
-    config.standaloneScenes.map((scene) => scene.id),
-  )
+  const standaloneSceneIds = new Set(config.standaloneScenes.map((scene) => scene.id))
 
   if (presentation.mode !== 'present') return null
 
   return (
-    <section
-      aria-label="Infoschematic controls"
-      className="producer-controls legend"
-      ref={ref}
-    >
+    <section aria-label="Infoschematic controls" className="producer-controls legend" ref={ref}>
       <section className="producer-bank" aria-label="Scopes">
         <span className="producer-label">Scopes</span>
         {infoschematicScopes.map((scope) => {
@@ -54,9 +43,7 @@ export function ProducerControls({
         })}
         <button
           className="action-button"
-          onClick={() =>
-            presentation.showAllScopes(!presentation.hasVisibleScopes)
-          }
+          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
           type="button"
         >
           {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
@@ -82,9 +69,7 @@ export function ProducerControls({
         ))}
         <button
           className="action-button"
-          onClick={() =>
-            presentation.showAllFamilies(!presentation.hasVisibleFamilies)
-          }
+          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
           type="button"
         >
           {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
@@ -94,14 +79,9 @@ export function ProducerControls({
       <section className="producer-bank" aria-label="Stories">
         <span className="producer-label">Stories</span>
         {stories.map((story) => {
-          const authored = config.stories.find(
-            (candidate) => candidate.id === story.id,
-          )
+          const authored = config.stories.find((candidate) => candidate.id === story.id)
           const enabled = authored
-            ? storyCanActivate(
-                storyForEditing(authored, config.standaloneScenes),
-                standaloneSceneIds,
-              )
+            ? storyCanActivate(storyForEditing(authored, config.standaloneScenes), standaloneSceneIds)
             : false
           return (
             <button

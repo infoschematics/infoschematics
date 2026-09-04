@@ -12,7 +12,7 @@ async function sourceFiles(directory: string): Promise<string[]> {
       const path = join(directory, entry.name)
       if (entry.isDirectory()) return sourceFiles(path)
       return /\.(css|ts|tsx)$/.test(entry.name) && !entry.name.includes('.test.') ? [path] : []
-    }),
+    })
   )
   return nested.flat()
 }
@@ -40,7 +40,7 @@ describe('reusable Studio source', () => {
       ['con', 'sortium'].join(''),
       ['dash', 'board'].join(''),
       ['leg', 'acy'].join(''),
-      ['migra', 'tion'].join(''),
+      ['migra', 'tion'].join('')
     ]
     const findings: string[] = []
 

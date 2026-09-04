@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { publicEntrySpecifiers, validatePackedPackage, type PackedPackage } from './pack-smoke.ts'
+import { type PackedPackage, publicEntrySpecifiers, validatePackedPackage } from './pack-smoke.ts'
 import {
   type PackageManifest,
   type ReleasePackage,
   releasePackages,
   releaseRepositoryUrl,
-  validateReleaseManifests,
+  validateReleaseManifests
 } from './packages.ts'
 
 const dependencies: Readonly<Record<string, readonly string[]>> = {
@@ -17,15 +17,15 @@ const dependencies: Readonly<Record<string, readonly string[]>> = {
   '@infoschematics/view-present': [
     '@infoschematics/domain-model',
     '@infoschematics/view-canvas',
-    '@infoschematics/view-model',
+    '@infoschematics/view-model'
   ],
   '@infoschematics/view-studio': [
     '@infoschematics/domain-core',
     '@infoschematics/domain-model',
     '@infoschematics/view-canvas',
     '@infoschematics/view-model',
-    '@infoschematics/view-present',
-  ],
+    '@infoschematics/view-present'
+  ]
 }
 
 const manifestFor = (entry: ReleasePackage, version = '1.2.3'): PackageManifest => ({
@@ -38,7 +38,7 @@ const manifestFor = (entry: ReleasePackage, version = '1.2.3'): PackageManifest 
   publishConfig: { access: 'public' },
   repository: { directory: entry.directory, type: 'git', url: releaseRepositoryUrl },
   type: 'module',
-  version,
+  version
 })
 
 describe('coordinated release manifests', () => {
@@ -50,25 +50,25 @@ describe('coordinated release manifests', () => {
       '@infoschematics/render-svg',
       '@infoschematics/view-canvas',
       '@infoschematics/view-present',
-      '@infoschematics/view-studio',
+      '@infoschematics/view-studio'
     ])
-    expect(
-      validateReleaseManifests(releasePackages.map((entry) => ({ entry, manifest: manifestFor(entry) }))),
-    ).toEqual([])
+    expect(validateReleaseManifests(releasePackages.map((entry) => ({ entry, manifest: manifestFor(entry) })))).toEqual(
+      []
+    )
   })
 
   it('rejects independently versioned packages and drifting internal ranges', () => {
     const packages = releasePackages.map((entry) => ({ entry, manifest: manifestFor(entry) }))
     packages[1] = {
       entry: releasePackages[1] as ReleasePackage,
-      manifest: { ...packages[1]?.manifest, version: '1.2.4' },
+      manifest: { ...packages[1]?.manifest, version: '1.2.4' }
     }
     packages[2] = {
       entry: releasePackages[2] as ReleasePackage,
       manifest: {
         ...packages[2]?.manifest,
-        dependencies: { '@infoschematics/domain-model': '^1.2.3' },
-      },
+        dependencies: { '@infoschematics/domain-model': '^1.2.3' }
+      }
     }
     packages[3] = {
       entry: releasePackages[3] as ReleasePackage,
@@ -76,8 +76,8 @@ describe('coordinated release manifests', () => {
         ...packages[3]?.manifest,
         engines: { node: '>=20' },
         publishConfig: { access: 'restricted' },
-        repository: { directory: 'packages/wrong', url: 'https://example.test/wrong.git' },
-      },
+        repository: { directory: 'packages/wrong', url: 'https://example.test/wrong.git' }
+      }
     }
 
     const errors = validateReleaseManifests(packages)
@@ -97,7 +97,7 @@ describe('packed public package inspection', () => {
     engines: { node: '>=22' },
     exports: {
       '.': { import: './dist/index.js', types: './dist/index.d.ts' },
-      './styles.css': './dist/styles.css',
+      './styles.css': './dist/styles.css'
     },
     license: 'MIT',
     files: ['dist'],
@@ -105,7 +105,7 @@ describe('packed public package inspection', () => {
     publishConfig: { access: 'public' },
     repository: { directory: entry.directory, type: 'git', url: releaseRepositoryUrl },
     type: 'module',
-    version: '1.2.3',
+    version: '1.2.3'
   }
 
   it('accepts only runtime, declarations, CSS and package metadata', () => {
@@ -116,8 +116,8 @@ describe('packed public package inspection', () => {
         'dist/index.d.ts',
         'dist/index.js',
         'dist/styles.css',
-        'package.json',
-      ]),
+        'package.json'
+      ])
     ).toEqual([])
   })
 
@@ -128,7 +128,7 @@ describe('packed public package inspection', () => {
       files: [],
       publishConfig: { access: 'restricted' },
       repository: { directory: 'packages/wrong', url: 'https://example.test/wrong.git' },
-      exports: { '.': './src/index.ts', './styles.css': './src/styles.css' },
+      exports: { '.': './src/index.ts', './styles.css': './src/styles.css' }
     }
     const errors = validatePackedPackage(entry, invalid, ['package.json', 'src/index.ts', 'src/index.test.ts'])
 
@@ -151,16 +151,16 @@ describe('packed public package inspection', () => {
       manifest: {
         ...manifest,
         exports: {
-          './*': { import: './dist/*.js', types: './dist/*.d.ts' },
+          './*': { import: './dist/*.js', types: './dist/*.d.ts' }
         },
-        name: '@infoschematics/view-model',
+        name: '@infoschematics/view-model'
       },
-      tarball: '/tmp/view-model.tgz',
+      tarball: '/tmp/view-model.tgz'
     }
 
     expect(publicEntrySpecifiers(packed).javascript).toEqual([
       '@infoschematics/view-model/geometry',
-      '@infoschematics/view-model/index',
+      '@infoschematics/view-model/index'
     ])
   })
 })

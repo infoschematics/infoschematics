@@ -42,7 +42,7 @@ describe('infoschematicsInfoschematic', () => {
       'package-view-studio',
       'package-render-svg',
       'example-infoschematics',
-      'host-site',
+      'host-site'
     ])
   })
 
@@ -52,15 +52,15 @@ describe('infoschematicsInfoschematic', () => {
         compact: true,
         description: false,
         identity: true,
-        stereotype: true,
+        stereotype: true
       },
       grid: 'major-plus-minor',
-      surface: 'blueprint',
+      surface: 'blueprint'
     })
     expect(diagram.domains?.map(({ id }) => id)).toEqual([
       'product-foundation',
       'interactive-experience',
-      'publication',
+      'publication'
     ])
 
     const domains = new Set((diagram.domains ?? []).map(({ id }) => id))
@@ -69,15 +69,13 @@ describe('infoschematicsInfoschematic', () => {
 
     const publicationCards = diagram.cards.filter(({ domain }) => domain === 'publication')
     expect(new Set(publicationCards.map(({ scope }) => scope))).toEqual(
-      new Set(['renderer-output', 'authored-examples', 'application-hosts']),
+      new Set(['renderer-output', 'authored-examples', 'application-hosts'])
     )
 
     const panels = diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')
     const fills = diagram.regions.filter(({ labelMount }) => labelMount !== 'boundary')
     expect(panels.map(({ frame }) => frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
-    expect(new Set(fills.map(({ frame }) => frame?.style))).toEqual(
-      new Set(['solid', 'dashed', 'dotted']),
-    )
+    expect(new Set(fills.map(({ frame }) => frame?.style))).toEqual(new Set(['solid', 'dashed', 'dotted']))
     expect(fills.every(({ fill }) => fill !== undefined)).toBe(true)
     expect(diagram.regions.every(({ labelPlacement }) => labelPlacement !== undefined)).toBe(true)
   })
@@ -103,8 +101,8 @@ describe('infoschematicsInfoschematic', () => {
         'package-render-svg->package-view-model',
         'example-infoschematics->package-domain-core',
         'host-site->package-view-studio',
-        'host-site->example-infoschematics',
-      ]),
+        'host-site->example-infoschematics'
+      ])
     )
   })
 
@@ -159,9 +157,9 @@ describe('infoschematicsInfoschematic', () => {
     expectSerialisable(infoschematicsInfoschematic)
     expect(JSON.parse(JSON.stringify(infoschematicsInfoschematic))).toEqual(infoschematicsInfoschematic)
 
-    const packageJson = JSON.parse(
-      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
-    ) as { dependencies: Record<string, string> }
+    const packageJson = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as {
+      dependencies: Record<string, string>
+    }
     const source = readFileSync(new URL('./index.ts', import.meta.url), 'utf8')
 
     expect(packageJson.dependencies).toEqual({ '@infoschematics/domain-core': '0.1.0' })

@@ -2,64 +2,59 @@ import type {
   InfoschematicRuntime,
   RuntimeStandaloneScene,
   RuntimeStory,
-  RuntimeThemeScene,
-} from "@infoschematics/view-model/runtime";
-import {
-  type SceneSignalSelection,
-  resolveSceneFlowSignals,
-} from "@infoschematics/view-model/signals";
+  RuntimeThemeScene
+} from '@infoschematics/view-model/runtime'
+import { resolveSceneFlowSignals, type SceneSignalSelection } from '@infoschematics/view-model/signals'
 
-export type PlayingStory = Readonly<{ id: string; step: number }>;
+export type PlayingStory = Readonly<{ id: string; step: number }>
 
-export type SceneSignalPolicy = "focused-flows" | "none";
+export type SceneSignalPolicy = 'focused-flows' | 'none'
 
 export type PresentationState = Readonly<{
-  annotated: boolean;
-  autoAdvance: boolean;
-  playing: PlayingStory | null;
-  sceneOccurrence: number;
-  standaloneSceneId: string | null;
-  takeaways: boolean;
-  thematicSceneId: string | null;
-  visibleFamilies: ReadonlySet<string>;
-  visibleScopes: ReadonlySet<string>;
-}>;
+  annotated: boolean
+  autoAdvance: boolean
+  playing: PlayingStory | null
+  sceneOccurrence: number
+  standaloneSceneId: string | null
+  takeaways: boolean
+  thematicSceneId: string | null
+  visibleFamilies: ReadonlySet<string>
+  visibleScopes: ReadonlySet<string>
+}>
 
 export type PresentationAction =
-  | Readonly<{ type: "clear-focus" }>
-  | Readonly<{ type: "set-annotated"; value: boolean }>
-  | Readonly<{ type: "set-auto-advance"; value: boolean }>
-  | Readonly<{ type: "set-takeaways"; value: boolean }>
+  | Readonly<{ type: 'clear-focus' }>
+  | Readonly<{ type: 'set-annotated'; value: boolean }>
+  | Readonly<{ type: 'set-auto-advance'; value: boolean }>
+  | Readonly<{ type: 'set-takeaways'; value: boolean }>
   | Readonly<{
-      type: "show-all-families";
-      ids: readonly string[];
-      value: boolean;
+      type: 'show-all-families'
+      ids: readonly string[]
+      value: boolean
     }>
   | Readonly<{
-      type: "show-all-scopes";
-      ids: readonly string[];
-      value: boolean;
+      type: 'show-all-scopes'
+      ids: readonly string[]
+      value: boolean
     }>
-  | Readonly<{ type: "start-story"; story: RuntimeStory }>
+  | Readonly<{ type: 'start-story'; story: RuntimeStory }>
   | Readonly<{
-      type: "step-story";
-      stories: readonly RuntimeStory[];
-      delta: number;
+      type: 'step-story'
+      stories: readonly RuntimeStory[]
+      delta: number
     }>
   | Readonly<{
-      type: "step-theme";
-      scenes: readonly RuntimeThemeScene[];
-      delta: number;
+      type: 'step-theme'
+      scenes: readonly RuntimeThemeScene[]
+      delta: number
     }>
-  | Readonly<{ type: "stop-story" }>
-  | Readonly<{ type: "toggle-family"; id: string }>
-  | Readonly<{ type: "toggle-scope"; id: string }>
-  | Readonly<{ type: "toggle-standalone-scene"; scene: RuntimeStandaloneScene }>
-  | Readonly<{ type: "toggle-theme-scene"; scene: RuntimeThemeScene }>;
+  | Readonly<{ type: 'stop-story' }>
+  | Readonly<{ type: 'toggle-family'; id: string }>
+  | Readonly<{ type: 'toggle-scope'; id: string }>
+  | Readonly<{ type: 'toggle-standalone-scene'; scene: RuntimeStandaloneScene }>
+  | Readonly<{ type: 'toggle-theme-scene'; scene: RuntimeThemeScene }>
 
-export const createPresentationState = (
-  runtime: InfoschematicRuntime,
-): PresentationState => ({
+export const createPresentationState = (runtime: InfoschematicRuntime): PresentationState => ({
   annotated: false,
   autoAdvance: true,
   playing: null,
@@ -67,204 +62,163 @@ export const createPresentationState = (
   standaloneSceneId: null,
   takeaways: true,
   thematicSceneId: null,
-  visibleFamilies: new Set(
-    runtime.infoschematicFamilies.map((family) => family.id),
-  ),
-  visibleScopes: new Set(runtime.infoschematicScopes.map((scope) => scope.id)),
-});
+  visibleFamilies: new Set(runtime.infoschematicFamilies.map((family) => family.id)),
+  visibleScopes: new Set(runtime.infoschematicScopes.map((scope) => scope.id))
+})
 
 const toggled = (current: ReadonlySet<string>, id: string) => {
-  const next = new Set(current);
-  if (next.has(id)) next.delete(id);
-  else next.add(id);
-  return next;
-};
+  const next = new Set(current)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  return next
+}
 
-export const reducePresentation = (
-  state: PresentationState,
-  action: PresentationAction,
-): PresentationState => {
+export const reducePresentation = (state: PresentationState, action: PresentationAction): PresentationState => {
   switch (action.type) {
-    case "clear-focus":
+    case 'clear-focus':
       return {
         ...state,
         playing: null,
         standaloneSceneId: null,
-        thematicSceneId: null,
-      };
-    case "set-annotated":
-      return { ...state, annotated: action.value };
-    case "set-auto-advance":
-      return { ...state, autoAdvance: action.value };
-    case "set-takeaways":
-      return { ...state, takeaways: action.value };
-    case "show-all-families":
+        thematicSceneId: null
+      }
+    case 'set-annotated':
+      return { ...state, annotated: action.value }
+    case 'set-auto-advance':
+      return { ...state, autoAdvance: action.value }
+    case 'set-takeaways':
+      return { ...state, takeaways: action.value }
+    case 'show-all-families':
       return {
         ...state,
-        visibleFamilies: action.value ? new Set(action.ids) : new Set(),
-      };
-    case "show-all-scopes":
+        visibleFamilies: action.value ? new Set(action.ids) : new Set()
+      }
+    case 'show-all-scopes':
       return {
         ...state,
-        visibleScopes: action.value ? new Set(action.ids) : new Set(),
-      };
-    case "start-story":
-      if (action.story.steps.length === 0) return state;
+        visibleScopes: action.value ? new Set(action.ids) : new Set()
+      }
+    case 'start-story':
+      if (action.story.steps.length === 0) return state
       return {
         ...state,
         playing: { id: action.story.id, step: 0 },
         sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
-        thematicSceneId: null,
-      };
-    case "step-story": {
-      if (!state.playing) return state;
-      const story = action.stories.find(
-        (entry) => entry.id === state.playing?.id,
-      );
-      if (!story || story.steps.length === 0)
-        return { ...state, playing: null };
-      const step =
-        (state.playing.step + action.delta + story.steps.length) %
-        story.steps.length;
+        thematicSceneId: null
+      }
+    case 'step-story': {
+      if (!state.playing) return state
+      const story = action.stories.find((entry) => entry.id === state.playing?.id)
+      if (!story || story.steps.length === 0) return { ...state, playing: null }
+      const step = (state.playing.step + action.delta + story.steps.length) % story.steps.length
       return {
         ...state,
         playing: { ...state.playing, step },
-        sceneOccurrence: state.sceneOccurrence + 1,
-      };
+        sceneOccurrence: state.sceneOccurrence + 1
+      }
     }
-    case "step-theme": {
-      if (!state.thematicSceneId || action.scenes.length === 0) return state;
-      const current = action.scenes.findIndex(
-        (entry) => entry.id === state.thematicSceneId,
-      );
-      if (current === -1) return { ...state, thematicSceneId: null };
-      const scene =
-        action.scenes[
-          (current + action.delta + action.scenes.length) % action.scenes.length
-        ];
+    case 'step-theme': {
+      if (!state.thematicSceneId || action.scenes.length === 0) return state
+      const current = action.scenes.findIndex((entry) => entry.id === state.thematicSceneId)
+      if (current === -1) return { ...state, thematicSceneId: null }
+      const scene = action.scenes[(current + action.delta + action.scenes.length) % action.scenes.length]
       return scene
         ? {
             ...state,
             sceneOccurrence: state.sceneOccurrence + 1,
-            thematicSceneId: scene.id,
+            thematicSceneId: scene.id
           }
-        : state;
+        : state
     }
-    case "stop-story":
-      return { ...state, playing: null };
-    case "toggle-family":
+    case 'stop-story':
+      return { ...state, playing: null }
+    case 'toggle-family':
       return {
         ...state,
-        visibleFamilies: toggled(state.visibleFamilies, action.id),
-      };
-    case "toggle-scope":
+        visibleFamilies: toggled(state.visibleFamilies, action.id)
+      }
+    case 'toggle-scope':
       return {
         ...state,
-        visibleScopes: toggled(state.visibleScopes, action.id),
-      };
-    case "toggle-standalone-scene":
-      return {
-        ...state,
-        playing: null,
-        sceneOccurrence:
-          state.standaloneSceneId === action.scene.id
-            ? state.sceneOccurrence
-            : state.sceneOccurrence + 1,
-        standaloneSceneId:
-          state.standaloneSceneId === action.scene.id ? null : action.scene.id,
-        thematicSceneId: null,
-      };
-    case "toggle-theme-scene":
+        visibleScopes: toggled(state.visibleScopes, action.id)
+      }
+    case 'toggle-standalone-scene':
       return {
         ...state,
         playing: null,
         sceneOccurrence:
-          state.thematicSceneId === action.scene.id
-            ? state.sceneOccurrence
-            : state.sceneOccurrence + 1,
+          state.standaloneSceneId === action.scene.id ? state.sceneOccurrence : state.sceneOccurrence + 1,
+        standaloneSceneId: state.standaloneSceneId === action.scene.id ? null : action.scene.id,
+        thematicSceneId: null
+      }
+    case 'toggle-theme-scene':
+      return {
+        ...state,
+        playing: null,
+        sceneOccurrence: state.thematicSceneId === action.scene.id ? state.sceneOccurrence : state.sceneOccurrence + 1,
         standaloneSceneId: null,
-        thematicSceneId:
-          state.thematicSceneId === action.scene.id ? null : action.scene.id,
-      };
+        thematicSceneId: state.thematicSceneId === action.scene.id ? null : action.scene.id
+      }
   }
-};
+}
 
 export const derivePresentation = (
   runtime: InfoschematicRuntime,
   state: PresentationState,
-  signalPolicy: SceneSignalPolicy = "focused-flows",
+  signalPolicy: SceneSignalPolicy = 'focused-flows'
 ) => {
   const visibleCards = runtime.infoschematicCards.filter((card) =>
-    runtime.infoschematicCardIsVisible(card, state.visibleScopes),
-  );
+    runtime.infoschematicCardIsVisible(card, state.visibleScopes)
+  )
   const visibleFabrics = runtime.infoschematicFabrics.filter((fabric) =>
-    runtime.infoschematicFabricIsVisible(fabric, state.visibleScopes),
-  );
+    runtime.infoschematicFabricIsVisible(fabric, state.visibleScopes)
+  )
   const visibleFlows = runtime.infoschematicFlows.filter((flow) =>
-    runtime.infoschematicFlowIsVisible(
-      flow,
-      state.visibleFamilies,
-      state.visibleScopes,
-    ),
-  );
-  const runningStory = state.playing
-    ? runtime.stories.find((entry) => entry.id === state.playing?.id)
-    : undefined;
-  const runningStoryScene = state.playing
-    ? runningStory?.steps[state.playing.step]
-    : undefined;
+    runtime.infoschematicFlowIsVisible(flow, state.visibleFamilies, state.visibleScopes)
+  )
+  const runningStory = state.playing ? runtime.stories.find((entry) => entry.id === state.playing?.id) : undefined
+  const runningStoryScene = state.playing ? runningStory?.steps[state.playing.step] : undefined
   const thematicScene = state.thematicSceneId
     ? runtime.thematicScenes.find((entry) => entry.id === state.thematicSceneId)
-    : undefined;
+    : undefined
   const standaloneScene = state.standaloneSceneId
-    ? runtime.standaloneScenes.find(
-        (entry) => entry.id === state.standaloneSceneId,
-      )
-    : undefined;
-  const focusedScene = runningStoryScene ?? thematicScene ?? standaloneScene;
+    ? runtime.standaloneScenes.find((entry) => entry.id === state.standaloneSceneId)
+    : undefined
+  const focusedScene = runningStoryScene ?? thematicScene ?? standaloneScene
   const thematicThemeId = thematicScene
-    ? runtime.config.themes.find((theme) =>
-        theme.scenes.some((scene) => scene.id === thematicScene.id),
-      )?.id
-    : undefined;
-  let signalSelection: SceneSignalSelection | undefined;
+    ? runtime.config.themes.find((theme) => theme.scenes.some((scene) => scene.id === thematicScene.id))?.id
+    : undefined
+  let signalSelection: SceneSignalSelection | undefined
   if (state.playing) {
     signalSelection = {
-      kind: "story",
+      kind: 'story',
       sceneIndex: state.playing.step,
-      storyId: state.playing.id,
-    };
+      storyId: state.playing.id
+    }
   } else if (thematicScene && thematicThemeId) {
     signalSelection = {
-      kind: "theme",
+      kind: 'theme',
       sceneId: thematicScene.id,
-      themeId: thematicThemeId,
-    };
+      themeId: thematicThemeId
+    }
   } else if (standaloneScene) {
-    signalSelection = { kind: "standalone", sceneId: standaloneScene.id };
+    signalSelection = { kind: 'standalone', sceneId: standaloneScene.id }
   }
   const signals =
-    signalPolicy === "focused-flows" && signalSelection
-      ? resolveSceneFlowSignals(
-          runtime.config,
-          signalSelection,
-          `present-scene-${state.sceneOccurrence}`,
-        )
-      : [];
+    signalPolicy === 'focused-flows' && signalSelection
+      ? resolveSceneFlowSignals(runtime.config, signalSelection, `present-scene-${state.sceneOccurrence}`)
+      : []
   const focusedFlows = focusedScene
-    ? visibleFlows
-        .filter((flow) => focusedScene.flows.includes(flow.id))
-        .map((flow) => flow.id)
-    : [];
+    ? visibleFlows.filter((flow) => focusedScene.flows.includes(flow.id)).map((flow) => flow.id)
+    : []
   const highlight =
-    focusedScene &&
-    (focusedFlows.length > 0 || focusedScene.components.length > 0)
+    focusedScene && (focusedFlows.length > 0 || focusedScene.components.length > 0)
       ? {
           endpoints: new Set(focusedScene.components),
-          flows: new Set(focusedFlows),
+          flows: new Set(focusedFlows)
         }
-      : undefined;
+      : undefined
 
   return {
     focusedScene,
@@ -276,8 +230,8 @@ export const derivePresentation = (
     thematicScene,
     visibleCards,
     visibleFabrics,
-    visibleFlows,
-  };
-};
+    visibleFlows
+  }
+}
 
-export type DerivedPresentation = ReturnType<typeof derivePresentation>;
+export type DerivedPresentation = ReturnType<typeof derivePresentation>

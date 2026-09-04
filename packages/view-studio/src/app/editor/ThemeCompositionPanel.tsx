@@ -7,7 +7,7 @@ import type { ThemeComposition } from './use-theme-composition.ts'
 export function ThemeCompositionPanel({
   editor,
   selected,
-  selectedIsFlow,
+  selectedIsFlow
 }: {
   editor: ThemeComposition
   selected: string | null
@@ -72,7 +72,11 @@ export function ThemeCompositionPanel({
         <div className="scene-fields">
           <label className="text-row">
             <span>Name</span>
-            <input onChange={(event) => editor.editTheme({ title: event.target.value })} type="text" value={theme.title} />
+            <input
+              onChange={(event) => editor.editTheme({ title: event.target.value })}
+              type="text"
+              value={theme.title}
+            />
           </label>
           <label className="text-row">
             <span>Detail</span>
@@ -176,7 +180,11 @@ export function ThemeCompositionPanel({
         <div className="scene-fields">
           <label className="text-row">
             <span>Scene</span>
-            <input onChange={(event) => editor.editScene({ label: event.target.value })} type="text" value={scene.label} />
+            <input
+              onChange={(event) => editor.editScene({ label: event.target.value })}
+              type="text"
+              value={scene.label}
+            />
           </label>
           <label className="text-row">
             <span>Detail</span>
@@ -191,7 +199,7 @@ export function ThemeCompositionPanel({
             <input
               onChange={(event) =>
                 editor.editScene({
-                  callout: { ...scene.callout, body: scene.callout?.body ?? '', title: event.target.value || undefined },
+                  callout: { ...scene.callout, body: scene.callout?.body ?? '', title: event.target.value || undefined }
                 })
               }
               type="text"
@@ -201,9 +209,7 @@ export function ThemeCompositionPanel({
           <label className="text-row">
             <span>Callout</span>
             <textarea
-              onChange={(event) =>
-                editor.editScene({ callout: { ...scene.callout, body: event.target.value } })
-              }
+              onChange={(event) => editor.editScene({ callout: { ...scene.callout, body: event.target.value } })}
               rows={3}
               value={scene.callout?.body ?? ''}
             />
@@ -216,8 +222,8 @@ export function ThemeCompositionPanel({
                   callout: {
                     ...scene.callout,
                     body: scene.callout?.body ?? '',
-                    renderer: event.target.value || undefined,
-                  },
+                    renderer: event.target.value || undefined
+                  }
                 })
               }
               type="text"
@@ -232,15 +238,19 @@ export function ThemeCompositionPanel({
                 callout: {
                   ...scene.callout,
                   body: scene.callout?.body ?? '',
-                  takeaways: takeaways.filter((line) => line.trim() !== ''),
-                },
+                  takeaways: takeaways.filter((line) => line.trim() !== '')
+                }
               })
             }
             placeholder="Add a takeaway"
           />
           <p className="scene-lit">
             Lights {lit} {lit === 1 ? 'thing' : 'things'}.{' '}
-            <button disabled={!selected} onClick={() => selected && editor.toggle(selected, selectedIsFlow)} type="button">
+            <button
+              disabled={!selected}
+              onClick={() => selected && editor.toggle(selected, selectedIsFlow)}
+              type="button"
+            >
               {selected ? `Add or remove ${selected}` : 'Select something on the Infoschematic to add it'}
             </button>
           </p>

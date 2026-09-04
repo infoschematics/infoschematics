@@ -1,7 +1,7 @@
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { Placement } from '@infoschematics/view-model/editable'
 import type { PortCounts, Side } from '@infoschematics/view-model/ports'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '@infoschematics/view-canvas'
 import { Part } from '../panels/Part.tsx'
 import { PlacementPanel } from '../panels/PlacementPanel.tsx'
 import { ComponentControls } from './ComponentControls.tsx'
@@ -46,10 +46,7 @@ export function EditorPanel({
    * being handed all three back each time they select something is the
    * behaviour the register was folded to avoid.
    */
-  const [shut, setShut] = usePersistentState<Record<string, boolean>>(
-    config.id && `${config.id}.properties.shut`,
-    {}
-  )
+  const [shut, setShut] = usePersistentState<Record<string, boolean>>(config.id && `${config.id}.properties.shut`, {})
   const toggle = (part: string) => setShut((current) => ({ ...current, [part]: !current[part] }))
 
   return (

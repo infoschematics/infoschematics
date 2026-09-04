@@ -1,12 +1,7 @@
-import type { SetStateAction } from 'react'
-import type {
-  ArtefactOperation,
-  AttachedEnd,
-  CreatedComponent,
-  CreatedFlow,
-} from '@infoschematics/view-model/editable'
+import type { ArtefactOperation, AttachedEnd, CreatedComponent, CreatedFlow } from '@infoschematics/view-model/editable'
 import type { Offset, Point } from '@infoschematics/view-model/geometry'
 import type { PortCounts } from '@infoschematics/view-model/ports'
+import type { SetStateAction } from 'react'
 
 export type Creation = Omit<CreatedFlow, 'code'>
 export type CardCreation = Omit<CreatedComponent, 'code'>
@@ -50,7 +45,7 @@ export const emptyEditorDraft = (): EditorDraft => ({
   removals: {},
   routes: {},
   text: {},
-  version: editorDraftVersion,
+  version: editorDraftVersion
 })
 
 const record = <T>(value: unknown): Record<string, T> =>
@@ -72,7 +67,7 @@ export const normaliseEditorDraft = (value: unknown): EditorDraft => {
     removals: record<Removal>(candidate.removals),
     routes: record<readonly Point[]>(candidate.routes),
     text: record<TextDraft>(candidate.text),
-    version: editorDraftVersion,
+    version: editorDraftVersion
   }
 }
 
@@ -100,14 +95,14 @@ export const readPreviousEditorDraft = (storage: string | undefined, store: Stor
     portCounts: read(store, `${storage}.diagram.ports`, {}),
     removals: read(store, `${storage}.diagram.removals`, {}),
     routes: read(store, `${storage}.diagram.routes`, {}),
-    text: read(store, `${storage}.diagram.text`, {}),
+    text: read(store, `${storage}.diagram.text`, {})
   })
 }
 
 export const updateEditorDraft = <K extends Exclude<keyof EditorDraft, 'version'>>(
   draft: EditorDraft,
   field: K,
-  update: SetStateAction<EditorDraft[K]>,
+  update: SetStateAction<EditorDraft[K]>
 ): EditorDraft => {
   const next = typeof update === 'function' ? update(draft[field]) : update
   return Object.is(next, draft[field]) ? draft : { ...draft, [field]: next }
@@ -125,7 +120,7 @@ export const editorDraftHasChanges = (draft: EditorDraft): boolean =>
       draft.portCounts,
       draft.removals,
       draft.routes,
-      draft.text,
+      draft.text
     ] as const
   ).some((entries) => Object.keys(entries).length > 0)
 
@@ -141,7 +136,7 @@ const textProperty: Readonly<Record<TextField, string>> = {
   detail: 'detail',
   family: 'family',
   group: 'group',
-  name: 'label',
+  name: 'label'
 }
 
 /** Drops stale, invalid and already-applied persisted values from every existing field. */
@@ -149,8 +144,8 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
   const known = (key: string) => model.knows(key)
   const components = Object.fromEntries(
     Object.entries(draft.components).filter(
-      ([key, component]) => known(key) && component.from === model.authored(key, 'card'),
-    ),
+      ([key, component]) => known(key) && component.from === model.authored(key, 'card')
+    )
   )
   const creations = Object.fromEntries(Object.entries(draft.creations).filter(([key]) => !model.authors(key)))
   const cards = Object.fromEntries(Object.entries(draft.cards).filter(([key]) => !model.authors(key)))
@@ -160,24 +155,24 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
         known(key) &&
         along >= 0 &&
         along <= 1 &&
-        `${key}  ->  label: { along: ${along} },` !== model.authored(key, 'label'),
-    ),
+        `${key}  ->  label: { along: ${along} },` !== model.authored(key, 'label')
+    )
   )
   const routes = Object.fromEntries(
     Object.entries(draft.routes).filter(([key, points]) => {
       if (!known(key)) return false
       const list = points.map((point) => `{ x: ${point.x}, y: ${point.y} }`).join(', ')
       return `${key}  ->  points: [${list}],` !== model.authored(key, 'points')
-    }),
+    })
   )
   const portCounts = Object.fromEntries(
     Object.entries(draft.portCounts).filter(([key, counts]) => {
       if (!known(key)) return false
       const authored = model.authored(key, 'ports') ?? ''
       return (['north', 'east', 'south', 'west'] as const).some(
-        (side) => counts[side] !== undefined && !authored.includes(`${side}: ${counts[side]}`),
+        (side) => counts[side] !== undefined && !authored.includes(`${side}: ${counts[side]}`)
       )
-    }),
+    })
   )
   const attachments = Object.fromEntries(
     Object.entries(draft.attachments)
@@ -186,11 +181,11 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
         const kept = Object.fromEntries(
           (['source', 'target'] as const)
             .filter((end) => ends[end] && ends[end]?.from === model.authored(key, end))
-            .map((end) => [end, ends[end]]),
+            .map((end) => [end, ends[end]])
         )
         return [key, kept]
       })
-      .filter(([, ends]) => Object.keys(ends).length > 0),
+      .filter(([, ends]) => Object.keys(ends).length > 0)
   )
   const text = Object.fromEntries(
     Object.entries(draft.text)
@@ -201,12 +196,12 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
             .filter(
               (field) =>
                 fields[field] !== undefined &&
-                `${key}  ->  ${textProperty[field]}: '${fields[field]}',` !== model.authored(key, field),
+                `${key}  ->  ${textProperty[field]}: '${fields[field]}',` !== model.authored(key, field)
             )
-            .map((field) => [field, fields[field]]),
+            .map((field) => [field, fields[field]])
         )
         return Object.keys(kept).length > 0 ? [[key, kept]] : []
-      }),
+      })
   )
   const removals = Object.fromEntries(Object.entries(draft.removals).filter(([key]) => known(key)))
 
@@ -220,7 +215,7 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
     portCounts,
     removals,
     routes,
-    text,
+    text
   }
 }
 
@@ -235,7 +230,7 @@ export const createEditorDraftHistory = (current: EditorDraft): EditorDraftHisto
   current,
   future: [],
   gesture: null,
-  past: [],
+  past: []
 })
 
 export const applyDiscreteDraft = (history: EditorDraftHistory, next: EditorDraft): EditorDraftHistory =>
@@ -247,9 +242,7 @@ export const beginDraftGesture = (history: EditorDraftHistory): EditorDraftHisto
   history.gesture ? history : { ...history, future: [], gesture: history.current }
 
 export const applyGestureDraft = (history: EditorDraftHistory, next: EditorDraft): EditorDraftHistory =>
-  editorDraftsEqual(history.current, next)
-    ? history
-    : { ...beginDraftGesture(history), current: next, future: [] }
+  editorDraftsEqual(history.current, next) ? history : { ...beginDraftGesture(history), current: next, future: [] }
 
 export const endDraftGesture = (history: EditorDraftHistory): EditorDraftHistory => {
   if (!history.gesture) return history
@@ -265,7 +258,7 @@ export const undoEditorDraft = (history: EditorDraftHistory): EditorDraftHistory
         current: previous,
         future: [...history.future, history.current],
         gesture: null,
-        past: history.past.slice(0, -1),
+        past: history.past.slice(0, -1)
       }
     : history
 }
@@ -277,7 +270,7 @@ export const redoEditorDraft = (history: EditorDraftHistory): EditorDraftHistory
         current: next,
         future: history.future.slice(0, -1),
         gesture: null,
-        past: [...history.past, history.current],
+        past: [...history.past, history.current]
       }
     : history
 }

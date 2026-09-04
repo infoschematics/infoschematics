@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
+import { useEffect, useRef, useState } from 'react'
 
 // The host supplies published specification documents; this module reads and
 // summarises their standard fields.

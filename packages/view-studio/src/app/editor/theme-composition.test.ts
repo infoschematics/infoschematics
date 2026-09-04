@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import type { ThemeConfig } from '@infoschematics/domain-model/theme'
+import { describe, expect, it } from 'vitest'
 import {
   addTheme,
   addThemeScene,
@@ -9,7 +9,7 @@ import {
   removeThemeScene,
   themeCanActivate,
   themesAsSource,
-  toggleThemeLit,
+  toggleThemeLit
 } from './theme-composition.ts'
 
 const themes: readonly ThemeConfig[] = [
@@ -21,12 +21,12 @@ const themes: readonly ThemeConfig[] = [
         code: 'THM-07',
         focus: { artefacts: ['card-a'], flows: ['flow-a'] },
         id: 'overview',
-        label: 'Overview',
+        label: 'Overview'
       },
-      { code: 'THM-08', focus: {}, id: 'detail', label: 'Detail' },
+      { code: 'THM-08', focus: {}, id: 'detail', label: 'Detail' }
     ],
-    title: 'Operations',
-  },
+    title: 'Operations'
+  }
 ]
 
 describe('Theme composition', () => {
@@ -40,7 +40,7 @@ describe('Theme composition', () => {
       description: '',
       focus: {},
       id: 'overview-2',
-      label: 'Overview',
+      label: 'Overview'
     })
   })
 
@@ -74,7 +74,7 @@ describe('Theme composition', () => {
     const allStale: ThemeConfig = {
       id: 'stale',
       scenes: [{ code: 'THM-10', focus: { artefacts: ['gone'] }, id: 'gone', label: 'Gone' }],
-      title: 'Stale',
+      title: 'Stale'
     }
     expect(themeCanActivate(allStale, new Set(), new Set())).toBe(false)
   })

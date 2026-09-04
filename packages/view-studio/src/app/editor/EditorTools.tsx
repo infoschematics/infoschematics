@@ -53,8 +53,8 @@ export function EditorTools({
       <fieldset className="editor-tools">
         <legend className="sr-only">Scene tools</legend>
         <span className="scene-hint">
-        {mode === 'scenes'
-          ? 'Click a card or a flow on the Infoschematic to add it to the selected scene.'
+          {mode === 'scenes'
+            ? 'Click a card or a flow on the Infoschematic to add it to the selected scene.'
             : 'Story Scenes that play a named scene are edited under Scenes.'}
         </span>
       </fieldset>

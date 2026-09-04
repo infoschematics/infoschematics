@@ -1,50 +1,33 @@
-import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
-  artefactCapabilities as capabilitiesByKind,
-  createArtefactOperation,
   type ArtefactKind,
   type ArtefactSelection,
   type ArtefactValueByKind,
   type Change,
   type CreatedComponent,
   type CreatedFlow,
+  artefactCapabilities as capabilitiesByKind,
+  createArtefactOperation,
   type EditableDiagram,
   moveArtefactOperation,
   orderChanges,
-  reorderArtefactOperation,
-  resizeArtefactOperation,
   type ResizeMinimum,
+  reorderArtefactOperation,
+  resizeArtefactOperation
 } from '@infoschematics/view-model/editable'
 import type { Offset, Point } from '@infoschematics/view-model/geometry'
 import { type Guide, snapToGuides } from '@infoschematics/view-model/guides'
-import type { PortCounts, Side } from '@infoschematics/view-model/ports'
+import type { Side } from '@infoschematics/view-model/ports'
 import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing'
 import * as waypoints from '@infoschematics/view-model/waypoints'
-import { useInfoschematic } from '@infoschematics/view-canvas'
+import { type SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
 import {
-  type Attachment,
-  type CardCreation,
-  type ComponentDraft,
-  editorDraftHasChanges,
-  emptyEditorDraft,
-  type EditorDraft,
-  normaliseEditorDraft,
-  readPreviousEditorDraft,
-  type Removal,
-  sweepEditorDraft,
-  type TextDraft,
-  type TextField,
-  updateEditorDraft,
-  type Creation,
-} from './editor-draft.ts'
-import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
-import {
+  type ArtefactPropertiesPatch,
   artefactIndex,
   artefactOperationKey,
-  type ArtefactPropertiesPatch,
   artefactSourceChanges,
   createdArtefactDetails,
   discardArtefactOperation,
@@ -53,10 +36,24 @@ import {
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
-  replaceArtefactPropertiesOperation,
+  replaceArtefactPropertiesOperation
 } from './artefact-operations.ts'
+import {
+  type Attachment,
+  type CardCreation,
+  type Creation,
+  type EditorDraft,
+  editorDraftHasChanges,
+  emptyEditorDraft,
+  normaliseEditorDraft,
+  readPreviousEditorDraft,
+  sweepEditorDraft,
+  type TextField,
+  updateEditorDraft
+} from './editor-draft.ts'
+import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
-export type { Attachment, CardCreation, ComponentDraft, Creation, Removal, TextDraft, TextField } from './editor-draft.ts'
+export type { Attachment, CardCreation, Creation, TextDraft, TextField } from './editor-draft.ts'
 
 // Editing state is held apart from the Infoschematic and its host. Drafts
 // persist because they represent unsaved work; the active editor does not.
@@ -83,7 +80,7 @@ export const gridSize = 10
 
 const toGrid = (point: Point): Point => ({
   x: Math.round(point.x / gridSize) * gridSize,
-  y: Math.round(point.y / gridSize) * gridSize,
+  y: Math.round(point.y / gridSize) * gridSize
 })
 
 /** Everything undo has to put back, which is everything an edit may change. */
@@ -181,7 +178,7 @@ const textProperty: Record<TextField, string> = {
   detail: 'detail',
   family: 'family',
   group: 'group',
-  name: 'label',
+  name: 'label'
 }
 
 const sameValue = (left: unknown, right: unknown) => left === right || JSON.stringify(left) === JSON.stringify(right)
@@ -201,17 +198,14 @@ const selectionKey = (selection: ArtefactSelection): string => {
 
 const selectionForCreation = <K extends ArtefactKind>(
   kind: K,
-  value: ArtefactValueByKind[K],
+  value: ArtefactValueByKind[K]
 ): ArtefactSelection | undefined => {
   const code = 'code' in value && typeof value.code === 'string' ? value.code : null
   if (kind === 'flow') return { code, geometry: 'route', id: value.id, kind }
   return { code, geometry: 'box', id: value.id, kind }
 }
 
-const artefactCount = (
-  config: InfoschematicConfig,
-  target: ArtefactSelection,
-) => {
+const artefactCount = (config: InfoschematicConfig, target: ArtefactSelection) => {
   switch (target.kind) {
     case 'region':
       return config.infoschematic.regions.length
@@ -226,10 +220,7 @@ const artefactCount = (
   }
 }
 
-const sameArtefactCollection = (
-  left: ArtefactSelection,
-  right: ArtefactSelection,
-) => left.kind === right.kind
+const sameArtefactCollection = (left: ArtefactSelection, right: ArtefactSelection) => left.kind === right.kind
 
 /** Which port each end of a flow has been moved to, where either has. */
 /**
@@ -251,8 +242,8 @@ export function useEditor(
     // editable did not know about could be drawn but not selected or dragged,
     // which is a line the reader can see and cannot touch.
     created: readonly CreatedFlow[],
-    createdCards: readonly CreatedComponent[],
-  ) => EditableDiagram,
+    createdCards: readonly CreatedComponent[]
+  ) => EditableDiagram
 ) {
   const { config } = useInfoschematic()
   const storage = config.id
@@ -286,7 +277,7 @@ export function useEditor(
   }, [storage])
   const [storedDraft, setStoredDraft] = usePersistentState<EditorDraft>(
     storage && `${storage}.diagram.draft.v1`,
-    previousDraft,
+    previousDraft
   )
   const draft = useMemo(() => normaliseEditorDraft(storedDraft), [storedDraft])
   const {
@@ -299,36 +290,59 @@ export function useEditor(
     portCounts,
     removals,
     routes,
-    text,
+    text
   } = draft
   // The persisted envelope predates the materialiser's additive
   // replace-properties operation, but remains wire-compatible JSON.
-  const artefactOperations =
-    storedArtefactOperations as readonly ArtefactDraftOperation[]
+  const artefactOperations = storedArtefactOperations as readonly ArtefactDraftOperation[]
 
   const setDraftField = useCallback(
     <K extends Exclude<keyof EditorDraft, 'version'>>(field: K, update: SetStateAction<EditorDraft[K]>) =>
       setStoredDraft((current) => updateEditorDraft(normaliseEditorDraft(current), field, update)),
-    [setStoredDraft],
+    [setStoredDraft]
   )
-  const setAttachments = (update: SetStateAction<EditorDraft['attachments']>) =>
-    setDraftField('attachments', update)
-  const setArtefactOperations = (
-    update: SetStateAction<readonly ArtefactDraftOperation[]>,
-  ) =>
+  const setAttachments = useCallback(
+    (update: SetStateAction<EditorDraft['attachments']>) => setDraftField('attachments', update),
+    [setDraftField]
+  )
+  const setArtefactOperations = (update: SetStateAction<readonly ArtefactDraftOperation[]>) =>
     setDraftField('artefactOperations', (current) => {
       const typed = current as readonly ArtefactDraftOperation[]
       const next = typeof update === 'function' ? update(typed) : update
       return next as EditorDraft['artefactOperations']
     })
-  const setCards = (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update)
-  const setCreations = (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update)
-  const setDrafts = (update: SetStateAction<EditorDraft['components']>) => setDraftField('components', update)
-  const setLabels = (update: SetStateAction<EditorDraft['labels']>) => setDraftField('labels', update)
-  const setPortCounts = (update: SetStateAction<EditorDraft['portCounts']>) => setDraftField('portCounts', update)
-  const setRemovals = (update: SetStateAction<EditorDraft['removals']>) => setDraftField('removals', update)
-  const setRoutes = (update: SetStateAction<EditorDraft['routes']>) => setDraftField('routes', update)
-  const setText = (update: SetStateAction<EditorDraft['text']>) => setDraftField('text', update)
+  const setCards = useCallback(
+    (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update),
+    [setDraftField]
+  )
+  const setCreations = useCallback(
+    (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update),
+    [setDraftField]
+  )
+  const setDrafts = useCallback(
+    (update: SetStateAction<EditorDraft['components']>) => setDraftField('components', update),
+    [setDraftField]
+  )
+  const setLabels = useCallback(
+    (update: SetStateAction<EditorDraft['labels']>) => setDraftField('labels', update),
+    [setDraftField]
+  )
+  const setPortCounts = useCallback(
+    (update: SetStateAction<EditorDraft['portCounts']>) => setDraftField('portCounts', update),
+    [setDraftField]
+  )
+  const setRemovals = useCallback(
+    (update: SetStateAction<EditorDraft['removals']>) => setDraftField('removals', update),
+    [setDraftField]
+  )
+  const setRoutes = useCallback(
+    (update: SetStateAction<EditorDraft['routes']>) => setDraftField('routes', update),
+    [setDraftField]
+  )
+  const setText = useCallback(
+    (update: SetStateAction<EditorDraft['text']>) => setDraftField('text', update),
+    [setDraftField]
+  )
 
   // Undo keeps whole snapshots rather than inverse operations, so a new kind of
   // edit is covered by adding its state to `EditorDraft` - and to `restore`,
@@ -364,7 +378,7 @@ export function useEditor(
 
   const offsets = useMemo<ReadonlyMap<string, Offset>>(
     () => new Map(Object.entries(drafts).map(([key, { dx, dy }]) => [key, { dx, dy }])),
-    [drafts],
+    [drafts]
   )
   const labelPositions = useMemo<ReadonlyMap<string, number>>(() => new Map(Object.entries(labels)), [labels])
   const attached = useMemo<ReadonlyMap<string, Attachment>>(() => new Map(Object.entries(attachments)), [attachments])
@@ -373,18 +387,18 @@ export function useEditor(
   // and the code is a property of the line everywhere else.
   const created = useMemo<readonly CreatedFlow[]>(
     () => Object.entries(creations).map(([code, line]) => ({ code, ...line })),
-    [creations],
+    [creations]
   )
   // The created cards as a list, for the same reason the lines are one: the map
   // is keyed by code so a draft can be dropped on its own, and the code is a
   // property of the card everywhere else.
   const createdCards = useMemo<readonly CreatedComponent[]>(
     () => Object.entries(cards).map(([code, card]) => ({ code, ...card })),
-    [cards],
+    [cards]
   )
   const diagram = useMemo(
     () => build(offsets, labelPositions, attached, created, createdCards),
-    [attached, build, created, createdCards, labelPositions, offsets],
+    [attached, build, created, createdCards, labelPositions, offsets]
   )
   const selectedArtefactDetails = useMemo(() => {
     const authored = selected ? diagram.selectionFor(selected) : undefined
@@ -395,34 +409,21 @@ export function useEditor(
         (operation) =>
           operation.operation === 'create' &&
           operation.target.kind === selectedArtefact.kind &&
-          operation.target.id === selectedArtefact.id,
+          operation.target.id === selectedArtefact.id
       )
     if (created?.operation !== 'create') return undefined
-    const value = effectiveArtefactValue(
-      config,
-      artefactOperations,
-      selectedArtefact,
-    )
-    return value
-      ? createdArtefactDetails({ ...created, value } as typeof created)
-      : undefined
+    const value = effectiveArtefactValue(config, artefactOperations, selectedArtefact)
+    return value ? createdArtefactDetails({ ...created, value } as typeof created) : undefined
   }, [artefactOperations, config, diagram, selected, selectedArtefact])
   const selectedArtefactCapabilities =
-    selectedArtefactDetails?.capabilities ??
-    (selectedArtefact ? capabilitiesByKind[selectedArtefact.kind] : undefined)
+    selectedArtefactDetails?.capabilities ?? (selectedArtefact ? capabilitiesByKind[selectedArtefact.kind] : undefined)
   const artefactValue = useMemo(
-    () =>
-      selectedArtefact
-        ? effectiveArtefactValue(config, artefactOperations, selectedArtefact)
-        : undefined,
-    [artefactOperations, config, selectedArtefact],
+    () => (selectedArtefact ? effectiveArtefactValue(config, artefactOperations, selectedArtefact) : undefined),
+    [artefactOperations, config, selectedArtefact]
   )
   const artefactOperation = useMemo(
-    () =>
-      selectedArtefact
-        ? effectiveArtefactOperation(artefactOperations, selectedArtefact)
-        : undefined,
-    [artefactOperations, selectedArtefact],
+    () => (selectedArtefact ? effectiveArtefactOperation(artefactOperations, selectedArtefact) : undefined),
+    [artefactOperations, selectedArtefact]
   )
 
   /*
@@ -439,6 +440,7 @@ export function useEditor(
    * already says is enough to know they have been applied.
    */
   const swept = useRef(false)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   useEffect(() => {
     if (swept.current) return
     swept.current = true
@@ -449,8 +451,8 @@ export function useEditor(
 
     setDrafts((current) =>
       Object.fromEntries(
-        Object.entries(current).filter(([key, draft]) => known(key) && draft.from === diagram.authored(key, 'card')),
-      ),
+        Object.entries(current).filter(([key, draft]) => known(key) && draft.from === diagram.authored(key, 'card'))
+      )
     )
     // A creation has no value to compare - the whole of it was the thing that
     // was missing - so the only question worth asking is whether the model has
@@ -468,9 +470,9 @@ export function useEditor(
             // label some multiple of the line away from where it was meant.
             along >= 0 &&
             along <= 1 &&
-            `${key}  ->  label: { along: ${along} },` !== diagram.authored(key, 'label'),
-        ),
-      ),
+            `${key}  ->  label: { along: ${along} },` !== diagram.authored(key, 'label')
+        )
+      )
     )
     setRoutes((current) =>
       Object.fromEntries(
@@ -478,8 +480,8 @@ export function useEditor(
           if (!known(key)) return false
           const list = points.map((point) => `{ x: ${point.x}, y: ${point.y} }`).join(', ')
           return `${key}  ->  points: [${list}],` !== diagram.authored(key, 'points')
-        }),
-      ),
+        })
+      )
     )
     // Per end rather than per flow: one end may be spent while the other
     // is still a change, and keeping the pair would offer the spent one back.
@@ -492,10 +494,10 @@ export function useEditor(
           // line - the model lists every side, and the two never matched.
           const authored = diagram.authored(key, 'ports') ?? ''
           return (['north', 'east', 'south', 'west'] as const).some(
-            (side) => counts[side] !== undefined && !authored.includes(`${side}: ${counts[side]}`),
+            (side) => counts[side] !== undefined && !authored.includes(`${side}: ${counts[side]}`)
           )
-        }),
-      ),
+        })
+      )
     )
     setAttachments((current) =>
       Object.fromEntries(
@@ -505,12 +507,12 @@ export function useEditor(
             const kept = Object.fromEntries(
               (['source', 'target'] as const)
                 .filter((end) => ends[end] && ends[end]?.from === diagram.authored(key, end))
-                .map((end) => [end, ends[end]]),
+                .map((end) => [end, ends[end]])
             )
             return [key, kept] as const
           })
-          .filter(([, ends]) => Object.keys(ends).length > 0),
-      ),
+          .filter(([, ends]) => Object.keys(ends).length > 0)
+      )
     )
     setText((current) => sweepEditorDraft({ ...draft, text: current }, diagram).text)
     setRemovals((current) => sweepEditorDraft({ ...draft, removals: current }, diagram).removals)
@@ -525,7 +527,7 @@ export function useEditor(
     setPortCounts,
     setRemovals,
     setRoutes,
-    setText,
+    setText
   ])
 
   const selectedHandle = selected ? diagram.handles().find((handle) => handle.key === selected) : undefined
@@ -556,22 +558,22 @@ export function useEditor(
         ordering: change,
         origin: {
           key: change.key,
-          map: 'artefactOperations' as const,
+          map: 'artefactOperations' as const
         },
-        source: change.source,
+        source: change.source
       })),
       ...changes.map((change) => ({
         field: 'card' as const,
         key: change.key,
         origin: { key: change.key, map: 'components' as const },
-        source: change.source,
+        source: change.source
       })),
       ...diagram.derived().map((change) => ({ field: 'points' as const, key: change.key, source: change.source })),
       ...Object.entries(labels).map(([code, along]) => ({
         field: 'label' as const,
         key: code,
         origin: { key: code, map: 'labels' as const },
-        source: `${code}  ->  label: { along: ${along} },`,
+        source: `${code}  ->  label: { along: ${along} },`
       })),
       ...Object.entries(attachments).flatMap(([code, ends]) =>
         (['source', 'target'] as const)
@@ -580,14 +582,14 @@ export function useEditor(
             field: end,
             key: code,
             origin: { end, key: code, map: 'attachments' as const },
-            source: `${code}  ->  ${end}: '${ends[end]?.component}', ${end}Port: '${ends[end]?.port}',`,
-          })),
+            source: `${code}  ->  ${end}: '${ends[end]?.component}', ${end}Port: '${ends[end]?.port}',`
+          }))
       ),
       ...Object.entries(routes).map(([code, points]) => ({
         field: 'points' as const,
         key: code,
         origin: { key: code, map: 'routes' as const },
-        source: `${code}  ->  points: [${points.map((point) => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}],`,
+        source: `${code}  ->  points: [${points.map((point) => `{ x: ${point.x}, y: ${point.y} }`).join(', ')}],`
       })),
       // One line per property changed, so a card renamed and rescoped hands back
       // two lines rather than one that has to be unpicked.
@@ -598,8 +600,8 @@ export function useEditor(
             field,
             key: code,
             origin: { key: code, map: 'text' as const, property: field },
-            source: `${code}  ->  ${textProperty[field]}: '${fields[field]}',`,
-          })),
+            source: `${code}  ->  ${textProperty[field]}: '${fields[field]}',`
+          }))
       ),
       /*
        * A whole registry entry, and a layout entry beside it, because a card is
@@ -622,14 +624,14 @@ export function useEditor(
             field: 'create-card' as const,
             key: code,
             origin: { key: code, map: 'cards' as const },
-            source: `${code}  ->  { code: '${code}', id: '${card.id}', label: '${card.label}', detail: '${card.detail}', group: '${card.group}', scopes: [${card.scopes.map((scope) => `'${scope}'`).join(', ')}]${card.wraps ? `, wraps: '${card.wraps}'` : ''} },`,
+            source: `${code}  ->  { code: '${code}', id: '${card.id}', label: '${card.label}', detail: '${card.detail}', group: '${card.group}', scopes: [${card.scopes.map((scope) => `'${scope}'`).join(', ')}]${card.wraps ? `, wraps: '${card.wraps}'` : ''} },`
           },
           {
             field: 'card' as const,
             key: code,
             origin: { key: code, map: 'cards' as const },
-            source: card.box ? `${code}  ->  card(${card.box.x}, ${card.box.y}), ${ports},` : `${code}  ->  ${ports},`,
-          },
+            source: card.box ? `${code}  ->  card(${card.box.x}, ${card.box.y}), ${ports},` : `${code}  ->  ${ports},`
+          }
         ]
       }),
       /*
@@ -642,13 +644,13 @@ export function useEditor(
         field: 'create' as const,
         key: code,
         origin: { key: code, map: 'creations' as const },
-        source: `${code}  ->  create: { family: '${line.family}', id: '', source: '${line.source}', sourcePort: '${line.sourcePort}', target: '${line.target}', targetPort: '${line.targetPort}' },`,
+        source: `${code}  ->  create: { family: '${line.family}', id: '', source: '${line.source}', sourcePort: '${line.sourcePort}', target: '${line.target}', targetPort: '${line.targetPort}' },`
       })),
       ...Object.entries(removals).map(([code, { because }]) => ({
         field: 'remove' as const,
         key: code,
         origin: { key: code, map: 'removals' as const },
-        source: `${code}  ->  remove${because ? `, with ${because}` : ''}`,
+        source: `${code}  ->  remove${because ? `, with ${because}` : ''}`
       })),
       ...Object.entries(portCounts).map(([code, counts]) => ({
         field: 'ports' as const,
@@ -657,8 +659,8 @@ export function useEditor(
         source: `${code}  ->  ports: { ${(['north', 'east', 'south', 'west'] as const)
           .filter((side) => counts[side] !== undefined)
           .map((side) => `${side}: ${counts[side]}`)
-          .join(', ')} },`,
-      })),
+          .join(', ')} },`
+      }))
     ]
 
     /*
@@ -677,7 +679,7 @@ export function useEditor(
           authoredIndex: change.ordering.authoredIndex,
           owner: change.ordering.owner,
           phase: change.ordering.phase,
-          target: change.ordering.target,
+          target: change.ordering.target
         }
       }
       const identity = diagram.identityOf(change.key)
@@ -701,9 +703,12 @@ export function useEditor(
       return {
         ...change,
         authoredIndex: Number.isFinite(authoredIndex) ? authoredIndex : undefined,
-        owner: kind === 'flow' ? creations[change.key]?.family ?? identity?.family : cards[change.key]?.group ?? identity?.group,
+        owner:
+          kind === 'flow'
+            ? (creations[change.key]?.family ?? identity?.family)
+            : (cards[change.key]?.group ?? identity?.group),
         phase,
-        target,
+        target
       }
     }
 
@@ -715,9 +720,8 @@ export function useEditor(
     // draft persists, the model has caught up with it, and it would otherwise
     // sit in the list for ever describing a difference that no longer exists.
     return orderSourceChanges(
-      [...latest.values()].filter((change) => change.source !== diagram.authored(change.key, change.field)),
+      [...latest.values()].filter((change) => change.source !== diagram.authored(change.key, change.field))
     )
-
   }, [artefactOperations, attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
 
   const selectArtefact = (target: ArtefactSelection | null) => {
@@ -732,23 +736,17 @@ export function useEditor(
     setArtefactIssue(null)
   }
 
-  const recordOperation = (
-    operation: ArtefactDraftOperation,
-    discrete: boolean,
-  ) => {
+  const recordOperation = (operation: ArtefactDraftOperation, discrete: boolean) => {
     checkpoint()
     if (discrete) closeGesture()
-    setArtefactOperations((current) =>
-      recordArtefactOperation(current, operation),
-    )
+    setArtefactOperations((current) => recordArtefactOperation(current, operation))
   }
 
   const moveSelectedArtefact = (point: Point) => {
     if (!selectedArtefactDetails?.capabilities.move) return
     const target = selectedArtefactDetails.movementTarget
     const details =
-      target.kind === selectedArtefactDetails.selection.kind &&
-      target.id === selectedArtefactDetails.selection.id
+      target.kind === selectedArtefactDetails.selection.kind && target.id === selectedArtefactDetails.selection.id
         ? selectedArtefactDetails
         : diagram.selectionFor(selectionKey(target))
     if (!details || !details.capabilities.move) return
@@ -758,7 +756,7 @@ export function useEditor(
         case 'box':
           return {
             dx: point.x - (geometry.box.x + geometry.box.width / 2),
-            dy: point.y - (geometry.box.y + geometry.box.height / 2),
+            dy: point.y - (geometry.box.y + geometry.box.height / 2)
           }
         case 'route':
           return undefined
@@ -771,11 +769,7 @@ export function useEditor(
 
   const resizeSelectedArtefact = (size: ResizeMinimum) => {
     if (!selectedArtefactDetails?.capabilities.resize) return
-    const operation = resizeArtefactOperation(
-      selectedArtefactDetails.selection,
-      selectedArtefactDetails.geometry,
-      size,
-    )
+    const operation = resizeArtefactOperation(selectedArtefactDetails.selection, selectedArtefactDetails.geometry, size)
     if (operation) recordOperation(operation, false)
   }
 
@@ -788,30 +782,18 @@ export function useEditor(
         (operation) =>
           operation.operation === 'reorder' &&
           operation.target.kind === target.kind &&
-          operation.target.id === target.id,
+          operation.target.id === target.id
       )
-    const from =
-      previous?.operation === 'reorder'
-        ? previous.to
-        : artefactIndex(config, target)
+    const from = previous?.operation === 'reorder' ? previous.to : artefactIndex(config, target)
     if (from === undefined) return
     const createdCount = artefactOperations.filter(
-      (operation) =>
-        operation.operation === 'create' &&
-        sameArtefactCollection(operation.target, target),
+      (operation) => operation.operation === 'create' && sameArtefactCollection(operation.target, target)
     ).length
     const removedCount = artefactOperations.filter(
-      (operation) =>
-        operation.operation === 'remove' &&
-        sameArtefactCollection(operation.target, target),
+      (operation) => operation.operation === 'remove' && sameArtefactCollection(operation.target, target)
     ).length
     const length = artefactCount(config, target) + createdCount - removedCount
-    const operation = reorderArtefactOperation(
-      target,
-      from,
-      from + direction,
-      length,
-    )
+    const operation = reorderArtefactOperation(target, from, from + direction, length)
     if (operation && operation.from !== operation.to) {
       recordOperation(operation, true)
     }
@@ -819,11 +801,7 @@ export function useEditor(
 
   const removeSelectedArtefact = (): string | undefined => {
     if (!selectedArtefactDetails?.capabilities.remove) return undefined
-    const plan = planArtefactRemoval(
-      config,
-      selectedArtefactDetails.selection,
-      artefactOperations,
-    )
+    const plan = planArtefactRemoval(config, selectedArtefactDetails.selection, artefactOperations)
     if (plan.blockedReason) {
       setArtefactIssue(plan.blockedReason)
       return plan.blockedReason
@@ -831,16 +809,12 @@ export function useEditor(
     if (plan.operations.length === 0) return undefined
     checkpoint()
     closeGesture()
-    setArtefactOperations((current) =>
-      recordArtefactOperations(current, plan.operations),
-    )
+    setArtefactOperations((current) => recordArtefactOperations(current, plan.operations))
     selectArtefact(null)
     return undefined
   }
 
-  const replaceSelectedArtefactProperties = (
-    patch: ArtefactPropertiesPatch,
-  ): string | undefined => {
+  const replaceSelectedArtefactProperties = (patch: ArtefactPropertiesPatch): string | undefined => {
     const target = selectedArtefactDetails?.selection ?? selectedArtefact
     if (!target || !selectedArtefactCapabilities?.['edit-properties']) {
       const reason = 'Selected artefact does not support property editing'
@@ -852,12 +826,7 @@ export function useEditor(
       setArtefactIssue(reason)
       return reason
     }
-    const operation = replaceArtefactPropertiesOperation(
-      config,
-      artefactOperations,
-      target,
-      patch,
-    )
+    const operation = replaceArtefactPropertiesOperation(config, artefactOperations, target, patch)
     if (!operation) {
       const reason = `Could not replace properties for ${target.kind} ${target.id}`
       setArtefactIssue(reason)
@@ -868,18 +837,12 @@ export function useEditor(
     return undefined
   }
 
-  const createTypedArtefact = <K extends ArtefactKind>(
-    kind: K,
-    value: ArtefactValueByKind[K],
-    index: number,
-  ) => {
+  const createTypedArtefact = <K extends ArtefactKind>(kind: K, value: ArtefactValueByKind[K], index: number) => {
     const target = selectionForCreation(kind, value)
     if (!target) return undefined
-    const operation = createArtefactOperation(
-      target as never,
-      value as never,
-      index,
-    ) as ArtefactDraftOperation | undefined
+    const operation = createArtefactOperation(target as never, value as never, index) as
+      | ArtefactDraftOperation
+      | undefined
     if (!operation) return undefined
     recordOperation(operation, true)
     selectArtefact(target)
@@ -994,7 +957,7 @@ export function useEditor(
       closeGesture()
       setAttachments((current) => ({
         ...current,
-        [code]: { ...current[code], [end]: { component, port, from } },
+        [code]: { ...current[code], [end]: { component, port, from } }
       }))
     },
     /*
@@ -1056,7 +1019,7 @@ export function useEditor(
         const from = diagram.authored(key, 'card')
         return {
           ...current,
-          [key]: axis === 'x' ? { ...offset, dx: offset.dx + delta, from } : { ...offset, dy: offset.dy + delta, from },
+          [key]: axis === 'x' ? { ...offset, dx: offset.dx + delta, from } : { ...offset, dy: offset.dy + delta, from }
         }
       })
     },
@@ -1161,7 +1124,7 @@ export function useEditor(
           for (const { code: flow, component, end, port } of reseated) {
             updated[flow] = {
               ...updated[flow],
-              [end]: { component, port, from: diagram.authored(flow, end) },
+              [end]: { component, port, from: diagram.authored(flow, end) }
             }
           }
           return updated
@@ -1173,10 +1136,7 @@ export function useEditor(
       if (!next) return
       closeGesture()
       setFuture((current) => current.slice(0, -1))
-      setPast((current) => [
-        ...current,
-        draft,
-      ])
+      setPast((current) => [...current, draft])
       restore(next)
     },
     /*
@@ -1206,14 +1166,14 @@ export function useEditor(
           const nextCard = {
             ...cards[code],
             [property]: value,
-            ...(property === 'group' ? { scopes: [value] } : {}),
+            ...(property === 'group' ? { scopes: [value] } : {})
           }
           if (sameValue(cards[code], nextCard)) return
           checkpoint()
           closeGesture()
           setCards((current) => ({
             ...current,
-            [code]: nextCard,
+            [code]: nextCard
           }))
         }
         return
@@ -1265,7 +1225,7 @@ export function useEditor(
         if (meeting.some((line) => !unmade.has(line))) {
           setRemovals((current) => ({
             ...current,
-            ...Object.fromEntries(meeting.filter((line) => !unmade.has(line)).map((line) => [line, { because: code }])),
+            ...Object.fromEntries(meeting.filter((line) => !unmade.has(line)).map((line) => [line, { because: code }]))
           }))
         }
         return
@@ -1274,11 +1234,11 @@ export function useEditor(
       setRemovals((current) => {
         if (current[code]) {
           return Object.fromEntries(
-            Object.entries(current).filter(([key, entry]) => key !== code && entry.because !== code),
+            Object.entries(current).filter(([key, entry]) => key !== code && entry.because !== code)
           )
         }
         const taken = Object.fromEntries(
-          meeting.filter((line) => !unmade.has(line)).map((line) => [line, { because: code }]),
+          meeting.filter((line) => !unmade.has(line)).map((line) => [line, { because: code }])
         )
         return { ...current, ...taken, [code]: {} }
       })
@@ -1293,10 +1253,7 @@ export function useEditor(
       if (!previous) return
       closeGesture()
       setPast((current) => current.slice(0, -1))
-      setFuture((current) => [
-        ...current,
-        draft,
-      ])
+      setFuture((current) => [...current, draft])
       restore(previous)
     },
     pending,
@@ -1306,11 +1263,10 @@ export function useEditor(
     discardOne: (origin: PendingOrigin) => {
       const exists = (() => {
         if (origin.map === 'artefactOperations') {
-          return artefactOperations.some(
-            (operation) => artefactOperationKey(operation) === origin.key,
-          )
+          return artefactOperations.some((operation) => artefactOperationKey(operation) === origin.key)
         }
-        if (origin.map === 'attachments') return origin.end ? attachments[origin.key]?.[origin.end] !== undefined : false
+        if (origin.map === 'attachments')
+          return origin.end ? attachments[origin.key]?.[origin.end] !== undefined : false
         if (origin.map === 'cards') return cards[origin.key] !== undefined
         if (origin.map === 'components') return drafts[origin.key] !== undefined
         if (origin.map === 'creations') return creations[origin.key] !== undefined
@@ -1328,9 +1284,7 @@ export function useEditor(
         return rest
       }
       if (origin.map === 'artefactOperations') {
-        setArtefactOperations((current) =>
-          discardArtefactOperation(current, origin.key),
-        )
+        setArtefactOperations((current) => discardArtefactOperation(current, origin.key))
       }
       if (origin.map === 'components') setDrafts(without)
       if (origin.map === 'cards') setCards(without)
@@ -1342,8 +1296,8 @@ export function useEditor(
       if (origin.map === 'removals') {
         setRemovals((current) =>
           Object.fromEntries(
-            Object.entries(current).filter(([key, entry]) => key !== origin.key && entry.because !== origin.key),
-          ),
+            Object.entries(current).filter(([key, entry]) => key !== origin.key && entry.because !== origin.key)
+          )
         )
       }
       if (origin.map === 'text') {
@@ -1391,6 +1345,6 @@ export function useEditor(
     },
     mode,
     toggleView: (key: keyof EditorView) => setView((current) => ({ ...current, [key]: !current[key] })),
-    view,
+    view
   }
 }

@@ -18,7 +18,7 @@ const uniqueIdentifier = (wanted: string, used: ReadonlySet<string>, fallback: s
 
 export const nextThemeSceneCode = (themes: ThemeCollection): string => {
   const serials = themes.flatMap((theme) =>
-    theme.scenes.flatMap((scene) => /^THM-(\d+)$/.exec(scene.code)?.slice(1) ?? []),
+    theme.scenes.flatMap((scene) => /^THM-(\d+)$/.exec(scene.code)?.slice(1) ?? [])
   )
   const highest = serials.reduce((best, serial) => Math.max(best, Number(serial)), 0)
   const width = serials.reduce((widest, serial) => Math.max(widest, serial.length), 2)
@@ -49,10 +49,10 @@ export const addThemeScene = (themes: ThemeCollection, themeId: string, label: s
     description: '',
     focus: {},
     id: uniqueIdentifier(named, used, 'theme-scene'),
-    label: named,
+    label: named
   }
   return themes.map((candidate) =>
-    candidate.id === themeId ? { ...candidate, scenes: [...candidate.scenes, scene] } : candidate,
+    candidate.id === themeId ? { ...candidate, scenes: [...candidate.scenes, scene] } : candidate
   )
 }
 
@@ -60,20 +60,25 @@ export const editThemeScene = (
   themes: ThemeCollection,
   themeId: string,
   sceneId: string,
-  change: Partial<ThematicSceneConfig>,
+  change: Partial<ThematicSceneConfig>
 ): ThemeCollection =>
   themes.map((theme) =>
     theme.id === themeId
       ? {
           ...theme,
           scenes: theme.scenes.map((scene) =>
-            scene.id === sceneId ? { ...scene, ...change, code: scene.code, id: scene.id } : scene,
-          ),
+            scene.id === sceneId ? { ...scene, ...change, code: scene.code, id: scene.id } : scene
+          )
         }
-      : theme,
+      : theme
   )
 
-export const moveThemeScene = (themes: ThemeCollection, themeId: string, at: number, delta: number): ThemeCollection => {
+export const moveThemeScene = (
+  themes: ThemeCollection,
+  themeId: string,
+  at: number,
+  delta: number
+): ThemeCollection => {
   const theme = themes.find((candidate) => candidate.id === themeId)
   const to = at + delta
   if (!theme || at < 0 || at >= theme.scenes.length || to < 0 || to >= theme.scenes.length) return themes
@@ -88,9 +93,7 @@ export const removeThemeScene = (themes: ThemeCollection, themeId: string, at: n
   const theme = themes.find((candidate) => candidate.id === themeId)
   if (!theme || at < 0 || at >= theme.scenes.length) return themes
   return themes.map((candidate) =>
-    candidate.id === themeId
-      ? { ...candidate, scenes: candidate.scenes.filter((_, index) => index !== at) }
-      : candidate,
+    candidate.id === themeId ? { ...candidate, scenes: candidate.scenes.filter((_, index) => index !== at) } : candidate
   )
 }
 
@@ -105,7 +108,7 @@ export const toggleThemeLit = (
   themeId: string,
   sceneId: string,
   id: string,
-  isFlow: boolean,
+  isFlow: boolean
 ): ThemeCollection => {
   const theme = themes.find((candidate) => candidate.id === themeId)
   const scene = theme?.scenes.find((candidate) => candidate.id === sceneId)
@@ -121,7 +124,7 @@ export const toggleThemeLit = (
 export const themeCanActivate = (
   theme: ThemeConfig,
   validArtefactIds?: ReadonlySet<string>,
-  validFlowIds?: ReadonlySet<string>,
+  validFlowIds?: ReadonlySet<string>
 ): boolean =>
   theme.scenes.some(
     (scene) =>
@@ -129,7 +132,7 @@ export const themeCanActivate = (
       scene.code.trim() !== '' &&
       scene.label.trim() !== '' &&
       (!validArtefactIds || (scene.focus.artefacts ?? []).every((id) => validArtefactIds.has(id))) &&
-      (!validFlowIds || (scene.focus.flows ?? []).every((id) => validFlowIds.has(id))),
+      (!validFlowIds || (scene.focus.flows ?? []).every((id) => validFlowIds.has(id)))
   )
 
 /** The complete authored collection, so fields not exposed by the panel survive. */

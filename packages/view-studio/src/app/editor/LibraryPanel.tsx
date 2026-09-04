@@ -1,10 +1,10 @@
 import {
   instantiateLibraryTemplate,
   isValidLibraryFlowContext,
-  libraryTemplates,
   type LibraryContext,
   type LibraryCreateOperation,
   type LibraryTemplate,
+  libraryTemplates
 } from './library.ts'
 
 export type LibraryPanelProps = Readonly<{
@@ -16,7 +16,7 @@ export type LibraryPanelProps = Readonly<{
 /** A narrow picker: placement and persistence remain responsibilities of its caller. */
 export function LibraryPanel({ context, onInstantiate, templates = libraryTemplates }: LibraryPanelProps) {
   const available = templates.filter(
-    (template) => template.seed.kind !== 'flow' || isValidLibraryFlowContext(context.flow),
+    (template) => template.seed.kind !== 'flow' || isValidLibraryFlowContext(context.flow)
   )
 
   return (

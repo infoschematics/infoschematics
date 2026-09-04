@@ -51,9 +51,7 @@ describe('InfoschematicDiagram interaction styles', () => {
         failures.push(`${className} carries a pointer handler and has no rule at all`)
         continue
       }
-      const asksForPointerEvents = rules.some(([, body]) =>
-        /pointer-events:\s*(auto|stroke|all|visible)/.test(body),
-      )
+      const asksForPointerEvents = rules.some(([, body]) => /pointer-events:\s*(auto|stroke|all|visible)/.test(body))
       if (!asksForPointerEvents && !inertClasses.has(className)) {
         failures.push(`${className} carries a pointer handler but never asks for pointer-events`)
       }

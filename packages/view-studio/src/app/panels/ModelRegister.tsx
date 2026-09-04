@@ -1,6 +1,6 @@
+import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useEffect, useRef } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
-import { useInfoschematic } from '@infoschematics/view-canvas'
 import { Part } from './Part.tsx'
 
 /*
@@ -35,7 +35,7 @@ function Row({
   detail,
   name,
   onPoint,
-  pointed,
+  pointed
 }: {
   code: string
   detail: string
@@ -75,7 +75,7 @@ function Row({
 
 export function ModelRegister({
   hovered,
-  onPoint,
+  onPoint
 }: {
   /** What the Infoschematic is pointing at, so the row for it lights with it. */
   hovered: string | null
@@ -89,7 +89,7 @@ export function ModelRegister({
     infoschematicFlows,
     infoschematicInterfaceById,
     infoschematicRegister,
-    infoschematicScopes,
+    infoschematicScopes
   } = runtime
   const cards = infoschematicRegister.all.filter((entry) => entry.kind === 'card')
   const fabrics = infoschematicRegister.all.filter((entry) => entry.kind === 'fabric')
@@ -181,9 +181,7 @@ export function ModelRegister({
                   return row(
                     flow.code,
                     `${endpointName(flow.source)} → ${endpointName(flow.target)}`,
-                    [conforms || 'Carriage, to no specification of its own', flow.operation]
-                      .filter(Boolean)
-                      .join(' · '),
+                    [conforms || 'Carriage, to no specification of its own', flow.operation].filter(Boolean).join(' · ')
                   )
                 })}
               </dl>

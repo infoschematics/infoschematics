@@ -1,17 +1,15 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   defineInfoschematicRenderers,
   InfoschematicContext,
   InfoschematicDiagram,
   InfoschematicRenderersContext,
-  useInfoschematic,
+  useInfoschematic
 } from '@infoschematics/view-canvas'
-import type { PresentProps } from '@infoschematics/view-present'
 import type {
   ArtefactGeometry,
   ArtefactSelection,
   CreatedComponent,
-  CreatedFlow,
+  CreatedFlow
 } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { portsForBox } from '@infoschematics/view-model/ports'
@@ -19,10 +17,12 @@ import { routeBetweenPorts } from '@infoschematics/view-model/routing'
 import {
   createInfoschematicRuntime,
   type InfoschematicRuntime,
-  type RuntimeStory,
+  type RuntimeStory
 } from '@infoschematics/view-model/runtime'
-import { infoschematicEditable } from './editor/infoschematic-editable.ts'
+import type { PresentProps } from '@infoschematics/view-present'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
+import { infoschematicEditable } from './editor/infoschematic-editable.ts'
 import { type Attachment, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
@@ -30,9 +30,9 @@ import { useThemeComposition } from './editor/use-theme-composition.ts'
 import { usePersistentState } from './hooks/use-persistent-state.ts'
 import { usePresentation } from './hooks/use-presentation.ts'
 import { DetailsPanel } from './panels/DetailsPanel.tsx'
-import { SceneCallout } from './panels/SceneCallout.tsx'
-import { ProducerControls } from './panels/ProducerControls.tsx'
 import { PanelRail } from './panels/PanelRail.tsx'
+import { ProducerControls } from './panels/ProducerControls.tsx'
+import { SceneCallout } from './panels/SceneCallout.tsx'
 import { ShortcutOverlay } from './panels/ShortcutOverlay.tsx'
 import { TitleBar } from './panels/TitleBar.tsx'
 
@@ -44,7 +44,7 @@ export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: 
   if (!arrow || geometry.role === 'route') return undefined
   return {
     x: geometry.box.x + geometry.box.width / 2 + arrow[0] * step,
-    y: geometry.box.y + geometry.box.height / 2 + arrow[1] * step,
+    y: geometry.box.y + geometry.box.height / 2 + arrow[1] * step
   }
 }
 
@@ -64,7 +64,7 @@ const sameArtefact = (left: ArtefactSelection | null, right: ArtefactSelection) 
 function linesMeeting(
   code: string,
   flows: readonly { code: string; source: string; target: string }[],
-  runtime: InfoschematicRuntime,
+  runtime: InfoschematicRuntime
 ) {
   const card = runtime.infoschematicRegister.cardAt(code)
   if (!card) return []
@@ -83,7 +83,7 @@ const authoredPortAt =
   (
     runtime: InfoschematicRuntime,
     visibleScopes: ReadonlySet<InfoschematicScopeId>,
-    created: readonly CreatedComponent[] = [],
+    created: readonly CreatedComponent[] = []
   ) =>
   (endpoint: string, port: string) => {
     // Created cards are included but their offsets are not, which is the same
@@ -132,7 +132,7 @@ const roomForCard = (viewBox: Box, made: number): Box => ({
   height: 80,
   width: 160,
   x: viewBox.x + viewBox.width / 2 - 80 + made * 20,
-  y: viewBox.y + viewBox.height / 2 - 40 + made * 20,
+  y: viewBox.y + viewBox.height / 2 - 40 + made * 20
 })
 
 export function Studio({ config, renderers }: PresentProps) {
@@ -162,7 +162,7 @@ function AppContent() {
     infoschematicRegisterWith,
     infoschematicScopes,
     thematicScenes,
-    themeLogos,
+    themeLogos
   } = runtime
   const storage = runtime.config.id
   const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
@@ -184,14 +184,14 @@ function AppContent() {
       labels: ReadonlyMap<string, number>,
       attached: ReadonlyMap<string, Attachment>,
       created: readonly CreatedFlow[],
-      createdCards: readonly CreatedComponent[],
+      createdCards: readonly CreatedComponent[]
     ) =>
       infoschematicEditable(
         runtime.editableModel,
         flowsAfterCreations(
           presentation.visibleFlows,
           created,
-          authoredPortAt(runtime, presentation.visibleScopes, createdCards),
+          authoredPortAt(runtime, presentation.visibleScopes, createdCards)
         ),
         presentation.visibleScopes,
         drafts,
@@ -200,10 +200,10 @@ function AppContent() {
         createdCards,
         {
           fabrics: runtime.config.infoschematic.fabrics,
-          graphics: runtime.config.infoschematic.graphics,
-        },
+          graphics: runtime.config.infoschematic.graphics
+        }
       ),
-    [flowsAfterCreations, presentation.visibleFlows, presentation.visibleScopes, runtime],
+    [flowsAfterCreations, presentation.visibleFlows, presentation.visibleScopes, runtime]
   )
   const editor = useEditor(buildEditable)
   const editorRef = useRef(editor)
@@ -252,6 +252,7 @@ function AppContent() {
    * producer's cursor through another draft.
    */
   const directTargetKey = JSON.stringify(directTarget)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Direct target identity owns this synchronisation; editor callbacks are stable facades intentionally left out.
   useEffect(() => {
     if (presentation.mode !== 'direct' || !directTarget) return
 
@@ -280,12 +281,11 @@ function AppContent() {
     const at =
       story?.steps.findIndex(
         (entry, index) =>
-          (entry.authored.id ?? entry.scene ?? `${story.id}-scene-${index + 1}`) === directTarget.sceneId,
+          (entry.authored.id ?? entry.scene ?? `${story.id}-scene-${index + 1}`) === directTarget.sceneId
       ) ?? -1
     if (at >= 0) sceneList.select(at)
     // The target is the dependency: editor callbacks are intentionally
     // transient facades over stable React setters.
-    // biome-ignore lint/correctness/useExhaustiveDependencies: Direct target identity owns this synchronisation
   }, [directTargetKey, presentation.mode])
   const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
   const storyCallout = playing
@@ -326,7 +326,7 @@ function AppContent() {
       if (!placeable) return undefined
       return portsForBox(placeable.box, placeable.ports).find((candidate) => candidate.id === port)?.at
     },
-    [editor.createdCards, editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes],
+    [editor.createdCards, editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes]
   )
 
   /*
@@ -344,7 +344,7 @@ function AppContent() {
   const proposeLine = useCallback(
     (ends: { source: string; sourcePort: string; target: string; targetPort: string }, at: { x: number; y: number }) =>
       setProposed({ at, ends }),
-    [],
+    []
   )
 
   /*
@@ -363,6 +363,7 @@ function AppContent() {
    * A new Card starts in the first configured Scope. An adapter inherits the
    * Scope of the Card it wraps because it has no independent ownership.
    */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const createCard = useCallback(
     (kind: 'adapter' | 'card') => {
       const held = kind === 'adapter' ? wrappable : undefined
@@ -383,17 +384,10 @@ function AppContent() {
         label,
         ports: held ? { east: 0, north: 0, south: 3, west: 0 } : { east: 3, north: 3, south: 3, west: 3 },
         scopes: [scope],
-        wraps: held?.id,
+        wraps: held?.id
       })
     },
-    [
-      editor.cards,
-      editor.createCard,
-      editor.createdCards.length,
-      infoschematicRegister,
-      infoschematicScopes,
-      wrappable,
-    ],
+    [editor.cards, editor.createCard, editor.createdCards.length, infoschematicRegister, infoschematicScopes, wrappable]
   )
 
   // Created lines join the authored ones before the edit drafts are folded in,
@@ -406,7 +400,7 @@ function AppContent() {
     movedComponents,
     editor.routes,
     editor.attachments instanceof Map ? editor.attachments : new Map(Object.entries(editor.attachments)),
-    portAt,
+    portAt
   )
 
   /*
@@ -433,7 +427,7 @@ function AppContent() {
     }
     editor.addWaypoint(selectedRoute.code, points, {
       x: (points[at].x + points[at - 1].x) / 2,
-      y: (points[at].y + points[at - 1].y) / 2,
+      y: (points[at].y + points[at - 1].y) / 2
     })
   }, [editor.addWaypoint, selectedRoute])
 
@@ -609,7 +603,7 @@ function AppContent() {
     presentation.stepThematicScene,
     presentation.thematicScene,
     drawnFlows,
-    runtime,
+    runtime
   ])
 
   useEffect(() => {
@@ -751,7 +745,9 @@ function AppContent() {
                 onHover={editor.hover}
                 hovered={editor.hovered}
                 onSelect={editor.select}
-                onArtefactMove={editor.editing ? (_selection, point) => editorRef.current.moveArtefact(point) : undefined}
+                onArtefactMove={
+                  editor.editing ? (_selection, point) => editorRef.current.moveArtefact(point) : undefined
+                }
                 onArtefactRelease={() => editorRef.current.releaseGuides()}
                 onArtefactRemove={
                   editor.editing
@@ -771,8 +767,12 @@ function AppContent() {
                       }
                     : undefined
                 }
-                onArtefactResize={editor.editing ? (_selection, size) => editorRef.current.resizeArtefact(size) : undefined}
-                onArtefactSelect={editor.editing ? (selection) => editorRef.current.selectArtefact(selection) : undefined}
+                onArtefactResize={
+                  editor.editing ? (_selection, size) => editorRef.current.resizeArtefact(size) : undefined
+                }
+                onArtefactSelect={
+                  editor.editing ? (selection) => editorRef.current.selectArtefact(selection) : undefined
+                }
                 portCounts={editor.portCounts}
                 flows={drawnFlows}
                 selected={editor.selected}
@@ -825,9 +825,7 @@ function AppContent() {
                   onExit={presentation.lightNothing}
                   onStep={presentation.stepThematicScene}
                   step={presentation.thematicScene}
-                  stepNumber={
-                    thematicScenes.findIndex((entry) => entry.id === presentation.thematicScene?.id) + 1
-                  }
+                  stepNumber={thematicScenes.findIndex((entry) => entry.id === presentation.thematicScene?.id) + 1}
                   stepTotal={thematicScenes.length}
                   takeaways={presentation.takeaways ? presentation.thematicScene.takeaways : undefined}
                   wide={presentation.thematicScene.cover}
@@ -865,7 +863,7 @@ function AppContent() {
               // descriptors keep flows apart from components because their id
               // types are two unions, and that typecheck is what stops a Story Scene
               // naming something that does not exist.
-              selectedIsFlow: Boolean(selectedRoute),
+              selectedIsFlow: Boolean(selectedRoute)
             }}
             onAddWaypoint={addWaypoint}
             onCreateCard={createCard}

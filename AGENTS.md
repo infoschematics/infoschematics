@@ -10,4 +10,4 @@ The public website is an outlet for this repository, not the owner of reusable p
 
 Canonical consumer documentation remains under `docs/`; Site renders selected Markdown rather than maintaining copies.
 
-Run `bun run check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.
+Run `bun run ki:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.

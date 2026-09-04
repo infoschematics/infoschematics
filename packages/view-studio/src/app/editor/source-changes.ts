@@ -1,9 +1,9 @@
 import {
-  orderArtefactOperations,
   type ArtefactOperation,
   type ArtefactSelection,
-  type ReorderArtefactOperation,
+  orderArtefactOperations,
   type RemoveArtefactOperation,
+  type ReorderArtefactOperation
 } from '@infoschematics/view-model/editable'
 
 export type SourceChangePhase = 'create' | 'update' | 'remove'
@@ -23,7 +23,7 @@ const operationFor = (change: SourceChangeOrder): ArtefactOperation =>
 
 const dependencyRanks = (
   changes: readonly SourceChangeOrder[],
-  phase: Extract<SourceChangePhase, 'create' | 'remove'>,
+  phase: Extract<SourceChangePhase, 'create' | 'remove'>
 ): ReadonlyMap<ArtefactSelection['kind'], number> => {
   const representative = new Map<ArtefactSelection['kind'], SourceChangeOrder>()
   for (const change of changes) {
@@ -37,12 +37,12 @@ const dependencyRanks = (
 
 const kindRanks = (changes: readonly SourceChangeOrder[]): ReadonlyMap<ArtefactSelection['kind'], number> => {
   const representative = new Map<ArtefactSelection['kind'], SourceChangeOrder>()
-  for (const change of changes) if (!representative.has(change.target.kind)) representative.set(change.target.kind, change)
+  for (const change of changes)
+    if (!representative.has(change.target.kind)) representative.set(change.target.kind, change)
   const ordered = orderArtefactOperations(
     [...representative.values()].map(
-      (change) =>
-        ({ from: 0, operation: 'reorder', target: change.target, to: 0 }) as ReorderArtefactOperation,
-    ),
+      (change) => ({ from: 0, operation: 'reorder', target: change.target, to: 0 }) as ReorderArtefactOperation
+    )
   )
   return new Map(ordered.map((operation, index) => [operation.target.kind, index]))
 }
@@ -50,7 +50,7 @@ const kindRanks = (changes: readonly SourceChangeOrder[]): ReadonlyMap<ArtefactS
 const phaseRank: Readonly<Record<SourceChangePhase, number>> = {
   create: 0,
   update: 1,
-  remove: 2,
+  remove: 2
 }
 
 const identityOf = (target: ArtefactSelection) => target.code ?? target.id
@@ -82,15 +82,17 @@ export const orderSourceChanges = <T extends SourceChangeOrder>(changes: readonl
         const byOwner = leftOwner.localeCompare(rightOwner)
         if (byOwner !== 0) return byOwner
 
-        const byIndex = (left.authoredIndex ?? Number.MAX_SAFE_INTEGER) -
-          (right.authoredIndex ?? Number.MAX_SAFE_INTEGER)
+        const byIndex =
+          (left.authoredIndex ?? Number.MAX_SAFE_INTEGER) - (right.authoredIndex ?? Number.MAX_SAFE_INTEGER)
         if (byIndex !== 0) return byIndex
 
         const byField = left.field.localeCompare(right.field)
         if (byField !== 0) return byField
       }
 
-      return identityOf(left.target).localeCompare(identityOf(right.target)) || left.target.id.localeCompare(right.target.id)
-    }),
+      return (
+        identityOf(left.target).localeCompare(identityOf(right.target)) || left.target.id.localeCompare(right.target.id)
+      )
+    })
   )
 }

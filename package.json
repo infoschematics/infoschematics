@@ -7,19 +7,22 @@
     "url": "https://github.com/infoschematics/infoschematics/issues"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.5.12",
     "@infoschematics/domain-core": "0.1.0",
-    "@infoschematics/domain-model": "0.1.0",
     "@infoschematics/render-svg": "0.1.0",
     "@infoschematics/view-canvas": "0.1.0",
-    "@infoschematics/view-model": "0.1.0",
-    "@infoschematics/view-present": "0.1.0",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.4",
     "dependency-cruiser": "^18.2.0",
+    "husky": "^9.1.7",
+    "knip": "^6.34.0",
+    "lint-staged": "^17.4.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "rumdl": "^0.2.64",
+    "syncpack": "^15.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
     "vitest": "^4.0.3"
@@ -39,30 +42,40 @@
     "visualization"
   ],
   "license": "MIT",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,jsonc}": [
+      "bunx @biomejs/biome check --write --no-errors-on-unmatched"
+    ],
+    "*.md": [
+      "bunx rumdl check --fix"
+    ]
+  },
   "packageManager": "bun@1.4.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/infoschematics/infoschematics.git"
   },
   "scripts": {
-    "build": "bun run packages:build && bun run --cwd apps/site build",
-    "check": "bun run packages:build && bun run ki:verify:visual-tokens && bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run --cwd apps/site build",
-    "clean": "bun run packages:clean && bun run --cwd apps/site clean",
-    "dev": "bun run packages:build && bun run --cwd apps/site dev",
-    "generate:visual-tokens": "bun scripts/generate-visual-tokens.ts",
+    "build": "bun run ki:packages:build && bun run --cwd apps/site build",
+    "clean": "rm -rf node_modules && bun run ki:packages:clean && bun run --cwd apps/site clean",
+    "ki:check": "bun run ki:packages:build && bun run ki:verify:visual-tokens && bun run test && bun run ki:verify:typecheck && bun run ki:verify:depcruise && bun run --cwd apps/site build",
+    "ki:deps:update": "bun update --latest",
+    "ki:dev": "bun run ki:packages:build && bun run --cwd apps/site dev",
+    "ki:packages:build": "bun run ki:packages:check-versions && bun run --cwd packages/domain-model build && bun run --cwd packages/domain-core build && bun run --cwd packages/view-model build && bun run --cwd packages/render-svg build && bun run --cwd packages/view-canvas build && bun run --cwd packages/view-present build && bun run --cwd packages/view-studio build",
+    "ki:packages:check-versions": "bun scripts/release/check-versions.ts",
+    "ki:packages:clean": "bun run --cwd packages/domain-model clean && bun run --cwd packages/domain-core clean && bun run --cwd packages/view-model clean && bun run --cwd packages/render-svg clean && bun run --cwd packages/view-canvas clean && bun run --cwd packages/view-present clean && bun run --cwd packages/view-studio clean",
+    "ki:packages:pack-smoke": "bun scripts/release/pack-smoke.ts",
+    "ki:release:verify": "bun run ki:packages:build && bun run ki:packages:pack-smoke",
     "ki:site:build": "bun run --cwd apps/site build",
     "ki:site:clean": "bun run --cwd apps/site clean",
     "ki:site:deploy": "bun run --cwd apps/site deploy",
     "ki:site:dev": "bun run --cwd apps/site dev",
     "ki:site:preview": "bun run --cwd apps/site preview",
+    "ki:tokens:generate": "bun scripts/generate-visual-tokens.ts",
     "ki:verify:depcruise": "depcruise packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-canvas/src packages/view-present/src packages/view-studio/src packages/render-svg/src examples/is-blank/src examples/is-infoschematics/src examples/is-system/src apps/site/src",
     "ki:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-canvas && tsc --noEmit -p packages/view-present && tsc --noEmit -p packages/view-studio && tsc --noEmit -p packages/render-svg && tsc --noEmit -p examples/is-blank && tsc --noEmit -p examples/is-infoschematics && tsc --noEmit -p examples/is-system && tsc --noEmit -p apps/site",
     "ki:verify:visual-tokens": "bun scripts/generate-visual-tokens.ts --check",
-    "packages:build": "bun run packages:check-versions && bun run --cwd packages/domain-model build && bun run --cwd packages/domain-core build && bun run --cwd packages/view-model build && bun run --cwd packages/render-svg build && bun run --cwd packages/view-canvas build && bun run --cwd packages/view-present build && bun run --cwd packages/view-studio build",
-    "packages:check-versions": "bun scripts/release/check-versions.ts",
-    "packages:clean": "bun run --cwd packages/domain-model clean && bun run --cwd packages/domain-core clean && bun run --cwd packages/view-model clean && bun run --cwd packages/render-svg clean && bun run --cwd packages/view-canvas clean && bun run --cwd packages/view-present clean && bun run --cwd packages/view-studio clean",
-    "packages:pack-smoke": "bun scripts/release/pack-smoke.ts",
-    "release:verify": "bun run packages:build && bun run packages:pack-smoke",
+    "prepare": "husky",
     "test": "vitest run --root ."
   },
   "type": "module",

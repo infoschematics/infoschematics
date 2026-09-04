@@ -1,9 +1,9 @@
 {
   "name": "@infoschematics/is-blank",
   "description": "A blank Infoschematic definition for examples and host integration checks.",
-	"version": "0.1.0",
-	"dependencies": {
-		"@infoschematics/domain-core": "0.1.0"
+  "version": "0.1.0",
+  "dependencies": {
+    "@infoschematics/domain-core": "0.1.0"
   },
   "exports": {
     ".": "./src/index.ts"

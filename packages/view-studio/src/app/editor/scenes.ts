@@ -48,10 +48,7 @@ export type Story = {
  * Project an authored Story into the fields the editor presents without
  * throwing away fields the editor does not yet expose.
  */
-export const storyForEditing = (
-  story: StoryConfig,
-  standaloneScenes: readonly StandaloneSceneConfig[],
-): Story => {
+export const storyForEditing = (story: StoryConfig, standaloneScenes: readonly StandaloneSceneConfig[]): Story => {
   const standaloneById = new Map(standaloneScenes.map((scene) => [scene.id, scene]))
   return {
     authored: story,
@@ -74,9 +71,9 @@ export const storyForEditing = (
         renderer: scene.callout?.renderer,
         scene: scene.sourceScene,
         takeaways: scene.callout?.takeaways,
-        title: scene.title,
+        title: scene.title
       }
-    }),
+    })
   }
 }
 
@@ -101,13 +98,10 @@ export const moveScene = (story: Story, at: number, delta: number): Story => {
 }
 
 export const removeScene = (story: Story, at: number): Story =>
-  at < 0 || at >= story.steps.length
-    ? story
-    : { ...story, steps: story.steps.filter((_, index) => index !== at) }
+  at < 0 || at >= story.steps.length ? story : { ...story, steps: story.steps.filter((_, index) => index !== at) }
 
 /** Empty is a valid Direct draft, even though it cannot be activated in Present. */
-export const clearScenes = (story: Story): Story =>
-  story.steps.length === 0 ? story : { ...story, steps: [] }
+export const clearScenes = (story: Story): Story => (story.steps.length === 0 ? story : { ...story, steps: [] })
 
 /**
  * A new scene, after the one given.
@@ -120,7 +114,7 @@ export const insertScene = (story: Story, after: number): Story => {
   const authored: StorySceneConfig = {
     callout: { body: '' },
     duration: holdFor(''),
-    title: 'New scene',
+    title: 'New scene'
   }
   const blank: Scene = {
     authored,
@@ -128,7 +122,7 @@ export const insertScene = (story: Story, after: number): Story => {
     components: [],
     flows: [],
     hold: authored.duration ?? 0,
-    title: authored.title,
+    title: authored.title
   }
   const steps = [...story.steps]
   steps.splice(Math.min(Math.max(after + 1, 0), steps.length), 0, blank)
@@ -150,12 +144,12 @@ export const editScene = (story: Story, at: number, change: Partial<Scene>): Sto
         body: change.caption ?? step.caption,
         renderer: 'renderer' in change ? change.renderer : step.renderer,
         takeaways: change.takeaways ?? step.takeaways,
-        title: 'calloutTitle' in change ? change.calloutTitle : step.calloutTitle,
+        title: 'calloutTitle' in change ? change.calloutTitle : step.calloutTitle
       }
     }
 
     return { ...step, ...change, authored }
-  }),
+  })
 })
 
 /**
@@ -187,12 +181,12 @@ export const toggleLit = (story: Story, at: number, id: string, isFlow: boolean)
               focus: {
                 ...candidate.authored.focus,
                 artefacts: isFlow ? candidate.components : next,
-                flows: isFlow ? next : candidate.flows,
-              },
-            },
+                flows: isFlow ? next : candidate.flows
+              }
+            }
           }
-        : candidate,
-    ),
+        : candidate
+    )
   }
 }
 
@@ -226,7 +220,7 @@ export const scenesAsSource = (story: Story): string => {
     question: story.authored.question,
     scenes: story.steps.map((step) => step.authored),
     short: story.short,
-    title: story.label,
+    title: story.label
   }
   return `${story.code}  ->  ${JSON.stringify(authored, null, 2)}`
 }

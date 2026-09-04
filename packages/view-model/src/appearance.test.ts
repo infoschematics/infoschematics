@@ -1,18 +1,13 @@
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import { describe, expect, it } from 'vitest'
-import {
-  resolveCardDomain,
-  resolveReadableInk,
-  resolveRegionTreatment,
-  resolveVisualTreatment,
-} from './appearance.ts'
+import { resolveCardDomain, resolveReadableInk, resolveRegionTreatment, resolveVisualTreatment } from './appearance.ts'
 
 describe('visual treatment resolution', () => {
   it('preserves the label-only legacy treatment when appearance is absent', () => {
     expect(resolveVisualTreatment()).toEqual({
       card: { compact: false, description: false, identity: false, stereotype: false },
       grid: 'none',
-      surface: 'neutral',
+      surface: 'neutral'
     })
   })
 
@@ -22,14 +17,14 @@ describe('visual treatment resolution', () => {
         {
           card: { compact: true, description: true, identity: true, stereotype: false },
           grid: 'major-plus-minor',
-          surface: 'blueprint',
+          surface: 'blueprint'
         },
-        { description: false, identity: false, stereotype: true },
-      ),
+        { description: false, identity: false, stereotype: true }
+      )
     ).toEqual({
       card: { compact: true, description: false, identity: false, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint',
+      surface: 'blueprint'
     })
   })
 })
@@ -41,7 +36,7 @@ describe('region treatment resolution', () => {
       frameOpacity: 1,
       label: 'north-west',
       labelOffset: null,
-      labelTreatment: 'plain',
+      labelTreatment: 'plain'
     })
   })
 
@@ -51,16 +46,16 @@ describe('region treatment resolution', () => {
         frame: { style: 'dashed' },
         label: 'Region',
         labelMount: 'boundary',
-        labelPlacement: 'none',
-      }),
+        labelPlacement: 'none'
+      })
     ).toEqual({ frame: 'dashed', frameOpacity: 1, label: null, labelOffset: null, labelTreatment: 'plain' })
     expect(
       resolveRegionTreatment({
         frame: { style: 'dotted' },
         label: '',
         labelMount: 'boundary',
-        labelPlacement: 'north',
-      }),
+        labelPlacement: 'north'
+      })
     ).toEqual({ frame: 'dotted', frameOpacity: 1, label: null, labelOffset: null, labelTreatment: 'plain' })
   })
 
@@ -71,15 +66,23 @@ describe('region treatment resolution', () => {
         label: 'Region',
         labelMount: 'boundary',
         labelOffset: 32,
-        labelPlacement: 'south',
-      }),
+        labelPlacement: 'south'
+      })
     ).toEqual({ frame: 'dotted', frameOpacity: 0.4, label: 'south', labelOffset: 32, labelTreatment: 'notched' })
-    expect(
-      resolveRegionTreatment({ label: 'Region', labelMount: 'boundary', labelPlacement: 'east' }),
-    ).toEqual({ frame: 'none', frameOpacity: 1, label: 'east', labelOffset: null, labelTreatment: 'plain' })
-    expect(
-      resolveRegionTreatment({ frame: { style: 'solid' }, label: 'Region', labelPlacement: 'east' }),
-    ).toEqual({ frame: 'solid', frameOpacity: 1, label: 'east', labelOffset: null, labelTreatment: 'plain' })
+    expect(resolveRegionTreatment({ label: 'Region', labelMount: 'boundary', labelPlacement: 'east' })).toEqual({
+      frame: 'none',
+      frameOpacity: 1,
+      label: 'east',
+      labelOffset: null,
+      labelTreatment: 'plain'
+    })
+    expect(resolveRegionTreatment({ frame: { style: 'solid' }, label: 'Region', labelPlacement: 'east' })).toEqual({
+      frame: 'solid',
+      frameOpacity: 1,
+      label: 'east',
+      labelOffset: null,
+      labelTreatment: 'plain'
+    })
   })
 })
 
@@ -91,7 +94,7 @@ describe('readable ink resolution', () => {
     ['#e8f0ff', 'dark'],
     ['#f2f5f7', 'dark'],
     ['#ffffff', 'dark'],
-    ['#000000', 'light'],
+    ['#000000', 'light']
   ] as const)('resolves %s to %s ink by relative luminance', (fill, ink) => {
     expect(resolveReadableInk(fill)).toBe(ink)
   })
@@ -112,9 +115,7 @@ describe('readable ink resolution', () => {
 })
 
 describe('Domain resolution', () => {
-  const domains: readonly DomainConfig[] = [
-    { color: '#123456', fill: '#abcdef', id: 'platform', label: 'Platform' },
-  ]
+  const domains: readonly DomainConfig[] = [{ color: '#123456', fill: '#abcdef', id: 'platform', label: 'Platform' }]
 
   it('resolves Domain independently of Scope and tolerates an absent classification', () => {
     expect(resolveCardDomain({ domain: 'platform' }, domains)?.id).toBe('platform')

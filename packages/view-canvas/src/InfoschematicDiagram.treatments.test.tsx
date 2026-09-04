@@ -1,7 +1,7 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { GridTreatment } from '@infoschematics/domain-model/appearance'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
 
 const treatmentConfig = defineInfoschematic({
@@ -10,7 +10,7 @@ const treatmentConfig = defineInfoschematic({
     appearance: {
       surface: 'blueprint',
       grid: 'major-plus-minor',
-      card: { compact: true, description: true, identity: true, stereotype: true },
+      card: { compact: true, description: true, identity: true, stereotype: true }
     },
     scopes: [
       {
@@ -19,8 +19,8 @@ const treatmentConfig = defineInfoschematic({
         label: 'Delivery scope',
         description: 'Controls applicability',
         color: '#ff0055',
-        fill: '#330011',
-      },
+        fill: '#330011'
+      }
     ],
     domains: [
       {
@@ -28,8 +28,8 @@ const treatmentConfig = defineInfoschematic({
         label: 'Platform domain',
         description: 'Controls semantic treatment',
         color: '#00aa88',
-        fill: '#053c35',
-      },
+        fill: '#053c35'
+      }
     ],
     regions: [
       {
@@ -38,7 +38,7 @@ const treatmentConfig = defineInfoschematic({
         box: { x: 10, y: 20, width: 620, height: 240 },
         fill: '#071e2d',
         frame: { style: 'dotted' },
-        labelPlacement: 'center',
+        labelPlacement: 'center'
       },
       {
         id: 'lane',
@@ -46,8 +46,8 @@ const treatmentConfig = defineInfoschematic({
         box: { x: 10, y: 20, width: 620, height: 240, radius: 8 },
         frame: { style: 'dashed' },
         labelMount: 'boundary',
-        labelPlacement: 'south-east',
-      },
+        labelPlacement: 'south-east'
+      }
     ],
     cards: [
       {
@@ -59,10 +59,10 @@ const treatmentConfig = defineInfoschematic({
         scopes: ['delivery'],
         domain: 'platform',
         stereotype: 'service',
-        placement: { box: { x: 80, y: 100, width: 220, height: 90 }, ports: {} },
-      },
-    ],
-  },
+        placement: { box: { x: 80, y: 100, width: 220, height: 90 }, ports: {} }
+      }
+    ]
+  }
 })
 
 describe('Canvas visual treatments', () => {
@@ -92,25 +92,18 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('Accepts external requests')
     expect(markup).toContain('aria-label="DEL-001 · Gateway · service · Accepts external requests"')
     expect(markup).toContain('<title>DEL-001 · Gateway · service · Accepts external requests</title>')
-    expect(markup).toContain(
-      '<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>',
-    )
+    expect(markup).toContain('<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>')
   })
 
   it('keeps hidden Card metadata accessible when output detail overrides hide its visual rows', () => {
     const markup = renderToStaticMarkup(
-      <Canvas
-        cardDetails={{ description: false, identity: false, stereotype: false }}
-        config={treatmentConfig}
-      />,
+      <Canvas cardDetails={{ description: false, identity: false, stereotype: false }} config={treatmentConfig} />
     )
 
     expect(markup).not.toContain('data-card-detail=')
     expect(markup).toContain('<title>DEL-001 · Gateway · service · Accepts external requests</title>')
     expect(markup).toContain('aria-label="DEL-001 · Gateway · service · Accepts external requests"')
-    expect(markup).toContain(
-      '<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>',
-    )
+    expect(markup).toContain('<desc>Cards: DEL-001 · Gateway · service · Accepts external requests</desc>')
   })
 
   it('retains neutral, label-only backward defaults and Scope appearance without a Domain', () => {
@@ -124,8 +117,8 @@ describe('Canvas visual treatments', () => {
             label: 'Scope',
             description: 'Compatibility appearance',
             color: '#456789',
-            fill: '#123456',
-          },
+            fill: '#123456'
+          }
         ],
         regions: [
           {
@@ -133,15 +126,15 @@ describe('Canvas visual treatments', () => {
             label: 'Legacy zone',
             box: { x: 10, y: 20, width: 420, height: 180 },
             fill: '#081522',
-            labelPlacement: 'north-east',
+            labelPlacement: 'north-east'
           },
           {
             id: 'lane',
             label: 'Legacy lane',
             box: { x: 10, y: 20, width: 420, height: 180, radius: 8 },
             frame: { style: 'solid' },
-            labelMount: 'boundary',
-          },
+            labelMount: 'boundary'
+          }
         ],
         cards: [
           {
@@ -151,10 +144,10 @@ describe('Canvas visual treatments', () => {
             detail: 'Accessible only by default',
             scope: 'scope',
             scopes: ['scope'],
-            placement: { box: { x: 80, y: 80, width: 180, height: 80 }, ports: {} },
-          },
-        ],
-      },
+            placement: { box: { x: 80, y: 80, width: 180, height: 80 }, ports: {} }
+          }
+        ]
+      }
     })
     const markup = renderToStaticMarkup(<Canvas config={config} />)
 
@@ -183,7 +176,7 @@ describe('Canvas visual treatments', () => {
 
       expect(markup).toContain(`fill="url(#infoschematic-grid-${grid})"`)
       expect(markup).not.toContain('<g class="edit-grid">')
-    },
+    }
   )
 
   it('preserves the legacy boolean Design grid without changing authored treatment', () => {
@@ -205,10 +198,10 @@ describe('Canvas visual treatments', () => {
             box: { x: 10, y: 10, width: 300, height: 100, radius: 8 },
             frame: { style: 'dashed' },
             labelMount: 'boundary',
-            labelPlacement: 'none',
-          },
-        ],
-      },
+            labelPlacement: 'none'
+          }
+        ]
+      }
     })
     const markup = renderToStaticMarkup(<Canvas config={config} />)
 

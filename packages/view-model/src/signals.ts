@@ -17,34 +17,24 @@ export type SceneSignalSelection =
   | Readonly<{ kind: 'theme'; sceneId: string; themeId: string }>
   | Readonly<{ kind: 'story'; sceneIndex: number; storyId: string }>
 
-const focusedFlowIds = (
-  config: InfoschematicConfig,
-  selection: SceneSignalSelection,
-): readonly string[] => {
+const focusedFlowIds = (config: InfoschematicConfig, selection: SceneSignalSelection): readonly string[] => {
   if (selection.kind === 'standalone') {
-    return (
-      config.standaloneScenes.find(({ id }) => id === selection.sceneId)?.focus.flows ?? []
-    )
+    return config.standaloneScenes.find(({ id }) => id === selection.sceneId)?.focus.flows ?? []
   }
 
   if (selection.kind === 'theme') {
     return (
-      config.themes
-        .find(({ id }) => id === selection.themeId)
-        ?.scenes.find(({ id }) => id === selection.sceneId)?.focus.flows ?? []
+      config.themes.find(({ id }) => id === selection.themeId)?.scenes.find(({ id }) => id === selection.sceneId)?.focus
+        .flows ?? []
     )
   }
 
   if (!Number.isInteger(selection.sceneIndex) || selection.sceneIndex < 0) return []
-  const scene = config.stories.find(({ id }) => id === selection.storyId)?.scenes[
-    selection.sceneIndex
-  ]
+  const scene = config.stories.find(({ id }) => id === selection.storyId)?.scenes[selection.sceneIndex]
   if (!scene) return []
   if (scene.focus?.flows !== undefined) return scene.focus.flows
   if (!scene.sourceScene) return []
-  return (
-    config.standaloneScenes.find(({ id }) => id === scene.sourceScene)?.focus.flows ?? []
-  )
+  return config.standaloneScenes.find(({ id }) => id === scene.sourceScene)?.focus.flows ?? []
 }
 
 /**
@@ -57,7 +47,7 @@ const focusedFlowIds = (
 export const resolveSceneFlowSignals = (
   config: InfoschematicConfig,
   selection: SceneSignalSelection,
-  occurrenceKey: string,
+  occurrenceKey: string
 ): readonly FlowSignal[] => {
   const knownFlowIds = new Set(config.infoschematic.flows.map(({ id }) => id))
   const resolved = new Set<string>()

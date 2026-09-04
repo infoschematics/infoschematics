@@ -125,7 +125,7 @@ const config = {
   ],
   options: {
     doNotFollow: { path: 'node_modules' },
-    tsConfig: { fileName: 'tsconfig.base.json' },
+    tsConfig: { fileName: 'tsconfig.json' },
   },
 }
 

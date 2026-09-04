@@ -19,7 +19,7 @@ export function TextControls({
   draft,
   isFlow,
   onChange,
-  value,
+  value
 }: {
   code: string
   /** What has been typed but not yet applied, which is what the field shows. */

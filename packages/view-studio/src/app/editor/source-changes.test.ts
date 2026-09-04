@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { defineArtefactSelection } from '@infoschematics/view-model/editable'
+import { describe, expect, it } from 'vitest'
 import { orderSourceChanges } from './source-changes.ts'
 
 const region = defineArtefactSelection({ code: null, geometry: 'box', id: 'region', kind: 'region' })
@@ -14,7 +14,7 @@ describe('source change ordering', () => {
       { field: 'remove', phase: 'remove', source: 'card', target: card },
       { field: 'create', phase: 'create', source: 'card', target: card },
       { field: 'remove', phase: 'remove', source: 'flow', target: flow },
-      { field: 'create', phase: 'create', source: 'region', target: region },
+      { field: 'create', phase: 'create', source: 'region', target: region }
     ] as const
 
     expect(orderSourceChanges(changes).map((change) => change.source)).toEqual([
@@ -23,7 +23,7 @@ describe('source change ordering', () => {
       'flow',
       'flow',
       'card',
-      'region',
+      'region'
     ])
   })
 
@@ -33,7 +33,7 @@ describe('source change ordering', () => {
       { authoredIndex: 1, field: 'fill', phase: 'update', source: 'region fill', target: region },
       { authoredIndex: 1, field: 'label', phase: 'update', source: 'region label', target: region },
       { field: 'name', phase: 'update', source: 'card', target: card },
-      { field: 'points', phase: 'update', source: 'flow', target: flow },
+      { field: 'points', phase: 'update', source: 'flow', target: flow }
     ] as const
 
     expect(orderSourceChanges(changes).map((change) => change.source)).toEqual([
@@ -41,7 +41,7 @@ describe('source change ordering', () => {
       'region label',
       'late region',
       'card',
-      'flow',
+      'flow'
     ])
     expect(Object.isFrozen(orderSourceChanges(changes))).toBe(true)
   })

@@ -8,7 +8,7 @@ const context = (flow: LibraryContext['flow']): LibraryContext => ({
   at: 0,
   box: { x: 40, y: 60 },
   flow,
-  scope: 'inside',
+  scope: 'inside'
 })
 
 describe('LibraryPanel', () => {
@@ -27,10 +27,10 @@ describe('LibraryPanel', () => {
         context={context({
           family: 'request',
           source: { component: 'source', point: { x: 40, y: 80 }, port: 'E1' },
-          target: { component: 'target', point: { x: 280, y: 80 }, port: 'W1' },
+          target: { component: 'target', point: { x: 280, y: 80 }, port: 'W1' }
         })}
         onInstantiate={vi.fn()}
-      />,
+      />
     )
 
     expect(html).toContain('aria-label="Add Directed flow"')

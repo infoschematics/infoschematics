@@ -11,7 +11,7 @@ import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '@infos
 export function InterfaceLines({
   cards,
   flows,
-  interfaceEntry,
+  interfaceEntry
 }: {
   cards: readonly RuntimeIdentity[]
   flows: readonly RuntimeFlow[]

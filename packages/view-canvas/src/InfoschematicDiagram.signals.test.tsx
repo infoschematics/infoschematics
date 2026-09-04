@@ -1,13 +1,9 @@
 import { readFile } from 'node:fs/promises'
+import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { defineInfoschematic } from '@infoschematics/domain-core'
 import { Canvas } from './Canvas.tsx'
-import {
-  advanceFlowSignalAnnouncement,
-  flowSignalKey,
-  reconcileFlowSignals,
-} from './flow-signals.ts'
+import { advanceFlowSignalAnnouncement, flowSignalKey, reconcileFlowSignals } from './flow-signals.ts'
 
 const config = defineInfoschematic({
   title: 'Signal reference',
@@ -19,12 +15,10 @@ const config = defineInfoschematic({
         fill: '#dbeafe',
         id: 'system',
         label: 'System',
-        prefix: 'SYS',
-      },
+        prefix: 'SYS'
+      }
     ],
-    flowFamilies: [
-      { color: '#7c3aed', description: 'Requests', id: 'request', label: 'Request', prefix: 'REQ' },
-    ],
+    flowFamilies: [{ color: '#7c3aed', description: 'Requests', id: 'request', label: 'Request', prefix: 'REQ' }],
     cards: [
       {
         code: 'SYS-001',
@@ -33,7 +27,7 @@ const config = defineInfoschematic({
         label: 'Source',
         placement: { box: { height: 60, width: 120, x: 20, y: 40 }, ports: {} },
         scope: 'system',
-        scopes: ['system'],
+        scopes: ['system']
       },
       {
         code: 'SYS-002',
@@ -42,8 +36,8 @@ const config = defineInfoschematic({
         label: 'Target',
         placement: { box: { height: 60, width: 120, x: 260, y: 40 }, ports: {} },
         scope: 'system',
-        scopes: ['system'],
-      },
+        scopes: ['system']
+      }
     ],
     flows: [
       {
@@ -52,15 +46,15 @@ const config = defineInfoschematic({
         id: 'request-flow',
         points: [
           { x: 140, y: 70 },
-          { x: 260, y: 70 },
+          { x: 260, y: 70 }
         ],
         source: 'source',
         sourcePort: 'E1',
         target: 'target',
-        targetPort: 'W1',
-      },
-    ],
-  },
+        targetPort: 'W1'
+      }
+    ]
+  }
 })
 
 describe('Canvas Flow signals', () => {
@@ -83,7 +77,7 @@ describe('Canvas Flow signals', () => {
 
   it('ignores unknown Flow ids without changing the stable route', () => {
     const markup = renderToStaticMarkup(
-      <Canvas config={config} signals={[{ flowId: 'missing', occurrenceKey: 'external:1' }]} />,
+      <Canvas config={config} signals={[{ flowId: 'missing', occurrenceKey: 'external:1' }]} />
     )
 
     expect(markup).not.toContain('data-occurrence-key=')
@@ -107,12 +101,7 @@ describe('Canvas Flow signals', () => {
 
     const hidden = reconcileFlowSignals([first], [first], new Set(), seen)
     const restored = reconcileFlowSignals(hidden.activeSignals, [first], new Set(['request-flow']), seen)
-    const newOccurrence = reconcileFlowSignals(
-      restored.activeSignals,
-      [replay],
-      new Set(['request-flow']),
-      seen,
-    )
+    const newOccurrence = reconcileFlowSignals(restored.activeSignals, [replay], new Set(['request-flow']), seen)
 
     expect(hidden).toEqual({ acceptedSignals: [], activeSignals: [] })
     expect(restored).toEqual({ acceptedSignals: [], activeSignals: [] })
@@ -127,7 +116,7 @@ describe('Canvas Flow signals', () => {
       [],
       [left, left, right, right],
       new Set(['request-flow:scene', 'request-flow']),
-      seen,
+      seen
     )
 
     expect(flowSignalKey(left)).not.toBe(flowSignalKey(right))
@@ -150,7 +139,7 @@ describe('Canvas Flow signals', () => {
     expect(unchanged).toEqual({ acceptedSignals: [], activeSignals: [first] })
     expect(replayed).toEqual({
       acceptedSignals: [replay, simultaneous],
-      activeSignals: [replay, simultaneous],
+      activeSignals: [replay, simultaneous]
     })
     expect(cancelled).toEqual({ acceptedSignals: [], activeSignals: [] })
   })
@@ -182,7 +171,7 @@ describe('Canvas Flow signals', () => {
         hovered="REQ-001"
         selected="REQ-001"
         signals={[{ flowId: 'request-flow', occurrenceKey: 'scene:1' }]}
-      />,
+      />
     )
 
     expect(markup).toContain('class="flow-family-request highlighted selected pointed"')

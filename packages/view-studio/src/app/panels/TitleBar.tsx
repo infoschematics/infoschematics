@@ -1,17 +1,26 @@
-import { Clapperboard, List, Maximize2, Minimize2, PanelRightClose, PanelRightOpen, PenTool, Presentation as PresentIcon, Tags } from 'lucide-react'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ProductionMode } from '@infoschematics/view-present'
+import {
+  Clapperboard,
+  List,
+  Maximize2,
+  Minimize2,
+  PanelRightClose,
+  PanelRightOpen,
+  PenTool,
+  Presentation as PresentIcon,
+  Tags
+} from 'lucide-react'
 import type { Presentation } from '../hooks/use-presentation.ts'
 
 const modes: readonly ProductionMode[] = ['present', 'design', 'direct']
 
-const modeLabel = (mode: ProductionMode) =>
-  `${mode[0]?.toUpperCase()}${mode.slice(1)}`
+const modeLabel = (mode: ProductionMode) => `${mode[0]?.toUpperCase()}${mode.slice(1)}`
 
 const modeIcons: Record<ProductionMode, typeof PresentIcon> = {
   design: PenTool,
   direct: Clapperboard,
-  present: PresentIcon,
+  present: PresentIcon
 }
 
 /* Product identity and production mode remain stable across panel layouts. */
@@ -20,7 +29,7 @@ export function TitleBar({
   fullscreen,
   onToggleCollapsed,
   onToggleFullscreen,
-  presentation,
+  presentation
 }: {
   collapsed: boolean
   fullscreen: boolean
@@ -63,11 +72,8 @@ export function TitleBar({
           </>
         ) : null}
 
-        <div
-          aria-label="Production mode"
-          className="title-bar-actions"
-          role="group"
-        >
+        {/* biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form control group; fieldset default chrome does not fit. */}
+        <div aria-label="Production mode" className="title-bar-actions" role="group">
           {modes.map((mode) => {
             const label = modeLabel(mode)
             const Icon = modeIcons[mode]
@@ -94,11 +100,7 @@ export function TitleBar({
           title={fullscreen ? 'Exit full screen' : 'Full screen'}
           type="button"
         >
-          {fullscreen ? (
-            <Minimize2 aria-hidden="true" size={14} />
-          ) : (
-            <Maximize2 aria-hidden="true" size={14} />
-          )}
+          {fullscreen ? <Minimize2 aria-hidden="true" size={14} /> : <Maximize2 aria-hidden="true" size={14} />}
         </button>
 
         <button

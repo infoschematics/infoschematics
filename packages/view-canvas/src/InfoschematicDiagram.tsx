@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import {
@@ -6,12 +5,9 @@ import {
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
-  resolveVisualTreatment,
+  resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
-import {
-  applyArtefactOperations,
-  type ArtefactDraftOperation,
-} from '@infoschematics/view-model/artefact-draft'
+import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
@@ -21,18 +17,13 @@ import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
+import { useEffect, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
-import {
-  createInfoschematicRuntime,
-  type RuntimeFlow as InfoschematicFlow,
-} from '@infoschematics/view-model/runtime'
-import { useInfoschematic } from './runtime-context.tsx'
-import {
-  type FabricRendererProps,
-  resolveInfoschematicRenderer,
-  useInfoschematicRenderers,
-} from './renderers.tsx'
+
+import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
 import { flowSignalKey } from './flow-signals.ts'
+import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
+import { useInfoschematic } from './runtime-context.tsx'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -49,7 +40,7 @@ const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
     height,
     width,
     x: graphic.placement?.x ?? viewBox.x + (viewBox.width - width) / 2,
-    y: graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2,
+    y: graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2
   }
 }
 
@@ -113,15 +104,8 @@ function DefaultGraphic({ graphic, bounds }: { graphic: GraphicConfig; bounds: B
   )
 }
 
-const {
-  addReach,
-  attachmentReach,
-  cornerRadius,
-  dragThreshold,
-  gridMajorSize,
-  gridMinorStrokeWidth,
-  gridSize,
-} = visualTokens.canvas.geometry
+const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMajorSize, gridMinorStrokeWidth, gridSize } =
+  visualTokens.canvas.geometry
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
 
@@ -166,7 +150,7 @@ export function InfoschematicDiagram({
   cardDetails,
   grid,
   graphic,
-  visibleScopes,
+  visibleScopes
 }: {
   /** Authored Design operations previewed without changing the host configuration. */
   artefactOperations?: readonly ArtefactDraftOperation[]
@@ -244,11 +228,9 @@ export function InfoschematicDiagram({
   const runtime = useMemo(
     () =>
       previewing
-        ? createInfoschematicRuntime(
-            applyArtefactOperations(hostRuntime.config, artefactOperations).config,
-          )
+        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.config, artefactOperations).config)
         : hostRuntime,
-    [artefactOperations, hostRuntime, previewing],
+    [artefactOperations, hostRuntime, previewing]
   )
   const {
     adapterFloor,
@@ -266,20 +248,18 @@ export function InfoschematicDiagram({
     infoschematicInterfaceById,
     infoschematicLayout,
     infoschematicPlaceables,
-    infoschematicPortAudit,
     infoschematicRegions,
     infoschematicRegisterWith,
     infoschematicScopes,
-    infoschematicViewBox,
+    infoschematicViewBox
   } = runtime
+  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const flows = useMemo(() => {
     if (!previewing || mode !== 'design') return suppliedFlows
 
     const families = new Set(infoschematicFamilies.map((family) => family.id))
     const suppliedById = new Map(suppliedFlows.map((flow) => [flow.id, flow]))
-    const authoredById = new Map(
-      hostRuntime.infoschematicFlows.map((flow) => [flow.id, flow]),
-    )
+    const authoredById = new Map(hostRuntime.infoschematicFlows.map((flow) => [flow.id, flow]))
     const effective = infoschematicFlows
       .filter((flow) => infoschematicFlowIsVisible(flow, families, visibleScopes))
       .map((flow) => {
@@ -301,17 +281,13 @@ export function InfoschematicDiagram({
               source: draft.source,
               sourcePort: draft.sourcePort,
               target: draft.target,
-              targetPort: draft.targetPort,
+              targetPort: draft.targetPort
             }
           : flow
       })
     const effectiveIds = new Set(effective.map((flow) => flow.id))
-    const authoredIds = new Set(
-      hostRuntime.config.infoschematic.flows.map((flow) => flow.id),
-    )
-    const legacyDrafts = suppliedFlows.filter(
-      (flow) => !authoredIds.has(flow.id) && !effectiveIds.has(flow.id),
-    )
+    const authoredIds = new Set(hostRuntime.config.infoschematic.flows.map((flow) => flow.id))
+    const legacyDrafts = suppliedFlows.filter((flow) => !authoredIds.has(flow.id) && !effectiveIds.has(flow.id))
     return [...effective, ...legacyDrafts]
   }, [
     hostRuntime.config.infoschematic.flows,
@@ -321,7 +297,7 @@ export function InfoschematicDiagram({
     mode,
     previewing,
     suppliedFlows,
-    visibleScopes,
+    visibleScopes
   ])
   const renderers = useInfoschematicRenderers()
   const visualTreatment = resolveVisualTreatment(config.infoschematic.appearance, cardDetails)
@@ -334,28 +310,25 @@ export function InfoschematicDiagram({
   const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
   const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
   const scopeAppearance = Object.fromEntries(
-    infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }]),
+    infoschematicScopes.map((scope) => [scope.id, { fill: scope.fill, stroke: scope.color }])
   ) as Record<string, { fill: string; stroke: string }>
   const cardById = new Map(infoschematicCards.map((card) => [card.id, card]))
   const accessibleSummary = infoschematicCards
     .filter((card) => infoschematicCardIsVisible(card, visibleScopes))
     .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
     .join('; ')
-  const _audit = infoschematicPortAudit(flows)
   // Every port a card offers is shown; the ones a route already meets are drawn
   // solid and named, so a reader can see what is taken and what is free.
   // Green marks the ports the *selected* flow meets, not every port in
   // use anywhere: a Infoschematic full of green says nothing about what is selected,
   // and the two ends you can re-attach are the two worth pointing at.
   const selectedFlow = flows.find(
-    (flow) =>
-      flow.code === selected ||
-      (selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id),
+    (flow) => flow.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id)
   )
   const used = new Set(
     selectedFlow
       ? [`${selectedFlow.source}:${selectedFlow.sourcePort}`, `${selectedFlow.target}:${selectedFlow.targetPort}`]
-      : [],
+      : []
   )
   // Boxes and ports with the edits in hand already folded in, so the drop
   // target, the ports drawn, and the lookup that resolves a chosen port all
@@ -363,7 +336,7 @@ export function InfoschematicDiagram({
   const placeables = infoschematicPlaceables(visibleScopes, {
     created: createdCards,
     offsets: componentOffsets,
-    portCounts,
+    portCounts
   })
   // The register with the created cards folded in, so a card made a moment ago
   // answers what it is called and what scope it belongs to exactly as one that
@@ -392,9 +365,9 @@ export function InfoschematicDiagram({
       }
       return [
         ...(anchored(flow.source, flow.sourcePort) ? [`${flow.code}:start`] : []),
-        ...(anchored(flow.target, flow.targetPort) ? [`${flow.code}:end`] : []),
+        ...(anchored(flow.target, flow.targetPort) ? [`${flow.code}:end`] : [])
       ]
-    }),
+    })
   )
   const labelPositions = infoschematicAnnotationLabelPositions(flows, visibleScopes, labelAlong)
   /*
@@ -483,13 +456,14 @@ export function InfoschematicDiagram({
     return { x: mapped.x, y: mapped.y }
   }
 
-  const dragArtefact = (
-    selection: MovableArtefactSelection,
-    legacyKey: string,
-    origin: Point,
-    axes: Readonly<{ x: boolean; y: boolean }>,
-    selectionToSelect: ArtefactSelection = selection,
-  ) =>
+  const dragArtefact =
+    (
+      selection: MovableArtefactSelection,
+      legacyKey: string,
+      origin: Point,
+      axes: Readonly<{ x: boolean; y: boolean }>,
+      selectionToSelect: ArtefactSelection = selection
+    ) =>
     (event: React.PointerEvent<SVGElement>) => {
       selectArtefact(selectionToSelect, legacyKey)
       if (!onArtefactMove) return
@@ -507,7 +481,7 @@ export function InfoschematicDiagram({
         if (!point) return
         onArtefactMove(selection, {
           x: axes.x ? point.x : origin.x,
-          y: axes.y ? point.y : origin.y,
+          y: axes.y ? point.y : origin.y
         })
       }
       const stop = () => {
@@ -524,7 +498,7 @@ export function InfoschematicDiagram({
     bounds,
     label,
     renderOrigin,
-    selection,
+    selection
   }: {
     axes: ResizeAxes
     bounds: Box
@@ -536,7 +510,7 @@ export function InfoschematicDiagram({
     const resize = (point: Point) =>
       onArtefactResize(selection, {
         height: axes.height ? point.y - bounds.y : undefined,
-        width: axes.width ? point.x - bounds.x : undefined,
+        width: axes.width ? point.x - bounds.x : undefined
       })
     return (
       // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the labelled group is keyboard operable.
@@ -586,25 +560,15 @@ export function InfoschematicDiagram({
     )
   }
 
-  const ArtefactActions = ({
-    at,
-    label,
-    selection,
-  }: {
-    at: Point
-    label: string
-    selection: ArtefactSelection
-  }) => {
+  const ArtefactActions = ({ at, label, selection }: { at: Point; label: string; selection: ArtefactSelection }) => {
     const actions = [
       ...(onArtefactReorder
         ? [
             { action: () => onArtefactReorder(selection, -1), glyph: '↑', label: `Move ${label} earlier` },
-            { action: () => onArtefactReorder(selection, 1), glyph: '↓', label: `Move ${label} later` },
+            { action: () => onArtefactReorder(selection, 1), glyph: '↓', label: `Move ${label} later` }
           ]
         : []),
-      ...(onArtefactRemove
-        ? [{ action: () => onArtefactRemove(selection), glyph: '×', label: `Remove ${label}` }]
-        : []),
+      ...(onArtefactRemove ? [{ action: () => onArtefactRemove(selection), glyph: '×', label: `Remove ${label}` }] : [])
     ] as const
     if (actions.length === 0) return null
     return (
@@ -778,8 +742,8 @@ export function InfoschematicDiagram({
       portsForBox(placeable.box, placeable.ports).map((port) => ({
         at: port.at,
         endpoint: placeable.id,
-        id: port.id,
-      })),
+        id: port.id
+      }))
     )
 
   /**
@@ -800,7 +764,7 @@ export function InfoschematicDiagram({
         Math.hypot(port.at.x - dropped.x, port.at.y - dropped.y) <
         Math.hypot(best.at.x - dropped.x, best.at.y - dropped.y)
           ? port
-          : best,
+          : best
       )
       return Math.hypot(nearest.at.x - dropped.x, nearest.at.y - dropped.y) <= attachmentReach ? nearest : undefined
     }
@@ -840,7 +804,7 @@ export function InfoschematicDiagram({
   const dragUnanchoredEnd =
     (flow: InfoschematicFlow, end: 'end' | 'start') => (event: React.PointerEvent<SVGElement>) => {
       if (!onFreeEnd) return
-  const svg = event.currentTarget.ownerSVGElement
+      const svg = event.currentTarget.ownerSVGElement
       const matrix = svg?.getScreenCTM()
       if (!svg || !matrix) return
       event.preventDefault()
@@ -933,7 +897,7 @@ export function InfoschematicDiagram({
       if (over && !(over.endpoint === endpoint && over.id === port.id)) {
         onCreateLine(
           { source: endpoint, sourcePort: port.id, target: over.endpoint, targetPort: over.id },
-          { x: released.clientX, y: released.clientY },
+          { x: released.clientX, y: released.clientY }
         )
       }
       setDropPort(null)
@@ -954,13 +918,13 @@ export function InfoschematicDiagram({
     dragHandle(
       `${flow.code}:waypoint:${index}`,
       onMoveWaypoint && ((_key, point) => onMoveWaypoint(flow.code, flow.points, index, point)),
-      onRouteRelease,
+      onRouteRelease
     )
   const dragSegment = (flow: InfoschematicFlow, index: number) =>
     dragHandle(
       `${flow.code}:segment:${index}`,
       onMoveSegment && ((_key, point) => onMoveSegment(flow.code, flow.points, index, point)),
-      onRouteRelease,
+      onRouteRelease
     )
 
   // Selecting a Flow and adding a waypoint are separate actions. The dedicated
@@ -968,10 +932,7 @@ export function InfoschematicDiagram({
   const routeClicked = (flow: InfoschematicFlow) => (event: React.PointerEvent<SVGPathElement>) => {
     if (!editing) return
     event.stopPropagation()
-    selectArtefact(
-      { code: flow.code, geometry: 'route', id: flow.id, kind: 'flow' },
-      flow.code,
-    )
+    selectArtefact({ code: flow.code, geometry: 'route', id: flow.id, kind: 'flow' }, flow.code)
   }
 
   // Where the delete control sits: pushed away from whichever card's centre is
@@ -1001,7 +962,7 @@ export function InfoschematicDiagram({
       code: flow.code,
       geometry: 'route',
       id: flow.id,
-      kind: 'flow',
+      kind: 'flow'
     } as const satisfies ArtefactSelection
     const family = familyById.get(flow.family) ?? infoschematicFamilies[0]
     const sourceCode = infoschematicEndpointCodes.get(flow.source) ?? flow.source
@@ -1011,6 +972,7 @@ export function InfoschematicDiagram({
     const flowSelected = artefactSelected(selection, flow.code)
     return (
       // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the route is keyboard operable in Design.
+      // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
       <g
         aria-label={`Flow ${flow.code}`}
         data-artefact-id={selection.id}
@@ -1042,6 +1004,7 @@ export function InfoschematicDiagram({
         {signals
           .filter((signal) => signal.flowId === flow.id)
           .map((signal) => (
+            // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative signal graphic with no focusable descendants.
             <g
               aria-hidden="true"
               className="infoschematic-flow-signal"
@@ -1225,8 +1188,18 @@ export function InfoschematicDiagram({
         y={infoschematicViewBox.y}
       />
       <defs>
-        <pattern height={gridSize} id="infoschematic-grid-minor" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
-          <path className="infoschematic-grid-line minor" d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`} />
+        <pattern
+          height={gridSize}
+          id="infoschematic-grid-minor"
+          patternUnits="userSpaceOnUse"
+          width={gridSize}
+          x="0"
+          y="0"
+        >
+          <path
+            className="infoschematic-grid-line minor"
+            d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`}
+          />
         </pattern>
         <pattern
           height={gridMajorSize}
@@ -1255,7 +1228,14 @@ export function InfoschematicDiagram({
             d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
           />
         </pattern>
-        <pattern height={gridSize} id="infoschematic-grid-dots" patternUnits="userSpaceOnUse" width={gridSize} x="0" y="0">
+        <pattern
+          height={gridSize}
+          id="infoschematic-grid-dots"
+          patternUnits="userSpaceOnUse"
+          width={gridSize}
+          x="0"
+          y="0"
+        >
           <circle className="infoschematic-grid-dot" cx="0" cy="0" r={gridMinorStrokeWidth * 3} />
         </pattern>
         {Definitions ? <Definitions /> : null}
@@ -1299,7 +1279,7 @@ export function InfoschematicDiagram({
           code: null,
           geometry: 'box',
           id: region.id,
-          kind: 'region',
+          kind: 'region'
         } as const satisfies ArtefactSelection
         const legacyKey = `region:${region.id}`
         const treatment = resolveRegionTreatment(region)
@@ -1307,11 +1287,10 @@ export function InfoschematicDiagram({
         // A boundary-mounted label sits over the backdrop the notch exposes,
         // not the fill, so only a plain label takes its ink from the fill.
         const ink =
-          region.fill && geometry.label && treatment.labelTreatment === 'plain'
-            ? resolveReadableInk(region.fill)
-            : null
+          region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
         return (
           // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Region is keyboard operable in Design.
+          // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
           <g
             aria-label={`Region ${region.label}`}
             className={`infoschematic-region artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
@@ -1324,7 +1303,12 @@ export function InfoschematicDiagram({
             onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
             onPointerDown={
               editing
-                ? dragArtefact(selection, legacyKey, { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 }, { x: true, y: true })
+                ? dragArtefact(
+                    selection,
+                    legacyKey,
+                    { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 },
+                    { x: true, y: true }
+                  )
                 : undefined
             }
             role={editing ? 'button' : undefined}
@@ -1368,7 +1352,12 @@ export function InfoschematicDiagram({
             ) : null}
             {editing && artefactSelected(selection, legacyKey) ? (
               <>
-                <ResizeHandle axes={{ height: true, width: true }} bounds={region.box} label={region.label} selection={selection} />
+                <ResizeHandle
+                  axes={{ height: true, width: true }}
+                  bounds={region.box}
+                  label={region.label}
+                  selection={selection}
+                />
                 <ArtefactActions
                   at={{ x: region.box.x + region.box.width - 48, y: region.box.y + 12 }}
                   label={region.label}
@@ -1413,7 +1402,7 @@ export function InfoschematicDiagram({
             code: fabric.code,
             geometry: 'box',
             id: fabric.id,
-            kind: 'fabric',
+            kind: 'fabric'
           } as const satisfies ArtefactSelection
           const rendererKey = fabric.appearance?.renderer
           const renderer = resolveInfoschematicRenderer(
@@ -1421,10 +1410,11 @@ export function InfoschematicDiagram({
             'fabric',
             rendererKey,
             fabric.appearance?.properties,
-            fabric.id,
+            fabric.id
           )
           const Renderer = renderer?.Component
           return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={fabric.label}
               className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
@@ -1438,7 +1428,7 @@ export function InfoschematicDiagram({
                       selection,
                       fabric.code,
                       { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
-                      { x: true, y: true },
+                      { x: true, y: true }
                     )
                   : undefined
               }
@@ -1465,7 +1455,12 @@ export function InfoschematicDiagram({
               ) : null}
               {editing && artefactSelected(selection, fabric.code) ? (
                 <>
-                  <ResizeHandle axes={{ height: true, width: true }} bounds={bounds} label={fabric.label} selection={selection} />
+                  <ResizeHandle
+                    axes={{ height: true, width: true }}
+                    bounds={bounds}
+                    label={fabric.label}
+                    selection={selection}
+                  />
                   <ArtefactActions
                     at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
                     label={fabric.label}
@@ -1498,9 +1493,7 @@ export function InfoschematicDiagram({
             return (familyLayer.get(right.family) ?? 0) - (familyLayer.get(left.family) ?? 0)
           })
           .filter(
-            (flow) =>
-              flow.code !== selected &&
-              !(selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id),
+            (flow) => flow.code !== selected && !(selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id)
           )
           .map(renderFlow)}
       </g>
@@ -1527,13 +1520,13 @@ export function InfoschematicDiagram({
             code: adapter.code,
             geometry: 'box',
             id: adapter.id,
-            kind: 'card',
+            kind: 'card'
           } as const satisfies ArtefactSelection
           const heldSelection = {
             code: holds.code,
             geometry: 'box',
             id: holds.id,
-            kind: 'card',
+            kind: 'card'
           } as const satisfies ArtefactSelection
           // Traced as one outline so the clasp is a single shape: out along the
           // left arm, down into the notch the card sits in, up the right arm and
@@ -1548,12 +1541,13 @@ export function InfoschematicDiagram({
               { x: held.x + held.width, y: box.y },
               { x: box.x + box.width, y: box.y },
               { x: box.x + box.width, y: box.y + box.height },
-              { x: box.x, y: box.y + box.height },
+              { x: box.x, y: box.y + box.height }
             ],
-            cornerRadius,
+            cornerRadius
           )
 
           return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={`${adapter.label}, holding ${adapter.wraps}`}
               className={`infoschematic-adapter${editing ? ' selectable' : ''}${
@@ -1578,7 +1572,7 @@ export function InfoschematicDiagram({
                           adapter.code,
                           { x: held.x + held.width / 2, y: held.y + held.height / 2 },
                           { x: true, y: true },
-                          selection,
+                          selection
                         )(event)
                       } else {
                         selectArtefact(selection, adapter.code)
@@ -1619,14 +1613,16 @@ export function InfoschematicDiagram({
           const card = register.cardAt(placeable.code)
           const authored = cardById.get(placeable.id)
           return card && !card.wraps
-            ? [{
-                ...placeable,
-                domain: authored?.domain,
-                group: card.group,
-                label: card.label,
-                name: card.detail,
-                stereotype: authored?.stereotype,
-              }]
+            ? [
+                {
+                  ...placeable,
+                  domain: authored?.domain,
+                  group: card.group,
+                  label: card.label,
+                  name: card.detail,
+                  stereotype: authored?.stereotype
+                }
+              ]
             : []
         })
         // The selected card paints last so nothing overlaps what is being worked
@@ -1644,13 +1640,14 @@ export function InfoschematicDiagram({
             code: card.code,
             geometry: 'box',
             id: card.id,
-            kind: 'card',
+            kind: 'card'
           } as const satisfies ArtefactSelection
           const domain = resolveCardDomain(card, domains)
-          const appearance = domain ?? scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
-            color: 'currentColor',
-            fill: 'transparent',
-          }
+          const appearance = domain ??
+            scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
+              color: 'currentColor',
+              fill: 'transparent'
+            }
           const labelLines = visualTreatment.card.compact ? [card.label] : splitLabel(card.label)
           // The legacy treatment remains centred; compact Cards use a left-aligned
           // editorial stack with optional metadata around the authored label.
@@ -1666,6 +1663,7 @@ export function InfoschematicDiagram({
           const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
 
           return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={accessibleDetail}
               className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
@@ -1694,7 +1692,7 @@ export function InfoschematicDiagram({
                           selection,
                           card.code,
                           { x: layout.x + layout.width / 2, y: layout.y + layout.height / 2 },
-                          { x: true, y: true },
+                          { x: true, y: true }
                         )(event)
                       } else {
                         selectArtefact(selection, card.code)
@@ -1765,11 +1763,7 @@ export function InfoschematicDiagram({
                     renderOrigin={{ x: 0, y: 0 }}
                     selection={selection}
                   />
-                  <ArtefactActions
-                    at={{ x: layout.width - 48, y: 12 }}
-                    label={card.label}
-                    selection={selection}
-                  />
+                  <ArtefactActions at={{ x: layout.width - 48, y: 12 }} label={card.label} selection={selection} />
                 </>
               ) : null}
             </g>
@@ -1823,7 +1817,7 @@ export function InfoschematicDiagram({
                   </text>
                 </g>
               )
-            },
+            }
           )}
           {editing
             ? placeables.flatMap((placeable) =>
@@ -1863,7 +1857,7 @@ export function InfoschematicDiagram({
                       <text x={port.at.x + 8} y={port.at.y - 8}>{`${placeable.code}:${port.id}`}</text>
                     </g>
                   )
-                }),
+                })
               )
             : null}
           {/* The line a port-to-port drag is making, which has no entry to be
@@ -1884,7 +1878,7 @@ export function InfoschematicDiagram({
               code: flow.code,
               geometry: 'route',
               id: flow.id,
-              kind: 'flow',
+              kind: 'flow'
             } as const satisfies ArtefactSelection
             return (
               <g
@@ -1935,7 +1929,7 @@ export function InfoschematicDiagram({
           code: null,
           geometry: 'box',
           id: entry.id,
-          kind: 'graphic',
+          kind: 'graphic'
         } as const satisfies ArtefactSelection
         const legacyKey = `graphic:${entry.id}`
         const renderer =
@@ -1944,6 +1938,7 @@ export function InfoschematicDiagram({
             : resolveInfoschematicRenderer(renderers, 'graphic', entry.renderer, entry.properties, entry.id)
         const Renderer = renderer?.Component
         return (
+          // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
           <g
             aria-label={entry.label ?? entry.id}
             className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${
@@ -1959,7 +1954,7 @@ export function InfoschematicDiagram({
                     selection,
                     legacyKey,
                     { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
-                    { x: true, y: true },
+                    { x: true, y: true }
                   )
                 : undefined
             }
@@ -1978,17 +1973,16 @@ export function InfoschematicDiagram({
               <DefaultGraphic bounds={bounds} graphic={entry} />
             )}
             {editing ? (
-              <rect
-                className="graphic-frame"
-                height={bounds.height}
-                width={bounds.width}
-                x={bounds.x}
-                y={bounds.y}
-              />
+              <rect className="graphic-frame" height={bounds.height} width={bounds.width} x={bounds.x} y={bounds.y} />
             ) : null}
             {editing && artefactSelected(selection, legacyKey) ? (
               <>
-                <ResizeHandle axes={{ height: true, width: true }} bounds={bounds} label={entry.label ?? entry.id} selection={selection} />
+                <ResizeHandle
+                  axes={{ height: true, width: true }}
+                  bounds={bounds}
+                  label={entry.label ?? entry.id}
+                  selection={selection}
+                />
                 <ArtefactActions
                   at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
                   label={entry.label ?? entry.id}

@@ -1,76 +1,63 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import type { CalloutConfig } from "@infoschematics/domain-model/scene";
-import {
-  resolveInfoschematicRenderer,
-  useInfoschematicRenderers,
-} from "@infoschematics/view-canvas";
-import type { Box } from "@infoschematics/view-model/geometry";
-import {
-  chooseSpot,
-  type Obstacle,
-} from "@infoschematics/view-model/placement";
-import type { InfoschematicRuntime } from "@infoschematics/view-model/runtime";
+import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import { resolveInfoschematicRenderer, useInfoschematicRenderers } from '@infoschematics/view-canvas'
+import type { Box } from '@infoschematics/view-model/geometry'
+import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
+import type { InfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 export type LitScene = Readonly<{
-  callout?: Readonly<{ x: number; y: number }>;
-  components: readonly string[];
-  flows: readonly string[];
-}>;
+  callout?: Readonly<{ x: number; y: number }>
+  components: readonly string[]
+  flows: readonly string[]
+}>
 
 const grown = (box: Box, by: number, weight: number): Obstacle => ({
   height: box.height + by * 2,
   weight,
   width: box.width + by * 2,
   x: box.x - by,
-  y: box.y - by,
-});
+  y: box.y - by
+})
 
-export const litObstacles = (
-  scene: LitScene,
-  runtime: InfoschematicRuntime,
-): Obstacle[] => {
-  const flowById = new Map(
-    runtime.infoschematicFlows.map((flow) => [flow.id, flow]),
-  );
-  const fabricById = new Map(
-    runtime.infoschematicFabrics.map((fabric) => [fabric.id, fabric]),
-  );
-  const obstacles: Obstacle[] = [];
+export const litObstacles = (scene: LitScene, runtime: InfoschematicRuntime): Obstacle[] => {
+  const flowById = new Map(runtime.infoschematicFlows.map((flow) => [flow.id, flow]))
+  const fabricById = new Map(runtime.infoschematicFabrics.map((fabric) => [fabric.id, fabric]))
+  const obstacles: Obstacle[] = []
 
   for (const id of scene.components) {
-    const card = runtime.infoschematicLayout[id];
+    const card = runtime.infoschematicLayout[id]
     if (card) {
-      obstacles.push(grown(card, 12, 6));
-      continue;
+      obstacles.push(grown(card, 12, 6))
+      continue
     }
-    const fabric = fabricById.get(id);
-    if (fabric) obstacles.push(grown(fabric.bounds, 12, 6));
+    const fabric = fabricById.get(id)
+    if (fabric) obstacles.push(grown(fabric.bounds, 12, 6))
   }
 
   for (const id of scene.flows) {
-    const points = flowById.get(id)?.points;
-    if (!points) continue;
+    const points = flowById.get(id)?.points
+    if (!points) continue
     for (let index = 1; index < points.length; index += 1) {
-      const from = points[index - 1];
-      const to = points[index];
-      if (!from || !to) continue;
+      const from = points[index - 1]
+      const to = points[index]
+      if (!from || !to) continue
       obstacles.push(
         grown(
           {
             height: Math.abs(to.y - from.y),
             width: Math.abs(to.x - from.x),
             x: Math.min(from.x, to.x),
-            y: Math.min(from.y, to.y),
+            y: Math.min(from.y, to.y)
           },
           4,
-          1,
-        ),
-      );
+          1
+        )
+      )
     }
   }
 
-  return obstacles;
-};
+  return obstacles
+}
 
 export function SceneCallout({
   autoAdvance,
@@ -88,39 +75,32 @@ export function SceneCallout({
   stepTotal,
   takeaways,
   title,
-  wide,
+  wide
 }: {
-  autoAdvance?: boolean;
-  body: string;
-  calloutConfig?: CalloutConfig;
-  eyebrow: string;
-  logo?: string;
-  onExit: () => void;
-  onStep: (delta: number) => void;
-  onToggleAuto?: () => void;
-  profile?: readonly string[];
-  runtime: InfoschematicRuntime;
-  scene: LitScene;
-  stepNumber: number;
-  stepTotal: number;
-  takeaways?: readonly string[];
-  title?: string;
-  wide?: boolean;
+  autoAdvance?: boolean
+  body: string
+  calloutConfig?: CalloutConfig
+  eyebrow: string
+  logo?: string
+  onExit: () => void
+  onStep: (delta: number) => void
+  onToggleAuto?: () => void
+  profile?: readonly string[]
+  runtime: InfoschematicRuntime
+  scene: LitScene
+  stepNumber: number
+  stepTotal: number
+  takeaways?: readonly string[]
+  title?: string
+  wide?: boolean
 }) {
-  const callout = useRef<HTMLDivElement>(null);
-  const renderers = useInfoschematicRenderers();
-  const [position, setPosition] = useState(
-    scene.callout ?? runtime.calloutPorts[0] ?? { x: 0.5, y: 0.5 },
-  );
-  const aside = Boolean(logo || profile?.length);
+  const callout = useRef<HTMLDivElement>(null)
+  const renderers = useInfoschematicRenderers()
+  const [position, setPosition] = useState(scene.callout ?? runtime.calloutPorts[0] ?? { x: 0.5, y: 0.5 })
+  const aside = Boolean(logo || profile?.length)
   const resolved = calloutConfig
-    ? resolveInfoschematicRenderer(
-        renderers,
-        "callout",
-        calloutConfig.renderer,
-        calloutConfig.properties,
-      )
-    : undefined;
+    ? resolveInfoschematicRenderer(renderers, 'callout', calloutConfig.renderer, calloutConfig.properties)
+    : undefined
   const standardContent = (
     <>
       {title ? <p className="isp-callout-title">{title}</p> : null}
@@ -133,48 +113,44 @@ export function SceneCallout({
         </ul>
       ) : null}
     </>
-  );
+  )
 
   useLayoutEffect(() => {
-    const element = callout.current;
-    const container = element?.parentElement?.parentElement;
-    if (!element || !container) return;
+    const element = callout.current
+    const container = element?.parentElement?.parentElement
+    if (!element || !container) return
 
     const choose = () => {
       if (scene.callout) {
-        setPosition(scene.callout);
-        return;
+        setPosition(scene.callout)
+        return
       }
-      const unitsPerPixel =
-        runtime.infoschematicViewBox.width / container.clientWidth;
-      const candidates =
-        runtime.calloutPorts.length > 0
-          ? runtime.calloutPorts
-          : [{ x: 0.5, y: 0.5 }];
+      const unitsPerPixel = runtime.infoschematicViewBox.width / container.clientWidth
+      const candidates = runtime.calloutPorts.length > 0 ? runtime.calloutPorts : [{ x: 0.5, y: 0.5 }]
       setPosition(
         chooseSpot({
           candidates,
           label: {
             height: element.offsetHeight * unitsPerPixel,
-            width: element.offsetWidth * unitsPerPixel,
+            width: element.offsetWidth * unitsPerPixel
           },
           obstacles: litObstacles(scene, runtime),
-          view: runtime.infoschematicViewBox,
-        }),
-      );
-    };
+          view: runtime.infoschematicViewBox
+        })
+      )
+    }
 
-    choose();
-    if (typeof ResizeObserver === "undefined") return;
-    const observer = new ResizeObserver(choose);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [runtime, scene]);
+    choose()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(choose)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [runtime, scene])
 
   return (
     <div className="isp-callout-layer" aria-live="polite">
       <div
-        className={`isp-callout${wide ? " isp-callout-wide" : ""}${aside ? " isp-callout-sided" : ""}`}
+        className={`isp-callout${wide ? ' isp-callout-wide' : ''}${aside ? ' isp-callout-sided' : ''}`}
         ref={callout}
         role="status"
         style={{ left: `${position.x * 100}%`, top: `${position.y * 100}%` }}
@@ -185,7 +161,7 @@ export function SceneCallout({
             {stepNumber} of {stepTotal}
           </em>
         </p>
-        <div className={aside ? "isp-callout-sides" : undefined}>
+        <div className={aside ? 'isp-callout-sides' : undefined}>
           {aside ? (
             <div className="isp-callout-aside">
               {logo ? <img alt="" src={logo} /> : null}
@@ -196,10 +172,7 @@ export function SceneCallout({
           ) : null}
           <div>
             {resolved && calloutConfig ? (
-              <resolved.Component
-                callout={calloutConfig}
-                properties={resolved.properties}
-              >
+              <resolved.Component callout={calloutConfig} properties={resolved.properties}>
                 {standardContent}
               </resolved.Component>
             ) : (
@@ -219,40 +192,24 @@ export function SceneCallout({
           {autoAdvance === undefined || !onToggleAuto ? null : (
             <button
               aria-label={
-                autoAdvance
-                  ? "Advancing automatically. Activate to hold."
-                  : "Held. Activate to advance automatically."
+                autoAdvance ? 'Advancing automatically. Activate to hold.' : 'Held. Activate to advance automatically.'
               }
               aria-pressed={autoAdvance}
               onClick={onToggleAuto}
-              title={
-                autoAdvance
-                  ? "Advancing automatically · space to hold"
-                  : "Held · space to resume"
-              }
+              title={autoAdvance ? 'Advancing automatically · space to hold' : 'Held · space to resume'}
               type="button"
             >
-              {autoAdvance ? "◷" : "Ⅱ"}
+              {autoAdvance ? '◷' : 'Ⅱ'}
             </button>
           )}
-          <button
-            aria-label="Next step"
-            onClick={() => onStep(1)}
-            title="Next step · right arrow"
-            type="button"
-          >
+          <button aria-label="Next step" onClick={() => onStep(1)} title="Next step · right arrow" type="button">
             ›
           </button>
-          <button
-            aria-label="Stop the Story"
-            onClick={onExit}
-            title="Stop · escape"
-            type="button"
-          >
+          <button aria-label="Stop the Story" onClick={onExit} title="Stop · escape" type="button">
             ×
           </button>
         </div>
       </div>
     </div>
-  );
+  )
 }

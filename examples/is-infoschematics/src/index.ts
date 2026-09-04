@@ -4,7 +4,7 @@ const packagePorts = {
   east: 2,
   north: 6,
   south: 6,
-  west: 2,
+  west: 2
 } as const
 
 const packageCard = (
@@ -17,7 +17,7 @@ const packageCard = (
   stereotype: string,
   x: number,
   y: number,
-  width = 280,
+  width = 280
 ) => ({
   code,
   detail,
@@ -26,11 +26,11 @@ const packageCard = (
   label,
   placement: {
     box: { height: 90, width, x, y },
-    ports: packagePorts,
+    ports: packagePorts
   },
   scope,
   scopes: [scope],
-  stereotype,
+  stereotype
 })
 
 const dependency = (
@@ -40,7 +40,7 @@ const dependency = (
   sourcePort: `N${number}` | `E${number}` | `S${number}` | `W${number}`,
   target: string,
   targetPort: `N${number}` | `E${number}` | `S${number}` | `W${number}`,
-  points: readonly { x: number; y: number }[],
+  points: readonly { x: number; y: number }[]
 ) => ({
   code,
   family: 'dependency',
@@ -49,7 +49,7 @@ const dependency = (
   source,
   sourcePort,
   target,
-  targetPort,
+  targetPort
 })
 
 export const infoschematicsInfoschematic = defineInfoschematic({
@@ -61,7 +61,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
   takeaways: [
     'Domain Model is the dependency root.',
     'Interactive Views add capability without reversing package ownership.',
-    'Examples contain authored data; hosts choose how to present it.',
+    'Examples contain authored data; hosts choose how to present it.'
   ],
   infoschematic: {
     viewBox: { height: 920, width: 1400, x: 0, y: 0 },
@@ -72,8 +72,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         compact: true,
         identity: true,
         stereotype: true,
-        description: false,
-      },
+        description: false
+      }
     },
     domains: [
       {
@@ -81,22 +81,22 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         description: 'Reusable contracts and framework-neutral behaviour.',
         fill: '#e8f0ff',
         id: 'product-foundation',
-        label: 'Product foundation',
+        label: 'Product foundation'
       },
       {
         color: '#087f5b',
         description: 'Interactive capability for Producers and Audiences.',
         fill: '#e4f7ef',
         id: 'interactive-experience',
-        label: 'Interactive experience',
+        label: 'Interactive experience'
       },
       {
         color: '#a23b72',
         description: 'Authored and rendered outlets for sharing Infoschematics.',
         fill: '#fdebf5',
         id: 'publication',
-        label: 'Publication',
-      },
+        label: 'Publication'
+      }
     ],
     scopes: [
       {
@@ -105,7 +105,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#e8f0ff',
         id: 'domain-contract',
         label: 'Domain contract',
-        prefix: 'DM',
+        prefix: 'DM'
       },
       {
         color: '#5b4aa8',
@@ -113,7 +113,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#f0edff',
         id: 'neutral-behaviour',
         label: 'Framework-neutral behaviour',
-        prefix: 'FN',
+        prefix: 'FN'
       },
       {
         color: '#087f5b',
@@ -121,7 +121,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#e4f7ef',
         id: 'interactive-views',
         label: 'Interactive Views',
-        prefix: 'VW',
+        prefix: 'VW'
       },
       {
         color: '#9a6700',
@@ -129,7 +129,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#fff4d6',
         id: 'renderer-output',
         label: 'Renderer output',
-        prefix: 'RO',
+        prefix: 'RO'
       },
       {
         color: '#a23b72',
@@ -137,7 +137,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#fdebf5',
         id: 'authored-examples',
         label: 'Authored examples',
-        prefix: 'EX',
+        prefix: 'EX'
       },
       {
         color: '#b54708',
@@ -145,8 +145,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         fill: '#fff0e5',
         id: 'application-hosts',
         label: 'Application hosts',
-        prefix: 'HOST',
-      },
+        prefix: 'HOST'
+      }
     ],
     flowFamilies: [
       {
@@ -154,8 +154,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         description: 'A package or host consumes a lower-level package.',
         id: 'dependency',
         label: 'Depends on',
-        prefix: 'DEP',
-      },
+        prefix: 'DEP'
+      }
     ],
     // Authored order is paint order: the filled panels first, then the framed
     // row panels whose boundary-mounted titles read over them.
@@ -166,7 +166,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'zone-domain-model',
         label: 'Dependency root',
-        labelPlacement: 'south-east',
+        labelPlacement: 'south-east'
       },
       {
         box: { height: 170, width: 680, x: 20, y: 210 },
@@ -174,7 +174,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'dashed' },
         id: 'zone-domain-behaviour',
         label: 'Domain behaviour',
-        labelPlacement: 'west',
+        labelPlacement: 'west'
       },
       {
         box: { height: 170, width: 680, x: 700, y: 210 },
@@ -182,7 +182,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'zone-view-calculations',
         label: 'View calculations',
-        labelPlacement: 'east',
+        labelPlacement: 'east'
       },
       {
         box: { height: 170, width: 1000, x: 20, y: 410 },
@@ -190,7 +190,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'zone-interactive-views',
         label: 'Additive interactive Views',
-        labelPlacement: 'south-west',
+        labelPlacement: 'south-west'
       },
       {
         box: { height: 170, width: 360, x: 1020, y: 410 },
@@ -198,7 +198,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'dotted' },
         id: 'zone-static-output',
         label: 'Static output',
-        labelPlacement: 'south-east',
+        labelPlacement: 'south-east'
       },
       {
         box: { height: 230, width: 680, x: 20, y: 660 },
@@ -206,7 +206,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'zone-authored-examples',
         label: 'Authored examples',
-        labelPlacement: 'north-west',
+        labelPlacement: 'north-west'
       },
       {
         box: { height: 230, width: 680, x: 700, y: 660 },
@@ -214,7 +214,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         frame: { style: 'solid' },
         id: 'zone-application-hosts',
         label: 'Application hosts',
-        labelPlacement: 'north-east',
+        labelPlacement: 'north-east'
       },
       {
         box: { height: 160, radius: 12, width: 1360, x: 20, y: 20 },
@@ -222,7 +222,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         id: 'lane-domain-contract',
         label: 'Authored contract',
         labelMount: 'boundary',
-        labelPlacement: 'north-west',
+        labelPlacement: 'north-west'
       },
       {
         box: { height: 170, radius: 12, width: 1360, x: 20, y: 210 },
@@ -230,7 +230,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         id: 'lane-neutral-behaviour',
         label: 'Framework-neutral behaviour',
         labelMount: 'boundary',
-        labelPlacement: 'north',
+        labelPlacement: 'north'
       },
       {
         box: { height: 170, radius: 12, width: 1360, x: 20, y: 410 },
@@ -238,7 +238,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         id: 'lane-output-packages',
         label: 'View and renderer packages',
         labelMount: 'boundary',
-        labelPlacement: 'north-east',
+        labelPlacement: 'north-east'
       },
       {
         box: { height: 230, radius: 12, width: 1360, x: 20, y: 660 },
@@ -246,8 +246,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         id: 'lane-composition',
         label: 'Authored composition',
         labelMount: 'boundary',
-        labelPlacement: 'south',
-      },
+        labelPlacement: 'south'
+      }
     ],
     cards: [
       packageCard(
@@ -260,7 +260,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package',
         560,
         65,
-        280,
+        280
       ),
       packageCard(
         'PKG-DC',
@@ -272,7 +272,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package',
         180,
         255,
-        280,
+        280
       ),
       packageCard(
         'PKG-VM',
@@ -284,7 +284,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package',
         900,
         255,
-        280,
+        280
       ),
       packageCard(
         'PKG-VC',
@@ -295,7 +295,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-experience',
         'package',
         80,
-        450,
+        450
       ),
       packageCard(
         'PKG-VP',
@@ -306,7 +306,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-experience',
         'package',
         380,
-        450,
+        450
       ),
       packageCard(
         'PKG-VS',
@@ -317,7 +317,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-experience',
         'package',
         680,
-        450,
+        450
       ),
       packageCard(
         'PKG-SVG',
@@ -328,7 +328,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'publication',
         'package',
         1080,
-        450,
+        450
       ),
       packageCard(
         'EX-IS',
@@ -340,7 +340,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'Infoschematic',
         220,
         710,
-        280,
+        280
       ),
       packageCard(
         'HOST-SITE',
@@ -352,101 +352,165 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'application',
         900,
         710,
-        280,
-      ),
+        280
+      )
     ],
     flows: [
-      dependency('DEP-001', 'dependency-domain-core-domain-model', 'package-domain-core', 'N1', 'package-domain-model', 'S1', [
-        { x: 220, y: 255 },
-        { x: 220, y: 200 },
-        { x: 600, y: 200 },
-        { x: 600, y: 155 },
-      ]),
-      dependency('DEP-002', 'dependency-view-model-domain-model', 'package-view-model', 'N1', 'package-domain-model', 'S2', [
-        { x: 940, y: 255 },
-        { x: 940, y: 190 },
-        { x: 640, y: 190 },
-        { x: 640, y: 155 },
-      ]),
-      dependency('DEP-003', 'dependency-canvas-domain-model', 'package-view-canvas', 'N1', 'package-domain-model', 'S3', [
-        { x: 120, y: 450 },
-        { x: 120, y: 400 },
-        { x: 680, y: 400 },
-        { x: 680, y: 155 },
-      ]),
+      dependency(
+        'DEP-001',
+        'dependency-domain-core-domain-model',
+        'package-domain-core',
+        'N1',
+        'package-domain-model',
+        'S1',
+        [
+          { x: 220, y: 255 },
+          { x: 220, y: 200 },
+          { x: 600, y: 200 },
+          { x: 600, y: 155 }
+        ]
+      ),
+      dependency(
+        'DEP-002',
+        'dependency-view-model-domain-model',
+        'package-view-model',
+        'N1',
+        'package-domain-model',
+        'S2',
+        [
+          { x: 940, y: 255 },
+          { x: 940, y: 190 },
+          { x: 640, y: 190 },
+          { x: 640, y: 155 }
+        ]
+      ),
+      dependency(
+        'DEP-003',
+        'dependency-canvas-domain-model',
+        'package-view-canvas',
+        'N1',
+        'package-domain-model',
+        'S3',
+        [
+          { x: 120, y: 450 },
+          { x: 120, y: 400 },
+          { x: 680, y: 400 },
+          { x: 680, y: 155 }
+        ]
+      ),
       dependency('DEP-004', 'dependency-canvas-view-model', 'package-view-canvas', 'N2', 'package-view-model', 'S1', [
         { x: 160, y: 450 },
         { x: 160, y: 390 },
         { x: 940, y: 390 },
-        { x: 940, y: 345 },
+        { x: 940, y: 345 }
       ]),
-      dependency('DEP-005', 'dependency-present-domain-model', 'package-view-present', 'N1', 'package-domain-model', 'S4', [
-        { x: 420, y: 450 },
-        { x: 420, y: 380 },
-        { x: 720, y: 380 },
-        { x: 720, y: 155 },
-      ]),
+      dependency(
+        'DEP-005',
+        'dependency-present-domain-model',
+        'package-view-present',
+        'N1',
+        'package-domain-model',
+        'S4',
+        [
+          { x: 420, y: 450 },
+          { x: 420, y: 380 },
+          { x: 720, y: 380 },
+          { x: 720, y: 155 }
+        ]
+      ),
       dependency('DEP-006', 'dependency-present-view-model', 'package-view-present', 'N2', 'package-view-model', 'S2', [
         { x: 460, y: 450 },
         { x: 460, y: 370 },
         { x: 980, y: 370 },
-        { x: 980, y: 345 },
+        { x: 980, y: 345 }
       ]),
       dependency('DEP-007', 'dependency-present-canvas', 'package-view-present', 'W1', 'package-view-canvas', 'E1', [
         { x: 380, y: 480 },
-      { x: 360, y: 480 },
+        { x: 360, y: 480 }
       ]),
       dependency('DEP-008', 'dependency-studio-domain-core', 'package-view-studio', 'N1', 'package-domain-core', 'S1', [
         { x: 720, y: 450 },
         { x: 720, y: 360 },
         { x: 220, y: 360 },
-        { x: 220, y: 345 },
+        { x: 220, y: 345 }
       ]),
-      dependency('DEP-009', 'dependency-studio-domain-model', 'package-view-studio', 'N2', 'package-domain-model', 'S5', [
-        { x: 760, y: 450 },
-        { x: 760, y: 155 },
-      ]),
+      dependency(
+        'DEP-009',
+        'dependency-studio-domain-model',
+        'package-view-studio',
+        'N2',
+        'package-domain-model',
+        'S5',
+        [
+          { x: 760, y: 450 },
+          { x: 760, y: 155 }
+        ]
+      ),
       dependency('DEP-010', 'dependency-studio-view-model', 'package-view-studio', 'N3', 'package-view-model', 'S3', [
         { x: 800, y: 450 },
         { x: 800, y: 350 },
         { x: 1020, y: 350 },
-        { x: 1020, y: 345 },
+        { x: 1020, y: 345 }
       ]),
       dependency('DEP-011', 'dependency-studio-canvas', 'package-view-studio', 'W2', 'package-view-canvas', 'E2', [
         { x: 680, y: 510 },
-      { x: 360, y: 510 },
+        { x: 360, y: 510 }
       ]),
       dependency('DEP-012', 'dependency-studio-present', 'package-view-studio', 'W1', 'package-view-present', 'E1', [
         { x: 680, y: 480 },
-      { x: 660, y: 480 },
+        { x: 660, y: 480 }
       ]),
-      dependency('DEP-013', 'dependency-render-svg-domain-model', 'package-render-svg', 'N1', 'package-domain-model', 'S6', [
-        { x: 1120, y: 450 },
-        { x: 1120, y: 360 },
-        { x: 800, y: 360 },
-        { x: 800, y: 155 },
-      ]),
-      dependency('DEP-014', 'dependency-render-svg-view-model', 'package-render-svg', 'N2', 'package-view-model', 'S4', [
-        { x: 1160, y: 450 },
-        { x: 1160, y: 350 },
-        { x: 1060, y: 350 },
-        { x: 1060, y: 345 },
-      ]),
-      dependency('DEP-015', 'dependency-example-domain-core', 'example-infoschematics', 'N1', 'package-domain-core', 'S2', [
-        { x: 260, y: 710 },
-        { x: 260, y: 345 },
-      ]),
+      dependency(
+        'DEP-013',
+        'dependency-render-svg-domain-model',
+        'package-render-svg',
+        'N1',
+        'package-domain-model',
+        'S6',
+        [
+          { x: 1120, y: 450 },
+          { x: 1120, y: 360 },
+          { x: 800, y: 360 },
+          { x: 800, y: 155 }
+        ]
+      ),
+      dependency(
+        'DEP-014',
+        'dependency-render-svg-view-model',
+        'package-render-svg',
+        'N2',
+        'package-view-model',
+        'S4',
+        [
+          { x: 1160, y: 450 },
+          { x: 1160, y: 350 },
+          { x: 1060, y: 350 },
+          { x: 1060, y: 345 }
+        ]
+      ),
+      dependency(
+        'DEP-015',
+        'dependency-example-domain-core',
+        'example-infoschematics',
+        'N1',
+        'package-domain-core',
+        'S2',
+        [
+          { x: 260, y: 710 },
+          { x: 260, y: 345 }
+        ]
+      ),
       dependency('DEP-016', 'dependency-site-studio', 'host-site', 'N1', 'package-view-studio', 'S1', [
         { x: 940, y: 710 },
         { x: 940, y: 630 },
         { x: 720, y: 630 },
-        { x: 720, y: 540 },
+        { x: 720, y: 540 }
       ]),
       dependency('DEP-017', 'dependency-site-example', 'host-site', 'W1', 'example-infoschematics', 'E1', [
         { x: 900, y: 740 },
-        { x: 500, y: 740 },
-      ]),
-    ],
+        { x: 500, y: 740 }
+      ])
+    ]
   },
   standaloneScenes: [
     {
@@ -454,22 +518,23 @@ export const infoschematicsInfoschematic = defineInfoschematic({
       description: 'The dependency-free contract supports two independent framework-neutral behaviour packages.',
       focus: {
         artefacts: ['package-domain-model', 'package-domain-core', 'package-view-model'],
-        flows: ['dependency-domain-core-domain-model', 'dependency-view-model-domain-model'],
+        flows: ['dependency-domain-core-domain-model', 'dependency-view-model-domain-model']
       },
       id: 'scene-foundations',
       label: 'Start with the foundations',
-      short: 'Domain Model is the dependency root.',
+      short: 'Domain Model is the dependency root.'
     },
     {
       code: 'SCN-02',
-      description: 'Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.',
+      description:
+        'Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.',
       focus: {
         artefacts: [
           'package-domain-model',
           'package-view-model',
           'package-view-canvas',
           'package-view-present',
-          'package-view-studio',
+          'package-view-studio'
         ],
         flows: [
           'dependency-canvas-domain-model',
@@ -480,16 +545,17 @@ export const infoschematicsInfoschematic = defineInfoschematic({
           'dependency-studio-domain-model',
           'dependency-studio-view-model',
           'dependency-studio-canvas',
-          'dependency-studio-present',
-        ],
+          'dependency-studio-present'
+        ]
       },
       id: 'scene-additive-views',
       label: 'Add interactive Views',
-      short: 'Each View builds on narrower capability.',
+      short: 'Each View builds on narrower capability.'
     },
     {
       code: 'SCN-03',
-      description: 'Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.',
+      description:
+        'Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.',
       focus: {
         artefacts: [
           'package-domain-core',
@@ -498,19 +564,19 @@ export const infoschematicsInfoschematic = defineInfoschematic({
           'package-view-studio',
           'package-render-svg',
           'example-infoschematics',
-          'host-site',
+          'host-site'
         ],
         flows: [
           'dependency-render-svg-domain-model',
           'dependency-render-svg-view-model',
           'dependency-example-domain-core',
           'dependency-site-studio',
-          'dependency-site-example',
-        ],
+          'dependency-site-example'
+        ]
       },
       id: 'scene-public-outlets',
       label: 'Compose examples and hosts',
-      short: 'Authored data remains separate from its outlets.',
+      short: 'Authored data remains separate from its outlets.'
     },
     {
       code: 'SCN-04',
@@ -525,7 +591,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
           'package-view-studio',
           'package-render-svg',
           'example-infoschematics',
-          'host-site',
+          'host-site'
         ],
         flows: [
           'dependency-domain-core-domain-model',
@@ -544,13 +610,13 @@ export const infoschematicsInfoschematic = defineInfoschematic({
           'dependency-render-svg-view-model',
           'dependency-example-domain-core',
           'dependency-site-studio',
-          'dependency-site-example',
-        ],
+          'dependency-site-example'
+        ]
       },
       id: 'scene-complete-architecture',
       label: 'See the complete architecture',
-      short: 'One-way dependencies keep ownership clear.',
-    },
+      short: 'One-way dependencies keep ownership clear.'
+    }
   ],
   stories: [
     {
@@ -562,45 +628,45 @@ export const infoschematicsInfoschematic = defineInfoschematic({
           anchor: 'package-domain-model',
           callout: {
             body: 'Begin with serialisable product data and a dependency-free contract.',
-            takeaways: ['The Domain Model imports no package.'],
+            takeaways: ['The Domain Model imports no package.']
           },
           duration: 5,
           id: 'story-scene-foundations',
           sourceScene: 'scene-foundations',
-          title: 'Define the product',
+          title: 'Define the product'
         },
         {
           anchor: 'package-view-studio',
           callout: {
             body: 'Add Canvas, Present, and Studio capability without moving authored state into a View.',
-            takeaways: ['Views depend downward; authored products do not depend on Views.'],
+            takeaways: ['Views depend downward; authored products do not depend on Views.']
           },
           duration: 6,
           id: 'story-scene-views',
           sourceScene: 'scene-additive-views',
-          title: 'Choose the narrowest View',
+          title: 'Choose the narrowest View'
         },
         {
           anchor: 'host-site',
           callout: {
             body: 'Let examples own reusable data and let the Site own routing, metadata, and deployment.',
-            takeaways: ['The same definition can drive Studio and deterministic SVG.'],
+            takeaways: ['The same definition can drive Studio and deterministic SVG.']
           },
           duration: 6,
           id: 'story-scene-outlets',
           sourceScene: 'scene-public-outlets',
-          title: 'Publish through a host',
-        },
+          title: 'Publish through a host'
+        }
       ],
       short: 'From serialisable contract to public outlet.',
-      title: 'From contract to Audience',
-    },
+      title: 'From contract to Audience'
+    }
   ],
   calloutPositions: [
     { x: 70, y: 95 },
     { x: 1010, y: 235 },
-    { x: 1040, y: 680 },
-  ],
+    { x: 1040, y: 680 }
+  ]
 })
 
 export const infoschematicsExample = infoschematicsInfoschematic

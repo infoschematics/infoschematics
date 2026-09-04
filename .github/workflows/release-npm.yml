@@ -83,8 +83,8 @@ jobs:
 
       - name: Verify repository and release candidates
         run: |
-          bun run check
-          bun run release:verify
+          bun run ki:check
+          bun run ki:release:verify
 
       - name: Publish dependency-first package set
         env:

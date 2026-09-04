@@ -34,7 +34,7 @@ describe('systemExample', () => {
     expect(diagram.appearance).toEqual({
       card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint',
+      surface: 'blueprint'
     })
     expect(diagram.domains?.map((domain) => domain.id)).toEqual(['observe', 'arrange', 'illuminate', 'understand'])
     for (const flow of diagram.flows) expect(flow.label).toEqual({ along: 0.5 })

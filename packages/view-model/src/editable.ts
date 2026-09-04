@@ -1,11 +1,11 @@
-import type { Box, Offset, Point } from './geometry.ts'
-import type { Guide } from './guides.ts'
-import type { PortCounts } from './ports.ts'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
+import type { Box, Offset, Point } from './geometry.ts'
+import type { Guide } from './guides.ts'
+import type { PortCounts } from './ports.ts'
 
 // What a diagram must provide to become editable. Nothing here knows what the
 // diagram is of: the editor asks for handles, asks what a drop means, and asks
@@ -96,21 +96,11 @@ export type ArtefactSelection =
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'graphic' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'route'; kind: 'flow' }>)
 
-export type ArtefactCapability =
-  | 'create'
-  | 'select'
-  | 'move'
-  | 'resize'
-  | 'edit-properties'
-  | 'remove'
-  | 'reorder'
+export type ArtefactCapability = 'create' | 'select' | 'move' | 'resize' | 'edit-properties' | 'remove' | 'reorder'
 
 export type ArtefactCapabilities = Readonly<Record<ArtefactCapability, boolean>>
 
-const capabilities = (
-  move: boolean,
-  resize: boolean,
-): ArtefactCapabilities =>
+const capabilities = (move: boolean, resize: boolean): ArtefactCapabilities =>
   Object.freeze({
     create: true,
     'edit-properties': true,
@@ -118,28 +108,23 @@ const capabilities = (
     remove: true,
     reorder: true,
     resize,
-    select: true,
+    select: true
   })
 
 /** Type-appropriate Design operations; Flow geometry stays with endpoint and waypoint tools. */
-export const artefactCapabilities: Readonly<
-  Record<ArtefactKind, ArtefactCapabilities>
-> = Object.freeze({
+export const artefactCapabilities: Readonly<Record<ArtefactKind, ArtefactCapabilities>> = Object.freeze({
   card: capabilities(true, true),
   fabric: capabilities(true, true),
   flow: capabilities(false, false),
   graphic: capabilities(true, true),
-  region: capabilities(true, true),
+  region: capabilities(true, true)
 })
 
-export const artefactCan = (
-  kind: ArtefactKind,
-  capability: ArtefactCapability,
-): boolean => artefactCapabilities[kind][capability]
+export const artefactCan = (kind: ArtefactKind, capability: ArtefactCapability): boolean =>
+  artefactCapabilities[kind][capability]
 
-export const defineArtefactSelection = <T extends ArtefactSelection>(
-  selection: T,
-): T => Object.freeze({ ...selection }) as T
+export const defineArtefactSelection = <T extends ArtefactSelection>(selection: T): T =>
+  Object.freeze({ ...selection }) as T
 
 export type BoxGeometry = Readonly<{ box: Box; role: 'box' }>
 export type RouteGeometry = Readonly<{
@@ -206,13 +191,11 @@ export type EditableArtefact = Readonly<{
 
 export type ResizeMinimum = Readonly<{ height?: number; width?: number }>
 
-export const artefactResizeMinimums: Readonly<
-  Record<Exclude<ArtefactKind, 'flow'>, ResizeMinimum>
-> = Object.freeze({
+export const artefactResizeMinimums: Readonly<Record<Exclude<ArtefactKind, 'flow'>, ResizeMinimum>> = Object.freeze({
   card: Object.freeze({ height: 40, width: 40 }),
   fabric: Object.freeze({ height: 40, width: 40 }),
   graphic: Object.freeze({ height: 20, width: 20 }),
-  region: Object.freeze({ height: 20, width: 20 }),
+  region: Object.freeze({ height: 20, width: 20 })
 })
 
 const cloneFrozen = <T>(value: T): T => {
@@ -222,10 +205,8 @@ const cloneFrozen = <T>(value: T): T => {
   if (value && typeof value === 'object') {
     return Object.freeze(
       Object.fromEntries(
-        Object.entries(value).flatMap(([key, entry]) =>
-          entry === undefined ? [] : [[key, cloneFrozen(entry)]],
-        ),
-      ),
+        Object.entries(value).flatMap(([key, entry]) => (entry === undefined ? [] : [[key, cloneFrozen(entry)]]))
+      )
     ) as T
   }
   return value
@@ -233,10 +214,7 @@ const cloneFrozen = <T>(value: T): T => {
 
 const validNumber = (value: number) => Number.isFinite(value)
 
-const selectionMatchesValue = <K extends ArtefactKind>(
-  target: SelectionFor<K>,
-  value: ArtefactValueByKind[K],
-) => {
+const selectionMatchesValue = <K extends ArtefactKind>(target: SelectionFor<K>, value: ArtefactValueByKind[K]) => {
   if (target.id !== value.id) return false
   if (target.code === null) return true
   return 'code' in value && value.code === target.code
@@ -245,14 +223,14 @@ const selectionMatchesValue = <K extends ArtefactKind>(
 export const createArtefactOperation = <K extends ArtefactKind>(
   target: SelectionFor<K>,
   value: ArtefactValueByKind[K],
-  at: number,
+  at: number
 ): CreateArtefactOperation<K> | undefined => {
   if (!selectionMatchesValue(target, value) || !validNumber(at)) return undefined
   return cloneFrozen({
     at: Math.max(0, Math.trunc(at)),
     operation: 'create' as const,
     target,
-    value,
+    value
   })
 }
 
@@ -262,7 +240,7 @@ const clamp = (value: number, minimum: number, maximum: number) =>
 const moveGeometry = (
   geometry: Exclude<ArtefactGeometry, RouteGeometry>,
   offset: Offset,
-  bounds?: Box,
+  bounds?: Box
 ): Exclude<ArtefactGeometry, RouteGeometry> | undefined => {
   if (!validNumber(offset.dx) || !validNumber(offset.dy)) return undefined
 
@@ -271,14 +249,10 @@ const moveGeometry = (
   return cloneFrozen({
     box: {
       ...geometry.box,
-      x: bounds
-        ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.box.width)
-        : x,
-      y: bounds
-        ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.box.height)
-        : y,
+      x: bounds ? clamp(x, bounds.x, bounds.x + bounds.width - geometry.box.width) : x,
+      y: bounds ? clamp(y, bounds.y, bounds.y + bounds.height - geometry.box.height) : y
     },
-    role: 'box' as const,
+    role: 'box' as const
   })
 }
 
@@ -286,7 +260,7 @@ export const moveArtefactOperation = (
   target: ArtefactSelection,
   geometry: ArtefactGeometry,
   offset: Offset,
-  bounds?: Box,
+  bounds?: Box
 ): MoveArtefactOperation | undefined => {
   if (
     !artefactCan(target.kind, 'move') ||
@@ -297,16 +271,10 @@ export const moveArtefactOperation = (
     return undefined
   }
   const moved = moveGeometry(geometry, offset, bounds)
-  return moved
-    ? cloneFrozen({ geometry: moved, operation: 'move' as const, target })
-    : undefined
+  return moved ? cloneFrozen({ geometry: moved, operation: 'move' as const, target }) : undefined
 }
 
-const boundedSize = (
-  wanted: number,
-  minimum: number,
-  available?: number,
-) => {
+const boundedSize = (wanted: number, minimum: number, available?: number) => {
   const floor = Math.max(1, minimum)
   if (available === undefined) return Math.max(floor, wanted)
   const ceiling = Math.max(1, available)
@@ -318,8 +286,7 @@ export const resizeArtefactOperation = (
   geometry: ArtefactGeometry,
   size: ResizeMinimum,
   bounds?: Box,
-  minimum: ResizeMinimum =
-    target.kind === 'flow' ? {} : artefactResizeMinimums[target.kind],
+  minimum: ResizeMinimum = target.kind === 'flow' ? {} : artefactResizeMinimums[target.kind]
 ): ResizeArtefactOperation | undefined => {
   if (
     !artefactCan(target.kind, 'resize') ||
@@ -338,21 +305,21 @@ export const resizeArtefactOperation = (
       height: boundedSize(
         size.height ?? geometry.box.height,
         minimum.height ?? 1,
-        bounds ? bounds.y + bounds.height - geometry.box.y : undefined,
+        bounds ? bounds.y + bounds.height - geometry.box.y : undefined
       ),
       width: boundedSize(
         size.width ?? geometry.box.width,
         minimum.width ?? 1,
-        bounds ? bounds.x + bounds.width - geometry.box.x : undefined,
-      ),
+        bounds ? bounds.x + bounds.width - geometry.box.x : undefined
+      )
     },
-    role: 'box',
+    role: 'box'
   }
 
   return cloneFrozen({
     geometry: resized,
     operation: 'resize' as const,
-    target,
+    target
   })
 }
 
@@ -360,7 +327,7 @@ export const reorderArtefactOperation = (
   target: ArtefactSelection,
   from: number,
   to: number,
-  length: number,
+  length: number
 ): ReorderArtefactOperation | undefined => {
   if (
     !artefactCan(target.kind, 'reorder') ||
@@ -376,13 +343,11 @@ export const reorderArtefactOperation = (
     from: clamp(Math.trunc(from), 0, last),
     operation: 'reorder' as const,
     target,
-    to: clamp(Math.trunc(to), 0, last),
+    to: clamp(Math.trunc(to), 0, last)
   })
 }
 
-export const removeArtefactOperation = (
-  target: ArtefactSelection,
-): RemoveArtefactOperation =>
+export const removeArtefactOperation = (target: ArtefactSelection): RemoveArtefactOperation =>
   cloneFrozen({ operation: 'remove' as const, target })
 
 export type HandleKind = 'component' | 'label' | 'port' | 'region' | 'waypoint'
@@ -507,7 +472,7 @@ const kindDependencyOrder: Readonly<Record<ArtefactKind, number>> = {
   fabric: 1,
   card: 2,
   graphic: 3,
-  flow: 4,
+  flow: 4
 }
 
 const operationOrder: Readonly<Record<ArtefactOperation['operation'], number>> = {
@@ -515,44 +480,38 @@ const operationOrder: Readonly<Record<ArtefactOperation['operation'], number>> =
   move: 1,
   resize: 2,
   reorder: 3,
-  remove: 4,
+  remove: 4
 }
 
 /**
  * Orders creates from containers to dependants and removals in reverse. Other
  * edits retain fixed kind depth, then stable authored identity and operation.
  */
-export const orderArtefactOperations = (
-  operations: readonly ArtefactOperation[],
-): readonly ArtefactOperation[] =>
+export const orderArtefactOperations = (operations: readonly ArtefactOperation[]): readonly ArtefactOperation[] =>
   Object.freeze(
     operations
       .map((operation, arrival) => ({ arrival, operation }))
       .sort((left, right) => {
-      const leftPhase = operationOrder[left.operation.operation]
-      const rightPhase = operationOrder[right.operation.operation]
-      if (leftPhase !== rightPhase) return leftPhase - rightPhase
+        const leftPhase = operationOrder[left.operation.operation]
+        const rightPhase = operationOrder[right.operation.operation]
+        if (leftPhase !== rightPhase) return leftPhase - rightPhase
 
-      const leftKind = kindDependencyOrder[left.operation.target.kind]
-      const rightKind = kindDependencyOrder[right.operation.target.kind]
-      const dependencyOrder =
-        left.operation.operation === 'remove'
-          ? rightKind - leftKind
-          : leftKind - rightKind
-      if (dependencyOrder !== 0) return dependencyOrder
+        const leftKind = kindDependencyOrder[left.operation.target.kind]
+        const rightKind = kindDependencyOrder[right.operation.target.kind]
+        const dependencyOrder = left.operation.operation === 'remove' ? rightKind - leftKind : leftKind - rightKind
+        if (dependencyOrder !== 0) return dependencyOrder
 
-      const leftIdentity = left.operation.target.code ?? left.operation.target.id
-      const rightIdentity = right.operation.target.code ?? right.operation.target.id
-      const byIdentity =
-        leftIdentity < rightIdentity ? -1 : leftIdentity > rightIdentity ? 1 : 0
-      if (byIdentity !== 0) return byIdentity
+        const leftIdentity = left.operation.target.code ?? left.operation.target.id
+        const rightIdentity = right.operation.target.code ?? right.operation.target.id
+        const byIdentity = leftIdentity < rightIdentity ? -1 : leftIdentity > rightIdentity ? 1 : 0
+        if (byIdentity !== 0) return byIdentity
 
-      const leftId = left.operation.target.id
-      const rightId = right.operation.target.id
-      const byId = leftId < rightId ? -1 : leftId > rightId ? 1 : 0
-      if (byId !== 0) return byId
+        const leftId = left.operation.target.id
+        const rightId = right.operation.target.id
+        const byId = leftId < rightId ? -1 : leftId > rightId ? 1 : 0
+        if (byId !== 0) return byId
 
-      return left.arrival - right.arrival
+        return left.arrival - right.arrival
       })
-      .map(({ operation }) => operation),
+      .map(({ operation }) => operation)
   )

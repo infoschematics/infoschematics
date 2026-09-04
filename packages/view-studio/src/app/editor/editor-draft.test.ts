@@ -12,14 +12,14 @@ import {
   redoEditorDraft,
   sweepEditorDraft,
   undoEditorDraft,
-  updateEditorDraft,
+  updateEditorDraft
 } from './editor-draft.ts'
 
 describe('the canonical editor draft', () => {
   it('normalises partial earlier snapshots and reserves the six-kind operation seam', () => {
     const draft = normaliseEditorDraft({
       drafts: { 'STD-01': { dx: 10, dy: 20, from: 'authored' } },
-      labels: { 'TEL-01': 0.25 },
+      labels: { 'TEL-01': 0.25 }
     })
 
     expect(draft.version).toBe(1)
@@ -33,7 +33,7 @@ describe('the canonical editor draft', () => {
     const values = new Map([
       ['sample.diagram.labels', JSON.stringify({ 'STD-01': { dx: 10, dy: 0, from: 'card' } })],
       ['sample.diagram.removals', JSON.stringify({ 'TEL-01': {} })],
-      ['sample.diagram.text', JSON.stringify({ 'STD-01': { name: 'Changed' } })],
+      ['sample.diagram.text', JSON.stringify({ 'STD-01': { name: 'Changed' } })]
     ])
     const store = { getItem: vi.fn((key: string) => values.get(key) ?? null) } as unknown as Storage
 
@@ -49,17 +49,22 @@ describe('the canonical editor draft', () => {
   it('sweeps stale and already-applied values from every existing field', () => {
     const draft = normaliseEditorDraft({
       attachments: {
-        'TEL-01': { source: { component: 'card', from: 'old', port: 'E1' } },
+        'TEL-01': { source: { component: 'card', from: 'old', port: 'E1' } }
       },
       cards: { 'STD-NEW': { detail: '', group: 'scope', id: 'new', label: 'New', ports: {}, scopes: ['scope'] } },
       creations: {
-        'TEL-NEW': { family: 'family', source: 'a', sourcePort: 'E1', target: 'b', targetPort: 'W1' },
+        'TEL-NEW': { family: 'family', source: 'a', sourcePort: 'E1', target: 'b', targetPort: 'W1' }
       },
       labels: { 'TEL-01': 0.5, stale: 2 },
       portCounts: { 'STD-01': { north: 3 } },
       removals: { gone: {}, 'STD-01': {} },
-      routes: { 'TEL-01': [{ x: 0, y: 0 }, { x: 10, y: 0 }] },
-      text: { gone: { name: 'Gone' }, 'STD-01': { detail: 'Same', name: 'Different' } },
+      routes: {
+        'TEL-01': [
+          { x: 0, y: 0 },
+          { x: 10, y: 0 }
+        ]
+      },
+      text: { gone: { name: 'Gone' }, 'STD-01': { detail: 'Same', name: 'Different' } }
     })
     const authored = (key: string, field: string) => {
       if (key === 'TEL-01' && field === 'label') return 'TEL-01  ->  label: { along: 0.5 },'
@@ -72,7 +77,7 @@ describe('the canonical editor draft', () => {
     const swept = sweepEditorDraft(draft, {
       authored,
       authors: (key) => key === 'STD-NEW' || key === 'TEL-NEW',
-      knows: (key) => key === 'STD-01' || key === 'TEL-01',
+      knows: (key) => key === 'STD-01' || key === 'TEL-01'
     })
 
     expect(swept.attachments).toEqual({})
