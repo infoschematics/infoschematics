@@ -66,7 +66,7 @@ _Implementation surface: editing layers in `packages/view-studio/src/app/Infosch
 
 ### EDIT-034 — Selection does not imply mutation
 
-Selecting an artefact, flow, label, lane, zone, port or waypoint MUST NOT move or otherwise edit it. Selection and mutation MUST remain separate actions.
+Selecting an artefact, flow, label, region, port or waypoint MUST NOT move or otherwise edit it. Selection and mutation MUST remain separate actions.
 
 _Implementation surface: selection and handle contracts in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
@@ -106,9 +106,9 @@ A fabric with authored placement and ports MUST be selectable and editable throu
 
 _Implementation surface: placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`._
 
-### EDIT-079 — Design exposes the six-kind capability contract
+### EDIT-079 — Design exposes the five-kind capability contract
 
-Design MUST use discriminated Lane, Zone, Fabric, Card, Flow and Graphic selections shared with Canvas and View Model. Lane, Zone, Fabric, Card and Graphic MUST be pointer-selectable and keyboard-selectable, movable, resizable, property-editable, removable and reorderable. Flow MUST be pointer-selectable and keyboard-selectable, property-editable, removable and reorderable, but MUST use endpoint and waypoint tools instead of generic move or resize.
+Design MUST use discriminated Region, Fabric, Card, Flow and Graphic selections shared with Canvas and View Model. Region, Fabric, Card and Graphic MUST be pointer-selectable and keyboard-selectable, movable, resizable, property-editable, removable and reorderable. Flow MUST be pointer-selectable and keyboard-selectable, property-editable, removable and reorderable, but MUST use endpoint and waypoint tools instead of generic move or resize.
 
 The selected kind MUST determine the Properties controls. A stale or empty selection MUST render a total empty state rather than interpreting an identifier as another kind.
 
@@ -160,11 +160,11 @@ _Implementation surface: waypoint actions in `packages/view-studio/src/app/edito
 
 ### EDIT-080 — Artefact geometry follows kind constraints
 
-Lane movement and resize MUST change only `y` and `height`; Zone movement and resize MUST change only `x` and `width` within its owning Lane. Fabric, Card and Graphic boxes MUST move on both axes and respect View Model minima. Flow MUST retain route-specific editing.
+Region, Fabric, Card and Graphic boxes MUST move and resize on both axes and respect View Model minima. Flow MUST retain route-specific editing.
 
-Reorder MUST change authored order only inside the selected kind, with Zone restricted to its owning Lane. Studio MUST NOT expose cross-family z-order. Adapter interaction MUST direct movement to the wrapped Card and MUST NOT offer independent Adapter resize.
+Reorder MUST change authored order only inside the selected kind. Studio MUST NOT expose cross-family z-order. Adapter interaction MUST direct movement to the wrapped Card and MUST NOT offer independent Adapter resize.
 
-_Verification: Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover six-kind selection, constraints, actions and Flow or Adapter exclusions._
+_Verification: Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover five-kind selection, constraints, actions and Flow or Adapter exclusions._
 
 ## Undo and drafts
 
@@ -274,7 +274,7 @@ _Implementation surface: composition in `packages/view-studio/src/app/App.tsx` a
 
 ### EDIT-084 — Removal plans make consequences explicit
 
-Removing a Card or Fabric MUST include endpoint Flow removals before the owner. Applied Card removal MUST also account for Adapter Cards that wrap it. Removing a Lane MUST include its Zones. Studio MUST block Graphic removal while a Story Scene directly references the Graphic and expose the reason to the Producer.
+Removing a Card or Fabric MUST include endpoint Flow removals before the owner. Applied Card removal MUST also account for Adapter Cards that wrap it. Removing a Region MUST NOT cascade to any other artefact. Studio MUST block Graphic removal while a Story Scene directly references the Graphic and expose the reason to the Producer.
 
 The underlying materialiser MUST remain total when it receives a direct Graphic removal by clearing Story references and Scene focus entries atomically. This cleanup is a safety boundary, not permission for Studio to bypass the review block.
 

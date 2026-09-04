@@ -44,7 +44,7 @@ Use lighter variants for text and restrained emphasis, darker variants for trans
 
 ## Authored appearance and output policy
 
-Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, compact Cards and default Card metadata visibility, and standard Lane or Zone frame style, label placement, and label treatment. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
+Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, and compact Cards with default Card metadata visibility. A Region's frame style, fill, label placement and label treatment are authored on the Region record itself. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
 
 Output policy can reduce optional Card detail for the available space. Canvas and static SVG may override identity, stereotype, and description visibility without changing the authored definition. Compactness remains authored because it changes the Card's composition rather than merely revealing or hiding metadata.
 
@@ -52,9 +52,9 @@ Region geometry is shared View Model behaviour. A frame is independently absent,
 
 Domain and Scope communicate separate facts. Domain classifies a Card and supplies semantic colour. Scope controls applicability and filtering. A Card may use both, and changing the visible Scope set must not silently reclassify its Domain treatment. Colour must still be paired with labels and other non-colour evidence.
 
-Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
+Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, and unframed, unfilled Regions with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
 
-Ink is invariant behaviour, not an authored knob. Card and Zone-label text resolves dark or light ink from the relative luminance of the fill it sits on, so an author choosing a dark fill gets legible text in every renderer without recording a text colour. Flow-code annotation chips are a render option for hosts — deterministic output detail at the shared placement — and are likewise never part of the authored definition.
+Ink is invariant behaviour, not an authored knob. Card and Region-label text resolves dark or light ink from the relative luminance of the fill it sits on, so an author choosing a dark fill gets legible text in every renderer without recording a text colour. Flow-code annotation chips are a render option for hosts — deterministic output detail at the shared placement — and are likewise never part of the authored definition.
 
 ## Visual token ownership
 
@@ -88,11 +88,11 @@ The default surface is dark and low contrast, with depth established by borders,
 
 The artefact depths are visually distinct:
 
-- Lanes and Zones form the background geography.
+- Regions form the background geography.
 - Fabrics occupy the midground and remain visibly connectable.
 - Flows, Cards and Graphics occupy the foreground.
 
-Standard Cards use a consistent shape language: a dark or translucent fill, a meaningful border, a modest corner radius and enough separation from Flows beneath them. Fabrics, Lanes and Zones provide context without competing with Cards and Flows.
+Standard Cards use a consistent shape language: a dark or translucent fill, a meaningful border, a modest corner radius and enough separation from Flows beneath them. Fabrics and Regions provide context without competing with Cards and Flows.
 
 Glow is a focused state cue. It should not become a general surface treatment, and a decorative status dot should not be added where it communicates no state.
 
@@ -116,7 +116,7 @@ Adapter Cards remain visibly attached to the standard Card they wrap. Fabrics ca
 
 Every independently addressable artefact has a stable identity separate from its display label. An identity tag can help authoring, discussion and review, but should be optional in Present and static output.
 
-Lanes run across one axis and Zones subdivide them along the other. They describe geography rather than ownership of the foreground. A Card's placement, scope, domain and appearance can express different facts and are not required to agree visually.
+Regions are background panels — rows, columns or free boxes are shapes an author draws, not kinds the model knows. They describe geography rather than ownership of the foreground. A Card's placement, scope, domain and appearance can express different facts and are not required to agree visually.
 
 ## Flows and routes
 

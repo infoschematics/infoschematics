@@ -42,9 +42,9 @@ Canvas-only hit targets, drag handles, editing guides, and transient motion MAY 
 
 ### CANVAS-006 — Canvas resolves authored appearance through View Model
 
-Canvas MUST consume View Model's resolved visual treatment and region geometry rather than interpret authored appearance independently. It MUST render the selected surface and authored grid; absent, solid, dashed, and dotted Lane and Zone frames; independently plain or notched Region labels at the resolved placement; Card compactness; optional Card metadata; and Domain semantic colour. A Domain-classified Card MUST use its Domain colour and fill independently of Scope visibility; an unclassified Card MAY retain the existing Scope treatment as fallback.
+Canvas MUST consume View Model's resolved visual treatment and region geometry rather than interpret authored appearance independently. It MUST render the selected surface and authored grid; absent, solid, dashed, and dotted Region frames; independently plain or notched Region labels at the resolved placement; Card compactness; optional Card metadata; and Domain semantic colour. A Domain-classified Card MUST use its Domain colour and fill independently of Scope visibility; an unclassified Card MAY retain the existing Scope treatment as fallback.
 
-Absent appearance MUST render the backward-compatible defaults: neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels. An absent or hidden Region label MUST suppress a requested notch without changing the authored frame style. Label placement and rounded or notched outlines MUST use the framework-neutral geometry returned by View Model.
+Absent appearance MUST render the backward-compatible defaults: neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, and unframed, unfilled Regions with plain internal labels. An absent or hidden Region label MUST suppress a requested notch without changing the authored frame style. Label placement and rounded or notched outlines MUST use the framework-neutral geometry returned by View Model.
 
 The `cardDetails` output option MAY override authored identity, stereotype, and description visibility. It MUST NOT remove authored metadata or override Card compactness. The legacy boolean Design grid MUST remain an editing overlay independent of the authored grid treatment.
 
@@ -54,7 +54,7 @@ _Implementation surface: `packages/view-canvas/src/Canvas.tsx`, `packages/view-c
 
 The root SVG description MUST summarise visible Card identity, stereotype, and description. A Card's accessible label MUST retain those authored values even when output options hide their visual rows.
 
-Canvas MUST provide an accessible name for the complete Infoschematic and for interactive Lane, Zone, Card, and Flow elements. Hiding optional Card rows visually MUST NOT remove the Card's authored identity, stereotype, or description from its accessible SVG metadata. Domain colour, surface, and grid MUST NOT be the only source of meaning.
+Canvas MUST provide an accessible name for the complete Infoschematic and for interactive Region, Card, and Flow elements. Hiding optional Card rows visually MUST NOT remove the Card's authored identity, stereotype, or description from its accessible SVG metadata. Domain colour, surface, and grid MUST NOT be the only source of meaning.
 
 Representative treatment fixtures MUST prove the same resolved surface, grid, frame, label placement, Card detail, compactness, and Domain decisions as static SVG. Tests MAY compare semantic attributes and deterministic geometry rather than byte-identical React and string-rendered markup.
 

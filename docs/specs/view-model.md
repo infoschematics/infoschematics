@@ -128,17 +128,15 @@ _Verification: `packages/view-model/src/placement.test.ts` covers preferred, cle
 
 ### VIEW-020 — Selection and capabilities are discriminated by kind
 
-View Model MUST expose a discriminated selection for Lane, Zone, Fabric, Card, Flow and Graphic. Every selection MUST carry `kind`, stable `id`, geometry role and nullable authored `code`; Zone MUST also carry its owning `laneId`.
+View Model MUST expose a discriminated selection for Region, Fabric, Card, Flow and Graphic. Every selection MUST carry `kind`, stable `id`, geometry role and nullable authored `code`.
 
-Each kind MUST support create, select, property editing, remove and within-kind reorder. Lane, Zone, Fabric, Card and Graphic MUST support move and resize. Flow MUST NOT expose generic move or resize because its endpoint and waypoint operations own route geometry.
+Each kind MUST support create, select, property editing, remove and within-kind reorder. Region, Fabric, Card and Graphic MUST support move and resize. Flow MUST NOT expose generic move or resize because its endpoint and waypoint operations own route geometry.
 
 _Implementation surface: `ArtefactSelection`, `artefactCapabilities` and `artefactCan` in `packages/view-model/src/editable.ts`._
 
 ### VIEW-021 — Geometry operations preserve kind constraints
 
-Lane geometry MUST expose and change only `y` and `height`; applying it MUST keep panel `x` and `width` fixed while synchronising panel `y` and `height`. Zone geometry MUST expose and change only `x` and `width` within its owning Lane. A Zone operation MUST NOT reflow sibling Zones.
-
-Fabric, Card and Graphic geometry MUST use a box movable on both axes. Default resize minima MUST be 20 units for Lane height, 20 for Zone width, 40 by 40 for Fabric and Card, and 20 by 20 for Graphic. Invalid, stale or kind-mismatched geometry MUST be rejected rather than partially applied.
+Region, Fabric, Card and Graphic geometry MUST use a box movable and resizable on both axes; an authored Region corner radius MUST survive geometry changes. Default resize minima MUST be 20 by 20 for Region and Graphic, and 40 by 40 for Fabric and Card. Invalid, stale or kind-mismatched geometry MUST be rejected rather than partially applied.
 
 _Implementation surface: geometry records and `artefactResizeMinimums` in `packages/view-model/src/editable.ts`; immutable application in `packages/view-model/src/artefact-draft.ts`._
 
@@ -146,13 +144,13 @@ _Implementation surface: geometry records and `artefactResizeMinimums` in `packa
 
 Applying artefact operations MUST return a new `InfoschematicConfig` without mutating the host configuration or supplied serialisable values. Created and replacement values MUST be deep-copied. A rejected operation MUST leave the current materialised value unchanged and produce an indexed diagnostic.
 
-Create, property replacement, geometry, reorder and remove operations MUST apply in their supplied order. Callers MUST use deterministic dependency ordering before persistence or handoff. Reorder MUST change only the authored array for the selected kind; Zone reorder MUST remain inside its owning Lane. Flow property replacement MAY replace route points and other authored Flow properties, but generic Flow movement and resize MUST remain invalid.
+Create, property replacement, geometry, reorder and remove operations MUST apply in their supplied order. Callers MUST use deterministic dependency ordering before persistence or handoff. Reorder MUST change only the authored array for the selected kind. Flow property replacement MAY replace route points and other authored Flow properties, but generic Flow movement and resize MUST remain invalid.
 
 _Verification: `packages/view-model/src/artefact-draft.test.ts` covers all six kinds, immutability, authored order, property replacement, rejection and cascades._
 
 ### VIEW-023 — Removal materialisation preserves references
 
-Removing a Card MUST remove direct and transitive Adapter Cards that wrap it and every Flow ending on a removed Card. Removing a Fabric MUST remove its endpoint Flows. Removing a Lane MUST remove its nested Zones. Removing a Graphic MUST clear direct Story Scene Graphic references and remove it from Standalone Scene, Thematic Scene and Story Scene focus collections.
+Removing a Card MUST remove direct and transitive Adapter Cards that wrap it and every Flow ending on a removed Card. Removing a Fabric MUST remove its endpoint Flows. Removing a Region MUST NOT cascade to any other artefact. Removing a Graphic MUST clear direct Story Scene Graphic references and remove it from Standalone Scene, Thematic Scene and Story Scene focus collections.
 
 Unrelated Scopes, Flow families, renderer keys, renderer properties and authored route data MUST survive materialisation unchanged.
 

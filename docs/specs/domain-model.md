@@ -52,31 +52,31 @@ _Implementation surface: renderer references in `packages/domain-model/src/fabri
 
 ### DOMAIN-014 — Editable kinds retain distinct authored collections
 
-Lane, Zone, Fabric, Card, Flow and Graphic MUST remain distinct authored kinds. A Zone MUST belong to exactly one Lane's ordered `zones` collection. Every other kind MUST retain its own ordered collection in the Infoschematic definition. Reordering one kind MUST NOT imply cross-kind layering or move a Zone to another Lane.
+Region, Fabric, Card, Flow and Graphic MUST remain distinct authored kinds, each with its own ordered collection in the Infoschematic definition. Reordering one kind MUST NOT imply cross-kind layering.
 
-_Implementation surface: collections in `packages/domain-model/src/infoschematic.ts` and nested Zones in `packages/domain-model/src/lane.ts`._
+_Implementation surface: collections in `packages/domain-model/src/infoschematic.ts` and `packages/domain-model/src/region.ts`._
 
 ### DOMAIN-015 — Applied removal leaves valid authored references
 
-An applied configuration change MUST NOT retain a Flow whose source or target artefact was removed. Removing a Card MUST also remove Adapter Cards that directly or transitively wrap it before dependent Flows are retained. Removing a Lane MUST remove its owned Zones.
+An applied configuration change MUST NOT retain a Flow whose source or target artefact was removed. Removing a Card MUST also remove Adapter Cards that directly or transitively wrap it before dependent Flows are retained. Removing a Region MUST NOT cascade to any other artefact.
 
 A Graphic referenced directly by a Story Scene MUST either block the authored removal before application or clear the Story Scene reference atomically. Focus collections in Standalone Scenes, Thematic Scenes and Story Scenes MUST NOT retain the removed Graphic after an applied cleanup.
 
-_Implementation surface: relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/lane.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`._
+_Implementation surface: relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`._
 
 ## Geography
 
-### DOMAIN-007 — Lanes and zones state geography
+### DOMAIN-007 — Regions state geography
 
-Lanes and their zones MUST be authored independently from the artefacts placed over them. Zones within a lane describe contiguous geographic regions; they MUST NOT be treated as containment fences for artefacts.
+Regions MUST be authored independently from the artefacts placed over them. Regions describe geography; they MUST NOT be treated as containment fences for artefacts, and the model MUST record no containment between Regions — nesting is read from the geometry, and authored order is paint order.
 
-An artefact MAY cross a zone boundary. Its placement, rather than membership in a zone collection, determines where it appears.
+An artefact MAY cross a Region boundary. Its placement, rather than membership in any collection, determines where it appears.
 
-_Implementation surface: `packages/domain-model/src/lane.ts`, `packages/domain-model/src/zone.ts` and `packages/domain-model/src/infoschematic.ts`._
+_Implementation surface: `packages/domain-model/src/region.ts` and `packages/domain-model/src/infoschematic.ts`._
 
 ### DOMAIN-008 — Placed artefacts belong to the Infoschematic geography
 
-Cards and fabrics MUST carry explicit placement within the Infoschematic coordinate space. A fabric MAY span zones, but its placement MUST remain interpretable against the authored lanes and view box.
+Cards and fabrics MUST carry explicit placement within the Infoschematic coordinate space. A fabric MAY span Regions, but its placement MUST remain interpretable against the authored Regions and view box.
 
 _Implementation surface: `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/infoschematic.ts`._
 
@@ -84,11 +84,11 @@ _Implementation surface: `packages/domain-model/src/card.ts`, `packages/domain-m
 
 ### DOMAIN-016 — Authored appearance is serialisable intent
 
-An Infoschematic MAY author a neutral or blueprint surface, no grid or one of the standard grid treatments, and Card compactness and metadata-visibility defaults. A Lane or Zone MAY author an absent, solid, dashed, or dotted frame; an optional label at one of nine compass placements; and a plain or notched label treatment. Frame style, label placement, and label treatment MUST remain independent fields. Appearance MUST remain typed serialisable data and MUST NOT contain CSS, callbacks, renderer components, free coordinates, or derived geometry.
+An Infoschematic MAY author a neutral or blueprint surface, no grid or one of the standard grid treatments, and Card compactness and metadata-visibility defaults. A Region MAY author an absent, solid, dashed, or dotted frame at an opacity; an optional fill; and an optional label at one of nine compass placements, mounted internally or on the boundary with an along-edge offset. Frame, fill, label placement, and label mount MUST remain independent fields; the notched label treatment is resolved from a boundary mount over a visible frame rather than authored. Appearance MUST remain typed serialisable data and MUST NOT contain CSS, callbacks, renderer components, free coordinates, or derived geometry.
 
-Omitted appearance MUST normalise to a neutral surface, no authored grid, non-compact Cards, and hidden optional Card identity, stereotype, and description. A Lane MUST default to a solid frame with a plain label; a Zone MUST default to no frame with a plain label. Region placement defaults are resolved by View Model so every renderer receives the same treatment.
+Omitted appearance MUST normalise to a neutral surface, no authored grid, non-compact Cards, and hidden optional Card identity, stereotype, and description. A Region MUST default to no frame, no fill, and a plain internal label. Region placement defaults are resolved by View Model so every renderer receives the same treatment.
 
-_Implementation surface: `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/lane.ts`, `packages/domain-model/src/zone.ts`, and `packages/domain-core/src/index.ts`._
+_Implementation surface: `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/region.ts`, and `packages/domain-core/src/index.ts`._
 
 ### DOMAIN-017 — Domain classification is independent of Scope applicability
 
@@ -132,7 +132,7 @@ _Implementation surface: `scopes` and `scopeRule` in `packages/domain-model/src/
 
 ## Gaps
 
-- The package exposes the required data shapes but does not yet validate uniqueness of identifiers or codes, the existence of relationship targets, port availability, lane and zone continuity, or placement within geography.
+- The package exposes the required data shapes but does not yet validate uniqueness of identifiers or codes, the existence of relationship targets, port availability, region continuity, or placement within geography.
 - Code-family policies are intentionally host-defined; a reusable validator extension point has not yet been specified.
 - The relationship between a Card's singular `scope` and plural `scopes` is not yet explicit and needs a deliberate contract decision.
 - Renderer references have an explicit serialisability contract; source-boundary verification must continue to prevent executable host values entering authored examples.

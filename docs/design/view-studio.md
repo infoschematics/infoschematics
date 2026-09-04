@@ -23,7 +23,7 @@ Design and Direct use the complete authored Infoschematic rather than the filter
 
 ## Structured editing
 
-Studio offers choices the Infoschematic model already understands. It selects a Lane or Zone, chooses a Flow family, moves a waypoint or changes a renderer key; it does not expose arbitrary rotation, per-object paint, unrestricted shapes, fonts or z-order.
+Studio offers choices the Infoschematic model already understands. It selects a Region, chooses a Flow family, moves a waypoint or changes a renderer key; it does not expose arbitrary rotation, per-object paint, unrestricted shapes, fonts or z-order.
 
 Where the model constrains a value, Studio prevents an invalid choice rather than accepting it and warning later. Where a value is derived, Studio changes the authored input from which it is derived.
 
@@ -31,22 +31,21 @@ This makes adding a new artefact kind deliberate. The model, vocabulary and rend
 
 ## Artefact capabilities
 
-Design uses one discriminated capability contract for the six authored kinds. A capability means the operation is available through the shared draft pipeline; the geometry role still determines what that operation may change.
+Design uses one discriminated capability contract for the five authored kinds. A capability means the operation is available through the shared draft pipeline; the geometry role still determines what that operation may change.
 
 | Kind | Create | Select | Move | Resize | Properties | Remove | Reorder |
 | ---- | ------ | ------ | ---- | ------ | ---------- | ------ | ------- |
-| Lane | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
-| Zone | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Region | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | Fabric | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | Card | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | Flow | Yes | Yes | No | No | Yes | Yes | Yes |
 | Graphic | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 
-A selection always carries `kind`, stable `id`, geometry role and nullable authored `code`. Zone selection additionally carries its owning `laneId`. This prevents a stale identifier from being interpreted against the wrong collection and lets Canvas, Properties and Changes share one selection value.
+A selection always carries `kind`, stable `id`, geometry role and nullable authored `code`. This prevents a stale identifier from being interpreted against the wrong collection and lets Canvas, Properties and Changes share one selection value.
 
-Lane movement and resize change only `y` and `height`; the Lane panel follows those values while retaining its authored `x` and `width`. Zone movement and resize change only `x` and `width` within the owning Lane. Fabrics, Cards and Graphics use box geometry and move on both axes. The minimum dimensions are 20 units for Lane height, 20 for Zone width, 40 by 40 for Fabric and Card, and 20 by 20 for Graphic. Flow geometry belongs to endpoint, waypoint and route operations rather than a generic box gesture.
+Regions, Fabrics, Cards and Graphics use box geometry and move and resize on both axes; an authored Region corner radius survives the change. The minimum dimensions are 20 by 20 for Region and Graphic, and 40 by 40 for Fabric and Card. Flow geometry belongs to endpoint, waypoint and route operations rather than a generic box gesture.
 
-Reordering changes authored array order only within the selected kind. A Zone can reorder only among Zones in its owning Lane. The operation never introduces cross-family z-order or lets an object move between the fixed geographic, artefact, Flow and Graphic depths.
+Reordering changes authored array order only within the selected kind. The operation never introduces cross-family z-order or lets an object move between the fixed geographic, artefact, Flow and Graphic depths.
 
 ## Grid and Canvas
 
@@ -54,7 +53,7 @@ Design uses one presentation grid for Cards, Flow waypoints, ports and labels. A
 
 The grid fills the Canvas coordinate system exactly and sits above geographic fills but below the artefacts it helps align. Alignment guides remain separate: the grid establishes rhythm, while guides align the edited item with a particular edge, centre, boundary or label.
 
-The Canvas has an explicit boundary distinct from any Lane or Zone. Moving an artefact towards that edge should make the available extent clear.
+The Canvas has an explicit boundary distinct from any Region. Moving an artefact towards that edge should make the available extent clear.
 
 Grid interval and Canvas extent are product-level configuration or source decisions, not casual per-selection controls. Exposing them alongside ordinary placement would make it easy to invalidate the system used by routes and ports.
 
@@ -62,7 +61,7 @@ Grid interval and Canvas extent are product-level configuration or source decisi
 
 Studio has one primary selection unless a concrete operation requires more. The selected kind determines which structured controls appear.
 
-- Selecting a Lane or Zone exposes its extent and geographic role.
+- Selecting a Region exposes its extent and geographic role.
 - Selecting a Fabric or Card exposes identity, text, placement, renderer properties and ports.
 - Selecting a Flow exposes identity, endpoints, family, label and route.
 - Selecting a waypoint exposes its position and route operations.
@@ -78,7 +77,7 @@ The Canvas itself should remain the primary way to find visual artefacts. A para
 
 Every selected visual artefact reports its position in Canvas units, even where only part of its extent is editable. Numeric entry and dragging are two inputs to the same placement operation and should produce the same derived result.
 
-Lanes and Zones are geography, not freely moving foreground artefacts. A Card remains within its Lane while it can move between Zones where the authored model permits. The useful rule is: clamp to the Lane and derive the Zone from the resulting position.
+Regions are geography, not freely moving foreground artefacts. A Card sits over whatever Regions its position places it in: the position is the claim, and there is no membership declaration to drift from it.
 
 Moving a Card carries the things structurally attached to it:
 
@@ -162,7 +161,7 @@ One serialisable draft contains typed artefact operations alongside the establis
 
 Change rows use deterministic phase and dependency order: creates precede updates, updates precede removals; containers precede dependants during creation and dependants precede owners during removal. Updates retain fixed kind depth and stable owner, authored index, field and identity ordering. Arrival timing does not become source order.
 
-Removal planning and materialisation keep relationships safe. Applied Card removal also removes wrapping Adapter Cards and every Flow ending on any removed Card; applied Fabric removal removes its endpoint Flows; applied Lane removal removes its Zones. Studio blocks an explicit Graphic removal while a Story Scene directly references it so the Producer can resolve the narrative choice. The framework-neutral materialiser also clears Graphic references and focus entries if it receives such an operation directly, keeping preview and handoff total rather than emitting a dangling reference.
+Removal planning and materialisation keep relationships safe. Applied Card removal also removes wrapping Adapter Cards and every Flow ending on any removed Card; applied Fabric removal removes its endpoint Flows; applied Region removal cascades to nothing. Studio blocks an explicit Graphic removal while a Story Scene directly references it so the Producer can resolve the narrative choice. The framework-neutral materialiser also clears Graphic references and focus entries if it receives such an operation directly, keeping preview and handoff total rather than emitting a dangling reference.
 
 Design renders complete authored content with the materialised draft layered into a derived runtime. Creates, movement, resize, property replacement, authored reordering and safe removal are visible before handoff without mutating the host configuration. Existing component-offset, route and waypoint drafts remain the final transient overlay. Present continues to resolve its active Story Graphic independently.
 

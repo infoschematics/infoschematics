@@ -34,7 +34,7 @@ Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and 
 
 ### SVG-007 — Static output honours resolved visual treatments
 
-Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface and grid; absent, solid, dashed, and dotted Lane and Zone frames; independently plain or notched Region labels and their placement; Card compactness; optional Card metadata; and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, solid-framed Lanes with plain labels, and unframed Zones with plain labels.
+Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface and grid; absent, solid, dashed, and dotted Region frames; independently plain or notched Region labels and their placement; Card compactness; optional Card metadata; and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, and unframed, unfilled Regions with plain labels.
 
 The `cardDetails` option MAY override identity, stereotype, and description visibility without mutating authored data. It MUST NOT override Card compactness. Domain colour MUST remain independent of Scope visibility, with existing Scope treatment available as the fallback for an unclassified Card.
 
@@ -60,7 +60,7 @@ _Verification: `packages/render-svg/src/index.test.ts` covers default-off output
 
 ### SVG-010 — Ink resolves from the fill it sits on
 
-Card and Zone-label text colour MUST resolve through View Model's readable-ink resolution against the fill the text is drawn over, not against the surface treatment. Output MUST expose the resolved ink as a `data-ink` attribute on Card groups and Zone labels so Canvas and static SVG can be compared without browser CSS, and Canvas MUST resolve the same ink from the same fills. Lane labels and the Flow pipe underlay MAY remain surface-conditional because they sit on the surface itself.
+Card and Region-label text colour MUST resolve through View Model's readable-ink resolution against the fill the text is drawn over, not against the surface treatment. Output MUST expose the resolved ink as a `data-ink` attribute on Card groups and on plain Region labels drawn over an authored fill so Canvas and static SVG can be compared without browser CSS, and Canvas MUST resolve the same ink from the same fills. Labels on unfilled Regions and the Flow pipe underlay MAY remain surface-conditional because they sit on the surface itself.
 
 _Verification: `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers._
 

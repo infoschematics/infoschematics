@@ -18,7 +18,7 @@ This produces a 1200-by-800 blank canvas with empty artefact, Scene, Theme, and 
 
 Populate the structural `infoschematic` field:
 
-- `lanes` and `zones` establish background geography;
+- `regions` establish background geography;
 - `fabrics` and `cards` establish focusable artefacts;
 - `flows` connect Cards and Fabrics through named ports and points;
 - `graphics` register visual material that Scenes may reveal;
@@ -46,17 +46,21 @@ infoschematic: {
 }
 ```
 
-A Lane or Zone can select an absent, solid, dashed, or dotted frame independently of its label placement and label treatment:
+A Region authors its frame, fill and label treatment on the record itself, each independently of the others:
 
 ```ts
-appearance: {
-  frame: 'dashed',
-  label: 'north-east',
-  labelTreatment: 'notched'
+{
+  id: 'delivery',
+  label: 'Delivery',
+  box: { x: 20, y: 20, width: 1680, height: 610, radius: 18 },
+  frame: { style: 'dashed' },
+  fill: '#0d2134aa',
+  labelMount: 'boundary',
+  labelPlacement: 'north-east'
 }
 ```
 
-Use `frame: 'none'`, `'solid'`, `'dashed'`, or `'dotted'`. Use `labelTreatment: 'plain'` or `'notched'` independently. Place the label at `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`; use `label: 'none'` to hide it. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Lanes retain solid frames and plain labels, Zones remain unframed with plain labels, Cards remain non-compact, and no authored grid is shown.
+Omit `frame` for no frame, or use `style: 'solid'`, `'dashed'`, or `'dotted'` with an optional `opacity`. Omit `fill` for no fill; alpha travels in the hex. Place the label at `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`; use `labelPlacement: 'none'` to hide it, and `labelOffset` to pull it along its edge. A label mounted on the `boundary` sits on the frame line and is notched out of a visible frame; an `internal` label (the default) is set down inside the Region. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Cards remain non-compact and no authored grid is shown; a Region with nothing authored beyond its box and label is unframed and unfilled with a plain label.
 
 Use `grid: 'none'`, `'major'`, `'major-plus-minor'`, or `'dots'`. The `dots` treatment marks each grid intersection instead of drawing line strokes, at the same `gridSize` spacing as the line grids.
 
@@ -100,7 +104,7 @@ renderInfoschematicSvg(config, {
 
 Output detail overrides affect only identity, stereotype, and description visibility. Shared corner geometry, notch padding, type scales, fallback colours, and Card compactness are not output-detail knobs.
 
-Static SVG hosts can additionally pass `renderInfoschematicSvg(config, { annotations: true })` to draw each visible Flow's code chip at the shared annotation placement; a Flow may pin its chip with `label: { along: 0.5 }`. Text ink over Card and Zone fills resolves automatically from each fill's luminance — author the fill and the renderers choose legible dark or light ink; there is no authored text-colour knob.
+Static SVG hosts can additionally pass `renderInfoschematicSvg(config, { annotations: true })` to draw each visible Flow's code chip at the shared annotation placement; a Flow may pin its chip with `label: { along: 0.5 }`. Text ink over Card and Region fills resolves automatically from each fill's luminance — author the fill and the renderers choose legible dark or light ink; there is no authored text-colour knob.
 
 ## Add presentation material
 
@@ -122,7 +126,7 @@ Open Design when you want the complete authored Infoschematic rather than the Au
 
 The Library provides Card, Fabric and Flow starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
 
-Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Lane removes its Zones. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
+Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
 
 ## Keep configuration portable
 
@@ -132,4 +136,4 @@ Removing a Card or Fabric also removes Flows that would lose an endpoint; removi
 - Keep React components, browser APIs, fetched documents, and derived maps out of configuration.
 - Let the host own contract files and other static assets addressed by configuration URLs.
 
-The [`examples/is-blank`](../../examples/is-blank/) package is the minimum executable reference, hosted at `/examples/blank/`. The [`examples/is-infoschematics`](../../examples/is-infoschematics/) package is a substantial self-describing reference: its Lanes, Zones, Cards, Flows, Scenes, and Story explain the repository's ownership and dependency direction. The website hosts that same serialisable definition in Studio at `/examples/infoschematics/` and renders it as deterministic SVG on the homepage.
+The [`examples/is-blank`](../../examples/is-blank/) package is the minimum executable reference, hosted at `/examples/blank/`. The [`examples/is-infoschematics`](../../examples/is-infoschematics/) package is a substantial self-describing reference: its Regions, Cards, Flows, Scenes, and Story explain the repository's ownership and dependency direction. The website hosts that same serialisable definition in Studio at `/examples/infoschematics/` and renders it as deterministic SVG on the homepage.

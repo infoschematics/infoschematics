@@ -12,8 +12,7 @@ The **product** is an Infoschematic together with its Standalone Scenes, Themes,
 | ------------------- | ------------- |
 | Infoschematic | schematic, structural diagram |
 | Infoschematic artefact | element, visual element |
-| Lane | swimlane, band, tier |
-| Zone | column, segment |
+| Region | lane, zone, swimlane, band, tier, column, segment |
 | Fabric | backdrop, plane, region, transport |
 | Standard Card | node, box, service box |
 | Adapter Card | sidecar, wrapper |
@@ -67,14 +66,13 @@ An **Infoschematic** is the complete structural diagram. It establishes what exi
 
 An Infoschematic contains exactly six primary artefact kinds:
 
-- **Lane** — a full-width background region.
-- **Zone** — a named subdivision of a Lane.
+- **Region** — a background panel: an explicit box with an optional frame, an optional fill, and a label treatment.
 - **Fabric** — a midground artefact that can participate in Flows and be focused by a Scene.
 - **Card** — a box-like foreground artefact. An Adapter Card wraps a Standard Card without taking an independent position.
 - **Flow** — a foreground artefact showing movement between Cards and Fabrics.
 - **Graphic** — a foreground artefact normally hidden until a Scene makes it visible.
 
-Routes, Waypoints, and Ports describe Flow geometry; they are not additional artefact kinds. Lanes and Zones establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
+Routes, Waypoints, and Ports describe Flow geometry; they are not additional artefact kinds. Regions establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
 
 Every independently identifiable artefact has a stable machine identifier. Human-readable codes are authored discussion handles and do not change merely because an item moves within a list.
 
