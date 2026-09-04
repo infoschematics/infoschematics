@@ -20,7 +20,7 @@ describe("defineInfoschematic", () => {
         scopes: [],
         domains: [],
 				flowFamilies: [],
-				lanes: [],
+				regions: [],
 				cards: [],
 				fabrics: [],
 				points: [],

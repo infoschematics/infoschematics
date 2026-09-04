@@ -3,8 +3,6 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 import type {
   GridTreatment,
   InfoschematicAppearanceConfig,
-  RegionAppearanceConfig,
-  RegionFrameTreatment,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
@@ -12,14 +10,14 @@ import type {
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
-import type { ZoneConfig } from '@infoschematics/domain-model/zone'
+import type { RegionConfig, RegionFrameStyle, RegionLabelMount } from '@infoschematics/domain-model/region'
 
 describe('authored appearance contracts', () => {
   it('keeps every treatment a closed serialisable value', () => {
     expectTypeOf<GridTreatment>().toEqualTypeOf<'none' | 'major' | 'major-plus-minor'>()
     expectTypeOf<SurfaceTreatment>().toEqualTypeOf<'neutral' | 'blueprint'>()
-    expectTypeOf<RegionFrameTreatment>().toEqualTypeOf<'none' | 'solid' | 'dashed' | 'dotted'>()
+    expectTypeOf<RegionFrameStyle>().toEqualTypeOf<'solid' | 'dashed' | 'dotted'>()
+    expectTypeOf<RegionLabelMount>().toEqualTypeOf<'boundary' | 'internal'>()
     expectTypeOf<RegionLabelFrameTreatment>().toEqualTypeOf<'plain' | 'notched'>()
     expectTypeOf<RegionLabelPlacement>().toEqualTypeOf<
       | 'north-west'
@@ -40,33 +38,28 @@ describe('authored appearance contracts', () => {
       card: { compact: true, identity: false, stereotype: true, description: false },
     } satisfies InfoschematicAppearanceConfig
     const region = {
-      frame: 'dashed',
-      label: 'north-east',
-      labelTreatment: 'notched',
-    } satisfies RegionAppearanceConfig
+      id: 'application',
+      label: 'Application',
+      box: { x: 0, y: 0, width: 320, height: 180, radius: 12 },
+      frame: { style: 'dashed', opacity: 0.6 },
+      fill: '#eef',
+      labelPlacement: 'north-east',
+      labelMount: 'boundary',
+      labelOffset: 8,
+    } satisfies RegionConfig
 
     expect(JSON.parse(JSON.stringify({ appearance, region }))).toEqual({ appearance, region })
   })
 
   it('keeps region, Card, Domain, and Scope meanings distinct', () => {
-    const zone = {
-      id: 'application',
-      label: 'Application',
-      x: 0,
-      width: 320,
-      fill: '#eef',
-      appearance: { frame: 'dotted', label: 'south', labelTreatment: 'plain' },
-    } satisfies ZoneConfig
-    const lane = {
+    const region = {
       id: 'software',
       label: 'Software',
-      y: 0,
-      height: 180,
-      labelY: 20,
-      panel: { x: 0, y: 0, width: 320, height: 180, radius: 12 },
-      zones: [zone],
-      appearance: { frame: 'solid', label: 'north-west', labelTreatment: 'notched' },
-    } satisfies LaneConfig
+      box: { x: 0, y: 0, width: 320, height: 180, radius: 12 },
+      frame: { style: 'solid' },
+      labelPlacement: 'north-west',
+      labelMount: 'boundary',
+    } satisfies RegionConfig
     const domain = {
       id: 'platform',
       label: 'Platform',
@@ -85,6 +78,6 @@ describe('authored appearance contracts', () => {
       placement: { box: { x: 40, y: 40, width: 160, height: 90 } },
     } satisfies CardConfig
 
-    expect(JSON.parse(JSON.stringify({ card, domain, lane }))).toEqual({ card, domain, lane })
+    expect(JSON.parse(JSON.stringify({ card, domain, region }))).toEqual({ card, domain, region })
   })
 })

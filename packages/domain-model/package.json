@@ -31,15 +31,14 @@
     "./geometry": { "types": "./dist/geometry.d.ts", "import": "./dist/geometry.js" },
     "./infoschematic": { "types": "./dist/infoschematic.d.ts", "import": "./dist/infoschematic.js" },
     "./interface": { "types": "./dist/interface.d.ts", "import": "./dist/interface.js" },
-    "./lane": { "types": "./dist/lane.d.ts", "import": "./dist/lane.js" },
     "./metadata": { "types": "./dist/metadata.d.ts", "import": "./dist/metadata.js" },
     "./point": { "types": "./dist/point.d.ts", "import": "./dist/point.js" },
     "./ports": { "types": "./dist/ports.d.ts", "import": "./dist/ports.js" },
+    "./region": { "types": "./dist/region.d.ts", "import": "./dist/region.js" },
     "./scene": { "types": "./dist/scene.d.ts", "import": "./dist/scene.js" },
     "./scope": { "types": "./dist/scope.d.ts", "import": "./dist/scope.js" },
     "./specification-group": { "types": "./dist/specification-group.d.ts", "import": "./dist/specification-group.js" },
     "./story": { "types": "./dist/story.d.ts", "import": "./dist/story.js" },
-    "./theme": { "types": "./dist/theme.d.ts", "import": "./dist/theme.js" },
-    "./zone": { "types": "./dist/zone.d.ts", "import": "./dist/zone.js" }
+    "./theme": { "types": "./dist/theme.d.ts", "import": "./dist/theme.js" }
   }
 }

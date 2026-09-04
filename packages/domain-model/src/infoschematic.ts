@@ -7,8 +7,8 @@ import type { FlowConfig } from "./flow.ts";
 import type { Box } from "./geometry.ts";
 import type { GraphicConfig } from "./graphic.ts";
 import type { InterfaceConfig } from "./interface.ts";
-import type { LaneConfig } from "./lane.ts";
 import type { PointConfig } from "./point.ts";
+import type { RegionConfig } from "./region.ts";
 import type { ScopeConfig } from "./scope.ts";
 import type { SpecificationGroupConfig } from "./specification-group.ts";
 
@@ -18,7 +18,7 @@ export type InfoschematicDefinition = {
   scopes: readonly ScopeConfig[];
   domains?: readonly DomainConfig[];
   flowFamilies: readonly FlowFamilyConfig[];
-  lanes: readonly LaneConfig[];
+  regions: readonly RegionConfig[];
   cards: readonly CardConfig[];
   fabrics: readonly FabricConfig[];
   points: readonly PointConfig[];

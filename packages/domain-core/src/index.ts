@@ -58,7 +58,7 @@ export const defineInfoschematic = (
       scopes: input.infoschematic?.scopes ?? [],
       domains: input.infoschematic?.domains ?? [],
       flowFamilies: input.infoschematic?.flowFamilies ?? [],
-      lanes: input.infoschematic?.lanes ?? [],
+      regions: input.infoschematic?.regions ?? [],
       cards: input.infoschematic?.cards ?? [],
       fabrics: input.infoschematic?.fabrics ?? [],
       points: input.infoschematic?.points ?? [],

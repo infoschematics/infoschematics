@@ -3,8 +3,6 @@ import type {
   CardDetailDefaults,
   GridTreatment,
   InfoschematicAppearanceConfig,
-  RegionAppearanceConfig,
-  RegionFrameTreatment,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
@@ -24,7 +22,6 @@ import type { GraphicConfig } from "@infoschematics/domain-model/graphic";
 import type { Box, Point } from "@infoschematics/domain-model/geometry";
 import type { InfoschematicDefinition } from "@infoschematics/domain-model/infoschematic";
 import type { InterfaceConfig } from "@infoschematics/domain-model/interface";
-import type { LaneConfig } from "@infoschematics/domain-model/lane";
 import type { InfoschematicMetadata } from "@infoschematics/domain-model/metadata";
 import type { PointConfig } from "@infoschematics/domain-model/point";
 import type {
@@ -32,6 +29,12 @@ import type {
 	PortId,
 	Side,
 } from "@infoschematics/domain-model/ports";
+import type {
+  RegionConfig,
+  RegionFrameConfig,
+  RegionFrameStyle,
+  RegionLabelMount,
+} from "@infoschematics/domain-model/region";
 import type {
   CalloutConfig,
   FocusConfig,
@@ -41,24 +44,23 @@ import type { ScopeConfig } from "@infoschematics/domain-model/scope";
 import type { SpecificationGroupConfig } from "@infoschematics/domain-model/specification-group";
 import type { StoryConfig, StorySceneConfig } from "@infoschematics/domain-model/story";
 import type { ThematicSceneConfig, ThemeConfig } from "@infoschematics/domain-model/theme";
-import type { ZoneConfig } from "@infoschematics/domain-model/zone";
 
 type PublicContracts = [
   SurfaceTreatment,
   GridTreatment,
-  RegionFrameTreatment,
+  RegionFrameStyle,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
-  RegionAppearanceConfig,
+  RegionFrameConfig,
   CardDetailDefaults,
   InfoschematicAppearanceConfig,
   DomainConfig,
   InfoschematicMetadata,
   ScopeConfig,
   FlowFamilyConfig,
-  ZoneConfig,
-  LaneConfig,
+  RegionLabelMount,
+  RegionConfig,
   InterfaceConfig,
   SpecificationGroupConfig,
   ArtefactIdentity,
