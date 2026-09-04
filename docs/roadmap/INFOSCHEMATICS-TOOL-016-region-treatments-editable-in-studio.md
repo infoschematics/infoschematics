@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-016
 area: TOOL
-title: Region treatments editable in the Studio
+title: Edit region treatments
 theme: tool
 horizon: soon
 status: draft
@@ -27,3 +27,7 @@ This item adds editing surface for the existing `RegionConfig` fields only; it d
 - Decide the control shapes: frame style as a choice including none, opacity as a number, fill as a colour (alpha in the hex, matching the authored convention), label placement as `none` plus the nine bearings, mount as boundary/internal, offset as a number.
 - Keep the round trip serialisable: the panel edits produce the same replace operations the editing stack already orders (`packages/view-studio/src/app/editor/artefact-operations.ts`).
 - Extend `DetailsPanel.artefacts` tests to cover a treatment edit per field, mirroring the existing label-rename coverage.
+
+## Discussion
+
+Confirm the control shapes and round-trip expectations before selecting implementation.

@@ -1,10 +1,11 @@
 ---
 id: INFOSCHEMATICS-TOOL-018
 area: TOOL
-title: Region fill, frame and background variety
+title: Expand region treatments
 theme: tool
-horizon: later
+horizon: future
 status: draft
+candidate: true
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -30,3 +31,7 @@ Candidate ideas to triage, each a design decision before any code:
 - Frame variety: double strokes, per-side frames (a rule under a header region), corner treatments beyond one radius.
 - Background as a first-class idea: whether a canvas-level background record subsumes the "fill-only region as backdrop" idiom, and how surface, background and Region fills layer.
 - Label metrics as tokens: promote the geometry constants to named tokens the visual-tokens gate owns, and decide whether notch sizing should use real text measurement rather than the character-width estimate.
+
+## Discussion
+
+Choose which treatment ideas deserve a behaviour contract before authorising implementation.

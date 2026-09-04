@@ -1,10 +1,11 @@
 ---
 id: INFOSCHEMATICS-TOOL-017
 area: TOOL
-title: Region extents derived for matrix geographies
+title: Derive region extents
 theme: tool
-horizon: later
+horizon: future
 status: draft
+candidate: true
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -27,3 +28,7 @@ Whatever mechanism is chosen must stay serialisable and must not reintroduce lan
 - Decide the mechanism as a design question first: a reference field (`within: 'media-streaming'` supplying the cross-axis extent), authoring-time helpers in the definition package that expand to explicit boxes, or true render-time clipping.
 - Decide what the editor does when a referenced region moves or resizes — whether dependent extents follow live or are re-derived on save.
 - Weigh whether the two authored consumers (the IBC definition and `examples/is-infoschematics`) actually earn the mechanism, or whether a documented authoring idiom (shared constants in the definition source) is enough; that answer can close this item without code.
+
+## Discussion
+
+Decide whether the authoring cost justifies a new derivation mechanism or only documented shared constants.
