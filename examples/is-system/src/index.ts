@@ -78,16 +78,15 @@ export const systemExample = defineInfoschematic({
         prefix: 'STG',
       },
     ],
-    lanes: [
+    regions: [
       {
-        appearance: { frame: 'solid', label: 'north-west', labelTreatment: 'notched' },
-        height: 300,
+        box: { height: 300, radius: 12, width: 1360, x: 20, y: 140 },
+        fill: '#12273b24',
+        frame: { style: 'solid' },
         id: 'journey',
         label: 'Infoschematic',
-        labelY: 168,
-        panel: { height: 300, radius: 12, width: 1360, x: 20, y: 140 },
-        y: 140,
-        zones: [],
+        labelMount: 'boundary',
+        labelPlacement: 'north-west',
       },
     ],
     cards: [
