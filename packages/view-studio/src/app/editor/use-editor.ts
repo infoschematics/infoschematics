@@ -188,10 +188,8 @@ const sameValue = (left: unknown, right: unknown) => left === right || JSON.stri
 
 const selectionKey = (selection: ArtefactSelection): string => {
   switch (selection.kind) {
-    case 'lane':
-      return `lane:${selection.id}`
-    case 'zone':
-      return `zone:${selection.laneId}:${selection.id}`
+    case 'region':
+      return `region:${selection.id}`
     case 'graphic':
       return `graphic:${selection.id}`
     case 'fabric':
@@ -204,14 +202,8 @@ const selectionKey = (selection: ArtefactSelection): string => {
 const selectionForCreation = <K extends ArtefactKind>(
   kind: K,
   value: ArtefactValueByKind[K],
-  ownerId?: string,
 ): ArtefactSelection | undefined => {
   const code = 'code' in value && typeof value.code === 'string' ? value.code : null
-  if (kind === 'zone') {
-    if (!ownerId) return undefined
-    return { code, geometry: 'zone', id: value.id, kind, laneId: ownerId }
-  }
-  if (kind === 'lane') return { code, geometry: 'lane', id: value.id, kind }
   if (kind === 'flow') return { code, geometry: 'route', id: value.id, kind }
   return { code, geometry: 'box', id: value.id, kind }
 }
@@ -221,13 +213,8 @@ const artefactCount = (
   target: ArtefactSelection,
 ) => {
   switch (target.kind) {
-    case 'lane':
-      return config.infoschematic.lanes.length
-    case 'zone':
-      return (
-        config.infoschematic.lanes.find((entry) => entry.id === target.laneId)
-          ?.zones.length ?? 0
-      )
+    case 'region':
+      return config.infoschematic.regions.length
     case 'fabric':
       return config.infoschematic.fabrics.length
     case 'card':
@@ -242,10 +229,7 @@ const artefactCount = (
 const sameArtefactCollection = (
   left: ArtefactSelection,
   right: ArtefactSelection,
-) =>
-  left.kind === right.kind &&
-  (left.kind !== 'zone' ||
-    (right.kind === 'zone' && left.laneId === right.laneId))
+) => left.kind === right.kind
 
 /** Which port each end of a flow has been moved to, where either has. */
 /**
@@ -771,10 +755,6 @@ export function useEditor(
     const geometry = details.geometry
     const offset = (() => {
       switch (geometry.role) {
-        case 'lane':
-          return { dx: 0, dy: point.y - (geometry.y + geometry.height / 2) }
-        case 'zone':
-          return { dx: point.x - (geometry.x + geometry.width / 2), dy: 0 }
         case 'box':
           return {
             dx: point.x - (geometry.box.x + geometry.box.width / 2),
@@ -892,9 +872,8 @@ export function useEditor(
     kind: K,
     value: ArtefactValueByKind[K],
     index: number,
-    ownerId?: string,
   ) => {
-    const target = selectionForCreation(kind, value, ownerId)
+    const target = selectionForCreation(kind, value)
     if (!target) return undefined
     const operation = createArtefactOperation(
       target as never,

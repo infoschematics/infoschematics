@@ -543,7 +543,7 @@ h2 {
   width: 100%;
 }
 
-.infoschematic-zone-label {
+.infoschematic-region-label {
   fill: #ffffff65;
   font:
     600 12px "DM Mono",
@@ -551,26 +551,24 @@ h2 {
   letter-spacing: 1.5px;
 }
 
-/* The outline is a path with a gap rather than a rect, so the lane's name can
-   sit on the border like a legend. */
-.infoschematic-group path {
-  fill: #12273b24;
-  stroke: #b5c4d54d;
-  stroke-width: 1.5px;
-}
-
-/* The lane outline is a filled path drawn over the zones, so it swallowed every
-   click meant for the zone beneath it. Only its legend is interactive. */
-.infoschematic-group path {
-  pointer-events: none;
-}
-
-.infoschematic-group text {
+/* A boundary-mounted title sits on the frame line the notch breaks, so it
+   takes the frame's brighter voice. */
+[data-label-treatment="notched"] .infoschematic-region-label {
   fill: #9ed9ff;
   font:
     600 13px "DM Mono",
     monospace;
   letter-spacing: 1.6px;
+}
+
+/* The outline is a path with a gap rather than a rect, so a region's name can
+   sit on the border like a legend. Frames never swallow clicks meant for the
+   content beneath them. */
+.infoschematic-region path {
+  fill: none;
+  stroke: #b5c4d54d;
+  stroke-width: 1.5px;
+  pointer-events: none;
 }
 
 .fabric-shell {

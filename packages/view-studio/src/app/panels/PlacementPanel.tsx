@@ -5,7 +5,7 @@ const boxAxes: readonly PlacementAxis[] = ['x', 'y', 'width', 'height']
 // Dragging cannot reliably land on a chosen coordinate, so a box states where it
 // sits and lets the number be typed where the model allows it. Every box states
 // all four numbers in the same order regardless of which are editable, so a
-// lane or a zone reads against the geography it sits in rather than making the
+// region reads against the geography it sits in rather than making the
 // reader work it out from what is missing. A route's position is its
 // waypoints', so it states its endpoints and how many it has instead.
 // Everything that is not a box states itself as plain rows. A port and a

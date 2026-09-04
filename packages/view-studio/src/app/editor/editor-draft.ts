@@ -21,9 +21,9 @@ export const editorDraftVersion = 1 as const
 /**
  * One serialisable draft value for persistence, history and review output.
  *
- * `artefactOperations` is the additive seam for the six-kind editor. Existing
- * Card and Flow drafts retain their settled public hook API while later Lane,
- * Zone, Fabric, Card, Flow and Graphic operations enter the same lifecycle.
+ * `artefactOperations` is the additive seam for the five-kind editor. Existing
+ * Card and Flow drafts retain their settled public hook API while later Region,
+ * Fabric, Card, Flow and Graphic operations enter the same lifecycle.
  */
 export type EditorDraft = {
   artefactOperations: readonly ArtefactOperation[]

@@ -217,8 +217,7 @@ export const detailsArtefactContexts = (
     ...definition.fabrics,
     ...definition.flows,
     ...definition.graphics,
-    ...definition.lanes,
-    ...definition.lanes.flatMap((lane) => lane.zones),
+    ...definition.regions,
   ]
   const usedIds = [
     ...allAuthored.map((value) => value.id),
@@ -252,24 +251,6 @@ export const detailsArtefactContexts = (
       ),
     ),
   }
-  const selectedLane = (() => {
-    const selected = editor.selectedArtefact
-    if (selected?.kind === 'lane') {
-      const value = editor.artefactValue
-      if (value && 'zones' in value) {
-        return { height: value.height, id: selected.id, y: value.y }
-      }
-      const lane = definition.lanes.find((candidate) => candidate.id === selected.id)
-      return lane ? { height: lane.height, id: lane.id, y: lane.y } : undefined
-    }
-    if (selected?.kind === 'zone') {
-      const lane = definition.lanes.find(
-        (candidate) => candidate.id === selected.laneId,
-      )
-      return lane ? { height: lane.height, id: lane.id, y: lane.y } : undefined
-    }
-    return undefined
-  })()
   const at = allAuthored.length + editor.artefactOperations.length
   const selectedPlaceable = effectivePlaceable(
     config,
@@ -282,7 +263,6 @@ export const detailsArtefactContexts = (
       allocate: createFactoryIdentityAllocator(usedIds),
       at,
       box,
-      lane: selectedLane,
     },
     library: {
       allocate: createLibraryIdentityAllocator({ codes: usedCodes, ids: usedIds }),

@@ -42,12 +42,6 @@ export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: 
   const arrows = { ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1] } as const
   const arrow = arrows[key as keyof typeof arrows]
   if (!arrow || geometry.role === 'route') return undefined
-  if (geometry.role === 'lane') {
-    return arrow[1] === 0 ? undefined : { x: 0, y: geometry.y + geometry.height / 2 + arrow[1] * step }
-  }
-  if (geometry.role === 'zone') {
-    return arrow[0] === 0 ? undefined : { x: geometry.x + geometry.width / 2 + arrow[0] * step, y: 0 }
-  }
   return {
     x: geometry.box.x + geometry.box.width / 2 + arrow[0] * step,
     y: geometry.box.y + geometry.box.height / 2 + arrow[1] * step,
@@ -55,9 +49,7 @@ export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: 
 }
 
 const sameArtefact = (left: ArtefactSelection | null, right: ArtefactSelection) =>
-  left?.kind === right.kind &&
-  left.id === right.id &&
-  (left.kind !== 'zone' || (right.kind === 'zone' && left.laneId === right.laneId))
+  left?.kind === right.kind && left.id === right.id
 
 // Flow Families remain visible controls whether or not their Flows reference a
 // published interface specification.

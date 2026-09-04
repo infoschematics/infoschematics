@@ -26,7 +26,6 @@ export type ArtefactControlsEditor = Readonly<{
     kind: K,
     value: ArtefactValueByKind[K],
     index: number,
-    ownerId?: string,
   ) => ArtefactSelection | undefined
   removeArtefact: () => string | undefined
   reorderArtefact: (direction: -1 | 1) => void
@@ -43,10 +42,6 @@ export type ArtefactControlsProps = Readonly<{
 export const describeArtefactGeometry = (geometry: ArtefactGeometry | undefined): string => {
   if (!geometry) return 'Geometry unavailable'
   switch (geometry.role) {
-    case 'lane':
-      return `Lane at y ${geometry.y}, height ${geometry.height}`
-    case 'zone':
-      return `Zone at x ${geometry.x}, width ${geometry.width}, in Lane ${geometry.laneId}`
     case 'box':
       return `Box at ${geometry.box.x}, ${geometry.box.y}; ${geometry.box.width} × ${geometry.box.height}`
     case 'route':
@@ -60,11 +55,8 @@ const submitOperation = (
 ) => {
   if (!operation) return
   switch (operation.target.kind) {
-    case 'lane':
-      editor.createArtefact('lane', operation.value as ArtefactValueByKind['lane'], operation.at)
-      break
-    case 'zone':
-      editor.createArtefact('zone', operation.value as ArtefactValueByKind['zone'], operation.at, operation.target.laneId)
+    case 'region':
+      editor.createArtefact('region', operation.value as ArtefactValueByKind['region'], operation.at)
       break
     case 'graphic':
       editor.createArtefact('graphic', operation.value as ArtefactValueByKind['graphic'], operation.at)
@@ -109,17 +101,8 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
     <section aria-label="Design controls" className="artefact-controls">
       <h3>Create</h3>
       <div aria-label="Create structural artefact" role="group">
-        <button aria-label="Create Lane" onClick={() => create('lane')} type="button">
-          Lane
-        </button>
-        <button
-          aria-label="Create Zone"
-          disabled={!factoryContext.lane}
-          onClick={() => create('zone')}
-          title={factoryContext.lane ? 'Create Zone in the current Lane' : 'Select a Lane before creating a Zone'}
-          type="button"
-        >
-          Zone
+        <button aria-label="Create Region" onClick={() => create('region')} type="button">
+          Region
         </button>
         <button aria-label="Create Graphic" onClick={() => create('graphic')} type="button">
           Graphic
@@ -174,7 +157,7 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
           ) : null}
         </div>
       ) : (
-        <p>Select a Lane, Zone, Fabric, Card, Flow, or Graphic to edit it.</p>
+        <p>Select a Region, Fabric, Card, Flow, or Graphic to edit it.</p>
       )}
 
       {editor.artefactIssue ? <p role="alert">{editor.artefactIssue}</p> : null}

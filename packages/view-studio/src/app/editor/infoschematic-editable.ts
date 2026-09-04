@@ -17,7 +17,7 @@ import type { Box } from '@infoschematics/view-model/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/view-model/geometry'
 import { guidesFrom } from '@infoschematics/view-model/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/view-model/ports'
-import type { LaneConfig } from '@infoschematics/domain-model/lane'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 type InfoschematicScopeId = string
@@ -67,7 +67,7 @@ type EditableModel = {
   componentLayout: Readonly<Record<string, { box: Box; ports?: PortCounts }>>
   endpointCodes: ReadonlyMap<string, string>
   flowCodes: ReadonlySet<string>
-  lanes: readonly LaneConfig[]
+  regions: readonly RegionConfig[]
   layout: Readonly<Record<string, Box>>
   register: { byCode: (code: string) => unknown }
   registerWith: (created: readonly CreatedComponent[]) => {
@@ -232,44 +232,20 @@ export const infoschematicEditable = (
         selection,
       }
     }
-    if (key.startsWith('lane:')) {
-      const lane = model.lanes.find(
-        (candidate) => candidate.id === key.slice('lane:'.length),
+    if (key.startsWith('region:')) {
+      const region = model.regions.find(
+        (candidate) => candidate.id === key.slice('region:'.length),
       )
-      if (!lane) return undefined
+      if (!region) return undefined
       const selection = defineArtefactSelection({
         code: null,
-        geometry: 'lane' as const,
-        id: lane.id,
-        kind: 'lane' as const,
+        geometry: 'box' as const,
+        id: region.id,
+        kind: 'region' as const,
       })
       return {
-        capabilities: artefactCapabilities.lane,
-        geometry: { height: lane.height, role: 'lane' as const, y: lane.y },
-        movementTarget: selection,
-        selection,
-      }
-    }
-    if (key.startsWith('zone:')) {
-      const [, laneId, zoneId] = key.split(':')
-      const lane = model.lanes.find((candidate) => candidate.id === laneId)
-      const zone = lane?.zones.find((candidate) => candidate.id === zoneId)
-      if (!lane || !zone) return undefined
-      const selection = defineArtefactSelection({
-        code: null,
-        geometry: 'zone' as const,
-        id: zone.id,
-        kind: 'zone' as const,
-        laneId: lane.id,
-      })
-      return {
-        capabilities: artefactCapabilities.zone,
-        geometry: {
-          laneId: lane.id,
-          role: 'zone' as const,
-          width: zone.width,
-          x: zone.x,
-        },
+        capabilities: artefactCapabilities.region,
+        geometry: { box: region.box, role: 'box' as const },
         movementTarget: selection,
         selection,
       }
@@ -359,8 +335,8 @@ export const infoschematicEditable = (
         key: service.code,
         kind: 'component' as const,
       })),
-      // Lanes and zones are geography, not components - they are handles only so
-      // the panel can be told what a reader clicked, never so one can be dragged.
+      // Regions are geography, not components - they are handles only so the
+      // panel can be told what a reader clicked, never so one can be dragged.
       // Every port and every interior waypoint is a handle, so the panel can be
       // told what was clicked. A port is not draggable - it is chosen, not
       // placed - so offsetFor refuses it.
@@ -378,18 +354,11 @@ export const infoschematicEditable = (
           kind: 'waypoint' as const,
         })),
       ),
-      ...model.lanes.map((lane) => ({
-        at: { x: lane.panel.x + lane.panel.width / 2, y: lane.panel.y + lane.panel.height / 2 },
-        key: `lane:${lane.id}`,
-        kind: 'lane' as const,
+      ...model.regions.map((region) => ({
+        at: boxCentreOf(region.box),
+        key: `region:${region.id}`,
+        kind: 'region' as const,
       })),
-      ...model.lanes.flatMap((lane) =>
-        lane.zones.map((zone) => ({
-          at: { x: zone.x + zone.width / 2, y: lane.y + lane.height / 2 },
-          key: `zone:${lane.id}:${zone.id}`,
-          kind: 'zone' as const,
-        })),
-      ),
     ],
 
     // A label lives on its line, so its drop is a distance along it rather than
@@ -599,30 +568,13 @@ export const infoschematicEditable = (
         return { kind: 'waypoint', label: 'Waypoint', at, flow: code, index }
       }
 
-      if (key.startsWith('lane:')) {
-        const lane = model.lanes.find((candidate) => candidate.id === key.slice('lane:'.length))
-        if (!lane) return undefined
-        // A lane spans the full panel width, so x and width are read against
-        // the geography rather than typed - only its own vertical strip moves.
+      if (key.startsWith('region:')) {
+        const region = model.regions.find((candidate) => candidate.id === key.slice('region:'.length))
+        if (!region) return undefined
         return {
           kind: 'box',
-          label: 'Lane',
-          box: { x: lane.panel.x, y: lane.y, width: lane.panel.width, height: lane.height },
-          editable: [],
-        }
-      }
-
-      if (key.startsWith('zone:')) {
-        const [, laneId, zoneId] = key.split(':')
-        const lane = model.lanes.find((candidate) => candidate.id === laneId)
-        const zone = lane?.zones.find((candidate) => candidate.id === zoneId)
-        if (!lane || !zone) return undefined
-        // A zone fills its lane's full height, so y and height come from the
-        // lane it sits in rather than being its own.
-        return {
-          kind: 'box',
-          label: 'Zone',
-          box: { x: zone.x, y: lane.y, width: zone.width, height: lane.height },
+          label: 'Region',
+          box: { x: region.box.x, y: region.box.y, width: region.box.width, height: region.box.height },
           editable: [],
         }
       }

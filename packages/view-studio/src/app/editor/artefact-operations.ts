@@ -35,23 +35,17 @@ type AnyReplaceArtefactPropertiesOperation = Extract<
 >
 
 export const artefactOperationKey = (operation: ArtefactDraftOperation): string =>
-  operation.target.kind === 'zone'
-    ? `zone:${operation.target.laneId}:${operation.target.id}:${operation.operation}`
-    : `${operation.target.kind}:${operation.target.id}:${operation.operation}`
+  `${operation.target.kind}:${operation.target.id}:${operation.operation}`
 
 const sameTarget = (left: ArtefactSelection, right: ArtefactSelection) =>
-  left.kind === right.kind &&
-  left.id === right.id &&
-  (left.kind !== 'zone' ||
-    (right.kind === 'zone' && left.laneId === right.laneId))
+  left.kind === right.kind && left.id === right.id
 
 const kindOrder: Readonly<Record<ArtefactSelection['kind'], number>> = {
-  lane: 0,
-  zone: 1,
-  fabric: 2,
-  card: 3,
-  graphic: 4,
-  flow: 5,
+  region: 0,
+  fabric: 1,
+  card: 2,
+  graphic: 3,
+  flow: 4,
 }
 
 const orderDraftOperations = (
@@ -73,9 +67,6 @@ const orderDraftOperations = (
     .sort(
       (left, right) =>
         kindOrder[left.target.kind] - kindOrder[right.target.kind] ||
-        (left.target.kind === 'zone' ? left.target.laneId : '').localeCompare(
-          right.target.kind === 'zone' ? right.target.laneId : '',
-        ) ||
         left.target.id.localeCompare(right.target.id),
     )
 
@@ -172,12 +163,8 @@ const valueForTarget = (
   target: ArtefactSelection,
 ): ArtefactValueByKind[ArtefactSelection['kind']] | undefined => {
   switch (target.kind) {
-    case 'lane':
-      return config.infoschematic.lanes.find((value) => value.id === target.id)
-    case 'zone':
-      return config.infoschematic.lanes
-        .find((lane) => lane.id === target.laneId)
-        ?.zones.find((value) => value.id === target.id)
+    case 'region':
+      return config.infoschematic.regions.find((value) => value.id === target.id)
     case 'fabric':
       return config.infoschematic.fabrics.find((value) => value.id === target.id)
     case 'card':
@@ -297,19 +284,12 @@ export const createdArtefactDetails = (
         ).placement
         return placement ? { box: placement, role: 'box' as const } : undefined
       }
-      case 'lane': {
-        const lane = operation.value as InfoschematicConfig['infoschematic']['lanes'][number]
-        return { height: lane.height, role: 'lane' as const, y: lane.y }
-      }
-      case 'zone': {
-        const zone = operation.value as InfoschematicConfig['infoschematic']['lanes'][number]['zones'][number]
+      case 'region':
         return {
-          laneId: target.laneId,
-          role: 'zone' as const,
-          width: zone.width,
-          x: zone.x,
+          box: (operation.value as InfoschematicConfig['infoschematic']['regions'][number])
+            .box,
+          role: 'box' as const,
         }
-      }
     }
   })()
 
@@ -364,25 +344,6 @@ export const planArtefactRemoval = (
       }
     }
   }
-  if (target.kind === 'lane') {
-    const lane = effectiveConfig.infoschematic.lanes.find(
-      (candidate) => candidate.id === target.id,
-    )
-    for (const zone of lane?.zones ?? []) {
-      cascades.push(
-        removeArtefactOperation(
-          defineArtefactSelection({
-            code: null,
-            geometry: 'zone' as const,
-            id: zone.id,
-            kind: 'zone' as const,
-            laneId: lane?.id ?? target.id,
-          }),
-        ),
-      )
-    }
-  }
-
   return {
     operations: orderArtefactOperations([
       ...cascades,
@@ -397,14 +358,10 @@ export const artefactIndex = (
 ): number | undefined => {
   const index = (() => {
     switch (target.kind) {
-      case 'lane':
-        return config.infoschematic.lanes.findIndex(
+      case 'region':
+        return config.infoschematic.regions.findIndex(
           (entry) => entry.id === target.id,
         )
-      case 'zone':
-        return config.infoschematic.lanes
-          .find((entry) => entry.id === target.laneId)
-          ?.zones.findIndex((entry) => entry.id === target.id)
       case 'fabric':
         return config.infoschematic.fabrics.findIndex(
           (entry) => entry.id === target.id,
@@ -463,10 +420,7 @@ export const artefactSourceChanges = (
             : undefined,
       field: operation.operation,
       key: artefactOperationKey(operation),
-      owner:
-        operation.target.kind === 'zone'
-          ? operation.target.laneId
-          : undefined,
+      owner: undefined,
       phase:
         operation.operation === 'create'
           ? 'create'
