@@ -176,22 +176,22 @@ describe('visual treatment renderer parity', () => {
           {
             box: { height: 80, width: 300, x: 10, y: 10 },
             fill: '#eeeeee',
-            id: 'legacy-zone',
-            label: 'Legacy zone',
+            id: 'legacy-fill',
+            label: 'Legacy fill',
             labelPlacement: 'north-east'
           },
           {
             box: { height: 80, radius: 2, width: 300, x: 10, y: 10 },
             frame: { style: 'solid' },
             id: 'legacy',
-            label: 'Legacy lane',
+            label: 'Legacy frame',
             labelMount: 'boundary'
           },
           {
             box: { height: 80, radius: 30, width: 300, x: 10, y: 150 },
             frame: { style: 'dashed' },
             id: 'hidden',
-            label: 'Hidden lane',
+            label: 'Hidden frame',
             labelMount: 'boundary',
             labelPlacement: 'none'
           }
@@ -205,8 +205,8 @@ describe('visual treatment renderer parity', () => {
     expect(regionPaths(canvas)).toEqual(regionPaths(svg))
     expect(values(canvas, 'data-label-placement')).toEqual(['none', 'north-east', 'north-west'])
     expect(values(canvas, 'data-label-treatment')).toEqual(['notched', 'plain', 'plain'])
-    expect(canvas).not.toContain('>HIDDEN LANE</text>')
-    expect(svg).not.toContain('>HIDDEN LANE</text>')
+    expect(canvas).not.toContain('>HIDDEN FRAME</text>')
+    expect(svg).not.toContain('>HIDDEN FRAME</text>')
   })
 
   it('keeps the dots grid treatment equivalent across renderers', () => {

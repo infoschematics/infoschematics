@@ -33,7 +33,7 @@ export type RegionGeometryInput = Readonly<{
 }>
 
 export const regionGeometryDefaults = Object.freeze({
-  // Matches the canvas lane-label metrics (13px/600 code face + 1.6px tracking);
+  // Matches the canvas region-label metrics (13px/600 code face + 1.6px tracking);
   // notched text is pinned to this via textLength so the notch stays symmetric.
   characterWidth: 9.4,
   labelHeight: 14,

@@ -740,17 +740,14 @@ h2 {
   );
 }
 
-/* A lane's legend and a zone's heading are text, so the glow is a text shadow.
+/* A region's heading is text, so the glow is a text shadow.
    Geography is pointed at the same way a component is; only dragging differs. */
-.infoschematic-svg .lane-selectable.pointed,
-.infoschematic-svg .zone-selectable.pointed,
-.infoschematic-svg.editing .lane-selectable.selected,
-.infoschematic-svg.editing .zone-selectable.selected {
+.infoschematic-svg .region-selectable.pointed,
+.infoschematic-svg.editing .region-selectable.selected {
   text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
 }
 
-.infoschematic-svg .lane-selectable.pointed,
-.infoschematic-svg .zone-selectable.pointed {
+.infoschematic-svg .region-selectable.pointed {
   fill: #dff3ff;
 }
 
@@ -768,7 +765,7 @@ h2 {
 }
 
 /* The socket the card drops into: the rim is what is seen, so the outline
-   carries it and the fill only separates the recess from the lane behind. */
+   carries it and the fill only separates the recess from the region behind. */
 .adapter-socket {
   fill: #1a1436c9;
   stroke: #8062b4;
@@ -850,7 +847,7 @@ h2 {
 }
 
 /* Sits behind everything else on the Infoschematic, transparent rather than absent, so
-   a click only ever reaches it once every card, zone and line drawn above it
+   a click only ever reaches it once every card, region and line drawn above it
    has been missed - which is what makes an empty Infoschematic clickable to clear the
    selection without this having to know what else is on screen. */
 .infoschematic-backdrop {
@@ -873,17 +870,6 @@ h2 {
 .infoschematic-svg.editing .infoschematic-service.selected rect {
   stroke: #82b366;
   stroke-width: 3px;
-}
-
-.lane-selectable {
-  cursor: pointer;
-}
-
-/* A zone is geography rather than a component - selectable so its position can
-   be read, never draggable, which is why there is no .selectable variant here. */
-.infoschematic-svg.editing .zone-selectable {
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 /* Typed as readily as stepped: a side with room for sixteen counts is a lot of
@@ -2475,8 +2461,8 @@ button:focus-visible,
 }
 
 /* The canvas's own edge, drawn whenever the editor is open regardless of
-   whether the grid is switched on, and distinct from the lane panels inside
-   it - a dragged card runs out of room here, not at a lane's rounded corner. */
+   whether the grid is switched on, and distinct from the region panels inside
+   it - a dragged card runs out of room here, not at a region's rounded corner. */
 .canvas-edge {
   fill: none;
   pointer-events: none;

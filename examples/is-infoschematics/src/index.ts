@@ -164,7 +164,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 160, width: 1360, x: 20, y: 20 },
         fill: '#e8f0ff',
         frame: { style: 'solid' },
-        id: 'zone-domain-model',
+        id: 'panel-domain-model',
         label: 'Dependency root',
         labelPlacement: 'south-east'
       },
@@ -172,7 +172,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 170, width: 680, x: 20, y: 210 },
         fill: '#f4f0ff',
         frame: { style: 'dashed' },
-        id: 'zone-domain-behaviour',
+        id: 'panel-domain-behaviour',
         label: 'Domain behaviour',
         labelPlacement: 'west'
       },
@@ -180,7 +180,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 170, width: 680, x: 700, y: 210 },
         fill: '#ece9ff',
         frame: { style: 'solid' },
-        id: 'zone-view-calculations',
+        id: 'panel-view-calculations',
         label: 'View calculations',
         labelPlacement: 'east'
       },
@@ -188,7 +188,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 170, width: 1000, x: 20, y: 410 },
         fill: '#e4f7ef',
         frame: { style: 'solid' },
-        id: 'zone-interactive-views',
+        id: 'panel-interactive-views',
         label: 'Additive interactive Views',
         labelPlacement: 'south-west'
       },
@@ -196,7 +196,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 170, width: 360, x: 1020, y: 410 },
         fill: '#fff4d6',
         frame: { style: 'dotted' },
-        id: 'zone-static-output',
+        id: 'panel-static-output',
         label: 'Static output',
         labelPlacement: 'south-east'
       },
@@ -204,7 +204,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 230, width: 680, x: 20, y: 660 },
         fill: '#fdebf5',
         frame: { style: 'solid' },
-        id: 'zone-authored-examples',
+        id: 'panel-authored-examples',
         label: 'Authored examples',
         labelPlacement: 'north-west'
       },
@@ -212,14 +212,14 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         box: { height: 230, width: 680, x: 700, y: 660 },
         fill: '#fff0e5',
         frame: { style: 'solid' },
-        id: 'zone-application-hosts',
+        id: 'panel-application-hosts',
         label: 'Application hosts',
         labelPlacement: 'north-east'
       },
       {
         box: { height: 160, radius: 12, width: 1360, x: 20, y: 20 },
         frame: { style: 'solid' },
-        id: 'lane-domain-contract',
+        id: 'row-domain-contract',
         label: 'Authored contract',
         labelMount: 'boundary',
         labelPlacement: 'north-west'
@@ -227,7 +227,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
       {
         box: { height: 170, radius: 12, width: 1360, x: 20, y: 210 },
         frame: { style: 'dashed' },
-        id: 'lane-neutral-behaviour',
+        id: 'row-neutral-behaviour',
         label: 'Framework-neutral behaviour',
         labelMount: 'boundary',
         labelPlacement: 'north'
@@ -235,7 +235,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
       {
         box: { height: 170, radius: 12, width: 1360, x: 20, y: 410 },
         frame: { style: 'dotted' },
-        id: 'lane-output-packages',
+        id: 'row-output-packages',
         label: 'View and renderer packages',
         labelMount: 'boundary',
         labelPlacement: 'north-east'
@@ -243,7 +243,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
       {
         box: { height: 230, radius: 12, width: 1360, x: 20, y: 660 },
         frame: { style: 'solid' },
-        id: 'lane-composition',
+        id: 'row-composition',
         label: 'Authored composition',
         labelMount: 'boundary',
         labelPlacement: 'south'

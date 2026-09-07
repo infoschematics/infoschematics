@@ -33,7 +33,7 @@ const treatmentConfig = defineInfoschematic({
     ],
     regions: [
       {
-        id: 'zone',
+        id: 'panel',
         label: 'Runtime',
         box: { x: 10, y: 20, width: 620, height: 240 },
         fill: '#071e2d',
@@ -41,7 +41,7 @@ const treatmentConfig = defineInfoschematic({
         labelPlacement: 'center'
       },
       {
-        id: 'lane',
+        id: 'row',
         label: 'Delivery',
         box: { x: 10, y: 20, width: 620, height: 240, radius: 8 },
         frame: { style: 'dashed' },
@@ -122,15 +122,15 @@ describe('Canvas visual treatments', () => {
         ],
         regions: [
           {
-            id: 'zone',
-            label: 'Legacy zone',
+            id: 'panel',
+            label: 'Quiet panel',
             box: { x: 10, y: 20, width: 420, height: 180 },
             fill: '#081522',
             labelPlacement: 'north-east'
           },
           {
-            id: 'lane',
-            label: 'Legacy lane',
+            id: 'row',
+            label: 'Plain title',
             box: { x: 10, y: 20, width: 420, height: 180, radius: 8 },
             frame: { style: 'solid' },
             labelMount: 'boundary'
@@ -158,8 +158,8 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-frame-treatment="none"')
     expect(markup).toContain('data-label-placement="north-west"')
     expect(markup).toContain('data-label-placement="north-east"')
-    expect(markup).toMatch(/text-anchor="end" x="414" y="36">LEGACY ZONE<\/text>/)
-    expect(markup).toMatch(/text-anchor="start" textLength="103.4" x="28" y="20">LEGACY LANE<\/text>/)
+    expect(markup).toMatch(/text-anchor="end" x="414" y="36">QUIET PANEL<\/text>/)
+    expect(markup).toMatch(/text-anchor="start" textLength="103.4" x="28" y="20">PLAIN TITLE<\/text>/)
     expect(markup).toContain('data-label-treatment="notched"')
     expect(markup).not.toContain('data-card-compact=')
     expect(markup).not.toContain('data-card-detail=')
@@ -193,7 +193,7 @@ describe('Canvas visual treatments', () => {
       infoschematic: {
         regions: [
           {
-            id: 'lane',
+            id: 'private',
             label: 'Private geography',
             box: { x: 10, y: 10, width: 300, height: 100, radius: 8 },
             frame: { style: 'dashed' },
