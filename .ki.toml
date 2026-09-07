@@ -48,6 +48,7 @@ dependency_holds = [
 script_exclusions = [
   "ki:check",
   "ki:dev",
+  "ki:examples:render",
   "ki:packages:build",
   "ki:packages:check-versions",
   "ki:packages:clean",

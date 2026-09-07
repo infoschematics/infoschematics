@@ -17,6 +17,7 @@
     }
   },
   "ignore": [".claude/skills/**", ".agents/skills/**"],
+  "ignoreBinaries": ["rsvg-convert"],
   "ignoreDependencies": ["syncpack"],
   "ignoreExportsUsedInFile": true,
   "exclude": ["duplicates"]

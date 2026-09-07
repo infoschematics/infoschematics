@@ -7,6 +7,10 @@
       "devDependencies": {
         "@biomejs/biome": "^2.5.12",
         "@infoschematics/domain-core": "0.1.0",
+        "@infoschematics/domain-model": "0.1.0",
+        "@infoschematics/is-blank": "0.1.0",
+        "@infoschematics/is-infoschematics": "0.1.0",
+        "@infoschematics/is-system": "0.1.0",
         "@infoschematics/render-svg": "0.1.0",
         "@infoschematics/view-canvas": "0.1.0",
         "@types/node": "^24.10.0",

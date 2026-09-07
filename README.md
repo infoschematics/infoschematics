@@ -65,6 +65,8 @@ bun run ki:check
 
 `bun run ki:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
 
+`bun run ki:examples:render` writes an authored example to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site. Pass `--all` for every example, `--annotations` for Flow code chips, and `--png` to rasterise beside the SVG (needs `rsvg-convert`).
+
 Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
 
 ## Licence
