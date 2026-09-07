@@ -1,5 +1,5 @@
-import { resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+#!/usr/bin/env bun
+import { type CliSpec, isDirectInvocation, runCli } from '../cli.ts'
 import { coordinatedVersion, readReleaseManifests, releasePackages, validateReleaseManifests } from './packages.ts'
 
 export async function checkReleaseVersions() {
@@ -13,15 +13,19 @@ export async function checkReleaseVersions() {
   } as const
 }
 
-const invokedDirectly = process.argv[1] ? resolve(process.argv[1]) === fileURLToPath(import.meta.url) : false
+export const spec: CliSpec = {
+  describe: 'Verify every public package declares one coordinated release version and consistent publication metadata.',
+  flags: {
+    json: { describe: 'Report the coordinated version and build order as JSON.', kind: 'boolean' }
+  },
+  run: 'ki:packages:check-versions',
+  script: 'scripts/release/check-versions.ts'
+}
 
-if (invokedDirectly) {
-  try {
+if (isDirectInvocation(import.meta.url)) {
+  await runCli(spec, async (parsed) => {
     const result = await checkReleaseVersions()
-    if (process.argv.includes('--json')) console.log(JSON.stringify(result, null, 2))
+    if (parsed.boolean('json')) console.log(JSON.stringify(result, null, 2))
     else console.log(`Release packages ${result.version}: ${result.buildOrder.join(' -> ')}`)
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
-  }
+  })
 }

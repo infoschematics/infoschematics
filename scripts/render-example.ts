@@ -1,12 +1,13 @@
+#!/usr/bin/env bun
 import { spawnSync } from 'node:child_process'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { blankInfoschematic } from '@infoschematics/is-blank'
 import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { type CliSpec, CliUsageError, isDirectInvocation, runCli } from './cli.ts'
 
 /** Authored examples this repository can render without a browser or dev server. */
 export const renderableExamples: Readonly<Record<string, InfoschematicConfig>> = {
@@ -66,63 +67,57 @@ export async function renderExample(example: string, options: RenderExampleOptio
   return { ...result, png: pngPath }
 }
 
-const usage = `Render an authored Infoschematic example to a standalone SVG.
-
-Usage: bun run ki:examples:render [example] [options]
-
-Examples: ${Object.keys(renderableExamples).join(', ')}
-
-Options:
-  --all            Render every example.
-  --annotations    Emit each visible Flow's code chip.
-  --out <path>     Output SVG pathname. Defaults to reports/<example>.svg.
-  --png            Also rasterise beside the SVG (needs rsvg-convert).
-  --width <n>      Rasterised width in pixels. Defaults to 1400.
-  --json           Report results as JSON.
-  --help           Show this message.`
-
-const flagValue = (argv: readonly string[], flag: string) => {
-  const at = argv.indexOf(flag)
-  return at >= 0 ? argv[at + 1] : undefined
+export const spec: CliSpec = {
+  describe:
+    'Render an authored Infoschematic example to a standalone SVG, so a diagram can be reviewed without a browser.',
+  flags: {
+    all: { describe: 'Render every example.', kind: 'boolean' },
+    annotations: { describe: "Emit each visible Flow's code chip.", kind: 'boolean' },
+    json: { describe: 'Report results as JSON.', kind: 'boolean' },
+    out: { describe: 'Output SVG pathname. Defaults to reports/<example>.svg.', kind: 'string', value: 'path' },
+    png: { describe: 'Also rasterise beside the SVG (needs rsvg-convert).', kind: 'boolean' },
+    width: { describe: 'Rasterised width in pixels. Defaults to 1400.', kind: 'number', value: 'n' }
+  },
+  operands: {
+    describe: `example to render, one of ${Object.keys(renderableExamples).join(', ')}. Defaults to infoschematics.`,
+    name: 'example'
+  },
+  run: 'ki:examples:render',
+  script: 'scripts/render-example.ts'
 }
 
-const invokedDirectly = process.argv[1] ? resolve(process.argv[1]) === fileURLToPath(import.meta.url) : false
-
-if (invokedDirectly) {
-  const argv = process.argv.slice(2)
-  if (argv.includes('--help') || argv.includes('-h')) {
-    console.log(usage)
-  } else {
-    try {
-      const width = flagValue(argv, '--width')
-      const options: RenderExampleOptions = {
-        annotations: argv.includes('--annotations'),
-        out: flagValue(argv, '--out'),
-        png: argv.includes('--png'),
-        width: width ? Number(width) : undefined
-      }
-      if (options.width !== undefined && !Number.isFinite(options.width)) {
-        throw new Error(`--width needs a number, received ${width}.`)
-      }
-
-      const selected = argv.includes('--all')
-        ? Object.keys(renderableExamples)
-        : argv.filter((argument) => !argument.startsWith('--') && argument !== width)
-      const examples = selected.length > 0 ? selected : ['infoschematics']
-      if (examples.length > 1 && options.out) throw new Error('--out renders one example; drop it to render several.')
-
-      const results: RenderExampleResult[] = []
-      for (const example of examples) results.push(await renderExample(example, options))
-
-      if (argv.includes('--json')) console.log(JSON.stringify(results, null, 2))
-      else
-        for (const result of results) {
-          const raster = result.png ? ` and ${result.png}` : ''
-          console.log(`${result.example} (${result.viewBox.width}×${result.viewBox.height}) -> ${result.svg}${raster}`)
-        }
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : error)
-      process.exitCode = 1
+if (isDirectInvocation(import.meta.url)) {
+  await runCli(spec, async (parsed) => {
+    const options: RenderExampleOptions = {
+      annotations: parsed.boolean('annotations'),
+      out: parsed.string('out'),
+      png: parsed.boolean('png'),
+      width: parsed.number('width')
     }
-  }
+
+    const unknown = parsed.operands.filter((example) => !(example in renderableExamples))
+    if (unknown.length > 0) {
+      throw new CliUsageError(
+        `Unknown example ${unknown.join(', ')}. Choose one of: ${Object.keys(renderableExamples).join(', ')}.`
+      )
+    }
+
+    const selected = parsed.boolean('all') ? Object.keys(renderableExamples) : parsed.operands
+    const examples = selected.length > 0 ? selected : ['infoschematics']
+    if (examples.length > 1 && options.out) {
+      throw new CliUsageError('--out renders one example; drop it to render several.')
+    }
+
+    const results: RenderExampleResult[] = []
+    for (const example of examples) results.push(await renderExample(example, options))
+
+    if (parsed.boolean('json')) {
+      console.log(JSON.stringify(results, null, 2))
+      return
+    }
+    for (const result of results) {
+      const raster = result.png ? ` and ${result.png}` : ''
+      console.log(`${result.example} (${result.viewBox.width}\u00d7${result.viewBox.height}) -> ${result.svg}${raster}`)
+    }
+  })
 }

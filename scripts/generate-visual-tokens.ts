@@ -1,7 +1,10 @@
+#!/usr/bin/env bun
 import { readFile, writeFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { type VisualTokenValue, visualTokens } from '../packages/view-model/src/tokens.ts'
+import { type CliSpec, isDirectInvocation, runCli } from './cli.ts'
 
 export type VisualTokenEntry = Readonly<{
   cssName: `--infoschematic-${string}`
@@ -87,7 +90,7 @@ export const generateVisualTokens = async ({
     const actual = await readFile(output, 'utf8').catch(() => undefined)
     if (actual !== expected) {
       throw new Error(
-        `Generated visual tokens are stale: ${fileURLToPath(output)}. Run bun scripts/generate-visual-tokens.ts.`
+        `Generated visual tokens are stale: ${fileURLToPath(output)}. Run scripts/generate-visual-tokens.ts.`
       )
     }
     return
@@ -96,12 +99,32 @@ export const generateVisualTokens = async ({
   await writeFile(output, expected)
 }
 
-const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : undefined
-if (invokedPath === import.meta.url) {
-  generateVisualTokens({
-    check: process.argv.slice(2).includes('--check')
-  }).catch((error: unknown) => {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
+export const spec: CliSpec = {
+  describe: 'Generate the CSS custom properties that mirror the view model\u2019s visual tokens.',
+  flags: {
+    check: { describe: 'Verify the generated file is current instead of writing it.', kind: 'boolean' },
+    out: {
+      describe: 'Generated CSS pathname. Defaults to the view model\u2019s tokens.',
+      kind: 'string',
+      value: 'path'
+    }
+  },
+  run: 'ki:tokens:generate',
+  script: 'scripts/generate-visual-tokens.ts'
+}
+
+if (isDirectInvocation(import.meta.url)) {
+  await runCli(spec, async (parsed) => {
+    const out = parsed.string('out')
+    const output = out ? pathToFileURL(resolve(out)) : generatedVisualTokensUrl
+    const check = parsed.boolean('check')
+
+    await generateVisualTokens({ check, output })
+    const count = visualTokenEntries().length
+    console.log(
+      check
+        ? `Visual tokens current: ${count} declarations in ${fileURLToPath(output)}`
+        : `Visual tokens written: ${count} declarations to ${fileURLToPath(output)}`
+    )
   })
 }

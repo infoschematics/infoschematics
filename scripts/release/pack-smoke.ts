@@ -1,8 +1,9 @@
+#!/usr/bin/env bun
 import { spawn } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { type CliSpec, isDirectInvocation, runCli } from '../cli.ts'
 import { checkReleaseVersions } from './check-versions.ts'
 import {
   type PackageManifest,
@@ -246,7 +247,12 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   return run(['bun', 'run', 'smoke.ts'], directory)
 }
 
-export async function packAndSmoke() {
+export type PackAndSmokeOptions = Readonly<{
+  /** Retain the temporary pack and consumer directory for inspection. Defaults to off. */
+  keepTemp?: boolean
+}>
+
+export async function packAndSmoke({ keepTemp = false }: PackAndSmokeOptions = {}) {
   await checkReleaseVersions()
   const temporary = await mkdtemp(join(tmpdir(), 'infoschematics-release-'))
   const tarballDirectory = join(temporary, 'tarballs')
@@ -264,18 +270,29 @@ export async function packAndSmoke() {
       smoke: JSON.parse(smoke) as unknown
     }
   } finally {
-    if (!process.argv.includes('--keep-temp')) await rm(temporary, { force: true, recursive: true })
-    else console.log(`Release smoke retained at ${temporary}`)
+    if (keepTemp) console.log(`Release smoke retained at ${temporary}`)
+    else await rm(temporary, { force: true, recursive: true })
   }
 }
 
-const invokedDirectly = process.argv[1] ? resolve(process.argv[1]) === fileURLToPath(import.meta.url) : false
+export const spec: CliSpec = {
+  describe: 'Pack every public package and import it from a clean consumer, proving the published surface works.',
+  flags: {
+    json: { describe: 'Report packed tarballs and smoke results as JSON.', kind: 'boolean' },
+    'keep-temp': { describe: 'Retain the temporary pack and consumer directory for inspection.', kind: 'boolean' }
+  },
+  run: 'ki:packages:pack-smoke',
+  script: 'scripts/release/pack-smoke.ts'
+}
 
-if (invokedDirectly) {
-  try {
-    console.log(JSON.stringify(await packAndSmoke(), null, 2))
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
-  }
+if (isDirectInvocation(import.meta.url)) {
+  await runCli(spec, async (parsed) => {
+    const result = await packAndSmoke({ keepTemp: parsed.boolean('keep-temp') })
+    if (parsed.boolean('json')) {
+      console.log(JSON.stringify(result, null, 2))
+      return
+    }
+    for (const { name, tarball } of result.packages) console.log(`${name} -> ${tarball}`)
+    console.log(`Clean-consumer smoke passed for ${result.packages.length} packages.`)
+  })
 }
