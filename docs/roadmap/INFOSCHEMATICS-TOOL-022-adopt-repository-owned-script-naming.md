@@ -4,10 +4,10 @@ area: TOOL
 title: Adopt repository-owned script naming
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 91e2fae82ec675a988d68f3c73cdd9f6f35aac61
 ---
 
 ## Goal
@@ -30,11 +30,11 @@ Receiver baseline `0dacf9cc2be690520fd8332fc24c49b1a281a80c` is on `main`. The o
 
 ## Steps
 
-- [ ] Rename the twelve locked `package.json` keys and every internal invocation to the same suffix under `self:` without changing command behaviour.
-- [ ] Remove the now-empty `script_exclusions` declaration and its obsolete comment from `.ki.toml` while preserving all other parsed configuration.
-- [ ] Update scoped live references in repository instructions, README, workflows, guides, script diagnostics, and active roadmap verification commands.
-- [ ] Verify JSON, YAML, and TOML parsing; search scoped live surfaces for stale old names; run the required repository and executable gates.
-- [ ] Add the canonical review packet and bound batch run evidence, then stop at `awaiting-review` with the stylesheet untouched and unstaged.
+- [x] Rename the twelve locked `package.json` keys and every internal invocation to the same suffix under `self:` without changing command behaviour.
+- [x] Remove the now-empty `script_exclusions` declaration and its obsolete comment from `.ki.toml` while preserving all other parsed configuration.
+- [x] Update scoped live references in repository instructions, README, workflows, guides, script diagnostics, and active roadmap verification commands.
+- [x] Verify JSON, YAML, and TOML parsing; search scoped live surfaces for stale old names; run the required repository and executable gates.
+- [x] Add the canonical review packet and bound batch run evidence, then stop at `awaiting-review` with the stylesheet untouched and unstaged.
 
 ## Files touched
 
@@ -89,6 +89,37 @@ Update the two scoped guides so their executable command references use the repo
 ### Roadmap
 
 Create this receiver-owned rollout record, allocate `TOOL-022`, and update the three scoped active verification references whose commands are renamed.
+
+## Review
+
+### Delivered
+
+Renamed the twelve locked Infoschematics-owned package scripts from `ki:` to the same suffix under `self:`, updated their internal invocations and every approved live reference, and removed the now-empty engineering exclusion declaration.
+
+### Summary of changes
+
+The root package command graph, repository instructions, README, CI and release workflows, two guides, four self-describing script diagnostics, and three active roadmap verification references now use the repository-owned names. `ki:deps:update` and every `ki:site:*` command remain unchanged. The resulting script keys are alphabetised as authorised by harness amendment `0f48e572` without changing command bodies.
+
+### Verification
+
+- Exact normalisation confirmed that `package.json` differs from baseline only by the twelve key renames, corresponding internal-name replacements, and key ordering; capability-owned commands are unchanged.
+- Parsed `package.json`, `.ki.toml`, and both changed workflow YAML files successfully; parsed TOML differs only by removal of `script_exclusions`.
+- The scoped live-reference search found no former names, and `git diff --check` passed.
+- Focused `ki-engineering`, full repository, and focused `ki-work-roadmap` audits passed.
+- `bun run self:check` and `bun run self:release:verify` passed, including package builds, tests, type checks, dependency-boundary checks, site build, and packed clean-consumer smoke verification.
+- `apps/site/src/styles.css` remained unstaged with its preflight diff SHA-256 unchanged at `0b1b698ee54d92e2cedb44f945eb5712a33240b9499100086cfd1976d34a4c9c`.
+
+### Outstanding concerns
+
+None. The first focused audit correctly stopped on unsorted renamed script keys; work resumed only after amendment `0f48e572` explicitly authorised alphabetising those keys.
+
+### Post-change review
+
+The migration stayed inside the approved file set and changed no script implementation, dependency, product behaviour, public package API, or capability-owned command. The other actor's stylesheet remains outside the index and this delivery.
+
+### Mini recap
+
+Infoschematics now passes the shared script-ownership contract without repository-specific exclusions and is ready for human review. Closure, pruning, publishing, deployment, and push remain outside this run.
 
 ## Discussion
 

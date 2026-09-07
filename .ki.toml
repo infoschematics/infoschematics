@@ -43,22 +43,6 @@ dependency_holds = [
   "@vitejs/plugin-react — major release (6); adopted together with the vite major",
   "@types/node — major release; tracks the TypeScript and toolchain majors and is adopted with them",
 ]
-# Repo-owned ki:-prefixed scripts not claimed by a registered skill's namespace.
-script_exclusions = [
-  "ki:check",
-  "ki:dev",
-  "ki:examples:render",
-  "ki:packages:build",
-  "ki:packages:check-versions",
-  "ki:packages:clean",
-  "ki:packages:pack-smoke",
-  "ki:release:verify",
-  "ki:tokens:generate",
-  "ki:verify:depcruise",
-  "ki:verify:typecheck",
-  "ki:verify:visual-tokens",
-]
-
 # -----------------------------------------------------------------------------
 # Change management
 # -----------------------------------------------------------------------------

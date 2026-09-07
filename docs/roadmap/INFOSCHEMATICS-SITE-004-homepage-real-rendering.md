@@ -41,7 +41,7 @@ The homepage renders both treatments side by side under `.comparison-lane` for c
 
 ## Verify
 
-`bun run test`, `bun run ki:verify:typecheck`, and a visual check of `/` confirm the homepage shows only the real rendered Infoschematic with no bespoke-panel remnants.
+`bun run test`, `bun run self:verify:typecheck`, and a visual check of `/` confirm the homepage shows only the real rendered Infoschematic with no bespoke-panel remnants.
 
 ## Dependencies / blocks
 
@@ -83,7 +83,7 @@ No deviations from the approved plan.
 
 - `bunx vitest run apps/site/src/App.test.tsx` — 5/5 passed (scoped, before the full run).
 - `bun run test` — 331/331 passed across all 51 test files.
-- `bun run ki:verify:typecheck` — clean across every workspace, including `apps/site`.
+- `bun run self:verify:typecheck` — clean across every workspace, including `apps/site`.
 - `bun run --cwd apps/site build` — production build succeeds (pre-existing, unrelated chunk-size advisory only).
 - `grep` confirmed no remaining references to any removed CSS selector.
 

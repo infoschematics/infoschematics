@@ -109,7 +109,7 @@ export const spec: CliSpec = {
       value: 'path'
     }
   },
-  run: 'ki:tokens:generate',
+  run: 'self:tokens:generate',
   script: 'scripts/generate-visual-tokens.ts'
 }
 

@@ -281,7 +281,7 @@ export const spec: CliSpec = {
     json: { describe: 'Report packed tarballs and smoke results as JSON.', kind: 'boolean' },
     'keep-temp': { describe: 'Retain the temporary pack and consumer directory for inspection.', kind: 'boolean' }
   },
-  run: 'ki:packages:pack-smoke',
+  run: 'self:packages:pack-smoke',
   script: 'scripts/release/pack-smoke.ts'
 }
 

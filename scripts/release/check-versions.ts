@@ -18,7 +18,7 @@ export const spec: CliSpec = {
   flags: {
     json: { describe: 'Report the coordinated version and build order as JSON.', kind: 'boolean' }
   },
-  run: 'ki:packages:check-versions',
+  run: 'self:packages:check-versions',
   script: 'scripts/release/check-versions.ts'
 }
 

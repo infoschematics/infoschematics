@@ -20,11 +20,11 @@ From a clean checkout, install locked dependencies and run the complete verifica
 
 ```bash
 bun install --frozen-lockfile
-bun run ki:check
-bun run ki:release:verify
+bun run self:check
+bun run self:release:verify
 ```
 
-`ki:release:verify` is the required dry run. It builds unbundled ESM and declarations, inspects packed contents, installs the tarballs in clean consumers, and exercises public entry points and server rendering. Review package filenames, exact internal dependency versions, and CSS entries before continuing.
+`self:release:verify` is the required dry run. It builds unbundled ESM and declarations, inspects packed contents, installs the tarballs in clean consumers, and exercises public entry points and server rendering. Review package filenames, exact internal dependency versions, and CSS entries before continuing.
 
 ## Tag the release
 

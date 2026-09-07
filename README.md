@@ -59,11 +59,11 @@ Interactive views are additive. `@infoschematics/view-canvas` owns the reusable 
 
 ```bash
 bun install
-bun run ki:dev
-bun run ki:check
+bun run self:dev
+bun run self:check
 ```
 
-`bun run ki:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
+`bun run self:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
 
 Each script under `scripts/` is a self-describing command as well as a `bun run` target: run it directly (`./scripts/render-example.ts`), ask it for `--help`, and read its exit code — 0 for success, 1 for failure, 2 for misuse. Unknown options are rejected rather than ignored.
 
@@ -73,7 +73,7 @@ Each script under `scripts/` is a self-describing command as well as a `bun run`
 ./scripts/release/pack-smoke.ts --keep-temp
 ```
 
-`ki:examples:render` writes an authored example to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
+`self:examples:render` writes an authored example to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
 
 Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
 

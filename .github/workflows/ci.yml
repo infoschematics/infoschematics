@@ -67,7 +67,7 @@ jobs:
       # The native read-only gate resolves the repository's declared skills from the
       # verified active harness collection and runs their registered operations.
       - name: Build workspace prerequisites
-        run: bun run ki:packages:build
+        run: bun run self:packages:build
 
       - name: Audit
         run: ki repo audit --repo .
@@ -76,7 +76,7 @@ jobs:
         run: bun run test
 
       - name: Full local verification gate
-        run: bun run ki:check
+        run: bun run self:check
 
       - name: Build and verify packed release packages
-        run: bun run ki:release:verify
+        run: bun run self:release:verify

@@ -82,7 +82,7 @@ export const spec: CliSpec = {
     describe: `example to render, one of ${Object.keys(renderableExamples).join(', ')}. Defaults to infoschematics.`,
     name: 'example'
   },
-  run: 'ki:examples:render',
+  run: 'self:examples:render',
   script: 'scripts/render-example.ts'
 }
 

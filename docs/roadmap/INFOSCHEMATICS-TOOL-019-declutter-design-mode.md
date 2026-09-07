@@ -47,7 +47,7 @@ Design mode exposes every editing affordance simultaneously, the Studio panel se
 
 ## Verify
 
-- `bun run ki:packages:build`, then `bunx vitest run` (never `bun test`); the renderer parity test must stay green (render-svg output untouched by editing-only changes).
+- `bun run self:packages:build`, then `bunx vitest run` (never `bun test`); the renderer parity test must stay green (render-svg output untouched by editing-only changes).
 - Downstream visual check from the IBC dashboard host: design mode (graphics dimmed and behind, ports appearing on hover, chips dimmed), the Design tab panel (Library/Create/Selection styled), and the Direct-mode Storyboard tab (no overlap, panes scroll).
 
 ## Dependencies / blocks

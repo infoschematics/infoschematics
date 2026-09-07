@@ -43,7 +43,7 @@ This item does not change the default treatment, remove `major` or `major-plus-m
 
 ## Verify
 
-`bun run test`, `bun run ki:verify:typecheck`, and `scripts/visual-treatment-parity.test.ts` pass with the new `dots` treatment covered end to end.
+`bun run test`, `bun run self:verify:typecheck`, and `scripts/visual-treatment-parity.test.ts` pass with the new `dots` treatment covered end to end.
 
 ## Dependencies / blocks
 
@@ -91,7 +91,7 @@ Added `dots` as a third `GridTreatment` member, rendered as a mark at each grid 
 
 - `bunx vitest run scripts/visual-treatment-parity.test.ts packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx packages/render-svg/src/index.test.ts` — 3 files, 24 tests passed.
 - `bun run test` — 51 files, 334 tests passed.
-- `bun run ki:verify:typecheck` — clean across all eleven workspaces.
+- `bun run self:verify:typecheck` — clean across all eleven workspaces.
 - `bun run check` — clean (tests, every TypeScript workspace, dependency boundaries, and the production website build).
 
 ### Outstanding concerns
