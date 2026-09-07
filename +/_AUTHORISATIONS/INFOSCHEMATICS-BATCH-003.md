@@ -54,3 +54,11 @@ Stop on public-contract change, destructive or irreversible work, external coord
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-003-RUN-001 c475c10f4358fb6d22f1ecf791d0941b47873986e8f7a03fdf1b645d9b6468ea -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-TOOL-022 | ready | awaiting-review | `91e2fae8` to `cb7755cc`; required semantic, audit, executable, stale-reference, and diff gates passed | Review the item delivery packet |
+
+## Batch recap
+
+The single selected item reached the authorised `awaiting-review` target. The twelve repository-owned scripts and scoped live references now use `self:`, the empty exclusion declaration is gone, and all required gates pass. The unrelated `apps/site/src/styles.css` modification remains unchanged and unstaged. Closure, pruning, external action, and push were not performed.
