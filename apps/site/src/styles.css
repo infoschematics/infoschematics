@@ -116,17 +116,11 @@ a:focus-visible {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-items: center;
-  gap: clamp(40px, 5vw, 72px);
+  grid-template-rows: auto auto;
+  align-content: center;
+  gap: clamp(40px, 6vh, 72px);
   min-width: 0;
-  padding: clamp(48px, 8vh, 100px) 0;
-}
-
-@media (max-width: 900px) {
-  .hero {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  padding: clamp(40px, 6vh, 84px) 0;
 }
 
 .hero > * {
@@ -136,7 +130,14 @@ a:focus-visible {
 .hero__copy {
   position: relative;
   z-index: 2;
-  max-width: 520px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(28px, 4vw, 72px);
+}
+
+.hero__copy > * {
+  min-width: 0;
 }
 
 .eyebrow {
@@ -149,7 +150,7 @@ a:focus-visible {
 
 .hero h1 {
   max-width: 660px;
-  margin: 22px 0 24px;
+  margin: 22px 0 0;
   font-size: clamp(50px, 6.6vw, 102px);
   font-weight: 650;
   letter-spacing: -0.068em;
@@ -163,8 +164,8 @@ a:focus-visible {
 }
 
 .hero__lede {
-  max-width: 500px;
-  margin: 0;
+  max-width: 520px;
+  margin: 0 0 10px;
   color: #9db4c9;
   font-size: clamp(15px, 1.25vw, 18px);
   line-height: 1.75;
@@ -427,12 +428,13 @@ a:focus-visible {
 
 @media (max-width: 1120px) {
   .hero {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-    gap: 48px;
+    gap: 44px;
   }
 
   .hero__copy {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 26px;
     max-width: 760px;
   }
 
@@ -441,6 +443,7 @@ a:focus-visible {
   }
 
   .hero__lede {
+    margin-bottom: 0;
     max-width: 650px;
   }
 }

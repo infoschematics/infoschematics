@@ -29,10 +29,12 @@ export function App() {
 
       <section className="hero" aria-labelledby="hero-title">
         <div className="hero__copy">
-          <p className="eyebrow">A visual instrument for complex systems</p>
-          <h1 id="hero-title">
-            See how it <span>fits together.</span>
-          </h1>
+          <div className="hero__headline">
+            <p className="eyebrow">A visual instrument for complex systems</p>
+            <h1 id="hero-title">
+              See how it <span>fits together.</span>
+            </h1>
+          </div>
           <p className="hero__lede">
             Infoschematic turns architecture, movement and meaning into one calm, explorable view. The full experience
             is being assembled.
