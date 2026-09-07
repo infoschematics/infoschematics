@@ -66,6 +66,9 @@ jobs:
 
       # The native read-only gate resolves the repository's declared skills from the
       # verified active harness collection and runs their registered operations.
+      - name: Build workspace prerequisites
+        run: bun run ki:packages:build
+
       - name: Audit
         run: ki repo audit --repo .
 
