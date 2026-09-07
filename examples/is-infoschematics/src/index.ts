@@ -157,67 +157,11 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         prefix: 'DEP'
       }
     ],
-    // Authored order is paint order: the filled panels first, then the framed
-    // row panels whose boundary-mounted titles read over them.
+    // Authored order is paint order. Each band is a framed row whose boundary-mounted
+    // title reads against the backdrop, holding filled panels inset inside it.
     regions: [
       {
-        box: { height: 160, width: 1360, x: 20, y: 20 },
-        fill: '#e8f0ff',
-        frame: { style: 'solid' },
-        id: 'panel-domain-model',
-        label: 'Dependency root',
-        labelPlacement: 'south-east'
-      },
-      {
-        box: { height: 170, width: 680, x: 20, y: 210 },
-        fill: '#f4f0ff',
-        frame: { style: 'dashed' },
-        id: 'panel-domain-behaviour',
-        label: 'Domain behaviour',
-        labelPlacement: 'west'
-      },
-      {
-        box: { height: 170, width: 680, x: 700, y: 210 },
-        fill: '#ece9ff',
-        frame: { style: 'solid' },
-        id: 'panel-view-calculations',
-        label: 'View calculations',
-        labelPlacement: 'east'
-      },
-      {
-        box: { height: 170, width: 1000, x: 20, y: 410 },
-        fill: '#e4f7ef',
-        frame: { style: 'solid' },
-        id: 'panel-interactive-views',
-        label: 'Additive interactive Views',
-        labelPlacement: 'south-west'
-      },
-      {
-        box: { height: 170, width: 360, x: 1020, y: 410 },
-        fill: '#fff4d6',
-        frame: { style: 'dotted' },
-        id: 'panel-static-output',
-        label: 'Static output',
-        labelPlacement: 'south-east'
-      },
-      {
-        box: { height: 230, width: 680, x: 20, y: 660 },
-        fill: '#fdebf5',
-        frame: { style: 'solid' },
-        id: 'panel-authored-examples',
-        label: 'Authored examples',
-        labelPlacement: 'north-west'
-      },
-      {
-        box: { height: 230, width: 680, x: 700, y: 660 },
-        fill: '#fff0e5',
-        frame: { style: 'solid' },
-        id: 'panel-application-hosts',
-        label: 'Application hosts',
-        labelPlacement: 'north-east'
-      },
-      {
-        box: { height: 160, radius: 12, width: 1360, x: 20, y: 20 },
+        box: { height: 150, radius: 12, width: 1360, x: 20, y: 20 },
         frame: { style: 'solid' },
         id: 'row-domain-contract',
         label: 'Authored contract',
@@ -225,15 +169,36 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         labelPlacement: 'north-west'
       },
       {
-        box: { height: 170, radius: 12, width: 1360, x: 20, y: 210 },
+        box: { height: 122, width: 1332, x: 34, y: 34 },
+        fill: '#e8f0ff',
+        id: 'panel-domain-model',
+        label: 'Dependency root',
+        labelPlacement: 'south-east'
+      },
+      {
+        box: { height: 160, radius: 12, width: 1360, x: 20, y: 230 },
         frame: { style: 'dashed' },
         id: 'row-neutral-behaviour',
         label: 'Framework-neutral behaviour',
         labelMount: 'boundary',
-        labelPlacement: 'north'
+        labelPlacement: 'north-east'
       },
       {
-        box: { height: 170, radius: 12, width: 1360, x: 20, y: 410 },
+        box: { height: 132, width: 666, x: 34, y: 244 },
+        fill: '#f4f0ff',
+        id: 'panel-domain-behaviour',
+        label: 'Domain behaviour',
+        labelPlacement: 'west'
+      },
+      {
+        box: { height: 132, width: 660, x: 706, y: 244 },
+        fill: '#ece9ff',
+        id: 'panel-view-calculations',
+        label: 'View calculations',
+        labelPlacement: 'east'
+      },
+      {
+        box: { height: 170, radius: 12, width: 1360, x: 20, y: 500 },
         frame: { style: 'dotted' },
         id: 'row-output-packages',
         label: 'View and renderer packages',
@@ -241,12 +206,40 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         labelPlacement: 'north-east'
       },
       {
-        box: { height: 230, radius: 12, width: 1360, x: 20, y: 660 },
+        box: { height: 142, width: 986, x: 34, y: 514 },
+        fill: '#e4f7ef',
+        id: 'panel-interactive-views',
+        label: 'Additive interactive Views',
+        labelPlacement: 'south-west'
+      },
+      {
+        box: { height: 142, width: 332, x: 1034, y: 514 },
+        fill: '#fff4d6',
+        id: 'panel-static-output',
+        label: 'Static output',
+        labelPlacement: 'south-east'
+      },
+      {
+        box: { height: 150, radius: 12, width: 1360, x: 20, y: 740 },
         frame: { style: 'solid' },
         id: 'row-composition',
         label: 'Authored composition',
         labelMount: 'boundary',
         labelPlacement: 'south'
+      },
+      {
+        box: { height: 122, width: 666, x: 34, y: 754 },
+        fill: '#fdebf5',
+        id: 'panel-authored-examples',
+        label: 'Authored examples',
+        labelPlacement: 'north-west'
+      },
+      {
+        box: { height: 122, width: 660, x: 706, y: 754 },
+        fill: '#fff0e5',
+        id: 'panel-application-hosts',
+        label: 'Application hosts',
+        labelPlacement: 'north-east'
       }
     ],
     cards: [
@@ -254,12 +247,12 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'PKG-DM',
         'package-domain-model',
         'Domain Model',
-        'Serialisable authored product types and no package dependencies.',
+        'Serialisable authored product types with no package dependencies.',
         'domain-contract',
         'product-foundation',
         'package',
         560,
-        65,
+        60,
         280
       ),
       packageCard(
@@ -271,7 +264,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'product-foundation',
         'package',
         180,
-        255,
+        265,
         280
       ),
       packageCard(
@@ -283,7 +276,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'product-foundation',
         'package',
         900,
-        255,
+        265,
         280
       ),
       packageCard(
@@ -294,8 +287,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-views',
         'interactive-experience',
         'package',
-        80,
-        450
+        60,
+        535
       ),
       packageCard(
         'PKG-VP',
@@ -306,7 +299,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-experience',
         'package',
         380,
-        450
+        535
       ),
       packageCard(
         'PKG-VS',
@@ -316,8 +309,8 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'interactive-views',
         'interactive-experience',
         'package',
-        680,
-        450
+        700,
+        535
       ),
       packageCard(
         'PKG-SVG',
@@ -328,7 +321,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'publication',
         'package',
         1080,
-        450
+        535
       ),
       packageCard(
         'EX-IS',
@@ -339,7 +332,7 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'publication',
         'Infoschematic',
         220,
-        710,
+        765,
         280
       ),
       packageCard(
@@ -351,10 +344,12 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'publication',
         'application',
         900,
-        710,
+        765,
         280
       )
     ],
+    // Every long route travels in one of three horizontal corridors between the bands,
+    // each dependency on its own lane, so no two routes share a segment.
     flows: [
       dependency(
         'DEP-001',
@@ -362,12 +357,12 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-domain-core',
         'N1',
         'package-domain-model',
-        'S1',
+        'S2',
         [
-          { x: 220, y: 255 },
-          { x: 220, y: 200 },
-          { x: 600, y: 200 },
-          { x: 600, y: 155 }
+          { x: 220, y: 265 },
+          { x: 220, y: 212 },
+          { x: 640, y: 212 },
+          { x: 640, y: 150 }
         ]
       ),
       dependency(
@@ -376,12 +371,12 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-view-model',
         'N1',
         'package-domain-model',
-        'S2',
+        'S5',
         [
-          { x: 940, y: 255 },
-          { x: 940, y: 190 },
-          { x: 640, y: 190 },
-          { x: 640, y: 155 }
+          { x: 940, y: 265 },
+          { x: 940, y: 188 },
+          { x: 760, y: 188 },
+          { x: 760, y: 150 }
         ]
       ),
       dependency(
@@ -390,19 +385,19 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-view-canvas',
         'N1',
         'package-domain-model',
-        'S3',
+        'S1',
         [
-          { x: 120, y: 450 },
-          { x: 120, y: 400 },
-          { x: 680, y: 400 },
-          { x: 680, y: 155 }
+          { x: 100, y: 535 },
+          { x: 100, y: 496 },
+          { x: 600, y: 496 },
+          { x: 600, y: 150 }
         ]
       ),
       dependency('DEP-004', 'dependency-canvas-view-model', 'package-view-canvas', 'N2', 'package-view-model', 'S1', [
-        { x: 160, y: 450 },
-        { x: 160, y: 390 },
-        { x: 940, y: 390 },
-        { x: 940, y: 345 }
+        { x: 140, y: 535 },
+        { x: 140, y: 436 },
+        { x: 940, y: 436 },
+        { x: 940, y: 355 }
       ]),
       dependency(
         'DEP-005',
@@ -410,55 +405,59 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-view-present',
         'N1',
         'package-domain-model',
-        'S4',
+        'S3',
         [
-          { x: 420, y: 450 },
-          { x: 420, y: 380 },
-          { x: 720, y: 380 },
-          { x: 720, y: 155 }
+          { x: 420, y: 535 },
+          { x: 420, y: 484 },
+          { x: 680, y: 484 },
+          { x: 680, y: 150 }
         ]
       ),
       dependency('DEP-006', 'dependency-present-view-model', 'package-view-present', 'N2', 'package-view-model', 'S2', [
-        { x: 460, y: 450 },
-        { x: 460, y: 370 },
-        { x: 980, y: 370 },
-        { x: 980, y: 345 }
+        { x: 460, y: 535 },
+        { x: 460, y: 424 },
+        { x: 980, y: 424 },
+        { x: 980, y: 355 }
       ]),
       dependency('DEP-007', 'dependency-present-canvas', 'package-view-present', 'W1', 'package-view-canvas', 'E1', [
-        { x: 380, y: 480 },
-        { x: 360, y: 480 }
+        { x: 380, y: 565 },
+        { x: 340, y: 565 }
       ]),
-      dependency('DEP-008', 'dependency-studio-domain-core', 'package-view-studio', 'N1', 'package-domain-core', 'S1', [
-        { x: 720, y: 450 },
-        { x: 720, y: 360 },
-        { x: 220, y: 360 },
-        { x: 220, y: 345 }
+      dependency('DEP-008', 'dependency-studio-domain-core', 'package-view-studio', 'N2', 'package-domain-core', 'S1', [
+        { x: 780, y: 535 },
+        { x: 780, y: 448 },
+        { x: 220, y: 448 },
+        { x: 220, y: 355 }
       ]),
       dependency(
         'DEP-009',
         'dependency-studio-domain-model',
         'package-view-studio',
-        'N2',
+        'N1',
         'package-domain-model',
-        'S5',
+        'S4',
         [
-          { x: 760, y: 450 },
-          { x: 760, y: 155 }
+          { x: 740, y: 535 },
+          { x: 740, y: 472 },
+          { x: 720, y: 472 },
+          { x: 720, y: 150 }
         ]
       ),
       dependency('DEP-010', 'dependency-studio-view-model', 'package-view-studio', 'N3', 'package-view-model', 'S3', [
-        { x: 800, y: 450 },
-        { x: 800, y: 350 },
-        { x: 1020, y: 350 },
-        { x: 1020, y: 345 }
+        { x: 820, y: 535 },
+        { x: 820, y: 412 },
+        { x: 1020, y: 412 },
+        { x: 1020, y: 355 }
       ]),
-      dependency('DEP-011', 'dependency-studio-canvas', 'package-view-studio', 'W2', 'package-view-canvas', 'E2', [
-        { x: 680, y: 510 },
-        { x: 360, y: 510 }
+      dependency('DEP-011', 'dependency-studio-canvas', 'package-view-studio', 'S1', 'package-view-canvas', 'S6', [
+        { x: 740, y: 625 },
+        { x: 740, y: 643 },
+        { x: 300, y: 643 },
+        { x: 300, y: 625 }
       ]),
       dependency('DEP-012', 'dependency-studio-present', 'package-view-studio', 'W1', 'package-view-present', 'E1', [
-        { x: 680, y: 480 },
-        { x: 660, y: 480 }
+        { x: 700, y: 565 },
+        { x: 660, y: 565 }
       ]),
       dependency(
         'DEP-013',
@@ -468,10 +467,10 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-domain-model',
         'S6',
         [
-          { x: 1120, y: 450 },
-          { x: 1120, y: 360 },
-          { x: 800, y: 360 },
-          { x: 800, y: 155 }
+          { x: 1120, y: 535 },
+          { x: 1120, y: 460 },
+          { x: 800, y: 460 },
+          { x: 800, y: 150 }
         ]
       ),
       dependency(
@@ -482,10 +481,10 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-view-model',
         'S4',
         [
-          { x: 1160, y: 450 },
-          { x: 1160, y: 350 },
-          { x: 1060, y: 350 },
-          { x: 1060, y: 345 }
+          { x: 1160, y: 535 },
+          { x: 1160, y: 400 },
+          { x: 1060, y: 400 },
+          { x: 1060, y: 355 }
         ]
       ),
       dependency(
@@ -496,19 +495,23 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         'package-domain-core',
         'S2',
         [
-          { x: 260, y: 710 },
-          { x: 260, y: 345 }
+          { x: 260, y: 765 },
+          { x: 260, y: 700 },
+          { x: 360, y: 700 },
+          { x: 360, y: 380 },
+          { x: 260, y: 380 },
+          { x: 260, y: 355 }
         ]
       ),
-      dependency('DEP-016', 'dependency-site-studio', 'host-site', 'N1', 'package-view-studio', 'S1', [
-        { x: 940, y: 710 },
-        { x: 940, y: 630 },
-        { x: 720, y: 630 },
-        { x: 720, y: 540 }
+      dependency('DEP-016', 'dependency-site-studio', 'host-site', 'N1', 'package-view-studio', 'S2', [
+        { x: 940, y: 765 },
+        { x: 940, y: 712 },
+        { x: 780, y: 712 },
+        { x: 780, y: 625 }
       ]),
       dependency('DEP-017', 'dependency-site-example', 'host-site', 'W1', 'example-infoschematics', 'E1', [
-        { x: 900, y: 740 },
-        { x: 500, y: 740 }
+        { x: 900, y: 795 },
+        { x: 500, y: 795 }
       ])
     ]
   },
@@ -663,9 +666,9 @@ export const infoschematicsInfoschematic = defineInfoschematic({
     }
   ],
   calloutPositions: [
-    { x: 70, y: 95 },
-    { x: 1010, y: 235 },
-    { x: 1040, y: 680 }
+    { x: 70, y: 60 },
+    { x: 1080, y: 250 },
+    { x: 1080, y: 700 }
   ]
 })
 

@@ -72,11 +72,14 @@ describe('infoschematicsInfoschematic', () => {
       new Set(['renderer-output', 'authored-examples', 'application-hosts'])
     )
 
-    const panels = diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')
-    const fills = diagram.regions.filter(({ labelMount }) => labelMount !== 'boundary')
-    expect(panels.map(({ frame }) => frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
-    expect(new Set(fills.map(({ frame }) => frame?.style))).toEqual(new Set(['solid', 'dashed', 'dotted']))
-    expect(fills.every(({ fill }) => fill !== undefined)).toBe(true)
+    // Each band is a framed row holding filled panels inset inside it, so a boundary-mounted
+    // title reads against the backdrop and no panel repeats its band's frame line.
+    const bands = diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')
+    const panels = diagram.regions.filter(({ labelMount }) => labelMount !== 'boundary')
+    expect(bands.map(({ frame }) => frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
+    expect(bands.every(({ fill }) => fill === undefined)).toBe(true)
+    expect(panels.every(({ fill }) => fill !== undefined)).toBe(true)
+    expect(panels.every(({ frame }) => frame === undefined)).toBe(true)
     expect(diagram.regions.every(({ labelPlacement }) => labelPlacement !== undefined)).toBe(true)
   })
 
