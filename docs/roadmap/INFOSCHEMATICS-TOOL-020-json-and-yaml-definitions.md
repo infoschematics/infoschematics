@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-020
 area: TOOL
-title: Authored definitions in JSON and YAML
+title: JSON and YAML definitions
 theme: tool
 horizon: next
 status: draft
@@ -24,9 +24,56 @@ What is missing is the boundary that turns an untrusted document into an `Infosc
 
 TOML is explicitly out of scope; the supported set is TypeScript, JSON, and YAML.
 
-This item does not publish the renderer as an installable command — that is [INFOSCHEMATICS-TOOL-021](INFOSCHEMATICS-TOOL-021-publish-the-renderer-as-a-command.md), which depends on the loader landing first. It does not change `InfoschematicConfig`, add runtime behaviour to authored definitions, or migrate the existing examples away from TypeScript; TypeScript authoring stays first-class and keeps its compile-time guarantee.
+This item does not publish the renderer as an installable command — that is [INFOSCHEMATICS-TOOL-021](INFOSCHEMATICS-TOOL-021-publish-renderer-command.md), which depends on the loader landing first. It does not change `InfoschematicConfig`, add runtime behaviour to authored definitions, or migrate the existing examples away from TypeScript; TypeScript authoring stays first-class and keeps its compile-time guarantee.
 
-## Shaping
+## Current state
+
+The domain contract already round-trips through JSON without changing rendered output, but the repository has no supported boundary for parsing, validating, and diagnosing an untrusted authored document.
+
+## Steps
+
+- [ ] Decide the schema source and validation ownership.
+- [ ] Implement safe JSON and YAML parsing with path-specific diagnostics.
+- [ ] Extend the example renderer loader to accept supported files.
+- [ ] Publish an editor-consumable JSON Schema.
+- [ ] Add format-parity and malformed-document tests.
+
+## Files touched
+
+- `packages/domain-core/` for the validated document boundary
+- `packages/domain-model/` only if the schema-source decision changes type ownership
+- `scripts/render-example.ts` for file-based loading
+- Package manifests, schema output, and focused tests required by the selected implementation
+
+## Verify
+
+Prove that equivalent TypeScript, JSON, and YAML definitions render byte-identical SVG. Reject malformed documents with a path-specific diagnostic, and run the affected package tests and type-checks.
+
+## Dependencies / blocks
+
+The schema-source decision is the first step and gates the remaining implementation because it determines whether domain types remain hand-written.
+
+## Documentation impact
+
+### Decision Records
+
+Record the schema-source choice if it establishes a durable ownership or architecture boundary.
+
+### Specifications
+
+Specify the supported document formats, validation boundary, and diagnostic guarantees.
+
+### Guides
+
+Document file authoring and editor schema integration alongside the published entry point.
+
+### Roadmap
+
+Keep INFOSCHEMATICS-TOOL-021 blocked until the validated loader contract lands.
+
+## Discussion
+
+### Implementation notes
 
 The intended pass will:
 
@@ -39,8 +86,6 @@ The intended pass will:
 - Cover each format with a test proving the same definition renders identical output through all three, and that a malformed document is rejected with a useful message.
 
 Known dependency: the schema-source decision above gates the rest, because it determines whether the domain types stay hand-written.
-
-## Discussion
 
 ### Why validation cannot simply be a cast
 

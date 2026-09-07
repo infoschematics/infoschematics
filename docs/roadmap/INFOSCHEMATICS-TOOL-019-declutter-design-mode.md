@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-019
 area: TOOL
-title: Declutter design mode and repair panel chrome
+title: Declutter design mode
 theme: tool
 horizon: next
 status: ready
@@ -22,7 +22,59 @@ User review of the 5G-EMERGE IBC dashboard found present mode healthy but the st
 2. **Parts of the right panel are unstyled** — Library items render as native white buttons with list bullets and title+description run together; the Create/Selection sections are raw browser widgets. `library-panel`, `artefact-controls` and `scene-list-panel` have zero rules in `packages/view-studio/src/styles.css`.
 3. **The Direct-mode Storyboard tab overlaps and clips** — `.editor-tab` declares `grid-template-rows: auto minmax(0,1fr)` for two children, but direct mode inserts a third (the target select), pushing `SplitPane` into an implicit auto row: the hint text paints over the select and the form is chopped by the CHANGES pane instead of scrolling.
 
-## Shaping
+## Boundary
+
+No serialisable record, present-mode rendering, or treatment vocabulary changes. IBC-specific composition remains in the dashboard repository.
+
+## Current state
+
+Design mode exposes every editing affordance simultaneously, the Studio panel sections have no component chrome, and Direct mode places its Storyboard controls into an implicit grid row that overlaps the split pane.
+
+## Steps
+
+- [ ] Dim non-selected editing graphics and flow chips while retaining hover and selection recovery.
+- [ ] Gate unused port dots by hover, selection, or active flow drag while retaining in-use ports.
+- [ ] Add Studio panel chrome to the Library, Create, Selection, and scene sections.
+- [ ] Fix the Direct-mode Storyboard grid and scrolling behaviour.
+- [ ] Update the affected interaction and regression tests.
+
+## Files touched
+
+- `packages/view-canvas/src/InfoschematicDiagram.tsx`
+- `packages/view-canvas/src/styles.css`
+- `packages/view-studio/src/styles.css`
+- The directly affected view-canvas and view-studio tests
+
+## Verify
+
+- `bun run ki:packages:build`, then `bunx vitest run` (never `bun test`); the renderer parity test must stay green (render-svg output untouched by editing-only changes).
+- Downstream visual check from the IBC dashboard host: design mode (graphics dimmed and behind, ports appearing on hover, chips dimmed), the Design tab panel (Library/Create/Selection styled), and the Direct-mode Storyboard tab (no overlap, panes scroll).
+
+## Dependencies / blocks
+
+No external dependency blocks this item. The existing hover, selection, and drag state supplies the required interaction signals.
+
+## Documentation impact
+
+### Decision Records
+
+No Decision Record change is expected.
+
+### Specifications
+
+No specification change is expected unless implementation reveals a reusable interaction contract.
+
+### Guides
+
+Update component-facing guidance only if the final interaction contract introduces a reusable convention.
+
+### Roadmap
+
+Record implementation and visual-review evidence in this item before acceptance.
+
+## Discussion
+
+### Implementation notes
 
 ### A. Design-mode declutter (`packages/view-canvas`)
 
@@ -42,11 +94,4 @@ User review of the 5G-EMERGE IBC dashboard found present mode healthy but the st
 - **Label wrap**: "Storyboard title" / "Callout title" overflow the 54px `.text-row` label column — shorten to "Title" / "Callout" in `SceneListPanel.tsx` rather than widening the column.
 - New CSS appended in `src/styles.css` **before** the trailing `@import` at line 3330, matching the file's literal-hex idiom (no new custom properties).
 
-## Verification
-
-- `bun run ki:packages:build`, then `bunx vitest run` (never `bun test`); the renderer parity test must stay green (render-svg output untouched by editing-only changes).
-- Downstream visual check from the IBC dashboard host: design mode (graphics dimmed and behind, ports appearing on hover, chips dimmed), the Design tab panel (Library/Create/Selection styled), and the Direct-mode Storyboard tab (no overlap, panes scroll).
-
-## Boundary
-
-No serialisable record changes, no present-mode rendering changes, no new treatment vocabulary. IBC-specific composition stays in the dashboard repository.
+The intended balance keeps in-use anchors visible while reducing editing noise. Visual review should confirm that dimming preserves diagram comprehension and that on-demand ports remain discoverable.
