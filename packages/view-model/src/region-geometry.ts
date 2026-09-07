@@ -74,9 +74,9 @@ const labelGeometry = (
   const north = placement.startsWith('north')
   const south = placement.startsWith('south')
   // A boundary-mounted label sits on the frame line the notch breaks; only a
-  // plain label sets down inside the region by the inset. The authored offset
-  // pulls the label in along its edge; the set-down depth stays standard.
-  const edgeInset = mounted ? 0 : regionGeometryDefaults.labelInset
+  // plain label sets down inside the region. The authored offset pulls the
+  // label in on both axes: along its edge and by the set-down depth.
+  const edgeInset = mounted ? 0 : offset
   return {
     dominantBaseline: 'middle',
     length: null,
