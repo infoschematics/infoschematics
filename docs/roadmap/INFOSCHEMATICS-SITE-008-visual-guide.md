@@ -6,7 +6,7 @@ theme: site-experience
 horizon: now
 status: awaiting-review
 blocks: []
-blocked_by: [INFOSCHEMATICS-SITE-007]
+blocked_by: []
 baseline_ref: 2976e69ab1711bdb2f9cd25aa1b0bc51d04f005b
 ---
 
@@ -22,7 +22,7 @@ Requested directly by the user, drawing the comparison to `https://mui.com/mater
 
 ## Boundary
 
-This item does not change any renderer's visual output, add new appearance options, or replace `scripts/visual-treatment-parity.test.ts`'s existing parity coverage. It does not enumerate all 16 `CardDetailDefaults` boolean combinations — see Discussion. It depends on `INFOSCHEMATICS-SITE-007` landing first, since it needs `SiteNav` and the `/docs/` folder to exist.
+This item does not change any renderer's visual output, add new appearance options, or replace `scripts/visual-treatment-parity.test.ts`'s existing parity coverage. It does not enumerate all 16 `CardDetailDefaults` boolean combinations — see Discussion.
 
 ## Current state
 
@@ -53,7 +53,7 @@ This item does not change any renderer's visual output, add new appearance optio
 
 ## Dependencies / blocks
 
-Blocked by `INFOSCHEMATICS-SITE-007` (needs `SiteNav` and `/docs/` to exist).
+None. This item needs `SiteNav` and the `/docs/` folder to exist, which `INFOSCHEMATICS-SITE-007` delivered to `main` in `263a42d5`, so that dependency is discharged. It was declared as a lifecycle blocker until the user withdrew it — see the Discussion.
 
 ## Documentation impact
 
@@ -118,7 +118,9 @@ Specimens live site-local (`apps/site/src/visual-guide/specimens.ts`), not in a 
 
 ### Proceeding ahead of SITE-007's acceptance
 
-`ki-work-roadmap`'s dependency audit (ITEM-5) correctly flags this item's blocker, `INFOSCHEMATICS-SITE-007`, as not yet `done` (it is `awaiting-review`). Discussed directly with the user, who chose to progress this item anyway so both could be reviewed and accepted together. `SiteNav` and `/docs/` already exist on `main` from SITE-007's delivery commit (`263a42d5`), so the technical dependency is satisfied even though the lifecycle acceptance is not; the risk accepted is that a review of SITE-007 could still request a change to `SiteNav` or the `/docs/` route shape that this item would then need to absorb.
+The declared blocker was withdrawn by direct user decision: a build-order dependency is discharged when the code it needs exists, not when the record that produced it is approved, and holding this item behind a queue of pending approvals described nothing real. `blocked_by` is now empty and this section is retained as the history of why it once was not.
+
+`ki-work-roadmap`'s dependency audit (ITEM-5) correctly flagged this item's declared blocker, `INFOSCHEMATICS-SITE-007`, as not yet `done` (it was `awaiting-review`). Discussed directly with the user, who chose to progress this item anyway so both could be reviewed and accepted together. `SiteNav` and `/docs/` already exist on `main` from SITE-007's delivery commit (`263a42d5`), so the technical dependency is satisfied even though the lifecycle acceptance is not; the risk accepted is that a review of SITE-007 could still request a change to `SiteNav` or the `/docs/` route shape that this item would then need to absorb.
 
 ### Why `CardDetailDefaults` is curated, not exhaustive
 

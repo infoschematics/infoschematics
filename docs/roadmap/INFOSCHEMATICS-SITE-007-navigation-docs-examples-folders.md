@@ -5,7 +5,7 @@ title: Docs and examples folders
 theme: site-experience
 horizon: now
 status: awaiting-review
-blocks: [INFOSCHEMATICS-SITE-008]
+blocks: []
 blocked_by: []
 baseline_ref: b22506148ea6bde1e4fe8a663df681c90f995a35
 ---
@@ -78,7 +78,7 @@ Not published, matching ADR-007's maintainer-facing default: `docs/decisions/`, 
 
 ## Dependencies / blocks
 
-Blocks `INFOSCHEMATICS-SITE-008`, which needs `SiteNav` and the `/docs/` folder to exist before adding a visual guide page under it.
+None. `INFOSCHEMATICS-SITE-008` needed `SiteNav` and the `/docs/` folder to exist before adding a visual guide page under them; this item delivered both, so that declaration has been withdrawn on both sides.
 
 ## Documentation impact
 
@@ -122,7 +122,7 @@ None beyond this item and `INFOSCHEMATICS-SITE-008`.
 
 ### Outstanding concerns
 
-None for this item. `INFOSCHEMATICS-SITE-008` (visual guide) remains `blocked_by` this item and can now proceed to its own `ki-plan` cycle.
+None for this item. `INFOSCHEMATICS-SITE-008` (visual guide) was delivered against the `SiteNav` and `/docs/` shape this item landed, and no longer declares a blocker.
 
 ### Post-change review
 
