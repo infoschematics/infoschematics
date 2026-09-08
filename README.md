@@ -1,6 +1,6 @@
 # Infoschematics
 
-Infoschematics is a visual instrument for making complex systems legible. An Infoschematic combines structural artefacts with Scenes, Themes, and Stories, then supports Present, Design, and Direct production modes.
+Infoschematics is a visual instrument for making complex systems comprehensible. An Infoschematic combines structural artefacts with Scenes, Themes, and Stories, then supports Present, Design, and Direct production modes.
 
 This Bun monorepo owns the reusable domain and view packages, authored examples, consumer guidance, and public website.
 

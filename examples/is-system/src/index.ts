@@ -93,7 +93,15 @@ export const systemExample = defineInfoschematic({
       stageCard('OBS-01', 'signals', 'Signals', 'Facts, events and relationships', 'observe', 'Observe', 64),
       stageCard('MAP-02', 'structure', 'Structure', 'Systems, boundaries and flow', 'arrange', 'Arrange', 364),
       stageCard('LIT-03', 'meaning', 'Meaning', 'Stories, scenes and evidence', 'illuminate', 'Illuminate', 664),
-      stageCard('SEE-04', 'shared-view', 'Shared view', 'Complexity made legible', 'understand', 'Understand', 964)
+      stageCard(
+        'SEE-04',
+        'shared-view',
+        'Shared view',
+        'Complexity made comprehensible',
+        'understand',
+        'Understand',
+        964
+      )
     ],
     flows: [
       connector('SELECT', 'select', 'signals', 'structure', 304),

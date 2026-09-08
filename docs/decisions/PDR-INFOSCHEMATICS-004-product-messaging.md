@@ -23,7 +23,7 @@ The canonical messaging is:
 - **Essence** — _A visual instrument for complex systems._
 - **Invitation** (headline register) — _See how it works together._ "Works", not "fits": a schematic shows operation, and "fits together" reads as assembly.
 - **Definition** (one sentence, introduces the product anywhere) — _An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view — precise enough for the engineer, clear enough to present to anyone._
-- **Mission** (what we do) — _Make complex systems legible: to the people who build them, run them, and depend on them._
+- **Mission** (what we do) — _Make complex systems comprehensible: to the people who build them, run them, and depend on them._
 - **Vision** (where this goes) — _Serious systems explained by a live instrument, not a stale diagram._
 
 Tone rules for any surface that describes the product:
