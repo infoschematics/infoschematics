@@ -460,6 +460,20 @@ a:focus-visible {
   padding-bottom: 24px;
 }
 
+.docs-sidebar section {
+  padding-top: 16px;
+  border-top: 1px solid #ffffff12;
+}
+
+.docs-sidebar section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.docs-columns--full > main {
+  max-width: none;
+}
+
 .docs-sidebar h2,
 .docs-toc h2 {
   margin: 0 0 6px;

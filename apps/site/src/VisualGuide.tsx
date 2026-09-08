@@ -1,4 +1,6 @@
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { DocsSidebar } from './DocsSidebar.tsx'
+import { visualGuidePath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import {
   cardDetailSpecimens,
@@ -29,21 +31,24 @@ function SpecimenCard({ specimen }: { specimen: Specimen }) {
 
 export function VisualGuide() {
   return (
-    <div className="document-shell document-shell--wide">
-      <SiteNav section="visual-guide" />
-      <main id="document-content">
-        <h1>Visual guide</h1>
-        {groups.map((group) => (
-          <section aria-labelledby={`group-${group.key}`} key={group.key}>
-            <h2 id={`group-${group.key}`}>{group.title}</h2>
-            <ul className="specimen-grid">
-              {group.specimens.map((specimen) => (
-                <SpecimenCard key={specimen.key} specimen={specimen} />
-              ))}
-            </ul>
-          </section>
-        ))}
-      </main>
+    <div className="document-shell document-shell--wide docs-shell">
+      <SiteNav section="docs" />
+      <div className="docs-columns docs-columns--full">
+        <DocsSidebar currentPath={visualGuidePath} />
+        <main id="document-content">
+          <h1>Visual guide</h1>
+          {groups.map((group) => (
+            <section aria-labelledby={`group-${group.key}`} key={group.key}>
+              <h2 id={`group-${group.key}`}>{group.title}</h2>
+              <ul className="specimen-grid">
+                {group.specimens.map((specimen) => (
+                  <SpecimenCard key={specimen.key} specimen={specimen} />
+                ))}
+              </ul>
+            </section>
+          ))}
+        </main>
+      </div>
     </div>
   )
 }

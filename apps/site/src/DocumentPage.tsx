@@ -5,6 +5,7 @@ import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
 import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
 import authoringMarkdown from '../../../docs/guides/authoring.md?raw'
 import reactIntegrationMarkdown from '../../../docs/guides/react-integration.md?raw'
+import overviewMarkdown from '../../../docs/overview.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
 import domainCoreMarkdown from '../../../docs/specs/domain-core.md?raw'
 import domainModelMarkdown from '../../../docs/specs/domain-model.md?raw'
@@ -23,6 +24,7 @@ import './styles.css'
 const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
 
 const markdownBySourcePath: Record<string, string> = {
+  'docs/overview.md': overviewMarkdown,
   'docs/guides/authoring.md': authoringMarkdown,
   'docs/guides/react-integration.md': reactIntegrationMarkdown,
   'docs/reference/vocabulary.md': vocabularyMarkdown,

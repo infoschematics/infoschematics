@@ -2,7 +2,6 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
 import { BlankInfoschematic } from './BlankInfoschematic.tsx'
-import { DocsIndex } from './DocsIndex.tsx'
 import { ExamplesIndex } from './ExamplesIndex.tsx'
 import {
   docsIndexPath,
@@ -73,12 +72,9 @@ describe('website routes', () => {
     expect(isExamplesIndexPath('/')).toBe(false)
   })
 
-  it('lists every published document on the docs index', () => {
-    const page = renderToStaticMarkup(<DocsIndex />)
-
-    for (const route of documentationRoutes) {
-      expect(page).toContain(`href="${route.path}"`)
-    }
+  it('renders the overview document at the docs index path', () => {
+    expect(getDocumentationRoute('/docs/')?.sourcePath).toBe('docs/overview.md')
+    expect(getDocumentationRoute('/docs')?.sourcePath).toBe('docs/overview.md')
   })
 
   it('lists all three hosted examples on the examples index', () => {

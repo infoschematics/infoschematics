@@ -10,16 +10,16 @@ export function playgroundPresetPath(preset: string) {
   return `${playgroundPath}?preset=${preset}`
 }
 
-export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
+export type DocumentSection = 'getting-started' | 'reference' | 'design' | 'specs'
 
 export const sectionTitles: Record<DocumentSection, string> = {
-  guides: 'Guides',
+  'getting-started': 'Getting started',
   reference: 'Reference',
   design: 'Design',
   specs: 'Specifications'
 }
 
-export const documentSections: readonly DocumentSection[] = ['guides', 'reference', 'design', 'specs']
+export const documentSections: readonly DocumentSection[] = ['getting-started', 'reference', 'design', 'specs']
 
 interface PublishedDocument {
   sourcePath: string
@@ -30,16 +30,22 @@ interface PublishedDocument {
 
 const publishedDocuments = [
   {
+    sourcePath: 'docs/overview.md',
+    title: 'Overview',
+    summary: 'What an Infoschematic is, the pieces that produce one, and where to start.',
+    section: 'getting-started'
+  },
+  {
     sourcePath: 'docs/guides/authoring.md',
     title: 'Authoring Infoschematics',
     summary: 'Write a serialisable Infoschematic definition from scratch.',
-    section: 'guides'
+    section: 'getting-started'
   },
   {
     sourcePath: 'docs/guides/react-integration.md',
     title: 'React integration',
     summary: 'Mount an authored Infoschematic inside a host React application.',
-    section: 'guides'
+    section: 'getting-started'
   },
   {
     sourcePath: 'docs/reference/vocabulary.md',
@@ -122,6 +128,10 @@ const publishedDocuments = [
 ] as const satisfies readonly PublishedDocument[]
 
 function documentPath(sourcePath: string): string {
+  if (sourcePath === 'docs/overview.md') {
+    return docsIndexPath
+  }
+
   const withoutReadme = sourcePath.endsWith('/README.md') ? sourcePath.slice(0, -'README.md'.length) : sourcePath
   const withoutExtension = withoutReadme.endsWith('.md') ? withoutReadme.slice(0, -'.md'.length) : withoutReadme
   return `/${withoutExtension}/`.replace(/\/+/g, '/')
