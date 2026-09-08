@@ -4,7 +4,7 @@ area: SITE
 title: Appearance options visual guide
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 2976e69ab1711bdb2f9cd25aa1b0bc51d04f005b
@@ -94,19 +94,23 @@ A rendered gallery at `/docs/visual-guide/`: one small SVG specimen per `Surface
 
 ### Verification
 
-`bun run self:check` passes (tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/docs/visual-guide/` and `/docs/` serve `200` on a dev server.
+`bun run self:check` passes (tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/docs/visual-guide/` and `/docs/` serve `200` on a dev server. A fresh `bun run self:check` also passed on 2026-09-08 immediately before acceptance.
 
 ### Outstanding concerns
 
-This item was progressed ahead of `INFOSCHEMATICS-SITE-007`'s formal acceptance, per direct user decision — see the Discussion section below. If SITE-007's review changes `SiteNav` or the `/docs/` route shape, this item's `SiteNav` and `routes.ts` edits would need to be reconciled with that change.
+None for this item. `INFOSCHEMATICS-SITE-007`'s navigation and route shape were accepted alongside this record, resolving the earlier lifecycle concern described in Discussion.
 
 ### Post-change review
 
-Verified the diff matches the approved plan. The one deviation — routing the appearance tuples through `domain-core` rather than importing `domain-model` directly from `apps/site` — was required by an existing dependency-boundary rule the plan hadn't anticipated, not a scope change.
+Verified the diff matches the approved plan. The one deviation — routing the appearance tuples through `domain-core` rather than importing `domain-model` directly from `apps/site` — was required by an existing dependency-boundary rule the plan hadn't anticipated, not a scope change. Kris Brown approved closure on 2026-09-08 as part of the SITE-007 through SITE-010 review.
 
 ### Mini recap
 
 Added a rendered visual guide at `/docs/visual-guide/` covering every surface, grid, and region-label-placement option plus a curated card-detail sequence, generated from new exhaustiveness-checked domain tuples; `self:check` passes.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -16,9 +16,9 @@ import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
 const formats: readonly { format: InfoschematicFormat; label: string }[] = [
-  { format: 'typescript', label: 'TypeScript' },
+  { format: 'yaml', label: 'YAML' },
   { format: 'json', label: 'JSON' },
-  { format: 'yaml', label: 'YAML' }
+  { format: 'typescript', label: 'TypeScript' }
 ]
 
 export type PlaygroundPreset = 'blank' | 'format-parity' | 'infoschematics' | 'system'
@@ -40,7 +40,7 @@ export const presets: readonly {
     key: 'format-parity',
     label: 'Format parity seed',
     buffers: { json: jsonSeed, typescript: typescriptSeed, yaml: yamlSeed },
-    focus: 'typescript'
+    focus: 'yaml'
   },
   {
     key: 'infoschematics',
@@ -123,9 +123,7 @@ const seedBuffers = (preset: PlaygroundPreset): Record<InfoschematicFormat, stri
  * the same loader the CLI uses. The TypeScript tab reads the strict document subset as data; nothing is executed.
  */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {
-  const [active, setActive] = useState<InfoschematicFormat>(
-    presets.find(({ key }) => key === preset)?.focus ?? 'typescript'
-  )
+  const [active, setActive] = useState<InfoschematicFormat>(presets.find(({ key }) => key === preset)?.focus ?? 'yaml')
   const [buffers, setBuffers] = useState<Record<InfoschematicFormat, string>>(() => seedBuffers(preset))
   const text = buffers[active]
   const parsed = usePlaygroundParse(text, active)

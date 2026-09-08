@@ -4,7 +4,7 @@ area: SITE
 title: Wide shell playground presets
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: bc27482fd355ad44502adf8dd893e6625e4c429b
@@ -81,7 +81,7 @@ The examples index, visual guide, and playground now use a wide shell (`.documen
 
 ### Verification
 
-`bun run self:check` passes end to end. Site tests extended to 44 passing: wide-shell and preset-picker render, every preset buffer parses in its own format, a preset prop focuses its buffer and renders, `presetFromSearch` accepts known keys and refuses unknown ones, plus the existing preview/issue/rejection coverage.
+`bun run self:check` passes end to end. Site tests extended to 44 passing: wide-shell and preset-picker render, every preset buffer parses in its own format, a preset prop focuses its buffer and renders, `presetFromSearch` accepts known keys and refuses unknown ones, plus the existing preview/issue/rejection coverage. A fresh `bun run self:check` also passed on 2026-09-08 immediately before acceptance.
 
 ### Outstanding concerns
 
@@ -90,11 +90,15 @@ The examples index, visual guide, and playground now use a wide shell (`.documen
 
 ### Post-change review
 
-The examples pages themselves are untouched, as bounded. Presets replace buffer contents without confirmation; the toolbar hint states this. The `?preset=` read is guarded for non-browser rendering so static tests and SSR-style rendering stay clean.
+The examples pages themselves are untouched, as bounded. Presets replace buffer contents without confirmation; the toolbar hint states this. The `?preset=` read is guarded for non-browser rendering so static tests and SSR-style rendering stay clean. Kris Brown approved closure on 2026-09-08 as part of the SITE-007 through SITE-010 review, retaining the recorded interactive-walk and JSON-only preset constraints.
 
 ### Mini recap
 
 Visual pages went wide, the playground became a full-viewport sandbox, and the hosted examples became loadable playground presets with deep links from the examples index.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above.
 
 ## Discussion
 

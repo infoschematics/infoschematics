@@ -4,7 +4,7 @@ area: SITE
 title: Docs and examples folders
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b22506148ea6bde1e4fe8a663df681c90f995a35
@@ -118,7 +118,7 @@ None beyond this item and `INFOSCHEMATICS-SITE-008`.
 
 ### Verification
 
-`bun run self:check` passes (412 tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/`, `/docs/`, `/examples/`, `/docs/guides/authoring/`, `/docs/specs/`, `/docs/specs/domain-core/`, and `/examples/system/` all serve `200` on a dev server.
+`bun run self:check` passes (412 tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/`, `/docs/`, `/examples/`, `/docs/guides/authoring/`, `/docs/specs/`, `/docs/specs/domain-core/`, and `/examples/system/` all serve `200` on a dev server. A fresh `bun run self:check` also passed on 2026-09-08 immediately before acceptance.
 
 ### Outstanding concerns
 
@@ -126,11 +126,15 @@ None for this item. `INFOSCHEMATICS-SITE-008` (visual guide) was delivered again
 
 ### Post-change review
 
-Verified the diff matches the approved plan; the one addition beyond the original scope (`docs/specs/domain-core.md`) closes a link that the plan's own decision to publish "design and specs" already covered in intent, so it isn't new scope.
+Verified the diff matches the approved plan; the one addition beyond the original scope (`docs/specs/domain-core.md`) closes a link that the plan's own decision to publish "design and specs" already covered in intent, so it isn't new scope. Kris Brown approved closure on 2026-09-08 as part of the SITE-007 through SITE-010 review.
 
 ### Mini recap
 
 Added a shared top nav and real `/docs/`/`/examples/` folders with indexes, replacing the homepage's flat footer links and the old `/guides/…`/`/reference/…` URLs; `self:check` passes.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above.
 
 ## Discussion
 

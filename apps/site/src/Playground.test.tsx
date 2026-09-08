@@ -7,14 +7,17 @@ import typescriptSeed from './playground/seeds/format-parity.ts.txt?raw'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 
 describe('Playground', () => {
-  it('renders the three format tabs with TypeScript active and a live preview of its seed', () => {
+  it('orders the three format tabs by portability with YAML active and a live preview of its seed', () => {
     const page = renderToStaticMarkup(<Playground />)
 
-    expect(page).toContain('>TypeScript</button>')
-    expect(page).toContain('>JSON</button>')
-    expect(page).toContain('>YAML</button>')
+    const yamlTab = page.indexOf('>YAML</button>')
+    const jsonTab = page.indexOf('>JSON</button>')
+    const typescriptTab = page.indexOf('>TypeScript</button>')
+    expect(yamlTab).toBeGreaterThan(-1)
+    expect(yamlTab).toBeLessThan(jsonTab)
+    expect(jsonTab).toBeLessThan(typescriptTab)
     expect(page).toContain('aria-selected="true"')
-    expect(page).toContain('export const formatParityDefinition')
+    expect(page).toContain('aria-label="YAML document"')
     expect(page).toContain('data:image/svg+xml')
   })
 

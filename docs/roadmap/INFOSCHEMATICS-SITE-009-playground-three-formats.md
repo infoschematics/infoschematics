@@ -4,7 +4,7 @@ area: SITE
 title: Playground three formats
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: e48be9b9627f57bbc948dc7a132805fd7e022e21
@@ -77,19 +77,19 @@ None beyond this item.
 
 ### Delivered
 
-A public `/playground/` page with three format tabs — TypeScript, JSON, YAML — each an independent buffer seeded with the format-parity definition, validated and rendered live through `parseInfoschematic`. `typescript` is a third document format in Domain Core: `parseTypescriptDocument` reads a strict literal subset as data, never executing anything, and the CLI gains `.ts` document loading through the shared extensions map with no further change.
+A public `/playground/` page with three format tabs — YAML, JSON, TypeScript — each an independent buffer seeded with the format-parity definition, validated and rendered live through `parseInfoschematic`. YAML is first and initially active, leading from the most portable form toward the more expressive strict-subset TypeScript form. `typescript` is a third document format in Domain Core: `parseTypescriptDocument` reads a strict literal subset as data, never executing anything, and the CLI gains `.ts` document loading through the shared extensions map with no further change.
 
 ### Summary of changes
 
 - `packages/domain-core/src/typescript-document.ts`: hand-rolled recursive-descent parser for the strict subset (comments, `import type` lines, one exported object literal; strings, plain decimal numbers, booleans, arrays, nesting, trailing commas). Rejections — identifier values, call expressions, template literals, spreads, computed keys, runtime imports, `satisfies`, non-decimal numbers, second exports — carry a dotted path and line/column.
 - `packages/domain-core/src/parse.ts`: `InfoschematicFormat` gains `'typescript'`, extensions gain `.ts`, and the new branch feeds the same metadata-strip → schema → `defineInfoschematic` pipeline, so all three formats share one diagnostic shape.
-- Site: `Playground.tsx` (tabs, debounced parse, SVG preview with last-good render dimmed, `formatInfoschematicIssue` list), route/nav/title wiring, styles in the existing idiom.
+- Site: `Playground.tsx` (YAML-first tab order and default, debounced parse, SVG preview with last-good render dimmed, `formatInfoschematicIssue` list), route/nav/title wiring, styles in the existing idiom. `Playground.test.tsx` asserts the order and YAML default explicitly.
 - Seeds are site-local copies (the TS one stored as `.ts.txt` so neither `tsc` nor dependency-cruiser treats it as a module); `scripts/format-parity.test.ts` holds them in step with the fixtures.
 - Docs: CORE-002 records the subset grammar contract, the authoring guide's document section covers `.ts` and links the playground, ADR-INFOSCHEMATICS-013 is amended.
 
 ### Verification
 
-`bun run self:check` passes end to end (packages build, visual tokens, schema, all workspace tests, typecheck, dependency boundaries, production site build). New coverage: `typescript-document.test.ts` (13 tests, accept and reject grammar), format-parity gains the `.ts`-as-document byte-identical SVG assertion and the seed-parity assertion, `Playground.test.tsx` covers tab render, valid preview, path-addressed issues, and rejection of executable TypeScript.
+`bun run self:check` passes end to end (packages build, visual tokens, schema, all workspace tests, typecheck, dependency boundaries, production site build). New coverage: `typescript-document.test.ts` (13 tests, accept and reject grammar), format-parity gains the `.ts`-as-document byte-identical SVG assertion and the seed-parity assertion, `Playground.test.tsx` covers YAML-first order and default, tab render, valid preview, path-addressed issues, and rejection of executable TypeScript. A focused Playground run passed 9 tests, followed by a fresh full `bun run self:check`, on 2026-09-08 immediately before acceptance.
 
 ### Outstanding concerns
 
@@ -98,11 +98,15 @@ A public `/playground/` page with three format tabs — TypeScript, JSON, YAML �
 
 ### Post-change review
 
-The planned `?raw` import of `scripts/fixtures/` was indeed rejected by the `nothing-imports-repository-scripts` boundary, and a real `.ts` seed inside `apps/site` would itself have violated `site-does-not-own-product-model`, so the planned fallback (site-local copies, `.txt`-suffixed TS seed, scripts-side parity test) was taken. `Preview` is exported solely for the component test, noted inline.
+The planned `?raw` import of `scripts/fixtures/` was indeed rejected by the `nothing-imports-repository-scripts` boundary, and a real `.ts` seed inside `apps/site` would itself have violated `site-does-not-own-product-model`, so the planned fallback (site-local copies, `.txt`-suffixed TS seed, scripts-side parity test) was taken. `Preview` is exported solely for the component test, noted inline. During acceptance, the user requested and approved the YAML → JSON → TypeScript order and YAML default; the focused test and full repository gate passed afterward. Kris Brown approved closure on 2026-09-08 with the recorded interactive-walk concern retained.
 
 ### Mini recap
 
-Three-format playground shipped at `/playground/`; TypeScript is now a first-class document format in Domain Core, parsed as data and proven render-identical to JSON and YAML.
+Three-format playground shipped at `/playground/`, ordered YAML → JSON → TypeScript from portability toward expressiveness; TypeScript is now a first-class document format in Domain Core, parsed as data and proven render-identical to JSON and YAML.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above.
 
 ## Discussion
 
@@ -113,3 +117,7 @@ A site-local parser would hide a reusable "TypeScript as data format" capability
 ### Why three independent buffers
 
 Auto-converting between tabs needs a TypeScript emitter for no authoring benefit, and independent buffers are what make the playground a parity check: the same definition authored three ways, validated identically, matching how `scripts/format-parity.test.ts` already proves the loader.
+
+### Why YAML comes first
+
+Discussed directly with the user during acceptance: order the formats YAML, JSON, then TypeScript, with YAML selected initially. The sequence presents the formats from the most portable authoring form toward the more expressive strict-subset TypeScript form without changing their shared validation or rendering semantics.
