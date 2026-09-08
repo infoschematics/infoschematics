@@ -4,7 +4,7 @@ area: SITE
 title: Homepage real rendering
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 11d6a0692eb215649375199c5409291565e11f55
@@ -98,6 +98,14 @@ Goal met: the homepage hero is now the real shared-renderer output of `examples/
 ### Mini recap
 
 Delivered: `apps/site` homepage now renders only the shared-renderer SVG hero; the bespoke instrument/flow-map panel and its CSS are gone. Verification: full test suite (331/331), full typecheck (clean), production build (succeeds). Outstanding: no live visual check possible in this sandboxed session — recommend a human check of `/` before closing. No learnings proposed for promotion beyond this record.
+
+## Done
+
+Accepted on 2026-09-08 by Kris Brown, who approved `INFOSCHEMATICS-SITE-004` by identifier alongside TOOL-015 and TOOL-022.
+
+Evidence re-checked at closure rather than restated from the packet: `bun run self:check` passes — 52/52 test files, 343/343 tests, `self:verify:depcruise` clean across 197 modules and 468 dependencies, and the `apps/site` production build succeeds.
+
+The packet's single outstanding concern — that nobody had looked at the rendered `/` — closes on the accepting human's own approval, not on new automated evidence. The sandbox restriction that prevented an in-session pixel check still stands, so the recommendation was answered by the reviewer rather than by tooling.
 
 ## Discussion
 

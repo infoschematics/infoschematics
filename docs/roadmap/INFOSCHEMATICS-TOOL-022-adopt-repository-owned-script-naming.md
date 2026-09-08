@@ -4,7 +4,7 @@ area: TOOL
 title: Adopt repository-owned script naming
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 91e2fae82ec675a988d68f3c73cdd9f6f35aac61
@@ -120,6 +120,14 @@ The migration stayed inside the approved file set and changed no script implemen
 ### Mini recap
 
 Infoschematics now passes the shared script-ownership contract without repository-specific exclusions and is ready for human review. Closure, pruning, publishing, deployment, and push remain outside this run.
+
+## Done
+
+Accepted on 2026-09-08 by Kris Brown, who approved `INFOSCHEMATICS-TOOL-022` by identifier alongside SITE-004 and TOOL-015.
+
+Evidence re-checked at closure: no repository-owned `ki:`-prefixed key remains in `package.json`, `README.md`, `AGENTS.md`, the CI workflow, the guides, or `scripts/`; `.ki.toml` carries no `script_exclusions`; `ki repo audit --skill ki-engineering --repo .` PASS; and `bun run self:check` passes.
+
+The packet recorded no outstanding concerns.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: TOOL
 title: Adopt the engineering standard
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 176bc8c672a189adc30b8d272362860698a477ed
@@ -114,6 +114,16 @@ Goal met: the repository now declares and passes `[skills.ki-engineering]` witho
 ### Mini recap
 
 Delivered: full KI engineering-standard adoption — mise-pinned toolchain, `ki:`-prefixed scripts, root `tsconfig.json`/`tsconfig.build-base.json` split, Biome and knip adopted with all ERROR-level findings resolved, syncpack-sorted manifests. Verification: `ki repo audit --skill ki-engineering` PASS, full local `ki:check` and `ki:release:verify` both green. Outstanding: several suppression-vs-fix judgment calls and one new GDR flagged above for explicit review; two latent (pre-existing) dependency-array bugs identified but intentionally left unfixed and documented rather than fixed outside this item's boundary. No new learnings proposed for promotion beyond the GDR already added.
+
+## Done
+
+Accepted on 2026-09-08 by Kris Brown, who approved `INFOSCHEMATICS-TOOL-015` by identifier alongside SITE-004 and TOOL-022.
+
+Evidence re-checked at closure: `ki repo audit --skill ki-engineering --repo .` PASS, and `bun run self:check` passes end to end.
+
+Acceptance confirms each judgment call the packet raised for explicit review: knip's global `duplicates` exclusion in place of a source fix, the documented `biome-ignore` suppressions taken instead of behavioural changes, the two latent dependency-array bugs recorded rather than repaired inside this item's boundary, the mechanical syncpack manifest reordering, and [GDR-INFOSCHEMATICS-003](../decisions/GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md).
+
+The `ki:` script prefix this item introduced was itself superseded by [INFOSCHEMATICS-TOOL-022](INFOSCHEMATICS-TOOL-022-adopt-repository-owned-script-naming.md), which moved repository-owned keys to `self:`. The packet's `bun run ki:check` and `bun run ki:release:verify` evidence therefore reads today as `self:check` and `self:release:verify`.
 
 ## Discussion
 
