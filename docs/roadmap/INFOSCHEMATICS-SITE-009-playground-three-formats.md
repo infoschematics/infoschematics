@@ -4,10 +4,10 @@ area: SITE
 title: Playground three formats
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: e48be9b9627f57bbc948dc7a132805fd7e022e21
 ---
 
 ## Goal
