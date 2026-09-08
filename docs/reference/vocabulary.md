@@ -8,55 +8,57 @@ This reference defines the public language used by packages, authored configurat
 
 The **product** is an Infoschematic together with its Standalone Scenes, Themes, and Stories.
 
-| Infoschematics term | Also known as |
-| ------------------- | ------------- |
-| Infoschematic | schematic, structural diagram |
-| Infoschematic artefact | element, visual element |
-| Region | lane, zone, swimlane, band, tier, column, segment |
-| Fabric | backdrop, plane, region, transport |
-| Standard Card | node, box, service box |
-| Adapter Card | sidecar, wrapper |
-| Flow | connection, connector, link, edge |
-| Graphic | overlay figure, drawn annotation |
-| Route | geometry, line run |
-| Waypoint | bend, corner, vertex |
-| Port | connection point, attachment point |
-| Scene | focus composition, highlight group |
-| Standalone Scene | reusable Scene |
-| Thematic Scene | Theme-owned Scene |
-| Story Scene | step |
-| Theme | series, collection, deck |
-| Story | walkthrough, narrative |
-| Callout | narration card, caption card |
+| Id | Infoschematics term | Also known as |
+| --- | --- | --- |
+| `infoschematic` | Infoschematic | schematic, structural diagram |
+| `infoschematic-artefact` | Infoschematic artefact | element, visual element |
+| `region` | Region | lane, zone, swimlane, band, tier, column, segment |
+| `fabric` | Fabric | backdrop, plane, region, transport |
+| `standard-card` | Standard Card | node, box, service box |
+| `adapter-card` | Adapter Card | sidecar, wrapper |
+| `flow` | Flow | connection, connector, link, edge |
+| `graphic` | Graphic | overlay figure, drawn annotation |
+| `route` | Route | geometry, line run |
+| `waypoint` | Waypoint | bend, corner, vertex |
+| `port` | Port | connection point, attachment point |
+| `scene` | Scene | focus composition, highlight group |
+| `standalone-scene` | Standalone Scene | reusable Scene |
+| `thematic-scene` | Thematic Scene | Theme-owned Scene |
+| `story-scene` | Story Scene | step |
+| `theme` | Theme | series, collection, deck |
+| `story` | Story | walkthrough, narrative |
+| `callout` | Callout | narration card, caption card |
 
 The alternatives help readers recognise a concept; they do not introduce additional public terms.
+
+Each term carries a stable `Id`. Code and documents cite a concept by that id rather than by repeating its name, so a term cannot be reworded or retired without its citations failing. `packages/domain-model/src/option-catalogue.ts` cites these ids from every appearance option.
 
 ### Production
 
 **Production** is the coordinated work through which a Producer authors and presents the product to an Audience.
 
-| Infoschematics term | Also known as |
-| ------------------- | ------------- |
-| Producer | author, editor, operator |
-| Audience | viewer, people watching |
-| Present | viewing, playback |
-| Design | structural editing |
-| Direct | presentation editing, directing |
-| Infoschematic panel | canvas, main view |
-| Producer controls | control surface |
-| Details panel | sidebar, inspector, state |
-| Info | what is currently shown |
-| Schematics | technical references and interfaces |
+| Id | Infoschematics term | Also known as |
+| --- | --- | --- |
+| `producer` | Producer | author, editor, operator |
+| `audience` | Audience | viewer, people watching |
+| `present` | Present | viewing, playback |
+| `design` | Design | structural editing |
+| `direct` | Direct | presentation editing, directing |
+| `infoschematic-panel` | Infoschematic panel | canvas, main view |
+| `producer-controls` | Producer controls | control surface |
+| `details-panel` | Details panel | sidebar, inspector, state |
+| `info` | Info | what is currently shown |
+| `schematics` | Schematics | technical references and interfaces |
 
 ### Groupings
 
 Three independent groupings classify what appears in an Infoschematic. None is an artefact and none substitutes for another.
 
-| Infoschematics term | Meaning |
-| ------------------- | ------- |
-| Flow Family | What a Flow carries and the visual identity associated with it |
-| Scope | A selectable architectural grouping of artefacts |
-| Domain | A sphere of concern that can classify or visually distinguish Cards |
+| Id | Infoschematics term | Meaning |
+| --- | --- | --- |
+| `flow-family` | Flow Family | What a Flow carries and the visual identity associated with it |
+| `scope` | Scope | A selectable architectural grouping of artefacts |
+| `domain` | Domain | A sphere of concern that can classify or visually distinguish Cards |
 
 `family` and `scope` are acceptable shorthand where the surrounding code or prose makes their full meaning unambiguous.
 

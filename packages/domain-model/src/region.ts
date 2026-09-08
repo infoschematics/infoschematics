@@ -27,3 +27,22 @@ export type RegionConfig = {
   labelMount?: RegionLabelMount
   labelOffset?: number
 }
+
+// The unions above are erased at runtime, but a control surface and a visual
+// guide both need to offer their members. Keying a literal object by the union
+// makes the tuple exhaustive: a new style or mount fails to compile until it is
+// listed here as well.
+const regionFrameStyleMembers: Record<RegionFrameStyle, true> = {
+  solid: true,
+  dashed: true,
+  dotted: true
+}
+
+const regionLabelMountMembers: Record<RegionLabelMount, true> = {
+  boundary: true,
+  internal: true
+}
+
+export const regionFrameStyles = Object.keys(regionFrameStyleMembers) as readonly RegionFrameStyle[]
+
+export const regionLabelMounts = Object.keys(regionLabelMountMembers) as readonly RegionLabelMount[]

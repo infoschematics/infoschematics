@@ -1,5 +1,7 @@
-import type { RegionLabelPlacement, RegionLabelTreatment } from '@infoschematics/domain-model/appearance'
-import type { RegionConfig, RegionFrameStyle, RegionLabelMount } from '@infoschematics/domain-model/region'
+import type { RegionLabelTreatment } from '@infoschematics/domain-model/appearance'
+import { regionLabelPlacements } from '@infoschematics/domain-model/appearance'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
+import { regionFrameStyles, regionLabelMounts } from '@infoschematics/domain-model/region'
 
 import type { PropertyPatch } from './artefact-operations.ts'
 
@@ -16,20 +18,8 @@ export type RegionTreatmentOption = Readonly<{ label: string; value: string }>
 /** The empty control value: the Region carries no such treatment and takes the rendered default. */
 export const regionTreatmentUnset = ''
 
-const frameStyles: readonly RegionFrameStyle[] = ['solid', 'dashed', 'dotted']
-const labelMounts: readonly RegionLabelMount[] = ['boundary', 'internal']
-const labelPlacements: readonly RegionLabelPlacement[] = [
-  'north-west',
-  'north',
-  'north-east',
-  'west',
-  'center',
-  'east',
-  'south-west',
-  'south',
-  'south-east'
-]
-const labelTreatments: readonly RegionLabelTreatment[] = ['none', ...labelPlacements]
+// The domain states these members once; a control offers them in that order.
+const labelTreatments: readonly RegionLabelTreatment[] = ['none', ...regionLabelPlacements]
 
 const describe = (value: string) => `${value.slice(0, 1).toUpperCase()}${value.slice(1).replaceAll('-', ' ')}`
 
@@ -46,8 +36,8 @@ export const regionTreatmentOptions: Readonly<
     readonly RegionTreatmentOption[]
   >
 > = Object.freeze({
-  frameStyle: options(frameStyles, 'None'),
-  labelMount: options(labelMounts, 'Default'),
+  frameStyle: options(regionFrameStyles, 'None'),
+  labelMount: options(regionLabelMounts, 'Default'),
   labelPlacement: options(labelTreatments, 'Default')
 })
 
@@ -104,12 +94,12 @@ export const regionTreatmentPatch = (
     }
     case 'frameStyle': {
       if (cleared) return { frame: null }
-      const style = chosen(frameStyles, value)
+      const style = chosen(regionFrameStyles, value)
       return style === undefined ? undefined : { frame: { style } }
     }
     case 'labelMount': {
       if (cleared) return { labelMount: null }
-      const mount = chosen(labelMounts, value)
+      const mount = chosen(regionLabelMounts, value)
       return mount === undefined ? undefined : { labelMount: mount }
     }
     case 'labelOffset': {

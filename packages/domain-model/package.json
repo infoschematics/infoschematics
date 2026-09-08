@@ -54,6 +54,10 @@
       "types": "./dist/interface.d.ts",
       "import": "./dist/interface.js"
     },
+    "./option-catalogue": {
+      "types": "./dist/option-catalogue.d.ts",
+      "import": "./dist/option-catalogue.js"
+    },
     "./metadata": {
       "types": "./dist/metadata.d.ts",
       "import": "./dist/metadata.js"

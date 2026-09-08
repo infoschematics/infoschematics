@@ -4,10 +4,10 @@ area: TOOL
 title: Catalogue appearance options
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: 0bb213dd11b686f75bcb302d2a6c08160eacc5a0
+baseline_ref: 421dd6f9896ea4ab7d933f2d8c3eda937ca2a736
 ---
 
 ## Goal
@@ -41,14 +41,14 @@ This item describes options that already exist. It does not add, rename, or remo
 
 ## Steps
 
-- [ ] Add `regionFrameStyles` and `regionLabelMounts` tuples to `packages/domain-model/src/region.ts` using the `Record<Union, true>` exhaustiveness trick, with matching assertions in its test.
-- [ ] Add `packages/domain-model/src/option-catalogue.ts`: the `AppearanceOptionKey` union, an `AppearanceOptionDescriptor` type carrying `control`, `values`, `term`, and an optional `default`, and the `appearanceOptions` record over every key.
-- [ ] Add stable term ids to [the vocabulary reference](../reference/vocabulary.md) for each term the catalogue cites.
-- [ ] Add `packages/domain-model/src/option-catalogue.test.ts`: every choice descriptor's values equal its union tuple, every key of the authored appearance config is described, and no descriptor is orphaned.
-- [ ] Add a test asserting every cited term id resolves to a heading id present in the vocabulary reference, so a renamed term breaks the build rather than the guide.
-- [ ] Repoint `packages/view-studio/src/app/editor/region-treatments.ts` at the domain tuples, removing the hand-written placement, frame-style, and label-mount lists.
-- [ ] Export the catalogue from `packages/domain-model/src/index.ts` and its `exports` map, and confirm the dependency cruise stays clean.
-- [ ] Record the requirement in [the domain model specification](../specs/domain-model.md): every authored appearance option is described in the catalogue and cites a vocabulary term.
+- [x] Add `regionFrameStyles` and `regionLabelMounts` tuples to `packages/domain-model/src/region.ts` using the `Record<Union, true>` exhaustiveness trick, with matching assertions in its test.
+- [x] Add `packages/domain-model/src/option-catalogue.ts`: the `AppearanceOptionKey` union, an `AppearanceOptionDescriptor` type carrying `control`, `values`, `term`, and an optional `default`, and the `appearanceOptions` record over every key.
+- [x] Add stable term ids to [the vocabulary reference](../reference/vocabulary.md) for each term the catalogue cites.
+- [x] Add `packages/domain-model/src/option-catalogue.test.ts`: every choice descriptor's values equal its union tuple, every key of the authored appearance config is described, and no descriptor is orphaned.
+- [x] Add a test asserting every cited term id resolves to a heading id present in the vocabulary reference, so a renamed term breaks the build rather than the guide.
+- [x] Repoint `packages/view-studio/src/app/editor/region-treatments.ts` at the domain tuples, removing the hand-written placement, frame-style, and label-mount lists.
+- [x] Export the catalogue from `packages/domain-model/src/index.ts` and its `exports` map, and confirm the dependency cruise stays clean.
+- [x] Record the requirement in [the domain model specification](../specs/domain-model.md): every authored appearance option is described in the catalogue and cites a vocabulary term.
 
 ## Files touched
 
@@ -83,6 +83,61 @@ None directly. [The architecture guide](../design/architecture.md) needs no chan
 ### Roadmap
 
 Record implementation and verification evidence in this item before acceptance.
+
+## Review
+
+### Delivered
+
+Every authored appearance option is now described once, at runtime, with its control shape, its values, its rendered default where one exists, and the vocabulary term it gives visual form to. The option surface can no longer be re-listed by hand without the compiler noticing, and Studio's Region controls consume the domain's tuples instead of their own copy.
+
+### Summary of changes
+
+- `packages/domain-model/src/option-catalogue.ts`, new: `AppearanceOptionKey` derived from the config types rather than written out, `AppearanceOptionDescriptor`, `VocabularyTermId`, and the `appearanceOptions` record keyed by the union so an undescribed option fails to compile.
+- `packages/domain-model/src/region.ts`: `regionFrameStyles` and `regionLabelMounts` tuples via the `Record<Union, true>` exhaustiveness trick, matching the three tuples `appearance.ts` already exported.
+- `docs/reference/vocabulary.md`: an `Id` column across all three glossary tables — 31 terms — and a paragraph stating that code and documents cite the id rather than repeat the name.
+- `packages/view-studio/src/app/editor/region-treatments.ts`: the hand-written nine-placement list, frame styles, and label mounts replaced by imports of the domain tuples.
+- `packages/domain-model/package.json` and `modules.test.ts`: the `./option-catalogue` subpath and its four contracts, taking the public contract count from 38 to 42.
+- `packages/domain-model/src/option-catalogue.test.ts`, new: choice values match their unions in order, every key is described, values appear only on choices, number controls are bounded, and a stated default is one the choice offers.
+- `scripts/vocabulary-terms.test.ts`, new: every glossary id is unique and every term the catalogue cites resolves in the reference.
+- `docs/specs/domain-model.md`: DOMAIN-019 requires the catalogue, its compile-time keying, and that cited terms resolve.
+
+### Verification
+
+`bun run self:check` exits 0 — 65 test files, 455 tests, `✔ no dependency violations found (360 modules, 1115 dependencies cruised)`.
+
+The compile-time guarantee was proved by hand rather than asserted. Adding `icon?: boolean` to `CardDetailDefaults` produces:
+
+```text
+option-catalogue.ts(86,14): error TS2741: Property '"card.icon"' is missing in type
+'Readonly<{ 'card.compact': ...; }>' but required in type
+'Readonly<Record<AppearanceOptionKey, ...>>'
+```
+
+An option added to authored appearance therefore cannot ship uncatalogued, which is the claim the item rests on. The probe was reverted; `appearance.ts` is unchanged.
+
+### Outstanding concerns
+
+Three shaping decisions were widened during delivery, each recorded here rather than absorbed silently.
+
+The catalogue carries four control kinds, not the two the plan named. Region's authored appearance includes a fill colour and two numbers alongside its choices, so a `choice`-and-`flag` catalogue would have described part of the surface and left the rest to be hand-written again — the exact failure the item exists to remove. `colour` and `number` were added, with `range` bounding the numbers.
+
+Term ids were added to all 31 glossary terms rather than only the ones the catalogue cites. A column populated for three rows and blank for twenty-eight is not a table anyone would ship. This does not take work from `INFOSCHEMATICS-TOOL-027`, which owns citing terms across the corpus and the check that those citations resolve; it only means the ids exist to be cited.
+
+The vocabulary-resolution test lives in `scripts/`, not in the package. A package test that reads `docs/reference/vocabulary.md` would tie a published package to a repository path, and `INFOSCHEMATICS-TOOL-025` set the precedent when the same problem arose with the token generator.
+
+The `region.labelOffset` bounds — plus or minus 200 — are a control's sensible range, not a domain constraint. Nothing rejects a larger authored value, and nothing should on this item's evidence.
+
+### Post-change review
+
+The boundary held: no option was added, renamed, or removed, no renderer output changed, and `InfoschematicConfig` is untouched. `card.icon` exists only in the reverted probe.
+
+The drift the item was written against is closed rather than described. `region-treatments.ts` had its own nine-member placement list, and the deeper problem was that nothing made importing the tuple easier than retyping it — `RegionFrameStyle` and `RegionLabelMount` had no tuple to import at all. Adding those two was what made the repoint possible, so the fix is structural rather than a tidy-up that the next contributor can undo by accident.
+
+Worth flagging for `INFOSCHEMATICS-SITE-011`: `appearanceOptions` describes Region's options with `region.` keys, but a Region option applies per Region while `surface` and `grid` apply to the whole Infoschematic. A control surface has to know which config it is patching, and the catalogue deliberately does not say — the key's prefix does. If that turns out to be too implicit when the controls are built, an explicit `target` field is the small change to make.
+
+### Mini recap
+
+Delivered under INFOSCHEMATICS-TOOL-026: a runtime catalogue of all twelve authored appearance options, two new domain tuples, stable ids for all 31 vocabulary terms, Studio repointed off its hand-written lists, a new spec requirement, and two new test files. Verified by `bun run self:check` (455 tests, clean cruise) plus a hand probe proving an uncatalogued option fails to compile. Outstanding: four control kinds instead of two, ids added corpus-wide rather than only where cited, and the implicit patch target noted above for SITE-011. Proposed learning route: none beyond this record — DOMAIN-019 and the vocabulary reference already carry the durable statements.
 
 ## Discussion
 

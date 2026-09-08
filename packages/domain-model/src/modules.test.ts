@@ -19,6 +19,12 @@ import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { InfoschematicDefinition } from '@infoschematics/domain-model/infoschematic'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { InfoschematicMetadata } from '@infoschematics/domain-model/metadata'
+import type {
+  AppearanceOptionControl,
+  AppearanceOptionDescriptor,
+  AppearanceOptionKey,
+  VocabularyTermId
+} from '@infoschematics/domain-model/option-catalogue'
 import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { PortCounts, PortId, Side } from '@infoschematics/domain-model/ports'
 import type {
@@ -37,6 +43,10 @@ import { describe, expect, it } from 'vitest'
 type PublicContracts = [
   SurfaceTreatment,
   GridTreatment,
+  AppearanceOptionControl,
+  AppearanceOptionDescriptor,
+  AppearanceOptionKey,
+  VocabularyTermId,
   RegionFrameStyle,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
@@ -77,7 +87,7 @@ type PublicContracts = [
 
 describe('public model modules', () => {
   it('resolves every explicit contract subpath', () => {
-    const contractCount: PublicContracts['length'] = 38
-    expect(contractCount).toBe(38)
+    const contractCount: PublicContracts['length'] = 42
+    expect(contractCount).toBe(42)
   })
 })

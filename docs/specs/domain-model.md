@@ -104,6 +104,14 @@ Shared corner geometry, notch padding, type scales, line widths, fallback colour
 
 An output MAY override whether Card identity, stereotype, and description are visible. Such an override MUST NOT alter the authored data or become part of `InfoschematicConfig`.
 
+### DOMAIN-019 — Authored appearance options are catalogued
+
+Every authored appearance option MUST be described once at runtime: its control shape, the values it accepts where those are a closed set, the default the renderers apply where they state one, and the vocabulary term the option gives visual form to. A consumer that offers an option to a Producer or a reader MUST derive it from that catalogue rather than restate the option's members.
+
+The catalogue MUST be keyed so that an option present in authored appearance and absent from the catalogue fails to compile. Each cited vocabulary term MUST resolve to a declared term id in [the vocabulary reference](../reference/vocabulary.md). The catalogue describes options; it MUST NOT decide what an absent option means, which remains the renderers' resolution.
+
+_Implementation surface: `packages/domain-model/src/option-catalogue.ts` and `docs/reference/vocabulary.md`._
+
 ## Relationships
 
 ### DOMAIN-009 — Relationship semantics and geometry are separate facts
