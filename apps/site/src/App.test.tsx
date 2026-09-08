@@ -62,6 +62,14 @@ describe('website routes', () => {
     expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
   })
 
+  it('groups onboarding under getting started and leaves the rest as reference', () => {
+    const titlesIn = (section: string) =>
+      documentationRoutes.filter((route) => route.section === section).map((route) => route.title)
+
+    expect(titlesIn('getting-started')).toEqual(['Getting started', 'Authoring Infoschematics'])
+    expect(titlesIn('reference')).toEqual(['Terminology', 'React integration'])
+  })
+
   it('publishes guidance rather than the specifications, which stay in the repository', () => {
     expect(documentationRoutes.some((route) => route.sourcePath.startsWith('docs/specs/'))).toBe(false)
     expect(getDocumentationRoute('/docs/specs/')).toBeUndefined()

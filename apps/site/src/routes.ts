@@ -41,15 +41,15 @@ const publishedDocuments = [
     section: 'getting-started'
   },
   {
+    sourcePath: 'docs/reference/vocabulary.md',
+    title: 'Terminology',
+    summary: 'Canonical product terms used across every specification and guide.',
+    section: 'reference'
+  },
+  {
     sourcePath: 'docs/guides/react-integration.md',
     title: 'React integration',
     summary: 'Mount an authored Infoschematic inside a host React application.',
-    section: 'getting-started'
-  },
-  {
-    sourcePath: 'docs/reference/vocabulary.md',
-    title: 'Infoschematics vocabulary',
-    summary: 'Canonical product terms used across every specification and guide.',
     section: 'reference'
   },
   {

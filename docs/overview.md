@@ -8,9 +8,7 @@ One serialisable definition drives consistent outputs: static renderings for doc
 
 ## What appears in an Infoschematic
 
-An Infoschematic comprises five visual element types: Regions, Fabrics, Cards, Flows, and Overlays. Scenes can focus or reveal parts of that diagram, while Themes and Stories can arrange those Scenes for explanation and presentation.
-
-The diagram has five visual element types:
+An Infoschematic comprises five visual element types. Scenes can focus or reveal parts of that diagram, while Themes and Stories can arrange those Scenes for explanation and presentation.
 
 - **Region** establishes background geography with a labelled box, optional fill, and optional frame.
 - **Fabric** is a connectable midground plane or backdrop.
@@ -35,9 +33,7 @@ Applications and examples sit outside those reusable layers. An example owns aut
 
 Start in the [Playground](/playground/). Its formats are ordered from most portable to most expressive: YAML, JSON, then TypeScript. Each represents the same product contract and produces the same diagram.
 
-Use a Region to establish the drawing area, add one or more Cards or Fabrics, and connect them with a Flow. Then add appearance only where it communicates meaning: a Domain colour, a Flow Family, a Region frame, or selected Card metadata.
-
-For a complete walkthrough, follow the [authoring guide](/docs/guides/authoring/). When integrating a renderer into an application, continue with the [React integration guide](/docs/guides/react-integration/).
+The [authoring guide](/docs/guides/authoring/) is the complete walkthrough: what to place first, how far to take appearance, and how the same definition reads as YAML, JSON, or TypeScript. When mounting the result in an application, continue with the [React integration guide](/docs/guides/react-integration/).
 
 ## Choose the right output
 
@@ -52,7 +48,6 @@ All four read the same authored definition. A host can choose the narrowest outp
 
 ## Continue learning
 
-- Use the [visual guide](/docs/visual-guide/) for visible elements, treatments, and presentation-state boundaries.
 - Read the [visual-language guide](/docs/design/visual-language/) for composition, colour, routing, motion, and accessibility principles.
-- Keep the [vocabulary reference](/docs/reference/vocabulary/) nearby when naming authored concepts.
+- Keep the [terminology reference](/docs/reference/vocabulary/) nearby when naming authored concepts.
 - Explore the [hosted examples](/examples/) to see complete Infoschematics in operation.
