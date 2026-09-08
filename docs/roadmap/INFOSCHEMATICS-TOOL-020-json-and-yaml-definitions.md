@@ -4,7 +4,7 @@ area: TOOL
 title: JSON and YAML definitions
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-021]
 blocked_by: []
 baseline_ref: 05f7c569592dbdd346aaa596f6573115e996411a
@@ -126,6 +126,10 @@ INFOSCHEMATICS-TOOL-020 delivers the JSON and YAML authoring boundary. Domain Co
 Verification is `bun run self:check` at exit 0 with 370 tests, `self:release:verify` clean across 7 packages, a passing `ki repo audit`, and byte-identical SVG rendered from all three formats. The parity assertion was deliberately broken three ways and observed to fail before being trusted.
 
 Four concerns are open for review: the schema cannot be published under the current release contract, strict validation constrains future document versioning, referential validation remains a gap shared with TypeScript authoring, and the decision was filed as ADR-INFOSCHEMATICS-013 rather than as the GDR the plan named. INFOSCHEMATICS-TOOL-021 is unblocked by the loader landing.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above.
 
 ## Discussion
 

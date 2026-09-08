@@ -4,7 +4,7 @@ area: TOOL
 title: Declutter design mode
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8c6e3892adbd0417b1e9b4e08c58329d09ffcc26
@@ -122,11 +122,17 @@ Regression risk is concentrated in the graphics layer move, which is the only ch
 
 Acceptance readiness: **not ready**. The verification the item specifies is only partly done, and the missing part is precisely the part that judges whether the result is legible.
 
+Accepted by the reviewer on 2026-09-08 with that downstream visual check still outstanding. The concerns above stand as recorded: if the dimmed Graphic opacity or the hover-only port discoverability proves wrong in the IBC dashboard host, it is a fresh record rather than a reopening of this one.
+
 ### Mini recap
 
 `INFOSCHEMATICS-TOOL-019` delivered all five approved steps against baseline `8c6e3892`. `bun run self:check` passes; 349 tests, six of them new; dependency boundaries and the site build clean. The item stops at `awaiting-review` with one blocking concern — the downstream visual check from the IBC dashboard host has not been performed, and two of the judgment calls above are questions about legibility that only a rendered pixel can answer.
 
 Proposed learning routes, none promoted: the discovery that `used` is selection-scoped while a diagram's anchors are a separate question may belong in the canvas component's own comments, where it now is, rather than anywhere durable; and the observation that a declared port count does not bound the rendered complement is a candidate note for the authoring guide if it surprises anyone else.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above, with the downstream visual check in the IBC dashboard host still outstanding.
 
 ## Discussion
 
