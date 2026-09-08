@@ -63,7 +63,10 @@ export const formatParityDefinition: InfoschematicConfigInput = {
         sourcePort: 'E1',
         targetPort: 'W1',
         operation: 'load',
-        points: [{ x: 400, y: 220 }]
+        points: [
+          { x: 300, y: 220 },
+          { x: 500, y: 220 }
+        ]
       }
     ]
   },

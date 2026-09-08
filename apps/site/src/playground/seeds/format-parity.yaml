@@ -65,7 +65,8 @@ infoschematic:
       targetPort: W1
       operation: load
       points:
-        - { x: 400, y: 220 }
+        - { x: 300, y: 220 }
+        - { x: 500, y: 220 }
 standaloneScenes:
   - id: overview
     code: S-001

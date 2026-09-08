@@ -1,4 +1,5 @@
 import { parseInfoschematic } from '@infoschematics/domain-core'
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Issues, Playground, Preview, presetFromSearch, presets } from './Playground.tsx'
@@ -35,6 +36,23 @@ describe('Playground', () => {
     expect(parseInfoschematic(typescriptSeed, { format: 'typescript' }).ok).toBe(true)
     expect(parseInfoschematic(jsonSeed, { format: 'json' }).ok).toBe(true)
     expect(parseInfoschematic(yamlSeed, { format: 'yaml' }).ok).toBe(true)
+  })
+
+  it('starts every format with a visible Flow from Source to Sink', () => {
+    const seeds = [
+      { format: 'yaml', text: yamlSeed },
+      { format: 'json', text: jsonSeed },
+      { format: 'typescript', text: typescriptSeed }
+    ] as const
+
+    for (const { format, text } of seeds) {
+      const parsed = parseInfoschematic(text, { format })
+      expect(parsed.ok).toBe(true)
+      if (!parsed.ok) continue
+
+      expect(parsed.config.infoschematic.flows).toEqual([expect.objectContaining({ source: 'source', target: 'sink' })])
+      expect(renderInfoschematicSvg(parsed.config)).toContain('d="M300 220 H500"')
+    }
   })
 
   it('serialises every example preset to a document JSON accepts', () => {
