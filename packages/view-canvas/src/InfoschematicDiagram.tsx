@@ -50,19 +50,6 @@ const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
  * it is applicable and visible. Cards authored before Domain classification
  * retain their Scope colours as a compatibility fallback.
  */
-const splitLabel = (label: string) => {
-  if (label.length <= 22 || !label.includes(' ')) return [label]
-
-  const words = label.split(' ')
-  const candidates = words.slice(1).map((_, index) => {
-    const first = words.slice(0, index + 1).join(' ')
-    const second = words.slice(index + 1).join(' ')
-    return { first, second, width: Math.max(first.length, second.length) }
-  })
-  const balanced = candidates.reduce((best, candidate) => (candidate.width < best.width ? candidate : best))
-  return [balanced.first, balanced.second]
-}
-
 function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
   const caption = fabric.appearance?.caption ?? fabric.label
   const detail = fabric.appearance?.detail ?? fabric.detail
@@ -1727,19 +1714,20 @@ export function InfoschematicDiagram({
               color: 'currentColor',
               fill: 'transparent'
             }
-          const labelLines = visualTreatment.card.compact ? [card.label] : splitLabel(card.label)
-          // Card internals are placed from the Card's own box by View Model, so the
-          // Canvas and the static SVG draw the same Card the same way at any shape.
+          // Card internals are placed and fitted from the Card's own box by View
+          // Model, so the Canvas and the static SVG draw the same Card the same
+          // way, saying the same thing, at any shape.
           const text = resolveCardLayout({
             box: layout,
             code: card.code,
             compact: visualTreatment.card.compact,
+            description: card.name,
             detail: {
-              description: visualTreatment.card.description && Boolean(card.name),
+              description: visualTreatment.card.description,
               identity: visualTreatment.card.identity,
               stereotype: visualTreatment.card.stereotype
             },
-            labelLines: labelLines.length,
+            label: card.label,
             stereotype: card.stereotype
           })
           const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
@@ -1814,14 +1802,14 @@ export function InfoschematicDiagram({
                   </text>
                 </g>
               ) : null}
-              {text.stereotype && card.stereotype ? (
+              {text.stereotype ? (
                 <text
                   className="infoschematic-card-stereotype"
                   data-card-detail="stereotype"
                   x={text.stereotype.x}
                   y={text.stereotype.y}
                 >
-                  {card.stereotype.toUpperCase()}
+                  {text.stereotype.text.toUpperCase()}
                 </text>
               ) : null}
               <text
@@ -1830,13 +1818,13 @@ export function InfoschematicDiagram({
                 x={text.label.x}
                 y={text.label.y}
               >
-                {labelLines.map((line, index) => (
+                {text.label.lines.map((line, index) => (
                   <tspan key={line} x={text.label.x} dy={index === 0 ? 0 : text.label.lineHeight}>
                     {line}
                   </tspan>
                 ))}
               </text>
-              {text.description && card.name ? (
+              {text.description ? (
                 <text
                   className="infoschematic-card-description"
                   data-card-detail="description"
@@ -1844,7 +1832,7 @@ export function InfoschematicDiagram({
                   x={text.description.x}
                   y={text.description.y}
                 >
-                  {card.name}
+                  {text.description.text}
                 </text>
               ) : null}
               {editing && artefactSelected(selection, card.code) ? (

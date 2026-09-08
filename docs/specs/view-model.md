@@ -134,6 +134,14 @@ The label MUST always be placed. An optional element MUST be withheld where its 
 
 _Verification: `packages/view-model/src/card-layout.test.ts` covers the reference, square, tall, narrow, and undersized boxes; `scripts/visual-treatment-parity.test.ts` compares placed Card geometry across both renderers._
 
+### VIEW-026 — Card text is fitted to the Card it is drawn on
+
+View Model MUST resolve the text a Card draws as well as where it draws it: the lines its label is drawn on, and the stereotype and description strings that fit their own bands. Text that does not fit MUST be reduced rather than drawn past the Card's border — wrapped onto the lines the treatment allows, then ended with an ellipsis. A compact Card MUST keep its label to one line, because its stack already carries a band and a description; the legacy treatment MAY wrap onto a second line where the box is tall enough for it. Wrapping MUST break on word boundaries against the box's usable width, never on a character count, and the stereotype MUST be fitted to the box rather than to the space the identity chip leaves.
+
+A fitted string is a visual reduction only. Every renderer MUST keep the authored label, stereotype, and description in full in the Card's accessible name, as CANVAS-007 requires.
+
+_Verification: `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name._
+
 ## Artefact editing
 
 ### VIEW-020 — Selection and capabilities are discriminated by kind

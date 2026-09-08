@@ -4,7 +4,9 @@
 // 80-tall Card and static SVG centred it, and nothing said which was right.
 //
 // Every position is the element's visual centre, so a renderer draws it with a
-// middle dominant baseline and one number means one thing in both.
+// middle dominant baseline and one number means one thing in both. The text is
+// fitted here too, for the same reason: two wrapping rules is how the renderers
+// came to disagree about what a Card says as well as where it says it.
 
 export type CardBox = Readonly<{ height: number; width: number }>
 
@@ -21,9 +23,11 @@ export type CardLayoutRequest = Readonly<{
   compact: boolean
   /** Authored identity code, which the chip is sized from. */
   code?: string
+  /** Authored description, fitted to the width its band leaves. */
+  description?: string
   detail: CardLayoutDetail
-  /** How many lines the label is drawn on; a renderer that does not wrap passes one. */
-  labelLines?: number
+  /** Authored label, wrapped or ended with an ellipsis to fit the box. */
+  label: string
   /** Authored stereotype, whose drawn width decides whether it clears the identity chip. */
   stereotype?: string
 }>
@@ -34,7 +38,15 @@ export type CardTextPlacement = Readonly<{
   y: number
 }>
 
-export type CardLabelPlacement = CardTextPlacement & Readonly<{ lineHeight: number }>
+export type CardLabelPlacement = CardTextPlacement &
+  Readonly<{
+    lineHeight: number
+    /** The label as it is drawn: one line per drawn line, fitted to the box. */
+    lines: readonly string[]
+  }>
+
+/** A placed element and the text that fits where it was placed. */
+export type CardFittedPlacement = CardTextPlacement & Readonly<{ text: string }>
 
 export type CardIdentityPlacement = Readonly<{
   height: number
@@ -47,10 +59,10 @@ export type CardIdentityPlacement = Readonly<{
 }>
 
 export type CardLayout = Readonly<{
-  description: CardTextPlacement | null
+  description: CardFittedPlacement | null
   identity: CardIdentityPlacement | null
   label: CardLabelPlacement
-  stereotype: CardTextPlacement | null
+  stereotype: CardFittedPlacement | null
 }>
 
 const inset = 10
@@ -69,6 +81,11 @@ const identityMinimumWidth = 42
 const codeAdvance = 6.5
 const codePadding = 14
 const stereotypeAdvance = 5.8
+const labelAdvance = 7.28
+const compactLabelAdvance = 6.76
+const descriptionAdvance = 5
+const labelLineLimit = 2
+const ellipsis = '\u2026'
 
 const band = topInset + chipHeight
 
@@ -82,6 +99,39 @@ const stereotypeWidth = (stereotype: string) => stereotype.length * stereotypeAd
 
 const authored = (text: string | undefined) => (text && text.trim().length > 0 ? text : undefined)
 
+const fits = (text: string, width: number, advance: number) => text.length * advance <= width
+
+/** Cut to what the width holds, ending in an ellipsis so the reader knows there is more. */
+const truncate = (text: string, width: number, advance: number) => {
+  if (fits(text, width, advance)) return text
+  const room = Math.floor(width / advance) - 1
+  return room >= 1 ? `${text.slice(0, room).trimEnd()}${ellipsis}` : ''
+}
+
+/**
+ * Break a label onto the lines it is allowed, against the width it has rather
+ * than a character count. Whatever will not fit on the last line is cut there,
+ * so a long label ends in an ellipsis instead of running through the border.
+ */
+const wrap = (text: string, width: number, advance: number, limit: number): readonly string[] => {
+  const words = text.trim().split(/\s+/)
+  const lines: string[] = []
+  let current = ''
+  for (let index = 0; index < words.length; index += 1) {
+    const word = words[index] ?? ''
+    const candidate = current.length === 0 ? word : `${current} ${word}`
+    if (current.length === 0 || fits(candidate, width, advance)) {
+      current = candidate
+      continue
+    }
+    if (lines.length + 1 === limit)
+      return [...lines, truncate([current, ...words.slice(index)].join(' '), width, advance)]
+    lines.push(current)
+    current = word
+  }
+  return [...lines, truncate(current, width, advance)]
+}
+
 /**
  * Place one Card's internals inside its own box.
  *
@@ -94,21 +144,36 @@ export const resolveCardLayout = ({
   box,
   code,
   compact,
+  description,
   detail,
-  labelLines,
+  label: authoredLabel,
   stereotype
 }: CardLayoutRequest): CardLayout => {
-  const lines = Math.max(1, labelLines ?? 1)
+  const usable = box.width - inset * 2
   const identityCode = detail.identity ? authored(code) : undefined
   const stereotypeText = detail.stereotype ? authored(stereotype) : undefined
+  // A compact Card keeps one line: its stack is a band, a label and a
+  // description, and a wrapped label would push the description into the floor.
+  const labelLines = compact
+    ? [truncate(authoredLabel.trim(), usable, compactLabelAdvance)]
+    : wrap(
+        authoredLabel,
+        usable,
+        labelAdvance,
+        box.height >= topInset * 2 + lineHeight * labelLineLimit ? labelLineLimit : 1
+      )
+  const lines = labelLines.length
 
   // The top band holds the stereotype and the identity chip. A compact Card
   // stacks its label under the band, so it also needs room for both.
   const banded = box.height >= band + lineHeight
   const stacked = !compact || box.height >= bandedCompactLabelY + lineHeight
 
-  const stereotypeSpan = stereotypeText === undefined ? 0 : stereotypeWidth(stereotypeText)
-  const stereotypePlaced = stereotypeText !== undefined && banded && stacked && inset * 2 + stereotypeSpan <= box.width
+  // The stereotype fits the box, and the identity chip yields to it where the
+  // two would meet: a fitted stereotype never overruns, but it can still reach.
+  const stereotypeFitted = stereotypeText === undefined ? '' : truncate(stereotypeText, usable, stereotypeAdvance)
+  const stereotypeSpan = stereotypeWidth(stereotypeFitted)
+  const stereotypePlaced = stereotypeFitted.length > 0 && banded && stacked
 
   const chipWidth = identityCode === undefined ? 0 : identityWidth(identityCode)
   const chipStart = box.width - chipWidth - chipGap
@@ -118,12 +183,14 @@ export const resolveCardLayout = ({
     chipWidth + chipGap * 2 <= box.width &&
     (!stereotypePlaced || inset + stereotypeSpan <= chipStart)
 
-  const describing = detail.description
+  const descriptionText = detail.description ? truncate(authored(description) ?? '', usable, descriptionAdvance) : ''
+  const describing = descriptionText.length > 0
   const compactLabelY = stereotypePlaced ? bandedCompactLabelY : bareCompactLabelY
   const label: CardLabelPlacement = compact
     ? {
         anchor: 'start',
         lineHeight,
+        lines: labelLines,
         x: inset,
         // A box too short even for the bare stack centres what it can show.
         y: box.height >= compactLabelY + lineHeight / 2 ? compactLabelY : box.height / 2
@@ -131,6 +198,7 @@ export const resolveCardLayout = ({
     : {
         anchor: 'middle',
         lineHeight,
+        lines: labelLines,
         x: box.width / 2,
         y: box.height / 2 - (describing ? descriptionLift : 0) - ((lines - 1) * lineHeight) / 2
       }
@@ -143,7 +211,9 @@ export const resolveCardLayout = ({
     describing && descriptionY >= lastLine + lineHeight && descriptionY + descriptionHalf <= box.height
 
   return {
-    description: descriptionPlaced ? { anchor: label.anchor, x: label.x, y: descriptionY } : null,
+    description: descriptionPlaced
+      ? { anchor: label.anchor, text: descriptionText, x: label.x, y: descriptionY }
+      : null,
     identity: identityPlaced
       ? {
           height: chipHeight,
@@ -155,6 +225,8 @@ export const resolveCardLayout = ({
         }
       : null,
     label,
-    stereotype: stereotypePlaced ? { anchor: 'start', x: inset, y: topInset + chipHeight / 2 } : null
+    stereotype: stereotypePlaced
+      ? { anchor: 'start', text: stereotypeFitted, x: inset, y: topInset + chipHeight / 2 }
+      : null
   }
 }

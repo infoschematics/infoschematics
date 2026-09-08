@@ -74,7 +74,9 @@ _Verification: `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.tr
 
 Static output MUST place Card label, description, stereotype, and identity text through View Model's Card layout rather than from constants of its own, and MUST draw those elements with a middle dominant baseline. An element the layout withholds — metadata a small Card has no room for — MUST NOT be emitted.
 
-_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions._
+It MUST draw the text the layout fits, including one line per fitted label line, rather than fit or wrap text of its own.
+
+_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions._
 
 ## Dependency boundary
 

@@ -85,6 +85,17 @@ const cardText = (output: string) => ({
   stereotype: at(output, /class="infoschematic-card-stereotype"[^>]*?x="([\d.-]+)" y="([\d.-]+)"/g)
 })
 
+const strings = (output: string, pattern: RegExp) => [...output.matchAll(pattern)].map((match) => match[1] ?? '')
+
+/** What each Card actually says, line by line, as opposed to where it says it. */
+const cardStrings = (output: string) => ({
+  description: strings(output, /class="infoschematic-card-description"[^>]*>([^<]*)</g),
+  label: [...output.matchAll(/class="infoschematic-(?:service|card)-label"[^>]*>([\s\S]*?)<\/text>/g)].map((match) =>
+    [...(match[1] ?? '').matchAll(/<tspan[^>]*>([^<]*)<\/tspan>/g)].map((line) => line[1]).join(' | ')
+  ),
+  stereotype: strings(output, /class="infoschematic-card-stereotype"[^>]*>([^<]*)</g)
+})
+
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
   dataInks: values(output, 'data-ink'),
@@ -221,6 +232,54 @@ describe('visual treatment renderer parity', () => {
     expect(values(canvas, 'data-label-treatment')).toEqual(['notched', 'plain', 'plain'])
     expect(canvas).not.toContain('>HIDDEN FRAME</text>')
     expect(svg).not.toContain('>HIDDEN FRAME</text>')
+  })
+
+  it('fits Card text to the Card, identically in both renderers, without losing the authored text', () => {
+    const wordy = defineInfoschematic({
+      title: 'Card text reference',
+      infoschematic: {
+        appearance: { card: { compact: true, description: true, identity: true, stereotype: true } },
+        scopes: [
+          {
+            color: '#ff0055',
+            description: 'Controls applicability only',
+            fill: '#330011',
+            id: 'delivery-scope',
+            label: 'Delivery scope',
+            prefix: 'DEL'
+          }
+        ],
+        cards: (
+          [
+            ['LND-001', 'Payments and settlement ledger', { height: 80, width: 160, x: 20, y: 20 }],
+            ['SQR-001', 'Reconciliation', { height: 120, width: 120, x: 220, y: 20 }],
+            ['TAL-001', 'Orchestration', { height: 240, width: 90, x: 380, y: 20 }]
+          ] as const
+        ).map(([code, label, box]) => ({
+          code,
+          detail: 'Settles card payments across the ledger',
+          id: code.toLowerCase(),
+          label,
+          placement: { box, ports: {} },
+          scope: 'delivery-scope',
+          scopes: ['delivery-scope'],
+          stereotype: 'orchestration service'
+        }))
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: wordy }))
+    const svg = renderInfoschematicSvg(wordy)
+
+    expect(cardStrings(canvas)).toEqual(cardStrings(svg))
+    expect(cardStrings(svg)).toEqual({
+      // Each string is cut to the band it is drawn in, so a wider Card says more.
+      description: ['Settles card payments acros\u2026', 'Settles card paymen\u2026', 'Settles card\u2026'],
+      label: ['Payments and settle\u2026', 'Reconciliation', 'Orchestra\u2026'],
+      stereotype: ['ORCHESTRATION SERVICE', 'ORCHESTRATION SE\u2026', 'ORCHESTRATI\u2026']
+    })
+    // Fitting is a drawing decision: the authored text stays in the accessible name.
+    expect(canvas).toContain('LND-001 \u00b7 Payments and settlement ledger \u00b7 orchestration service')
+    expect(svg).toContain('LND-001 \u00b7 Payments and settlement ledger \u00b7 orchestration service')
   })
 
   it("places Card internals from each Card's own box, identically in both renderers", () => {

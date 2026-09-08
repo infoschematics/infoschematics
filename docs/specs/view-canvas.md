@@ -64,7 +64,9 @@ _Verification: `packages/view-canvas/src/InfoschematicDiagram.treatments.test.ts
 
 Canvas MUST place Card label, description, stereotype, and identity text through View Model's Card layout rather than from constants of its own, so a Card of any proportion reads the same on the Canvas as in static output. It MUST draw those elements with a middle dominant baseline, and MUST NOT draw an element the layout withholds.
 
-_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions._
+It MUST draw the text the layout fits, including one line per fitted label line, rather than fit or wrap text of its own.
+
+_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions._
 
 ## Flow signals
 

@@ -576,11 +576,13 @@ export const renderInfoschematicSvg = (
       box,
       code: card.code,
       compact: visualTreatment.card.compact,
+      description: card.detail,
       detail: {
         description: visualTreatment.card.description,
         identity: visualTreatment.card.identity,
         stereotype: visualTreatment.card.stereotype
       },
+      label: card.label,
       stereotype: card.stereotype
     })
     const content = [
@@ -594,7 +596,7 @@ export const renderInfoschematicSvg = (
         ['width', box.width]
       ])
     ]
-    if (layout.stereotype && card.stereotype) {
+    if (layout.stereotype) {
       content.push(
         line(
           2,
@@ -611,7 +613,7 @@ export const renderInfoschematicSvg = (
             ['x', layout.stereotype.x],
             ['y', layout.stereotype.y]
           ],
-          xmlText(card.stereotype.toUpperCase())
+          xmlText(layout.stereotype.text.toUpperCase())
         )
       )
     }
@@ -669,7 +671,17 @@ export const renderInfoschematicSvg = (
           ['x', layout.label.x],
           ['y', layout.label.y]
         ],
-        xmlText(card.label)
+        // One tspan per drawn line, as the Canvas draws it: a wrapped label is
+        // one text element whose lines are placed from the same first line.
+        layout.label.lines
+          .map(
+            (text, index) =>
+              `<tspan${attributes([
+                ['x', layout.label.x],
+                ['dy', index === 0 ? 0 : layout.label.lineHeight]
+              ])}>${xmlText(text)}</tspan>`
+          )
+          .join('')
       )
     )
     if (layout.description) {
@@ -687,7 +699,7 @@ export const renderInfoschematicSvg = (
             ['x', layout.description.x],
             ['y', layout.description.y]
           ],
-          xmlText(card.detail)
+          xmlText(layout.description.text)
         )
       )
     }
