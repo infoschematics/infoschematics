@@ -3,7 +3,7 @@ id: INFOSCHEMATICS-SITE-005
 area: SITE
 title: Card shape variety
 theme: site-experience
-horizon: soon
+horizon: next
 status: awaiting-review
 blocks: []
 blocked_by: []
@@ -67,17 +67,21 @@ None. True silhouette variety (hexagon, pill) remains unshaped and would be a ne
 
 ## Documentation impact
 
+### Decision Records
+
+None expected: this moves an existing calculation to the package that already owns framework-neutral view calculation, which is the documented dependency direction rather than a change to it.
+
 ### Specifications
 
 Add a View Model requirement that Card internal layout resolves from the Card's own box and drops what does not fit, and record in the Canvas and static SVG specifications that both consume that one resolution.
 
-### Design
+### Guides
 
 Note in [the visual language](../design/visual-language.md) that the Card's shape language holds across proportions, and how its internals adapt.
 
-### Decision Records
+### Roadmap
 
-None expected: this moves an existing calculation to the package that already owns framework-neutral view calculation, which is the documented dependency direction rather than a change to it.
+Record implementation and verification evidence in this item before acceptance.
 
 ## Review
 

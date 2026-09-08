@@ -3,7 +3,7 @@ id: INFOSCHEMATICS-TOOL-016
 area: TOOL
 title: Edit region treatments
 theme: tool
-horizon: soon
+horizon: next
 status: awaiting-review
 blocks: []
 blocked_by: []
@@ -60,13 +60,21 @@ None. INFOSCHEMATICS-TOOL-018 extends the treatment vocabulary later and consume
 
 ## Documentation impact
 
+### Decision Records
+
+None expected: the patch convention is an implementation detail of one editing module, recorded in code rather than as an architecture boundary.
+
 ### Specifications
 
 Add a Studio requirement that a Region's authored treatments are editable through typed controls and that clearing an optional treatment removes it.
 
-### Decision Records
+### Guides
 
-None expected: the patch convention is an implementation detail of one editing module, recorded in code rather than as an architecture boundary.
+No guide change is expected.
+
+### Roadmap
+
+Record implementation and verification evidence in this item before acceptance.
 
 ## Review
 

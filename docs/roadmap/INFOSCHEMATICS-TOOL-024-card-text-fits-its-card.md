@@ -1,9 +1,9 @@
 ---
 id: INFOSCHEMATICS-TOOL-024
 area: TOOL
-title: Card text fits its Card
+title: Fit Card text
 theme: tool
-horizon: soon
+horizon: next
 status: awaiting-review
 blocks: []
 blocked_by: []
@@ -63,13 +63,21 @@ Split from INFOSCHEMATICS-TOOL-014, which retains the registry publication, the 
 
 ## Documentation impact
 
+### Decision Records
+
+None expected: this completes an existing calculation rather than establishing a boundary.
+
 ### Specifications
 
 Extend the View Model Card-layout requirement to cover fitted text, and record that a fitted string is a visual reduction that leaves the accessible name whole.
 
-### Decision Records
+### Guides
 
-None expected: this completes an existing calculation rather than establishing a boundary.
+No guide change is expected.
+
+### Roadmap
+
+Record implementation and verification evidence in this item before acceptance.
 
 ## Review
 
