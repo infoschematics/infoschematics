@@ -3,8 +3,8 @@ id: INFOSCHEMATICS-SITE-008
 area: SITE
 title: Appearance options visual guide
 theme: site-experience
-horizon: next
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-007]
 baseline_ref: null
@@ -83,6 +83,10 @@ _Pending delivery._
 Discussed directly with the user, who asked whether specimens should be generated dynamically or checked in, and whether tracking them helps visibility of changes. Resolved as: generate dynamically from checked-in code, not checked-in rendered output. The `InfoschematicConfig` objects and the generator function are ordinary TypeScript — reviewable in diffs like any other change — and because one generator shapes every specimen, they are consistent by construction rather than by convention. Nothing is committed as a rendered SVG or JSON fixture, so there is no output artifact to drift out of format or go stale; only the source tuples and the generator need to stay current, and the domain-model exhaustiveness trick enforces that for the three closed unions.
 
 Specimens live site-local (`apps/site/src/visual-guide/specimens.ts`), not in a new `examples/is-*` package: they illustrate the renderer's option space for this guide rather than being independently reusable authored content, matching the boundary AGENTS.md draws between authored Infoschematic examples and site-owned presentation.
+
+### Proceeding ahead of SITE-007's acceptance
+
+`ki-work-roadmap`'s dependency audit (ITEM-5) correctly flags this item's blocker, `INFOSCHEMATICS-SITE-007`, as not yet `done` (it is `awaiting-review`). Discussed directly with the user, who chose to progress this item anyway so both could be reviewed and accepted together. `SiteNav` and `/docs/` already exist on `main` from SITE-007's delivery commit (`263a42d5`), so the technical dependency is satisfied even though the lifecycle acceptance is not; the risk accepted is that a review of SITE-007 could still request a change to `SiteNav` or the `/docs/` route shape that this item would then need to absorb.
 
 ### Why `CardDetailDefaults` is curated, not exhaustive
 
