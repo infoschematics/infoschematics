@@ -1,21 +1,23 @@
 # Getting started
 
-An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view — precise enough for the engineer, clear enough to present to anyone.
+An Infoschematic combines a diagrammatic representation, using shapes and lines to show the main parts and connections of a system, with supplemental information directly in the diagram. It shows what exists, how things interrelate, and what moves between them.
 
-One serialisable definition drives consistent outputs: a deterministic SVG for documents, an interactive Canvas for exploration, a Present view for an Audience, and a Studio view for Producers. An Infoschematic is a schematic, not assembly instructions: it shows what exists, where it sits, and what moves between it without coupling the definition to React, browser state, or a particular host application.
+This simple diagram is then turned into a live, explorable view that can be tailored to multiple audiences and is clear enough to present to anyone.
+
+One serialisable definition drives consistent outputs: static renderings for documents, including SVG and PNG; an interactive Canvas for exploration; a Present view for an audience; and a Studio view for producers.
 
 ## What appears in an Infoschematic
 
-An Infoschematic shows a system through six visible elements: Regions, Fabrics, Cards, Flows, Points, and Graphics. Scenes can focus or reveal parts of that diagram, while Themes and Stories organise those views for explanation and presentation.
+An Infoschematic comprises six diagrammatic element types: Regions, Fabrics, Cards, Flows, Points, and Graphics. Scenes can focus or reveal parts of that diagram, while Themes and Stories can arrange those Scenes for explanation and presentation.
 
 The diagram has six visible artefact kinds:
 
-- [Region](/docs/reference/vocabulary/#region) establishes background geography with a labelled box, optional fill, and optional frame.
-- [Fabric](/docs/reference/vocabulary/#fabric) is a connectable midground plane or backdrop.
-- [Card](/docs/reference/vocabulary/#standard-card) is a placed foreground component. A Standard Card stands alone; an Adapter Card wraps another Card.
-- [Flow](/docs/reference/vocabulary/#flow) connects Cards and Fabrics through authored endpoints and route geometry.
-- [Point](/docs/reference/vocabulary/#point) is a labelled junction or anchor placed directly on the diagram.
-- [Graphic](/docs/reference/vocabulary/#graphic) is a renderer-selected overlay, commonly revealed by a Scene.
+- **Region** establishes background geography with a labelled box, optional fill, and optional frame.
+- **Fabric** is a connectable midground plane or backdrop.
+- **Card** is a placed foreground component. A Standard Card stands alone; an Adapter Card wraps another Card.
+- **Flow** connects Cards and Fabrics through authored endpoints and route geometry.
+- **Point** is a labelled junction or anchor placed directly on the diagram.
+- **Graphic** is a renderer-selected overlay, commonly revealed by a Scene.
 
 [Scope](/docs/reference/vocabulary/#scope), [Domain](/docs/reference/vocabulary/#domain), and [Flow Family](/docs/reference/vocabulary/#flow-family) are independent groupings. They classify visibility, concern, and movement respectively; they are not additional shapes.
 
