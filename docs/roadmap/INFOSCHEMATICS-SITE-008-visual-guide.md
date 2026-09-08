@@ -4,7 +4,7 @@ area: SITE
 title: Appearance options visual guide
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-007]
 baseline_ref: 2976e69ab1711bdb2f9cd25aa1b0bc51d04f005b
@@ -30,25 +30,26 @@ This item does not change any renderer's visual output, add new appearance optio
 
 ## Steps
 
-- [ ] Add `surfaceTreatments`, `gridTreatments`, and `regionLabelPlacements` as exported `readonly [...]` tuples in `packages/domain-model/src/appearance.ts`, each built via a `Record<Union, true>` exhaustiveness trick (a literal object keyed by every union member, then `Object.keys(...)`) so a future treatment added without updating the tuple fails typecheck.
-- [ ] Extend `packages/domain-model/src/appearance.test.ts` to assert each tuple's length and content against its union, alongside the existing closed-type assertions.
-- [ ] Add `apps/site/src/visual-guide/specimens.ts`: one small `InfoschematicConfig` per specimen (one region, one card, via `defineInfoschematic`), generated from the domain tuples for the surface/grid/region-label groups, and from a curated progressive `CardDetailDefaults` sequence (label only → + stereotype → + identity → + description → all details, compact) for the card-detail group.
-- [ ] Add `apps/site/src/visual-guide/specimens.test.ts`: a count check per group against its source tuple/array, plus an assertion that every `CardDetailDefaults` key is `true` in at least one card-detail specimen.
-- [ ] Add `apps/site/src/VisualGuide.tsx`: renders `SiteNav` (`section="visual-guide"`), then one section per group (Surface, Grid, Card detail, Region label placement), each a grid of specimen cards showing the rendered SVG (via `renderInfoschematicSvg` from `@infoschematics/render-svg`, the same call `App.tsx` already makes for the homepage preview) captioned with its option value.
-- [ ] Add `visualGuidePath = '/docs/visual-guide/'` and `isVisualGuidePath` to `apps/site/src/routes.ts`, and a `Visual guide` entry to `SiteNav`.
-- [ ] Wire the route into `apps/site/src/main.tsx`, matching the existing lazy-import-and-set-title pattern.
-- [ ] Link the guide from `docs/design/visual-language.md` and the `/docs/` index as the rendered counterpart to that prose document.
+- [x] Add `surfaceTreatments`, `gridTreatments`, and `regionLabelPlacements` as exported `readonly [...]` tuples in `packages/domain-model/src/appearance.ts`, each built via a `Record<Union, true>` exhaustiveness trick (a literal object keyed by every union member, then `Object.keys(...)`) so a future treatment added without updating the tuple fails typecheck.
+- [x] Extend `packages/domain-model/src/appearance.test.ts` to assert each tuple's length and content against its union, alongside the existing closed-type assertions.
+- [x] Add `apps/site/src/visual-guide/specimens.ts`: one small `InfoschematicConfig` per specimen (one region, one card, via `defineInfoschematic`), generated from the domain tuples for the surface/grid/region-label groups, and from a curated progressive `CardDetailDefaults` sequence (label only → + stereotype → + identity → + description → all details, compact) for the card-detail group.
+- [x] Add `apps/site/src/visual-guide/specimens.test.ts`: a count check per group against its source tuple/array, plus an assertion that every `CardDetailDefaults` key is `true` in at least one card-detail specimen.
+- [x] Add `apps/site/src/VisualGuide.tsx`: renders `SiteNav` (`section="visual-guide"`), then one section per group (Surface, Grid, Card detail, Region label placement), each a grid of specimen cards showing the rendered SVG (via `renderInfoschematicSvg` from `@infoschematics/render-svg`, the same call `App.tsx` already makes for the homepage preview) captioned with its option value.
+- [x] Add `visualGuidePath = '/docs/visual-guide/'` and `isVisualGuidePath` to `apps/site/src/routes.ts`, and a `Visual guide` entry to `SiteNav`.
+- [x] Wire the route into `apps/site/src/main.tsx`, matching the existing lazy-import-and-set-title pattern.
+- [x] Link the guide from `docs/design/visual-language.md` and the `/docs/` index as the rendered counterpart to that prose document.
 
 ## Files touched
 
 - `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/appearance.test.ts`
+- `packages/domain-core/src/index.ts`
 - `apps/site/src/visual-guide/specimens.ts`, `apps/site/src/visual-guide/specimens.test.ts`, `apps/site/src/VisualGuide.tsx`
-- `apps/site/src/routes.ts`, `apps/site/src/main.tsx`, `apps/site/src/SiteNav.tsx`
-- `docs/design/visual-language.md`, docs index page added by `INFOSCHEMATICS-SITE-007`
+- `apps/site/src/routes.ts`, `apps/site/src/main.tsx`, `apps/site/src/SiteNav.tsx`, `apps/site/src/styles.css`, `apps/site/src/DocsIndex.tsx`
+- `docs/design/visual-language.md`
 
 ## Verify
 
-`bun run ki:check`. New tests: `appearance.test.ts` tuple/union parity; `specimens.test.ts` group counts and the card-detail flag-coverage check. Manually visit `/docs/visual-guide/` on a dev server and confirm a distinct rendered SVG per specimen and correct captions.
+`bun run self:check`. New tests: `appearance.test.ts` tuple/union parity; `specimens.test.ts` group counts and the card-detail flag-coverage check. Manually visit `/docs/visual-guide/` on a dev server and confirm a distinct rendered SVG per specimen and correct captions.
 
 ## Dependencies / blocks
 
@@ -74,7 +75,38 @@ None beyond this item and `INFOSCHEMATICS-SITE-007`.
 
 ## Review
 
-_Pending delivery._
+### Delivered
+
+A rendered gallery at `/docs/visual-guide/`: one small SVG specimen per `SurfaceTreatment`, `GridTreatment`, and `RegionLabelPlacement` value, plus a curated progressive `CardDetailDefaults` sequence, generated from exhaustiveness-checked domain tuples.
+
+### Summary of changes
+
+- `packages/domain-model/src/appearance.ts`: added `surfaceTreatments`, `gridTreatments`, `regionLabelPlacements` as exported tuples, each built from a `Record<Union, true>` exhaustiveness object so a future union member fails typecheck until the tuple is updated.
+- `packages/domain-model/src/appearance.test.ts`: asserts each tuple's content against its union and that every element type-checks as a member.
+- `packages/domain-core/src/index.ts`: re-exports the three tuples, their types, and `InfoschematicConfig` from `domain-model`. This detour was necessary — `apps/site` may not import `domain-model` or `view-model` directly (dependency-cruiser rule `site-does-not-own-product-model`), only discovered when the first implementation attempt failed that gate.
+- `apps/site/src/visual-guide/specimens.ts` (new): one small `InfoschematicConfig` per specimen (one region, one card via `defineInfoschematic`), generated from the domain tuples for surface/grid/region-label, and from a curated five-step progressive sequence for card detail (label only → + stereotype → + identity → + description → all details, compact).
+- `apps/site/src/visual-guide/specimens.test.ts` (new): count checks per group against its source tuple, a flag-coverage check for card detail, and a specimen-key uniqueness check.
+- `apps/site/src/VisualGuide.tsx` (new): renders `SiteNav` (`section="visual-guide"`) then one section per group, each a grid of specimen cards rendered via `renderInfoschematicSvg`.
+- `apps/site/src/routes.ts`, `apps/site/src/main.tsx`: added `visualGuidePath`/`isVisualGuidePath` and wired the route.
+- `apps/site/src/SiteNav.tsx`: added a `Visual guide` nav entry and `'visual-guide'` to `SiteSection`.
+- `apps/site/src/styles.css`: added `.specimen-grid`/`.specimen-card` styles.
+- `docs/design/visual-language.md`, `apps/site/src/DocsIndex.tsx`: cross-linked the guide as the rendered counterpart to the prose visual-language document.
+
+### Verification
+
+`bun run self:check` passes (tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/docs/visual-guide/` and `/docs/` serve `200` on a dev server.
+
+### Outstanding concerns
+
+This item was progressed ahead of `INFOSCHEMATICS-SITE-007`'s formal acceptance, per direct user decision — see the Discussion section below. If SITE-007's review changes `SiteNav` or the `/docs/` route shape, this item's `SiteNav` and `routes.ts` edits would need to be reconciled with that change.
+
+### Post-change review
+
+Verified the diff matches the approved plan. The one deviation — routing the appearance tuples through `domain-core` rather than importing `domain-model` directly from `apps/site` — was required by an existing dependency-boundary rule the plan hadn't anticipated, not a scope change.
+
+### Mini recap
+
+Added a rendered visual guide at `/docs/visual-guide/` covering every surface, grid, and region-label-placement option plus a curated card-detail sequence, generated from new exhaustiveness-checked domain tuples; `self:check` passes.
 
 ## Discussion
 
