@@ -5,6 +5,10 @@ import { defineConfig } from 'vitest/config'
 // The package ships TypeScript source behind its exports map - hosts compile
 // it in their own build. This config exists for the test suite alone.
 export default defineConfig({
+  // Mirrors the apps/site build stamp so its components render under the shared test run.
+  define: {
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
+  },
   plugins: [react()],
   test: {
     // Both extensions: a component test has to be .tsx, and leaving it out of

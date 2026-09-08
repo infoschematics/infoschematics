@@ -5,6 +5,10 @@ import { defineConfig } from 'vitest/config'
 const projectRoot = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
+  // Stamped at build time so the footer states when the site was last published.
+  define: {
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
+  },
   envDir: projectRoot,
   plugins: [react()],
   resolve: {

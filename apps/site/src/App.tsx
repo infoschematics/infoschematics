@@ -37,10 +37,8 @@ export function App() {
       </section>
 
       <footer className="page-footer">
-        <p>infoschematics.info</p>
-        <p>
-          <span aria-hidden="true">●</span> A new way to explain what systems are and what moves through them.
-        </p>
+        <p>infoschematics.info © {__BUILD_DATE__.slice(0, 4)}</p>
+        <p>Last updated {__BUILD_DATE__}</p>
       </footer>
     </main>
   )

@@ -252,16 +252,7 @@ a:focus-visible {
 }
 
 .page-footer p:last-child {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   text-align: right;
-}
-
-.page-footer p:last-child span {
-  color: #82b366;
-  font-size: 7px;
-  text-shadow: 0 0 8px #82b366;
 }
 
 .document-shell {
