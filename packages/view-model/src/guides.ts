@@ -49,13 +49,46 @@ export type Snap = { guides: readonly Guide[]; point: Point }
  */
 export type BoxSnap = { guides: readonly Guide[]; box: Box }
 
+export type BoxSnapOptions = {
+  threshold?: number
+  /**
+   * When set, the grid is strict: the box origin always lands on a multiple of
+   * this, and a guide may only choose between the grid lines either side of
+   * where the drop wanted to be - never pull the box off the grid to align.
+   */
+  grid?: number
+}
+
 /**
  * Pull a box onto the nearest guide within the threshold, per axis, by
  * whichever of its edges or centre is closest. Snapping the box rather than
  * the pointer is what makes an edge land exactly on the line it aligned with -
  * the pointer sits somewhere inside the box, generally nowhere a guide is.
  */
-export const snapBoxToGuides = (box: Box, guides: readonly Guide[], threshold = snapThreshold): BoxSnap => {
+export const snapBoxToGuides = (
+  box: Box,
+  guides: readonly Guide[],
+  { threshold = snapThreshold, grid }: BoxSnapOptions = {}
+): BoxSnap => {
+  const aligned = (axis: Axis, origin: number, size: number) =>
+    guides.find(
+      (guide) =>
+        guide.axis === axis && (guide.at === origin || guide.at === origin + size / 2 || guide.at === origin + size)
+    )
+
+  const onGrid = (axis: Axis, origin: number, size: number, unit: number) => {
+    const lower = Math.floor(origin / unit) * unit
+    const candidates = [...new Set([lower, lower + unit])].sort(
+      (left, right) => Math.abs(left - origin) - Math.abs(right - origin)
+    )
+    for (const at of candidates) {
+      if (Math.abs(at - origin) > threshold) continue
+      const guide = aligned(axis, at, size)
+      if (guide) return { at, guide }
+    }
+    return { at: candidates[0] as number, guide: undefined }
+  }
+
   const nearest = (axis: Axis, values: readonly number[]) => {
     let best: { delta: number; guide: Guide } | undefined
     for (const value of values) {
@@ -67,6 +100,15 @@ export const snapBoxToGuides = (box: Box, guides: readonly Guide[], threshold = 
       }
     }
     return best
+  }
+
+  if (grid) {
+    const x = onGrid('x', box.x, box.width, grid)
+    const y = onGrid('y', box.y, box.height, grid)
+    return {
+      guides: [x.guide, y.guide].filter((guide): guide is Guide => Boolean(guide)),
+      box: { ...box, x: x.at, y: y.at }
+    }
   }
 
   const x = nearest('x', [box.x, box.x + box.width / 2, box.x + box.width])

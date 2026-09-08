@@ -513,7 +513,9 @@ export function InfoschematicDiagram({
         aria-label={`Resize ${label}`}
         className="artefact-resize-handle"
         onKeyDown={(event) => {
-          const step = event.shiftKey ? 10 : 1
+          // With the grid on a resize steps a whole cell, so the far edge
+          // stays on a grid line; the editor rounds the result to the grid too.
+          const step = grid ? gridSize : event.shiftKey ? 10 : 1
           const size: ResizeMinimum =
             axes.width && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
               ? { width: bounds.width + (event.key === 'ArrowRight' ? step : -step) }

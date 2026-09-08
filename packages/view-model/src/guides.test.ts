@@ -87,6 +87,37 @@ describe('snapping a box', () => {
   })
 })
 
+// The grid is strict: a box always lands on grid lines, and a guide only
+// chooses which grid line - it may never pull the box off the grid to align.
+describe('snapping a box on a strict grid', () => {
+  const grid = { grid: 10 }
+
+  it('always lands the origin on a grid line', () => {
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 503, y: 897 }, guidesFrom([card], []), grid)
+
+    expect(snapped.box).toEqual({ height: 40, width: 60, x: 500, y: 900 })
+    expect(snapped.guides).toEqual([])
+  })
+
+  it('prefers the grid line a guide aligns with over the nearer one', () => {
+    // 170 is nearer to 174, but the card's centre line at 180 aligns the box's
+    // left edge only from 180 - so the guide chooses that grid line.
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 174, y: 500 }, guidesFrom([card], []), grid)
+
+    expect(snapped.box.x).toBe(180)
+    expect(snapped.guides.map((guide) => guide.axis)).toEqual(['x'])
+  })
+
+  it('never pulls the box off the grid, however close an off-grid guide is', () => {
+    // A handle at 183 would win a free snap from 181; on the grid the box goes
+    // to 180 and no guide is claimed, because nothing truly aligns there.
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 181, y: 500 }, guidesFrom([], [{ x: 183, y: 0 }]), grid)
+
+    expect(snapped.box.x).toBe(180)
+    expect(snapped.guides).toEqual([])
+  })
+})
+
 describe('attachment points', () => {
   // One sits in the middle, three split the side into quarters, seven into
   // eighths - the series a side may take, each level halving the last.

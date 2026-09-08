@@ -23,7 +23,7 @@ import type { PresentProps } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { infoschematicEditable } from './editor/infoschematic-editable.ts'
-import { type Attachment, useEditor } from './editor/use-editor.ts'
+import { type Attachment, gridSize, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
 import { useThemeComposition } from './editor/use-theme-composition.ts'
@@ -531,7 +531,9 @@ function AppContent() {
         const geometry = editor.artefactGeometry
         if (geometry.role === 'route') return
         event.preventDefault()
-        const step = event.shiftKey ? 10 : 1
+        // With the grid on an arrow steps a whole cell, so a keyboard move
+        // lands on grid lines exactly as a drag does.
+        const step = editor.view.grid ? gridSize : event.shiftKey ? 10 : 1
         const point = designArrowPoint(geometry, event.key, step)
         if (point) editor.moveArtefact(point, true)
         return
@@ -541,7 +543,7 @@ function AppContent() {
       // whatever Story is running.
       if (arrow && editor.editing && editor.selected) {
         event.preventDefault()
-        const step = event.shiftKey ? 10 : 1
+        const step = editor.view.grid ? gridSize : event.shiftKey ? 10 : 1
         editor.nudge(arrow[0] * step, arrow[1] * step)
         return
       }
@@ -591,6 +593,7 @@ function AppContent() {
     editor.selected,
     editor.selectedArtefact,
     editor.artefactGeometry,
+    editor.view.grid,
     playing,
     presentation.stepStory,
     presentation.stopStory,

@@ -758,17 +758,19 @@ export function useEditor(
     const offset = (() => {
       switch (geometry.role) {
         case 'box': {
-          const wanted = { x: point.x - geometry.box.width / 2, y: point.y - geometry.box.height / 2 }
-          let origin = !exact && view.grid ? toGrid(wanted) : wanted
-          if (!exact && view.snapping) {
-            const pulled = snapBoxToGuides(
-              { ...geometry.box, x: origin.x, y: origin.y },
-              diagram.guidesFor(selectionKey(target))
-            )
-            setGuides(pulled.guides)
-            origin = { x: pulled.box.x, y: pulled.box.y }
-          } else setGuides([])
-          return { dx: origin.x - geometry.box.x, dy: origin.y - geometry.box.y }
+          const wanted = { ...geometry.box, x: point.x - geometry.box.width / 2, y: point.y - geometry.box.height / 2 }
+          const placed = (() => {
+            if (exact) return { box: wanted, guides: [] as readonly Guide[] }
+            if (view.snapping)
+              return snapBoxToGuides(
+                wanted,
+                diagram.guidesFor(selectionKey(target)),
+                view.grid ? { grid: gridSize } : {}
+              )
+            return { box: view.grid ? { ...wanted, ...toGrid(wanted) } : wanted, guides: [] as readonly Guide[] }
+          })()
+          setGuides(placed.guides)
+          return { dx: placed.box.x - geometry.box.x, dy: placed.box.y - geometry.box.y }
         }
         case 'route':
           return undefined
@@ -779,9 +781,18 @@ export function useEditor(
     if (operation) recordOperation(operation, false)
   }
 
+  // The grid is strict about size as well as position: a box's width and
+  // height are multiples of the grid, so its far edges land on grid lines too.
   const resizeSelectedArtefact = (size: ResizeMinimum) => {
     if (!selectedArtefactDetails?.capabilities.resize) return
-    const operation = resizeArtefactOperation(selectedArtefactDetails.selection, selectedArtefactDetails.geometry, size)
+    const toGridLength = (length: number | undefined) =>
+      length === undefined ? undefined : Math.max(gridSize, Math.round(length / gridSize) * gridSize)
+    const wanted = view.grid ? { height: toGridLength(size.height), width: toGridLength(size.width) } : size
+    const operation = resizeArtefactOperation(
+      selectedArtefactDetails.selection,
+      selectedArtefactDetails.geometry,
+      wanted
+    )
     if (operation) recordOperation(operation, false)
   }
 
@@ -943,10 +954,10 @@ export function useEditor(
           setGuides(snapped.guides)
           return snapped.point
         }
-        const wanted = { x: point.x - box.width / 2, y: point.y - box.height / 2 }
-        const origin = view.grid ? toGrid(wanted) : wanted
-        const placed = { ...box, x: origin.x, y: origin.y }
-        const snapped = view.snapping ? snapBoxToGuides(placed, diagram.guidesFor(key)) : { box: placed, guides: [] }
+        const wanted = { ...box, x: point.x - box.width / 2, y: point.y - box.height / 2 }
+        const snapped = view.snapping
+          ? snapBoxToGuides(wanted, diagram.guidesFor(key), view.grid ? { grid: gridSize } : {})
+          : { box: view.grid ? { ...wanted, ...toGrid(wanted) } : wanted, guides: [] }
         setGuides(snapped.guides)
         return { x: snapped.box.x + box.width / 2, y: snapped.box.y + box.height / 2 }
       })()
