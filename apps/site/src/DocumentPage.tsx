@@ -1,32 +1,47 @@
 import { marked } from 'marked'
+import architectureMarkdown from '../../../docs/design/architecture.md?raw'
+import viewPresentDesignMarkdown from '../../../docs/design/view-present.md?raw'
+import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
+import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
 import authoringMarkdown from '../../../docs/guides/authoring.md?raw'
 import reactIntegrationMarkdown from '../../../docs/guides/react-integration.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
+import domainCoreMarkdown from '../../../docs/specs/domain-core.md?raw'
+import domainModelMarkdown from '../../../docs/specs/domain-model.md?raw'
+import specsReadmeMarkdown from '../../../docs/specs/README.md?raw'
+import renderSvgMarkdown from '../../../docs/specs/render-svg.md?raw'
+import viewCanvasMarkdown from '../../../docs/specs/view-canvas.md?raw'
+import viewModelMarkdown from '../../../docs/specs/view-model.md?raw'
+import viewPresentSpecMarkdown from '../../../docs/specs/view-present.md?raw'
+import viewStudioSpecMarkdown from '../../../docs/specs/view-studio.md?raw'
 import type { DocumentationRoute } from './routes.ts'
+import { documentationRoutes } from './routes.ts'
+import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
 const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
 
-const publishedDocuments: Record<string, string> = {
-  'docs/guides/authoring.md': '/guides/authoring/',
-  'docs/guides/react-integration.md': '/guides/react-integration/',
-  'docs/reference/vocabulary.md': '/reference/vocabulary/'
+const markdownBySourcePath: Record<string, string> = {
+  'docs/guides/authoring.md': authoringMarkdown,
+  'docs/guides/react-integration.md': reactIntegrationMarkdown,
+  'docs/reference/vocabulary.md': vocabularyMarkdown,
+  'docs/design/architecture.md': architectureMarkdown,
+  'docs/design/visual-language.md': visualLanguageMarkdown,
+  'docs/design/view-present.md': viewPresentDesignMarkdown,
+  'docs/design/view-studio.md': viewStudioDesignMarkdown,
+  'docs/specs/README.md': specsReadmeMarkdown,
+  'docs/specs/domain-model.md': domainModelMarkdown,
+  'docs/specs/domain-core.md': domainCoreMarkdown,
+  'docs/specs/view-model.md': viewModelMarkdown,
+  'docs/specs/view-canvas.md': viewCanvasMarkdown,
+  'docs/specs/view-present.md': viewPresentSpecMarkdown,
+  'docs/specs/view-studio.md': viewStudioSpecMarkdown,
+  'docs/specs/render-svg.md': renderSvgMarkdown
 }
 
-const documents: Record<DocumentationRoute['key'], { markdown: string; sourcePath: string }> = {
-  authoring: {
-    markdown: authoringMarkdown,
-    sourcePath: 'docs/guides/authoring.md'
-  },
-  'react-integration': {
-    markdown: reactIntegrationMarkdown,
-    sourcePath: 'docs/guides/react-integration.md'
-  },
-  vocabulary: {
-    markdown: vocabularyMarkdown,
-    sourcePath: 'docs/reference/vocabulary.md'
-  }
-}
+const publishedPathBySourcePath: Record<string, string> = Object.fromEntries(
+  documentationRoutes.map((route) => [route.sourcePath, route.path])
+)
 
 function normaliseRepositoryPath(path: string) {
   const segments: string[] = []
@@ -62,7 +77,7 @@ function rewriteRepositoryLink(href: string, sourcePath: string) {
   const suffix = suffixIndex === -1 ? '' : href.slice(suffixIndex)
   const sourceDirectory = sourcePath.slice(0, sourcePath.lastIndexOf('/') + 1)
   const repositoryPath = normaliseRepositoryPath(`${sourceDirectory}${relativePath}`)
-  const publishedPath = publishedDocuments[repositoryPath]
+  const publishedPath = publishedPathBySourcePath[repositoryPath]
 
   if (publishedPath) {
     return `${publishedPath}${suffix}`
@@ -73,13 +88,13 @@ function rewriteRepositoryLink(href: string, sourcePath: string) {
 }
 
 export function DocumentPage({ route }: { route: DocumentationRoute }) {
-  const document = documents[route.key]
-  const html = marked.parse(document.markdown, {
+  const markdown = markdownBySourcePath[route.sourcePath]
+  const html = marked.parse(markdown, {
     async: false,
     gfm: true,
     walkTokens(token) {
       if (token.type === 'link') {
-        token.href = rewriteRepositoryLink(token.href, document.sourcePath)
+        token.href = rewriteRepositoryLink(token.href, route.sourcePath)
       }
     }
   })
@@ -89,22 +104,13 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
       <a className="skip-link" href="#document-content">
         Skip to content
       </a>
-      <header className="document-header">
-        <a className="document-brand" href="/">
-          Infoschematics
-        </a>
-        <nav aria-label="Documentation">
-          <a href="/guides/authoring/">Authoring</a>
-          <a href="/guides/react-integration/">React integration</a>
-          <a href="/reference/vocabulary/">Vocabulary</a>
-        </nav>
-      </header>
+      <SiteNav section="docs" />
       <main id="document-content">
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown under docs/, not user input */}
         <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
       </main>
       <footer className="document-footer">
-        <a href="/">Return to Infoschematics</a>
+        <a href="/docs/">Back to documentation</a>
       </footer>
     </div>
   )

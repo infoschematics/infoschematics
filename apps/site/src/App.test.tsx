@@ -2,14 +2,18 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
 import { BlankInfoschematic } from './BlankInfoschematic.tsx'
+import { DocsIndex } from './DocsIndex.tsx'
+import { ExamplesIndex } from './ExamplesIndex.tsx'
 import {
+  docsIndexPath,
   documentationRoutes,
+  examplesIndexPath,
   getDocumentationRoute,
-  infoschematicsExamplePath,
   isBlankExamplePath,
+  isDocsIndexPath,
+  isExamplesIndexPath,
   isInfoschematicsExamplePath,
-  isSystemExamplePath,
-  systemExamplePath
+  isSystemExamplePath
 } from './routes.ts'
 
 describe('website routes', () => {
@@ -29,11 +33,8 @@ describe('website routes', () => {
     expect(page).not.toContain('Bespoke homepage treatment')
     expect(page).not.toContain('system-card')
     expect(page).not.toContain('flow-connector')
-    expect(page).toContain(`href="${infoschematicsExamplePath}"`)
-    expect(page).toContain(`href="${systemExamplePath}"`)
-    expect(page).toContain('href="/examples/blank/"')
-    expect(page).toContain('href="/guides/authoring/"')
-    expect(page).toContain('href="/reference/vocabulary/"')
+    expect(page).toContain(`href="${docsIndexPath}"`)
+    expect(page).toContain(`href="${examplesIndexPath}"`)
   })
 
   it('renders the title-only Infoschematic at its blank example route', () => {
@@ -55,6 +56,37 @@ describe('website routes', () => {
 
     expect(getDocumentationRoute('/')).toBeUndefined()
     expect(getDocumentationRoute('/guides/unknown/')).toBeUndefined()
+  })
+
+  it('derives each document path from its source path, collapsing a trailing README', () => {
+    expect(getDocumentationRoute('/docs/guides/authoring/')?.sourcePath).toBe('docs/guides/authoring.md')
+    expect(getDocumentationRoute('/docs/specs/')?.sourcePath).toBe('docs/specs/README.md')
+    expect(getDocumentationRoute('/docs/specs/domain-core/')?.sourcePath).toBe('docs/specs/domain-core.md')
+  })
+
+  it('resolves the docs and examples indexes with or without a trailing slash', () => {
+    expect(isDocsIndexPath('/docs/')).toBe(true)
+    expect(isDocsIndexPath('/docs')).toBe(true)
+    expect(isDocsIndexPath('/')).toBe(false)
+    expect(isExamplesIndexPath('/examples/')).toBe(true)
+    expect(isExamplesIndexPath('/examples')).toBe(true)
+    expect(isExamplesIndexPath('/')).toBe(false)
+  })
+
+  it('lists every published document on the docs index', () => {
+    const page = renderToStaticMarkup(<DocsIndex />)
+
+    for (const route of documentationRoutes) {
+      expect(page).toContain(`href="${route.path}"`)
+    }
+  })
+
+  it('lists all three hosted examples on the examples index', () => {
+    const page = renderToStaticMarkup(<ExamplesIndex />)
+
+    expect(page).toContain('href="/examples/infoschematics/"')
+    expect(page).toContain('href="/examples/system/"')
+    expect(page).toContain('href="/examples/blank/"')
   })
 
   it('resolves the hosted Infoschematics example with or without a trailing slash', () => {

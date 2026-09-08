@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import {
   getDocumentationRoute,
   isBlankExamplePath,
+  isDocsIndexPath,
+  isExamplesIndexPath,
   isInfoschematicsExamplePath,
   isSystemExamplePath
 } from './routes.ts'
@@ -14,6 +16,18 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
     const { DocumentPage } = await import('./DocumentPage.tsx')
     document.title = `${documentationRoute.title} · Infoschematics`
     return <DocumentPage route={documentationRoute} />
+  }
+
+  if (isDocsIndexPath(pathname)) {
+    const { DocsIndex } = await import('./DocsIndex.tsx')
+    document.title = 'Documentation · Infoschematics'
+    return <DocsIndex />
+  }
+
+  if (isExamplesIndexPath(pathname)) {
+    const { ExamplesIndex } = await import('./ExamplesIndex.tsx')
+    document.title = 'Examples · Infoschematics'
+    return <ExamplesIndex />
   }
 
   if (isBlankExamplePath(pathname)) {

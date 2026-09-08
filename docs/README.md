@@ -15,10 +15,12 @@ These instruments should link to one another rather than repeat one another. A r
 
 ## Public documentation
 
-The website currently publishes:
+The website publishes this directory's guides, reference material, design documents, and specifications under `/docs/`, mirroring this tree's structure:
 
 - [the authoring guide](guides/authoring.md);
 - [the React integration guide](guides/react-integration.md);
-- [the vocabulary reference](reference/vocabulary.md).
+- [the vocabulary reference](reference/vocabulary.md);
+- [the architecture guide](design/architecture.md), [the visual language guide](design/visual-language.md), [the Present view design](design/view-present.md), and [the Studio view design](design/view-studio.md);
+- every specification under [`specs/`](specs/).
 
-Architecture, decision records, specifications, and roadmap records remain maintainer-facing unless publication would help a consumer understand a supported contract. The maintainer-facing [Cloudflare hosting guide](guides/cloudflare.md) records the dashboard-owned deployment settings.
+Decision records and roadmap records remain maintainer-facing. The maintainer-facing [Cloudflare hosting guide](guides/cloudflare.md) and [releasing-packages guide](guides/releasing-packages.md) also stay off the public site.

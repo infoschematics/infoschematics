@@ -1,24 +1,120 @@
 export const blankExamplePath = '/examples/blank/'
 export const infoschematicsExamplePath = '/examples/infoschematics/'
 export const systemExamplePath = '/examples/system/'
+export const docsIndexPath = '/docs/'
+export const examplesIndexPath = '/examples/'
 
-export const documentationRoutes = [
+export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
+
+interface PublishedDocument {
+  sourcePath: string
+  title: string
+  summary: string
+  section: DocumentSection
+}
+
+const publishedDocuments = [
   {
-    key: 'authoring',
-    path: '/guides/authoring/',
-    title: 'Authoring Infoschematics'
+    sourcePath: 'docs/guides/authoring.md',
+    title: 'Authoring Infoschematics',
+    summary: 'Write a serialisable Infoschematic definition from scratch.',
+    section: 'guides'
   },
   {
-    key: 'react-integration',
-    path: '/guides/react-integration/',
-    title: 'React integration'
+    sourcePath: 'docs/guides/react-integration.md',
+    title: 'React integration',
+    summary: 'Mount an authored Infoschematic inside a host React application.',
+    section: 'guides'
   },
   {
-    key: 'vocabulary',
-    path: '/reference/vocabulary/',
-    title: 'Infoschematics vocabulary'
+    sourcePath: 'docs/reference/vocabulary.md',
+    title: 'Infoschematics vocabulary',
+    summary: 'Canonical product terms used across every specification and guide.',
+    section: 'reference'
+  },
+  {
+    sourcePath: 'docs/design/architecture.md',
+    title: 'Architecture',
+    summary: 'Ownership roots, package boundaries and the dependency direction between them.',
+    section: 'design'
+  },
+  {
+    sourcePath: 'docs/design/visual-language.md',
+    title: 'Visual language',
+    summary: 'The appearance options an Infoschematic can express and how they render.',
+    section: 'design'
+  },
+  {
+    sourcePath: 'docs/design/view-present.md',
+    title: 'Present view design',
+    summary: 'Audience-facing filtering, Scene focus and Story playback design.',
+    section: 'design'
+  },
+  {
+    sourcePath: 'docs/design/view-studio.md',
+    title: 'Studio view design',
+    summary: 'Generic editing session design: selection, drafts and consolidation.',
+    section: 'design'
+  },
+  {
+    sourcePath: 'docs/specs/README.md',
+    title: 'Specifications',
+    summary: 'The reusable contracts Infoschematics defines and their requirement language.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/domain-model.md',
+    title: 'Domain Model',
+    summary: 'Authored identity, data, geography and relationship rules.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/domain-core.md',
+    title: 'Domain Core',
+    summary: 'Configuration normalisation and the JSON and YAML document boundary.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/view-model.md',
+    title: 'View Model',
+    summary: 'Geometry, routes, ports, guides and placement calculations.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/view-canvas.md',
+    title: 'Canvas View',
+    summary: 'The interactive surface, host renderer registry, validation and diagnostics.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/view-present.md',
+    title: 'Present View',
+    summary: 'Audience-facing filtering, Scene focus, Story playback and presentation controls.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/view-studio.md',
+    title: 'Studio View',
+    summary: 'Generic editing sessions, selection, drafts, change consolidation and creation or removal behaviour.',
+    section: 'specs'
+  },
+  {
+    sourcePath: 'docs/specs/render-svg.md',
+    title: 'Static SVG renderer',
+    summary: 'Deterministic, framework-neutral SVG output and visibility options.',
+    section: 'specs'
   }
-] as const
+] as const satisfies readonly PublishedDocument[]
+
+function documentPath(sourcePath: string): string {
+  const withoutReadme = sourcePath.endsWith('/README.md') ? sourcePath.slice(0, -'README.md'.length) : sourcePath
+  const withoutExtension = withoutReadme.endsWith('.md') ? withoutReadme.slice(0, -'.md'.length) : withoutReadme
+  return `/${withoutExtension}/`.replace(/\/+/g, '/')
+}
+
+export const documentationRoutes: ReadonlyArray<PublishedDocument & { path: string }> = publishedDocuments.map(
+  (document) => ({ ...document, path: documentPath(document.sourcePath) })
+)
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
 
@@ -32,6 +128,14 @@ export function isInfoschematicsExamplePath(pathname: string) {
 
 export function isSystemExamplePath(pathname: string) {
   return pathname === systemExamplePath || pathname === systemExamplePath.slice(0, -1)
+}
+
+export function isDocsIndexPath(pathname: string) {
+  return pathname === docsIndexPath || pathname === docsIndexPath.slice(0, -1)
+}
+
+export function isExamplesIndexPath(pathname: string) {
+  return pathname === examplesIndexPath || pathname === examplesIndexPath.slice(0, -1)
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {

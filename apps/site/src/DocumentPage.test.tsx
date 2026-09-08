@@ -4,17 +4,17 @@ import { DocumentPage } from './DocumentPage.tsx'
 import { documentationRoutes } from './routes.ts'
 
 describe('documentation pages', () => {
-  it.each(documentationRoutes)('renders the canonical $key Markdown', (route) => {
+  it.each(documentationRoutes)('renders the canonical $sourcePath Markdown', (route) => {
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
 
     expect(page).toContain('<article')
     expect(page).toContain('<h1>')
     expect(page).toContain(`aria-label="${route.title}"`)
-    expect(page).toContain('href="/"')
+    expect(page).toContain('href="/docs/"')
   })
 
   it('renders Markdown structure rather than exposing source text', () => {
-    const route = documentationRoutes.find(({ key }) => key === 'authoring')
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/guides/authoring.md')
 
     if (!route) {
       throw new Error('The authoring documentation route is missing.')
@@ -27,7 +27,7 @@ describe('documentation pages', () => {
   })
 
   it('rewrites repository-relative links to their canonical GitHub location', () => {
-    const route = documentationRoutes.find(({ key }) => key === 'vocabulary')
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/reference/vocabulary.md')
 
     if (!route) {
       throw new Error('The vocabulary documentation route is missing.')
