@@ -57,10 +57,14 @@ describe('website routes', () => {
     expect(getDocumentationRoute('/guides/unknown/')).toBeUndefined()
   })
 
-  it('derives each document path from its source path, collapsing a trailing README', () => {
+  it('derives each document path from its source path', () => {
     expect(getDocumentationRoute('/docs/guides/authoring/')?.sourcePath).toBe('docs/guides/authoring.md')
-    expect(getDocumentationRoute('/docs/specs/')?.sourcePath).toBe('docs/specs/README.md')
-    expect(getDocumentationRoute('/docs/specs/domain-core/')?.sourcePath).toBe('docs/specs/domain-core.md')
+    expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
+  })
+
+  it('publishes guidance rather than the specifications, which stay in the repository', () => {
+    expect(documentationRoutes.some((route) => route.sourcePath.startsWith('docs/specs/'))).toBe(false)
+    expect(getDocumentationRoute('/docs/specs/')).toBeUndefined()
   })
 
   it('resolves the docs and examples indexes with or without a trailing slash', () => {

@@ -10,16 +10,15 @@ export function playgroundPresetPath(preset: string) {
   return `${playgroundPath}?preset=${preset}`
 }
 
-export type DocumentSection = 'getting-started' | 'reference' | 'design' | 'specs'
+export type DocumentSection = 'getting-started' | 'reference' | 'design'
 
 export const sectionTitles: Record<DocumentSection, string> = {
   'getting-started': 'Getting started',
   reference: 'Reference',
-  design: 'Design',
-  specs: 'Specifications'
+  design: 'Design'
 }
 
-export const documentSections: readonly DocumentSection[] = ['getting-started', 'reference', 'design', 'specs']
+export const documentSections: readonly DocumentSection[] = ['getting-started', 'reference', 'design']
 
 interface PublishedDocument {
   sourcePath: string
@@ -76,54 +75,6 @@ const publishedDocuments = [
     title: 'Studio view design',
     summary: 'Generic editing session design: selection, drafts and consolidation.',
     section: 'design'
-  },
-  {
-    sourcePath: 'docs/specs/README.md',
-    title: 'Specifications',
-    summary: 'The reusable contracts Infoschematics defines and their requirement language.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/domain-model.md',
-    title: 'Domain Model',
-    summary: 'Authored identity, data, geography and relationship rules.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/domain-core.md',
-    title: 'Domain Core',
-    summary: 'Configuration normalisation and the YAML, JSON, and TypeScript document boundary.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/view-model.md',
-    title: 'View Model',
-    summary: 'Geometry, routes, ports, guides and placement calculations.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/view-canvas.md',
-    title: 'Canvas View',
-    summary: 'The interactive surface, host renderer registry, validation and diagnostics.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/view-present.md',
-    title: 'Present View',
-    summary: 'Audience-facing filtering, Scene focus, Story playback and presentation controls.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/view-studio.md',
-    title: 'Studio View',
-    summary: 'Generic editing sessions, selection, drafts, change consolidation and creation or removal behaviour.',
-    section: 'specs'
-  },
-  {
-    sourcePath: 'docs/specs/render-svg.md',
-    title: 'Static SVG renderer',
-    summary: 'Deterministic, framework-neutral SVG output and visibility options.',
-    section: 'specs'
   }
 ] as const satisfies readonly PublishedDocument[]
 
@@ -132,8 +83,7 @@ function documentPath(sourcePath: string): string {
     return docsIndexPath
   }
 
-  const withoutReadme = sourcePath.endsWith('/README.md') ? sourcePath.slice(0, -'README.md'.length) : sourcePath
-  const withoutExtension = withoutReadme.endsWith('.md') ? withoutReadme.slice(0, -'.md'.length) : withoutReadme
+  const withoutExtension = sourcePath.endsWith('.md') ? sourcePath.slice(0, -'.md'.length) : sourcePath
   return `/${withoutExtension}/`.replace(/\/+/g, '/')
 }
 

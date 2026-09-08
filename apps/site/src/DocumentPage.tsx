@@ -7,14 +7,6 @@ import authoringMarkdown from '../../../docs/guides/authoring.md?raw'
 import reactIntegrationMarkdown from '../../../docs/guides/react-integration.md?raw'
 import overviewMarkdown from '../../../docs/overview.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
-import domainCoreMarkdown from '../../../docs/specs/domain-core.md?raw'
-import domainModelMarkdown from '../../../docs/specs/domain-model.md?raw'
-import specsReadmeMarkdown from '../../../docs/specs/README.md?raw'
-import renderSvgMarkdown from '../../../docs/specs/render-svg.md?raw'
-import viewCanvasMarkdown from '../../../docs/specs/view-canvas.md?raw'
-import viewModelMarkdown from '../../../docs/specs/view-model.md?raw'
-import viewPresentSpecMarkdown from '../../../docs/specs/view-present.md?raw'
-import viewStudioSpecMarkdown from '../../../docs/specs/view-studio.md?raw'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import type { DocumentationRoute } from './routes.ts'
 import { documentationRoutes } from './routes.ts'
@@ -31,15 +23,7 @@ const markdownBySourcePath: Record<string, string> = {
   'docs/design/architecture.md': architectureMarkdown,
   'docs/design/visual-language.md': visualLanguageMarkdown,
   'docs/design/view-present.md': viewPresentDesignMarkdown,
-  'docs/design/view-studio.md': viewStudioDesignMarkdown,
-  'docs/specs/README.md': specsReadmeMarkdown,
-  'docs/specs/domain-model.md': domainModelMarkdown,
-  'docs/specs/domain-core.md': domainCoreMarkdown,
-  'docs/specs/view-model.md': viewModelMarkdown,
-  'docs/specs/view-canvas.md': viewCanvasMarkdown,
-  'docs/specs/view-present.md': viewPresentSpecMarkdown,
-  'docs/specs/view-studio.md': viewStudioSpecMarkdown,
-  'docs/specs/render-svg.md': renderSvgMarkdown
+  'docs/design/view-studio.md': viewStudioDesignMarkdown
 }
 
 const publishedPathBySourcePath: Record<string, string> = Object.fromEntries(
