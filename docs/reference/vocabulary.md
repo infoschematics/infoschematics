@@ -17,6 +17,7 @@ The **product** is an Infoschematic together with its Standalone Scenes, Themes,
 | `standard-card` | Standard Card | node, box, service box |
 | `adapter-card` | Adapter Card | sidecar, wrapper |
 | `flow` | Flow | connection, connector, link, edge |
+| `point` | Point | junction, anchor, endpoint |
 | `graphic` | Graphic | overlay figure, drawn annotation |
 | `route` | Route | geometry, line run |
 | `waypoint` | Waypoint | bend, corner, vertex |
@@ -72,6 +73,7 @@ An Infoschematic contains exactly six primary artefact kinds:
 - **Fabric** — a midground artefact that can participate in Flows and be focused by a Scene.
 - **Card** — a box-like foreground artefact. An Adapter Card wraps a Standard Card without taking an independent position.
 - **Flow** — a foreground artefact showing movement between Cards and Fabrics.
+- **Point** — a foreground junction or labelled anchor that can participate in the same scoped diagram geography.
 - **Graphic** — a foreground artefact normally hidden until a Scene makes it visible.
 
 Routes, Waypoints, and Ports describe Flow geometry; they are not additional artefact kinds. Regions establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.

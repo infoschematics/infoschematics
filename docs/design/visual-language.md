@@ -2,7 +2,7 @@
 
 This brief defines the visual character shared by Infoschematic views and renderers. It is a presentation system rather than a fixed page template: implementations can adapt layout and theme while preserving hierarchy, semantic colour, routing and motion rules.
 
-See the [rendered visual guide](/docs/visual-guide/) for every appearance option shown as an actual SVG specimen rather than described in prose.
+The [interactive visual guide](/docs/visual-guide/) introduces every visible artefact and lets readers compare the authored treatments in rendered SVG. This document explains the principles behind those outputs.
 
 ## Intent
 

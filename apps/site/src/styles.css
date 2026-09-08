@@ -429,6 +429,245 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
+.visual-guide {
+  color: #b8cad9;
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.7;
+}
+
+.visual-guide > :first-child {
+  margin-top: 0;
+}
+
+.visual-guide h1,
+.visual-guide h2,
+.visual-guide h3 {
+  color: #f5f8ff;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.visual-guide h1 {
+  margin: 0 0 18px;
+  font-size: clamp(42px, 7vw, 72px);
+}
+
+.visual-guide h2 {
+  margin: 0 0 18px;
+  font-size: clamp(28px, 4vw, 38px);
+}
+
+.visual-guide h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.visual-guide p {
+  margin: 0 0 20px;
+}
+
+.visual-guide a {
+  color: #79c9ff;
+  text-underline-offset: 0.18em;
+}
+
+.visual-guide__intro {
+  padding: clamp(24px, 4vw, 42px);
+  border: 1px solid #ffffff1c;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10283d, #091927);
+}
+
+.visual-guide__lede {
+  max-width: 68ch;
+  color: #d2e0eb;
+  font-size: clamp(18px, 2.4vw, 23px);
+}
+
+.visual-guide__eyebrow,
+.visual-guide__layer {
+  margin-bottom: 10px;
+  color: #79c9ff;
+  font: 650 10px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.visual-guide__contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding-top: 6px;
+}
+
+.visual-guide__contents a {
+  font: 650 12px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.visual-guide__section {
+  margin-top: clamp(56px, 8vw, 92px);
+  scroll-margin-top: 24px;
+}
+
+.visual-guide__anatomy,
+.interactive-specimen__output {
+  margin: 30px 0;
+  overflow: hidden;
+  border: 1px solid #ffffff1c;
+  border-radius: 12px;
+  background: #071624;
+}
+
+.visual-guide__anatomy img,
+.interactive-specimen__output img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.visual-guide__anatomy figcaption {
+  padding: 12px 16px;
+  border-top: 1px solid #ffffff12;
+  color: #8fa8bc;
+  font-size: 13px;
+}
+
+.visual-guide__reference-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.visual-guide__reference-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.visual-guide__reference-card {
+  padding: 20px;
+  border: 1px solid #ffffff16;
+  border-radius: 10px;
+  background: #0d2031;
+}
+
+.visual-guide__reference-card p:last-child {
+  margin-bottom: 0;
+  color: #a9bdcc;
+  font-size: 15px;
+}
+
+.visual-guide__treatment {
+  margin-top: 44px;
+  padding-top: 36px;
+  border-top: 1px solid #ffffff16;
+  scroll-margin-top: 24px;
+}
+
+.interactive-specimen {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(220px, 0.75fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.interactive-specimen__output {
+  margin: 0;
+}
+
+.interactive-specimen__controls {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid #ffffff1c;
+  border-radius: 10px;
+  background: #0d2031;
+}
+
+.interactive-specimen__controls legend {
+  padding: 0 6px;
+  color: #f5f8ff;
+  font: 650 11px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.visual-guide-control {
+  display: grid;
+  gap: 7px;
+  color: #b8cad9;
+  font-size: 13px;
+}
+
+.visual-guide-control--flag,
+.visual-guide-colour-value,
+.visual-guide-number-value {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.visual-guide-control select,
+.visual-guide-control input,
+.interactive-specimen__controls button {
+  font: inherit;
+}
+
+.visual-guide-control select,
+.interactive-specimen__controls button {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid #ffffff26;
+  border-radius: 6px;
+  color: #e8f2fa;
+  background: #071624;
+}
+
+.visual-guide-control input[type='range'] {
+  min-width: 0;
+  flex: 1;
+}
+
+.visual-guide-colour-value code,
+.visual-guide-number-value output {
+  color: #9db4c9;
+  font: 600 11px/1.4 'DM Mono', monospace;
+}
+
+.interactive-specimen__controls button {
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.interactive-specimen__controls button:hover,
+.interactive-specimen__controls button:focus-visible {
+  border-color: #79c9ff;
+}
+
+.visual-guide__section--callout {
+  padding: clamp(24px, 4vw, 36px);
+  border: 1px solid #2a5a7d;
+  border-radius: 12px;
+  background: #0d2031;
+}
+
+@media (max-width: 760px) {
+  .visual-guide {
+    width: calc(100vw - 36px);
+    overflow-wrap: anywhere;
+  }
+
+  .visual-guide__reference-grid,
+  .visual-guide__reference-grid--three,
+  .interactive-specimen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .docs-columns {
   display: grid;
   grid-template-columns: 220px minmax(0, 1fr) 200px;

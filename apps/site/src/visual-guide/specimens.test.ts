@@ -1,54 +1,29 @@
-import { gridTreatments, regionLabelPlacements, surfaceTreatments } from '@infoschematics/domain-core'
 import { describe, expect, it } from 'vitest'
-import { cardDetailSpecimens, gridSpecimens, regionLabelPlacementSpecimens, surfaceSpecimens } from './specimens.ts'
+import { guideAppearanceOptionKeys, guideAppearanceOptions } from './curriculum.ts'
+import { anatomySpecimen, appearanceOptionValue, treatmentSpecimen, withAppearanceOption } from './specimens.ts'
 
 describe('visual guide specimens', () => {
-  it('has one surface specimen per surface treatment', () => {
-    expect(surfaceSpecimens).toHaveLength(surfaceTreatments.length)
-    for (const [index, treatment] of surfaceTreatments.entries()) {
-      const specimen = surfaceSpecimens[index]
-      expect(specimen).toBeDefined()
-      expect(specimen?.config.infoschematic.appearance?.surface).toBe(treatment)
-    }
+  it('contains every primary artefact kind in the anatomy specimen', () => {
+    const definition = anatomySpecimen.infoschematic
+    expect(definition.regions).toHaveLength(1)
+    expect(definition.fabrics).toHaveLength(1)
+    expect(definition.cards).toHaveLength(1)
+    expect(definition.flows).toHaveLength(1)
+    expect(definition.points).toHaveLength(1)
+    expect(definition.graphics).toHaveLength(1)
   })
 
-  it('has one grid specimen per grid treatment', () => {
-    expect(gridSpecimens).toHaveLength(gridTreatments.length)
-    for (const [index, treatment] of gridTreatments.entries()) {
-      const specimen = gridSpecimens[index]
-      expect(specimen).toBeDefined()
-      expect(specimen?.config.infoschematic.appearance?.grid).toBe(treatment)
-    }
-  })
-
-  it('has one region label placement specimen per placement', () => {
-    expect(regionLabelPlacementSpecimens).toHaveLength(regionLabelPlacements.length)
-    for (const [index, placement] of regionLabelPlacements.entries()) {
-      const specimen = regionLabelPlacementSpecimens[index]
-      expect(specimen).toBeDefined()
-      expect(specimen?.config.infoschematic.regions[0]?.labelPlacement).toBe(placement)
-    }
-  })
-
-  it('covers every CardDetailDefaults flag across the curated progressive sequence', () => {
-    const flags = ['compact', 'identity', 'stereotype', 'description'] as const
-
-    for (const flag of flags) {
-      const hasFlagTrue = cardDetailSpecimens.some(
-        (specimen) => specimen.config.infoschematic.appearance?.card?.[flag] === true
-      )
-      expect(hasFlagTrue).toBe(true)
-    }
-  })
-
-  it('gives every specimen a unique key', () => {
-    const allSpecimens = [
-      ...surfaceSpecimens,
-      ...gridSpecimens,
-      ...regionLabelPlacementSpecimens,
-      ...cardDetailSpecimens
-    ]
-    const keys = allSpecimens.map((specimen) => specimen.key)
-    expect(new Set(keys).size).toBe(keys.length)
+  it.each(guideAppearanceOptionKeys)('round-trips the %s guide control', (key) => {
+    const descriptor = guideAppearanceOptions[key]
+    const value =
+      descriptor.control === 'flag'
+        ? !appearanceOptionValue(treatmentSpecimen(), key)
+        : descriptor.control === 'number'
+          ? (descriptor.range?.max ?? 1)
+          : descriptor.control === 'colour'
+            ? '#654ea3'
+            : (descriptor.values.at(-1) ?? '')
+    const updated = withAppearanceOption(treatmentSpecimen(), key, value)
+    expect(appearanceOptionValue(updated, key)).toBe(value)
   })
 })
