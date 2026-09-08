@@ -42,7 +42,7 @@ The [authoring guide](/docs/guides/authoring/) is the complete walkthrough: what
 | Embed an explorable diagram | Canvas View |
 | Guide an Audience through focus and narrative | Present View |
 | Let a Producer design or direct a product | Studio View |
-| Export deterministic, framework-neutral output | Static SVG renderer |
+| Export deterministic, framework-neutral output | Static Renderer |
 
 All four read the same authored definition. A host can choose the narrowest output it needs without changing ownership of the product data.
 

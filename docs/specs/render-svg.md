@@ -1,4 +1,4 @@
-# Static SVG renderer specification
+# Static Renderer specification
 
 _Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Scene](/docs/reference/vocabulary/#scene), and [Graphic](/docs/reference/vocabulary/#graphic)._
 

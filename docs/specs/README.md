@@ -12,7 +12,7 @@ These specifications define the reusable contracts owned by Infoschematics. They
 - [Canvas View](view-canvas.md) defines the interactive surface, host renderer registry, validation, diagnostics, and fallbacks.
 - [Present View](view-present.md) defines audience-facing filtering, Scene focus, Story playback and presentation controls.
 - [Studio View](view-studio.md) defines generic editing sessions, selection, drafts, change consolidation and creation or removal behaviour.
-- [Static SVG renderer](render-svg.md) defines deterministic, framework-neutral SVG output and visibility options.
+- [Static Renderer](render-svg.md) defines deterministic, framework-neutral SVG output and visibility options.
 
 The [vocabulary reference](../reference/vocabulary.md) is the canonical source for product terms. Requirements in these files use that vocabulary but do not redefine it.
 
