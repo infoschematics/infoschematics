@@ -28,7 +28,7 @@
     "build": "vite build",
     "clean": "rm -rf dist .wrangler",
     "deploy": "bun run build && wrangler deploy",
-    "dev": "vite",
+    "ki:site:dev": "vite",
     "preview": "bun run build && wrangler dev",
     "test": "vitest run --root .",
     "typecheck": "tsc --noEmit"
