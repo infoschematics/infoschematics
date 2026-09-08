@@ -68,6 +68,22 @@ export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
   },
   {
     metadata: {
+      description: 'A square Card, for grid and matrix compositions rather than a landscape row.',
+      key: 'square-card',
+      label: 'Square card'
+    },
+    seed: {
+      kind: 'card',
+      value: {
+        detail: 'A square boundary',
+        label: 'New node',
+        placement: { box: { height: 120, width: 120 }, ports: { east: 1, north: 1, south: 1, west: 1 } },
+        services: ['service']
+      }
+    }
+  },
+  {
+    metadata: {
       description: 'A bounded Fabric for infrastructure or platform detail.',
       key: 'platform-fabric',
       label: 'Platform fabric'

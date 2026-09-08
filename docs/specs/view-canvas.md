@@ -60,6 +60,12 @@ Representative treatment fixtures MUST prove the same resolved surface, grid, fr
 
 _Verification: `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx` and `packages/view-model/src/region-geometry.test.ts`._
 
+### CANVAS-010 — Card internals use the shared layout
+
+Canvas MUST place Card label, description, stereotype, and identity text through View Model's Card layout rather than from constants of its own, so a Card of any proportion reads the same on the Canvas as in static output. It MUST draw those elements with a middle dominant baseline, and MUST NOT draw an element the layout withholds.
+
+_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions._
+
 ## Flow signals
 
 ### CANVAS-008 — Signals are finite keyed occurrences

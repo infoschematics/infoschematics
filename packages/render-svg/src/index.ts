@@ -7,6 +7,7 @@ import {
   resolveRegionTreatment,
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
+import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { visualTokens } from '@infoschematics/view-model/tokens'
@@ -571,9 +572,17 @@ export const renderInfoschematicSvg = (
     const ink = resolveReadableInk(fill)
     const metadataColor = ink === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
-    const compactLabelX = 10
-    const compactLabelY = visualTreatment.card.stereotype && card.stereotype ? 38 : 28
-    const identityWidth = Math.max(42, card.code.length * 6.5 + 14)
+    const layout = resolveCardLayout({
+      box,
+      code: card.code,
+      compact: visualTreatment.card.compact,
+      detail: {
+        description: visualTreatment.card.description,
+        identity: visualTreatment.card.identity,
+        stereotype: visualTreatment.card.stereotype
+      },
+      stereotype: card.stereotype
+    })
     const content = [
       line(2, 'title', [], xmlText(accessibleDetail)),
       line(2, 'rect', [
@@ -585,27 +594,28 @@ export const renderInfoschematicSvg = (
         ['width', box.width]
       ])
     ]
-    if (visualTreatment.card.stereotype && card.stereotype) {
+    if (layout.stereotype && card.stereotype) {
       content.push(
         line(
           2,
           'text',
           [
             ['class', 'infoschematic-card-stereotype'],
+            ['dominant-baseline', 'middle'],
             ['fill', appearance?.color ?? canvasTokens.output.fallbackFamily],
             ['font-family', canvasTokens.text.codeFamily],
             ['font-size', 9],
             ['font-weight', 500],
             ['letter-spacing', '0.4px'],
-            ['text-anchor', 'start'],
-            ['x', 10],
-            ['y', 16]
+            ['text-anchor', layout.stereotype.anchor],
+            ['x', layout.stereotype.x],
+            ['y', layout.stereotype.y]
           ],
           xmlText(card.stereotype.toUpperCase())
         )
       )
     }
-    if (visualTreatment.card.identity) {
+    if (layout.identity) {
       content.push(
         group(
           2,
@@ -616,13 +626,13 @@ export const renderInfoschematicSvg = (
           [
             line(3, 'rect', [
               ['fill', canvasTokens.surfaces.backdrop],
-              ['height', 20],
+              ['height', layout.identity.height],
               ['rx', 4],
               ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
               ['stroke-width', 1],
-              ['width', identityWidth],
-              ['x', box.width - identityWidth - 8],
-              ['y', 8]
+              ['width', layout.identity.width],
+              ['x', layout.identity.x],
+              ['y', layout.identity.y]
             ]),
             line(
               3,
@@ -635,8 +645,8 @@ export const renderInfoschematicSvg = (
                 ['font-weight', 600],
                 ['letter-spacing', '0.5px'],
                 ['text-anchor', 'middle'],
-                ['x', box.width - identityWidth / 2 - 8],
-                ['y', 18]
+                ['x', layout.identity.textX],
+                ['y', layout.identity.textY]
               ],
               xmlText(card.code)
             )
@@ -655,33 +665,27 @@ export const renderInfoschematicSvg = (
           ['font-family', canvasTokens.text.bodyFamily],
           ['font-size', visualTreatment.card.compact ? 13 : 14],
           ['font-weight', 700],
-          ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
-          ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
-          [
-            'y',
-            visualTreatment.card.compact
-              ? compactLabelY
-              : visualTreatment.card.description
-                ? box.height / 2 - 6
-                : box.height / 2
-          ]
+          ['text-anchor', layout.label.anchor],
+          ['x', layout.label.x],
+          ['y', layout.label.y]
         ],
         xmlText(card.label)
       )
     )
-    if (visualTreatment.card.description) {
+    if (layout.description) {
       content.push(
         line(
           2,
           'text',
           [
             ['class', 'infoschematic-card-description'],
+            ['dominant-baseline', 'middle'],
             ['fill', metadataColor],
             ['font-family', canvasTokens.text.bodyFamily],
             ['font-size', 10],
-            ['text-anchor', visualTreatment.card.compact ? 'start' : 'middle'],
-            ['x', visualTreatment.card.compact ? compactLabelX : box.width / 2],
-            ['y', visualTreatment.card.compact ? Math.min(box.height - 10, compactLabelY + 18) : box.height / 2 + 14]
+            ['text-anchor', layout.description.anchor],
+            ['x', layout.description.x],
+            ['y', layout.description.y]
           ],
           xmlText(card.detail)
         )

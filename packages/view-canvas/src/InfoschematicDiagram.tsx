@@ -8,6 +8,7 @@ import {
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
+import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
@@ -1727,17 +1728,20 @@ export function InfoschematicDiagram({
               fill: 'transparent'
             }
           const labelLines = visualTreatment.card.compact ? [card.label] : splitLabel(card.label)
-          // The legacy treatment remains centred; compact Cards use a left-aligned
-          // editorial stack with optional metadata around the authored label.
-          const labelY = visualTreatment.card.compact
-            ? visualTreatment.card.stereotype && card.stereotype
-              ? 39
-              : 30
-            : labelLines.length === 1
-              ? 46
-              : 39
-          const labelX = visualTreatment.card.compact ? 14 : layout.width / 2
-          const identityWidth = Math.max(42, card.code.length * 6.5 + 14)
+          // Card internals are placed from the Card's own box by View Model, so the
+          // Canvas and the static SVG draw the same Card the same way at any shape.
+          const text = resolveCardLayout({
+            box: layout,
+            code: card.code,
+            compact: visualTreatment.card.compact,
+            detail: {
+              description: visualTreatment.card.description && Boolean(card.name),
+              identity: visualTreatment.card.identity,
+              stereotype: visualTreatment.card.stereotype
+            },
+            labelLines: labelLines.length,
+            stereotype: card.stereotype
+          })
           const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
 
           return (
@@ -1796,38 +1800,49 @@ export function InfoschematicDiagram({
                 stroke={'color' in appearance ? appearance.color : appearance.stroke}
                 width={layout.width}
               />
-              {visualTreatment.card.identity ? (
+              {text.identity ? (
                 <g className="infoschematic-card-identity" data-card-detail="identity">
-                  <rect height="20" rx="4" width={identityWidth} x={layout.width - identityWidth - 8} y="8" />
-                  <text x={layout.width - identityWidth / 2 - 8} y="18">
+                  <rect
+                    height={text.identity.height}
+                    rx="4"
+                    width={text.identity.width}
+                    x={text.identity.x}
+                    y={text.identity.y}
+                  />
+                  <text x={text.identity.textX} y={text.identity.textY}>
                     {card.code}
                   </text>
                 </g>
               ) : null}
-              {visualTreatment.card.stereotype && card.stereotype ? (
-                <text className="infoschematic-card-stereotype" data-card-detail="stereotype" x="14" y="18">
+              {text.stereotype && card.stereotype ? (
+                <text
+                  className="infoschematic-card-stereotype"
+                  data-card-detail="stereotype"
+                  x={text.stereotype.x}
+                  y={text.stereotype.y}
+                >
                   {card.stereotype.toUpperCase()}
                 </text>
               ) : null}
               <text
                 className="infoschematic-service-label"
-                textAnchor={visualTreatment.card.compact ? 'start' : 'middle'}
-                x={labelX}
-                y={labelY}
+                textAnchor={text.label.anchor}
+                x={text.label.x}
+                y={text.label.y}
               >
                 {labelLines.map((line, index) => (
-                  <tspan key={line} x={labelX} dy={index === 0 ? 0 : 13}>
+                  <tspan key={line} x={text.label.x} dy={index === 0 ? 0 : text.label.lineHeight}>
                     {line}
                   </tspan>
                 ))}
               </text>
-              {visualTreatment.card.description && card.name ? (
+              {text.description && card.name ? (
                 <text
                   className="infoschematic-card-description"
                   data-card-detail="description"
-                  textAnchor={visualTreatment.card.compact ? 'start' : 'middle'}
-                  x={labelX}
-                  y={Math.min(layout.height - 12, labelY + (labelLines.length - 1) * 13 + 18)}
+                  textAnchor={text.description.anchor}
+                  x={text.description.x}
+                  y={text.description.y}
                 >
                   {card.name}
                 </text>

@@ -426,7 +426,10 @@
   stroke-width: 2px;
 }
 
+/* One shared baseline convention: View Model places every Card text element by
+   its visual centre, so the Canvas and the static SVG draw it in the same place. */
 .infoschematic-service-label {
+  dominant-baseline: middle;
   fill: var(--infoschematic-canvas-text-label);
   font: 700 14px var(--infoschematic-canvas-text-body-family);
   text-anchor: middle;
@@ -452,12 +455,14 @@
 }
 
 .infoschematic-card-stereotype {
+  dominant-baseline: middle;
   fill: currentColor;
   font: 500 9px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 0.4px;
 }
 
 .infoschematic-card-description {
+  dominant-baseline: middle;
   fill: var(--infoschematic-canvas-text-muted);
   font: 500 10px var(--infoschematic-canvas-text-body-family);
 }

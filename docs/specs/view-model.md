@@ -124,6 +124,16 @@ A floating overlay position MUST be clamped inside the view before being scored.
 
 _Verification: `packages/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates._
 
+## Card layout
+
+### VIEW-025 — Card internals are placed from the Card's own box
+
+View Model MUST resolve where a Card's label, description, stereotype, and identity chip are drawn from that Card's own box, its resolved treatment, and its authored text. Both renderers MUST consume that one resolution rather than place Card text independently, and every position MUST be the element's visual centre so a renderer draws it with a middle dominant baseline.
+
+The label MUST always be placed. An optional element MUST be withheld where its band does not fit the box, and the identity chip MUST give way to an authored stereotype it would otherwise be drawn over. Element widths MAY be estimated from a fixed advance per character, because no text metric is available to static output and both renderers MUST agree on the same estimate.
+
+_Verification: `packages/view-model/src/card-layout.test.ts` covers the reference, square, tall, narrow, and undersized boxes; `scripts/visual-treatment-parity.test.ts` compares placed Card geometry across both renderers._
+
 ## Artefact editing
 
 ### VIEW-020 — Selection and capabilities are discriminated by kind

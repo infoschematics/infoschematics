@@ -71,6 +71,20 @@ const values = (output: string, attribute: string) =>
 const regionPaths = (output: string) =>
   [...output.matchAll(/<path class="infoschematic-region-frame" d="([^"]+)"/g)].map((match) => match[1])
 
+const at = (output: string, pattern: RegExp) => [...output.matchAll(pattern)].map((match) => `${match[1]},${match[2]}`)
+
+/**
+ * Where each Card's text was placed. Both renderers take their positions from
+ * one calculation over the Card's own box, so the geometry is comparable and
+ * not only the treatment flags that used to be all this suite could compare.
+ */
+const cardText = (output: string) => ({
+  description: at(output, /class="infoschematic-card-description"[^>]*?x="([\d.-]+)" y="([\d.-]+)"/g),
+  identity: at(output, /class="infoschematic-card-identity"[\s\S]*?<rect[^>]*?x="([\d.-]+)" y="([\d.-]+)"/g),
+  label: at(output, /class="infoschematic-(?:service|card)-label"[^>]*?x="([\d.-]+)" y="([\d.-]+)"/g),
+  stereotype: at(output, /class="infoschematic-card-stereotype"[^>]*?x="([\d.-]+)" y="([\d.-]+)"/g)
+})
+
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
   dataInks: values(output, 'data-ink'),
@@ -207,6 +221,54 @@ describe('visual treatment renderer parity', () => {
     expect(values(canvas, 'data-label-treatment')).toEqual(['notched', 'plain', 'plain'])
     expect(canvas).not.toContain('>HIDDEN FRAME</text>')
     expect(svg).not.toContain('>HIDDEN FRAME</text>')
+  })
+
+  it("places Card internals from each Card's own box, identically in both renderers", () => {
+    const proportions = defineInfoschematic({
+      title: 'Card proportion reference',
+      infoschematic: {
+        appearance: { card: { compact: true, description: true, identity: true, stereotype: true } },
+        scopes: [
+          {
+            color: '#ff0055',
+            description: 'Controls applicability only',
+            fill: '#330011',
+            id: 'delivery-scope',
+            label: 'Delivery scope',
+            prefix: 'DEL'
+          }
+        ],
+        cards: (
+          [
+            ['LND-001', 'Landscape', { height: 80, width: 160, x: 20, y: 20 }],
+            ['SQR-001', 'Square', { height: 120, width: 120, x: 220, y: 20 }],
+            ['TAL-001', 'Tall', { height: 240, width: 90, x: 380, y: 20 }],
+            ['SML-001', 'Small', { height: 40, width: 40, x: 500, y: 20 }]
+          ] as const
+        ).map(([code, label, box]) => ({
+          code,
+          detail: `${label} proportions`,
+          id: code.toLowerCase(),
+          label,
+          placement: { box, ports: {} },
+          scope: 'delivery-scope',
+          scopes: ['delivery-scope'],
+          stereotype: 'service'
+        }))
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: proportions }))
+    const svg = renderInfoschematicSvg(proportions)
+
+    expect(cardText(canvas)).toEqual(cardText(svg))
+    expect(cardText(svg)).toEqual({
+      // The narrow Card drops the identity chip it would otherwise draw over its
+      // stereotype, and the smallest drops the whole band and its description.
+      description: ['10,56', '10,56', '10,56'],
+      identity: ['92.5,8', '52.5,8'],
+      label: ['10,38', '10,38', '10,38', '10,28'],
+      stereotype: ['10,18', '10,18', '10,18']
+    })
   })
 
   it('keeps the dots grid treatment equivalent across renderers', () => {

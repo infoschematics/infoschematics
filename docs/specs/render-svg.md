@@ -70,6 +70,12 @@ Authored `grid: 'dots'` MUST render a mark at each grid intersection, sized from
 
 _Verification: `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers._
 
+### SVG-012 — Card internals use the shared layout
+
+Static output MUST place Card label, description, stereotype, and identity text through View Model's Card layout rather than from constants of its own, and MUST draw those elements with a middle dominant baseline. An element the layout withholds — metadata a small Card has no room for — MUST NOT be emitted.
+
+_Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions._
+
 ## Dependency boundary
 
 `@infoschematics/render-svg` MUST NOT depend on React, React DOM, browser globals, or any interactive View package. Shared derivation belongs in View Model.

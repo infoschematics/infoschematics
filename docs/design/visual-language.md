@@ -94,6 +94,8 @@ The artefact depths are visually distinct:
 
 Standard Cards use a consistent shape language: a dark or translucent fill, a meaningful border, a modest corner radius and enough separation from Flows beneath them. Fabrics and Regions provide context without competing with Cards and Flows.
 
+That shape language holds across proportions rather than only at the landscape default. A Card is placed from its own box: its label centres on the box it has, and its optional metadata — the identity chip, the stereotype and the description — is offered only while the box has room for it, so a square or tall Card reads as a deliberate shape rather than a broken one. A Card too small for its metadata carries less, never text through its own border.
+
 Glow is a focused state cue. It should not become a general surface treatment, and a decorative status dot should not be added where it communicates no state.
 
 ## Typography
