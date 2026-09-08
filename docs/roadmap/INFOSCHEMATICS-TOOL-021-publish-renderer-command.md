@@ -7,7 +7,7 @@ horizon: future
 status: draft
 candidate: true
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-020]
+blocked_by: []
 baseline_ref: null
 ---
 
@@ -19,7 +19,7 @@ Let someone outside this repository render an Infoschematic definition to SVG fr
 
 `scripts/render-example.ts` already renders an authored definition to a standalone SVG with no browser or dev server. It is repository-internal by design: it renders from a fixed registry of imported example packages, so its only possible inputs are the three examples this repository happens to own.
 
-A published command would need to accept a definition the caller wrote. That input has to be a document rather than a module, which is why this item waits on [INFOSCHEMATICS-TOOL-020](INFOSCHEMATICS-TOOL-020-json-and-yaml-definitions.md): a `bin` shipped before the loader exists would either accept nothing useful or hard-code an unvalidated `JSON.parse` at its edge, and the input contract would then be difficult to change once published.
+A published command would need to accept a definition the caller wrote. That input has to be a document rather than a module, which is why this item waited on `INFOSCHEMATICS-TOOL-020`, now delivered and pruned: a `bin` shipped before the loader existed would either accept nothing useful or hard-code an unvalidated `JSON.parse` at its edge, and the input contract would then be difficult to change once published.
 
 ## Boundary
 
@@ -35,7 +35,7 @@ The intended pass will:
 - Reconcile the published command's argument handling with the repository's own `scripts/cli.ts` contract, deciding whether that contract is shared or deliberately duplicated at the package boundary.
 - Extend `scripts/release/pack-smoke.ts` to execute the published `bin` from the clean consumer, so the command is verified the way the library exports already are.
 
-Known dependency: [INFOSCHEMATICS-TOOL-020](INFOSCHEMATICS-TOOL-020-json-and-yaml-definitions.md) must land first, because the loader defines what the command can be asked to render.
+The loader this shaping rests on is in place: `INFOSCHEMATICS-TOOL-020` delivered it and has been accepted and pruned, so nothing outside this item now blocks the pass.
 
 ## Discussion
 
