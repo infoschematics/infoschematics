@@ -6,6 +6,7 @@ import {
   isDocsIndexPath,
   isExamplesIndexPath,
   isInfoschematicsExamplePath,
+  isPlaygroundPath,
   isSystemExamplePath,
   isVisualGuidePath
 } from './routes.ts'
@@ -23,6 +24,12 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
     const { VisualGuide } = await import('./VisualGuide.tsx')
     document.title = 'Visual guide · Infoschematics'
     return <VisualGuide />
+  }
+
+  if (isPlaygroundPath(pathname)) {
+    const { Playground } = await import('./Playground.tsx')
+    document.title = 'Playground · Infoschematics'
+    return <Playground />
   }
 
   if (isDocsIndexPath(pathname)) {

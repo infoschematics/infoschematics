@@ -28,6 +28,8 @@ The published JSON Schema MUST be projected from the same Zod schema through `z.
 
 The parse boundary is one function, `parseInfoschematic(text, options)`, which selects a parser by explicit format or by pathname extension, validates, and on success passes the value through `defineInfoschematic` so a document and a TypeScript literal arrive at the same normalised config. It MUST return a discriminated result rather than throwing: the caller at a file boundary wants to print a diagnostic, not catch an exception. Unparseable syntax, contract violations, and the normaliser's own referential checks MUST all be reported in that one shape.
 
+The boundary also admits TypeScript itself as a document format. `parseTypescriptDocument` reads a strict literal subset — comments, `import type` lines, exactly one exported object literal — as plain data and never executes anything; the parsed value flows through the same schema and `defineInfoschematic` pipeline as JSON and YAML. The grammar is part of this validation boundary rather than a compiler: anything the subset cannot express as a literal, including a `defineInfoschematic(...)` call, MUST be rejected with the same path-addressed diagnostic shape.
+
 `yaml` is chosen over `js-yaml` because its default `parse` constructs only plain data. It has no schema that instantiates arbitrary types, so there is no unsafe-load footgun to remember at an untrusted boundary.
 
 ## Consequences

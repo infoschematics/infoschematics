@@ -2,9 +2,10 @@ import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { parse as parseYaml } from 'yaml'
 import { defineInfoschematic } from './define.ts'
 import { infoschematicConfigSchema } from './schema.ts'
+import { parseTypescriptDocument } from './typescript-document.ts'
 
 /** Serialised document formats an Infoschematic can be authored in. */
-export type InfoschematicFormat = 'json' | 'yaml'
+export type InfoschematicFormat = 'json' | 'typescript' | 'yaml'
 
 /** One reason a document was rejected, addressed to whoever has to fix the document. */
 export type InfoschematicIssue = Readonly<{
@@ -28,6 +29,7 @@ export type ParseInfoschematicOptions = Readonly<{
 
 const extensions: Readonly<Record<string, InfoschematicFormat>> = {
   '.json': 'json',
+  '.ts': 'typescript',
   '.yaml': 'yaml',
   '.yml': 'yaml'
 }
@@ -61,7 +63,8 @@ export const formatInfoschematicIssue = ({ document, message, path }: Infoschema
   `${document ? `${document}:` : ''}${path || '<document>'} ${message}`
 
 /**
- * Turn an authored JSON or YAML document into a normalised Infoschematic.
+ * Turn an authored TypeScript, JSON, or YAML document into a normalised Infoschematic. TypeScript documents are read
+ * in the strict subset `parseTypescriptDocument` defines - matched as data, never executed.
  *
  * The result is discriminated rather than thrown, because the caller at a file boundary almost always wants to print a
  * diagnostic. Syntax errors, contract violations, and the normaliser's own referential checks all arrive in that one
@@ -77,11 +80,17 @@ export function parseInfoschematic(text: string, options: ParseInfoschematicOpti
   }
 
   let document: unknown
-  try {
-    document = format === 'json' ? JSON.parse(text) : parseYaml(text)
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    return failure(pathname, [{ message: `Malformed ${format.toUpperCase()}: ${message}`, path: '' }])
+  if (format === 'typescript') {
+    const parsed = parseTypescriptDocument(text)
+    if (!parsed.ok) return failure(pathname, parsed.issues)
+    document = parsed.value
+  } else {
+    try {
+      document = format === 'json' ? JSON.parse(text) : parseYaml(text)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return failure(pathname, [{ message: `Malformed ${format.toUpperCase()}: ${message}`, path: '' }])
+    }
   }
 
   const validated = infoschematicConfigSchema.safeParse(withoutEditorMetadata(document))

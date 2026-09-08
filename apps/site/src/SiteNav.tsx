@@ -1,8 +1,8 @@
-import { docsIndexPath, examplesIndexPath, visualGuidePath } from './routes.ts'
+import { docsIndexPath, examplesIndexPath, playgroundPath, visualGuidePath } from './routes.ts'
 
 const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
 
-export type SiteSection = 'docs' | 'examples' | 'visual-guide'
+export type SiteSection = 'docs' | 'examples' | 'playground' | 'visual-guide'
 
 export function BrandMark() {
   return (
@@ -31,6 +31,9 @@ export function SiteNav({ section }: { section?: SiteSection }) {
         </a>
         <a aria-current={section === 'examples' ? 'page' : undefined} href={examplesIndexPath}>
           Examples
+        </a>
+        <a aria-current={section === 'playground' ? 'page' : undefined} href={playgroundPath}>
+          Playground
         </a>
         <a href={repositoryUrl} rel="noreferrer" target="_blank">
           GitHub

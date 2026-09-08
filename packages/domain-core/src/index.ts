@@ -20,3 +20,8 @@ export {
   parseInfoschematic
 } from './parse.ts'
 export { infoschematicConfigSchema, type SchemaMirrorsContract } from './schema.ts'
+export {
+  parseTypescriptDocument,
+  type TypescriptDocumentIssue,
+  type TypescriptDocumentResult
+} from './typescript-document.ts'

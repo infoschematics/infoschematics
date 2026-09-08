@@ -7,6 +7,7 @@ import { formatParityDefinition } from './fixtures/format-parity.ts'
 import { isDocumentSubject, loadRenderable } from './render-example.ts'
 
 const fixture = (name: string) => fileURLToPath(new URL(`fixtures/${name}`, import.meta.url))
+const siteSeed = (name: string) => fileURLToPath(new URL(`../apps/site/src/playground/seeds/${name}`, import.meta.url))
 
 const renderDocument = async (name: string) => {
   const parsed = parseInfoschematic(await readFile(fixture(name), 'utf8'), { pathname: fixture(name) })
@@ -21,6 +22,26 @@ describe('document format parity', () => {
     expect(await renderDocument('format-parity.json')).toBe(typescript)
     expect(await renderDocument('format-parity.yaml')).toBe(typescript)
     expect(typescript).toContain('Source')
+  })
+
+  it('parses the TypeScript fixture as a document, not an import, to the same SVG', async () => {
+    const imported = renderInfoschematicSvg(defineInfoschematic(formatParityDefinition), { annotations: true })
+    expect(await renderDocument('format-parity.ts')).toBe(imported)
+  })
+
+  it('keeps the playground seed copies in step with the fixtures', async () => {
+    const expected = defineInfoschematic(formatParityDefinition)
+    const seeds = [
+      { format: 'typescript', name: 'format-parity.ts.txt' },
+      { format: 'json', name: 'format-parity.json' },
+      { format: 'yaml', name: 'format-parity.yaml' }
+    ] as const
+
+    for (const { format, name } of seeds) {
+      const parsed = parseInfoschematic(await readFile(siteSeed(name), 'utf8'), { format })
+      if (!parsed.ok) throw new Error(parsed.issues.map((issue) => `${issue.path} ${issue.message}`).join('\n'))
+      expect(parsed.config, name).toEqual(expected)
+    }
   })
 })
 

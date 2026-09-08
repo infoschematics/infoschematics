@@ -4,6 +4,7 @@ export const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
 export const visualGuidePath = '/docs/visual-guide/'
+export const playgroundPath = '/playground/'
 
 export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
 
@@ -72,7 +73,7 @@ const publishedDocuments = [
   {
     sourcePath: 'docs/specs/domain-core.md',
     title: 'Domain Core',
-    summary: 'Configuration normalisation and the JSON and YAML document boundary.',
+    summary: 'Configuration normalisation and the TypeScript, JSON and YAML document boundary.',
     section: 'specs'
   },
   {
@@ -141,6 +142,10 @@ export function isExamplesIndexPath(pathname: string) {
 
 export function isVisualGuidePath(pathname: string) {
   return pathname === visualGuidePath || pathname === visualGuidePath.slice(0, -1)
+}
+
+export function isPlaygroundPath(pathname: string) {
+  return pathname === playgroundPath || pathname === playgroundPath.slice(0, -1)
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {

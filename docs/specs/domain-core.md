@@ -1,6 +1,6 @@
 # Domain Core specification
 
-Domain Core turns an authored definition into a complete Infoschematic. It normalises a TypeScript literal that the compiler has already proved, and it validates a JSON or YAML document that nothing has proved. It calculates no geometry, renders no view, and holds no editing session.
+Domain Core turns an authored definition into a complete Infoschematic. It normalises a TypeScript literal that the compiler has already proved, and it validates an authored document — strict-subset TypeScript, JSON, or YAML — that nothing has proved. It calculates no geometry, renders no view, and holds no editing session.
 
 ## Normalisation
 
@@ -16,9 +16,11 @@ _Implementation surface: `packages/domain-core/src/define.ts`. Verification: `pa
 
 ### CORE-002 — TypeScript, JSON, and YAML are the supported formats
 
-An Infoschematic MAY be authored as a TypeScript module, a JSON document, or a YAML document. The three MUST produce the same normalised `InfoschematicConfig` and therefore the same rendered output. No other document format is supported; a pathname whose extension is not `.json`, `.yaml`, or `.yml` MUST be rejected rather than guessed at.
+An Infoschematic MAY be authored as a TypeScript module, a JSON document, or a YAML document. The three MUST produce the same normalised `InfoschematicConfig` and therefore the same rendered output. No other document format is supported; a pathname whose extension is not `.ts`, `.json`, `.yaml`, or `.yml` MUST be rejected rather than guessed at.
 
-_Implementation surface: `packages/domain-core/src/parse.ts`. Verification: `scripts/format-parity.test.ts` renders the same definition authored three ways and asserts byte-identical SVG._
+A TypeScript document is read as data in a strict literal subset and MUST never be executed. The subset admits comments, `import type` lines, and exactly one exported definition — `export const <name> = <object literal>` or `export default <object literal>` — whose values are strings, plain decimal numbers, booleans, arrays, and nested object literals with identifier or string keys, trailing commas included. Everything else — identifiers as values, call expressions, template literals, spreads, computed keys, `satisfies` — MUST be rejected with a path-addressed diagnostic. A definition module in this subset therefore loads identically whether imported by the compiler or parsed as a document.
+
+_Implementation surface: `packages/domain-core/src/parse.ts` and `packages/domain-core/src/typescript-document.ts`. Verification: `scripts/format-parity.test.ts` renders the same definition authored three ways and asserts byte-identical SVG, including the `.ts` form parsed as a document; `packages/domain-core/src/typescript-document.test.ts` covers the subset's accept and reject grammar._
 
 ### CORE-003 — The schema mirrors the contract and cannot drift from it
 

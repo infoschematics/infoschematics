@@ -128,9 +128,9 @@ The Library provides Card, Fabric and Flow starting points. Each insertion deep-
 
 Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
 
-## Author as JSON or YAML
+## Author as a document: TypeScript, JSON, or YAML
 
-The same definition can be a JSON or YAML document instead of a TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically.
+The same definition can be a document instead of a compiled TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically. A `.ts` document is read in a strict TypeScript subset — comments, `import type` lines, and one exported object literal of strings, numbers, booleans, arrays, and nested objects — matched as data and never executed, so a definition module written in that subset loads without compiling. Try all three forms live in the [playground](/playground/) on the website.
 
 ```ts
 import { readFile } from 'node:fs/promises'
@@ -143,7 +143,7 @@ if (!parsed.ok) throw new Error(parsed.issues.map(formatInfoschematicIssue).join
 const config = parsed.config
 ```
 
-The format is taken from the pathname's extension — `.json`, `.yaml`, or `.yml` — or stated outright with `{ format: 'yaml' }`. Rejection is a result rather than an exception, because at a file boundary you almost always want to print the fault rather than catch it. Every fault arrives in one shape: a dotted path such as `infoschematic.cards.2.placement`, a message, and the document pathname when you supplied one. Unparseable syntax, a wrong type, a missing field, and a Card naming a Domain that does not exist all report the same way.
+The format is taken from the pathname's extension — `.ts`, `.json`, `.yaml`, or `.yml` — or stated outright with `{ format: 'yaml' }`. Rejection is a result rather than an exception, because at a file boundary you almost always want to print the fault rather than catch it. Every fault arrives in one shape: a dotted path such as `infoschematic.cards.2.placement`, a message, and the document pathname when you supplied one. Unparseable syntax, a wrong type, a missing field, and a Card naming a Domain that does not exist all report the same way.
 
 Validation is strict about keys. A misspelt `subtitel` is a reported fault, not a silently dropped field, because a dropped field renders a subtly wrong Infoschematic rather than an obvious one.
 
