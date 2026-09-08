@@ -8,18 +8,15 @@ One serialisable definition drives consistent outputs: static renderings for doc
 
 ## What appears in an Infoschematic
 
-An Infoschematic comprises six diagrammatic element types: Regions, Fabrics, Cards, Flows, Points, and Graphics. Scenes can focus or reveal parts of that diagram, while Themes and Stories can arrange those Scenes for explanation and presentation.
+An Infoschematic comprises five visual element types: Regions, Fabrics, Cards, Flows, and Overlays. Scenes can focus or reveal parts of that diagram, while Themes and Stories can arrange those Scenes for explanation and presentation.
 
-The diagram has six visible artefact kinds:
+The diagram has five visual element types:
 
 - **Region** establishes background geography with a labelled box, optional fill, and optional frame.
 - **Fabric** is a connectable midground plane or backdrop.
-- **Card** is a placed foreground component. A Standard Card stands alone; an Adapter Card wraps another Card.
+- **Card** is a placed foreground component.
 - **Flow** connects Cards and Fabrics through authored endpoints and route geometry.
-- **Point** is a labelled junction or anchor placed directly on the diagram.
-- **Graphic** is a renderer-selected overlay, commonly revealed by a Scene.
-
-[Scope](/docs/reference/vocabulary/#scope), [Domain](/docs/reference/vocabulary/#domain), and [Flow Family](/docs/reference/vocabulary/#flow-family) are independent groupings. They classify visibility, concern, and movement respectively; they are not additional shapes.
+- **Overlay** is a renderer-selected visual, commonly revealed by a Scene.
 
 The [visual guide](/docs/visual-guide/) shows this anatomy in one diagram and lets you try every authored appearance treatment.
 
