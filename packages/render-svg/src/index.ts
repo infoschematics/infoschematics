@@ -75,10 +75,13 @@ const line = (depth: number, name: string, values: Attributes, content?: string)
   return content === undefined ? `${opening} />` : `${opening}>${content}</${name}>`
 }
 
-const group = (depth: number, values: Attributes, children: readonly string[]) => {
+const container = (depth: number, name: string, values: Attributes, children: readonly string[]) => {
   const indentation = '  '.repeat(depth)
-  return [`${indentation}<g${attributes(values)}>`, ...children, `${indentation}</g>`]
+  return [`${indentation}<${name}${attributes(values)}>`, ...children, `${indentation}</${name}>`]
 }
+
+const group = (depth: number, values: Attributes, children: readonly string[]) =>
+  container(depth, 'g', values, children)
 
 const focusOf = (focus: FocusConfig | undefined, graphic?: string): ResolvedFocus => ({
   artefacts: new Set(focus?.artefacts ?? []),
@@ -235,21 +238,26 @@ export const renderInfoschematicSvg = (
   )
 
   if (flows.length > 0) {
+    /* A `marker` element, not a `g`: `marker-end` resolves nothing else, so a
+       group here defines an arrowhead that is referenced and never drawn. The
+       geometry matches the Canvas exactly — both are user-space triangles on a
+       four-unit route, so the same Flow cannot arrive blunt in one renderer. */
     const markers = [...families.values()].map(({ family, index }) =>
-      group(
+      container(
         3,
+        'marker',
         [
           ['id', `infoschematic-arrow-${index}`],
-          ['markerHeight', 16],
+          ['markerHeight', 32],
           ['markerUnits', 'userSpaceOnUse'],
-          ['markerWidth', 16],
+          ['markerWidth', 32],
           ['orient', 'auto-start-reverse'],
-          ['refX', 12],
-          ['refY', 6]
+          ['refX', 24],
+          ['refY', 12]
         ],
         [
           line(4, 'path', [
-            ['d', 'M0 0 L0 12 L12 6 z'],
+            ['d', 'M0 0 L0 24 L24 12 z'],
             ['fill', family.color]
           ])
         ]

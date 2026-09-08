@@ -331,6 +331,68 @@ describe('visual treatment renderer parity', () => {
     })
   })
 
+  it('arms a Flow with the same arrowhead in both renderers', () => {
+    const routed = defineInfoschematic({
+      title: 'Arrowhead reference',
+      infoschematic: {
+        scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
+        flowFamilies: [{ color: '#79c9ff', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
+        cards: [
+          {
+            code: 'ONE-001',
+            detail: 'Source node',
+            id: 'source',
+            label: 'Source',
+            placement: { box: { height: 60, width: 120, x: 20, y: 20 }, ports: { east: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          },
+          {
+            code: 'ONE-002',
+            detail: 'Target node',
+            id: 'target',
+            label: 'Target',
+            placement: { box: { height: 60, width: 120, x: 220, y: 20 }, ports: { west: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        flows: [
+          {
+            code: 'CALL-001',
+            family: 'calls',
+            id: 'call',
+            points: [
+              { x: 140, y: 50 },
+              { x: 220, y: 50 }
+            ],
+            source: 'source',
+            sourcePort: 'E1',
+            target: 'target',
+            targetPort: 'W1'
+          }
+        ]
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: routed }))
+    const svg = renderInfoschematicSvg(routed)
+
+    // `marker-end` resolves a `marker` element and nothing else, so emitting a
+    // `g` here defines an arrowhead that is referenced and never drawn — a Flow
+    // that arrives blunt while every structural assertion still passes. Both
+    // renderers state the same user-space triangle on the same four-unit route.
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain('<marker')
+      expect(markup).toContain('markerUnits="userSpaceOnUse"')
+      expect(markup).toContain('markerWidth="32"')
+      expect(markup).toContain('markerHeight="32"')
+      expect(markup).toContain('refX="24"')
+      expect(markup).toContain('refY="12"')
+      expect(markup).toMatch(/M0[ ,]0 L0[ ,]24 L24[ ,]12 z/)
+      expect(markup).toMatch(/marker-end="url\(#infoschematic-arrow-[^"]+\)"|markerEnd/)
+    }
+  })
+
   it('keeps the dots grid treatment equivalent across renderers', () => {
     const dotted = defineInfoschematic({
       title: 'Dotted grid reference',
