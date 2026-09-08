@@ -128,6 +128,10 @@ Worth noting for whoever reads the rules next: the header comment in `.dependenc
 
 Delivered under INFOSCHEMATICS-TOOL-025: workspace-import resolution, package-root rule anchoring, four new rules and one tightened one, `scripts/` in the cruise, a boundary test that proves the checker is closed, one genuine breach repaired, and the architecture guide updated. Verified by `bun run self:check` (396 tests, clean cruise over 330 modules). Outstanding: the `validate: true` requirement in programmatic cruises, and the `types` condition / `.d.ts` exemption pair, both recorded above. Proposed learning route: none outside this record — the durable statements already live in the architecture guide and the configuration's own header comment.
 
+## Done
+
+Accepted 2026-09-08 by Kris Brown on review of the packet above.
+
 ## Discussion
 
 ### Why not simply trust the review

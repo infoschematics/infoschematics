@@ -131,6 +131,10 @@ Verification is `bun run self:check` at exit 0 with 390 tests, of which 10 are n
 
 Four concerns are open: opt-in treatments shift by a few pixels as the renderers converge, fit is decided from an estimated text width, nothing tells an author why metadata vanished as they resized, and the Canvas still wraps labels where static output does not. True silhouette variety remains unshaped, and this change adds no authored field that would constrain it.
 
+## Done
+
+Accepted 2026-09-08 by Kris Brown on review of the packet above.
+
 ## Discussion
 
 ### Why not just document the existing resize freedom

@@ -125,6 +125,10 @@ Verification is `bun run self:check` at exit 0 with 394 tests, 4 of them new, co
 
 Open for review: a narrow Card now shows a truncated stereotype where SITE-005 dropped it, the character advances remain shared estimates rather than metrics, and an unbroken token is truncated rather than broken.
 
+## Done
+
+Accepted 2026-09-08 by Kris Brown on review of the packet above.
+
 ## Discussion
 
 ### Why not measure the text properly

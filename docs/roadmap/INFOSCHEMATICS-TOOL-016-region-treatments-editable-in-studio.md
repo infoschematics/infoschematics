@@ -125,6 +125,10 @@ Verification is `bun run self:check` at exit 0 with 380 tests, of which 15 are n
 
 Three concerns are open for review: the blur commit is not exercised in a driven DOM, fill remains unvalidated free text, and a cleared choice shows `Default` without naming the default it restores. `RegionConfig`, both renderers and the treatment vocabulary are unchanged, so INFOSCHEMATICS-TOOL-018 remains free to extend them.
 
+## Done
+
+Accepted 2026-09-08 by Kris Brown on review of the packet above.
+
 ## Discussion
 
 Confirm the control shapes and round-trip expectations before selecting implementation.

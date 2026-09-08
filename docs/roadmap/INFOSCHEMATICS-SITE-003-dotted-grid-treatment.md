@@ -106,6 +106,10 @@ The change stays inside the contract-first shape SITE-002 established: the domai
 
 Delivered `INFOSCHEMATICS-SITE-003` end to end in one pass: domain type, both renderers, parity and unit test coverage, and the two documented spec/guide updates, all verified clean by `bun run check`. No blockers encountered.
 
+## Done
+
+Accepted 2026-09-08 by Kris Brown on review of the packet above.
+
 ## Discussion
 
 ### Contract shape
