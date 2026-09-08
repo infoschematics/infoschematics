@@ -17,12 +17,12 @@ export function App() {
           <div className="hero__headline">
             <p className="eyebrow">A visual instrument for complex systems</p>
             <h1 id="hero-title">
-              See how it <span>fits together.</span>
+              See how it <span>works together.</span>
             </h1>
           </div>
           <p className="hero__lede">
-            Infoschematic turns architecture, movement and meaning into one calm, explorable view. The full experience
-            is being assembled.
+            An Infoschematic turns a system&rsquo;s architecture and the flows that move through it into one live,
+            explorable view &mdash; precise enough for the engineer, clear enough to present to anyone.
           </p>
         </div>
 

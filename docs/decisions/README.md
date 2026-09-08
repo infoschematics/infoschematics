@@ -22,3 +22,4 @@ Decision records explain why Infoschematics is shaped as it is. They state the c
 18. [ADR-INFOSCHEMATICS-012](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) — Flow signals are host- or Scene-owned runtime occurrences with deterministic accessible fallbacks.
 19. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — the root build tsconfig is a shared base file, not the standard's per-workspace shape marker.
 20. [ADR-INFOSCHEMATICS-013](ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md) — a Zod schema in Domain Core mirrors the dependency-free contract under a compile-time parity assertion, and is the single source of both document validation and the published JSON Schema.
+21. [PDR-INFOSCHEMATICS-004](PDR-INFOSCHEMATICS-004-product-messaging.md) — one canonical set of messaging lines and tone rules governs every surface that describes the product.
