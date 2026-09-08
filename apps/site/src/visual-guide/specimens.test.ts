@@ -13,6 +13,11 @@ describe('visual guide specimens', () => {
     expect(definition.graphics).toHaveLength(1)
   })
 
+  it('opens the guide on the blueprint treatment rather than the bare fallback', () => {
+    expect(anatomySpecimen.infoschematic.appearance?.surface).toBe('blueprint')
+    expect(anatomySpecimen.infoschematic.appearance?.grid).toBe('major-plus-minor')
+  })
+
   it.each(guideAppearanceOptionKeys)('round-trips the %s guide control', (key) => {
     const descriptor = guideAppearanceOptions[key]
     const value =

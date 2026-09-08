@@ -1,6 +1,7 @@
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { Canvas } from '@infoschematics/view-canvas'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -342,5 +343,17 @@ describe('visual treatment renderer parity', () => {
     expect(values(canvas, 'data-grid-treatment')).toEqual(['dots'])
     expect(canvas).toContain('fill="url(#infoschematic-grid-dots)"')
     expect(svg).toContain('fill="url(#infoschematic-grid-dots)"')
+
+    // Both renderers must tile the dots on the major pitch, and centre each dot
+    // in its tile so the edge does not clip it to a quarter. Either renderer
+    // drifting to the minor pitch turns a lattice of marks into a dense screen.
+    const { gridMajorSize } = visualTokens.canvas.geometry
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain(`height="${gridMajorSize}"`)
+      expect(markup).toContain(`x="${-gridMajorSize / 2}"`)
+      expect(markup).toContain(`y="${-gridMajorSize / 2}"`)
+      expect(markup).toContain(`cx="${gridMajorSize / 2}"`)
+      expect(markup).toContain(`cy="${gridMajorSize / 2}"`)
+    }
   })
 })

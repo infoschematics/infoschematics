@@ -1294,15 +1294,24 @@ export function InfoschematicDiagram({
             d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
           />
         </pattern>
+        {/* A dot marks each major intersection, so the same lattice the major
+            lines would draw is implied by its corners alone. The tile is offset
+            by half its width and the dot sits at its centre: a dot authored at
+            the tile's corner would be clipped to a quarter by the tile edge. */}
         <pattern
-          height={gridSize}
+          height={gridMajorSize}
           id="infoschematic-grid-dots"
           patternUnits="userSpaceOnUse"
-          width={gridSize}
-          x="0"
-          y="0"
+          width={gridMajorSize}
+          x={-gridMajorSize / 2}
+          y={-gridMajorSize / 2}
         >
-          <circle className="infoschematic-grid-dot" cx="0" cy="0" r={gridMinorStrokeWidth * 3} />
+          <circle
+            className="infoschematic-grid-dot"
+            cx={gridMajorSize / 2}
+            cy={gridMajorSize / 2}
+            r={gridMinorStrokeWidth * 3}
+          />
         </pattern>
         {Definitions ? <Definitions /> : null}
         {infoschematicFamilies.map((family) => (

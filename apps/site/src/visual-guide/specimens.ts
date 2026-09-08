@@ -11,9 +11,12 @@ const baseDefinition = () =>
     subtitle: 'A small system showing the visible parts of an Infoschematic.',
     infoschematic: {
       viewBox,
+      // Blueprint with a full grid is the treatment the authored examples reach
+      // for, so the guide opens on what the renderers can actually do rather
+      // than on the bare neutral surface a definition falls back to.
       appearance: {
-        surface: 'neutral',
-        grid: 'none',
+        surface: 'blueprint',
+        grid: 'major-plus-minor',
         card: { compact: false, description: true, identity: true, stereotype: true }
       },
       scopes: [

@@ -227,6 +227,50 @@ describe('renderInfoschematicSvg', () => {
     expect(overridden).toContain('data-compact="true"')
   })
 
+  it('paints the midground from the blueprint palette rather than the neutral output set', () => {
+    const { output, surfaces } = visualTokens.canvas
+    const empty = blank('Midground palette')
+    const withFabric: InfoschematicConfig = {
+      ...empty,
+      infoschematic: {
+        ...empty.infoschematic,
+        scopes: [{ color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' }],
+        fabrics: [
+          {
+            code: 'FAB-01',
+            detail: 'Connectable midground',
+            id: 'fabric',
+            label: 'Event fabric',
+            placement: { box: { height: 40, width: 100, x: 10, y: 10 }, ports: {} },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        graphics: [{ id: 'note', label: 'Note', placement: { height: 20, width: 60, x: 10, y: 55 }, renderer: 'note' }]
+      }
+    }
+    const asBlueprint: InfoschematicConfig = {
+      ...withFabric,
+      infoschematic: { ...withFabric.infoschematic, appearance: { surface: 'blueprint' } }
+    }
+
+    const blueprint = renderInfoschematicSvg(asBlueprint, { visibility: { graphics: 'all' } })
+    const neutral = renderInfoschematicSvg(withFabric, { visibility: { graphics: 'all' } })
+
+    // The Canvas draws blueprint natively, so a Fabric or Graphic left on the
+    // light output set here is a white slab on a dark backdrop in this renderer
+    // alone. Neutral keeps that same output set unchanged.
+    expect(blueprint).toContain(`fill="${surfaces.fabricFill}"`)
+    expect(blueprint).toContain(`stroke="${surfaces.fabricStroke}"`)
+    expect(blueprint).toContain(`fill="${surfaces.graphicFallbackFill}"`)
+    expect(blueprint).toContain(`stroke="${surfaces.graphicFallbackStroke}"`)
+    expect(blueprint).not.toContain(`fill="${output.surface}"`)
+    expect(blueprint).not.toContain(`fill="${output.graphicFill}"`)
+    expect(neutral).toContain(`fill="${output.surface}"`)
+    expect(neutral).toContain(`fill="${output.graphicFill}"`)
+    expect(neutral).not.toContain(`fill="${surfaces.fabricFill}"`)
+  })
+
   it('renders the dots grid treatment as a point pattern at each grid intersection', () => {
     const config: InfoschematicConfig = {
       ...representative,

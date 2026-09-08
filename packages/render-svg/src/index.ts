@@ -161,8 +161,19 @@ export const renderInfoschematicSvg = (
   const viewBox = definition.viewBox
   const visualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
   const signalledFlows = new Set(options.signals ?? [])
-  const backdrop =
-    visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop
+  /* The interactive Canvas draws the blueprint palette natively and overrides
+     only what neutral changes, so this renderer has to pick the same side for
+     every surface-sensitive token. Anything left on the `output` set alone
+     paints a light slab onto the blueprint backdrop. */
+  const blueprint = visualTreatment.surface === 'blueprint'
+  const backdrop = blueprint ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop
+  const fabricFill = blueprint ? canvasTokens.surfaces.fabricFill : canvasTokens.output.surface
+  const fabricStroke = blueprint ? canvasTokens.surfaces.fabricStroke : canvasTokens.output.stroke
+  const fabricText = blueprint ? canvasTokens.text.fabric : canvasTokens.output.text
+  const graphicFill = blueprint ? canvasTokens.surfaces.graphicFallbackFill : canvasTokens.output.graphicFill
+  const graphicStroke = blueprint ? canvasTokens.surfaces.graphicFallbackStroke : canvasTokens.output.stroke
+  const graphicText = blueprint ? canvasTokens.text.muted : canvasTokens.output.textMuted
+  const regionStroke = blueprint ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
   const visibleScopes = new Set(options.visibility?.scopes ?? definition.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
   const graphicVisibility = options.visibility?.graphics ?? 'scene'
@@ -248,21 +259,26 @@ export const renderInfoschematicSvg = (
   }
 
   if (visualTreatment.grid !== 'none') {
-    const gridStroke =
-      visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
+    const gridStroke = regionStroke
     const patternId = `infoschematic-grid-${visualTreatment.grid}`
     const defs: string[] =
       visualTreatment.grid === 'dots'
-        ? [
+        ? // A dot marks each major intersection, so the same lattice the major
+          // lines would draw is implied by its corners alone. The tile is offset
+          // by half its width and the dot sits at its centre: a dot authored at
+          // the tile's corner would be clipped to a quarter by the tile edge.
+          [
             `    <pattern${attributes([
-              ['height', canvasTokens.geometry.gridSize],
+              ['height', canvasTokens.geometry.gridMajorSize],
               ['id', patternId],
               ['patternUnits', 'userSpaceOnUse'],
-              ['width', canvasTokens.geometry.gridSize]
+              ['width', canvasTokens.geometry.gridMajorSize],
+              ['x', -canvasTokens.geometry.gridMajorSize / 2],
+              ['y', -canvasTokens.geometry.gridMajorSize / 2]
             ])}>`,
             line(3, 'circle', [
-              ['cx', 0],
-              ['cy', 0],
+              ['cx', canvasTokens.geometry.gridMajorSize / 2],
+              ['cy', canvasTokens.geometry.gridMajorSize / 2],
               ['fill', gridStroke],
               ['r', canvasTokens.geometry.gridMinorStrokeWidth * 3]
             ]),
@@ -355,7 +371,7 @@ export const renderInfoschematicSvg = (
           ['class', 'infoschematic-region-frame'],
           ['d', geometry.outline],
           ['fill', 'none'],
-          ['stroke', canvasTokens.output.regionStroke],
+          ['stroke', regionStroke],
           [
             'stroke-dasharray',
             treatment.frame === 'dashed'
@@ -421,10 +437,10 @@ export const renderInfoschematicSvg = (
     const content = [
       line(2, 'title', [], xmlText(`${fabric.code}: ${fabric.label} · ${fabric.detail}`)),
       line(2, 'rect', [
-        ['fill', canvasTokens.output.surface],
+        ['fill', fabricFill],
         ['height', box.height],
         ['rx', canvasTokens.geometry.cornerRadius],
-        ['stroke', canvasTokens.output.stroke],
+        ['stroke', fabricStroke],
         ['width', box.width],
         ['x', box.x],
         ['y', box.y]
@@ -433,7 +449,7 @@ export const renderInfoschematicSvg = (
         2,
         'text',
         [
-          ['fill', canvasTokens.output.text],
+          ['fill', fabricText],
           ['font-family', canvasTokens.output.fontFamily],
           ['font-size', canvasTokens.output.componentFontSize],
           ['text-anchor', 'middle'],
@@ -460,8 +476,7 @@ export const renderInfoschematicSvg = (
     )
   }
 
-  const flowPipe =
-    visualTreatment.surface === 'blueprint' ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
+  const flowPipe = blueprint ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
@@ -765,9 +780,9 @@ export const renderInfoschematicSvg = (
         ],
         [
           line(2, 'rect', [
-            ['fill', canvasTokens.output.graphicFill],
+            ['fill', graphicFill],
             ['height', box.height],
-            ['stroke', canvasTokens.output.stroke],
+            ['stroke', graphicStroke],
             ['stroke-dasharray', '6 4'],
             ['width', box.width],
             ['x', box.x],
@@ -778,7 +793,7 @@ export const renderInfoschematicSvg = (
             'text',
             [
               ['dominant-baseline', 'middle'],
-              ['fill', canvasTokens.output.textMuted],
+              ['fill', graphicText],
               ['font-family', canvasTokens.output.fontFamily],
               ['font-size', canvasTokens.output.metadataFontSize],
               ['text-anchor', 'middle'],
