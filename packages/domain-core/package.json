@@ -3,7 +3,9 @@
   "description": "Framework-neutral Infoschematic domain behaviour and configuration normalisation.",
   "version": "0.1.0",
   "dependencies": {
-    "@infoschematics/domain-model": "0.1.0"
+    "@infoschematics/domain-model": "0.1.0",
+    "yaml": "^2.9.0",
+    "zod": "^4.5.4"
   },
   "engines": {
     "node": ">=22"

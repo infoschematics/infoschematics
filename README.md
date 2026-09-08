@@ -35,7 +35,7 @@ export function InfoschematicPage() {
 }
 ```
 
-A title-only definition renders a blank canvas safely. See [the authoring guide](docs/guides/authoring.md) and [the React integration guide](docs/guides/react-integration.md) for the complete ownership boundary.
+A title-only definition renders a blank canvas safely. An Infoschematic can equally be authored as a JSON or YAML document and loaded with `parseInfoschematic`, which validates it against the same contract and reports faults by path. See [the authoring guide](docs/guides/authoring.md) and [the React integration guide](docs/guides/react-integration.md) for the complete ownership boundary.
 
 ## Package direction
 
@@ -70,10 +70,11 @@ Each script under `scripts/` is a self-describing command as well as a `bun run`
 ```bash
 ./scripts/render-example.ts --all --png
 ./scripts/generate-visual-tokens.ts --check
+./scripts/generate-schema.ts --check
 ./scripts/release/pack-smoke.ts --keep-temp
 ```
 
-`self:examples:render` writes an authored example to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
+`self:examples:render` writes an authored example, or any JSON or YAML document, to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
 
 Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
 

@@ -5,6 +5,7 @@ These specifications define the reusable contracts owned by Infoschematics. They
 ## Specification map
 
 - [Domain Model](domain-model.md) defines authored identity, data, geography and relationship rules.
+- [Domain Core](domain-core.md) defines configuration normalisation and the JSON and YAML document boundary.
 - [View Model](view-model.md) defines geometry, routes, ports, guides and placement calculations.
 - [Canvas View](view-canvas.md) defines the interactive surface, host renderer registry, validation, diagnostics, and fallbacks.
 - [Present View](view-present.md) defines audience-facing filtering, Scene focus, Story playback and presentation controls.

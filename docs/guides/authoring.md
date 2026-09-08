@@ -128,6 +128,39 @@ The Library provides Card, Fabric and Flow starting points. Each insertion deep-
 
 Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
 
+## Author as JSON or YAML
+
+The same definition can be a JSON or YAML document instead of a TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically.
+
+```ts
+import { readFile } from 'node:fs/promises'
+import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
+
+const pathname = 'infoschematic.yaml'
+const parsed = parseInfoschematic(await readFile(pathname, 'utf8'), { pathname })
+if (!parsed.ok) throw new Error(parsed.issues.map(formatInfoschematicIssue).join('\n'))
+
+const config = parsed.config
+```
+
+The format is taken from the pathname's extension — `.json`, `.yaml`, or `.yml` — or stated outright with `{ format: 'yaml' }`. Rejection is a result rather than an exception, because at a file boundary you almost always want to print the fault rather than catch it. Every fault arrives in one shape: a dotted path such as `infoschematic.cards.2.placement`, a message, and the document pathname when you supplied one. Unparseable syntax, a wrong type, a missing field, and a Card naming a Domain that does not exist all report the same way.
+
+Validation is strict about keys. A misspelt `subtitel` is a reported fault, not a silently dropped field, because a dropped field renders a subtly wrong Infoschematic rather than an obvious one.
+
+Point an editor at the committed schema, `packages/domain-core/schema/infoschematic.schema.json`, for completion and inline errors. It is generated from the same schema the loader validates with, so the two cannot disagree.
+
+```jsonc
+// infoschematic.json
+{ "$schema": "../packages/domain-core/schema/infoschematic.schema.json", "title": "My Infoschematic" }
+```
+
+```yaml
+# yaml-language-server: $schema=../packages/domain-core/schema/infoschematic.schema.json
+title: My Infoschematic
+```
+
+The `$schema` key is editor metadata; the loader removes it before validating. The schema is a repository file rather than a published package export, so a document outside this repository points at a copy or a checkout. `bun run self:examples:render infoschematic.yaml` renders a document straight to SVG. TypeScript authoring keeps its compile-time guarantee and remains the right choice for a definition that lives in a package.
+
 ## Keep configuration portable
 
 - Export one complete value created by `defineInfoschematic`.

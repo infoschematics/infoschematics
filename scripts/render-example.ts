@@ -1,7 +1,13 @@
 #!/usr/bin/env bun
 import { spawnSync } from 'node:child_process'
-import { mkdir, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { basename, dirname, extname, resolve } from 'node:path'
+import {
+  formatInfoschematicIssue,
+  infoschematicFormatExtensions,
+  infoschematicFormatOf,
+  parseInfoschematic
+} from '@infoschematics/domain-core'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { blankInfoschematic } from '@infoschematics/is-blank'
 import { infoschematicsExample } from '@infoschematics/is-infoschematics'
@@ -14,6 +20,28 @@ export const renderableExamples: Readonly<Record<string, InfoschematicConfig>> =
   blank: blankInfoschematic,
   infoschematics: infoschematicsExample,
   system: systemExample
+}
+
+const known = (subject: string) =>
+  `Choose a registered example (${Object.keys(renderableExamples).join(', ')}) or a document pathname ending in ${infoschematicFormatExtensions.join(', ')}. Received ${subject}.`
+
+/** True when an operand names a document to load rather than a registered example. */
+export const isDocumentSubject = (subject: string): boolean =>
+  !(subject in renderableExamples) && extname(subject).length > 0
+
+/** Load one subject, whether it names a registered example or an authored JSON or YAML document. */
+export async function loadRenderable(subject: string): Promise<InfoschematicConfig> {
+  const registered = renderableExamples[subject]
+  if (registered) return registered
+  if (!isDocumentSubject(subject)) throw new Error(`Unknown example ${subject}. ${known(subject)}`)
+  if (!infoschematicFormatOf(subject)) throw new Error(`Unsupported document format. ${known(subject)}`)
+
+  const text = await readFile(resolve(subject), 'utf8')
+  const parsed = parseInfoschematic(text, { pathname: subject })
+  if (parsed.ok) return parsed.config
+  throw new Error(
+    [`${subject} is not a valid Infoschematic:`, ...parsed.issues.map(formatInfoschematicIssue)].join('\n')
+  )
 }
 
 export type RenderExampleOptions = Readonly<{
@@ -44,14 +72,12 @@ const rasterise = (svgPath: string, pngPath: string, width: number) => {
   }
 }
 
-/** Render one authored example to a standalone SVG file, optionally rasterising it. */
+/** Render one authored example or document to a standalone SVG file, optionally rasterising it. */
 export async function renderExample(example: string, options: RenderExampleOptions = {}): Promise<RenderExampleResult> {
-  const config = renderableExamples[example]
-  if (!config) {
-    throw new Error(`Unknown example ${example}. Choose one of: ${Object.keys(renderableExamples).join(', ')}.`)
-  }
+  const config = await loadRenderable(example)
+  const stem = isDocumentSubject(example) ? basename(example, extname(example)) : example
 
-  const svgPath = resolve(options.out ?? `reports/${example}.svg`)
+  const svgPath = resolve(options.out ?? `reports/${stem}.svg`)
   await mkdir(dirname(svgPath), { recursive: true })
   await writeFile(svgPath, renderInfoschematicSvg(config, { annotations: options.annotations ?? false }))
 
@@ -68,19 +94,18 @@ export async function renderExample(example: string, options: RenderExampleOptio
 }
 
 export const spec: CliSpec = {
-  describe:
-    'Render an authored Infoschematic example to a standalone SVG, so a diagram can be reviewed without a browser.',
+  describe: 'Render an authored Infoschematic to a standalone SVG, so a diagram can be reviewed without a browser.',
   flags: {
     all: { describe: 'Render every example.', kind: 'boolean' },
     annotations: { describe: "Emit each visible Flow's code chip.", kind: 'boolean' },
     json: { describe: 'Report results as JSON.', kind: 'boolean' },
-    out: { describe: 'Output SVG pathname. Defaults to reports/<example>.svg.', kind: 'string', value: 'path' },
+    out: { describe: 'Output SVG pathname. Defaults to reports/<subject>.svg.', kind: 'string', value: 'path' },
     png: { describe: 'Also rasterise beside the SVG (needs rsvg-convert).', kind: 'boolean' },
     width: { describe: 'Rasterised width in pixels. Defaults to 1400.', kind: 'number', value: 'n' }
   },
   operands: {
-    describe: `example to render, one of ${Object.keys(renderableExamples).join(', ')}. Defaults to infoschematics.`,
-    name: 'example'
+    describe: `registered example (${Object.keys(renderableExamples).join(', ')}) or a document pathname ending in ${infoschematicFormatExtensions.join(', ')}. Defaults to infoschematics.`,
+    name: 'subject'
   },
   run: 'self:examples:render',
   script: 'scripts/render-example.ts'
@@ -95,17 +120,19 @@ if (isDirectInvocation(import.meta.url)) {
       width: parsed.number('width')
     }
 
-    const unknown = parsed.operands.filter((example) => !(example in renderableExamples))
-    if (unknown.length > 0) {
-      throw new CliUsageError(
-        `Unknown example ${unknown.join(', ')}. Choose one of: ${Object.keys(renderableExamples).join(', ')}.`
-      )
+    const unknown = parsed.operands.filter(
+      (subject) => !(subject in renderableExamples) && !infoschematicFormatOf(subject)
+    )
+    if (unknown.length > 0) throw new CliUsageError(known(unknown.join(', ')))
+
+    if (parsed.boolean('all') && parsed.operands.length > 0) {
+      throw new CliUsageError('--all renders every registered example; drop the operands.')
     }
 
     const selected = parsed.boolean('all') ? Object.keys(renderableExamples) : parsed.operands
     const examples = selected.length > 0 ? selected : ['infoschematics']
     if (examples.length > 1 && options.out) {
-      throw new CliUsageError('--out renders one example; drop it to render several.')
+      throw new CliUsageError('--out renders one subject; drop it to render several.')
     }
 
     const results: RenderExampleResult[] = []
