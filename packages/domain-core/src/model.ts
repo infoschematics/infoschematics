@@ -236,7 +236,12 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
             placement: region.labelPlacement
           }
         },
-        bounds: region.box,
+        bounds: {
+          height: region.box.height,
+          width: region.box.width,
+          x: region.box.x,
+          y: region.box.y
+        },
         id: region.id,
         label: region.label
       })),

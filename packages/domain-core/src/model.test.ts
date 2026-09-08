@@ -205,6 +205,13 @@ describe('infoschematicModelOf', () => {
               ]
             }
           ],
+          regions: [
+            {
+              id: 'area',
+              label: 'Area',
+              box: { x: 0, y: 0, width: 220, height: 100, radius: 8 }
+            }
+          ],
           scopes: [
             {
               id: 'edge',
@@ -227,6 +234,11 @@ describe('infoschematicModelOf', () => {
       { id: 'MED-01', family: 'media' },
       { id: 'MED-02', family: 'media-DASHED' }
     ])
+    expect(model.diagram.regions[0]).toMatchObject({
+      appearance: { cornerRadius: 8 },
+      bounds: { x: 0, y: 0, width: 220, height: 100 }
+    })
+    expect(model.diagram.regions[0]?.bounds).not.toHaveProperty('radius')
   })
 
   it('normalises new defaults and rejects dangling model references', () => {
