@@ -4,10 +4,10 @@ area: TOOL
 title: Enforce the package graph
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 31132d1e10284659a6c48e40dde977a4cc33a4c4
 ---
 
 ## Goal
@@ -45,14 +45,14 @@ There is no `no-unresolvable` rule, so the resolution failure that disables the 
 
 ## Steps
 
-- [ ] Configure `enhancedResolveOptions` and confirm workspace imports resolve to package paths.
-- [ ] Re-anchor every ownership rule on package roots so the legal edges pass and the illegal ones are the only failures.
-- [ ] Add the test-file allowance for Domain Core in `view-model`, `view-canvas` and `view-present`.
-- [ ] Add `no-unresolvable`, a declared-dependency rule, framework-neutrality rules for Domain Model, Domain Core and View Model, and the tightened authored-example rule.
-- [ ] Cruise `scripts/` and forbid anything importing it.
-- [ ] Add `scripts/dependency-boundaries.test.ts`: workspace edges resolve to package paths, and the illegal import from the positive control is rejected by the ruleset.
-- [ ] Resolve whatever genuine breaches remain, or record them as their own item where the repair exceeds this boundary.
-- [ ] Update [the architecture guide](../design/architecture.md): include `examples/is-system` in the package graph, and state that the graph is mechanically enforced.
+- [x] Configure `enhancedResolveOptions` and confirm workspace imports resolve to package paths.
+- [x] Re-anchor every ownership rule on package roots so the legal edges pass and the illegal ones are the only failures.
+- [x] Add the test-file allowance for Domain Core in `view-model`, `view-canvas` and `view-present`.
+- [x] Add `no-unresolvable`, a declared-dependency rule, framework-neutrality rules for Domain Model, Domain Core and View Model, and the tightened authored-example rule.
+- [x] Cruise `scripts/` and forbid anything importing it.
+- [x] Add `scripts/dependency-boundaries.test.ts`: workspace edges resolve to package paths, and the illegal import from the positive control is rejected by the ruleset.
+- [x] Resolve whatever genuine breaches remain, or record them as their own item where the repair exceeds this boundary.
+- [x] Update [the architecture guide](../design/architecture.md): include `examples/is-system` in the package graph, and state that the graph is mechanically enforced.
 
 ## Files touched
 
@@ -87,6 +87,46 @@ Update [the architecture guide](../design/architecture.md) with the missing exam
 ### Roadmap
 
 Record implementation and verification evidence in this item before acceptance.
+
+## Review
+
+### Delivered
+
+The dependency check now enforces the package graph instead of reporting a clean run over a graph it could not see. Workspace imports resolve into `packages/`, every ownership rule is anchored where a resolved import actually lands, the missing rules exist, `scripts/` is cruised, and a test asserts that the checker is still closed.
+
+### Summary of changes
+
+- `.dependency-cruiser.ts`: added `enhancedResolveOptions` (`exportsFields`, `conditionNames` including `types`, `extensions`) so subpath exports resolve, and `tsPreCompilationDeps: true` so the rules read authored imports rather than the compiler's emit — a type-only React import is a boundary crossing, and the injected `react/jsx-runtime` is nobody's import.
+- Re-anchored every ownership rule on package roots through an `owners()` helper, because a resolved workspace import lands in `dist` while a same-package relative import lands in `src`.
+- Added `no-unresolvable`, `domain-and-derivation-stay-framework-neutral`, `nothing-imports-repository-scripts`, and `not-to-dev-dep`; tightened `authored-infoschematics-stay-framework-neutral` to Domain Core alone; added `domain-core-is-a-test-only-dependency-for-views` so `defineInfoschematic` stays a test-file edge for the Views.
+- `package.json`: `self:verify:depcruise` now includes `scripts` in its roots.
+- `scripts/dependency-boundaries.test.ts`, new: asserts workspace edges resolve into `packages/` with nothing unresolved, and that a written negative control — a View Model module importing `@infoschematics/view-canvas` — is reported as a `view-model-stays-generic` violation.
+- Repaired the one genuine breach the enforcement found: `packages/view-model/src/tokens.test.ts` imported `scripts/generate-visual-tokens.ts`. The generator-driven cases moved to `scripts/generate-visual-tokens.test.ts`; the package test keeps its token-value assertions.
+- `docs/design/architecture.md`: added `examples/is-system` to the package graph and responsibilities, and stated that the graph is mechanically enforced and why the resolution test exists.
+
+### Verification
+
+`bun run self:check` passes: 60 test files, 396 tests, and `✔ no dependency violations found (330 modules, 1031 dependencies cruised)` — against 211 modules and 491 dependencies before, where every cross-package rule matched nothing.
+
+The three claims the item asked for are proved directly. Resolution: the first test asserts each `@infoschematics/*` dependency of `InfoschematicDiagram.tsx` resolves under `packages/` with no `couldNotResolve`. Rejection: the second writes the positive control and asserts `view-model-stays-generic` appears in the cruise violations; before the resolver fix the same import reported `✔ no dependency violations found`. Legal graph: the full cruise above.
+
+### Outstanding concerns
+
+The programmatic `cruise()` call needs `validate: true` alongside `ruleSet` or it builds the graph and evaluates nothing — the first attempt at the negative-control test reported zero violations with `rules: null` on every edge. The test now passes for the right reason, but the failure mode is the same fail-open shape this item exists to fix, one layer up.
+
+`conditionNames` includes `types` so that `vite/client` resolves in the two `vite-env.d.ts` files. That in turn made `not-to-dev-dep` fire on an ambient declaration, so `.d.ts` files are exempted from that rule alongside test files.
+
+The rules cover ownership direction, not module-level layering inside a package: `no-circular` is the only structural rule that applies within one package root.
+
+### Post-change review
+
+The item's boundary held: no source moved between ownership roots and no package's declared dependencies changed. The single source repair — splitting a test that reached into `scripts/` — is a one-line import change in the sense the boundary allows, done by relocating the three affected cases rather than widening a rule to permit the edge.
+
+Worth noting for whoever reads the rules next: the header comment in `.dependency-cruiser.ts` now states the fail-open risk explicitly, because the rules read correctly the whole time they were inert. Nothing about a passing check distinguishes enforcing from vacuous, which is the argument for keeping the resolution assertion in the test suite rather than trusting review.
+
+### Mini recap
+
+Delivered under INFOSCHEMATICS-TOOL-025: workspace-import resolution, package-root rule anchoring, four new rules and one tightened one, `scripts/` in the cruise, a boundary test that proves the checker is closed, one genuine breach repaired, and the architecture guide updated. Verified by `bun run self:check` (396 tests, clean cruise over 330 modules). Outstanding: the `validate: true` requirement in programmatic cruises, and the `types` condition / `.d.ts` exemption pair, both recorded above. Proposed learning route: none outside this record — the durable statements already live in the architecture guide and the configuration's own header comment.
 
 ## Discussion
 

@@ -42,14 +42,20 @@ The reasons for this direction are recorded in [the framework-neutral library de
 @infoschematics/is-infoschematics
 └── @infoschematics/domain-core
 
+@infoschematics/is-system
+└── @infoschematics/domain-core
+
 @infoschematics/site
 ├── @infoschematics/render-svg
 ├── @infoschematics/view-studio
 ├── @infoschematics/is-blank
-└── @infoschematics/is-infoschematics
+├── @infoschematics/is-infoschematics
+└── @infoschematics/is-system
 ```
 
 Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it; neither imports an interactive view, authored Infoschematic, or site. Authored Infoschematics do not import interactive views. Site consumes public package exports rather than package internals.
+
+This graph is mechanically enforced. `.dependency-cruiser.ts` states each ownership boundary as a rule, `bun run self:verify:depcruise` runs them over every source root including `scripts/`, and `bun run self:check` fails on a violation. Because a boundary checker fails silently when its imports stop resolving, `scripts/dependency-boundaries.test.ts` asserts that workspace imports still resolve into `packages/` and that an illegal import is still reported: a clean cruise means the rules ran, not that nothing was checked.
 
 ## Ownership roots
 
@@ -70,6 +76,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
 - `examples/is-infoschematics` owns the independently authored, serialisable self-description used by interactive and static hosts and depends only on Domain Core.
+- `examples/is-system` owns the independently authored, serialisable four-stage journey definition and depends only on Domain Core.
 - `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 
 Authored Infoschematic examples use the `is-` prefix. Reusable packages and host applications use role-based names. Published package names retain the `@infoschematics/*` namespace.
