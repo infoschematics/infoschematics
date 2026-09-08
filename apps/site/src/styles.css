@@ -171,17 +171,19 @@ a:focus-visible {
   line-height: 1.75;
 }
 
+/*
+ * The rendered Infoschematic already carries the blueprint backdrop, a near
+ * match for the page. Framing it in a card fought that, so the preview is
+ * masked into the background instead: content keeps a 24-unit margin inside
+ * the 1268x248 viewBox, which the fades below stay clear of. No box-shadow
+ * here — a shadow follows the border box, not the mask, and would restore the
+ * hard rectangle the mask exists to dissolve.
+ */
 .shared-preview {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(14px, 1.4vw, 20px);
   min-width: 0;
-  overflow: hidden;
-  border: 1px solid #ffffff1c;
-  border-radius: 15px;
-  background: #f7f9fc;
-  box-shadow:
-    0 38px 90px #02071191,
-    inset 0 1px 0 #ffffff0b;
 }
 
 .shared-preview__image {
@@ -190,17 +192,23 @@ a:focus-visible {
   height: auto;
   aspect-ratio: 1268 / 248;
   object-fit: contain;
-  background: #f7f9fc;
+  background: transparent;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  mask-image:
+    linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
+    linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 
 .shared-preview__caption {
   margin: 0;
-  padding: 14px 18px;
-  border-top: 1px solid #d7dee8;
-  color: #52606d;
-  background: #eef2f7;
-  font: 600 9px/1.4 'DM Mono', monospace;
-  letter-spacing: 0.07em;
+  color: #5c7a92;
+  font: 600 9px/1.5 'DM Mono', monospace;
+  letter-spacing: 0.09em;
+  text-align: center;
   text-transform: uppercase;
 }
 
