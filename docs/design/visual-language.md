@@ -2,6 +2,8 @@
 
 This brief defines the visual character shared by Infoschematic views and renderers. It is a presentation system rather than a fixed page template: implementations can adapt layout and theme while preserving hierarchy, semantic colour, routing and motion rules.
 
+See the [rendered visual guide](/docs/visual-guide/) for every appearance option shown as an actual SVG specimen rather than described in prose.
+
 ## Intent
 
 An Infoschematic should feel like a calm, precise technical instrument. It should be cinematic enough for a large presentation screen and exact enough for an engineer to explain every visible element.

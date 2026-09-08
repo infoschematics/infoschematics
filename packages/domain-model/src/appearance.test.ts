@@ -1,10 +1,13 @@
-import type {
-  GridTreatment,
-  InfoschematicAppearanceConfig,
-  RegionLabelFrameTreatment,
-  RegionLabelPlacement,
-  RegionLabelTreatment,
-  SurfaceTreatment
+import {
+  type GridTreatment,
+  gridTreatments,
+  type InfoschematicAppearanceConfig,
+  type RegionLabelFrameTreatment,
+  type RegionLabelPlacement,
+  type RegionLabelTreatment,
+  regionLabelPlacements,
+  type SurfaceTreatment,
+  surfaceTreatments
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
@@ -40,6 +43,24 @@ describe('authored appearance contracts', () => {
     } satisfies RegionConfig
 
     expect(JSON.parse(JSON.stringify({ appearance, region }))).toEqual({ appearance, region })
+  })
+
+  it('enumerates every closed treatment union at runtime', () => {
+    expect(surfaceTreatments.toSorted()).toEqual(['blueprint', 'neutral'])
+    expect(gridTreatments.toSorted()).toEqual(['dots', 'major', 'major-plus-minor', 'none'])
+    expect(regionLabelPlacements.toSorted()).toEqual(
+      ['center', 'east', 'north', 'north-east', 'north-west', 'south', 'south-east', 'south-west', 'west'].toSorted()
+    )
+
+    for (const surface of surfaceTreatments) {
+      expectTypeOf(surface).toEqualTypeOf<SurfaceTreatment>()
+    }
+    for (const grid of gridTreatments) {
+      expectTypeOf(grid).toEqualTypeOf<GridTreatment>()
+    }
+    for (const placement of regionLabelPlacements) {
+      expectTypeOf(placement).toEqualTypeOf<RegionLabelPlacement>()
+    }
   })
 
   it('keeps region, Card, Domain, and Scope meanings distinct', () => {

@@ -1,4 +1,4 @@
-import { type DocumentSection, documentationRoutes } from './routes.ts'
+import { type DocumentSection, documentationRoutes, visualGuidePath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
@@ -17,6 +17,10 @@ export function DocsIndex() {
       <SiteNav section="docs" />
       <main id="document-content">
         <h1>Documentation</h1>
+        <p>
+          See the <a href={visualGuidePath}>visual guide</a> for every appearance option rendered as an actual SVG
+          specimen.
+        </p>
         {sections.map((section) => (
           <section aria-labelledby={`section-${section}`} key={section}>
             <h2 id={`section-${section}`}>{sectionTitles[section]}</h2>

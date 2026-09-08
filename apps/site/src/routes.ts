@@ -3,6 +3,7 @@ export const infoschematicsExamplePath = '/examples/infoschematics/'
 export const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
+export const visualGuidePath = '/docs/visual-guide/'
 
 export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
 
@@ -136,6 +137,10 @@ export function isDocsIndexPath(pathname: string) {
 
 export function isExamplesIndexPath(pathname: string) {
   return pathname === examplesIndexPath || pathname === examplesIndexPath.slice(0, -1)
+}
+
+export function isVisualGuidePath(pathname: string) {
+  return pathname === visualGuidePath || pathname === visualGuidePath.slice(0, -1)
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {

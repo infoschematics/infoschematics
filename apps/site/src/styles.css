@@ -424,6 +424,36 @@ a:focus-visible {
   text-align: left;
 }
 
+.specimen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.specimen-card {
+  padding: 14px;
+  border: 1px solid #ffffff1c;
+  border-radius: 9px;
+  background: #0d2031;
+}
+
+.specimen-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.specimen-card p {
+  margin: 10px 0 0;
+  color: #9db4c9;
+  font: 600 9px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .document-footer {
   padding-top: 20px;
   border-top: 1px solid #ffffff1c;
