@@ -47,6 +47,37 @@ export type Snap = { guides: readonly Guide[]; point: Point }
  * snap independently, so a drag can align horizontally without being dragged
  * vertically to do it.
  */
+export type BoxSnap = { guides: readonly Guide[]; box: Box }
+
+/**
+ * Pull a box onto the nearest guide within the threshold, per axis, by
+ * whichever of its edges or centre is closest. Snapping the box rather than
+ * the pointer is what makes an edge land exactly on the line it aligned with -
+ * the pointer sits somewhere inside the box, generally nowhere a guide is.
+ */
+export const snapBoxToGuides = (box: Box, guides: readonly Guide[], threshold = snapThreshold): BoxSnap => {
+  const nearest = (axis: Axis, values: readonly number[]) => {
+    let best: { delta: number; guide: Guide } | undefined
+    for (const value of values) {
+      for (const guide of guides) {
+        if (guide.axis !== axis) continue
+        const delta = guide.at - value
+        if (Math.abs(delta) > threshold) continue
+        if (!best || Math.abs(delta) < Math.abs(best.delta)) best = { delta, guide }
+      }
+    }
+    return best
+  }
+
+  const x = nearest('x', [box.x, box.x + box.width / 2, box.x + box.width])
+  const y = nearest('y', [box.y, box.y + box.height / 2, box.y + box.height])
+
+  return {
+    guides: [x?.guide, y?.guide].filter((guide): guide is Guide => Boolean(guide)),
+    box: { ...box, x: box.x + (x?.delta ?? 0), y: box.y + (y?.delta ?? 0) }
+  }
+}
+
 export const snapToGuides = (point: Point, guides: readonly Guide[], threshold = snapThreshold): Snap => {
   const nearest = (axis: Axis, value: number) =>
     guides

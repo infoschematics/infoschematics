@@ -533,7 +533,7 @@ function AppContent() {
         event.preventDefault()
         const step = event.shiftKey ? 10 : 1
         const point = designArrowPoint(geometry, event.key, step)
-        if (point) editor.moveArtefact(point)
+        if (point) editor.moveArtefact(point, true)
         return
       }
 

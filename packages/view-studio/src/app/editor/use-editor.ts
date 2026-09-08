@@ -18,7 +18,7 @@ import {
   resizeArtefactOperation
 } from '@infoschematics/view-model/editable'
 import type { Offset, Point } from '@infoschematics/view-model/geometry'
-import { type Guide, snapToGuides } from '@infoschematics/view-model/guides'
+import { type Guide, snapBoxToGuides, snapToGuides } from '@infoschematics/view-model/guides'
 import type { Side } from '@infoschematics/view-model/ports'
 import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing'
 import * as waypoints from '@infoschematics/view-model/waypoints'
@@ -742,7 +742,11 @@ export function useEditor(
     setArtefactOperations((current) => recordArtefactOperation(current, operation))
   }
 
-  const moveSelectedArtefact = (point: Point) => {
+  // Snapping works on the box, not the pointer: the pointer sits somewhere
+  // inside the box, so pulling it onto the grid or a guide would leave the
+  // box's own edges off both. `exact` is for keyboard steps, where a unit is a
+  // unit and neither the grid nor a guide may pull the move somewhere else.
+  const moveSelectedArtefact = (point: Point, exact = false) => {
     if (!selectedArtefactDetails?.capabilities.move) return
     const target = selectedArtefactDetails.movementTarget
     const details =
@@ -753,11 +757,19 @@ export function useEditor(
     const geometry = details.geometry
     const offset = (() => {
       switch (geometry.role) {
-        case 'box':
-          return {
-            dx: point.x - (geometry.box.x + geometry.box.width / 2),
-            dy: point.y - (geometry.box.y + geometry.box.height / 2)
-          }
+        case 'box': {
+          const wanted = { x: point.x - geometry.box.width / 2, y: point.y - geometry.box.height / 2 }
+          let origin = !exact && view.grid ? toGrid(wanted) : wanted
+          if (!exact && view.snapping) {
+            const pulled = snapBoxToGuides(
+              { ...geometry.box, x: origin.x, y: origin.y },
+              diagram.guidesFor(selectionKey(target))
+            )
+            setGuides(pulled.guides)
+            origin = { x: pulled.box.x, y: pulled.box.y }
+          } else setGuides([])
+          return { dx: origin.x - geometry.box.x, dy: origin.y - geometry.box.y }
+        }
         case 'route':
           return undefined
       }
@@ -919,10 +931,26 @@ export function useEditor(
         return
       }
 
-      const wanted = view.grid ? toGrid(point) : point
-      const snapped = view.snapping ? snapToGuides(wanted, diagram.guidesFor(key)) : { guides: [], point: wanted }
-      setGuides(snapped.guides)
-      const offset = diagram.offsetFor(key, snapped.point)
+      // The pointer is the wanted centre, but what has to land on the grid and
+      // the guides is the box - so the box is placed first and the centre of
+      // wherever it settled is what the offset is worked out from.
+      const placement = diagram.placementFor(key)
+      const box = placement?.kind === 'box' ? placement.box : undefined
+      const centre = (() => {
+        if (!box) {
+          const wanted = view.grid ? toGrid(point) : point
+          const snapped = view.snapping ? snapToGuides(wanted, diagram.guidesFor(key)) : { guides: [], point: wanted }
+          setGuides(snapped.guides)
+          return snapped.point
+        }
+        const wanted = { x: point.x - box.width / 2, y: point.y - box.height / 2 }
+        const origin = view.grid ? toGrid(wanted) : wanted
+        const placed = { ...box, x: origin.x, y: origin.y }
+        const snapped = view.snapping ? snapBoxToGuides(placed, diagram.guidesFor(key)) : { box: placed, guides: [] }
+        setGuides(snapped.guides)
+        return { x: snapped.box.x + box.width / 2, y: snapped.box.y + box.height / 2 }
+      })()
+      const offset = diagram.offsetFor(key, centre)
       if (offset) {
         const next = { ...offset, from: diagram.authored(key, 'card') }
         if (sameValue(drafts[key], next)) return

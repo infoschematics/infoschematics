@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { guidesFrom, snapToGuides } from './guides.ts'
+import { guidesFrom, snapBoxToGuides, snapToGuides } from './guides.ts'
 import { portCountsForSide, portOffsetsForSide, portsForBox } from './ports.ts'
 
 const card = { height: 80, width: 160, x: 100, y: 200 }
@@ -53,6 +53,37 @@ describe('alignment guides', () => {
     )
 
     expect(snapToGuides({ x: 103, y: 0 }, guides).point.x).toBe(104)
+  })
+})
+
+describe('snapping a box', () => {
+  // The card's right edge is at 260; a box whose left edge lands near it is
+  // pulled until the edges meet exactly, which snapping the pointer never did -
+  // the pointer sits inside the box, nowhere near either edge.
+  it('pulls whichever edge or centre is closest onto the guide', () => {
+    const guides = guidesFrom([card], [])
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 263, y: 500 }, guides)
+
+    expect(snapped.box.x).toBe(260)
+    expect(snapped.box.y).toBe(500)
+    expect(snapped.guides.map((guide) => guide.axis)).toEqual(['x'])
+  })
+
+  it('can align centres as well as edges, per axis independently', () => {
+    const guides = guidesFrom([card], [])
+    // Centre x at 178 is 2 from the card's centre at 180; top edge at 242 is 2
+    // from the card's centre line at 240.
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 148, y: 242 }, guides)
+
+    expect(snapped.box).toEqual({ height: 40, width: 60, x: 150, y: 240 })
+    expect(snapped.guides.map((guide) => guide.from)).toEqual(['centre', 'centre'])
+  })
+
+  it('leaves a box alone when nothing is near enough', () => {
+    const snapped = snapBoxToGuides({ height: 40, width: 60, x: 500, y: 900 }, guidesFrom([card], []))
+
+    expect(snapped.box).toEqual({ height: 40, width: 60, x: 500, y: 900 })
+    expect(snapped.guides).toEqual([])
   })
 })
 
