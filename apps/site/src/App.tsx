@@ -32,7 +32,6 @@ export function App() {
             className="shared-preview__image"
             src={sharedPreviewSource}
           />
-          <p className="shared-preview__caption">Same serialisable definition as the hosted interactive example</p>
         </div>
       </section>
 

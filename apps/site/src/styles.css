@@ -225,15 +225,6 @@ a:focus-visible {
   mask-composite: intersect;
 }
 
-.shared-preview__caption {
-  margin: 0;
-  color: #5c7a92;
-  font: 600 9px/1.5 'DM Mono', monospace;
-  letter-spacing: 0.09em;
-  text-align: center;
-  text-transform: uppercase;
-}
-
 .page-footer {
   display: flex;
   align-items: center;
