@@ -62,6 +62,10 @@
       "types": "./dist/metadata.d.ts",
       "import": "./dist/metadata.js"
     },
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "import": "./dist/model.js"
+    },
     "./point": {
       "types": "./dist/point.d.ts",
       "import": "./dist/point.js"

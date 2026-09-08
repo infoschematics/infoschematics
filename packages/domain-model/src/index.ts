@@ -5,6 +5,8 @@ import type { StandaloneSceneConfig } from './scene.ts'
 import type { StoryConfig } from './story.ts'
 import type { ThemeConfig } from './theme.ts'
 
+export type * from './model.ts'
+
 export type InfoschematicConfig = InfoschematicMetadata & {
   infoschematic: InfoschematicDefinition
   standaloneScenes: readonly StandaloneSceneConfig[]

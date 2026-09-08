@@ -9,6 +9,7 @@ export {
   surfaceTreatments
 } from '@infoschematics/domain-model/appearance'
 export { defaultInfoschematicAppearance, defineInfoschematic } from './define.ts'
+export { infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
   type InfoschematicFormat,
