@@ -4,7 +4,7 @@ area: SITE
 title: Docs and examples folders
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-SITE-008]
 blocked_by: []
 baseline_ref: b22506148ea6bde1e4fe8a663df681c90f995a35
@@ -44,6 +44,7 @@ Document paths are derived mechanically from source path: `docs/guides/authoring
 | `/docs/design/view-studio/` | `docs/design/view-studio.md` |
 | `/docs/specs/` | `docs/specs/README.md` |
 | `/docs/specs/domain-model/` | `docs/specs/domain-model.md` |
+| `/docs/specs/domain-core/` | `docs/specs/domain-core.md` |
 | `/docs/specs/view-model/` | `docs/specs/view-model.md` |
 | `/docs/specs/view-canvas/` | `docs/specs/view-canvas.md` |
 | `/docs/specs/view-present/` | `docs/specs/view-present.md` |
@@ -56,24 +57,24 @@ Not published, matching ADR-007's maintainer-facing default: `docs/decisions/`, 
 
 ## Steps
 
-- [ ] Replace `documentationRoutes` in `apps/site/src/routes.ts` with one published-document table keyed by source path (`sourcePath`, `title`, `summary`, `section`); derive `path` from `sourcePath` with a shared helper. Add `isDocsIndexPath` and `isExamplesIndexPath` alongside the existing `is*Path` helpers.
-- [ ] Add `apps/site/src/SiteNav.tsx`: brand mark plus `Docs`, `Examples`, `GitHub`, with a `section` prop setting `aria-current="page"`. Move `BrandMark` out of `App.tsx` into this shared component.
-- [ ] Add `apps/site/src/DocsIndex.tsx` and `apps/site/src/ExamplesIndex.tsx`, grouping the published-document table by section and listing the three hosted examples respectively.
-- [ ] Extend `apps/site/src/DocumentPage.tsx`'s raw-Markdown imports to the full published set (explicit `?raw` imports, not a glob, so unpublished docs stay out of the bundle); swap its bespoke header nav for `SiteNav`. `rewriteRepositoryLink` and `normaliseRepositoryPath` are reused unchanged — more internal links now resolve on-site instead of falling through to GitHub.
-- [ ] Update `apps/site/src/App.tsx` to render `SiteNav` and reduce the footer to the wordmark and tagline.
-- [ ] Wire `/docs/` and `/examples/` (and every document route) into `apps/site/src/main.tsx`'s `resolvePage`, following its existing lazy-import-and-set-title pattern.
-- [ ] Add nav and index-list styles to `apps/site/src/styles.css`, reusing `.document-shell` and the existing `'DM Mono'` uppercase idiom.
-- [ ] Rewrite `docs/README.md`'s "Public documentation" section to match the new published set.
+- [x] Replace `documentationRoutes` in `apps/site/src/routes.ts` with one published-document table keyed by source path (`sourcePath`, `title`, `summary`, `section`); derive `path` from `sourcePath` with a shared helper. Add `isDocsIndexPath` and `isExamplesIndexPath` alongside the existing `is*Path` helpers.
+- [x] Add `apps/site/src/SiteNav.tsx`: brand mark plus `Docs`, `Examples`, `GitHub`, with a `section` prop setting `aria-current="page"`. Move `BrandMark` out of `App.tsx` into this shared component.
+- [x] Add `apps/site/src/DocsIndex.tsx` and `apps/site/src/ExamplesIndex.tsx`, grouping the published-document table by section and listing the three hosted examples respectively.
+- [x] Extend `apps/site/src/DocumentPage.tsx`'s raw-Markdown imports to the full published set (explicit `?raw` imports, not a glob, so unpublished docs stay out of the bundle); swap its bespoke header nav for `SiteNav`. `rewriteRepositoryLink` and `normaliseRepositoryPath` are reused unchanged — more internal links now resolve on-site instead of falling through to GitHub.
+- [x] Update `apps/site/src/App.tsx` to render `SiteNav` and reduce the footer to the wordmark and tagline.
+- [x] Wire `/docs/` and `/examples/` (and every document route) into `apps/site/src/main.tsx`'s `resolvePage`, following its existing lazy-import-and-set-title pattern.
+- [x] Add nav and index-list styles to `apps/site/src/styles.css`, reusing `.document-shell` and the existing `'DM Mono'` uppercase idiom.
+- [x] Rewrite `docs/README.md`'s "Public documentation" section to match the new published set.
 
 ## Files touched
 
 - `apps/site/src/routes.ts`, `apps/site/src/SiteNav.tsx`, `apps/site/src/DocsIndex.tsx`, `apps/site/src/ExamplesIndex.tsx`, `apps/site/src/DocumentPage.tsx`, `apps/site/src/App.tsx`, `apps/site/src/main.tsx`, `apps/site/src/styles.css`
-- `apps/site/src/App.test.tsx`
+- `apps/site/src/App.test.tsx`, `apps/site/src/DocumentPage.test.tsx`
 - `docs/README.md`
 
 ## Verify
 
-`bun run ki:check` (tests, every TypeScript workspace, dependency boundaries, production website build). Manually walk `/`, `/docs/`, `/examples/`, one document page per section, and each of the three examples on a dev server; confirm the nav marks the active section and that a cross-document link inside `/docs/specs/` navigates on-site rather than to GitHub.
+`bun run self:check` (tests, every TypeScript workspace, dependency boundaries, production website build). Manually walk `/`, `/docs/`, `/examples/`, one document page per section, and each of the three examples on a dev server; confirm the nav marks the active section and that a cross-document link inside `/docs/specs/` navigates on-site rather than to GitHub.
 
 ## Dependencies / blocks
 
@@ -99,7 +100,37 @@ None beyond this item and `INFOSCHEMATICS-SITE-008`.
 
 ## Review
 
-_Pending delivery._
+### Delivered
+
+`SiteNav`, `/docs/` and `/examples/` folders with index pages, and a full published-document table covering guides, reference, design, and specs — replacing the flat footer links and the `/guides/…`/`/reference/…` URLs.
+
+### Summary of changes
+
+- `apps/site/src/routes.ts`: replaced the three-entry `documentationRoutes` with a 14-entry published-document table (`sourcePath`, `title`, `summary`, `section`), a `documentPath` helper deriving the public path from the source path (with `/README.md` collapsing to the directory), and `docsIndexPath`/`examplesIndexPath`/`isDocsIndexPath`/`isExamplesIndexPath`. Also added `docs/specs/domain-core.md` to the published set — it exists and is linked from `docs/specs/README.md`, so omitting it (an oversight in the original roadmap table) would have left a broken on-site link.
+- `apps/site/src/SiteNav.tsx` (new): brand mark plus Docs/Examples/GitHub, with `aria-current="page"` on the active section. `BrandMark` moved here from `App.tsx`.
+- `apps/site/src/DocsIndex.tsx`, `apps/site/src/ExamplesIndex.tsx` (new): grouped document index and hosted-example index.
+- `apps/site/src/DocumentPage.tsx`: extended to 14 explicit `?raw` imports; swapped its bespoke header for `SiteNav`; `rewriteRepositoryLink` now resolves any link landing on a published source path to its on-site URL instead of falling through to GitHub.
+- `apps/site/src/App.tsx`: adopted `SiteNav`; footer reduced to wordmark and tagline.
+- `apps/site/src/main.tsx`: wired `/docs/` and `/examples/` into `resolvePage`.
+- `apps/site/src/styles.css`: added `.site-nav` and `.index-list` styles; removed the now-dead `.title-bar`, `.document-header`, `.document-brand`, and `.page-footer__link` rules.
+- `docs/README.md`: rewrote the "Public documentation" section to name the full published set.
+- `apps/site/src/App.test.tsx`, `apps/site/src/DocumentPage.test.tsx`: updated for the new nav, route shape (`sourcePath` replacing `key`), and added coverage for path derivation, the index helpers, and both index pages.
+
+### Verification
+
+`bun run self:check` passes (412 tests, every TypeScript workspace, dependency boundaries, production website build). Manually confirmed `/`, `/docs/`, `/examples/`, `/docs/guides/authoring/`, `/docs/specs/`, `/docs/specs/domain-core/`, and `/examples/system/` all serve `200` on a dev server.
+
+### Outstanding concerns
+
+None for this item. `INFOSCHEMATICS-SITE-008` (visual guide) remains `blocked_by` this item and can now proceed to its own `ki-plan` cycle.
+
+### Post-change review
+
+Verified the diff matches the approved plan; the one addition beyond the original scope (`docs/specs/domain-core.md`) closes a link that the plan's own decision to publish "design and specs" already covered in intent, so it isn't new scope.
+
+### Mini recap
+
+Added a shared top nav and real `/docs/`/`/examples/` folders with indexes, replacing the homepage's flat footer links and the old `/guides/…`/`/reference/…` URLs; `self:check` passes.
 
 ## Discussion
 
