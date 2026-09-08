@@ -4,7 +4,7 @@ area: SITE
 title: Docs and examples folders
 theme: site-experience
 horizon: now
-status: draft
+status: ready
 blocks: [INFOSCHEMATICS-SITE-008]
 blocked_by: []
 baseline_ref: null
