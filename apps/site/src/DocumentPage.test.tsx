@@ -8,9 +8,38 @@ describe('documentation pages', () => {
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
 
     expect(page).toContain('<article')
-    expect(page).toContain('<h1>')
+    expect(page).toContain('<h1 id="')
     expect(page).toContain(`aria-label="${route.title}"`)
     expect(page).toContain('href="/docs/"')
+  })
+
+  it.each(documentationRoutes)('lists every article in the sidebar and marks $sourcePath current', (route) => {
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+
+    expect(page).toContain('aria-label="Documentation"')
+    for (const other of documentationRoutes) {
+      expect(page).toContain(`>${other.title}</a>`)
+    }
+    expect(page).toContain(`aria-current="page" href="${route.path}"`)
+  })
+
+  it('gives headings anchor ids and lists them in the page contents', () => {
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/guides/authoring.md')
+
+    if (!route) {
+      throw new Error('The authoring documentation route is missing.')
+    }
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+    const article = page.slice(page.indexOf('<article'), page.indexOf('</article>'))
+    const ids = [...article.matchAll(/<h[23] id="([^"]+)"/g)].map(([, id]) => id)
+
+    expect(ids.length).toBeGreaterThan(0)
+    expect(new Set(ids).size).toBe(ids.length)
+    expect(page).toContain('aria-label="On this page"')
+    for (const id of ids) {
+      expect(page).toContain(`href="#${id}"`)
+    }
   })
 
   it('renders Markdown structure rather than exposing source text', () => {

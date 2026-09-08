@@ -12,6 +12,15 @@ export function playgroundPresetPath(preset: string) {
 
 export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
 
+export const sectionTitles: Record<DocumentSection, string> = {
+  guides: 'Guides',
+  reference: 'Reference',
+  design: 'Design',
+  specs: 'Specifications'
+}
+
+export const documentSections: readonly DocumentSection[] = ['guides', 'reference', 'design', 'specs']
+
 interface PublishedDocument {
   sourcePath: string
   title: string
