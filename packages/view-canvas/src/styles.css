@@ -608,6 +608,19 @@
    meets moves that end elsewhere. */
 .infoschematic-svg.editing .audit-port {
   pointer-events: auto;
+  transition: opacity var(--infoschematic-canvas-focus-transition-duration)
+    var(--infoschematic-canvas-focus-transition-timing);
+}
+
+/*
+ * A dormant port keeps its place in the tree rather than leaving it: the moment
+ * a line starts being drawn every port is a drop target again, and a dot that
+ * had to be mounted first would arrive after the drag had already passed it.
+ * It neither draws nor takes a press until then.
+ */
+.infoschematic-svg.editing .audit-port.dormant {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .infoschematic-svg.editing .audit-port.in-use {
@@ -854,4 +867,36 @@
   .infoschematic-svg.highlighting .infoschematic-service {
     transition: none;
   }
+}
+
+/*
+ * Design mode had every affordance at full strength at once — every chip, every
+ * port, every overlay Graphic — so nothing in it was emphasis. What follows
+ * sets the editing surface back far enough that the diagram reads first.
+ */
+
+/* Every chip is the drag handle for its own label, so none of them can be
+   hidden. The set steps back instead, and the one pointed at or selected
+   returns to full strength. */
+.infoschematic-svg.editing .audit-flow.editable {
+  transition: opacity var(--infoschematic-canvas-focus-transition-duration)
+    var(--infoschematic-canvas-focus-transition-timing);
+}
+
+.infoschematic-svg.editing .audit-flow.editable:not(.selected):not(.pointed) {
+  opacity: 0.4;
+}
+
+/* Overlay Graphics annotate the working surface rather than being the thing
+   worked on. In design mode they are drawn behind the diagram and dimmed, and
+   come back only for the one being pointed at or edited. */
+.infoschematic-svg.editing .infoschematic-graphic {
+  opacity: var(--infoschematic-canvas-focus-dimmed-opacity);
+  transition: opacity var(--infoschematic-canvas-focus-transition-duration)
+    var(--infoschematic-canvas-focus-transition-timing);
+}
+
+.infoschematic-svg.editing .infoschematic-graphic.selected,
+.infoschematic-svg.editing .infoschematic-graphic:hover {
+  opacity: 1;
 }

@@ -21,12 +21,13 @@ export function LibraryPanel({ context, onInstantiate, templates = libraryTempla
 
   return (
     <section aria-label="Library" className="library-panel">
-      <h3>Library</h3>
-      <ul>
+      <p className="eyebrow pane-heading">LIBRARY</p>
+      <ul className="library-list">
         {available.map((template) => (
           <li key={template.metadata.key}>
             <button
               aria-label={`Add ${template.metadata.label}`}
+              className="library-item"
               onClick={() => {
                 const operation = instantiateLibraryTemplate(template, context)
                 if (operation) onInstantiate(operation)

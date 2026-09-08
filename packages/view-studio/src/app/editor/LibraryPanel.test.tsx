@@ -35,4 +35,14 @@ describe('LibraryPanel', () => {
 
     expect(html).toContain('aria-label="Add Directed flow"')
   })
+
+  it('carries panel chrome rather than native list and button defaults', () => {
+    const html = renderToStaticMarkup(<LibraryPanel context={context(undefined)} onInstantiate={vi.fn()} />)
+
+    // The picker rendered as bulleted white browser buttons with the label and
+    // its description run together, inside an otherwise fully authored panel.
+    expect(html).toContain('class="eyebrow pane-heading"')
+    expect(html).toContain('class="library-list"')
+    expect(html).toContain('class="library-item"')
+  })
 })

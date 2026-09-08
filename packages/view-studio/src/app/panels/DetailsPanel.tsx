@@ -684,46 +684,53 @@ export function DetailsPanel({
 
       {presentation.mode !== 'present' ? (
         <div className="editor-tab">
-          {presentation.mode === 'direct' ? (
-            <label className="text-row">
-              <span>{directKinds.find(([kind]) => kind === directKind)?.[1] ?? 'Target'}</span>
-              <select
-                disabled={directOptionsForKind.length === 0}
-                onChange={(event) => {
-                  const option = directOptionsForKind.find(
-                    (candidate) => directTargetKey(candidate.target) === event.target.value
-                  )
-                  if (option) chooseDirectTarget(option.target)
-                  else presentation.setDirectTarget(null)
-                }}
-                value={activeDirectOption?.target.kind === directKind ? directTargetKey(activeDirectOption.target) : ''}
-              >
-                {directOptionsForKind.length === 0 ? <option value="">No targets yet</option> : null}
-                {directOptionsForKind.length > 0 && activeDirectOption?.target.kind !== directKind ? (
-                  <option value="">Choose a target</option>
-                ) : null}
-                {directOptionsForKind.map((option) => (
-                  <option key={directTargetKey(option.target)} value={directTargetKey(option.target)}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          {/* Above the split, so it neither scrolls with the properties nor
-              moves when the divider does. It acts on the editor rather than on
-              the selection, and one of its controls works with nothing
-              selected at all. */}
-          <EditorTools
-            mode={mode}
-            canRoute={editor.canRoute}
-            canWrap={editor.canWrap}
-            onAddWaypoint={onAddWaypoint}
-            onCreateCard={onCreateCard}
-            onResetRoute={onResetRoute}
-            onToggle={editor.toggleView}
-            view={editor.view}
-          />
+          {/* The tab is a two-row grid. Direct mode adds a target chooser, so it
+              joins the tools in one header row rather than claiming an implicit
+              third that the split pane's bounded track would come out of. */}
+          <div className="editor-tab-header">
+            {presentation.mode === 'direct' ? (
+              <label className="text-row">
+                <span>{directKinds.find(([kind]) => kind === directKind)?.[1] ?? 'Target'}</span>
+                <select
+                  disabled={directOptionsForKind.length === 0}
+                  onChange={(event) => {
+                    const option = directOptionsForKind.find(
+                      (candidate) => directTargetKey(candidate.target) === event.target.value
+                    )
+                    if (option) chooseDirectTarget(option.target)
+                    else presentation.setDirectTarget(null)
+                  }}
+                  value={
+                    activeDirectOption?.target.kind === directKind ? directTargetKey(activeDirectOption.target) : ''
+                  }
+                >
+                  {directOptionsForKind.length === 0 ? <option value="">No targets yet</option> : null}
+                  {directOptionsForKind.length > 0 && activeDirectOption?.target.kind !== directKind ? (
+                    <option value="">Choose a target</option>
+                  ) : null}
+                  {directOptionsForKind.map((option) => (
+                    <option key={directTargetKey(option.target)} value={directTargetKey(option.target)}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            {/* Above the split, so it neither scrolls with the properties nor
+                moves when the divider does. It acts on the editor rather than on
+                the selection, and one of its controls works with nothing
+                selected at all. */}
+            <EditorTools
+              mode={mode}
+              canRoute={editor.canRoute}
+              canWrap={editor.canWrap}
+              onAddWaypoint={onAddWaypoint}
+              onCreateCard={onCreateCard}
+              onResetRoute={onResetRoute}
+              onToggle={editor.toggleView}
+              view={editor.view}
+            />
+          </div>
           <SplitPane>
             {/* One pane, two things in it: what the selection is, and the story
                 built on top of the Infoschematic. The split's top half is a single

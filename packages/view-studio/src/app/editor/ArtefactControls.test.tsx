@@ -121,4 +121,23 @@ describe('geometry summaries', () => {
   it('states missing geometry without guessing', () => {
     expect(describeArtefactGeometry(undefined)).toBe('Geometry unavailable')
   })
+
+  it('carries panel chrome on its headings, controls, and empty state', () => {
+    const empty = renderToStaticMarkup(<ArtefactControls editor={editor(null)} factoryContext={factoryContext} />)
+    const chosen = renderToStaticMarkup(
+      <ArtefactControls
+        editor={editor(defineArtefactSelection({ code: null, geometry: 'box', id: 'region-one', kind: 'region' }), {
+          box: { height: 120, width: 700, x: 20, y: 60 },
+          role: 'box'
+        })}
+        factoryContext={factoryContext}
+      />
+    )
+
+    expect(empty).toContain('class="eyebrow pane-heading"')
+    expect(empty).toContain('class="contract-empty"')
+    expect(chosen).toContain('class="artefact-actions"')
+    expect(chosen).toContain('class="action-button"')
+    expect(chosen).toContain('class="artefact-properties"')
+  })
 })

@@ -330,6 +330,13 @@ export function InfoschematicDiagram({
       ? [`${selectedFlow.source}:${selectedFlow.sourcePort}`, `${selectedFlow.target}:${selectedFlow.targetPort}`]
       : []
   )
+  // The ports a route actually meets, which is a different question from the one
+  // `used` answers. `used` stays scoped to the selected flow so green keeps
+  // saying what is selected; these are the anchors the diagram is read by, so
+  // they keep their dot whether or not anything is selected.
+  const attached = new Set(
+    flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`])
+  )
   // Boxes and ports with the edits in hand already folded in, so the drop
   // target, the ports drawn, and the lookup that resolves a chosen port all
   // read one answer rather than three merges of the same two drafts.
@@ -1153,6 +1160,75 @@ export function InfoschematicDiagram({
     )
   }
 
+  // Overlay Graphics annotate the working surface rather than being the thing
+  // worked on, so design mode draws them behind the diagram while present mode
+  // keeps them on top. One layer, two positions, rather than two renderings.
+  const graphicLayer = graphics.map((entry) => {
+    const bounds = graphicBounds(entry, infoschematicViewBox)
+    const selection = {
+      code: null,
+      geometry: 'box',
+      id: entry.id,
+      kind: 'graphic'
+    } as const satisfies ArtefactSelection
+    const legacyKey = `graphic:${entry.id}`
+    const renderer =
+      !editing && graphic === entry
+        ? activeGraphicRenderer
+        : resolveInfoschematicRenderer(renderers, 'graphic', entry.renderer, entry.properties, entry.id)
+    const Renderer = renderer?.Component
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+      <g
+        aria-label={entry.label ?? entry.id}
+        className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${
+          artefactSelected(selection, legacyKey) ? ' selected' : ''
+        }`}
+        data-artefact-id={selection.id}
+        data-artefact-kind={selection.kind}
+        key={entry.id}
+        onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+        onPointerDown={
+          editing
+            ? dragArtefact(
+                selection,
+                legacyKey,
+                { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
+                { x: true, y: true }
+              )
+            : undefined
+        }
+        role={editing ? 'button' : 'img'}
+        tabIndex={editing ? 0 : undefined}
+      >
+        <title>{entry.label ?? entry.id}</title>
+        {Renderer ? (
+          <Renderer bounds={bounds} graphic={entry} properties={renderer.properties} viewBox={infoschematicViewBox} />
+        ) : (
+          <DefaultGraphic bounds={bounds} graphic={entry} />
+        )}
+        {editing ? (
+          <rect className="graphic-frame" height={bounds.height} width={bounds.width} x={bounds.x} y={bounds.y} />
+        ) : null}
+        {editing && artefactSelected(selection, legacyKey) ? (
+          <>
+            <ResizeHandle
+              axes={{ height: true, width: true }}
+              bounds={bounds}
+              label={entry.label ?? entry.id}
+              selection={selection}
+            />
+            <ArtefactActions
+              at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
+              label={entry.label ?? entry.id}
+              selection={selection}
+            />
+          </>
+        ) : null}
+      </g>
+    )
+  })
+
   return (
     <svg
       ref={infoschematic}
@@ -1393,6 +1469,8 @@ export function InfoschematicDiagram({
           />
         </g>
       ) : null}
+
+      {editing ? graphicLayer : null}
 
       {infoschematicFabrics
         .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
@@ -1823,13 +1901,21 @@ export function InfoschematicDiagram({
             ? placeables.flatMap((placeable) =>
                 portsForBox(placeable.box, placeable.ports).map((port) => {
                   const inUse = used.has(`${placeable.id}:${port.id}`) || dropPort === `${placeable.id}:${port.id}`
+                  const portKey = `port:${placeable.code}:${port.id}`
+                  // Every port on every card at once reads as noise rather than as
+                  // affordance. A port earns its dot by being an anchor the diagram
+                  // is read by, by being asked about, or by being a drop target for
+                  // the line currently being drawn.
+                  const asked = hovered === placeable.code || hovered === portKey || selected === placeable.code
+                  const dormant =
+                    !inUse && !attached.has(`${placeable.id}:${port.id}`) && !asked && selected !== portKey && !drawing
                   return (
                     <g
-                      className={`${inUse ? 'audit-port in-use' : 'audit-port'}${
-                        selected === `port:${placeable.code}:${port.id}` ? ' selected' : ''
-                      }${hovered === `port:${placeable.code}:${port.id}` ? ' pointed' : ''}`}
+                      className={`${inUse ? 'audit-port in-use' : 'audit-port'}${dormant ? ' dormant' : ''}${
+                        selected === portKey ? ' selected' : ''
+                      }${hovered === portKey ? ' pointed' : ''}`}
                       key={`${placeable.id}-${port.id}`}
-                      onPointerEnter={onHover ? () => onHover(`port:${placeable.code}:${port.id}`) : undefined}
+                      onPointerEnter={onHover ? () => onHover(portKey) : undefined}
                       onPointerLeave={onHover ? () => onHover(null) : undefined}
                       onPointerDown={(event) => {
                         const end =
@@ -1845,7 +1931,7 @@ export function InfoschematicDiagram({
                           return
                         }
                         event.stopPropagation()
-                        onSelect?.(`port:${placeable.code}:${port.id}`)
+                        onSelect?.(portKey)
                         // Selecting and starting a line are the same press: the
                         // drag only becomes one past the threshold, so a click
                         // that does not travel still just selects the port.
@@ -1923,76 +2009,7 @@ export function InfoschematicDiagram({
         </g>
       ) : null}
 
-      {graphics.map((entry) => {
-        const bounds = graphicBounds(entry, infoschematicViewBox)
-        const selection = {
-          code: null,
-          geometry: 'box',
-          id: entry.id,
-          kind: 'graphic'
-        } as const satisfies ArtefactSelection
-        const legacyKey = `graphic:${entry.id}`
-        const renderer =
-          !editing && graphic === entry
-            ? activeGraphicRenderer
-            : resolveInfoschematicRenderer(renderers, 'graphic', entry.renderer, entry.properties, entry.id)
-        const Renderer = renderer?.Component
-        return (
-          // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
-          <g
-            aria-label={entry.label ?? entry.id}
-            className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${
-              artefactSelected(selection, legacyKey) ? ' selected' : ''
-            }`}
-            data-artefact-id={selection.id}
-            data-artefact-kind={selection.kind}
-            key={entry.id}
-            onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
-            onPointerDown={
-              editing
-                ? dragArtefact(
-                    selection,
-                    legacyKey,
-                    { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
-                    { x: true, y: true }
-                  )
-                : undefined
-            }
-            role={editing ? 'button' : 'img'}
-            tabIndex={editing ? 0 : undefined}
-          >
-            <title>{entry.label ?? entry.id}</title>
-            {Renderer ? (
-              <Renderer
-                bounds={bounds}
-                graphic={entry}
-                properties={renderer.properties}
-                viewBox={infoschematicViewBox}
-              />
-            ) : (
-              <DefaultGraphic bounds={bounds} graphic={entry} />
-            )}
-            {editing ? (
-              <rect className="graphic-frame" height={bounds.height} width={bounds.width} x={bounds.x} y={bounds.y} />
-            ) : null}
-            {editing && artefactSelected(selection, legacyKey) ? (
-              <>
-                <ResizeHandle
-                  axes={{ height: true, width: true }}
-                  bounds={bounds}
-                  label={entry.label ?? entry.id}
-                  selection={selection}
-                />
-                <ArtefactActions
-                  at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
-                  label={entry.label ?? entry.id}
-                  selection={selection}
-                />
-              </>
-            ) : null}
-          </g>
-        )
-      })}
+      {editing ? null : graphicLayer}
     </svg>
   )
 }

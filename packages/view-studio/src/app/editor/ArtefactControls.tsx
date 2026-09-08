@@ -106,13 +106,13 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
 
   return (
     <section aria-label="Design controls" className="artefact-controls">
-      <h3>Create</h3>
+      <p className="eyebrow pane-heading">CREATE</p>
       {/* biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form control group; fieldset default chrome does not fit. */}
-      <div aria-label="Create structural artefact" role="group">
-        <button aria-label="Create Region" onClick={() => create('region')} type="button">
+      <div aria-label="Create structural artefact" className="artefact-actions" role="group">
+        <button aria-label="Create Region" className="action-button" onClick={() => create('region')} type="button">
           Region
         </button>
-        <button aria-label="Create Graphic" onClick={() => create('graphic')} type="button">
+        <button aria-label="Create Graphic" className="action-button" onClick={() => create('graphic')} type="button">
           Graphic
         </button>
       </div>
@@ -121,17 +121,19 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
         <LibraryPanel context={libraryContext} onInstantiate={(operation) => submitOperation(editor, operation)} />
       ) : null}
 
-      <h3>Selection</h3>
+      <p className="eyebrow pane-heading">SELECTION</p>
       {selected ? (
-        <div key={`${selected.kind}:${selected.id}`}>
-          <p>
+        <div className="artefact-selection" key={`${selected.kind}:${selected.id}`}>
+          <p className="artefact-identity">
             <strong>{selected.kind}</strong> {selected.code ?? selected.id}
           </p>
           {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: labels the summary for assistive tech; the visible text alone is ambiguous without it. */}
-          <p aria-label="Geometry summary">{describeArtefactGeometry(editor.artefactGeometry)}</p>
+          <p aria-label="Geometry summary" className="artefact-geometry">
+            {describeArtefactGeometry(editor.artefactGeometry)}
+          </p>
 
           {capabilities?.['edit-properties'] ? (
-            <fieldset>
+            <fieldset className="artefact-properties">
               <legend>Serialisable properties</legend>
               <label>
                 JSON properties
@@ -142,7 +144,7 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
                   value={properties}
                 />
               </label>
-              <button onClick={applyProperties} type="button">
+              <button className="action-button" onClick={applyProperties} type="button">
                 Apply properties
               </button>
             </fieldset>
@@ -150,9 +152,10 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
 
           {capabilities?.reorder ? (
             // biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form control group; fieldset default chrome does not fit.
-            <div aria-label={`Reorder ${selected.kind}`} role="group">
+            <div aria-label={`Reorder ${selected.kind}`} className="artefact-actions" role="group">
               <button
                 aria-label={`Move ${selected.kind} earlier`}
+                className="action-button"
                 onClick={() => editor.reorderArtefact(-1)}
                 type="button"
               >
@@ -160,6 +163,7 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
               </button>
               <button
                 aria-label={`Move ${selected.kind} later`}
+                className="action-button"
                 onClick={() => editor.reorderArtefact(1)}
                 type="button"
               >
@@ -169,17 +173,30 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
           ) : null}
 
           {capabilities?.remove ? (
-            <button aria-label={`Remove ${selected.kind}`} onClick={() => editor.removeArtefact()} type="button">
+            <button
+              aria-label={`Remove ${selected.kind}`}
+              className="action-button"
+              onClick={() => editor.removeArtefact()}
+              type="button"
+            >
               Remove
             </button>
           ) : null}
         </div>
       ) : (
-        <p>Select a Region, Fabric, Card, Flow, or Graphic to edit it.</p>
+        <p className="contract-empty">Select a Region, Fabric, Card, Flow, or Graphic to edit it.</p>
       )}
 
-      {editor.artefactIssue ? <p role="alert">{editor.artefactIssue}</p> : null}
-      {propertyIssue ? <p role="alert">{propertyIssue}</p> : null}
+      {editor.artefactIssue ? (
+        <p className="artefact-alert" role="alert">
+          {editor.artefactIssue}
+        </p>
+      ) : null}
+      {propertyIssue ? (
+        <p className="artefact-alert" role="alert">
+          {propertyIssue}
+        </p>
+      ) : null}
     </section>
   )
 }

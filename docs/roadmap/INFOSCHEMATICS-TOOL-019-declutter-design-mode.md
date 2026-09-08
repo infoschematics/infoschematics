@@ -4,10 +4,10 @@ area: TOOL
 title: Declutter design mode
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8c6e3892adbd0417b1e9b4e08c58329d09ffcc26
 ---
 
 ## Goal
@@ -32,11 +32,11 @@ Design mode exposes every editing affordance simultaneously, the Studio panel se
 
 ## Steps
 
-- [ ] Dim non-selected editing graphics and flow chips while retaining hover and selection recovery.
-- [ ] Gate unused port dots by hover, selection, or active flow drag while retaining in-use ports.
-- [ ] Add Studio panel chrome to the Library, Create, Selection, and scene sections.
-- [ ] Fix the Direct-mode Storyboard grid and scrolling behaviour.
-- [ ] Update the affected interaction and regression tests.
+- [x] Dim non-selected editing graphics and flow chips while retaining hover and selection recovery.
+- [x] Gate unused port dots by hover, selection, or active flow drag while retaining in-use ports.
+- [x] Add Studio panel chrome to the Library, Create, Selection, and scene sections.
+- [x] Fix the Direct-mode Storyboard grid and scrolling behaviour.
+- [x] Update the affected interaction and regression tests.
 
 ## Files touched
 
@@ -71,6 +71,62 @@ Update component-facing guidance only if the final interaction contract introduc
 ### Roadmap
 
 Record implementation and visual-review evidence in this item before acceptance.
+
+## Review
+
+### Delivered
+
+The approved boundary held: editing-only presentation and Studio panel chrome, with no change to any serialisable record, to present-mode rendering, or to the treatment vocabulary. IBC-specific composition stayed in the dashboard repository and was not touched.
+
+Baseline `8c6e3892adbd0417b1e9b4e08c58329d09ffcc26`, whose `bun run self:check` was confirmed green before any lifecycle change. Ten files changed and one added, 487 insertions and 136 deletions across `view-canvas` and `view-studio`.
+
+### Summary of changes
+
+**Design-mode declutter — `packages/view-canvas`.**
+
+`InfoschematicDiagram.tsx` lifts the graphics rendering out of the JSX into one `graphicLayer` binding and places it in one of two positions: after the edit grid and beneath the fabrics, cards, and flows while editing, and in its existing topmost position otherwise. Present mode is byte-identical. Port dots gained a `dormant` state, and the flow chips and overlay Graphics are dimmed in `styles.css` with the focus-transition idiom already used by `.highlighting`.
+
+Two material decisions, both departures from the plan's stated premise:
+
+- **The plan's account of `in-use` was inaccurate.** It assumed `used` holds every port a route meets, so that keeping `in-use` visible would keep the diagram's anchors drawn. `used` is in fact scoped to the _selected_ flow, by an explicit locked decision in the source: "Green marks the ports the selected flow meets, not every port in use anywhere". Following the plan literally would have opened Design mode with no port dots at all. Rather than widen `used` and break the green semantics that decision protects, a separate `attached` set holds the ports any route meets, and those keep their dot unconditionally. Green still says what is selected; the anchors still say what the diagram is read by.
+- **Dormant ports stay in the tree** rather than leaving it, hidden by `opacity: 0` and `pointer-events: none`. The moment a line starts being drawn every port is a drop target again, and a dot that had to be mounted first would arrive after the drag had already passed it.
+
+The scale of the original complaint is worth recording: a 120×60 card renders a *fourteen*-port complement, not the one port its `ports: { east: 1 }` declaration suggests. The three-box test fixture draws 60 port dots at once; after gating it draws two.
+
+**Panel chrome — `packages/view-studio`.** `LibraryPanel`, `ArtefactControls`, and `SceneLibraryPanel` gained classed markup on the existing `.scene-row`, `.action-button`, `.eyebrow pane-heading`, and `.contract-empty` idioms, with 190 lines of rules appended before the trailing `@import` in the file's literal-hex idiom and no new custom properties. Every `aria-label` was preserved, so the accessible surface the existing tests assert on is unchanged.
+
+**Storyboard grid — `panels/DetailsPanel.tsx`.** The direct-mode target chooser and `EditorTools` now share one `editor-tab-header`, so `.editor-tab` has exactly two children in every mode and `SplitPane` keeps its bounded `minmax(0, 1fr)` track. "Storyboard title" and "Callout title" became "Title" and "Callout" to fit the 54px `.text-row` label column rather than widening it.
+
+The plan's file paths were approximate — the Studio panels live under `src/app/editor/` and `src/app/panels/`, not `src/`.
+
+### Verification
+
+- `bun run self:check` — **pass**. 53 test files, 349 tests (from 52 and 343 at baseline: one new file, six new tests). Dependency boundaries clean across 198 modules and 470 dependencies. Production website build succeeds.
+- `bun run self:packages:build` — **pass**, run separately before the suite as the item required.
+- `bunx vitest run packages/view-canvas packages/view-studio` — **pass**, 23 files, 132 tests.
+- The renderer parity test stayed green throughout, confirming `render-svg` output is untouched by the editing-only changes.
+- New coverage: the two graphic-layer positions, the gated port contract (anchors kept, a placeable's complement woken by hover or selection, a single port woken by pointing at it), the dim rules, the panel chrome classes, and the two-child `.editor-tab` structure.
+
+### Outstanding concerns
+
+- **The downstream visual check the item asks for has not been performed.** Every claim above rests on tests and markup, not on rendered pixels. The item's own `Verify` section requires a check from the IBC dashboard host covering design mode, the Design tab panel, and the Direct-mode Storyboard tab; that host is a different repository, and this session had no browser able to reach a dev server. **This item should not be accepted without it.**
+- **Overlay Graphics are dimmed to `--infoschematic-canvas-focus-dimmed-opacity`, which is `0.14`.** The plan named that token, so it was used, but 0.14 behind the diagram may prove too faint to annotate anything — the concern is that the Graphic becomes invisible rather than merely secondary. It recovers fully on hover and selection. If review agrees it is too faint, the fix is one literal in `packages/view-canvas/src/styles.css`.
+- **Design mode now opens with only route anchors drawn.** This is the intended declutter, but discoverability rests entirely on hover: a producer who does not know to point at a card will not learn that ports exist. No affordance hint was added, because the plan did not call for one and it would have been scope expansion.
+- The pre-existing duplication between `packages/view-studio/src/styles.css` and the canvas rules it re-declares was left alone. It is unrelated to this item and repairing it is not editing-only.
+
+### Post-change review
+
+The goal is met in code: affordances are on demand, Graphics sit behind the working diagram, the unstyled panel sections have chrome, and the Storyboard grid defect is fixed at its structural cause rather than patched at its symptom. Scope held — nothing outside the two view packages was touched, and the one place the plan proved wrong about the existing code was resolved by preserving the locked decision it would have broken rather than by widening the item.
+
+Regression risk is concentrated in the graphics layer move, which is the only change that alters render order; present mode is guarded by the parity test and by an explicit ordering assertion. The port gating changes no geometry, only visibility. The Studio changes are additive CSS plus classed markup, with every `aria-label` preserved.
+
+Acceptance readiness: **not ready**. The verification the item specifies is only partly done, and the missing part is precisely the part that judges whether the result is legible.
+
+### Mini recap
+
+`INFOSCHEMATICS-TOOL-019` delivered all five approved steps against baseline `8c6e3892`. `bun run self:check` passes; 349 tests, six of them new; dependency boundaries and the site build clean. The item stops at `awaiting-review` with one blocking concern — the downstream visual check from the IBC dashboard host has not been performed, and two of the judgment calls above are questions about legibility that only a rendered pixel can answer.
+
+Proposed learning routes, none promoted: the discovery that `used` is selection-scoped while a diagram's anchors are a separate question may belong in the canvas component's own comments, where it now is, rather than anywhere durable; and the observation that a declared port count does not bound the rendered complement is a candidate note for the authoring guide if it surprises anyone else.
 
 ## Discussion
 

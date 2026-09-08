@@ -145,7 +145,7 @@ export function SceneListPanel({
       {scene ? (
         <div className="scene-fields">
           <label className="text-row">
-            <span>Storyboard title</span>
+            <span>Title</span>
             <input
               onChange={(event) => editor.edit({ title: event.target.value })}
               type="text"
@@ -153,7 +153,7 @@ export function SceneListPanel({
             />
           </label>
           <label className="text-row">
-            <span>Callout title</span>
+            <span>Callout</span>
             <input
               onChange={(event) => editor.edit({ calloutTitle: event.target.value || undefined })}
               type="text"

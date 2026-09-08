@@ -3331,4 +3331,194 @@ button:focus-visible,
   background: #1d2735;
   color: #dff0ff;
 }
+/*
+ * Studio panel chrome.
+ *
+ * The Library, Create and Selection sections had no rules at all, so they
+ * rendered as native browser widgets — white buttons, list bullets, a label and
+ * its description run together — inside a panel that is otherwise entirely
+ * authored. They take the chrome the scene list and the action buttons already
+ * establish rather than a set of their own.
+ */
+
+/*
+ * The tab is a two-row grid: what acts on the editor, then the split it acts on.
+ * Direct mode inserts a target chooser, which took an implicit third row and
+ * pushed the split pane out of its bounded track — the hint painted over the
+ * select and the form was chopped by the changes pane instead of scrolling.
+ * Header and tools share one row, so the tab always has exactly two children.
+ */
+.editor-tab-header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.editor-tab-header .editor-tools {
+  margin-bottom: 0;
+}
+
+.library-panel {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.library-list {
+  display: grid;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* Two stacked blocks rather than one run-on line: the label is what is being
+   picked, the description is why, and they are not the same sentence. */
+.library-item {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #aabbd0;
+  cursor: pointer;
+  display: grid;
+  gap: 2px;
+  padding: 5px 6px;
+  text-align: left;
+  width: 100%;
+}
+
+.library-item:hover {
+  background: #ffffff08;
+  border-color: #2f5878;
+  color: #dff0ff;
+}
+
+.library-item span {
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-item small {
+  color: #7f9bb3;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.artefact-controls {
+  display: grid;
+  gap: 6px;
+}
+
+/* A row of controls, not a form: they wrap rather than stretch, and the first
+   one drops the margin the shared button rule adds for its neighbours. */
+.artefact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.artefact-actions .action-button {
+  margin-left: 0;
+}
+
+.artefact-selection {
+  display: grid;
+  gap: 6px;
+}
+
+.artefact-identity {
+  color: #dff0ff;
+  font-size: 11px;
+  margin: 0;
+}
+
+.artefact-identity strong {
+  color: #79c9ff;
+  font:
+    600 10px "DM Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  margin-right: 6px;
+  text-transform: uppercase;
+}
+
+.artefact-geometry {
+  color: #8fa9c4;
+  font:
+    500 10px "DM Mono",
+    monospace;
+  margin: 0;
+}
+
+.artefact-properties {
+  border: 1px solid #ffffff1a;
+  border-radius: 5px;
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 8px;
+}
+
+.artefact-properties legend {
+  color: #8fa9c4;
+  font:
+    600 9px "DM Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  padding: 0 4px;
+  text-transform: uppercase;
+}
+
+.artefact-properties label {
+  color: #8fa9c4;
+  display: grid;
+  font:
+    600 9px "DM Mono",
+    monospace;
+  gap: 4px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.artefact-properties textarea {
+  background: #0c1c2b;
+  border: 1px solid #ffffff1e;
+  border-radius: 5px;
+  color: #dff0ff;
+  font:
+    500 11px "DM Mono",
+    monospace;
+  padding: 5px 6px;
+  resize: vertical;
+  width: 100%;
+}
+
+.artefact-properties textarea:focus {
+  border-color: #79c9ff;
+  outline: none;
+}
+
+.artefact-properties .action-button {
+  justify-self: start;
+  margin-left: 0;
+}
+
+/* A refusal, not a value: it is set apart from the fields it is about. */
+.artefact-alert {
+  color: #ffb4a2;
+  font-size: 11px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.scene-list-panel {
+  display: grid;
+  gap: 6px;
+}
+
 @import "@infoschematics/view-present/styles.css";
