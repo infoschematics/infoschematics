@@ -58,6 +58,8 @@ Domain and Scope communicate separate facts. Domain classifies a Card and suppli
 
 Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, and unframed, unfilled Regions with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
 
+Renderer parity is a token-selection duty. Canvas draws the blueprint palette natively and overrides only the values neutral changes, so every other renderer of the same definition must pick the same side of that split for each surface-sensitive value. A value left on the neutral output set alone paints a light Fabric, Graphic or Region onto the blueprint backdrop — a parity defect rather than an authored difference, because the same definition must not read differently for having been drawn by a different renderer.
+
 Ink is invariant behaviour, not an authored knob. Card and Region-label text resolves dark or light ink from the relative luminance of the fill it sits on, so an author choosing a dark fill gets legible text in every renderer without recording a text colour. Flow-code annotation chips are a render option for hosts — deterministic output detail at the shared placement — and are likewise never part of the authored definition.
 
 ## Visual token ownership
