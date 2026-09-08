@@ -17,7 +17,8 @@ These instruments should link to one another rather than repeat one another. A r
 
 The website publishes this directory's guides, reference material, design documents, and specifications under `/docs/`, mirroring this tree's structure:
 
-- [the overview](overview.md), rendered as the documentation landing page;
+- [Getting started](overview.md), rendered as the documentation landing page;
+- [the interactive visual guide](/docs/visual-guide/), a Site-rendered reference to visible artefacts and treatments;
 - [the authoring guide](guides/authoring.md);
 - [the React integration guide](guides/react-integration.md);
 - [the vocabulary reference](reference/vocabulary.md);

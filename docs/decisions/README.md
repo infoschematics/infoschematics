@@ -17,7 +17,7 @@ Decision records explain why Infoschematics is shaped as it is. They state the c
 13. [ADR-INFOSCHEMATICS-007](ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) — the site publishes canonical repository documentation and examples without owning reusable behaviour.
 14. [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md) — consumable packages, deployable applications, and authored examples use distinct monorepo roots.
 15. [ADR-INFOSCHEMATICS-009](ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) — hosts provide immutable, versioned renderer definitions while authored Infoschematics remain serialisable.
-16. [ADR-INFOSCHEMATICS-010](ADR-INFOSCHEMATICS-010-coordinated-package-release-contract.md) — seven public packages share one compiled, dependency-closed, human-authorised release contract.
+16. [ADR-INFOSCHEMATICS-010](ADR-INFOSCHEMATICS-010-coordinated-package-release-contract.md) — the dependency-closed public package set shares one compiled, human-authorised release contract.
 17. [ADR-INFOSCHEMATICS-011](ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md) — authored presentation intent, output-specific Card detail, invariant tokens, Domain classification, and Scope applicability remain separate concerns.
 18. [ADR-INFOSCHEMATICS-012](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) — Flow signals are host- or Scene-owned runtime occurrences with deterministic accessible fallbacks.
 19. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — the root build tsconfig is a shared base file, not the standard's per-workspace shape marker.

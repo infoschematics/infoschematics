@@ -1,5 +1,7 @@
 # Canvas View specification
 
+_Vocabulary: [Infoschematic artefact](/docs/reference/vocabulary/#infoschematic-artefact), [Scope](/docs/reference/vocabulary/#scope), and [Flow Family](/docs/reference/vocabulary/#flow-family)._
+
 Canvas View renders the reusable interactive React Infoschematic surface from serialisable Domain Model data and framework-neutral View Model calculations. `packages/view-canvas` owns renderer bindings and the base interaction contract; Present and Studio add behaviour without replacing that ownership.
 
 ## Host rendering

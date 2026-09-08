@@ -1,5 +1,7 @@
 # View Model specification
 
+_Vocabulary: [Route](/docs/reference/vocabulary/#route), [Waypoint](/docs/reference/vocabulary/#waypoint), [Port](/docs/reference/vocabulary/#port), and [Scene](/docs/reference/vocabulary/#scene)._
+
 The View Model owns framework-neutral calculations derived from Domain Model data. It may calculate geometry, routes, ports, guides and placement, but it does not render React, own browser state or decide application navigation.
 
 ## Runtime derivation

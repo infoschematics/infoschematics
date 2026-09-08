@@ -1,5 +1,7 @@
 # Specifications
 
+_Vocabulary used by every specification is defined in the [canonical reference](/docs/reference/vocabulary/)._
+
 These specifications define the reusable contracts owned by Infoschematics. They describe authored domain data, framework-neutral view calculations and the producer-facing Studio view without depending on one deployed Infoschematic.
 
 ## Specification map

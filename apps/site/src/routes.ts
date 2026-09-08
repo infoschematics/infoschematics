@@ -31,8 +31,8 @@ interface PublishedDocument {
 const publishedDocuments = [
   {
     sourcePath: 'docs/overview.md',
-    title: 'Overview',
-    summary: 'What an Infoschematic is, the pieces that produce one, and where to start.',
+    title: 'Getting started',
+    summary: 'Visible anatomy, the definition-to-output path, and where to begin.',
     section: 'getting-started'
   },
   {
@@ -62,7 +62,7 @@ const publishedDocuments = [
   {
     sourcePath: 'docs/design/visual-language.md',
     title: 'Visual language',
-    summary: 'The appearance options an Infoschematic can express and how they render.',
+    summary: 'Composition, colour, routing, motion, and accessible visual treatment.',
     section: 'design'
   },
   {
@@ -92,7 +92,7 @@ const publishedDocuments = [
   {
     sourcePath: 'docs/specs/domain-core.md',
     title: 'Domain Core',
-    summary: 'Configuration normalisation and the TypeScript, JSON and YAML document boundary.',
+    summary: 'Configuration normalisation and the YAML, JSON, and TypeScript document boundary.',
     section: 'specs'
   },
   {

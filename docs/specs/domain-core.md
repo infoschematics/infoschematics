@@ -1,5 +1,7 @@
 # Domain Core specification
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic)._
+
 Domain Core turns an authored definition into a complete Infoschematic. It normalises a TypeScript literal that the compiler has already proved, and it validates an authored document — strict-subset TypeScript, JSON, or YAML — that nothing has proved. It calculates no geometry, renders no view, and holds no editing session.
 
 ## Normalisation
@@ -14,7 +16,7 @@ _Implementation surface: `packages/domain-core/src/define.ts`. Verification: `pa
 
 ## Authored documents
 
-### CORE-002 — TypeScript, JSON, and YAML are the supported formats
+### CORE-002 — YAML, JSON, and TypeScript are the supported formats
 
 An Infoschematic MAY be authored as a TypeScript module, a JSON document, or a YAML document. The three MUST produce the same normalised `InfoschematicConfig` and therefore the same rendered output. No other document format is supported; a pathname whose extension is not `.ts`, `.json`, `.yaml`, or `.yml` MUST be rejected rather than guessed at.
 

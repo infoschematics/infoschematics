@@ -1,5 +1,7 @@
 # Static SVG renderer specification
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Scene](/docs/reference/vocabulary/#scene), and [Graphic](/docs/reference/vocabulary/#graphic)._
+
 The static SVG renderer produces deterministic, framework-neutral output from serialisable Infoschematic configuration. It consumes Domain Model and View Model only and does not emulate interactive or Producer state.
 
 ## Output

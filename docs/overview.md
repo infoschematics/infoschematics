@@ -1,8 +1,8 @@
 # Getting started
 
-Infoschematics turns one serialisable description of a system into consistent visual outputs: a deterministic SVG for documents, an interactive Canvas for exploration, a Present view for an Audience, and a Studio view for Producers.
+An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view — precise enough for the engineer, clear enough to present to anyone.
 
-An Infoschematic is a schematic, not assembly instructions. It shows what exists, where it sits, and what moves between it without coupling the definition to React, browser state, or a particular host application.
+One serialisable definition drives consistent outputs: a deterministic SVG for documents, an interactive Canvas for exploration, a Present view for an Audience, and a Studio view for Producers. An Infoschematic is a schematic, not assembly instructions: it shows what exists, where it sits, and what moves between it without coupling the definition to React, browser state, or a particular host application.
 
 ## The model at a glance
 

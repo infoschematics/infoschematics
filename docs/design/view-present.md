@@ -1,5 +1,7 @@
 # Present View design intent
 
+_Vocabulary: [Audience](/docs/reference/vocabulary/#audience), [Present](/docs/reference/vocabulary/#present), [Scene](/docs/reference/vocabulary/#scene), and [Story](/docs/reference/vocabulary/#story)._
+
 Present View is the audience-facing composition around an Infoschematic. It lets a presenter control what remains visible, focus the Audience on a Scene, move through a Story and explain the model without changing the model itself.
 
 Present View owns reusable presentation behaviour. Authored content, attribution and geometry come from the Infoschematic; product identity and surrounding application behaviour come from the host.

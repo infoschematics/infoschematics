@@ -1,5 +1,7 @@
 # Studio View specification
 
+_Vocabulary: [Producer](/docs/reference/vocabulary/#producer), [Design](/docs/reference/vocabulary/#design), and [Direct](/docs/reference/vocabulary/#direct)._
+
 Studio View adds Producer-facing editing to the lower interactive View contracts. It owns editing session drafts, but it does not own authored source or deployment decisions. `Studio` is the public component name and `App` remains a compatibility alias.
 
 ## Session

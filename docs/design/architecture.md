@@ -1,5 +1,7 @@
 # Architecture
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic) and [Infoschematic artefact](/docs/reference/vocabulary/#infoschematic-artefact)._
+
 Infoschematics separates authored product data, framework-neutral behaviour, derived visual calculations, output-specific rendering, authored examples, and host publication.
 
 The reasons for this direction are recorded in [the framework-neutral library decision](../decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md), [the ownership decision](../decisions/ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), [the host-boundary decision](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md), and [the monorepo-root decision](../decisions/ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).

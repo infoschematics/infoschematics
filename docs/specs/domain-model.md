@@ -1,5 +1,7 @@
 # Domain Model specification
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), its [artefacts](/docs/reference/vocabulary/#infoschematic-artefact), and its [groupings](/docs/reference/vocabulary/#flow-family)._
+
 The Domain Model is the serialisable authored contract for an Infoschematic. It describes what exists, how things relate and the geography in which they are presented. It does not calculate routes, render a view or hold an editing session.
 
 ## Identity

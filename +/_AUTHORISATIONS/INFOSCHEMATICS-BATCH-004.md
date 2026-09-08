@@ -53,3 +53,16 @@ Admitted items may reach `awaiting-review` only through their own complete imple
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-004-RUN-001 f1a7d8ce92d93c915f3e1d67de12e9587e92792eb74670623033aa295a476e35 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-SITE-011 | ready | awaiting-review | `532cdbfc` baseline; `3102a8c5` delivery; full gate and visual checks pass | Review guide flow and representative controls |
+| INFOSCHEMATICS-TOOL-027 | ready | awaiting-review | `3102a8c5` baseline; full gate, Markdown, authoring, citation, and decision sweeps pass | Review documentation voice and decision concision |
+
+## Batch recap
+
+Both selected records reached the authorised `awaiting-review` target. SITE-011 replaced the specimen wall with a structured guide to anatomy, groupings, treatments, and presentation-state boundaries, with every authored appearance option interactive. TOOL-027 added stable vocabulary anchors and citations, reconciled public navigation and YAML-first format wording, and reviewed every decision record, tightening the four that retained obsolete or volatile material.
+
+During SITE-011, `HEAD` advanced from `532cdbfc` to `4a59f0b3` through a user-owned two-value global page-inset change in `apps/site/src/styles.css`. The exact overlap was inspected, found independent of the new guide rules, and retained before the run continued. No other staged or dirty paths were present.
+
+Required gates pass. No public TypeScript contract, renderer behaviour, deployment, release, push, acceptance, or pruning was performed.

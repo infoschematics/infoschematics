@@ -12,34 +12,20 @@ decision_depends_on: [ADR-INFOSCHEMATICS-006, ADR-INFOSCHEMATICS-008]
 
 ## Context
 
-Infoschematics packages are developed together but consumed outside the repository through npm. Publishing TypeScript source or workspace-relative assumptions would make consumer behaviour depend on the consumer's toolchain, while independently versioning interdependent packages could create combinations the repository never verified. React View packages also expose CSS whose import and tree-shaking behaviour must remain explicit.
-
-The public set now includes seven packages. Studio depends on Domain Core, Domain Model, View Model, Canvas, and Present; Present depends on Canvas; Canvas and the static SVG renderer depend on View Model. A release therefore needs one dependency-closed contract rather than a collection of unrelated package uploads.
+Infoschematics packages are developed and verified together but consumed independently through npm. Publishing source would expose repository and toolchain assumptions. Versioning interdependent packages separately could create combinations the repository has never verified. React packages also need explicit stylesheet entry points that consumer optimisers preserve.
 
 ## Decision
 
-Every public package emits unbundled ESM JavaScript, source maps, and TypeScript declarations under `dist/`. Each package export map names every supported JavaScript, declaration, and CSS entry point explicitly and points only into `dist/`; source files, wildcard exports, and private internals are not part of the public release surface. Runtime dependencies remain external rather than bundled.
+Every public package publishes compiled, unbundled ESM JavaScript, source maps, and TypeScript declarations under `dist/`. Explicit export maps expose only supported JavaScript, declaration, and stylesheet entry points; runtime dependencies remain external.
 
-CSS is opt-in through explicit subpath imports. `@infoschematics/view-model/tokens.css` and each React View package's `styles.css` entry remain marked side-effectful so a consumer optimiser cannot discard an intentional style import. JavaScript-only packages declare no side effects.
+Stylesheets are opt-in subpath imports and remain marked as side effects. JavaScript-only packages declare no side effects. Browser-oriented React packages retain React and React DOM as peer dependencies and support server rendering at the repository's supported Node floor.
 
-Published ESM and declarations support Node 22 and later. Browser-oriented React packages also support server rendering under that Node floor, with React and React DOM retained as peer dependencies where required. Release automation uses a current Node 24 environment compatible with npm trusted publishing.
+The dependency-closed public package set shares one exact SemVer. Internal package dependencies use that exact version and publication proceeds in dependency order through trusted publishing. A release is a separately authorised operation after local release verification.
 
-One release assigns the same exact SemVer to the following dependency-closed set and uses exact versions for internal package dependencies:
-
-1. `@infoschematics/domain-model`
-2. `@infoschematics/domain-core`
-3. `@infoschematics/view-model`
-4. `@infoschematics/render-svg`
-5. `@infoschematics/view-canvas`
-6. `@infoschematics/view-present`
-7. `@infoschematics/view-studio`
-
-Build, pack inspection, and clean Node and browser-oriented consumer checks complete for the whole set before publication. Publication uses one immutable `v<version>` repository tag, dependency-first order, npm trusted publishing from the protected GitHub `npm` environment, OIDC, and provenance. No long-lived npm publish token is stored in the repository or GitHub environment.
+The [release guide](../guides/releasing-packages.md) owns current package membership, commands, runtime versions, and recovery procedure.
 
 ## Consequences
 
-Consumers receive stable JavaScript, declarations, and stylesheet entry points without compiling repository source or knowing the monorepo layout. Explicit export maps intentionally reject private subpath imports, and each CSS import remains a visible host decision.
+Consumers receive stable JavaScript, declarations, and explicit CSS without compiling repository source or depending on monorepo layout. Private subpath imports fail intentionally.
 
-Any public-package change coordinates all seven versions, dependency ranges, changelog, and release tag even if only one package implementation changed. A failed partial publication cannot overwrite an npm version; the release owner must deprecate the affected version when appropriate and fix forward with a new coordinated patch.
-
-Examples and Site remain outside the public package set. Publication remains a separately human-authorised operation after local and CI release verification; preparing release artefacts does not itself publish anything.
+A public-package change coordinates the dependency-closed set even when implementation changed in only one package. Partial publication cannot overwrite an npm version and must be repaired forward. Examples and applications remain outside the public package release set.

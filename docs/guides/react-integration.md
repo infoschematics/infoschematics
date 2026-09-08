@@ -1,5 +1,7 @@
 # Integrate a React host
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Present](/docs/reference/vocabulary/#present), [Design](/docs/reference/vocabulary/#design), [Direct](/docs/reference/vocabulary/#direct)._
+
 The React View packages render one complete host-owned `InfoschematicConfig`. A host chooses Canvas, Present, or Studio according to the controls it needs.
 
 ```tsx

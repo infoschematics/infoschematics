@@ -69,4 +69,18 @@ describe('documentation pages', () => {
     )
     expect(page).not.toContain('href="../decisions/')
   })
+
+  it('renders stable vocabulary anchors for direct concept links', () => {
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/reference/vocabulary.md')
+
+    if (!route) {
+      throw new Error('The vocabulary documentation route is missing.')
+    }
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+
+    expect(page).toContain('<span id="infoschematic"></span>')
+    expect(page).toContain('<span id="point"></span>')
+    expect(page).toContain('<span id="flow-family"></span>')
+  })
 })

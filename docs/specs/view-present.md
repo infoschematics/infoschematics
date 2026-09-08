@@ -1,5 +1,7 @@
 # Present View specification
 
+_Vocabulary: [Audience](/docs/reference/vocabulary/#audience), [Present](/docs/reference/vocabulary/#present), [Scene](/docs/reference/vocabulary/#scene), and [Story](/docs/reference/vocabulary/#story)._
+
 Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around Canvas. `packages/view-present` owns the reusable Audience component and pure presentation state; Studio composes it as the `present` member of the shared transient production mode.
 
 _Package verification: `packages/view-present/src/presentation.test.ts` and `packages/view-present/src/Present.test.tsx` cover state transitions and server-rendered composition._

@@ -1,5 +1,7 @@
 # Visual language
 
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Region](/docs/reference/vocabulary/#region), [Fabric](/docs/reference/vocabulary/#fabric), [Card](/docs/reference/vocabulary/#standard-card), [Flow](/docs/reference/vocabulary/#flow), [Point](/docs/reference/vocabulary/#point), and [Graphic](/docs/reference/vocabulary/#graphic)._
+
 This brief defines the visual character shared by Infoschematic views and renderers. It is a presentation system rather than a fixed page template: implementations can adapt layout and theme while preserving hierarchy, semantic colour, routing and motion rules.
 
 The [interactive visual guide](/docs/visual-guide/) introduces every visible artefact and lets readers compare the authored treatments in rendered SVG. This document explains the principles behind those outputs.

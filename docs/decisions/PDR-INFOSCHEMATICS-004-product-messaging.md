@@ -12,29 +12,25 @@ decision_depends_on: [PDR-INFOSCHEMATICS-003, KDR-INFOSCHEMATICS-001]
 
 ## Context
 
-The website, the README, package descriptions, and social metadata each carry a line or two about what Infoschematics is, and until now each was worded ad hoc. The homepage said the product "turns architecture, movement and meaning into one calm, explorable view" and apologised that "the full experience is being assembled" — placeholder copy describing the website's build state rather than the product. Vision, mission, and the sentence used to introduce the product deserve the same treatment the vocabulary already has: decided once, cited everywhere, drifting nowhere.
-
-A schematic explains a thing in operation. The distinction that anchors the messaging is that an Infoschematic is not assembly instructions: it shows what a system does and what moves through it, not how to put it together.
+The website, README, package descriptions, and social metadata need a consistent account of what Infoschematics is. Product messaging should describe the product rather than a surface's delivery state, and should preserve the distinction between explaining a system in operation and documenting how to assemble it.
 
 ## Decision
 
-The canonical messaging is:
+Canonical messaging is:
 
 - **Essence** — _A visual instrument for complex systems._
-- **Invitation** (headline register) — _See how it works together._ "Works", not "fits": a schematic shows operation, and "fits together" reads as assembly.
-- **Definition** (one sentence, introduces the product anywhere) — _An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view — precise enough for the engineer, clear enough to present to anyone._
-- **Mission** (what we do) — _Make complex systems comprehensible: to the people who build them, run them, and depend on them._
-- **Vision** (where this goes) — _Serious systems explained by a live instrument, not a stale diagram._
+- **Invitation** — _See how it works together._
+- **Definition** — _An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view — precise enough for the engineer, clear enough to present to anyone._
+- **Mission** — _Make complex systems comprehensible to the people who build them, run them, and depend on them._
+- **Vision** — _Serious systems explained by a live instrument, not a stale diagram._
 
-Tone rules for any surface that describes the product:
+Public copy follows four rules:
 
-1. Precise and calm; no marketing hyperbole, no exclamation.
-2. Operation over assembly: prefer "works", "moves", "explains" to "fits", "built from", "documents".
-3. Never apologise for build state ("is being assembled", "coming soon") in product copy; ship the surface when it can speak plainly.
-4. Product concepts keep their canonical names per [KDR-INFOSCHEMATICS-001](KDR-INFOSCHEMATICS-001-product-vocabulary.md); messaging may not coin synonyms.
-
-Surfaces quote these lines verbatim or shorten them without changing their claims. Changing the messaging means amending this record first.
+1. Be precise and calm; avoid marketing hyperbole and exclamation.
+2. Prefer operation language such as “works”, “moves”, and “explains” over assembly language.
+3. Describe the product, not whether a surface is complete or forthcoming.
+4. Use canonical product terms from [KDR-INFOSCHEMATICS-001](KDR-INFOSCHEMATICS-001-product-vocabulary.md).
 
 ## Consequences
 
-The homepage hero, HTML metadata, README opening, and any future package or release descriptions have one source to quote, and review can point at this record when copy drifts. The cost is ceremony: a better sentence found in passing must land here before it lands on a surface. Vision and mission are deliberately short and unnumbered — they are orientation, not OKRs, and delivery planning stays in the roadmap.
+The homepage, metadata, README, and future package descriptions share one review point. A better canonical phrase changes here before it propagates to public surfaces. Mission and vision provide orientation; delivery planning remains in the roadmap.

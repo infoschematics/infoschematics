@@ -1,5 +1,7 @@
 # Studio view design intent
 
+_Vocabulary: [Producer](/docs/reference/vocabulary/#producer), [Design](/docs/reference/vocabulary/#design), [Direct](/docs/reference/vocabulary/#direct), and [Details panel](/docs/reference/vocabulary/#details-panel)._
+
 Studio adds Producer-facing Design and Direct capability to Present. It is a structured Infoschematic authoring environment, not a general drawing tool: every control changes something the domain model can express, and every constraint is enforced at the point of editing.
 
 The destination is stated here so isolated editing affordances grow into one coherent production workflow. This document describes intent rather than claiming what is implemented today.

@@ -10,25 +10,25 @@ The **product** is an Infoschematic together with its Standalone Scenes, Themes,
 
 | Id | Infoschematics term | Also known as |
 | --- | --- | --- |
-| `infoschematic` | Infoschematic | schematic, structural diagram |
-| `infoschematic-artefact` | Infoschematic artefact | element, visual element |
-| `region` | Region | lane, zone, swimlane, band, tier, column, segment |
-| `fabric` | Fabric | backdrop, plane, region, transport |
-| `standard-card` | Standard Card | node, box, service box |
-| `adapter-card` | Adapter Card | sidecar, wrapper |
-| `flow` | Flow | connection, connector, link, edge |
-| `point` | Point | junction, anchor, endpoint |
-| `graphic` | Graphic | overlay figure, drawn annotation |
-| `route` | Route | geometry, line run |
-| `waypoint` | Waypoint | bend, corner, vertex |
-| `port` | Port | connection point, attachment point |
-| `scene` | Scene | focus composition, highlight group |
-| `standalone-scene` | Standalone Scene | reusable Scene |
-| `thematic-scene` | Thematic Scene | Theme-owned Scene |
-| `story-scene` | Story Scene | step |
-| `theme` | Theme | series, collection, deck |
-| `story` | Story | walkthrough, narrative |
-| `callout` | Callout | narration card, caption card |
+| `infoschematic` | <span id="infoschematic"></span>Infoschematic | schematic, structural diagram |
+| `infoschematic-artefact` | <span id="infoschematic-artefact"></span>Infoschematic artefact | element, visual element |
+| `region` | <span id="region"></span>Region | lane, zone, swimlane, band, tier, column, segment |
+| `fabric` | <span id="fabric"></span>Fabric | backdrop, plane, region, transport |
+| `standard-card` | <span id="standard-card"></span>Standard Card | node, box, service box |
+| `adapter-card` | <span id="adapter-card"></span>Adapter Card | sidecar, wrapper |
+| `flow` | <span id="flow"></span>Flow | connection, connector, link, edge |
+| `point` | <span id="point"></span>Point | junction, anchor, endpoint |
+| `graphic` | <span id="graphic"></span>Graphic | overlay figure, drawn annotation |
+| `route` | <span id="route"></span>Route | geometry, line run |
+| `waypoint` | <span id="waypoint"></span>Waypoint | bend, corner, vertex |
+| `port` | <span id="port"></span>Port | connection point, attachment point |
+| `scene` | <span id="scene"></span>Scene | focus composition, highlight group |
+| `standalone-scene` | <span id="standalone-scene"></span>Standalone Scene | reusable Scene |
+| `thematic-scene` | <span id="thematic-scene"></span>Thematic Scene | Theme-owned Scene |
+| `story-scene` | <span id="story-scene"></span>Story Scene | step |
+| `theme` | <span id="theme"></span>Theme | series, collection, deck |
+| `story` | <span id="story"></span>Story | walkthrough, narrative |
+| `callout` | <span id="callout"></span>Callout | narration card, caption card |
 
 The alternatives help readers recognise a concept; they do not introduce additional public terms.
 
@@ -40,16 +40,16 @@ Each term carries a stable `Id`. Code and documents cite a concept by that id ra
 
 | Id | Infoschematics term | Also known as |
 | --- | --- | --- |
-| `producer` | Producer | author, editor, operator |
-| `audience` | Audience | viewer, people watching |
-| `present` | Present | viewing, playback |
-| `design` | Design | structural editing |
-| `direct` | Direct | presentation editing, directing |
-| `infoschematic-panel` | Infoschematic panel | canvas, main view |
-| `producer-controls` | Producer controls | control surface |
-| `details-panel` | Details panel | sidebar, inspector, state |
-| `info` | Info | what is currently shown |
-| `schematics` | Schematics | technical references and interfaces |
+| `producer` | <span id="producer"></span>Producer | author, editor, operator |
+| `audience` | <span id="audience"></span>Audience | viewer, people watching |
+| `present` | <span id="present"></span>Present | viewing, playback |
+| `design` | <span id="design"></span>Design | structural editing |
+| `direct` | <span id="direct"></span>Direct | presentation editing, directing |
+| `infoschematic-panel` | <span id="infoschematic-panel"></span>Infoschematic panel | canvas, main view |
+| `producer-controls` | <span id="producer-controls"></span>Producer controls | control surface |
+| `details-panel` | <span id="details-panel"></span>Details panel | sidebar, inspector, state |
+| `info` | <span id="info"></span>Info | what is currently shown |
+| `schematics` | <span id="schematics"></span>Schematics | technical references and interfaces |
 
 ### Groupings
 
@@ -57,9 +57,9 @@ Three independent groupings classify what appears in an Infoschematic. None is a
 
 | Id | Infoschematics term | Meaning |
 | --- | --- | --- |
-| `flow-family` | Flow Family | What a Flow carries and the visual identity associated with it |
-| `scope` | Scope | A selectable architectural grouping of artefacts |
-| `domain` | Domain | A sphere of concern that can classify or visually distinguish Cards |
+| `flow-family` | <span id="flow-family"></span>Flow Family | What a Flow carries and the visual identity associated with it |
+| `scope` | <span id="scope"></span>Scope | A selectable architectural grouping of artefacts |
+| `domain` | <span id="domain"></span>Domain | A sphere of concern that can classify or visually distinguish Cards |
 
 `family` and `scope` are acceptable shorthand where the surrounding code or prose makes their full meaning unambiguous.
 
