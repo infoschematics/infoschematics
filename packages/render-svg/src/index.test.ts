@@ -1,4 +1,4 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
 import { renderInfoschematicSvg } from './index.ts'
@@ -130,6 +130,32 @@ describe('renderInfoschematicSvg', () => {
     expect(first).toContain('data-renderer="note&quot;renderer"')
     expect(first).toContain('d="M160 110 H240"')
     expect(first).not.toContain('Source <entry>')
+  })
+
+  it('renders canonical and established inputs identically', () => {
+    const established = blank('Canonical boundary')
+    const canonical: DefinedInfoschematic = {
+      id: 'BLANK',
+      title: 'Canonical boundary',
+      diagram: {
+        assemblies: [],
+        bounds: established.infoschematic.viewBox,
+        cards: [],
+        collections: [],
+        fabrics: [],
+        families: [],
+        flows: [],
+        overlays: [],
+        points: [],
+        regions: [],
+        sets: []
+      },
+      specifications: [],
+      stories: [],
+      themes: []
+    }
+
+    expect(renderInfoschematicSvg(canonical)).toBe(renderInfoschematicSvg(established))
   })
 
   it('uses shared static tokens while preserving authored colours', () => {

@@ -1,70 +1,9 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematicModel } from '@infoschematics/domain-core'
 
-const packagePorts = {
-  east: 2,
-  north: 6,
-  south: 6,
-  west: 2
-} as const
-
-const packageCard = (
-  code: string,
-  id: string,
-  label: string,
-  detail: string,
-  scope: string,
-  domain: string,
-  stereotype: string,
-  x: number,
-  y: number,
-  width = 280
-) => ({
-  code,
-  detail,
-  domain,
-  id,
-  label,
-  placement: {
-    box: { height: 90, width, x, y },
-    ports: packagePorts
-  },
-  scope,
-  scopes: [scope],
-  stereotype
-})
-
-const dependency = (
-  code: string,
-  id: string,
-  source: string,
-  sourcePort: `N${number}` | `E${number}` | `S${number}` | `W${number}`,
-  target: string,
-  targetPort: `N${number}` | `E${number}` | `S${number}` | `W${number}`,
-  points: readonly { x: number; y: number }[]
-) => ({
-  code,
-  family: 'dependency',
-  id,
-  points,
-  source,
-  sourcePort,
-  target,
-  targetPort
-})
-
-export const infoschematicsInfoschematic = defineInfoschematic({
-  id: 'infoschematics-architecture',
-  title: 'An Infoschematic of Infoschematics',
-  subtitle: 'One serialisable product from authored data to public host',
-  synopsis:
+export const infoschematicsInfoschematic = defineInfoschematicModel({
+  description:
     'The repository separates its authored contract, framework-neutral behaviour, interactive Views, renderers, examples, and hosts with dependencies pointing toward lower-level packages.',
-  takeaways: [
-    'Domain Model is the dependency root.',
-    'Interactive Views add capability without reversing package ownership.',
-    'Examples contain authored data; hosts choose how to present it.'
-  ],
-  infoschematic: {
-    viewBox: { height: 920, width: 1400, x: 0, y: 0 },
+  diagram: {
     appearance: {
       surface: 'blueprint',
       grid: 'major-plus-minor',
@@ -75,601 +14,1057 @@ export const infoschematicsInfoschematic = defineInfoschematic({
         description: false
       }
     },
-    domains: [
+    assemblies: [],
+    bounds: {
+      height: 920,
+      width: 1400,
+      x: 0,
+      y: 0
+    },
+    cards: [
       {
-        color: '#2456a6',
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 560,
+          y: 60
+        },
+        collection: 'product-foundation',
+        description: 'Serialisable authored product types with no package dependencies.',
+        id: 'PKG-DM',
+        label: 'Domain Model',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 180,
+          y: 265
+        },
+        collection: 'product-foundation',
+        description: 'Framework-neutral defaults and domain behaviour.',
+        id: 'PKG-DC',
+        label: 'Domain Core',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 900,
+          y: 265
+        },
+        collection: 'product-foundation',
+        description: 'Framework-neutral geometry, routing, presentation, and editing calculations.',
+        id: 'PKG-VM',
+        label: 'View Model',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 60,
+          y: 535
+        },
+        collection: 'interactive-experience',
+        description: 'Reusable interactive Infoschematic surface.',
+        id: 'PKG-VC',
+        label: 'Canvas View',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 380,
+          y: 535
+        },
+        collection: 'interactive-experience',
+        description: 'Audience focus, navigation, Callouts, and Story playback over Canvas.',
+        id: 'PKG-VP',
+        label: 'Present View',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 700,
+          y: 535
+        },
+        collection: 'interactive-experience',
+        description: 'Producer-facing Design and Direct capability over Present.',
+        id: 'PKG-VS',
+        label: 'Studio View',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 1080,
+          y: 535
+        },
+        collection: 'publication',
+        description: 'Deterministic static SVG from the same authored definition.',
+        id: 'PKG-SVG',
+        label: 'SVG Renderer',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'package'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 220,
+          y: 765
+        },
+        collection: 'publication',
+        description: 'Independent serialisable products depending only on Domain Core.',
+        id: 'EX-IS',
+        label: 'Authored examples',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'Infoschematic'
+      },
+      {
+        bounds: {
+          height: 90,
+          width: 280,
+          x: 900,
+          y: 765
+        },
+        collection: 'publication',
+        description: 'Host-owned routing, metadata, composition, and deployment.',
+        id: 'HOST-SITE',
+        label: 'Public Site',
+        ports: {
+          east: 2,
+          north: 6,
+          south: 6,
+          west: 2
+        },
+        stereotype: 'application'
+      }
+    ],
+    collections: [
+      {
+        appearance: {
+          color: '#2456a6',
+          fill: '#e8f0ff'
+        },
         description: 'Reusable contracts and framework-neutral behaviour.',
-        fill: '#e8f0ff',
         id: 'product-foundation',
         label: 'Product foundation'
       },
       {
-        color: '#087f5b',
+        appearance: {
+          color: '#087f5b',
+          fill: '#e4f7ef'
+        },
         description: 'Interactive capability for Producers and Audiences.',
-        fill: '#e4f7ef',
         id: 'interactive-experience',
         label: 'Interactive experience'
       },
       {
-        color: '#a23b72',
+        appearance: {
+          color: '#a23b72',
+          fill: '#fdebf5'
+        },
         description: 'Authored and rendered outlets for sharing Infoschematics.',
-        fill: '#fdebf5',
         id: 'publication',
         label: 'Publication'
       }
     ],
-    scopes: [
+    fabrics: [],
+    families: [
       {
-        color: '#2456a6',
-        description: 'Dependency-free authored product types.',
-        fill: '#e8f0ff',
-        id: 'domain-contract',
-        label: 'Domain contract',
-        prefix: 'DM'
-      },
-      {
-        color: '#5b4aa8',
-        description: 'Framework-neutral domain and visual calculations.',
-        fill: '#f0edff',
-        id: 'neutral-behaviour',
-        label: 'Framework-neutral behaviour',
-        prefix: 'FN'
-      },
-      {
-        color: '#087f5b',
-        description: 'Additive interactive Views.',
-        fill: '#e4f7ef',
-        id: 'interactive-views',
-        label: 'Interactive Views',
-        prefix: 'VW'
-      },
-      {
-        color: '#9a6700',
-        description: 'Framework-neutral rendering output.',
-        fill: '#fff4d6',
-        id: 'renderer-output',
-        label: 'Renderer output',
-        prefix: 'RO'
-      },
-      {
-        color: '#a23b72',
-        description: 'Independently authored Infoschematic definitions.',
-        fill: '#fdebf5',
-        id: 'authored-examples',
-        label: 'Authored examples',
-        prefix: 'EX'
-      },
-      {
-        color: '#b54708',
-        description: 'Deployable composition and publication hosts.',
-        fill: '#fff0e5',
-        id: 'application-hosts',
-        label: 'Application hosts',
-        prefix: 'HOST'
-      }
-    ],
-    flowFamilies: [
-      {
-        color: '#52606d',
+        appearance: {
+          color: '#52606d'
+        },
         description: 'A package or host consumes a lower-level package.',
         id: 'dependency',
-        label: 'Depends on',
-        prefix: 'DEP'
+        label: 'Depends on'
       }
     ],
-    // Authored order is paint order. Each band is a framed row whose boundary-mounted
-    // title reads against the backdrop, holding filled panels inset inside it.
+    flows: [
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-001',
+        route: {
+          waypoints: [
+            {
+              x: 220,
+              y: 212
+            },
+            {
+              x: 640,
+              y: 212
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-DC',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S3'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-002',
+        route: {
+          waypoints: [
+            {
+              x: 940,
+              y: 188
+            },
+            {
+              x: 760,
+              y: 188
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VM',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S4'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-003',
+        route: {
+          waypoints: [
+            {
+              x: 100,
+              y: 496
+            },
+            {
+              x: 600,
+              y: 496
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VC',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S5'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-004',
+        route: {
+          waypoints: [
+            {
+              x: 140,
+              y: 436
+            },
+            {
+              x: 940,
+              y: 436
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VC',
+          port: 'N3'
+        },
+        target: {
+          element: 'PKG-VM',
+          port: 'S5'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-005',
+        route: {
+          waypoints: [
+            {
+              x: 420,
+              y: 484
+            },
+            {
+              x: 680,
+              y: 484
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VP',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-006',
+        route: {
+          waypoints: [
+            {
+              x: 460,
+              y: 424
+            },
+            {
+              x: 980,
+              y: 424
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VP',
+          port: 'N3'
+        },
+        target: {
+          element: 'PKG-VM',
+          port: 'S3'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-007',
+        route: {
+          waypoints: []
+        },
+        source: {
+          element: 'PKG-VP',
+          port: 'W1'
+        },
+        target: {
+          element: 'PKG-VC',
+          port: 'E1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-008',
+        route: {
+          waypoints: [
+            {
+              x: 780,
+              y: 448
+            },
+            {
+              x: 220,
+              y: 448
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VS',
+          port: 'N3'
+        },
+        target: {
+          element: 'PKG-DC',
+          port: 'S5'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-009',
+        route: {
+          waypoints: [
+            {
+              x: 740,
+              y: 472
+            },
+            {
+              x: 720,
+              y: 472
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VS',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S2'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-010',
+        route: {
+          waypoints: [
+            {
+              x: 820,
+              y: 412
+            },
+            {
+              x: 1020,
+              y: 412
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VS',
+          port: 'N1'
+        },
+        target: {
+          element: 'PKG-VM',
+          port: 'S1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-011',
+        route: {
+          waypoints: [
+            {
+              x: 740,
+              y: 643
+            },
+            {
+              x: 300,
+              y: 643
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-VS',
+          port: 'S5'
+        },
+        target: {
+          element: 'PKG-VC',
+          port: 'S6'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-012',
+        route: {
+          waypoints: []
+        },
+        source: {
+          element: 'PKG-VS',
+          port: 'W1'
+        },
+        target: {
+          element: 'PKG-VP',
+          port: 'E1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-013',
+        route: {
+          waypoints: [
+            {
+              x: 1120,
+              y: 460
+            },
+            {
+              x: 800,
+              y: 460
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-SVG',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DM',
+          port: 'S6'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-014',
+        route: {
+          waypoints: [
+            {
+              x: 1160,
+              y: 400
+            },
+            {
+              x: 1060,
+              y: 400
+            }
+          ]
+        },
+        source: {
+          element: 'PKG-SVG',
+          port: 'N3'
+        },
+        target: {
+          element: 'PKG-VM',
+          port: 'S2'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-015',
+        route: {
+          waypoints: [
+            {
+              x: 260,
+              y: 700
+            },
+            {
+              x: 360,
+              y: 700
+            },
+            {
+              x: 360,
+              y: 380
+            },
+            {
+              x: 260,
+              y: 380
+            }
+          ]
+        },
+        source: {
+          element: 'EX-IS',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-DC',
+          port: 'S3'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-016',
+        route: {
+          waypoints: [
+            {
+              x: 940,
+              y: 712
+            },
+            {
+              x: 780,
+              y: 712
+            }
+          ]
+        },
+        source: {
+          element: 'HOST-SITE',
+          port: 'N5'
+        },
+        target: {
+          element: 'PKG-VS',
+          port: 'S3'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'dependency',
+        id: 'DEP-017',
+        route: {
+          waypoints: []
+        },
+        source: {
+          element: 'HOST-SITE',
+          port: 'W1'
+        },
+        target: {
+          element: 'EX-IS',
+          port: 'E1'
+        }
+      }
+    ],
+    overlays: [],
+    points: [],
     regions: [
       {
-        box: { height: 150, radius: 12, width: 1360, x: 20, y: 20 },
-        frame: { style: 'solid' },
+        appearance: {
+          cornerRadius: 12,
+          frame: {
+            style: 'solid'
+          },
+          label: {
+            mount: 'boundary',
+            placement: 'north-west'
+          }
+        },
+        bounds: {
+          height: 150,
+          width: 1360,
+          x: 20,
+          y: 20
+        },
         id: 'row-domain-contract',
-        label: 'Authored contract',
-        labelMount: 'boundary',
-        labelPlacement: 'north-west'
+        label: 'Authored contract'
       },
       {
-        box: { height: 122, width: 1332, x: 34, y: 34 },
-        fill: '#e8f0ff',
+        appearance: {
+          fill: '#e8f0ff',
+          label: {
+            placement: 'south-east'
+          }
+        },
+        bounds: {
+          height: 122,
+          width: 1332,
+          x: 34,
+          y: 34
+        },
         id: 'panel-domain-model',
-        label: 'Dependency root',
-        labelPlacement: 'south-east'
+        label: 'Dependency root'
       },
       {
-        box: { height: 160, radius: 12, width: 1360, x: 20, y: 230 },
-        frame: { style: 'dashed' },
+        appearance: {
+          cornerRadius: 12,
+          frame: {
+            style: 'dashed'
+          },
+          label: {
+            mount: 'boundary',
+            placement: 'north-east'
+          }
+        },
+        bounds: {
+          height: 160,
+          width: 1360,
+          x: 20,
+          y: 230
+        },
         id: 'row-neutral-behaviour',
-        label: 'Framework-neutral behaviour',
-        labelMount: 'boundary',
-        labelPlacement: 'north-east'
+        label: 'Framework-neutral behaviour'
       },
       {
-        box: { height: 132, width: 666, x: 34, y: 244 },
-        fill: '#f4f0ff',
+        appearance: {
+          fill: '#f4f0ff',
+          label: {
+            placement: 'west'
+          }
+        },
+        bounds: {
+          height: 132,
+          width: 666,
+          x: 34,
+          y: 244
+        },
         id: 'panel-domain-behaviour',
-        label: 'Domain behaviour',
-        labelPlacement: 'west'
+        label: 'Domain behaviour'
       },
       {
-        box: { height: 132, width: 660, x: 706, y: 244 },
-        fill: '#ece9ff',
+        appearance: {
+          fill: '#ece9ff',
+          label: {
+            placement: 'east'
+          }
+        },
+        bounds: {
+          height: 132,
+          width: 660,
+          x: 706,
+          y: 244
+        },
         id: 'panel-view-calculations',
-        label: 'View calculations',
-        labelPlacement: 'east'
+        label: 'View calculations'
       },
       {
-        box: { height: 170, radius: 12, width: 1360, x: 20, y: 500 },
-        frame: { style: 'dotted' },
+        appearance: {
+          cornerRadius: 12,
+          frame: {
+            style: 'dotted'
+          },
+          label: {
+            mount: 'boundary',
+            placement: 'north-east'
+          }
+        },
+        bounds: {
+          height: 170,
+          width: 1360,
+          x: 20,
+          y: 500
+        },
         id: 'row-output-packages',
-        label: 'View and renderer packages',
-        labelMount: 'boundary',
-        labelPlacement: 'north-east'
+        label: 'View and renderer packages'
       },
       {
-        box: { height: 142, width: 986, x: 34, y: 514 },
-        fill: '#e4f7ef',
+        appearance: {
+          fill: '#e4f7ef',
+          label: {
+            placement: 'south-west'
+          }
+        },
+        bounds: {
+          height: 142,
+          width: 986,
+          x: 34,
+          y: 514
+        },
         id: 'panel-interactive-views',
-        label: 'Additive interactive Views',
-        labelPlacement: 'south-west'
+        label: 'Additive interactive Views'
       },
       {
-        box: { height: 142, width: 332, x: 1034, y: 514 },
-        fill: '#fff4d6',
+        appearance: {
+          fill: '#fff4d6',
+          label: {
+            placement: 'south-east'
+          }
+        },
+        bounds: {
+          height: 142,
+          width: 332,
+          x: 1034,
+          y: 514
+        },
         id: 'panel-static-output',
-        label: 'Static output',
-        labelPlacement: 'south-east'
+        label: 'Static output'
       },
       {
-        box: { height: 150, radius: 12, width: 1360, x: 20, y: 740 },
-        frame: { style: 'solid' },
+        appearance: {
+          cornerRadius: 12,
+          frame: {
+            style: 'solid'
+          },
+          label: {
+            mount: 'boundary',
+            placement: 'south'
+          }
+        },
+        bounds: {
+          height: 150,
+          width: 1360,
+          x: 20,
+          y: 740
+        },
         id: 'row-composition',
-        label: 'Authored composition',
-        labelMount: 'boundary',
-        labelPlacement: 'south'
+        label: 'Authored composition'
       },
       {
-        box: { height: 122, width: 666, x: 34, y: 754 },
-        fill: '#fdebf5',
+        appearance: {
+          fill: '#fdebf5',
+          label: {
+            placement: 'north-west'
+          }
+        },
+        bounds: {
+          height: 122,
+          width: 666,
+          x: 34,
+          y: 754
+        },
         id: 'panel-authored-examples',
-        label: 'Authored examples',
-        labelPlacement: 'north-west'
+        label: 'Authored examples'
       },
       {
-        box: { height: 122, width: 660, x: 706, y: 754 },
-        fill: '#fff0e5',
+        appearance: {
+          fill: '#fff0e5',
+          label: {
+            placement: 'north-east'
+          }
+        },
+        bounds: {
+          height: 122,
+          width: 660,
+          x: 706,
+          y: 754
+        },
         id: 'panel-application-hosts',
-        label: 'Application hosts',
-        labelPlacement: 'north-east'
+        label: 'Application hosts'
       }
     ],
-    cards: [
-      packageCard(
-        'PKG-DM',
-        'package-domain-model',
-        'Domain Model',
-        'Serialisable authored product types with no package dependencies.',
-        'domain-contract',
-        'product-foundation',
-        'package',
-        560,
-        60,
-        280
-      ),
-      packageCard(
-        'PKG-DC',
-        'package-domain-core',
-        'Domain Core',
-        'Framework-neutral defaults and domain behaviour.',
-        'neutral-behaviour',
-        'product-foundation',
-        'package',
-        180,
-        265,
-        280
-      ),
-      packageCard(
-        'PKG-VM',
-        'package-view-model',
-        'View Model',
-        'Framework-neutral geometry, routing, presentation, and editing calculations.',
-        'neutral-behaviour',
-        'product-foundation',
-        'package',
-        900,
-        265,
-        280
-      ),
-      packageCard(
-        'PKG-VC',
-        'package-view-canvas',
-        'Canvas View',
-        'Reusable interactive Infoschematic surface.',
-        'interactive-views',
-        'interactive-experience',
-        'package',
-        60,
-        535
-      ),
-      packageCard(
-        'PKG-VP',
-        'package-view-present',
-        'Present View',
-        'Audience focus, navigation, Callouts, and Story playback over Canvas.',
-        'interactive-views',
-        'interactive-experience',
-        'package',
-        380,
-        535
-      ),
-      packageCard(
-        'PKG-VS',
-        'package-view-studio',
-        'Studio View',
-        'Producer-facing Design and Direct capability over Present.',
-        'interactive-views',
-        'interactive-experience',
-        'package',
-        700,
-        535
-      ),
-      packageCard(
-        'PKG-SVG',
-        'package-render-svg',
-        'SVG Renderer',
-        'Deterministic static SVG from the same authored definition.',
-        'renderer-output',
-        'publication',
-        'package',
-        1080,
-        535
-      ),
-      packageCard(
-        'EX-IS',
-        'example-infoschematics',
-        'Authored examples',
-        'Independent serialisable products depending only on Domain Core.',
-        'authored-examples',
-        'publication',
-        'Infoschematic',
-        220,
-        765,
-        280
-      ),
-      packageCard(
-        'HOST-SITE',
-        'host-site',
-        'Public Site',
-        'Host-owned routing, metadata, composition, and deployment.',
-        'application-hosts',
-        'publication',
-        'application',
-        900,
-        765,
-        280
-      )
-    ],
-    // Every long route travels in one of three horizontal corridors between the bands,
-    // each dependency on its own lane, so no two routes share a segment.
-    flows: [
-      dependency(
-        'DEP-001',
-        'dependency-domain-core-domain-model',
-        'package-domain-core',
-        'N1',
-        'package-domain-model',
-        'S2',
-        [
-          { x: 220, y: 265 },
-          { x: 220, y: 212 },
-          { x: 640, y: 212 },
-          { x: 640, y: 150 }
-        ]
-      ),
-      dependency(
-        'DEP-002',
-        'dependency-view-model-domain-model',
-        'package-view-model',
-        'N1',
-        'package-domain-model',
-        'S5',
-        [
-          { x: 940, y: 265 },
-          { x: 940, y: 188 },
-          { x: 760, y: 188 },
-          { x: 760, y: 150 }
-        ]
-      ),
-      dependency(
-        'DEP-003',
-        'dependency-canvas-domain-model',
-        'package-view-canvas',
-        'N1',
-        'package-domain-model',
-        'S1',
-        [
-          { x: 100, y: 535 },
-          { x: 100, y: 496 },
-          { x: 600, y: 496 },
-          { x: 600, y: 150 }
-        ]
-      ),
-      dependency('DEP-004', 'dependency-canvas-view-model', 'package-view-canvas', 'N2', 'package-view-model', 'S1', [
-        { x: 140, y: 535 },
-        { x: 140, y: 436 },
-        { x: 940, y: 436 },
-        { x: 940, y: 355 }
-      ]),
-      dependency(
-        'DEP-005',
-        'dependency-present-domain-model',
-        'package-view-present',
-        'N1',
-        'package-domain-model',
-        'S3',
-        [
-          { x: 420, y: 535 },
-          { x: 420, y: 484 },
-          { x: 680, y: 484 },
-          { x: 680, y: 150 }
-        ]
-      ),
-      dependency('DEP-006', 'dependency-present-view-model', 'package-view-present', 'N2', 'package-view-model', 'S2', [
-        { x: 460, y: 535 },
-        { x: 460, y: 424 },
-        { x: 980, y: 424 },
-        { x: 980, y: 355 }
-      ]),
-      dependency('DEP-007', 'dependency-present-canvas', 'package-view-present', 'W1', 'package-view-canvas', 'E1', [
-        { x: 380, y: 565 },
-        { x: 340, y: 565 }
-      ]),
-      dependency('DEP-008', 'dependency-studio-domain-core', 'package-view-studio', 'N2', 'package-domain-core', 'S1', [
-        { x: 780, y: 535 },
-        { x: 780, y: 448 },
-        { x: 220, y: 448 },
-        { x: 220, y: 355 }
-      ]),
-      dependency(
-        'DEP-009',
-        'dependency-studio-domain-model',
-        'package-view-studio',
-        'N1',
-        'package-domain-model',
-        'S4',
-        [
-          { x: 740, y: 535 },
-          { x: 740, y: 472 },
-          { x: 720, y: 472 },
-          { x: 720, y: 150 }
-        ]
-      ),
-      dependency('DEP-010', 'dependency-studio-view-model', 'package-view-studio', 'N3', 'package-view-model', 'S3', [
-        { x: 820, y: 535 },
-        { x: 820, y: 412 },
-        { x: 1020, y: 412 },
-        { x: 1020, y: 355 }
-      ]),
-      dependency('DEP-011', 'dependency-studio-canvas', 'package-view-studio', 'S1', 'package-view-canvas', 'S6', [
-        { x: 740, y: 625 },
-        { x: 740, y: 643 },
-        { x: 300, y: 643 },
-        { x: 300, y: 625 }
-      ]),
-      dependency('DEP-012', 'dependency-studio-present', 'package-view-studio', 'W1', 'package-view-present', 'E1', [
-        { x: 700, y: 565 },
-        { x: 660, y: 565 }
-      ]),
-      dependency(
-        'DEP-013',
-        'dependency-render-svg-domain-model',
-        'package-render-svg',
-        'N1',
-        'package-domain-model',
-        'S6',
-        [
-          { x: 1120, y: 535 },
-          { x: 1120, y: 460 },
-          { x: 800, y: 460 },
-          { x: 800, y: 150 }
-        ]
-      ),
-      dependency(
-        'DEP-014',
-        'dependency-render-svg-view-model',
-        'package-render-svg',
-        'N2',
-        'package-view-model',
-        'S4',
-        [
-          { x: 1160, y: 535 },
-          { x: 1160, y: 400 },
-          { x: 1060, y: 400 },
-          { x: 1060, y: 355 }
-        ]
-      ),
-      dependency(
-        'DEP-015',
-        'dependency-example-domain-core',
-        'example-infoschematics',
-        'N1',
-        'package-domain-core',
-        'S2',
-        [
-          { x: 260, y: 765 },
-          { x: 260, y: 700 },
-          { x: 360, y: 700 },
-          { x: 360, y: 380 },
-          { x: 260, y: 380 },
-          { x: 260, y: 355 }
-        ]
-      ),
-      dependency('DEP-016', 'dependency-site-studio', 'host-site', 'N1', 'package-view-studio', 'S2', [
-        { x: 940, y: 765 },
-        { x: 940, y: 712 },
-        { x: 780, y: 712 },
-        { x: 780, y: 625 }
-      ]),
-      dependency('DEP-017', 'dependency-site-example', 'host-site', 'W1', 'example-infoschematics', 'E1', [
-        { x: 900, y: 795 },
-        { x: 500, y: 795 }
-      ])
+    sets: [
+      {
+        description: 'Dependency-free authored product types.',
+        elements: ['PKG-DM'],
+        id: 'domain-contract',
+        label: 'Domain contract'
+      },
+      {
+        description: 'Framework-neutral domain and visual calculations.',
+        elements: ['PKG-DC', 'PKG-VM'],
+        id: 'neutral-behaviour',
+        label: 'Framework-neutral behaviour'
+      },
+      {
+        description: 'Additive interactive Views.',
+        elements: ['PKG-VC', 'PKG-VP', 'PKG-VS'],
+        id: 'interactive-views',
+        label: 'Interactive Views'
+      },
+      {
+        description: 'Framework-neutral rendering output.',
+        elements: ['PKG-SVG'],
+        id: 'renderer-output',
+        label: 'Renderer output'
+      },
+      {
+        description: 'Independently authored Infoschematic definitions.',
+        elements: ['EX-IS'],
+        id: 'authored-examples',
+        label: 'Authored examples'
+      },
+      {
+        description: 'Deployable composition and publication hosts.',
+        elements: ['HOST-SITE'],
+        id: 'application-hosts',
+        label: 'Application hosts'
+      }
     ]
   },
-  standaloneScenes: [
-    {
-      code: 'SCN-01',
-      description: 'The dependency-free contract supports two independent framework-neutral behaviour packages.',
-      focus: {
-        artefacts: ['package-domain-model', 'package-domain-core', 'package-view-model'],
-        flows: ['dependency-domain-core-domain-model', 'dependency-view-model-domain-model']
-      },
-      id: 'scene-foundations',
-      label: 'Start with the foundations',
-      short: 'Domain Model is the dependency root.'
-    },
-    {
-      code: 'SCN-02',
-      description:
-        'Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.',
-      focus: {
-        artefacts: [
-          'package-domain-model',
-          'package-view-model',
-          'package-view-canvas',
-          'package-view-present',
-          'package-view-studio'
-        ],
-        flows: [
-          'dependency-canvas-domain-model',
-          'dependency-canvas-view-model',
-          'dependency-present-domain-model',
-          'dependency-present-view-model',
-          'dependency-present-canvas',
-          'dependency-studio-domain-model',
-          'dependency-studio-view-model',
-          'dependency-studio-canvas',
-          'dependency-studio-present'
-        ]
-      },
-      id: 'scene-additive-views',
-      label: 'Add interactive Views',
-      short: 'Each View builds on narrower capability.'
-    },
-    {
-      code: 'SCN-03',
-      description:
-        'Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.',
-      focus: {
-        artefacts: [
-          'package-domain-core',
-          'package-domain-model',
-          'package-view-model',
-          'package-view-studio',
-          'package-render-svg',
-          'example-infoschematics',
-          'host-site'
-        ],
-        flows: [
-          'dependency-render-svg-domain-model',
-          'dependency-render-svg-view-model',
-          'dependency-example-domain-core',
-          'dependency-site-studio',
-          'dependency-site-example'
-        ]
-      },
-      id: 'scene-public-outlets',
-      label: 'Compose examples and hosts',
-      short: 'Authored data remains separate from its outlets.'
-    },
-    {
-      code: 'SCN-04',
-      description: 'The complete product graph keeps dependencies pointing toward lower-level packages.',
-      focus: {
-        artefacts: [
-          'package-domain-model',
-          'package-domain-core',
-          'package-view-model',
-          'package-view-canvas',
-          'package-view-present',
-          'package-view-studio',
-          'package-render-svg',
-          'example-infoschematics',
-          'host-site'
-        ],
-        flows: [
-          'dependency-domain-core-domain-model',
-          'dependency-view-model-domain-model',
-          'dependency-canvas-domain-model',
-          'dependency-canvas-view-model',
-          'dependency-present-domain-model',
-          'dependency-present-view-model',
-          'dependency-present-canvas',
-          'dependency-studio-domain-core',
-          'dependency-studio-domain-model',
-          'dependency-studio-view-model',
-          'dependency-studio-canvas',
-          'dependency-studio-present',
-          'dependency-render-svg-domain-model',
-          'dependency-render-svg-view-model',
-          'dependency-example-domain-core',
-          'dependency-site-studio',
-          'dependency-site-example'
-        ]
-      },
-      id: 'scene-complete-architecture',
-      label: 'See the complete architecture',
-      short: 'One-way dependencies keep ownership clear.'
-    }
-  ],
+  id: 'infoschematics-architecture',
+  specifications: [],
   stories: [
     {
-      code: 'STORY-01',
-      id: 'story-from-contract-to-host',
+      id: 'STORY-01',
+      label: 'From contract to Audience',
       question: 'How does one authored Infoschematic reach its Audience?',
       scenes: [
         {
-          anchor: 'package-domain-model',
           callout: {
             body: 'Begin with serialisable product data and a dependency-free contract.',
+            placement: {
+              element: 'PKG-DM'
+            },
             takeaways: ['The Domain Model imports no package.']
           },
+          description: 'The dependency-free contract supports two independent framework-neutral behaviour packages.',
           duration: 5,
+          focus: {
+            elements: ['PKG-DM', 'PKG-DC', 'PKG-VM', 'DEP-001', 'DEP-002']
+          },
           id: 'story-scene-foundations',
-          sourceScene: 'scene-foundations',
-          title: 'Define the product'
+          label: 'Define the product'
         },
         {
-          anchor: 'package-view-studio',
           callout: {
             body: 'Add Canvas, Present, and Studio capability without moving authored state into a View.',
+            placement: {
+              element: 'PKG-VS'
+            },
             takeaways: ['Views depend downward; authored products do not depend on Views.']
           },
+          description:
+            'Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.',
           duration: 6,
+          focus: {
+            elements: [
+              'PKG-DM',
+              'PKG-VM',
+              'PKG-VC',
+              'PKG-VP',
+              'PKG-VS',
+              'DEP-003',
+              'DEP-004',
+              'DEP-005',
+              'DEP-006',
+              'DEP-007',
+              'DEP-009',
+              'DEP-010',
+              'DEP-011',
+              'DEP-012'
+            ]
+          },
           id: 'story-scene-views',
-          sourceScene: 'scene-additive-views',
-          title: 'Choose the narrowest View'
+          label: 'Choose the narrowest View'
         },
         {
-          anchor: 'host-site',
           callout: {
             body: 'Let examples own reusable data and let the Site own routing, metadata, and deployment.',
+            placement: {
+              element: 'HOST-SITE'
+            },
             takeaways: ['The same definition can drive Studio and deterministic SVG.']
           },
+          description:
+            'Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.',
           duration: 6,
+          focus: {
+            elements: [
+              'PKG-DC',
+              'PKG-DM',
+              'PKG-VM',
+              'PKG-VS',
+              'PKG-SVG',
+              'EX-IS',
+              'HOST-SITE',
+              'DEP-013',
+              'DEP-014',
+              'DEP-015',
+              'DEP-016',
+              'DEP-017'
+            ]
+          },
           id: 'story-scene-outlets',
-          sourceScene: 'scene-public-outlets',
-          title: 'Publish through a host'
+          label: 'Publish through a host'
         }
-      ],
-      short: 'From serialisable contract to public outlet.',
-      title: 'From contract to Audience'
+      ]
     }
   ],
-  calloutPositions: [
-    { x: 70, y: 60 },
-    { x: 1080, y: 250 },
-    { x: 1080, y: 700 }
-  ]
+  subtitle: 'One serialisable product from authored data to public host',
+  themes: [
+    {
+      id: 'OVERVIEW',
+      label: 'Overview',
+      scenes: [
+        {
+          description: 'The dependency-free contract supports two independent framework-neutral behaviour packages.',
+          focus: {
+            elements: ['PKG-DM', 'PKG-DC', 'PKG-VM', 'DEP-001', 'DEP-002']
+          },
+          id: 'SCN-01',
+          label: 'Start with the foundations'
+        },
+        {
+          description:
+            'Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.',
+          focus: {
+            elements: [
+              'PKG-DM',
+              'PKG-VM',
+              'PKG-VC',
+              'PKG-VP',
+              'PKG-VS',
+              'DEP-003',
+              'DEP-004',
+              'DEP-005',
+              'DEP-006',
+              'DEP-007',
+              'DEP-009',
+              'DEP-010',
+              'DEP-011',
+              'DEP-012'
+            ]
+          },
+          id: 'SCN-02',
+          label: 'Add interactive Views'
+        },
+        {
+          description:
+            'Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.',
+          focus: {
+            elements: [
+              'PKG-DC',
+              'PKG-DM',
+              'PKG-VM',
+              'PKG-VS',
+              'PKG-SVG',
+              'EX-IS',
+              'HOST-SITE',
+              'DEP-013',
+              'DEP-014',
+              'DEP-015',
+              'DEP-016',
+              'DEP-017'
+            ]
+          },
+          id: 'SCN-03',
+          label: 'Compose examples and hosts'
+        },
+        {
+          description: 'The complete product graph keeps dependencies pointing toward lower-level packages.',
+          focus: {
+            elements: [
+              'PKG-DM',
+              'PKG-DC',
+              'PKG-VM',
+              'PKG-VC',
+              'PKG-VP',
+              'PKG-VS',
+              'PKG-SVG',
+              'EX-IS',
+              'HOST-SITE',
+              'DEP-001',
+              'DEP-002',
+              'DEP-003',
+              'DEP-004',
+              'DEP-005',
+              'DEP-006',
+              'DEP-007',
+              'DEP-008',
+              'DEP-009',
+              'DEP-010',
+              'DEP-011',
+              'DEP-012',
+              'DEP-013',
+              'DEP-014',
+              'DEP-015',
+              'DEP-016',
+              'DEP-017'
+            ]
+          },
+          id: 'SCN-04',
+          label: 'See the complete architecture'
+        }
+      ]
+    }
+  ],
+  title: 'An Infoschematic of Infoschematics'
 })
 
 export const infoschematicsExample = infoschematicsInfoschematic

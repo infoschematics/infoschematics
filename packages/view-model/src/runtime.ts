@@ -1,9 +1,10 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/domain-model'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
 import type { ThematicSceneConfig } from '@infoschematics/domain-model/theme'
+import { establishedInfoschematicOf } from './compatibility.ts'
 import type { AttachedEnd, CreatedComponent, CreatedFlow } from './editable.ts'
 import type { Box, Offset, Point } from './geometry.ts'
 import { routeEndpoints, routePath } from './geometry.ts'
@@ -127,7 +128,8 @@ const membershipVisible = (
     ? entry.scopes.every((scope) => visibleScopes.has(scope))
     : entry.scopes.some((scope) => visibleScopes.has(scope))
 
-export const createInfoschematicRuntime = (config: InfoschematicConfig) => {
+export const createInfoschematicRuntime = (input: InfoschematicInput) => {
+  const config = establishedInfoschematicOf(input)
   const definition = config.infoschematic
   const cards: RuntimeCard[] = definition.cards.map((card) => ({
     ...card,

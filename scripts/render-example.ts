@@ -8,15 +8,16 @@ import {
   infoschematicFormatOf,
   parseInfoschematic
 } from '@infoschematics/domain-core'
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { blankInfoschematic } from '@infoschematics/is-blank'
 import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { type CliSpec, CliUsageError, isDirectInvocation, runCli } from './cli.ts'
 
 /** Authored examples this repository can render without a browser or dev server. */
-export const renderableExamples: Readonly<Record<string, InfoschematicConfig>> = {
+export const renderableExamples: Readonly<Record<string, InfoschematicInput>> = {
   blank: blankInfoschematic,
   infoschematics: infoschematicsExample,
   system: systemExample
@@ -30,7 +31,7 @@ export const isDocumentSubject = (subject: string): boolean =>
   !(subject in renderableExamples) && extname(subject).length > 0
 
 /** Load one subject, whether it names a registered example or an authored JSON or YAML document. */
-export async function loadRenderable(subject: string): Promise<InfoschematicConfig> {
+export async function loadRenderable(subject: string): Promise<InfoschematicInput> {
   const registered = renderableExamples[subject]
   if (registered) return registered
   if (!isDocumentSubject(subject)) throw new Error(`Unknown example ${subject}. ${known(subject)}`)
@@ -75,6 +76,7 @@ const rasterise = (svgPath: string, pngPath: string, width: number) => {
 /** Render one authored example or document to a standalone SVG file, optionally rasterising it. */
 export async function renderExample(example: string, options: RenderExampleOptions = {}): Promise<RenderExampleResult> {
   const config = await loadRenderable(example)
+  const viewBox = createInfoschematicRuntime(config).infoschematicViewBox
   const stem = isDocumentSubject(example) ? basename(example, extname(example)) : example
 
   const svgPath = resolve(options.out ?? `reports/${stem}.svg`)
@@ -84,7 +86,7 @@ export async function renderExample(example: string, options: RenderExampleOptio
   const result: RenderExampleResult = {
     example,
     svg: svgPath,
-    viewBox: { height: config.infoschematic.viewBox.height, width: config.infoschematic.viewBox.width }
+    viewBox: { height: viewBox.height, width: viewBox.width }
   }
   if (!options.png) return result
 

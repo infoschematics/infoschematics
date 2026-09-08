@@ -85,6 +85,8 @@ describe('establishedInfoschematicOf', () => {
     const canonical = defineInfoschematicModel(infoschematicModelOf(legacy))
     const adapted = establishedInfoschematicOf(canonical)
 
+    expect(establishedInfoschematicOf(legacy)).toBe(legacy)
+
     expect(adapted.infoschematic.flows[0]).toMatchObject({
       code: 'MED-01',
       source: 'SRC',

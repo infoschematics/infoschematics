@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { systemExample } from './index.ts'
 
-const diagram = systemExample.infoschematic
+const diagram = systemExample.diagram
 
 const expectSerialisable = (value: unknown): void => {
   if (value === null) return
@@ -23,11 +23,11 @@ const expectSerialisable = (value: unknown): void => {
 describe('systemExample', () => {
   it('tells the four-stage journey with three named connectors', () => {
     expect(systemExample.title).toBe('A system, explained')
-    expect(diagram.viewBox).toEqual({ height: 248, width: 1268, x: 0, y: 0 })
+    expect(diagram.bounds).toEqual({ height: 248, width: 1268, x: 0, y: 0 })
     expect(diagram.cards).toHaveLength(4)
     expect(diagram.flows).toHaveLength(3)
-    expect(diagram.cards.map((card) => card.code)).toEqual(['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'])
-    expect(diagram.flows.map((flow) => flow.code)).toEqual(['SELECT', 'CONNECT', 'REVEAL'])
+    expect(diagram.cards.map((card) => card.id)).toEqual(['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'])
+    expect(diagram.flows.map((flow) => flow.id)).toEqual(['SELECT', 'CONNECT', 'REVEAL'])
   })
 
   it('authors the blueprint treatment with every Card detail on', () => {
@@ -36,8 +36,13 @@ describe('systemExample', () => {
       grid: 'major-plus-minor',
       surface: 'blueprint'
     })
-    expect(diagram.domains?.map((domain) => domain.id)).toEqual(['observe', 'arrange', 'illuminate', 'understand'])
-    for (const flow of diagram.flows) expect(flow.label).toEqual({ along: 0.5 })
+    expect(diagram.collections.map((collection) => collection.id)).toEqual([
+      'observe',
+      'arrange',
+      'illuminate',
+      'understand'
+    ])
+    for (const flow of diagram.flows) expect(flow.route?.labelAt).toBe(0.5)
   })
 
   it('remains serialisable data with no runtime values', () => {

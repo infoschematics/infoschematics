@@ -1,4 +1,4 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
@@ -20,7 +20,7 @@ export { reconcileFlowSignals } from './flow-signals.ts'
 export type CanvasProps = Omit<DiagramProps, 'flows' | 'visibleScopes'> & {
   children?: ReactNode
   className?: string
-  config: InfoschematicConfig
+  config: InfoschematicInput
   flows?: DiagramProps['flows']
   renderers?: InfoschematicRenderers
   visibleScopes?: DiagramProps['visibleScopes']

@@ -142,88 +142,98 @@ describe('infoschematicModelOf', () => {
   })
 
   it('represents mixed legacy line treatments as separate families', () => {
-    const model = infoschematicModelOf(
-      defineInfoschematic({
-        id: 'mixed-lines',
-        title: 'Mixed lines',
-        infoschematic: {
-          flowFamilies: [
-            {
-              id: 'media',
-              prefix: 'MED',
-              label: 'Media',
-              description: 'Media flow.',
-              color: '#ff00ff'
-            }
-          ],
-          cards: [
-            {
-              id: 'sink',
-              code: 'SNK',
-              label: 'Sink',
-              detail: 'Receives media.',
-              scope: 'edge',
-              scopes: ['edge'],
-              placement: { box: { x: 100, y: 20, width: 100, height: 60 } }
-            }
-          ],
-          points: [
-            {
-              id: 'source',
-              code: 'SRC',
-              label: 'Source',
-              scopes: ['edge'],
-              point: { x: 20, y: 50 }
-            }
-          ],
-          flows: [
-            {
-              id: 'solid',
-              code: 'MED-01',
-              family: 'media',
-              source: 'source',
-              target: 'sink',
-              sourcePort: 'E1',
-              targetPort: 'W1',
-              points: [
-                { x: 20, y: 50 },
-                { x: 100, y: 50 }
-              ]
-            },
-            {
-              id: 'dashed',
-              code: 'MED-02',
-              family: 'media',
-              dashed: true,
-              source: 'source',
-              target: 'sink',
-              sourcePort: 'E1',
-              targetPort: 'W1',
-              points: [
-                { x: 20, y: 50 },
-                { x: 100, y: 50 }
-              ]
-            }
-          ],
-          regions: [
-            {
-              id: 'area',
-              label: 'Area',
-              box: { x: 0, y: 0, width: 220, height: 100, radius: 8 }
-            }
-          ],
-          scopes: [
-            {
-              id: 'edge',
-              prefix: 'EDG',
-              label: 'Edge',
-              description: 'Visible at edge.',
-              color: '#123456',
-              fill: '#abcdef'
-            }
-          ]
-        }
-      })
+    const model = defineInfoschematicModel(
+      infoschematicModelOf(
+        defineInfoschematic({
+          id: 'mixed-lines',
+          title: 'Mixed lines',
+          infoschematic: {
+            flowFamilies: [
+              {
+                id: 'media',
+                prefix: 'MED',
+                label: 'Media',
+                description: 'Media flow.',
+                color: '#ff00ff'
+              }
+            ],
+            cards: [
+              {
+                id: 'sink',
+                code: 'SNK',
+                label: 'Sink',
+                detail: 'Receives media.',
+                scope: 'edge',
+                scopes: ['edge'],
+                placement: { box: { x: 100, y: 20, width: 100, height: 60 } }
+              }
+            ],
+            points: [
+              {
+                id: 'source',
+                code: 'SRC',
+                label: 'Source',
+                scopes: ['edge'],
+                point: { x: 20, y: 50 }
+              }
+            ],
+            flows: [
+              {
+                id: 'solid',
+                code: 'MED-01',
+                family: 'media',
+                source: 'source',
+                target: 'sink',
+                sourcePort: 'E1',
+                targetPort: 'W1',
+                points: [
+                  { x: 20, y: 50 },
+                  { x: 100, y: 50 }
+                ]
+              },
+              {
+                id: 'dashed',
+                code: 'MED-02',
+                family: 'media',
+                dashed: true,
+                source: 'source',
+                target: 'sink',
+                sourcePort: 'E1',
+                targetPort: 'W1',
+                points: [
+                  { x: 20, y: 50 },
+                  { x: 100, y: 50 }
+                ]
+              }
+            ],
+            regions: [
+              {
+                id: 'area',
+                label: 'Area',
+                box: { x: 0, y: 0, width: 220, height: 100, radius: 8 }
+              }
+            ],
+            scopes: [
+              {
+                id: 'edge',
+                prefix: 'EDG',
+                label: 'Edge',
+                description: 'Visible at edge.',
+                color: '#123456',
+                fill: '#abcdef'
+              },
+              {
+                id: 'unused',
+                prefix: 'NON',
+                label: 'Unused',
+                description: 'Visibility only.',
+                color: '#999999',
+                fill: '#eeeeee'
+              }
+            ]
+          }
+        })
+      )
     )
 
     expect(model.diagram.families).toMatchObject([
@@ -234,6 +244,7 @@ describe('infoschematicModelOf', () => {
       { id: 'MED-01', family: 'media' },
       { id: 'MED-02', family: 'media-DASHED' }
     ])
+    expect(model.diagram.collections.map(({ id }) => id)).toEqual(['edge'])
     expect(model.diagram.regions[0]).toMatchObject({
       appearance: { cornerRadius: 8 },
       bounds: { x: 0, y: 0, width: 220, height: 100 }

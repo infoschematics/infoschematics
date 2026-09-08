@@ -1,4 +1,4 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { Canvas, type CanvasProps } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -10,7 +10,7 @@ import { usePresentation } from './use-presentation.ts'
 
 export type PresentProps = Readonly<{
   className?: string
-  config: InfoschematicConfig
+  config: InfoschematicInput
   renderers?: CanvasProps['renderers']
   /** Signal focused Flows on Scene entry, or suppress automatic signalling. */
   signalPolicy?: SceneSignalPolicy
@@ -18,13 +18,15 @@ export type PresentProps = Readonly<{
 
 export function Present({ className, config, renderers, signalPolicy = 'focused-flows' }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
+  const established = runtime.config
   const presentation = usePresentation(runtime, signalPolicy)
   const { derived, dispatch, state } = presentation
   const storyCallout = state.playing
-    ? config.stories.find((story) => story.id === state.playing?.id)?.scenes[state.playing.step]?.callout
+    ? established.stories.find((story) => story.id === state.playing?.id)?.scenes[state.playing.step]?.callout
     : undefined
   const thematicCallout = derived.thematicScene
-    ? config.themes.flatMap((theme) => theme.scenes).find((scene) => scene.id === derived.thematicScene?.id)?.callout
+    ? established.themes.flatMap((theme) => theme.scenes).find((scene) => scene.id === derived.thematicScene?.id)
+        ?.callout
     : undefined
   const [detailsVisible, setDetailsVisible] = useState(true)
   const [fullscreen, setFullscreen] = useState(false)

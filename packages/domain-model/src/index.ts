@@ -1,6 +1,7 @@
 import type { Point } from './geometry.ts'
 import type { InfoschematicDefinition } from './infoschematic.ts'
 import type { InfoschematicMetadata } from './metadata.ts'
+import type { DefinedInfoschematic } from './model.ts'
 import type { StandaloneSceneConfig } from './scene.ts'
 import type { StoryConfig } from './story.ts'
 import type { ThemeConfig } from './theme.ts'
@@ -22,3 +23,6 @@ export type InfoschematicConfigInput = InfoschematicMetadata & {
   stories?: readonly StoryConfig[]
   calloutPositions?: readonly Point[]
 }
+
+/** Direct canonical data or the established serialisable configuration. */
+export type InfoschematicInput = DefinedInfoschematic | InfoschematicConfig

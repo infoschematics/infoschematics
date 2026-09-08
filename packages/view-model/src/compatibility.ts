@@ -3,6 +3,7 @@ import type {
   DefinedInfoschematic,
   ElementSelection,
   InfoschematicConfig,
+  InfoschematicInput,
   JsonValue,
   Scene
 } from '@infoschematics/domain-model'
@@ -63,7 +64,9 @@ const calloutOf = (callout: Callout | undefined) => {
  * Adapt a canonical model into the established view contract while renderers
  * migrate independently. This is a view-boundary adapter, not an authored form.
  */
-export const establishedInfoschematicOf = (model: DefinedInfoschematic): InfoschematicConfig => {
+export const establishedInfoschematicOf = (input: InfoschematicInput): InfoschematicConfig => {
+  if ('infoschematic' in input) return input
+  const model: DefinedInfoschematic = input
   const diagram = model.diagram
   const collectionById = new Map(diagram.collections.map((collection) => [collection.id, collection]))
   const memberships = new Map<string, string[]>()

@@ -40,6 +40,7 @@ const calloutOf = (
 export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic => {
   const definition = config.infoschematic
   const domains = definition.domains ?? []
+  const primaryScopeCollections = new Set(definition.cards.filter((card) => !card.domain).map((card) => card.scope))
   const endpoints = [...definition.cards, ...definition.fabrics, ...definition.points]
   const elementId = new Map(endpoints.map(({ code, id }) => [id, code]))
   const flowId = new Map(definition.flows.map(({ code, id }) => [id, code]))
@@ -137,7 +138,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           label: domain.label
         })),
         ...definition.scopes
-          .filter((scope) => !domains.some((domain) => domain.id === scope.id))
+          .filter((scope) => primaryScopeCollections.has(scope.id) && !domains.some((domain) => domain.id === scope.id))
           .map((scope) => ({
             appearance: {
               color: scope.color,

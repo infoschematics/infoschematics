@@ -1,112 +1,232 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematicModel } from '@infoschematics/domain-core'
 
-// One editorial pipeline: the same four stages the homepage tells in prose,
-// authored as serialisable data so every renderer can carry the story.
-const stageCard = (
-  code: string,
-  id: string,
-  label: string,
-  detail: string,
-  domain: string,
-  stereotype: string,
-  x: number
-) => ({
-  code,
-  detail,
-  domain,
-  id,
-  label,
-  placement: {
-    box: { height: 120, width: 240, x, y: 64 },
-    ports: { east: 1, west: 1 }
-  },
-  scope: 'system',
-  scopes: ['system'],
-  stereotype
-})
-
-const connector = (code: string, id: string, source: string, target: string, x: number) => ({
-  code,
-  family: 'progression',
-  id,
-  label: { along: 0.5 },
-  points: [
-    { x, y: 124 },
-    { x: x + 60, y: 124 }
-  ],
-  source,
-  sourcePort: 'E1' as const,
-  target,
-  targetPort: 'W1' as const
-})
-
-export const systemExample = defineInfoschematic({
-  id: 'system-explained',
-  title: 'A system, explained',
-  subtitle: 'From observed signals to a shared view',
-  synopsis:
+export const systemExample = defineInfoschematicModel({
+  description:
     'Observation gathers signals, arrangement gives them structure, illumination draws out meaning, and the result is a view a whole team can share.',
-  infoschematic: {
-    viewBox: { height: 248, width: 1268, x: 0, y: 0 },
+  diagram: {
     appearance: {
-      card: { compact: false, description: true, identity: true, stereotype: true },
+      surface: 'blueprint',
       grid: 'major-plus-minor',
-      surface: 'blueprint'
+      card: {
+        compact: false,
+        identity: true,
+        stereotype: true,
+        description: true
+      }
     },
-    domains: [
-      { color: '#9673a6', fill: '#0d1b2a', id: 'observe', label: 'Observe' },
-      { color: '#6c8ebf', fill: '#0d1b2a', id: 'arrange', label: 'Arrange' },
-      { color: '#b85450', fill: '#0d1b2a', id: 'illuminate', label: 'Illuminate' },
-      { color: '#82b366', fill: '#0d1b2a', id: 'understand', label: 'Understand' }
-    ],
-    scopes: [
+    assemblies: [],
+    bounds: {
+      height: 248,
+      width: 1268,
+      x: 0,
+      y: 0
+    },
+    cards: [
       {
-        color: '#79c9ff',
-        description: 'The system being explained',
-        fill: '#0d1b2a',
-        id: 'system',
-        label: 'System',
-        prefix: 'SYS'
+        bounds: {
+          height: 120,
+          width: 240,
+          x: 64,
+          y: 64
+        },
+        collection: 'observe',
+        description: 'Facts, events and relationships',
+        id: 'OBS-01',
+        label: 'Signals',
+        ports: {
+          east: 1,
+          west: 1
+        },
+        stereotype: 'Observe'
+      },
+      {
+        bounds: {
+          height: 120,
+          width: 240,
+          x: 364,
+          y: 64
+        },
+        collection: 'arrange',
+        description: 'Systems, boundaries and flow',
+        id: 'MAP-02',
+        label: 'Structure',
+        ports: {
+          east: 1,
+          west: 1
+        },
+        stereotype: 'Arrange'
+      },
+      {
+        bounds: {
+          height: 120,
+          width: 240,
+          x: 664,
+          y: 64
+        },
+        collection: 'illuminate',
+        description: 'Stories, scenes and evidence',
+        id: 'LIT-03',
+        label: 'Meaning',
+        ports: {
+          east: 1,
+          west: 1
+        },
+        stereotype: 'Illuminate'
+      },
+      {
+        bounds: {
+          height: 120,
+          width: 240,
+          x: 964,
+          y: 64
+        },
+        collection: 'understand',
+        description: 'Complexity made comprehensible',
+        id: 'SEE-04',
+        label: 'Shared view',
+        ports: {
+          east: 1,
+          west: 1
+        },
+        stereotype: 'Understand'
       }
     ],
-    flowFamilies: [
+    collections: [
       {
-        color: '#79c9ff',
+        appearance: {
+          color: '#9673a6',
+          fill: '#0d1b2a'
+        },
+        id: 'observe',
+        label: 'Observe'
+      },
+      {
+        appearance: {
+          color: '#6c8ebf',
+          fill: '#0d1b2a'
+        },
+        id: 'arrange',
+        label: 'Arrange'
+      },
+      {
+        appearance: {
+          color: '#b85450',
+          fill: '#0d1b2a'
+        },
+        id: 'illuminate',
+        label: 'Illuminate'
+      },
+      {
+        appearance: {
+          color: '#82b366',
+          fill: '#0d1b2a'
+        },
+        id: 'understand',
+        label: 'Understand'
+      }
+    ],
+    fabrics: [],
+    families: [
+      {
+        appearance: {
+          color: '#79c9ff'
+        },
         description: 'Each stage hands its result to the next',
         id: 'progression',
-        label: 'Progresses to',
-        prefix: 'STG'
+        label: 'Progresses to'
       }
-    ],
-    regions: [
-      {
-        box: { height: 200, radius: 12, width: 1220, x: 24, y: 24 },
-        fill: '#12273b24',
-        frame: { style: 'solid' },
-        id: 'journey',
-        label: 'Infoschematic',
-        labelMount: 'boundary',
-        labelPlacement: 'north-west'
-      }
-    ],
-    cards: [
-      stageCard('OBS-01', 'signals', 'Signals', 'Facts, events and relationships', 'observe', 'Observe', 64),
-      stageCard('MAP-02', 'structure', 'Structure', 'Systems, boundaries and flow', 'arrange', 'Arrange', 364),
-      stageCard('LIT-03', 'meaning', 'Meaning', 'Stories, scenes and evidence', 'illuminate', 'Illuminate', 664),
-      stageCard(
-        'SEE-04',
-        'shared-view',
-        'Shared view',
-        'Complexity made comprehensible',
-        'understand',
-        'Understand',
-        964
-      )
     ],
     flows: [
-      connector('SELECT', 'select', 'signals', 'structure', 304),
-      connector('CONNECT', 'connect', 'structure', 'meaning', 604),
-      connector('REVEAL', 'reveal', 'meaning', 'shared-view', 904)
+      {
+        direction: 'forward',
+        family: 'progression',
+        id: 'SELECT',
+        route: {
+          labelAt: 0.5,
+          waypoints: []
+        },
+        source: {
+          element: 'OBS-01',
+          port: 'E1'
+        },
+        target: {
+          element: 'MAP-02',
+          port: 'W1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'progression',
+        id: 'CONNECT',
+        route: {
+          labelAt: 0.5,
+          waypoints: []
+        },
+        source: {
+          element: 'MAP-02',
+          port: 'E1'
+        },
+        target: {
+          element: 'LIT-03',
+          port: 'W1'
+        }
+      },
+      {
+        direction: 'forward',
+        family: 'progression',
+        id: 'REVEAL',
+        route: {
+          labelAt: 0.5,
+          waypoints: []
+        },
+        source: {
+          element: 'LIT-03',
+          port: 'E1'
+        },
+        target: {
+          element: 'SEE-04',
+          port: 'W1'
+        }
+      }
+    ],
+    overlays: [],
+    points: [],
+    regions: [
+      {
+        appearance: {
+          cornerRadius: 12,
+          fill: '#12273b24',
+          frame: {
+            style: 'solid'
+          },
+          label: {
+            mount: 'boundary',
+            placement: 'north-west'
+          }
+        },
+        bounds: {
+          height: 200,
+          width: 1220,
+          x: 24,
+          y: 24
+        },
+        id: 'journey',
+        label: 'Infoschematic'
+      }
+    ],
+    sets: [
+      {
+        description: 'The system being explained',
+        elements: ['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'],
+        id: 'system',
+        label: 'System'
+      }
     ]
-  }
+  },
+  id: 'system-explained',
+  specifications: [],
+  stories: [],
+  subtitle: 'From observed signals to a shared view',
+  themes: [],
+  title: 'A system, explained'
 })

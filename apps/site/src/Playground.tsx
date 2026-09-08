@@ -8,6 +8,7 @@ import { blankInfoschematic } from '@infoschematics/is-blank'
 import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { establishedInfoschematicOf } from '@infoschematics/view-studio/compatibility'
 import { useEffect, useMemo, useState } from 'react'
 import jsonSeed from './playground/seeds/format-parity.json?raw'
 import typescriptSeed from './playground/seeds/format-parity.ts.txt?raw'
@@ -23,7 +24,8 @@ const formats: readonly { format: InfoschematicFormat; label: string }[] = [
 
 export type PlaygroundPreset = 'blank' | 'format-parity' | 'infoschematics' | 'system'
 
-const serialise = (config: unknown) => `${JSON.stringify(config, null, 2)}\n`
+const serialise = (config: Parameters<typeof establishedInfoschematicOf>[0]) =>
+  `${JSON.stringify(establishedInfoschematicOf(config), null, 2)}\n`
 
 /**
  * A preset fills one or more buffers and focuses one tab. The format-parity seed is authored in all three forms; an

@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 
 import { infoschematicsInfoschematic } from './index.ts'
 
-const diagram = infoschematicsInfoschematic.infoschematic
+const diagram = infoschematicsInfoschematic.diagram
 
 const expectUnique = (values: readonly string[]) => {
   expect(new Set(values).size).toBe(values.length)
@@ -29,20 +29,20 @@ const expectSerialisable = (value: unknown): void => {
 describe('infoschematicsInfoschematic', () => {
   it('models the repository as four architectural layers', () => {
     expect(diagram.regions).toHaveLength(11)
-    expect(diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')).toHaveLength(4)
+    expect(diagram.regions.filter(({ appearance }) => appearance?.label?.mount === 'boundary')).toHaveLength(4)
     expect(diagram.cards).toHaveLength(9)
     expect(diagram.flows).toHaveLength(17)
 
     expect(diagram.cards.map((card) => card.id)).toEqual([
-      'package-domain-model',
-      'package-domain-core',
-      'package-view-model',
-      'package-view-canvas',
-      'package-view-present',
-      'package-view-studio',
-      'package-render-svg',
-      'example-infoschematics',
-      'host-site'
+      'PKG-DM',
+      'PKG-DC',
+      'PKG-VM',
+      'PKG-VC',
+      'PKG-VP',
+      'PKG-VS',
+      'PKG-SVG',
+      'EX-IS',
+      'HOST-SITE'
     ])
   })
 
@@ -57,54 +57,55 @@ describe('infoschematicsInfoschematic', () => {
       grid: 'major-plus-minor',
       surface: 'blueprint'
     })
-    expect(diagram.domains?.map(({ id }) => id)).toEqual([
+    expect(diagram.collections.map(({ id }) => id)).toEqual([
       'product-foundation',
       'interactive-experience',
       'publication'
     ])
 
-    const domains = new Set((diagram.domains ?? []).map(({ id }) => id))
-    expect(diagram.cards.every((card) => card.domain && domains.has(card.domain))).toBe(true)
+    const collections = new Set(diagram.collections.map(({ id }) => id))
+    expect(diagram.cards.every((card) => card.collection && collections.has(card.collection))).toBe(true)
     expect(diagram.cards.every((card) => card.stereotype)).toBe(true)
 
-    const publicationCards = diagram.cards.filter(({ domain }) => domain === 'publication')
-    expect(new Set(publicationCards.map(({ scope }) => scope))).toEqual(
+    const setByElement = new Map(diagram.sets.flatMap((set) => set.elements.map((element) => [element, set.id])))
+    const publicationCards = diagram.cards.filter(({ collection }) => collection === 'publication')
+    expect(new Set(publicationCards.map(({ id }) => setByElement.get(id)))).toEqual(
       new Set(['renderer-output', 'authored-examples', 'application-hosts'])
     )
 
     // Each band is a framed row holding filled panels inset inside it, so a boundary-mounted
     // title reads against the backdrop and no panel repeats its band's frame line.
-    const bands = diagram.regions.filter(({ labelMount }) => labelMount === 'boundary')
-    const panels = diagram.regions.filter(({ labelMount }) => labelMount !== 'boundary')
-    expect(bands.map(({ frame }) => frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
-    expect(bands.every(({ fill }) => fill === undefined)).toBe(true)
-    expect(panels.every(({ fill }) => fill !== undefined)).toBe(true)
-    expect(panels.every(({ frame }) => frame === undefined)).toBe(true)
-    expect(diagram.regions.every(({ labelPlacement }) => labelPlacement !== undefined)).toBe(true)
+    const bands = diagram.regions.filter(({ appearance }) => appearance?.label?.mount === 'boundary')
+    const panels = diagram.regions.filter(({ appearance }) => appearance?.label?.mount !== 'boundary')
+    expect(bands.map(({ appearance }) => appearance?.frame?.style)).toEqual(['solid', 'dashed', 'dotted', 'solid'])
+    expect(bands.every(({ appearance }) => appearance?.fill === undefined)).toBe(true)
+    expect(panels.every(({ appearance }) => appearance?.fill !== undefined)).toBe(true)
+    expect(panels.every(({ appearance }) => appearance?.frame === undefined)).toBe(true)
+    expect(diagram.regions.every(({ appearance }) => appearance?.label?.placement !== undefined)).toBe(true)
   })
 
   it('expresses only the allowed dependency direction', () => {
-    const edges = diagram.flows.map((flow) => `${flow.source}->${flow.target}`)
+    const edges = diagram.flows.map((flow) => `${flow.source.element}->${flow.target.element}`)
 
     expect(new Set(edges)).toEqual(
       new Set([
-        'package-domain-core->package-domain-model',
-        'package-view-model->package-domain-model',
-        'package-view-canvas->package-domain-model',
-        'package-view-canvas->package-view-model',
-        'package-view-present->package-domain-model',
-        'package-view-present->package-view-model',
-        'package-view-present->package-view-canvas',
-        'package-view-studio->package-domain-core',
-        'package-view-studio->package-domain-model',
-        'package-view-studio->package-view-model',
-        'package-view-studio->package-view-canvas',
-        'package-view-studio->package-view-present',
-        'package-render-svg->package-domain-model',
-        'package-render-svg->package-view-model',
-        'example-infoschematics->package-domain-core',
-        'host-site->package-view-studio',
-        'host-site->example-infoschematics'
+        'PKG-DC->PKG-DM',
+        'PKG-VM->PKG-DM',
+        'PKG-VC->PKG-DM',
+        'PKG-VC->PKG-VM',
+        'PKG-VP->PKG-DM',
+        'PKG-VP->PKG-VM',
+        'PKG-VP->PKG-VC',
+        'PKG-VS->PKG-DC',
+        'PKG-VS->PKG-DM',
+        'PKG-VS->PKG-VM',
+        'PKG-VS->PKG-VC',
+        'PKG-VS->PKG-VP',
+        'PKG-SVG->PKG-DM',
+        'PKG-SVG->PKG-VM',
+        'EX-IS->PKG-DC',
+        'HOST-SITE->PKG-VS',
+        'HOST-SITE->EX-IS'
       ])
     )
   })
@@ -113,47 +114,41 @@ describe('infoschematicsInfoschematic', () => {
     const regionIds = diagram.regions.map((region) => region.id)
     const cardIds = diagram.cards.map((card) => card.id)
     const flowIds = diagram.flows.map((flow) => flow.id)
-    const sceneIds = infoschematicsInfoschematic.standaloneScenes.map((scene) => scene.id)
+    const sceneIds = infoschematicsInfoschematic.themes.flatMap((theme) => theme.scenes.map((scene) => scene.id))
     const storyIds = infoschematicsInfoschematic.stories.map((story) => story.id)
 
     for (const ids of [regionIds, cardIds, flowIds, sceneIds, storyIds]) {
       expectUnique(ids)
     }
-    expectUnique(diagram.cards.map((card) => card.code))
-    expectUnique(diagram.flows.map((flow) => flow.code))
-    expectUnique(infoschematicsInfoschematic.standaloneScenes.map((scene) => scene.code))
-    expectUnique(infoschematicsInfoschematic.stories.map((story) => story.code))
-
     const cards = new Set(cardIds)
     const flows = new Set(flowIds)
-    const flowFamilies = new Set(diagram.flowFamilies.map((family) => family.id))
-    const scenes = new Set(sceneIds)
+    const flowFamilies = new Set(diagram.families.map((family) => family.id))
 
     for (const flow of diagram.flows) {
-      expect(cards.has(flow.source)).toBe(true)
-      expect(cards.has(flow.target)).toBe(true)
-      expect(flow.source).not.toBe(flow.target)
-      expect(flowFamilies.has(flow.family)).toBe(true)
+      expect(cards.has(flow.source.element)).toBe(true)
+      expect(cards.has(flow.target.element)).toBe(true)
+      expect(flow.source.element).not.toBe(flow.target.element)
+      expect(flow.family && flowFamilies.has(flow.family)).toBe(true)
     }
 
-    for (const scene of infoschematicsInfoschematic.standaloneScenes) {
-      for (const artefact of scene.focus.artefacts ?? []) expect(cards.has(artefact)).toBe(true)
-      for (const flow of scene.focus.flows ?? []) expect(flows.has(flow)).toBe(true)
+    for (const scene of infoschematicsInfoschematic.themes.flatMap((theme) => theme.scenes)) {
+      for (const element of scene.focus?.elements ?? []) expect(cards.has(element) || flows.has(element)).toBe(true)
     }
 
     for (const story of infoschematicsInfoschematic.stories) {
       for (const scene of story.scenes) {
-        if (scene.sourceScene) expect(scenes.has(scene.sourceScene)).toBe(true)
-        if (scene.anchor) expect(cards.has(scene.anchor)).toBe(true)
+        const placement = scene.callout?.placement
+        if (placement && 'element' in placement) expect(cards.has(placement.element)).toBe(true)
       }
     }
   })
 
   it('provides several reusable scenes and one concise story', () => {
-    expect(infoschematicsInfoschematic.standaloneScenes).toHaveLength(4)
+    expect(infoschematicsInfoschematic.themes).toHaveLength(1)
+    expect(infoschematicsInfoschematic.themes[0]?.scenes).toHaveLength(4)
     expect(infoschematicsInfoschematic.stories).toHaveLength(1)
     expect(infoschematicsInfoschematic.stories[0]?.scenes).toHaveLength(3)
-    expect(infoschematicsInfoschematic.stories[0]?.scenes.every((scene) => scene.sourceScene)).toBe(true)
+    expect(infoschematicsInfoschematic.stories[0]?.scenes.every((scene) => scene.focus?.elements?.length)).toBe(true)
   })
 
   it('remains framework-neutral serialisable authored data', () => {

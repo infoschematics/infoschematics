@@ -1,4 +1,4 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/domain-model'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import {
   type CardDetailOverrides,
@@ -156,11 +156,12 @@ const includedByFocus = (
  * therefore use a labelled geometric fallback in this framework-neutral output.
  */
 export const renderInfoschematicSvg = (
-  config: InfoschematicConfig,
+  input: InfoschematicInput,
   options: RenderInfoschematicSvgOptions = {}
 ): string => {
+  const runtime = createInfoschematicRuntime(input)
+  const config = runtime.config
   const definition = config.infoschematic
-  const runtime = createInfoschematicRuntime(config)
   const viewBox = definition.viewBox
   const visualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
   const signalledFlows = new Set(options.signals ?? [])
