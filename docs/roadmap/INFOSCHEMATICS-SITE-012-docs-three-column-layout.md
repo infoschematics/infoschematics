@@ -4,7 +4,7 @@ area: SITE
 title: Docs three-column layout
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 24bab5b8f95c8cdd195f3b52a536095a860b965f
@@ -82,6 +82,8 @@ The documentation section is a three-column layout in the wide shell: a sticky l
 
 All 60 site tests pass (sidebar listing with `aria-current`, unique article anchor ids each linked from the contents nav, plus the pre-existing coverage — the `<h1>` pin updated to `<h1 id="` now that headings carry anchors). Site typecheck and the production build pass. `bun run self:check` cannot run end to end in this checkout while another writer's in-progress `view-studio` edits do not compile.
 
+`bun run self:check` was subsequently run against the combined tree once the concurrent `view-studio` work had landed, and passes: 65 test files, 473 tests, clean dependency cruise over 361 modules, production site build succeeding. The verification gap recorded above is closed; the manual dev-server walk remains outstanding.
+
 ### Outstanding concerns
 
 - Manual dev-server walk (columns at full width, anchor jumps, 1280px/960px collapses) not performed in this non-interactive session.
@@ -94,6 +96,10 @@ Canonical Markdown under `docs/` is untouched; the site still renders it rather 
 ### Mini recap
 
 Docs pages became a MUI-style three-column layout: article nav left, 72ch document centre, anchor contents right, collapsing gracefully on narrow viewports.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above, with the manual dev-server walk still outstanding.
 
 ## Discussion
 

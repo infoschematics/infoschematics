@@ -4,7 +4,7 @@ area: SITE
 title: Docs overview and navigation
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f553cd55daf3124f0d042b5e34538212aa91cb38
@@ -82,6 +82,8 @@ Ledger high-water `SITE` moves to 13.
 
 All 62 site tests pass (the `/docs/` path now resolves the overview route with and without a trailing slash; the DocsIndex listing test was replaced accordingly; the overview flows through the existing per-route rendering, sidebar, and anchor coverage automatically). Site typecheck and production build pass. `bun run self:check` still cannot run end to end while another writer's in-progress `view-studio` edits do not compile.
 
+`bun run self:check` was subsequently run against the combined tree once the concurrent `view-studio` work had landed, and passes: 65 test files, 473 tests, clean dependency cruise over 361 modules, production site build succeeding. The verification gap recorded above is closed; the manual dev-server walk remains outstanding.
+
 ### Outstanding concerns
 
 - Manual dev-server walk not performed in this non-interactive session.
@@ -94,6 +96,10 @@ The overview lives under `docs/` and is rendered, not copied, preserving ADR-INF
 ### Mini recap
 
 Docs now open on an authored Overview under Getting started, with the visual guide folded into the section and MUI-style dividers in the sidebar.
+
+## Done
+
+Accepted 2026-09-08 by Kris Brown on the review packet above, with the manual dev-server walk still outstanding.
 
 ## Discussion
 
