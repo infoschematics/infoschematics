@@ -8,8 +8,11 @@ export {
   type SurfaceTreatment,
   surfaceTreatments
 } from '@infoschematics/domain-model/appearance'
-export { defaultInfoschematicAppearance, defineInfoschematic } from './define.ts'
-export { infoschematicModelOf } from './model.ts'
+export {
+  defaultInfoschematicAppearance,
+  defineInfoschematic
+} from './define.ts'
+export { defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
   type InfoschematicFormat,
@@ -20,7 +23,10 @@ export {
   type ParseInfoschematicOptions,
   parseInfoschematic
 } from './parse.ts'
-export { infoschematicConfigSchema, type SchemaMirrorsContract } from './schema.ts'
+export {
+  infoschematicConfigSchema,
+  type SchemaMirrorsContract
+} from './schema.ts'
 export {
   parseTypescriptDocument,
   type TypescriptDocumentIssue,

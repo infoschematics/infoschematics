@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { infoschematicModelOf } from '@infoschematics/domain-core'
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import { defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
+import type { Infoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
 import type { RenderInfoschematicSvgOptions, SvgSceneSelection } from '@infoschematics/render-svg'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { establishedInfoschematicOf } from '@infoschematics/view-model/compatibility'
 
 type SharpInstance = {
   ensureAlpha(): SharpInstance
@@ -228,15 +229,27 @@ const semanticProjection = (config: InfoschematicConfig, selection: SvgSceneSele
     renderer,
     scopes
   })),
-  points: config.infoschematic.points.map(({ code, id, label, ports, scopes }) => ({ code, id, label, ports, scopes })),
+  points: config.infoschematic.points.map(({ code, id, label, ports, scopes }) => ({
+    code,
+    id,
+    label,
+    ports,
+    scopes
+  })),
   regions: config.infoschematic.regions.map(({ box: _box, ...region }) => region),
   selection
 })
 
 const layoutProjection = (config: InfoschematicConfig) => ({
   grid,
-  cards: config.infoschematic.cards.map(({ code, placement }) => ({ code, box: gridBox(config, placement.box) })),
-  fabrics: config.infoschematic.fabrics.map(({ code, placement }) => ({ code, box: gridBox(config, placement.box) })),
+  cards: config.infoschematic.cards.map(({ code, placement }) => ({
+    code,
+    box: gridBox(config, placement.box)
+  })),
+  fabrics: config.infoschematic.fabrics.map(({ code, placement }) => ({
+    code,
+    box: gridBox(config, placement.box)
+  })),
   flows: config.infoschematic.flows.map(({ code, points, source, sourcePort, target, targetPort }) => ({
     cells: gridRoute(config, points),
     code,
@@ -250,21 +263,46 @@ const layoutProjection = (config: InfoschematicConfig) => ({
     box: placement ? gridBox(config, placement) : 'diagram',
     id
   })),
-  points: config.infoschematic.points.map(({ code, point }) => ({ at: gridPoint(config, point), code })),
-  regions: config.infoschematic.regions.map(({ box, id }) => ({ box: gridBox(config, box), id }))
+  points: config.infoschematic.points.map(({ code, point }) => ({
+    at: gridPoint(config, point),
+    code
+  })),
+  regions: config.infoschematic.regions.map(({ box, id }) => ({
+    box: gridBox(config, box),
+    id
+  }))
 })
 
 const loadFixture = async (fixture: string) => {
   const source = join(fixture, 'src/index.ts')
-  const module = (await import(pathToFileURL(source).href)) as { fiveGEmerge?: InfoschematicConfig }
+  const module = (await import(pathToFileURL(source).href)) as {
+    fiveGEmerge?: Infoschematic | InfoschematicConfig
+  }
   if (!module.fiveGEmerge) throw new Error(`Expected fiveGEmerge export from ${source}.`)
-  return { config: module.fiveGEmerge, source }
+  const authored = module.fiveGEmerge
+  const model = defineInfoschematicModel('diagram' in authored ? authored : infoschematicModelOf(authored))
+  return { config: establishedInfoschematicOf(model), model, source }
 }
 
 const loadSharp = async (fixture: string): Promise<Sharp> => {
-  const source = pathToFileURL(join(fixture, 'node_modules/sharp/lib/index.js')).href
-  const module = (await import(source)) as { default: Sharp }
-  return module.default
+  let directory = fixture
+  while (true) {
+    for (const modulePath of ['dist/index.mjs', 'lib/index.js']) {
+      const candidate = join(directory, 'node_modules/sharp', modulePath)
+      try {
+        await access(candidate)
+        const module = (await import(pathToFileURL(candidate).href)) as {
+          default: Sharp
+        }
+        return module.default
+      } catch {
+        // Continue through known Sharp entry points and parent workspaces.
+      }
+    }
+    const parent = dirname(directory)
+    if (parent === directory) throw new Error(`Could not resolve Sharp from fixture workspace: ${fixture}`)
+    directory = parent
+  }
 }
 
 const renderEvidence = async (
@@ -348,12 +386,12 @@ export const compareIbcVisualManifests = (expected: IbcVisualManifest, actual: I
 
 const main = async () => {
   const args = argumentsOf(process.argv.slice(2))
-  const { config } = await loadFixture(args.fixture)
+  const { config, model } = await loadFixture(args.fixture)
   const sharp = await loadSharp(args.fixture)
   const rendered = await renderEvidence(config, args.output, sharp)
   const manifest: IbcVisualManifest = {
     fixture: { package: basename(args.fixture), source: 'src/index.ts' },
-    modelSha256: sha256(JSON.stringify(stable(infoschematicModelOf(config)))),
+    modelSha256: sha256(JSON.stringify(stable(model))),
     raster: {
       channels: 4,
       height: rendered.height,

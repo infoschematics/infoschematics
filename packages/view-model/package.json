@@ -21,6 +21,10 @@
       "types": "./dist/card-layout.d.ts",
       "import": "./dist/card-layout.js"
     },
+    "./compatibility": {
+      "types": "./dist/compatibility.d.ts",
+      "import": "./dist/compatibility.js"
+    },
     "./editable": {
       "types": "./dist/editable.d.ts",
       "import": "./dist/editable.js"

@@ -1,5 +1,6 @@
 import type {
   Callout,
+  DefinedInfoschematic,
   ElementSelection,
   Infoschematic,
   InfoschematicConfig,
@@ -9,17 +10,21 @@ import type {
 } from '@infoschematics/domain-model'
 
 const legacyPorts = Object.freeze({ east: 7, north: 7, south: 7, west: 7 })
+const standardPorts = Object.freeze({ east: 1, north: 1, south: 1, west: 1 })
 
 const propertiesOf = (
   properties: Readonly<Record<string, boolean | number | string>> | undefined
 ): Readonly<Record<string, JsonValue>> | undefined => properties
 
-const calloutOf = (callout: InfoschematicConfig['themes'][number]['scenes'][number]['callout']): Callout | undefined =>
+const calloutOf = (
+  callout: InfoschematicConfig['themes'][number]['scenes'][number]['callout'],
+  placement?: Callout['placement']
+): Callout | undefined =>
   callout
     ? {
         body: callout.body,
         kind: callout.renderer,
-        placement: callout.at ? { at: callout.at } : undefined,
+        placement: callout.at ? { at: callout.at } : placement,
         properties: propertiesOf(callout.properties),
         takeaways: callout.takeaways,
         title: callout.title
@@ -40,16 +45,33 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
   const flowId = new Map(definition.flows.map(({ code, id }) => [id, code]))
   const visibleId = (id: string) => elementId.get(id) ?? flowId.get(id) ?? id
   const scopeById = new Map(definition.scopes.map((scope) => [scope.id, scope]))
+  const dashedFamilyId = new Map(
+    definition.flowFamilies.flatMap((family) => {
+      const familyFlows = definition.flows.filter((flow) => flow.family === family.id)
+      const hasDashed = familyFlows.some((flow) => flow.dashed)
+      const hasSolid = familyFlows.some((flow) => !flow.dashed)
+
+      return hasDashed && hasSolid ? ([[family.id, `${family.id}-DASHED`]] as const) : []
+    })
+  )
 
   const selectionOf = (
-    focus: { artefacts?: readonly string[]; flows?: readonly string[]; graphics?: readonly string[] } | undefined
+    focus:
+      | {
+          artefacts?: readonly string[]
+          flows?: readonly string[]
+          graphics?: readonly string[]
+        }
+      | undefined,
+    graphics: readonly string[] = []
   ): ElementSelection | undefined => {
-    if (!focus) return undefined
+    if (!focus && graphics.length === 0) return undefined
     return {
       elements: [
-        ...(focus.artefacts ?? []).map(visibleId),
-        ...(focus.flows ?? []).map(visibleId),
-        ...(focus.graphics ?? []).map(visibleId)
+        ...(focus?.artefacts ?? []).map(visibleId),
+        ...(focus?.flows ?? []).map(visibleId),
+        ...(focus?.graphics ?? []).map(visibleId),
+        ...graphics.map(visibleId)
       ]
     }
   }
@@ -62,10 +84,10 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
   ) => {
     const source = scene.sourceScene ? standaloneById.get(scene.sourceScene) : undefined
     return {
-      callout: calloutOf(scene.callout),
+      callout: calloutOf(scene.callout, scene.anchor ? { element: visibleId(scene.anchor) } : undefined),
       description: source?.description,
       duration: scene.duration,
-      focus: selectionOf(scene.focus ?? source?.focus),
+      focus: selectionOf(scene.focus ?? source?.focus, scene.graphic ? [scene.graphic] : []),
       id: scene.id ?? `${storyId}-${index + 1}`,
       label: scene.title ?? source?.label ?? `Scene ${index + 1}`
     }
@@ -73,6 +95,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
 
   const interfaces: Interface[] = definition.interfaces.map((entry) => ({
     description: entry.description,
+    document: entry.contract || entry.href ? { href: entry.href, label: entry.contract } : undefined,
     id: entry.id,
     label: entry.label,
     operations: entry.operations
@@ -100,6 +123,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         collection: card.domain ?? card.scope,
         description: card.detail,
         id: card.code,
+        interfaces: card.conformsTo,
         label: card.label,
         ports: card.placement.ports ?? legacyPorts,
         provides: card.services,
@@ -115,7 +139,11 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         ...definition.scopes
           .filter((scope) => !domains.some((domain) => domain.id === scope.id))
           .map((scope) => ({
-            appearance: { color: scope.color, fill: scope.fill, icon: scope.icon },
+            appearance: {
+              color: scope.color,
+              fill: scope.fill,
+              icon: scope.icon
+            },
             description: scope.description,
             id: scope.id,
             label: scope.label
@@ -131,18 +159,45 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           kind: fabric.appearance?.renderer,
           label: fabric.label,
           ports: fabric.placement.ports ?? legacyPorts,
-          properties: propertiesOf(fabric.appearance?.properties)
+          properties: {
+            ...fabric.appearance?.properties,
+            ...(fabric.appearance?.caption ? { caption: fabric.appearance.caption } : {}),
+            ...(fabric.appearance?.detail ? { detail: fabric.appearance.detail } : {})
+          }
         }
       }),
-      families: definition.flowFamilies.map((family) => ({
-        appearance: { color: family.color },
-        description: family.description,
-        id: family.id,
-        label: family.label
-      })),
+      families: definition.flowFamilies.flatMap((family) => {
+        const dashedId = dashedFamilyId.get(family.id)
+        const appearance = { color: family.color }
+
+        return [
+          {
+            appearance: {
+              ...appearance,
+              line:
+                !dashedId && definition.flows.some((flow) => flow.family === family.id && flow.dashed)
+                  ? ('dashed' as const)
+                  : undefined
+            },
+            description: family.description,
+            id: family.id,
+            label: family.label
+          },
+          ...(dashedId
+            ? [
+                {
+                  appearance: { ...appearance, line: 'dashed' as const },
+                  description: family.description,
+                  id: dashedId,
+                  label: family.label
+                }
+              ]
+            : [])
+        ]
+      }),
       flows: definition.flows.map((flow) => ({
         direction: flow.bidirectional ? ('bidirectional' as const) : ('forward' as const),
-        family: flow.family,
+        family: flow.dashed ? (dashedFamilyId.get(flow.family) ?? flow.family) : flow.family,
         id: flow.code,
         interfaces: flow.conformsTo,
         operation: flow.operation,
@@ -253,4 +308,151 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
     ],
     title: config.title
   }
+}
+
+const ids = (values: readonly { id: string }[]) => new Set(values.map(({ id }) => id))
+
+const requireReference = (references: ReadonlySet<string>, value: string, context: string) => {
+  if (!references.has(value)) throw new Error(`${context} references unknown id: ${value}`)
+}
+
+const validateSelection = (
+  selection: ElementSelection | undefined,
+  elementIds: ReadonlySet<string>,
+  setIds: ReadonlySet<string>,
+  context: string
+) => {
+  for (const element of selection?.elements ?? []) requireReference(elementIds, element, context)
+  for (const set of selection?.sets ?? []) requireReference(setIds, set, context)
+}
+
+const validateScene = (scene: Scene, elementIds: ReadonlySet<string>, setIds: ReadonlySet<string>, context: string) => {
+  validateSelection(scene.focus, elementIds, setIds, `${context} focus`)
+  validateSelection(scene.visibility?.show, elementIds, setIds, `${context} show`)
+  validateSelection(scene.visibility?.hide, elementIds, setIds, `${context} hide`)
+  const placement = scene.callout?.placement
+  if (placement && 'element' in placement) requireReference(elementIds, placement.element, `${context} callout`)
+}
+
+const portCount = (ports: { north?: number; east?: number; south?: number; west?: number }, id: string) => {
+  const side = { E: 'east', N: 'north', S: 'south', W: 'west' }[id[0] ?? ''] as
+    | 'north'
+    | 'east'
+    | 'south'
+    | 'west'
+    | undefined
+  const number = Number(id.slice(1))
+  if (!side || !Number.isInteger(number) || number < 1 || number > (ports[side] ?? 0)) return false
+  return true
+}
+
+/** Normalise and validate a directly authored canonical Infoschematic. */
+export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschematic => {
+  const model: DefinedInfoschematic = {
+    ...input,
+    diagram: {
+      ...input.diagram,
+      assemblies: input.diagram.assemblies ?? [],
+      cards: (input.diagram.cards ?? []).map((card) => ({
+        ...card,
+        ports: card.ports ?? standardPorts
+      })),
+      collections: input.diagram.collections ?? [],
+      fabrics: (input.diagram.fabrics ?? []).map((fabric) => ({
+        ...fabric,
+        ports: fabric.ports ?? standardPorts
+      })),
+      families: input.diagram.families ?? [],
+      flows: (input.diagram.flows ?? []).map((flow) => ({
+        ...flow,
+        direction: flow.direction ?? 'forward',
+        route: { ...flow.route, waypoints: flow.route?.waypoints ?? [] }
+      })),
+      overlays: input.diagram.overlays ?? [],
+      points: (input.diagram.points ?? []).map((point) => ({
+        ...point,
+        ports: point.ports ?? standardPorts
+      })),
+      regions: input.diagram.regions ?? [],
+      sets: input.diagram.sets ?? []
+    },
+    specifications: input.specifications ?? [],
+    stories: input.stories ?? [],
+    themes: input.themes ?? []
+  }
+
+  const visible = [
+    ...model.diagram.regions,
+    ...model.diagram.cards,
+    ...model.diagram.fabrics,
+    ...model.diagram.points,
+    ...model.diagram.flows,
+    ...model.diagram.overlays
+  ]
+  const seen = new Set<string>()
+  for (const element of [...visible, ...model.diagram.assemblies]) {
+    if (seen.has(element.id)) throw new Error(`Duplicate Diagram id: ${element.id}`)
+    seen.add(element.id)
+  }
+
+  const cardIds = ids(model.diagram.cards)
+  const endpointIds = ids([...model.diagram.cards, ...model.diagram.fabrics, ...model.diagram.points])
+  const elementIds = ids(visible)
+  const collectionIds = ids(model.diagram.collections)
+  const familyIds = ids(model.diagram.families)
+  const setIds = ids(model.diagram.sets)
+  const interfaceIds = ids(model.specifications.flatMap((specification) => specification.interfaces))
+  const endpointById = new Map(
+    [...model.diagram.cards, ...model.diagram.fabrics, ...model.diagram.points].map((element) => [element.id, element])
+  )
+
+  for (const card of model.diagram.cards) {
+    if (card.collection) requireReference(collectionIds, card.collection, `Card ${card.id}`)
+    for (const contract of card.interfaces ?? []) requireReference(interfaceIds, contract, `Card ${card.id}`)
+  }
+  for (const assembly of model.diagram.assemblies) {
+    if (assembly.kind === 'adapter') {
+      requireReference(cardIds, assembly.adapter, `Assembly ${assembly.id}`)
+      requireReference(cardIds, assembly.interface, `Assembly ${assembly.id}`)
+    } else {
+      requireReference(cardIds, assembly.wrapper, `Assembly ${assembly.id}`)
+      requireReference(cardIds, assembly.wrapped, `Assembly ${assembly.id}`)
+    }
+  }
+  for (const flow of model.diagram.flows) {
+    if (flow.family) requireReference(familyIds, flow.family, `Flow ${flow.id}`)
+    for (const contract of flow.interfaces ?? []) requireReference(interfaceIds, contract, `Flow ${flow.id}`)
+    for (const [terminal, endpoint] of [
+      ['source', flow.source],
+      ['target', flow.target]
+    ] as const) {
+      requireReference(endpointIds, endpoint.element, `Flow ${flow.id} ${terminal}`)
+      const element = endpointById.get(endpoint.element)
+      if (!element || !portCount(element.ports ?? standardPorts, endpoint.port)) {
+        throw new Error(`Flow ${flow.id} ${terminal} references unavailable Port: ${endpoint.port}`)
+      }
+    }
+  }
+  for (const set of model.diagram.sets) {
+    for (const element of set.elements) requireReference(elementIds, element, `Set ${set.id}`)
+  }
+  for (const theme of model.themes) {
+    const sceneIds = new Set<string>()
+    for (const scene of theme.scenes) {
+      if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Theme ${theme.id}: ${scene.id}`)
+      sceneIds.add(scene.id)
+      validateScene(scene, elementIds, setIds, `Theme ${theme.id} Scene ${scene.id}`)
+    }
+  }
+  for (const story of model.stories) {
+    const sceneIds = new Set<string>()
+    for (const scene of story.scenes) {
+      if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Story ${story.id}: ${scene.id}`)
+      sceneIds.add(scene.id)
+      validateScene(scene, elementIds, setIds, `Story ${story.id} Scene ${scene.id}`)
+    }
+  }
+
+  JSON.stringify(model)
+  return model
 }

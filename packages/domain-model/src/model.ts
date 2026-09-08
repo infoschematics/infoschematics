@@ -36,7 +36,11 @@ export type Region = {
     fill?: string
     cornerRadius?: number
     frame?: { style: RegionFrameStyle; opacity?: number }
-    label?: { placement?: RegionLabelPlacement | 'none'; mount?: RegionLabelMount; offset?: number }
+    label?: {
+      placement?: RegionLabelPlacement | 'none'
+      mount?: RegionLabelMount
+      offset?: number
+    }
   }
 }
 
@@ -48,6 +52,7 @@ export type Card = {
   collection?: string
   bounds: Box
   ports?: PortCounts
+  interfaces?: readonly string[]
   provides?: readonly string[]
 }
 
@@ -99,7 +104,10 @@ export type Assembly =
   | (AssemblyBase & { kind: 'adapter'; interface: string; adapter: string })
   | (AssemblyBase & { kind: 'wrapped'; wrapper: string; wrapped: string })
 
-export type ElementSelection = { elements?: readonly string[]; sets?: readonly string[] }
+export type ElementSelection = {
+  elements?: readonly string[]
+  sets?: readonly string[]
+}
 
 export type Callout = {
   title?: string
@@ -119,7 +127,12 @@ export type Scene = {
   callout?: Callout
 }
 
-export type Theme = { id: string; label: string; description?: string; scenes: readonly Scene[] }
+export type Theme = {
+  id: string
+  label: string
+  description?: string
+  scenes: readonly Scene[]
+}
 
 export type StoryScene = Scene & { duration?: number }
 
@@ -135,6 +148,7 @@ export type Interface = {
   id: string
   label: string
   description?: string
+  document?: { label?: string; href?: string }
   operations?: readonly { id: string; summary: string }[]
 }
 
@@ -171,4 +185,27 @@ export type Infoschematic = {
   themes?: readonly Theme[]
   stories?: readonly Story[]
   specifications?: readonly Specification[]
+}
+
+export type DefinedDiagram = Omit<
+  Diagram,
+  'assemblies' | 'cards' | 'collections' | 'fabrics' | 'families' | 'flows' | 'overlays' | 'points' | 'regions' | 'sets'
+> & {
+  assemblies: readonly Assembly[]
+  cards: readonly Card[]
+  collections: readonly Collection[]
+  fabrics: readonly Fabric[]
+  families: readonly Family[]
+  flows: readonly Flow[]
+  overlays: readonly Overlay[]
+  points: readonly Point[]
+  regions: readonly Region[]
+  sets: readonly ElementSet[]
+}
+
+export type DefinedInfoschematic = Omit<Infoschematic, 'diagram' | 'specifications' | 'stories' | 'themes'> & {
+  diagram: DefinedDiagram
+  specifications: readonly Specification[]
+  stories: readonly Story[]
+  themes: readonly Theme[]
 }
