@@ -4,10 +4,10 @@ area: SITE
 title: Appearance options visual guide
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-007]
-baseline_ref: null
+baseline_ref: 2976e69ab1711bdb2f9cd25aa1b0bc51d04f005b
 ---
 
 ## Goal
