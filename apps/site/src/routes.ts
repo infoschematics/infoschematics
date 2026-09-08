@@ -6,6 +6,10 @@ export const examplesIndexPath = '/examples/'
 export const visualGuidePath = '/docs/visual-guide/'
 export const playgroundPath = '/playground/'
 
+export function playgroundPresetPath(preset: string) {
+  return `${playgroundPath}?preset=${preset}`
+}
+
 export type DocumentSection = 'guides' | 'reference' | 'design' | 'specs'
 
 interface PublishedDocument {

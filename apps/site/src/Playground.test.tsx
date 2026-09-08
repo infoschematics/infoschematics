@@ -1,7 +1,7 @@
 import { parseInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { Playground, Preview } from './Playground.tsx'
+import { Issues, Playground, Preview, presetFromSearch, presets } from './Playground.tsx'
 import jsonSeed from './playground/seeds/format-parity.json?raw'
 import typescriptSeed from './playground/seeds/format-parity.ts.txt?raw'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
@@ -18,10 +18,43 @@ describe('Playground', () => {
     expect(page).toContain('data:image/svg+xml')
   })
 
+  it('is a full-view page in the wide shell with the preset picker listed', () => {
+    const page = renderToStaticMarkup(<Playground />)
+
+    expect(page).toContain('document-shell--wide')
+    expect(page).toContain('playground-shell')
+    for (const { label } of presets) {
+      expect(page).toContain(`>${label}</option>`)
+    }
+  })
+
   it('seeds every tab with a document its own format accepts', () => {
     expect(parseInfoschematic(typescriptSeed, { format: 'typescript' }).ok).toBe(true)
     expect(parseInfoschematic(jsonSeed, { format: 'json' }).ok).toBe(true)
     expect(parseInfoschematic(yamlSeed, { format: 'yaml' }).ok).toBe(true)
+  })
+
+  it('serialises every example preset to a document JSON accepts', () => {
+    for (const preset of presets) {
+      for (const [format, text] of Object.entries(preset.buffers)) {
+        const parsed = parseInfoschematic(text, { format: format as never })
+        expect(parsed.ok, `${preset.key} ${format}`).toBe(true)
+      }
+    }
+  })
+
+  it('starts on the buffer a preset focuses, rendering its definition', () => {
+    const page = renderToStaticMarkup(<Playground preset="system" />)
+
+    expect(page).toContain('aria-label="JSON document"')
+    expect(page).toContain('data:image/svg+xml')
+  })
+
+  it('selects a preset from the query string and refuses one it does not know', () => {
+    expect(presetFromSearch('?preset=system')).toBe('system')
+    expect(presetFromSearch('?preset=blank')).toBe('blank')
+    expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()
+    expect(presetFromSearch('')).toBeUndefined()
   })
 
   it('renders a valid document as a preview image', () => {
@@ -30,13 +63,12 @@ describe('Playground', () => {
 
     expect(parsed.ok).toBe(true)
     expect(panel).toContain('data:image/svg+xml')
-    expect(panel).not.toContain('playground-issues')
   })
 
   it('shows path-addressed issues for a broken document', () => {
     const broken = jsonSeed.replace('"width": 800', '"width": "wide"')
     const parsed = parseInfoschematic(broken, { format: 'json' })
-    const panel = renderToStaticMarkup(<Preview parsed={parsed} />)
+    const panel = renderToStaticMarkup(<Issues parsed={parsed} />)
 
     expect(parsed.ok).toBe(false)
     expect(panel).toContain('playground-issues')

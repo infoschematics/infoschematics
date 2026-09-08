@@ -272,6 +272,10 @@ a:focus-visible {
   padding: 24px clamp(18px, 5vw, 64px) 48px;
 }
 
+.document-shell--wide {
+  width: min(1600px, 100%);
+}
+
 .skip-link {
   position: absolute;
   top: 8px;
@@ -459,10 +463,57 @@ a:focus-visible {
   border-top: 1px solid #ffffff1c;
 }
 
+.playground-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  padding-bottom: 20px;
+}
+
+.playground-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+.playground-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+}
+
+.playground-preset {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #9db4c9;
+  font: 600 11px/1 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.playground-preset select {
+  padding: 7px 10px;
+  border: 1px solid #ffffff1c;
+  border-radius: 7px;
+  background: #0d2031;
+  color: #e8f1f8;
+  font: 600 11px/1 'DM Mono', monospace;
+}
+
+.playground-hint {
+  margin: 0;
+  color: #9db4c9;
+  font-size: 12px;
+}
+
 .playground-tabs {
   display: flex;
   gap: 8px;
-  margin: 20px 0 14px;
 }
 
 .playground-tabs button {
@@ -485,13 +536,22 @@ a:focus-visible {
 
 .playground-panels {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex: 1;
+  grid-template-columns: minmax(320px, 560px) minmax(0, 1fr);
   gap: 20px;
-  align-items: start;
+  min-height: 0;
+}
+
+.playground-editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
 }
 
 .playground-editor {
-  min-height: 480px;
+  flex: 1;
+  min-height: 0;
   padding: 14px;
   border: 1px solid #ffffff1c;
   border-radius: 9px;
@@ -502,10 +562,12 @@ a:focus-visible {
 }
 
 .playground-preview {
+  min-height: 0;
   padding: 14px;
   border: 1px solid #ffffff1c;
   border-radius: 9px;
   background: #0d2031;
+  overflow: auto;
 }
 
 .playground-preview img {
@@ -526,8 +588,16 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
+  .playground-shell {
+    height: auto;
+  }
+
   .playground-panels {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .playground-editor {
+    min-height: 320px;
   }
 }
 

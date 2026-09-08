@@ -29,7 +29,7 @@ function SpecimenCard({ specimen }: { specimen: Specimen }) {
 
 export function VisualGuide() {
   return (
-    <div className="document-shell">
+    <div className="document-shell document-shell--wide">
       <SiteNav section="visual-guide" />
       <main id="document-content">
         <h1>Visual guide</h1>
