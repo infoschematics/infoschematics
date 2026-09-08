@@ -4,9 +4,9 @@ An Infoschematic turns a system's architecture and the flows that move through i
 
 One serialisable definition drives consistent outputs: a deterministic SVG for documents, an interactive Canvas for exploration, a Present view for an Audience, and a Studio view for Producers. An Infoschematic is a schematic, not assembly instructions: it shows what exists, where it sits, and what moves between it without coupling the definition to React, browser state, or a particular host application.
 
-## The model at a glance
+## What appears in an Infoschematic
 
-Every product contains one [Infoschematic](/docs/reference/vocabulary/#infoschematic): the structural diagram. It can also contain Scenes, Themes, and Stories that present that structure in different ways.
+An Infoschematic shows a system through six visible elements: Regions, Fabrics, Cards, Flows, Points, and Graphics. Scenes can focus or reveal parts of that diagram, while Themes and Stories organise those views for explanation and presentation.
 
 The diagram has six visible artefact kinds:
 
