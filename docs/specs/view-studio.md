@@ -280,6 +280,14 @@ The underlying materialiser MUST remain total when it receives a direct Graphic 
 
 _Verification: `packages/view-studio/src/app/editor/artefact-operations.test.ts` and `packages/view-model/src/artefact-draft.test.ts` cover removal plans, blocking and materialised cascades._
 
+### EDIT-085 — Authored treatments are editable, and an optional one can be cleared
+
+Every treatment a selected artefact authors MUST be editable through a typed control rather than only through free-text properties. A Region's frame style and opacity, fill, label placement, label mount and label offset are all such treatments.
+
+Clearing an optional treatment MUST remove the authored member rather than write an empty or null value into the record, and MUST NOT be offered for a required one. A control value the artefact cannot carry MUST leave the artefact as it stands.
+
+_Verification: `packages/view-studio/src/app/editor/region-treatments.test.ts` covers the control values, patches and clears, and `packages/view-studio/src/app/editor/artefact-operations.test.ts` covers member removal._
+
 ## Host rendering
 
 ### EDIT-072 — Hosts supply visual implementations

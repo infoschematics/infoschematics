@@ -4,6 +4,7 @@ import { artefactCapabilities, defineArtefactSelection } from '@infoschematics/v
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { regionTreatmentPatch } from '../editor/region-treatments.ts'
 import {
   artefactControlsEditorFor,
   DesignDetails,
@@ -216,6 +217,8 @@ describe('DetailsPanel typed Design controls', () => {
     )
 
     expect(html).toContain('aria-label="Create Region"')
+    expect(html).toContain('Region treatments')
+    expect(html).toContain('aria-label="Region label placement"')
     artefactControlsEditorFor(selected).replaceArtefactProperties({
       label: 'Renamed region'
     })
@@ -223,5 +226,16 @@ describe('DetailsPanel typed Design controls', () => {
       kind: 'region',
       value: { label: 'Renamed region' }
     })
+
+    const authored = config.infoschematic.regions[0]!
+    artefactControlsEditorFor(selected).replaceArtefactProperties(regionTreatmentPatch(authored, 'frameStyle', '')!)
+    artefactControlsEditorFor(selected).replaceArtefactProperties(
+      regionTreatmentPatch(authored, 'labelPlacement', 'south-east')!
+    )
+    expect(replaceArtefactProperties.mock.calls.map(([patch]) => patch)).toEqual([
+      { kind: 'region', value: { label: 'Renamed region' } },
+      { kind: 'region', value: { frame: null } },
+      { kind: 'region', value: { labelPlacement: 'south-east' } }
+    ])
   })
 })

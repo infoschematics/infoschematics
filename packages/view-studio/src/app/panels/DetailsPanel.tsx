@@ -244,6 +244,7 @@ export const artefactControlsEditorFor = (editor: DetailsPanelEditor): ArtefactC
   artefactCapabilities: editor.artefactCapabilities,
   artefactGeometry: editor.artefactGeometry,
   artefactIssue: editor.artefactIssue,
+  artefactValue: editor.artefactValue,
   createArtefact: editor.createArtefact,
   removeArtefact: editor.removeArtefact,
   reorderArtefact: editor.reorderArtefact,

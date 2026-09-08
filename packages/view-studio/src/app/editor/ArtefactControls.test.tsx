@@ -1,3 +1,4 @@
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import {
   type ArtefactGeometry,
   type ArtefactSelection,
@@ -30,6 +31,17 @@ const editor = (
   selectedArtefact,
   ...overrides
 })
+
+const treatedRegion: RegionConfig = {
+  box: { height: 120, radius: 8, width: 700, x: 20, y: 60 },
+  fill: '#0d1b2acc',
+  frame: { opacity: 0.6, style: 'dashed' },
+  id: 'region-one',
+  label: 'Region',
+  labelMount: 'boundary',
+  labelOffset: 24,
+  labelPlacement: 'north'
+}
 
 const matrix: readonly [ArtefactSelection, ArtefactGeometry, string][] = [
   [
@@ -114,6 +126,54 @@ describe('ArtefactControls', () => {
     expect(html).toContain('aria-label="Create Region"')
     expect(html).toContain('aria-label="Create Graphic"')
     expect(html).toContain('Select a Region, Fabric, Card, Flow, or Graphic')
+  })
+})
+
+describe('Region treatment controls', () => {
+  const [selection, geometry] = matrix[0]!
+
+  it('offers every authored treatment, showing what the Region currently carries', () => {
+    const html = renderToStaticMarkup(
+      <ArtefactControls
+        editor={editor(selection, geometry, { artefactValue: treatedRegion })}
+        factoryContext={factoryContext}
+      />
+    )
+
+    expect(html).toContain('Region treatments')
+    for (const control of ['frame style', 'frame opacity', 'fill', 'label placement', 'label mount', 'label offset']) {
+      expect(html).toContain(`aria-label="Region ${control}"`)
+    }
+    expect(html).toContain('value="#0d1b2acc"')
+    expect(html).toContain('value="0.6"')
+    expect(html).toContain('value="24"')
+    expect(html).toContain('<option value="dashed" selected="">Dashed</option>')
+    expect(html).toContain('<option value="north" selected="">North</option>')
+    expect(html).toContain('<option value="boundary" selected="">Boundary</option>')
+  })
+
+  it('withholds the frame opacity of a Region that draws no frame', () => {
+    const { frame, ...frameless } = treatedRegion
+    const html = renderToStaticMarkup(
+      <ArtefactControls
+        editor={editor(selection, geometry, { artefactValue: frameless })}
+        factoryContext={factoryContext}
+      />
+    )
+
+    expect(html).toContain('aria-label="Region frame style"')
+    expect(html).not.toContain('aria-label="Region frame opacity"')
+    expect(html).toContain('<option value="" selected="">None</option>')
+  })
+
+  it('leaves another kind with the general properties control alone', () => {
+    const [card, cardGeometry] = matrix[2]!
+    const html = renderToStaticMarkup(
+      <ArtefactControls editor={editor(card, cardGeometry)} factoryContext={factoryContext} />
+    )
+
+    expect(html).not.toContain('Region treatments')
+    expect(html).toContain('aria-label="Edit card properties"')
   })
 })
 

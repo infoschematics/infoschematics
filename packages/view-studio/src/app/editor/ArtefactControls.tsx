@@ -1,3 +1,4 @@
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type {
   ArtefactCapabilities,
   ArtefactGeometry,
@@ -14,12 +15,15 @@ import {
 } from './artefact-factories.ts'
 import { LibraryPanel } from './LibraryPanel.tsx'
 import type { LibraryContext, LibraryCreateOperation } from './library.ts'
+import { RegionTreatments } from './RegionTreatments.tsx'
 
+// A patch states members, so `undefined` belongs to its shape; parsed JSON never carries one.
 type Serialisable =
   | boolean
   | number
   | string
   | null
+  | undefined
   | readonly Serialisable[]
   | { readonly [key: string]: Serialisable }
 export type ArtefactPropertyPatch = Readonly<Record<string, Serialisable>>
@@ -28,6 +32,8 @@ export type ArtefactControlsEditor = Readonly<{
   artefactCapabilities?: ArtefactCapabilities
   artefactGeometry?: ArtefactGeometry
   artefactIssue?: string | null
+  /** The selected artefact as the draft currently states it, which the typed controls show. */
+  artefactValue?: ArtefactValueByKind[ArtefactKind]
   createArtefact: <K extends ArtefactKind>(
     kind: K,
     value: ArtefactValueByKind[K],
@@ -89,6 +95,7 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
     setProperties('{}')
     setPropertyIssue(null)
   }, [selected?.id, selected?.kind])
+  const region = selected?.kind === 'region' ? (editor.artefactValue as RegionConfig | undefined) : undefined
   const create = (kind: FactoryKind) => submitOperation(editor, createDefaultArtefact(kind, factoryContext))
   const applyProperties = () => {
     try {
@@ -131,6 +138,10 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
           <p aria-label="Geometry summary" className="artefact-geometry">
             {describeArtefactGeometry(editor.artefactGeometry)}
           </p>
+
+          {capabilities?.['edit-properties'] && region ? (
+            <RegionTreatments onPatch={editor.replaceArtefactProperties} region={region} />
+          ) : null}
 
           {capabilities?.['edit-properties'] ? (
             <fieldset className="artefact-properties">

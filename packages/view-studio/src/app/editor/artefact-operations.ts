@@ -13,16 +13,21 @@ import {
 } from '@infoschematics/view-model/editable'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
-type DeepPartial<T> = T extends readonly unknown[]
+/**
+ * A patch follows JSON Merge Patch: a stated member replaces, an absent member
+ * is left alone, and `null` removes. Only an optional member admits `null`, so
+ * a required one cannot be cleared away by construction.
+ */
+export type PropertyPatch<T> = T extends readonly unknown[]
   ? T
   : T extends object
-    ? { readonly [P in keyof T]?: DeepPartial<T[P]> }
+    ? { readonly [P in keyof T]?: PropertyPatch<T[P]> | (undefined extends T[P] ? null : never) }
     : T
 
 export type ArtefactPropertiesPatch = {
   [K in keyof ArtefactValueByKind]: Readonly<{
     kind: K
-    value: DeepPartial<ArtefactValueByKind[K]>
+    value: PropertyPatch<ArtefactValueByKind[K]>
   }>
 }[keyof ArtefactValueByKind]
 
@@ -172,7 +177,8 @@ const mergePatch = (current: unknown, patch: unknown): unknown => {
   if (!isRecord(current) || !isRecord(patch)) return patch
   const merged: Record<string, unknown> = { ...current }
   for (const [key, value] of Object.entries(patch)) {
-    if (value !== undefined) merged[key] = mergePatch(current[key], value)
+    if (value === null) delete merged[key]
+    else if (value !== undefined) merged[key] = mergePatch(current[key], value)
   }
   return merged
 }

@@ -1,4 +1,5 @@
 import { defineInfoschematic } from '@infoschematics/domain-core'
+import type { RegionConfig } from '@infoschematics/domain-model/region'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import {
   artefactCan,
@@ -18,6 +19,7 @@ import {
   discardArtefactOperation,
   effectiveArtefactOperation,
   effectiveArtefactValue,
+  type PropertyPatch,
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
@@ -257,6 +259,28 @@ describe('typed artefact operation lifecycle', () => {
       'graphic',
       'flow'
     ])
+  })
+
+  it('removes an optional member patched with null and keeps a required one', () => {
+    const cleared = replaceArtefactPropertiesOperation(config, [], region, {
+      kind: 'region',
+      value: { fill: null, frame: null }
+    })!
+    const materialised = applyArtefactOperations(config, [cleared])
+    const required: PropertyPatch<RegionConfig> = {
+      // @ts-expect-error a required member has no null to clear it with
+      label: null
+    }
+
+    expect(cleared.value).toEqual({
+      box: config.infoschematic.regions[0]!.box,
+      id: 'region-one',
+      label: 'Region'
+    })
+    expect(required).toEqual({ label: null })
+    expect(materialised.rejected).toEqual([])
+    expect(materialised.config.infoschematic.regions[0]).not.toHaveProperty('fill')
+    expect(materialised.config.infoschematic.regions[0]).not.toHaveProperty('frame')
   })
 
   it('coalesces property edits and keeps them undoable, discardable and ordered', () => {

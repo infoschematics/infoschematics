@@ -3485,6 +3485,8 @@ button:focus-visible,
   text-transform: uppercase;
 }
 
+.artefact-properties input,
+.artefact-properties select,
 .artefact-properties textarea {
   background: #0c1c2b;
   border: 1px solid #ffffff1e;
@@ -3494,10 +3496,15 @@ button:focus-visible,
     500 11px "DM Mono",
     monospace;
   padding: 5px 6px;
-  resize: vertical;
   width: 100%;
 }
 
+.artefact-properties textarea {
+  resize: vertical;
+}
+
+.artefact-properties input:focus,
+.artefact-properties select:focus,
 .artefact-properties textarea:focus {
   border-color: #79c9ff;
   outline: none;
