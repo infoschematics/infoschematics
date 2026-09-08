@@ -4,7 +4,7 @@ area: TOOL
 title: JSON and YAML definitions
 theme: tool
 horizon: next
-status: draft
+status: ready
 blocks: [INFOSCHEMATICS-TOOL-021]
 blocked_by: []
 baseline_ref: null
@@ -32,18 +32,18 @@ The domain contract already round-trips through JSON without changing rendered o
 
 ## Steps
 
-- [ ] Decide the schema source and validation ownership.
-- [ ] Implement safe JSON and YAML parsing with path-specific diagnostics.
-- [ ] Extend the example renderer loader to accept supported files.
-- [ ] Publish an editor-consumable JSON Schema.
-- [ ] Add format-parity and malformed-document tests.
+- [ ] Add the Zod schema for `InfoschematicConfigInput` to Domain Core, with a bidirectional type-parity assertion against the hand-written contract.
+- [ ] Implement `parseInfoschematic` over JSON and YAML with path-specific diagnostics.
+- [ ] Extend the example renderer loader to accept a pathname in any supported format.
+- [ ] Emit the JSON Schema through a repository-owned script and commit its output.
+- [ ] Add format-parity and malformed-document tests, and record the schema-source decision.
 
 ## Files touched
 
-- `packages/domain-core/` for the validated document boundary
-- `packages/domain-model/` only if the schema-source decision changes type ownership
-- `scripts/render-example.ts` for file-based loading
-- Package manifests, schema output, and focused tests required by the selected implementation
+- `packages/domain-core/src/schema.ts` and `packages/domain-core/src/parse.ts`, new, with their tests
+- `packages/domain-core/package.json` for the `zod` and `yaml` dependencies and the schema export
+- `scripts/render-example.ts` for file-based loading, and a new schema-emitting script
+- `packages/domain-model/` is **not** touched: the schema-source decision keeps type ownership where it is
 
 ## Verify
 
@@ -73,19 +73,29 @@ Keep INFOSCHEMATICS-TOOL-021 blocked until the validated loader contract lands.
 
 ## Discussion
 
+### Schema-source decision
+
+**Zod is adopted schema-first inside Domain Core; Domain Model keeps owning the types and stays dependency-free.**
+
+The item left this open between generating a JSON Schema from `InfoschematicConfig` and adopting a schema-first library whose inferred type replaces the hand-written one. The second reading is rejected on an architectural ground the repository already holds: `@infoschematics/domain-model` is the dependency-free contract, and a schema-first library whose inferred type _replaced_ `InfoschematicConfig` would put a runtime dependency inside that contract and move type ownership out of the package the architecture guide names as its owner. The first reading — generating a schema from the types — needs a second toolchain (a TypeScript-to-JSON-Schema generator plus a JSON Schema validator) to produce diagnostics that Zod gives directly.
+
+What is adopted is neither exactly: the Zod schema lives in Domain Core beside `defineInfoschematic`, mirrors the hand-written types rather than replacing them, and is held to them by a **bidirectional compile-time parity assertion** so the mirror cannot drift silently — a field added to `InfoschematicConfigInput` and not to the schema fails the type-check, and so does the reverse. `zod@4` also emits JSON Schema directly through `z.toJSONSchema()`, so the published editor schema comes from the same single source without a second generator.
+
+`zod` and `yaml` both already resolve in the workspace, and both become explicit Domain Core dependencies. `yaml` (eemeli) is chosen over `js-yaml` because its default `parse` constructs only plain data — it has no schema that instantiates arbitrary types, so there is no unsafe-load footgun to remember at an untrusted boundary.
+
+The parse boundary is one exported function rather than three: `parseInfoschematic(text, { format })`, where an omitted format is inferred from a supplied pathname. It returns a discriminated result rather than throwing, because the caller at a file boundary usually wants to print a diagnostic rather than catch an exception.
+
 ### Implementation notes
 
 The intended pass will:
 
-- Decide where validation belongs. `packages/domain-model` is dependency-free and `packages/domain-core` owns normalisation, so a parse-and-validate entry point most likely belongs beside `defineInfoschematic` in Domain Core, with any YAML dependency isolated from it.
-- Establish one schema as the single source of truth rather than a hand-maintained validator that drifts from the types. Decide between generating a JSON Schema from `InfoschematicConfig` and adopting a schema-first library whose inferred type replaces the hand-written one.
-- Define diagnostics worth having: an invalid document should report the offending path and the expected shape, not fail as an opaque cast.
-- Decide how YAML is parsed, and confirm the parser is safe for untrusted input and small enough to sit under a published package.
-- Extend the loader used by `scripts/render-example.ts` to accept a pathname in any supported format alongside the named-example registry, keeping named examples working unchanged.
-- Publish the generated JSON Schema so an editor can complete and validate a `.infoschematic.json` or `.infoschematic.yaml` document directly.
-- Cover each format with a test proving the same definition renders identical output through all three, and that a malformed document is rejected with a useful message.
-
-Known dependency: the schema-source decision above gates the rest, because it determines whether the domain types stay hand-written.
+- Add `packages/domain-core/src/schema.ts` holding `infoschematicConfigSchema`, a Zod mirror of `InfoschematicConfigInput`, and the parity assertion that binds the two. Export it from the package root so a host can validate without reaching into a subpath.
+- Add `packages/domain-core/src/parse.ts` holding `parseInfoschematic`, which selects the parser by format or pathname extension, parses, validates, and on success passes the value through `defineInfoschematic` so a parsed document and a TypeScript literal arrive at the same normalised config.
+- Report diagnostics as `{ ok: false, issues }`, each issue carrying the dotted path, the message, and the offending document. A YAML syntax error is reported in the same shape as a schema violation, so a caller has one thing to print.
+- Extend `scripts/render-example.ts` so its operand accepts a pathname as well as a registered example name, resolving by extension and keeping every named example working unchanged. The script keeps the shared CLI contract from `scripts/cli.ts`.
+- Add a repository-owned `self:schema:generate` script that writes the emitted JSON Schema, and commit its output so an editor can consume it from the repository without a build.
+- Cover format parity by rendering the same definition authored three ways through `@infoschematics/render-svg` and asserting byte-identical SVG, and cover rejection with documents that are malformed in each of the distinguishable ways: unparseable syntax, a wrong scalar type at a known path, and a missing required field.
+- Record the schema-source decision as a Governed Decision Record, since it fixes where validation lives and why the contract package stays dependency-free.
 
 ### Why validation cannot simply be a cast
 
