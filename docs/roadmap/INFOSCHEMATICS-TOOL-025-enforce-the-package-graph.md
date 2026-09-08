@@ -4,7 +4,7 @@ area: TOOL
 title: Enforce the package graph
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 31132d1e10284659a6c48e40dde977a4cc33a4c4

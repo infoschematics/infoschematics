@@ -4,7 +4,7 @@ area: TOOL
 title: Fit Card text
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: ee4aaacb7df43088b55c866adaaf2502378deb81

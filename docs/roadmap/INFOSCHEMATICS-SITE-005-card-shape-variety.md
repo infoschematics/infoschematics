@@ -4,7 +4,7 @@ area: SITE
 title: Card shape variety
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 532dab29f967edc0af0bd3142d7a1e9f2e62cf61

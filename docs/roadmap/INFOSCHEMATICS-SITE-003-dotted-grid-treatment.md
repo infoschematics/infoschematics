@@ -4,7 +4,7 @@ area: SITE
 title: Dotted grid treatment
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: d9b8c2dabbabb4eae900738e9f3a67d65ee30d6f

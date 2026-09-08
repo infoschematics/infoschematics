@@ -4,7 +4,7 @@ area: TOOL
 title: Edit region treatments
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 34adaf9bc7fd4cbb4c66485f61b9a4922b78899d
