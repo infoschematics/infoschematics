@@ -1,7 +1,5 @@
 # Author an Infoschematic
 
-_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Region](/docs/reference/vocabulary/#region), [Fabric](/docs/reference/vocabulary/#fabric), [Card](/docs/reference/vocabulary/#standard-card), [Flow](/docs/reference/vocabulary/#flow), [Point](/docs/reference/vocabulary/#point), [Graphic](/docs/reference/vocabulary/#graphic)._
-
 Author product data with types from `@infoschematics/domain-model` and normalise complete definitions with `defineInfoschematic` from `@infoschematics/domain-core`. Keep an independently maintained definition in its own `examples/is-*` package.
 
 ## Start blank
@@ -14,17 +12,17 @@ export const myInfoschematic = defineInfoschematic({
 })
 ```
 
-This produces a 1200-by-800 blank canvas with empty artefact, Scene, Theme, and Story collections. Add an `id` only when the host needs a stable namespace for local editorial preferences or drafts.
+This produces a 1200-by-800 blank canvas with empty artefact, [Scene](/docs/reference/vocabulary/#scene), [Theme](/docs/reference/vocabulary/#theme), and [Story](/docs/reference/vocabulary/#story) collections. Add an `id` only when the host needs a stable namespace for local editorial preferences or drafts.
 
 ## Add structure
 
 Populate the structural `infoschematic` field:
 
-- `regions` establish background geography;
-- `fabrics` and `cards` establish focusable artefacts;
-- `flows` connect Cards and Fabrics through named ports and points;
-- `graphics` register visual material that Scenes may reveal;
-- `scopes` provide applicability, `domains` provide Card classification, and `flowFamilies` provide Flow identity;
+- `regions` establish background geography as [Regions](/docs/reference/vocabulary/#region);
+- `fabrics` and `cards` establish focusable [Fabric](/docs/reference/vocabulary/#fabric) and [Card](/docs/reference/vocabulary/#standard-card) artefacts;
+- `flows` connect Cards and Fabrics through named [ports](/docs/reference/vocabulary/#port) and [points](/docs/reference/vocabulary/#point);
+- `graphics` register [Graphics](/docs/reference/vocabulary/#graphic), visual material that Scenes may reveal;
+- `scopes` provide [Scope](/docs/reference/vocabulary/#scope) applicability, `domains` provide [Domain](/docs/reference/vocabulary/#domain) classification, and `flowFamilies` provide [Flow](/docs/reference/vocabulary/#flow) identity;
 - `interfaces` and `specificationGroups` describe technical contracts.
 
 Coordinates use the `Box` and `Point` shapes exposed through Domain Model configuration types. Placement and routing algorithms remain View Model behaviour; authored output remains plain data.
@@ -110,7 +108,7 @@ Static SVG hosts can additionally pass `renderInfoschematicSvg(config, { annotat
 
 ## Add presentation material
 
-Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschematic` field. A Scene focuses artefacts and Flows, reveals Graphics, and may carry one Callout.
+Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschematic` field. A Scene focuses artefacts and Flows, reveals Graphics, and may carry one [Callout](/docs/reference/vocabulary/#callout).
 
 Copying a Standalone Scene into a Theme or Story creates independently owned material. Do not retain hidden object links or runtime references between them.
 

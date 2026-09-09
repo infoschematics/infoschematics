@@ -1,8 +1,6 @@
 # Present an Infoschematic
 
-_Vocabulary: [Audience](/docs/reference/vocabulary/#audience), [Present](/docs/reference/vocabulary/#present), [Scene](/docs/reference/vocabulary/#scene), [Story](/docs/reference/vocabulary/#story), [Callout](/docs/reference/vocabulary/#callout)._
-
-Present is the audience-facing view around an Infoschematic. It lets a presenter control what remains visible, focus the audience on a Scene, and move through a Story — explaining the model without changing it.
+[Present](/docs/reference/vocabulary/#present) is the audience-facing view around an Infoschematic. It lets a presenter control what remains visible, focus the [audience](/docs/reference/vocabulary/#audience) on a [Scene](/docs/reference/vocabulary/#scene), and move through a [Story](/docs/reference/vocabulary/#story) — explaining the model without changing it.
 
 ```tsx
 import { Present } from '@infoschematics/view-present'
@@ -28,7 +26,7 @@ The diagram answers first; the controls help the audience read it without becomi
 
 Scope and Flow-family controls are **subtractive** — they decide what remains present. A Scene is **emphatic** — it brings named content forward and pushes the rest back without moving anything. Filters apply first, then the Scene focuses only what remains visible. Story focus takes precedence over Thematic Scene focus, which takes precedence over Standalone Scene focus; at most one is active, and clearing every Scene leaves all visible content at full strength.
 
-Geometry never changes during presentation. Placement, routes, ports, and labels stay fixed while filters and Scenes change, so the audience keeps its spatial memory of the diagram. A Callout is the one thing that floats over the composition — and even it never moves the content beneath it.
+Geometry never changes during presentation. Placement, routes, ports, and labels stay fixed while filters and Scenes change, so the audience keeps its spatial memory of the diagram. A [Callout](/docs/reference/vocabulary/#callout) is the one thing that floats over the composition — and even it never moves the content beneath it.
 
 ## Story playback
 

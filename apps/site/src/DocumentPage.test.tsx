@@ -56,16 +56,16 @@ describe('documentation pages', () => {
   })
 
   it('rewrites repository-relative links to their canonical GitHub location', () => {
-    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/reference/vocabulary.md')
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/design/architecture.md')
 
     if (!route) {
-      throw new Error('The vocabulary documentation route is missing.')
+      throw new Error('The architecture documentation route is missing.')
     }
 
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
 
     expect(page).toContain(
-      'href="https://github.com/infoschematics/infoschematics/blob/main/docs/decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md"'
+      'href="https://github.com/infoschematics/infoschematics/blob/main/docs/decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md"'
     )
     expect(page).not.toContain('href="../decisions/')
   })

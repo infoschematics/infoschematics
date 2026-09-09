@@ -1,13 +1,11 @@
 # Produce with Studio
 
-_Vocabulary: [Producer](/docs/reference/vocabulary/#producer), [Design](/docs/reference/vocabulary/#design), [Direct](/docs/reference/vocabulary/#direct), [Present](/docs/reference/vocabulary/#present), [Details panel](/docs/reference/vocabulary/#details-panel)._
-
-Studio adds Producer capability to Present. It is a structured Infoschematic authoring environment, not a general drawing tool: every control changes something the domain model can express, and every constraint is enforced at the point of editing. There is no free rotation, arbitrary paint, font selection, or manual z-order — an Infoschematic remains a view of a structured model, not a picture that happens to resemble one.
+Studio adds [Producer](/docs/reference/vocabulary/#producer) capability to [Present](/docs/reference/vocabulary/#present). It is a structured Infoschematic authoring environment, not a general drawing tool: every control changes something the domain model can express, and every constraint is enforced at the point of editing. There is no free rotation, arbitrary paint, font selection, or manual z-order — an Infoschematic remains a view of a structured model, not a picture that happens to resemble one.
 
 Studio supports two closely related loops:
 
-- **Design** shapes the Infoschematic itself: its artefacts, geography, identity, layout, ports, and Flows.
-- **Direct** shapes its presentation material: Scenes, Themes, Stories, Callouts, and Graphics.
+- [**Design**](/docs/reference/vocabulary/#design) shapes the Infoschematic itself: its artefacts, geography, identity, layout, ports, and Flows.
+- [**Direct**](/docs/reference/vocabulary/#direct) shapes its presentation material: Scenes, Themes, Stories, Callouts, and Graphics.
 
 A session always starts in Present — the audience experience — and a Producer switches into Design or Direct deliberately. Design and Direct work on the complete authored content rather than the audience's filtered projection, so a hidden artefact never becomes unreachable while editing.
 

@@ -1,8 +1,6 @@
 # Getting started
 
-_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Region](/docs/reference/vocabulary/#region), [Fabric](/docs/reference/vocabulary/#fabric), [Card](/docs/reference/vocabulary/#standard-card), [Flow](/docs/reference/vocabulary/#flow), [Graphic](/docs/reference/vocabulary/#graphic), [Scene](/docs/reference/vocabulary/#scene), [Story](/docs/reference/vocabulary/#story)._
-
-An Infoschematic combines a diagrammatic representation, using shapes and lines to show the main parts and connections of a system, with supplemental information directly in the diagram. It shows what exists, how things interrelate, and what moves between them.
+An [Infoschematic](/docs/reference/vocabulary/#infoschematic) combines a diagrammatic representation, using shapes and lines to show the main parts and connections of a system, with supplemental information directly in the diagram. It shows what exists, how things interrelate, and what moves between them.
 
 This simple diagram is then turned into a live, explorable view that can be tailored to multiple audiences and is clear enough to present to anyone.
 
@@ -10,13 +8,13 @@ This simple diagram is then turned into a live, explorable view that can be tail
 
 The diagram itself is built from five visual element types:
 
-- **Region** establishes background geography with a labelled box, optional fill, and optional frame.
-- **Fabric** is a connectable midground plane or backdrop.
-- **Card** is a placed foreground component.
-- **Flow** connects Cards and Fabrics through authored endpoints and route geometry.
-- **Graphic** is a renderer-selected visual, commonly revealed by a Scene.
+- [**Region**](/docs/reference/vocabulary/#region) establishes background geography with a labelled box, optional fill, and optional frame.
+- [**Fabric**](/docs/reference/vocabulary/#fabric) is a connectable midground plane or backdrop.
+- [**Card**](/docs/reference/vocabulary/#standard-card) is a placed foreground component.
+- [**Flow**](/docs/reference/vocabulary/#flow) connects Cards and Fabrics through authored endpoints and route geometry.
+- [**Graphic**](/docs/reference/vocabulary/#graphic) is a renderer-selected visual, commonly revealed by a Scene.
 
-An Infoschematic is more than its diagram. **Scenes** focus or reveal parts of it, **Themes** and **Stories** arrange those Scenes for explanation and presentation, and **Scopes** control what is applicable for a given audience. Everything is one serialisable definition — plain data a host application selects and mounts.
+An Infoschematic is more than its diagram. [**Scenes**](/docs/reference/vocabulary/#scene) focus or reveal parts of it, [**Themes**](/docs/reference/vocabulary/#theme) and [**Stories**](/docs/reference/vocabulary/#story) arrange those Scenes for explanation and presentation, and [**Scopes**](/docs/reference/vocabulary/#scope) control what is applicable for a given audience. Everything is one serialisable definition — plain data a host application selects and mounts.
 
 ## From definition to output
 

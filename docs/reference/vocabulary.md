@@ -1,6 +1,6 @@
 # Infoschematics vocabulary
 
-This reference defines the public language used by packages, authored configuration, documentation, and visible interfaces. Product terms describe what is authored; production terms describe how people create and present it. The reasoning for maintaining one vocabulary is recorded in [KDR-INFOSCHEMATICS-001](../decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md).
+This reference defines the public language used by packages, authored configuration, documentation, and visible interfaces. Product terms describe what is authored; production terms describe how people create and present it.
 
 ## Glossary
 
