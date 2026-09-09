@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { cornerRadius, visualTokens } from './tokens.ts'
+import { annotationLabelWidth, cornerRadius, visualTokens } from './tokens.ts'
 
 describe('visual tokens', () => {
   it('keeps semantic names, representative values and the scalar compatibility export', () => {
@@ -22,5 +22,11 @@ describe('visual tokens', () => {
     expect(visualTokens.canvas.output.metadataFontSize).toBe(12)
     expect(visualTokens.canvas.output.unfocusedOpacity).toBe(0.2)
     expect(cornerRadius).toBe(visualTokens.canvas.geometry.cornerRadius)
+  })
+
+  it('sizes annotation badges deterministically from their labels', () => {
+    expect(annotationLabelWidth('SRC')).toBe(visualTokens.canvas.output.annotationWidth)
+    expect(annotationLabelWidth('MSF-SC-TM-ASSEMBLY')).toBeGreaterThan(visualTokens.canvas.output.annotationWidth)
+    expect(annotationLabelWidth('MSF-SC-TM-ASSEMBLY')).toBe(annotationLabelWidth('MSF-SC-TM-ASSEMBLY'))
   })
 })

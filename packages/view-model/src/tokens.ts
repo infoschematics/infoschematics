@@ -96,3 +96,16 @@ export const visualTokens = Object.freeze({
 
 /** Preserved public scalar while consumers move to the semantic manifest. */
 export const cornerRadius = visualTokens.canvas.geometry.cornerRadius
+
+/** Deterministic width for a monospaced annotation badge, including readable side padding. */
+export const annotationLabelWidth = (
+  label: string,
+  minimumWidth: number = visualTokens.canvas.output.annotationWidth
+): number =>
+  Math.max(
+    minimumWidth,
+    Math.ceil(
+      [...label].length * visualTokens.canvas.output.annotationFontSize * 0.62 +
+        visualTokens.canvas.output.annotationFontSize * 1.75
+    )
+  )

@@ -1,5 +1,5 @@
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
 import { renderInfoschematicSvg } from './index.ts'
 
@@ -415,7 +415,7 @@ describe('renderInfoschematicSvg', () => {
     expect(annotated).toContain('>CALL-001</text>')
     expect(annotated).toContain(`fill="${visualTokens.canvas.output.annotationFill}"`)
     expect(annotated).toContain(`font-family="${visualTokens.canvas.output.codeFontFamily}"`)
-    expect(annotated).toContain(`width="${visualTokens.canvas.output.annotationWidth}"`)
+    expect(annotated).toContain(`width="${annotationLabelWidth('CALL-001')}"`)
     expect(annotated).toContain('x="200" y="114"')
 
     const placed = renderInfoschematicSvg(

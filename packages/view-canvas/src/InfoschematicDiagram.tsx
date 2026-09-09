@@ -16,7 +16,7 @@ import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 import { type Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
@@ -2029,17 +2029,22 @@ export function InfoschematicDiagram({
               const badge = held
                 ? movedBox(held, placeable.code).y + held.height + (adapterFloor - 20) / 2
                 : layout.y + 5
+              const badgeWidth = annotationLabelWidth(placeable.code, 56)
               return (
                 <g key={placeable.id}>
                   <rect
                     className="audit-component-code-bg"
                     height="20"
                     rx="5"
-                    width="56"
-                    x={layout.x + layout.width - 60}
+                    width={badgeWidth}
+                    x={layout.x + layout.width - badgeWidth - 4}
                     y={badge}
                   />
-                  <text className="audit-component-code" x={layout.x + layout.width - 32} y={badge + 14}>
+                  <text
+                    className="audit-component-code"
+                    x={layout.x + layout.width - badgeWidth / 2 - 4}
+                    y={badge + 14}
+                  >
                     {placeable.code}
                   </text>
                 </g>
@@ -2112,6 +2117,7 @@ export function InfoschematicDiagram({
               : []
             ).map((flow) => {
               const { x, y } = labelPositions.get(flow.id) ?? { x: 0, y: 0 }
+              const badgeWidth = annotationLabelWidth(flow.code)
               const selection = {
                 code: flow.code,
                 geometry: 'route',
@@ -2137,7 +2143,7 @@ export function InfoschematicDiagram({
                   onPointerLeave={onHover ? () => onHover(null) : undefined}
                 >
                   {editing ? <title>{`${flow.code} — drag to place`}</title> : null}
-                  <rect height="20" rx="4" width="48" x={x - 24} y={y - 10} />
+                  <rect height="20" rx="4" width={badgeWidth} x={x - badgeWidth / 2} y={y - 10} />
                   <text x={x} y={y + 4}>
                     {flow.code}
                   </text>

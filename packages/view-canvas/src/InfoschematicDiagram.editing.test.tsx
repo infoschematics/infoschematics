@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import { annotationLabelWidth } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
@@ -106,6 +107,22 @@ const selections = [
 ] as const satisfies readonly ArtefactSelection[]
 
 describe('InfoschematicDiagram Design editing', () => {
+  it('sizes annotation badges to contain long element and Flow codes', () => {
+    const longCode = 'MSF-SC-TM-ASSEMBLY'
+    const longConfig = {
+      ...config,
+      infoschematic: {
+        ...config.infoschematic,
+        cards: config.infoschematic.cards.map((card, index) => (index === 0 ? { ...card, code: longCode } : card)),
+        flows: config.infoschematic.flows.map((flow) => ({ ...flow, code: `${longCode}-FLOW` }))
+      }
+    }
+    const markup = renderToStaticMarkup(<Canvas annotated config={longConfig} />)
+
+    expect(markup).toContain(`width="${annotationLabelWidth(longCode, 56)}"`)
+    expect(markup).toContain(`width="${annotationLabelWidth(`${longCode}-FLOW`)}"`)
+  })
+
   it('renders every artefact kind as a labelled keyboard-selectable SVG target', () => {
     const markup = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
 

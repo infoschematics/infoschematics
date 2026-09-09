@@ -10,7 +10,7 @@ import {
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 
 const canvasTokens = visualTokens.canvas
 
@@ -548,6 +548,7 @@ export const renderInfoschematicSvg = (
       const at = positions.get(flow.id)
       if (!at) continue
       const dimmed = focusClass(flow.id, focus?.flows, unfocused)
+      const badgeWidth = annotationLabelWidth(flow.code)
       body.push(
         group(
           1,
@@ -562,8 +563,8 @@ export const renderInfoschematicSvg = (
               ['height', canvasTokens.output.annotationHeight],
               ['rx', canvasTokens.output.annotationRadius],
               ['stroke', canvasTokens.output.annotationStroke],
-              ['width', canvasTokens.output.annotationWidth],
-              ['x', at.x - canvasTokens.output.annotationWidth / 2],
+              ['width', badgeWidth],
+              ['x', at.x - badgeWidth / 2],
               ['y', at.y - canvasTokens.output.annotationHeight / 2]
             ]),
             line(
