@@ -163,9 +163,10 @@ export function SceneCallout({
         return
       }
       const unitsPerPixel = infoschematicViewBox.width / container.clientWidth
+      const candidates = calloutPorts.length > 0 ? calloutPorts : [{ x: 0.5, y: 0.5 }]
       setPort(
         chooseSpot({
-          candidates: calloutPorts,
+          candidates,
           label: { height: element.offsetHeight * unitsPerPixel, width: element.offsetWidth * unitsPerPixel },
           obstacles: litObstacles(step, runtime),
           view: infoschematicViewBox

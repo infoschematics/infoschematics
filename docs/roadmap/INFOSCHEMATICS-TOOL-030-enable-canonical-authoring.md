@@ -91,13 +91,14 @@ Canonical Infoschematic definitions can now be normalised, validated, and adapte
 - `packages/domain-core/src/model.ts` validates global Diagram references, supplies one-Port canonical defaults, copies legacy source Scenes into their owners, and preserves legacy seven-Port geometry during projection.
 - Mixed legacy dashed and solid Flows retain one semantic Family, with line treatment projected as a per-Flow override without changing the rendered lines.
 - `packages/view-model/src/compatibility.ts` derives the established view contract from canonical data, including Assembly geometry and full Flow routes.
+- Diagram callout placement candidates survive both compatibility directions; empty candidate sets fall back safely to centre.
 - `scripts/ibc-visual-compatibility.ts` accepts legacy or canonical IBC exports and renders both through the same canonical boundary.
 
 ### Verification
 
 - Focused model, adapter, and compatibility-harness tests pass: 7 tests across 3 files.
 - All 39 post-adapter IBC PNG hashes exactly match the pre-adapter capture; no fuzzy allowance was required.
-- `bun run self:check` exits 0: 71 test files and 487 tests pass, every TypeScript workspace compiles, dependency boundaries pass, generated artefacts are current, and the production Site builds.
+- `bun run self:check` exits 0: 71 test files and 496 tests pass, every TypeScript workspace compiles, dependency boundaries pass, generated artefacts are current, and the production Site builds.
 
 ### Outstanding concerns
 

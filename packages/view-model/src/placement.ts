@@ -152,5 +152,5 @@ export const chooseSpot = ({ candidates, obstacles, label, view }: SpotRequest):
     if (cost === 0) return placed.at
     if (!best || cost < best.cost) best = { at: placed.at, cost }
   }
-  return best?.at ?? at(candidates[0]).at
+  return best?.at ?? at(candidates[0] ?? { x: 0.5, y: 0.5 }).at
 }

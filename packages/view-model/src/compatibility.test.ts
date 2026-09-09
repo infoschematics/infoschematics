@@ -7,6 +7,7 @@ describe('establishedInfoschematicOf', () => {
     const legacy = defineInfoschematic({
       id: 'legacy',
       title: 'Compatibility',
+      calloutPositions: [{ x: 0.25, y: 0.75 }],
       infoschematic: {
         scopes: [
           {
@@ -86,6 +87,7 @@ describe('establishedInfoschematicOf', () => {
     const adapted = establishedInfoschematicOf(canonical)
 
     expect(establishedInfoschematicOf(legacy)).toBe(legacy)
+    expect(adapted.calloutPositions).toEqual([{ x: 0.25, y: 0.75 }])
 
     expect(adapted.infoschematic.flows[0]).toMatchObject({
       code: 'MED-01',

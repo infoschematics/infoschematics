@@ -168,6 +168,7 @@ export type Specification = {
 export type Diagram = {
   bounds: Box
   appearance?: InfoschematicAppearanceConfig
+  calloutPositions?: readonly Coordinate[]
   collections?: readonly Collection[]
   families?: readonly Family[]
   sets?: readonly ElementSet[]
@@ -193,9 +194,20 @@ export type Infoschematic = {
 
 export type DefinedDiagram = Omit<
   Diagram,
-  'assemblies' | 'cards' | 'collections' | 'fabrics' | 'families' | 'flows' | 'overlays' | 'points' | 'regions' | 'sets'
+  | 'assemblies'
+  | 'calloutPositions'
+  | 'cards'
+  | 'collections'
+  | 'fabrics'
+  | 'families'
+  | 'flows'
+  | 'overlays'
+  | 'points'
+  | 'regions'
+  | 'sets'
 > & {
   assemblies: readonly Assembly[]
+  calloutPositions: readonly Coordinate[]
   cards: readonly Card[]
   collections: readonly Collection[]
   fabrics: readonly Fabric[]

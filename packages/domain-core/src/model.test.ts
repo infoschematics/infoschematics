@@ -7,6 +7,7 @@ describe('infoschematicModelOf', () => {
       id: 'legacy',
       title: 'Compatibility',
       synopsis: 'Existing authored input.',
+      calloutPositions: [{ x: 0.25, y: 0.75 }],
       infoschematic: {
         scopes: [
           {
@@ -100,6 +101,7 @@ describe('infoschematicModelOf', () => {
       id: 'legacy',
       description: 'Existing authored input.',
       diagram: {
+        calloutPositions: [{ x: 0.25, y: 0.75 }],
         cards: [{ id: 'SNK', ports: { east: 7, north: 7, south: 7, west: 7 } }, { id: 'ADP' }],
         points: [{ id: 'SRC', at: { x: 20, y: 50 } }],
         flows: [
@@ -272,6 +274,7 @@ describe('infoschematicModelOf', () => {
       west: 1
     })
     expect(model.diagram.flows).toEqual([])
+    expect(model.diagram.calloutPositions).toEqual([])
     expect(model.themes).toEqual([])
     expect(JSON.parse(JSON.stringify(model))).toEqual(model)
 

@@ -109,6 +109,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           : []
       ),
       bounds: definition.viewBox,
+      calloutPositions: config.calloutPositions,
       cards: definition.cards.map((card) => ({
         bounds: card.placement.box,
         collection: card.domain ?? card.scope,
@@ -327,6 +328,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     diagram: {
       ...input.diagram,
       assemblies: input.diagram.assemblies ?? [],
+      calloutPositions: input.diagram.calloutPositions ?? [],
       cards: (input.diagram.cards ?? []).map((card) => ({
         ...card,
         ports: card.ports ?? standardPorts

@@ -151,7 +151,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
   })
 
   return {
-    calloutPositions: [],
+    calloutPositions: diagram.calloutPositions,
     id: model.id,
     infoschematic: {
       appearance: diagram.appearance,

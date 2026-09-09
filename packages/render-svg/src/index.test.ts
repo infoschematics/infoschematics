@@ -140,6 +140,7 @@ describe('renderInfoschematicSvg', () => {
       diagram: {
         assemblies: [],
         bounds: established.infoschematic.viewBox,
+        calloutPositions: [],
         cards: [],
         collections: [],
         fabrics: [],

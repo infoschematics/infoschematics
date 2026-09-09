@@ -17,6 +17,10 @@ const blocking = (x: number, y: number, weight?: number): Obstacle => ({
 })
 
 describe('choosing where a floating panel sits', () => {
+  it('falls back to the centre when no candidates are available', () => {
+    expect(chooseSpot({ candidates: [], label, obstacles: [], view })).toEqual(at(0.5, 0.5))
+  })
+
   it('takes the first candidate when nothing is in the way', () => {
     expect(chooseSpot({ candidates: [at(0.5, 0.5), at(0.5, 0.2)], label, obstacles: [], view })).toEqual(at(0.5, 0.5))
   })

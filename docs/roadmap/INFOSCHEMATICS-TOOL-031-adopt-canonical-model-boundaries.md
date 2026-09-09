@@ -94,6 +94,7 @@ Canonical Infoschematic data is now accepted directly by the framework-neutral r
 - `InfoschematicInput` names the supported union of direct canonical and established serialisable definitions.
 - `establishedInfoschematicOf` is idempotent, and `createInfoschematicRuntime` performs the single compatibility adaptation used by downstream Views and renderers.
 - Canonical Flows may override their Family's default line treatment, so direct versus indirect routes do not create duplicate semantic Families.
+- Canonical Diagram callout positions pass through the runtime boundary; Studio and placement logic both guard an empty candidate set.
 - Static SVG, Canvas, Present, and Studio public props accept canonical definitions without host-side adaptation.
 - Blank, System, and Infoschematics examples now use `defineInfoschematicModel`, code-like element identities, Collections, Families, Sets, Flow endpoints, and embedded Scenes.
 - Legacy visibility scopes become Collections only when they supply a Card's primary identity; otherwise they remain Sets.
@@ -104,7 +105,7 @@ Canonical Infoschematic data is now accepted directly by the framework-neutral r
 
 - The migrated System and Infoschematics example PNGs are byte-identical to their pre-migration captures; SVG differences are limited to intended canonical `data-id` values.
 - Focused canonical-boundary and example tests pass.
-- `bun run self:check` exits 0: 71 test files and 487 tests pass, every TypeScript workspace compiles, dependency boundaries pass across 372 modules and 1,164 dependencies, generated artefacts are current, and the production Site builds.
+- `bun run self:check` exits 0: 71 test files and 496 tests pass, every TypeScript workspace compiles, dependency boundaries pass across 376 modules and 1,168 dependencies, generated artefacts are current, and the production Site builds.
 
 ### Outstanding concerns
 
