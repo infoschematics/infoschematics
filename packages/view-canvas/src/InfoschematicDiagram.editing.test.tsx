@@ -183,7 +183,7 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(source).toContain("event.altKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')")
     expect(flowSection).not.toContain('ResizeHandle')
     expect(flowSection).not.toContain('dragArtefact(')
-    expect(adapterSection).toContain('dragArtefact(\n                          heldSelection')
+    expect(adapterSection).toMatch(/dragArtefact\(\s+heldSelection/)
     expect(adapterSection).not.toContain('ResizeHandle')
   })
 

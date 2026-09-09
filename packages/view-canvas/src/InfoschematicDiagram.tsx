@@ -18,21 +18,40 @@ import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 
 import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
 import { flowSignalKey } from './flow-signals.ts'
 import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
+import { panViewport, sameViewport, viewportZoomStep, zoomViewport } from './viewport.ts'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
 type MovableArtefactSelection = Exclude<ArtefactSelection, { kind: 'flow' }>
 type ResizeAxes = Readonly<{ height: boolean; width: boolean }>
+type PanGesture = Readonly<{
+  clientX: number
+  clientY: number
+  pointerId: number
+  scaleX: number
+  scaleY: number
+  viewport: Box
+}>
 
 const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
   left?.kind === right.kind && left.id === right.id
+
+const pointInDiagram = (svg: SVGSVGElement, clientX: number, clientY: number): Point | undefined => {
+  const matrix = svg.getScreenCTM()
+  if (!matrix) return undefined
+  const point = svg.createSVGPoint()
+  point.x = clientX
+  point.y = clientY
+  const mapped = point.matrixTransform(matrix.inverse())
+  return { x: mapped.x, y: mapped.y }
+}
 
 const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
   const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
@@ -400,6 +419,93 @@ export function InfoschematicDiagram({
   // a thing to change, and an unarmed pointer cannot alter it by accident.
   const [armed, setArmed] = useState(false)
   const infoschematic = useRef<SVGSVGElement>(null)
+  const zoomPointer = useRef<{ clientX: number; clientY: number } | null>(null)
+  const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
+  const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
+  const lastAuthoredViewport = useRef(infoschematicViewBox)
+  if (!sameViewport(lastAuthoredViewport.current, infoschematicViewBox)) {
+    lastAuthoredViewport.current = infoschematicViewBox
+    setViewport(infoschematicViewBox)
+    if (panGesture) setPanGesture(null)
+  }
+  const fitted = sameViewport(viewport, infoschematicViewBox)
+  const zoomBy = useCallback(
+    (magnification: number, anchor?: Point) => {
+      setViewport((current) => zoomViewport(infoschematicViewBox, current, magnification, anchor))
+    },
+    [infoschematicViewBox]
+  )
+  const zoomAnchor = useCallback((): Point | undefined => {
+    const svg = infoschematic.current
+    const at = zoomPointer.current
+    return svg && at ? pointInDiagram(svg, at.clientX, at.clientY) : undefined
+  }, [])
+
+  useEffect(() => {
+    const keyDown = (event: KeyboardEvent) => {
+      if (!zoomPointer.current || event.altKey || event.ctrlKey || event.metaKey) return
+      const target = event.target
+      if (target instanceof Element && target.closest('input, textarea, select, [contenteditable="true"]')) return
+
+      if (event.key === '0') {
+        event.preventDefault()
+        setViewport(infoschematicViewBox)
+      } else if (event.key === '+') {
+        event.preventDefault()
+        zoomBy(viewportZoomStep, zoomAnchor())
+      } else if (event.key === '-') {
+        event.preventDefault()
+        zoomBy(1 / viewportZoomStep, zoomAnchor())
+      }
+    }
+    window.addEventListener('keydown', keyDown)
+    return () => window.removeEventListener('keydown', keyDown)
+  }, [infoschematicViewBox, zoomAnchor, zoomBy])
+
+  const rememberZoomPointer = (event: React.PointerEvent<SVGSVGElement>) => {
+    zoomPointer.current = { clientX: event.clientX, clientY: event.clientY }
+  }
+  const clearZoomPointer = () => {
+    zoomPointer.current = null
+  }
+  const clearSelection = () => {
+    if (!editing) return
+    if (onArtefactSelect) onArtefactSelect(null)
+    else onSelect?.('')
+  }
+  const startPan = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (editing && (event.target as Element).closest('[data-artefact-kind]')) return
+    clearSelection()
+    if (fitted || event.button !== 0) return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    if (bounds.width <= 0 || bounds.height <= 0) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setPanGesture({
+      clientX: event.clientX,
+      clientY: event.clientY,
+      pointerId: event.pointerId,
+      scaleX: viewport.width / bounds.width,
+      scaleY: viewport.height / bounds.height,
+      viewport
+    })
+  }
+  const movePan = (event: React.PointerEvent<SVGSVGElement>) => {
+    rememberZoomPointer(event)
+    if (!panGesture || panGesture.pointerId !== event.pointerId) return
+    setViewport(
+      panViewport(infoschematicViewBox, panGesture.viewport, {
+        x: -(event.clientX - panGesture.clientX) * panGesture.scaleX,
+        y: -(event.clientY - panGesture.clientY) * panGesture.scaleY
+      })
+    )
+  }
+  const stopPan = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!panGesture || panGesture.pointerId !== event.pointerId) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    setPanGesture(null)
+  }
   // The last pointer position, since a key press does not carry one.
   const pointer = useRef<MouseEvent | null>(null)
   const [dropPort, setDropPort] = useState<string | null>(null)
@@ -968,7 +1074,6 @@ export function InfoschematicDiagram({
     const call = flow.operation ? ` · ${flow.operation}` : ''
     const flowSelected = artefactSelected(selection, flow.code)
     return (
-      // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the route is keyboard operable in Design.
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
       <g
         aria-label={`Flow ${flow.code}`}
@@ -1220,665 +1325,674 @@ export function InfoschematicDiagram({
   })
 
   return (
-    <svg
-      ref={infoschematic}
-      aria-label={`${config.title} structural Infoschematic`}
-      className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''} surface-${visualTreatment.surface}`}
-      data-grid-treatment={visualTreatment.grid}
-      data-surface-treatment={visualTreatment.surface}
-      height={infoschematicViewBox.height}
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-      viewBox={`${infoschematicViewBox.x} ${infoschematicViewBox.y} ${infoschematicViewBox.width} ${infoschematicViewBox.height}`}
-      width={infoschematicViewBox.width}
-    >
-      <title>{config.title}</title>
-      {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
-      {/* Sits behind everything else drawn onto the Infoschematic, so it is only ever
+    <>
+      <svg
+        ref={infoschematic}
+        aria-label={`${config.title} structural Infoschematic`}
+        className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} surface-${visualTreatment.surface}`}
+        data-grid-treatment={visualTreatment.grid}
+        data-surface-treatment={visualTreatment.surface}
+        height={infoschematicViewBox.height}
+        onPointerCancel={panGesture ? stopPan : undefined}
+        onPointerDown={editing || !fitted ? startPan : undefined}
+        onPointerEnter={rememberZoomPointer}
+        onPointerLeave={clearZoomPointer}
+        onPointerMove={movePan}
+        onPointerUp={panGesture ? stopPan : undefined}
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        viewBox={`${viewport.x} ${viewport.y} ${viewport.width} ${viewport.height}`}
+        width={infoschematicViewBox.width}
+      >
+        <title>{config.title}</title>
+        {accessibleSummary ? <desc>{`Cards: ${accessibleSummary}`}</desc> : null}
+        {/* Sits behind everything else drawn onto the Infoschematic, so it is only ever
           reached once a click has missed every card, region, and line above it -
           which is what makes "clicking empty Infoschematic clears the selection" true
           without this having to know what else is on screen. */}
-      <rect
-        className="infoschematic-backdrop"
-        height={infoschematicViewBox.height}
-        onPointerDown={
-          editing
-            ? () => {
-                if (onArtefactSelect) onArtefactSelect(null)
-                else onSelect?.('')
-              }
-            : undefined
-        }
-        width={infoschematicViewBox.width}
-        x={infoschematicViewBox.x}
-        y={infoschematicViewBox.y}
-      />
-      <defs>
-        <pattern
-          height={gridSize}
-          id="infoschematic-grid-minor"
-          patternUnits="userSpaceOnUse"
-          width={gridSize}
-          x="0"
-          y="0"
-        >
-          <path
-            className="infoschematic-grid-line minor"
-            d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`}
-          />
-        </pattern>
-        <pattern
-          height={gridMajorSize}
-          id="infoschematic-grid-major"
-          patternUnits="userSpaceOnUse"
-          width={gridMajorSize}
-          x="0"
-          y="0"
-        >
-          <path
-            className="infoschematic-grid-line major"
-            d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
-          />
-        </pattern>
-        <pattern
-          height={gridMajorSize}
-          id="infoschematic-grid-major-plus-minor"
-          patternUnits="userSpaceOnUse"
-          width={gridMajorSize}
-          x="0"
-          y="0"
-        >
-          <rect fill="url(#infoschematic-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
-          <path
-            className="infoschematic-grid-line major"
-            d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
-          />
-        </pattern>
-        {/* A dot marks each major intersection, so the same lattice the major
+        <rect
+          className="infoschematic-backdrop"
+          height={infoschematicViewBox.height}
+          width={infoschematicViewBox.width}
+          x={infoschematicViewBox.x}
+          y={infoschematicViewBox.y}
+        />
+        <defs>
+          <pattern
+            height={gridSize}
+            id="infoschematic-grid-minor"
+            patternUnits="userSpaceOnUse"
+            width={gridSize}
+            x="0"
+            y="0"
+          >
+            <path
+              className="infoschematic-grid-line minor"
+              d={`M ${gridSize} 0 V ${gridSize} M 0 ${gridSize} H ${gridSize}`}
+            />
+          </pattern>
+          <pattern
+            height={gridMajorSize}
+            id="infoschematic-grid-major"
+            patternUnits="userSpaceOnUse"
+            width={gridMajorSize}
+            x="0"
+            y="0"
+          >
+            <path
+              className="infoschematic-grid-line major"
+              d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
+            />
+          </pattern>
+          <pattern
+            height={gridMajorSize}
+            id="infoschematic-grid-major-plus-minor"
+            patternUnits="userSpaceOnUse"
+            width={gridMajorSize}
+            x="0"
+            y="0"
+          >
+            <rect fill="url(#infoschematic-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
+            <path
+              className="infoschematic-grid-line major"
+              d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
+            />
+          </pattern>
+          {/* A dot marks each major intersection, so the same lattice the major
             lines would draw is implied by its corners alone. The tile is offset
             by half its width and the dot sits at its centre: a dot authored at
             the tile's corner would be clipped to a quarter by the tile edge. */}
-        <pattern
-          height={gridMajorSize}
-          id="infoschematic-grid-dots"
-          patternUnits="userSpaceOnUse"
-          width={gridMajorSize}
-          x={-gridMajorSize / 2}
-          y={-gridMajorSize / 2}
-        >
-          <circle
-            className="infoschematic-grid-dot"
-            cx={gridMajorSize / 2}
-            cy={gridMajorSize / 2}
-            r={gridMinorStrokeWidth * 3}
-          />
-        </pattern>
-        {Definitions ? <Definitions /> : null}
-        {infoschematicFamilies.map((family) => (
-          <marker
-            id={`infoschematic-arrow-${family.id}`}
-            key={family.id}
-            markerHeight="32"
-            /* In user units, not stroke widths: the default scales an arrowhead
+          <pattern
+            height={gridMajorSize}
+            id="infoschematic-grid-dots"
+            patternUnits="userSpaceOnUse"
+            width={gridMajorSize}
+            x={-gridMajorSize / 2}
+            y={-gridMajorSize / 2}
+          >
+            <circle
+              className="infoschematic-grid-dot"
+              cx={gridMajorSize / 2}
+              cy={gridMajorSize / 2}
+              r={gridMinorStrokeWidth * 3}
+            />
+          </pattern>
+          {Definitions ? <Definitions /> : null}
+          {infoschematicFamilies.map((family) => (
+            <marker
+              id={`infoschematic-arrow-${family.id}`}
+              key={family.id}
+              markerHeight="32"
+              /* In user units, not stroke widths: the default scales an arrowhead
                with its line, so focusing a line inflated its head by a quarter
                and a bidirectional line grew two of them. */
-            markerUnits="userSpaceOnUse"
-            markerWidth="32"
-            orient="auto-start-reverse"
-            refX="24"
-            refY="12"
-          >
-            {/* The family colour is the fallback. Where `context-stroke` is
+              markerUnits="userSpaceOnUse"
+              markerWidth="32"
+              orient="auto-start-reverse"
+              refX="24"
+              refY="12"
+            >
+              {/* The family colour is the fallback. Where `context-stroke` is
                 understood the stylesheet overrides it and the head takes the
                 colour of the line it sits on, so pointing at a line brightens
                 its head with it rather than leaving it behind. */}
-            <path className="arrow-head" d="M0,0 L0,24 L24,12 z" fill={family.color} />
-          </marker>
-        ))}
-      </defs>
+              <path className="arrow-head" d="M0,0 L0,24 L24,12 z" fill={family.color} />
+            </marker>
+          ))}
+        </defs>
 
-      {visualTreatment.grid !== 'none' ? (
-        <rect
-          className="infoschematic-authored-grid"
-          fill={`url(#infoschematic-grid-${visualTreatment.grid})`}
-          height={infoschematicViewBox.height}
-          pointerEvents="none"
-          width={infoschematicViewBox.width}
-          x={infoschematicViewBox.x}
-          y={infoschematicViewBox.y}
-        />
-      ) : null}
+        {visualTreatment.grid !== 'none' ? (
+          <rect
+            className="infoschematic-authored-grid"
+            fill={`url(#infoschematic-grid-${visualTreatment.grid})`}
+            height={infoschematicViewBox.height}
+            pointerEvents="none"
+            width={infoschematicViewBox.width}
+            x={infoschematicViewBox.x}
+            y={infoschematicViewBox.y}
+          />
+        ) : null}
 
-      {infoschematicRegions.map((region) => {
-        const selection = {
-          code: null,
-          geometry: 'box',
-          id: region.id,
-          kind: 'region'
-        } as const satisfies ArtefactSelection
-        const legacyKey = `region:${region.id}`
-        const treatment = resolveRegionTreatment(region)
-        const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
-        // A boundary-mounted label sits over the backdrop the notch exposes,
-        // not the fill, so only a plain label takes its ink from the fill.
-        const ink =
-          region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
-        return (
-          // biome-ignore lint/a11y/useSemanticElements: SVG has no button element; the full Region is keyboard operable in Design.
-          // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
-          <g
-            aria-label={`Region ${region.label}`}
-            className={`infoschematic-region artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
-            data-artefact-id={selection.id}
-            data-artefact-kind={selection.kind}
-            data-frame-treatment={treatment.frame}
-            data-label-placement={treatment.label ?? 'none'}
-            data-label-treatment={treatment.labelTreatment}
-            key={region.id}
-            onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
-            onPointerDown={
-              editing
-                ? dragArtefact(
-                    selection,
-                    legacyKey,
-                    { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 },
-                    { x: true, y: true }
-                  )
-                : undefined
-            }
-            role={editing ? 'button' : undefined}
-            tabIndex={editing ? 0 : undefined}
-          >
-            {region.fill ? (
-              <rect
-                className="infoschematic-region-fill"
-                fill={region.fill}
-                height={region.box.height}
-                rx={region.box.radius ?? cornerRadius}
-                width={region.box.width}
-                x={region.box.x}
-                y={region.box.y}
-              />
-            ) : null}
-            {geometry.outline ? (
-              <path
-                className="infoschematic-region-frame"
-                d={geometry.outline}
-                strokeOpacity={treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity}
-              />
-            ) : null}
-            {geometry.label ? (
-              <text
-                className={`infoschematic-region-label${editing && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
-                  artefactSelected(selection, legacyKey) ? ' selected' : ''
-                }${hovered === legacyKey ? ' pointed' : ''}`}
-                data-ink={ink ?? undefined}
-                dominantBaseline={geometry.label.dominantBaseline}
-                lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
-                onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
-                onPointerLeave={onHover ? () => onHover(null) : undefined}
-                textAnchor={geometry.label.textAnchor}
-                textLength={geometry.label.length ?? undefined}
-                x={geometry.label.x}
-                y={geometry.label.y}
-              >
-                {region.label.toUpperCase()}
-              </text>
-            ) : null}
-            {editing && artefactSelected(selection, legacyKey) ? (
-              <>
-                <ResizeHandle
-                  axes={{ height: true, width: true }}
-                  bounds={region.box}
-                  label={region.label}
-                  selection={selection}
+        {infoschematicRegions.map((region) => {
+          const selection = {
+            code: null,
+            geometry: 'box',
+            id: region.id,
+            kind: 'region'
+          } as const satisfies ArtefactSelection
+          const legacyKey = `region:${region.id}`
+          const treatment = resolveRegionTreatment(region)
+          const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+          // A boundary-mounted label sits over the backdrop the notch exposes,
+          // not the fill, so only a plain label takes its ink from the fill.
+          const ink =
+            region.fill && geometry.label && treatment.labelTreatment === 'plain'
+              ? resolveReadableInk(region.fill)
+              : null
+          return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+            <g
+              aria-label={`Region ${region.label}`}
+              className={`infoschematic-region artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+              data-artefact-id={selection.id}
+              data-artefact-kind={selection.kind}
+              data-frame-treatment={treatment.frame}
+              data-label-placement={treatment.label ?? 'none'}
+              data-label-treatment={treatment.labelTreatment}
+              key={region.id}
+              onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+              onPointerDown={
+                editing
+                  ? dragArtefact(
+                      selection,
+                      legacyKey,
+                      { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 },
+                      { x: true, y: true }
+                    )
+                  : undefined
+              }
+              role={editing ? 'button' : undefined}
+              tabIndex={editing ? 0 : undefined}
+            >
+              {region.fill ? (
+                <rect
+                  className="infoschematic-region-fill"
+                  fill={region.fill}
+                  height={region.box.height}
+                  rx={region.box.radius ?? cornerRadius}
+                  width={region.box.width}
+                  x={region.box.x}
+                  y={region.box.y}
                 />
-                <ArtefactActions
-                  at={{ x: region.box.x + region.box.width - 48, y: region.box.y + 12 }}
-                  label={region.label}
-                  selection={selection}
+              ) : null}
+              {geometry.outline ? (
+                <path
+                  className="infoschematic-region-frame"
+                  d={geometry.outline}
+                  strokeOpacity={treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity}
                 />
-              </>
-            ) : null}
-          </g>
-        )
-      })}
+              ) : null}
+              {geometry.label ? (
+                <text
+                  className={`infoschematic-region-label${editing && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
+                    artefactSelected(selection, legacyKey) ? ' selected' : ''
+                  }${hovered === legacyKey ? ' pointed' : ''}`}
+                  data-ink={ink ?? undefined}
+                  dominantBaseline={geometry.label.dominantBaseline}
+                  lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
+                  onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
+                  onPointerLeave={onHover ? () => onHover(null) : undefined}
+                  textAnchor={geometry.label.textAnchor}
+                  textLength={geometry.label.length ?? undefined}
+                  x={geometry.label.x}
+                  y={geometry.label.y}
+                >
+                  {region.label.toUpperCase()}
+                </text>
+              ) : null}
+              {editing && artefactSelected(selection, legacyKey) ? (
+                <>
+                  <ResizeHandle
+                    axes={{ height: true, width: true }}
+                    bounds={region.box}
+                    label={region.label}
+                    selection={selection}
+                  />
+                  <ArtefactActions
+                    at={{ x: region.box.x + region.box.width - 48, y: region.box.y + 12 }}
+                    label={region.label}
+                    selection={selection}
+                  />
+                </>
+              ) : null}
+            </g>
+          )
+        })}
 
-      {/* The canvas states its own edge, present whenever the editor is open
+        {/* The canvas states its own edge, present whenever the editor is open
           regardless of whether the grid is switched on, so a card dragged
           towards it has something other than the region panels to read against. */}
-      {editing ? (
-        <rect
-          className="canvas-edge"
-          height={infoschematicViewBox.height}
-          width={infoschematicViewBox.width}
-          x={infoschematicViewBox.x}
-          y={infoschematicViewBox.y}
-        />
-      ) : null}
-
-      {editing && grid ? (
-        <g className="edit-grid">
+        {editing ? (
           <rect
-            fill="url(#infoschematic-grid-major-plus-minor)"
+            className="canvas-edge"
             height={infoschematicViewBox.height}
             width={infoschematicViewBox.width}
             x={infoschematicViewBox.x}
             y={infoschematicViewBox.y}
           />
+        ) : null}
+
+        {editing && grid ? (
+          <g className="edit-grid">
+            <rect
+              fill="url(#infoschematic-grid-major-plus-minor)"
+              height={infoschematicViewBox.height}
+              width={infoschematicViewBox.width}
+              x={infoschematicViewBox.x}
+              y={infoschematicViewBox.y}
+            />
+          </g>
+        ) : null}
+
+        {editing ? graphicLayer : null}
+
+        {infoschematicFabrics
+          .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
+          .map((fabric) => {
+            const bounds = movedBox(fabric.bounds, fabric.code)
+            const selection = {
+              code: fabric.code,
+              geometry: 'box',
+              id: fabric.id,
+              kind: 'fabric'
+            } as const satisfies ArtefactSelection
+            const rendererKey = fabric.appearance?.renderer
+            const renderer = resolveInfoschematicRenderer(
+              renderers,
+              'fabric',
+              rendererKey,
+              fabric.appearance?.properties,
+              fabric.id
+            )
+            const Renderer = renderer?.Component
+            return (
+              // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+              <g
+                aria-label={fabric.label}
+                className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+                data-artefact-id={selection.id}
+                data-artefact-kind={selection.kind}
+                key={fabric.id}
+                onKeyDown={editing ? artefactKeyDown(selection, fabric.code) : undefined}
+                onPointerDown={
+                  editing
+                    ? dragArtefact(
+                        selection,
+                        fabric.code,
+                        { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
+                        { x: true, y: true }
+                      )
+                    : undefined
+                }
+                onPointerEnter={onHover ? () => onHover(fabric.code) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                role={editing ? 'button' : undefined}
+                tabIndex={editing ? 0 : undefined}
+              >
+                <title>{fabricTitle(fabric)}</title>
+                {Renderer ? (
+                  <Renderer bounds={bounds} fabric={fabric} properties={renderer.properties} />
+                ) : (
+                  <DefaultFabric bounds={bounds} fabric={fabric} />
+                )}
+                {editing ? (
+                  <rect
+                    className="fabric-frame"
+                    height={bounds.height}
+                    rx={cornerRadius}
+                    width={bounds.width}
+                    x={bounds.x}
+                    y={bounds.y}
+                  />
+                ) : null}
+                {editing && artefactSelected(selection, fabric.code) ? (
+                  <>
+                    <ResizeHandle
+                      axes={{ height: true, width: true }}
+                      bounds={bounds}
+                      label={fabric.label}
+                      selection={selection}
+                    />
+                    <ArtefactActions
+                      at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
+                      label={fabric.label}
+                      selection={selection}
+                    />
+                  </>
+                ) : null}
+              </g>
+            )
+          })}
+
+        <g className="infoschematic-flows">
+          {[...flows]
+            // Family order decides the resting stack, but a lit line always paints
+            // last. A lower family can otherwise leave its
+            // glow ends up underneath the dark backing pipe of every dimmed line
+            // crossing it - lit, and invisible.
+            .sort((left, right) => {
+              // A selected flow paints above everything until it is let go,
+              // so the line being worked on is never behind one that is not.
+              const leftPicked =
+                left.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === left.id) ? 1 : 0
+              const rightPicked =
+                right.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === right.id)
+                  ? 1
+                  : 0
+              if (leftPicked !== rightPicked) return leftPicked - rightPicked
+
+              const leftLit = highlight?.flows.has(left.id) ? 1 : 0
+              const rightLit = highlight?.flows.has(right.id) ? 1 : 0
+              if (leftLit !== rightLit) return leftLit - rightLit
+              return (familyLayer.get(right.family) ?? 0) - (familyLayer.get(left.family) ?? 0)
+            })
+            .filter(
+              (flow) =>
+                flow.code !== selected && !(selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id)
+            )
+            .map(renderFlow)}
         </g>
-      ) : null}
 
-      {editing ? graphicLayer : null}
-
-      {infoschematicFabrics
-        .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
-        .map((fabric) => {
-          const bounds = movedBox(fabric.bounds, fabric.code)
-          const selection = {
-            code: fabric.code,
-            geometry: 'box',
-            id: fabric.id,
-            kind: 'fabric'
-          } as const satisfies ArtefactSelection
-          const rendererKey = fabric.appearance?.renderer
-          const renderer = resolveInfoschematicRenderer(
-            renderers,
-            'fabric',
-            rendererKey,
-            fabric.appearance?.properties,
-            fabric.id
-          )
-          const Renderer = renderer?.Component
-          return (
-            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
-            <g
-              aria-label={fabric.label}
-              className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
-              data-artefact-id={selection.id}
-              data-artefact-kind={selection.kind}
-              key={fabric.id}
-              onKeyDown={editing ? artefactKeyDown(selection, fabric.code) : undefined}
-              onPointerDown={
-                editing
-                  ? dragArtefact(
-                      selection,
-                      fabric.code,
-                      { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
-                      { x: true, y: true }
-                    )
-                  : undefined
-              }
-              onPointerEnter={onHover ? () => onHover(fabric.code) : undefined}
-              onPointerLeave={onHover ? () => onHover(null) : undefined}
-              role={editing ? 'button' : undefined}
-              tabIndex={editing ? 0 : undefined}
-            >
-              <title>{fabricTitle(fabric)}</title>
-              {Renderer ? (
-                <Renderer bounds={bounds} fabric={fabric} properties={renderer.properties} />
-              ) : (
-                <DefaultFabric bounds={bounds} fabric={fabric} />
-              )}
-              {editing ? (
-                <rect
-                  className="fabric-frame"
-                  height={bounds.height}
-                  rx={cornerRadius}
-                  width={bounds.width}
-                  x={bounds.x}
-                  y={bounds.y}
-                />
-              ) : null}
-              {editing && artefactSelected(selection, fabric.code) ? (
-                <>
-                  <ResizeHandle
-                    axes={{ height: true, width: true }}
-                    bounds={bounds}
-                    label={fabric.label}
-                    selection={selection}
-                  />
-                  <ArtefactActions
-                    at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
-                    label={fabric.label}
-                    selection={selection}
-                  />
-                </>
-              ) : null}
-            </g>
-          )
-        })}
-
-      <g className="infoschematic-flows">
-        {[...flows]
-          // Family order decides the resting stack, but a lit line always paints
-          // last. A lower family can otherwise leave its
-          // glow ends up underneath the dark backing pipe of every dimmed line
-          // crossing it - lit, and invisible.
-          .sort((left, right) => {
-            // A selected flow paints above everything until it is let go,
-            // so the line being worked on is never behind one that is not.
-            const leftPicked =
-              left.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === left.id) ? 1 : 0
-            const rightPicked =
-              right.code === selected || (selectedArtefact?.kind === 'flow' && selectedArtefact.id === right.id) ? 1 : 0
-            if (leftPicked !== rightPicked) return leftPicked - rightPicked
-
-            const leftLit = highlight?.flows.has(left.id) ? 1 : 0
-            const rightLit = highlight?.flows.has(right.id) ? 1 : 0
-            if (leftLit !== rightLit) return leftLit - rightLit
-            return (familyLayer.get(right.family) ?? 0) - (familyLayer.get(left.family) ?? 0)
-          })
-          .filter(
-            (flow) => flow.code !== selected && !(selectedArtefact?.kind === 'flow' && selectedArtefact.id === flow.id)
-          )
-          .map(renderFlow)}
-      </g>
-
-      {/* An adapter is a socket the card it holds sits down into, so it is drawn
+        {/* An adapter is a socket the card it holds sits down into, so it is drawn
           with that card's shape cut out of it rather than as a panel behind:
           the rim shows around three sides and the footer carries its own name
           and code, and nothing of the adapter passes under the card. */}
-      {/* Geometry from the placeables, identity from the register - the same
+        {/* Geometry from the placeables, identity from the register - the same
           pairing the cards below use, and what lets an adapter made in the
           editor draw at all. The clasp is derived from the card it holds
           wherever that card has got to, so an adapter has never had a position
           of its own to read. */}
-      {placeables
-        .flatMap((placeable) => {
-          const adapter = register.cardAt(placeable.code)
-          if (!adapter?.wraps) return []
-          const found = placeables.find((candidate) => candidate.id === adapter.wraps)
-          return found ? [{ ...placeable, held: found.box, holds: found, identity: adapter }] : []
-        })
-        .map(({ held, holds, identity: adapter, ...placed }) => {
-          const box = placed.box
-          const selection = {
-            code: adapter.code,
-            geometry: 'box',
-            id: adapter.id,
-            kind: 'card'
-          } as const satisfies ArtefactSelection
-          const heldSelection = {
-            code: holds.code,
-            geometry: 'box',
-            id: holds.id,
-            kind: 'card'
-          } as const satisfies ArtefactSelection
-          // Traced as one outline so the clasp is a single shape: out along the
-          // left arm, down into the notch the card sits in, up the right arm and
-          // round the bottom. Every corner takes the card's own radius, the
-          // notch curving inward where the outside curves away.
-          const socket = roundedOutline(
-            [
-              { x: box.x, y: box.y },
-              { x: held.x, y: box.y },
-              { x: held.x, y: held.y + held.height },
-              { x: held.x + held.width, y: held.y + held.height },
-              { x: held.x + held.width, y: box.y },
-              { x: box.x + box.width, y: box.y },
-              { x: box.x + box.width, y: box.y + box.height },
-              { x: box.x, y: box.y + box.height }
-            ],
-            cornerRadius
-          )
+        {placeables
+          .flatMap((placeable) => {
+            const adapter = register.cardAt(placeable.code)
+            if (!adapter?.wraps) return []
+            const found = placeables.find((candidate) => candidate.id === adapter.wraps)
+            return found ? [{ ...placeable, held: found.box, holds: found, identity: adapter }] : []
+          })
+          .map(({ held, holds, identity: adapter, ...placed }) => {
+            const box = placed.box
+            const selection = {
+              code: adapter.code,
+              geometry: 'box',
+              id: adapter.id,
+              kind: 'card'
+            } as const satisfies ArtefactSelection
+            const heldSelection = {
+              code: holds.code,
+              geometry: 'box',
+              id: holds.id,
+              kind: 'card'
+            } as const satisfies ArtefactSelection
+            // Traced as one outline so the clasp is a single shape: out along the
+            // left arm, down into the notch the card sits in, up the right arm and
+            // round the bottom. Every corner takes the card's own radius, the
+            // notch curving inward where the outside curves away.
+            const socket = roundedOutline(
+              [
+                { x: box.x, y: box.y },
+                { x: held.x, y: box.y },
+                { x: held.x, y: held.y + held.height },
+                { x: held.x + held.width, y: held.y + held.height },
+                { x: held.x + held.width, y: box.y },
+                { x: box.x + box.width, y: box.y },
+                { x: box.x + box.width, y: box.y + box.height },
+                { x: box.x, y: box.y + box.height }
+              ],
+              cornerRadius
+            )
 
-          return (
-            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
-            <g
-              aria-label={`${adapter.label}, holding ${adapter.wraps}`}
-              className={`infoschematic-adapter${editing ? ' selectable' : ''}${
-                highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
-              }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
-              data-artefact-id={selection.id}
-              data-artefact-kind={selection.kind}
-              key={placed.id}
-              onKeyDown={editing ? artefactKeyDown(selection, adapter.code) : undefined}
-              onPointerDown={
-                editing
-                  ? (event) => {
-                      // Selects the adapter, drags the card. An adapter is a
-                      // grip on the thing it holds rather than a thing with a
-                      // position, so taking hold of one has to move that card -
-                      // and refusing the drag outright, which is what this did,
-                      // left a shape on the Infoschematic that could be picked up and
-                      // not moved.
-                      if (onArtefactMove) {
-                        dragArtefact(
-                          heldSelection,
-                          adapter.code,
-                          { x: held.x + held.width / 2, y: held.y + held.height / 2 },
-                          { x: true, y: true },
-                          selection
-                        )(event)
-                      } else {
-                        selectArtefact(selection, adapter.code)
-                        dragComponent(holds.code)(event)
+            return (
+              // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+              <g
+                aria-label={`${adapter.label}, holding ${adapter.wraps}`}
+                className={`infoschematic-adapter${editing ? ' selectable' : ''}${
+                  highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
+                }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
+                data-artefact-id={selection.id}
+                data-artefact-kind={selection.kind}
+                key={placed.id}
+                onKeyDown={editing ? artefactKeyDown(selection, adapter.code) : undefined}
+                onPointerDown={
+                  editing
+                    ? (event) => {
+                        // Selects the adapter, drags the card. An adapter is a
+                        // grip on the thing it holds rather than a thing with a
+                        // position, so taking hold of one has to move that card -
+                        // and refusing the drag outright, which is what this did,
+                        // left a shape on the Infoschematic that could be picked up and
+                        // not moved.
+                        if (onArtefactMove) {
+                          dragArtefact(
+                            heldSelection,
+                            adapter.code,
+                            { x: held.x + held.width / 2, y: held.y + held.height / 2 },
+                            { x: true, y: true },
+                            selection
+                          )(event)
+                        } else {
+                          selectArtefact(selection, adapter.code)
+                          dragComponent(holds.code)(event)
+                        }
                       }
-                    }
-                  : undefined
-              }
-              onPointerEnter={onHover ? () => onHover(adapter.code) : undefined}
-              onPointerLeave={onHover ? () => onHover(null) : undefined}
-              role={editing ? 'button' : undefined}
-              tabIndex={editing ? 0 : undefined}
-            >
-              <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
-              <path className="adapter-socket" d={socket} />
-              {/* The whole label is rendered exactly as authored. */}
-              <text className="adapter-label" x={box.x + box.width / 2} y={held.y + held.height + adapterFloor / 2 + 5}>
-                {adapter.label}
-              </text>
-              {editing && artefactSelected(selection, adapter.code) ? (
-                <ArtefactActions
-                  at={{ x: box.x + box.width - 48, y: box.y + 12 }}
-                  label={adapter.label}
-                  selection={selection}
-                />
-              ) : null}
-            </g>
-          )
-        })}
+                    : undefined
+                }
+                onPointerEnter={onHover ? () => onHover(adapter.code) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                role={editing ? 'button' : undefined}
+                tabIndex={editing ? 0 : undefined}
+              >
+                <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
+                <path className="adapter-socket" d={socket} />
+                {/* The whole label is rendered exactly as authored. */}
+                <text
+                  className="adapter-label"
+                  x={box.x + box.width / 2}
+                  y={held.y + held.height + adapterFloor / 2 + 5}
+                >
+                  {adapter.label}
+                </text>
+                {editing && artefactSelected(selection, adapter.code) ? (
+                  <ArtefactActions
+                    at={{ x: box.x + box.width - 48, y: box.y + 12 }}
+                    label={adapter.label}
+                    selection={selection}
+                  />
+                ) : null}
+              </g>
+            )
+          })}
 
-      {/* Geometry from the placeables, which already carry the drafts and the
+        {/* Geometry from the placeables, which already carry the drafts and the
           cards made this session; identity from the register. This read the
           Card list and the layout table and folded the offset in by hand,
           which is three sources for one card and no way at all to draw a card
           the model has never heard of. */}
-      {placeables
-        .flatMap((placeable) => {
-          const card = register.cardAt(placeable.code)
-          const authored = cardById.get(placeable.id)
-          return card && !card.wraps
-            ? [
-                {
-                  ...placeable,
-                  domain: authored?.domain,
-                  group: card.group,
-                  label: card.label,
-                  name: card.detail,
-                  stereotype: authored?.stereotype
-                }
-              ]
-            : []
-        })
-        // The selected card paints last so nothing overlaps what is being worked
-        // on, and drops back into place when it is let go.
-        .sort((left, right) => {
-          const leftPicked =
-            left.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === left.id) ? 1 : 0
-          const rightPicked =
-            right.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === right.id) ? 1 : 0
-          return leftPicked - rightPicked
-        })
-        .map((card) => {
-          const layout = card.box
-          const selection = {
-            code: card.code,
-            geometry: 'box',
-            id: card.id,
-            kind: 'card'
-          } as const satisfies ArtefactSelection
-          const domain = resolveCardDomain(card, domains)
-          const appearance = domain ??
-            scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
-              color: 'currentColor',
-              fill: 'transparent'
-            }
-          // Card internals are placed and fitted from the Card's own box by View
-          // Model, so the Canvas and the static SVG draw the same Card the same
-          // way, saying the same thing, at any shape.
-          const text = resolveCardLayout({
-            box: layout,
-            code: card.code,
-            compact: visualTreatment.card.compact,
-            description: card.name,
-            detail: {
-              description: visualTreatment.card.description,
-              identity: visualTreatment.card.identity,
-              stereotype: visualTreatment.card.stereotype
-            },
-            label: card.label,
-            stereotype: card.stereotype
+        {placeables
+          .flatMap((placeable) => {
+            const card = register.cardAt(placeable.code)
+            const authored = cardById.get(placeable.id)
+            return card && !card.wraps
+              ? [
+                  {
+                    ...placeable,
+                    domain: authored?.domain,
+                    group: card.group,
+                    label: card.label,
+                    name: card.detail,
+                    stereotype: authored?.stereotype
+                  }
+                ]
+              : []
           })
-          const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
-
-          return (
-            // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
-            <g
-              aria-label={accessibleDetail}
-              className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
-                editing || focusing ? ' selectable' : ''
-              }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
-                removals[card.code] ? ' going' : ''
-              }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
-              data-artefact-id={selection.id}
-              data-artefact-kind={selection.kind}
-              data-card-compact={visualTreatment.card.compact || undefined}
-              data-domain={domain?.id}
-              data-ink={resolveReadableInk(appearance.fill)}
-              key={card.id}
-              onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
-              /*
-               * Two editors, two meanings for the same press. In the Infoschematic
-               * editor a card is selected and dragged; in the scene editor it
-               * is added to or removed from what the scene lights, and there is
-               * nothing to drag because a scene has no geometry.
-               */
-              onPointerDown={
-                editing
-                  ? (event) => {
-                      if (onArtefactMove) {
-                        dragArtefact(
-                          selection,
-                          card.code,
-                          { x: layout.x + layout.width / 2, y: layout.y + layout.height / 2 },
-                          { x: true, y: true }
-                        )(event)
-                      } else {
-                        selectArtefact(selection, card.code)
-                        dragComponent(card.code)(event)
-                      }
-                    }
-                  : focusing
-                    ? () => onLight?.(card.id, false)
-                    : undefined
+          // The selected card paints last so nothing overlaps what is being worked
+          // on, and drops back into place when it is let go.
+          .sort((left, right) => {
+            const leftPicked =
+              left.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === left.id) ? 1 : 0
+            const rightPicked =
+              right.code === selected || (selectedArtefact?.kind === 'card' && selectedArtefact.id === right.id) ? 1 : 0
+            return leftPicked - rightPicked
+          })
+          .map((card) => {
+            const layout = card.box
+            const selection = {
+              code: card.code,
+              geometry: 'box',
+              id: card.id,
+              kind: 'card'
+            } as const satisfies ArtefactSelection
+            const domain = resolveCardDomain(card, domains)
+            const appearance = domain ??
+              scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
+                color: 'currentColor',
+                fill: 'transparent'
               }
-              onPointerEnter={onHover ? () => onHover(card.code) : undefined}
-              onPointerLeave={onHover ? () => onHover(null) : undefined}
-              role={editing ? 'button' : undefined}
-              style={{ color: 'color' in appearance ? appearance.color : appearance.stroke }}
-              tabIndex={editing ? 0 : undefined}
-              transform={`translate(${layout.x} ${layout.y})`}
-            >
-              <title>{accessibleDetail}</title>
-              <rect
-                fill={appearance.fill}
-                height={layout.height}
-                rx={cornerRadius}
-                stroke={'color' in appearance ? appearance.color : appearance.stroke}
-                width={layout.width}
-              />
-              {text.identity ? (
-                <g className="infoschematic-card-identity" data-card-detail="identity">
-                  <rect
-                    height={text.identity.height}
-                    rx="4"
-                    width={text.identity.width}
-                    x={text.identity.x}
-                    y={text.identity.y}
-                  />
-                  <text x={text.identity.textX} y={text.identity.textY}>
-                    {card.code}
-                  </text>
-                </g>
-              ) : null}
-              {text.stereotype ? (
-                <text
-                  className="infoschematic-card-stereotype"
-                  data-card-detail="stereotype"
-                  x={text.stereotype.x}
-                  y={text.stereotype.y}
-                >
-                  {text.stereotype.text.toUpperCase()}
-                </text>
-              ) : null}
-              <text
-                className="infoschematic-service-label"
-                textAnchor={text.label.anchor}
-                x={text.label.x}
-                y={text.label.y}
+            // Card internals are placed and fitted from the Card's own box by View
+            // Model, so the Canvas and the static SVG draw the same Card the same
+            // way, saying the same thing, at any shape.
+            const text = resolveCardLayout({
+              box: layout,
+              code: card.code,
+              compact: visualTreatment.card.compact,
+              description: card.name,
+              detail: {
+                description: visualTreatment.card.description,
+                identity: visualTreatment.card.identity,
+                stereotype: visualTreatment.card.stereotype
+              },
+              label: card.label,
+              stereotype: card.stereotype
+            })
+            const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
+
+            return (
+              // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+              <g
+                aria-label={accessibleDetail}
+                className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
+                  editing || focusing ? ' selectable' : ''
+                }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
+                  removals[card.code] ? ' going' : ''
+                }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
+                data-artefact-id={selection.id}
+                data-artefact-kind={selection.kind}
+                data-card-compact={visualTreatment.card.compact || undefined}
+                data-domain={domain?.id}
+                data-ink={resolveReadableInk(appearance.fill)}
+                key={card.id}
+                onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
+                /*
+                 * Two editors, two meanings for the same press. In the Infoschematic
+                 * editor a card is selected and dragged; in the scene editor it
+                 * is added to or removed from what the scene lights, and there is
+                 * nothing to drag because a scene has no geometry.
+                 */
+                onPointerDown={
+                  editing
+                    ? (event) => {
+                        if (onArtefactMove) {
+                          dragArtefact(
+                            selection,
+                            card.code,
+                            { x: layout.x + layout.width / 2, y: layout.y + layout.height / 2 },
+                            { x: true, y: true }
+                          )(event)
+                        } else {
+                          selectArtefact(selection, card.code)
+                          dragComponent(card.code)(event)
+                        }
+                      }
+                    : focusing
+                      ? () => onLight?.(card.id, false)
+                      : undefined
+                }
+                onPointerEnter={onHover ? () => onHover(card.code) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                role={editing ? 'button' : undefined}
+                style={{ color: 'color' in appearance ? appearance.color : appearance.stroke }}
+                tabIndex={editing ? 0 : undefined}
+                transform={`translate(${layout.x} ${layout.y})`}
               >
-                {text.label.lines.map((line, index) => (
-                  <tspan key={line} x={text.label.x} dy={index === 0 ? 0 : text.label.lineHeight}>
-                    {line}
-                  </tspan>
-                ))}
-              </text>
-              {text.description ? (
+                <title>{accessibleDetail}</title>
+                <rect
+                  fill={appearance.fill}
+                  height={layout.height}
+                  rx={cornerRadius}
+                  stroke={'color' in appearance ? appearance.color : appearance.stroke}
+                  width={layout.width}
+                />
+                {text.identity ? (
+                  <g className="infoschematic-card-identity" data-card-detail="identity">
+                    <rect
+                      height={text.identity.height}
+                      rx="4"
+                      width={text.identity.width}
+                      x={text.identity.x}
+                      y={text.identity.y}
+                    />
+                    <text x={text.identity.textX} y={text.identity.textY}>
+                      {card.code}
+                    </text>
+                  </g>
+                ) : null}
+                {text.stereotype ? (
+                  <text
+                    className="infoschematic-card-stereotype"
+                    data-card-detail="stereotype"
+                    x={text.stereotype.x}
+                    y={text.stereotype.y}
+                  >
+                    {text.stereotype.text.toUpperCase()}
+                  </text>
+                ) : null}
                 <text
-                  className="infoschematic-card-description"
-                  data-card-detail="description"
-                  textAnchor={text.description.anchor}
-                  x={text.description.x}
-                  y={text.description.y}
+                  className="infoschematic-service-label"
+                  textAnchor={text.label.anchor}
+                  x={text.label.x}
+                  y={text.label.y}
                 >
-                  {text.description.text}
+                  {text.label.lines.map((line, index) => (
+                    <tspan key={line} x={text.label.x} dy={index === 0 ? 0 : text.label.lineHeight}>
+                      {line}
+                    </tspan>
+                  ))}
                 </text>
-              ) : null}
-              {editing && artefactSelected(selection, card.code) ? (
-                <>
-                  <ResizeHandle
-                    axes={{ height: true, width: true }}
-                    bounds={layout}
-                    label={card.label}
-                    renderOrigin={{ x: 0, y: 0 }}
-                    selection={selection}
-                  />
-                  <ArtefactActions at={{ x: layout.width - 48, y: 12 }} label={card.label} selection={selection} />
-                </>
-              ) : null}
-            </g>
-          )
-        })}
+                {text.description ? (
+                  <text
+                    className="infoschematic-card-description"
+                    data-card-detail="description"
+                    textAnchor={text.description.anchor}
+                    x={text.description.x}
+                    y={text.description.y}
+                  >
+                    {text.description.text}
+                  </text>
+                ) : null}
+                {editing && artefactSelected(selection, card.code) ? (
+                  <>
+                    <ResizeHandle
+                      axes={{ height: true, width: true }}
+                      bounds={layout}
+                      label={card.label}
+                      renderOrigin={{ x: 0, y: 0 }}
+                      selection={selection}
+                    />
+                    <ArtefactActions at={{ x: layout.width - 48, y: 12 }} label={card.label} selection={selection} />
+                  </>
+                ) : null}
+              </g>
+            )
+          })}
 
-      {/* Above the cards, so a selected line and its controls are never behind
+        {/* Above the cards, so a selected line and its controls are never behind
           one. It leaves this layer the moment it is deselected. */}
-      {selectedFlow ? <g className="infoschematic-flows">{renderFlow(selectedFlow)}</g> : null}
+        {selectedFlow ? <g className="infoschematic-flows">{renderFlow(selectedFlow)}</g> : null}
 
-      {annotated || editing ? (
-        <g aria-label="Infoschematic annotations" className="infoschematic-audit">
-          {/*
-           * A scene narrows what is annotated to what it lights.
-           *
-           * Annotating the whole Infoschematic while a scene is up puts a code on
-           * every card the scene deliberately dimmed, which is the opposite
-           * of what a scene is for: a reader turning codes on during a
-           * walkthrough wants to name what they are being shown, not what
-           * they are not.
-           */}
-          {(annotated ? placeables.filter((placeable) => !highlight || highlight.endpoints.has(placeable.id)) : []).map(
-            (placeable) => {
+        {annotated || editing ? (
+          <g aria-label="Infoschematic annotations" className="infoschematic-audit">
+            {/*
+             * A scene narrows what is annotated to what it lights.
+             *
+             * Annotating the whole Infoschematic while a scene is up puts a code on
+             * every card the scene deliberately dimmed, which is the opposite
+             * of what a scene is for: a reader turning codes on during a
+             * walkthrough wants to name what they are being shown, not what
+             * they are not.
+             */}
+            {(annotated
+              ? placeables.filter((placeable) => !highlight || highlight.endpoints.has(placeable.id))
+              : []
+            ).map((placeable) => {
               /*
                * The placeable's box already has the drag folded in, so folding it
                * in again moved the code badge at twice the speed of the card it
@@ -1909,121 +2023,148 @@ export function InfoschematicDiagram({
                   </text>
                 </g>
               )
-            }
-          )}
-          {editing
-            ? placeables.flatMap((placeable) =>
-                portsForBox(placeable.box, placeable.ports).map((port) => {
-                  const inUse = used.has(`${placeable.id}:${port.id}`) || dropPort === `${placeable.id}:${port.id}`
-                  const portKey = `port:${placeable.code}:${port.id}`
-                  // Every port on every card at once reads as noise rather than as
-                  // affordance. A port earns its dot by being an anchor the diagram
-                  // is read by, by being asked about, or by being a drop target for
-                  // the line currently being drawn.
-                  const asked = hovered === placeable.code || hovered === portKey || selected === placeable.code
-                  const dormant =
-                    !inUse && !attached.has(`${placeable.id}:${port.id}`) && !asked && selected !== portKey && !drawing
-                  return (
-                    <g
-                      className={`${inUse ? 'audit-port in-use' : 'audit-port'}${dormant ? ' dormant' : ''}${
-                        selected === portKey ? ' selected' : ''
-                      }${hovered === portKey ? ' pointed' : ''}`}
-                      key={`${placeable.id}-${port.id}`}
-                      onPointerEnter={onHover ? () => onHover(portKey) : undefined}
-                      onPointerLeave={onHover ? () => onHover(null) : undefined}
-                      onPointerDown={(event) => {
-                        const end =
-                          selectedFlow && inUse
-                            ? selectedFlow.source === placeable.id && selectedFlow.sourcePort === port.id
-                              ? ('source' as const)
-                              : selectedFlow.target === placeable.id && selectedFlow.targetPort === port.id
-                                ? ('target' as const)
-                                : undefined
-                            : undefined
-                        if (end && selectedFlow) {
-                          dragAttachment(selectedFlow, end)(event)
-                          return
-                        }
-                        event.stopPropagation()
-                        onSelect?.(portKey)
-                        // Selecting and starting a line are the same press: the
-                        // drag only becomes one past the threshold, so a click
-                        // that does not travel still just selects the port.
-                        dragNewFlow(placeable.id, port)(event)
-                      }}
-                    >
-                      <circle className="audit-port-target" cx={port.at.x} cy={port.at.y} r="9" />
-                      <circle cx={port.at.x} cy={port.at.y} r="3.5" />
-                      <text x={port.at.x + 8} y={port.at.y - 8}>{`${placeable.code}:${port.id}`}</text>
-                    </g>
-                  )
-                })
-              )
-            : null}
-          {/* The line a port-to-port drag is making, which has no entry to be
+            })}
+            {editing
+              ? placeables.flatMap((placeable) =>
+                  portsForBox(placeable.box, placeable.ports).map((port) => {
+                    const inUse = used.has(`${placeable.id}:${port.id}`) || dropPort === `${placeable.id}:${port.id}`
+                    const portKey = `port:${placeable.code}:${port.id}`
+                    // Every port on every card at once reads as noise rather than as
+                    // affordance. A port earns its dot by being an anchor the diagram
+                    // is read by, by being asked about, or by being a drop target for
+                    // the line currently being drawn.
+                    const asked = hovered === placeable.code || hovered === portKey || selected === placeable.code
+                    const dormant =
+                      !inUse &&
+                      !attached.has(`${placeable.id}:${port.id}`) &&
+                      !asked &&
+                      selected !== portKey &&
+                      !drawing
+                    return (
+                      <g
+                        className={`${inUse ? 'audit-port in-use' : 'audit-port'}${dormant ? ' dormant' : ''}${
+                          selected === portKey ? ' selected' : ''
+                        }${hovered === portKey ? ' pointed' : ''}`}
+                        key={`${placeable.id}-${port.id}`}
+                        onPointerEnter={onHover ? () => onHover(portKey) : undefined}
+                        onPointerLeave={onHover ? () => onHover(null) : undefined}
+                        onPointerDown={(event) => {
+                          const end =
+                            selectedFlow && inUse
+                              ? selectedFlow.source === placeable.id && selectedFlow.sourcePort === port.id
+                                ? ('source' as const)
+                                : selectedFlow.target === placeable.id && selectedFlow.targetPort === port.id
+                                  ? ('target' as const)
+                                  : undefined
+                              : undefined
+                          if (end && selectedFlow) {
+                            dragAttachment(selectedFlow, end)(event)
+                            return
+                          }
+                          event.stopPropagation()
+                          onSelect?.(portKey)
+                          // Selecting and starting a line are the same press: the
+                          // drag only becomes one past the threshold, so a click
+                          // that does not travel still just selects the port.
+                          dragNewFlow(placeable.id, port)(event)
+                        }}
+                      >
+                        <circle className="audit-port-target" cx={port.at.x} cy={port.at.y} r="9" />
+                        <circle cx={port.at.x} cy={port.at.y} r="3.5" />
+                        <text x={port.at.x + 8} y={port.at.y - 8}>{`${placeable.code}:${port.id}`}</text>
+                      </g>
+                    )
+                  })
+                )
+              : null}
+            {/* The line a port-to-port drag is making, which has no entry to be
               drawn from yet. Broken and grey because it is a proposal: it has
               no family, so it has no colour to be drawn in. */}
-          {drawing ? (
-            <path
-              className="audit-new-flow"
-              d={`M ${drawing.from.x} ${drawing.from.y} L ${drawing.to.x} ${drawing.to.y}`}
-            />
-          ) : null}
-          {(annotated || editing
-            ? flows.filter((flow) => editing || !highlight || highlight.flows.has(flow.id))
-            : []
-          ).map((flow) => {
-            const { x, y } = labelPositions.get(flow.id) ?? { x: 0, y: 0 }
-            const selection = {
-              code: flow.code,
-              geometry: 'route',
-              id: flow.id,
-              kind: 'flow'
-            } as const satisfies ArtefactSelection
-            return (
-              <g
-                className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}`}
-                key={flow.code}
-                onPointerDown={
-                  editing
-                    ? (event) => {
-                        // Select on the press, not on the drag: below the drag
-                        // threshold nothing else would, and a label that cannot
-                        // be selected cannot be nudged with the arrow keys.
-                        selectArtefact(selection, flow.code)
-                        dragLabel(flow.code)(event)
-                      }
-                    : undefined
-                }
-                onPointerEnter={onHover ? () => onHover(flow.code) : undefined}
-                onPointerLeave={onHover ? () => onHover(null) : undefined}
-              >
-                {editing ? <title>{`${flow.code} — drag to place`}</title> : null}
-                <rect height="20" rx="4" width="48" x={x - 24} y={y - 10} />
-                <text x={x} y={y + 4}>
-                  {flow.code}
-                </text>
-              </g>
-            )
-          })}
-        </g>
-      ) : null}
+            {drawing ? (
+              <path
+                className="audit-new-flow"
+                d={`M ${drawing.from.x} ${drawing.from.y} L ${drawing.to.x} ${drawing.to.y}`}
+              />
+            ) : null}
+            {(annotated || editing
+              ? flows.filter((flow) => editing || !highlight || highlight.flows.has(flow.id))
+              : []
+            ).map((flow) => {
+              const { x, y } = labelPositions.get(flow.id) ?? { x: 0, y: 0 }
+              const selection = {
+                code: flow.code,
+                geometry: 'route',
+                id: flow.id,
+                kind: 'flow'
+              } as const satisfies ArtefactSelection
+              return (
+                <g
+                  className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}`}
+                  key={flow.code}
+                  onPointerDown={
+                    editing
+                      ? (event) => {
+                          // Select on the press, not on the drag: below the drag
+                          // threshold nothing else would, and a label that cannot
+                          // be selected cannot be nudged with the arrow keys.
+                          selectArtefact(selection, flow.code)
+                          dragLabel(flow.code)(event)
+                        }
+                      : undefined
+                  }
+                  onPointerEnter={onHover ? () => onHover(flow.code) : undefined}
+                  onPointerLeave={onHover ? () => onHover(null) : undefined}
+                >
+                  {editing ? <title>{`${flow.code} — drag to place`}</title> : null}
+                  <rect height="20" rx="4" width="48" x={x - 24} y={y - 10} />
+                  <text x={x} y={y + 4}>
+                    {flow.code}
+                  </text>
+                </g>
+              )
+            })}
+          </g>
+        ) : null}
 
-      {guides?.length ? (
-        <g className="infoschematic-guides">
-          {guides.map((guide) => (
-            <line
-              key={`${guide.axis}-${guide.at}-${guide.from}`}
-              x1={guide.axis === 'x' ? guide.at : infoschematicViewBox.x}
-              x2={guide.axis === 'x' ? guide.at : infoschematicViewBox.x + infoschematicViewBox.width}
-              y1={guide.axis === 'y' ? guide.at : infoschematicViewBox.y}
-              y2={guide.axis === 'y' ? guide.at : infoschematicViewBox.y + infoschematicViewBox.height}
-            />
-          ))}
-        </g>
-      ) : null}
+        {guides?.length ? (
+          <g className="infoschematic-guides">
+            {guides.map((guide) => (
+              <line
+                key={`${guide.axis}-${guide.at}-${guide.from}`}
+                x1={guide.axis === 'x' ? guide.at : infoschematicViewBox.x}
+                x2={guide.axis === 'x' ? guide.at : infoschematicViewBox.x + infoschematicViewBox.width}
+                y1={guide.axis === 'y' ? guide.at : infoschematicViewBox.y}
+                y2={guide.axis === 'y' ? guide.at : infoschematicViewBox.y + infoschematicViewBox.height}
+              />
+            ))}
+          </g>
+        ) : null}
 
-      {editing ? null : graphicLayer}
-    </svg>
+        {editing ? null : graphicLayer}
+      </svg>
+      <div aria-label="Diagram zoom controls" className="infoschematic-viewport-controls" role="toolbar">
+        <button aria-label="Zoom in" onClick={() => zoomBy(viewportZoomStep)} title="Zoom in (+)" type="button">
+          +
+        </button>
+        <button
+          aria-label="Zoom out"
+          disabled={fitted}
+          onClick={() => zoomBy(1 / viewportZoomStep)}
+          title="Zoom out (−)"
+          type="button"
+        >
+          −
+        </button>
+        <button
+          aria-label="Fit diagram to width"
+          disabled={fitted}
+          onClick={() => setViewport(infoschematicViewBox)}
+          title="Fit diagram to width (0)"
+          type="button"
+        >
+          0
+        </button>
+      </div>
+    </>
   )
 }
