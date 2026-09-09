@@ -683,8 +683,6 @@ a:focus-visible {
 .docs-columns > main {
   width: 100%;
   min-width: 0;
-  max-width: 72ch;
-  margin: 0 auto;
 }
 
 .docs-sidebar,
@@ -707,10 +705,6 @@ a:focus-visible {
 .docs-sidebar section:first-child {
   padding-top: 0;
   border-top: 0;
-}
-
-.docs-columns--full > main {
-  max-width: none;
 }
 
 .docs-sidebar h2,

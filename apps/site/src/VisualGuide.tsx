@@ -17,7 +17,7 @@ export function VisualGuide() {
   return (
     <div className="document-shell document-shell--wide docs-shell">
       <SiteNav section="docs" />
-      <div className="docs-columns docs-columns--full">
+      <div className="docs-columns">
         <DocsSidebar currentPath={visualGuidePath} />
         <main className="visual-guide" id="document-content">
           <header className="visual-guide__intro">
