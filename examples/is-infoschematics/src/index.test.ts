@@ -67,9 +67,11 @@ describe('infoschematicsInfoschematic', () => {
     expect(diagram.cards.every((card) => card.collection && collections.has(card.collection))).toBe(true)
     expect(diagram.cards.every((card) => card.stereotype)).toBe(true)
 
-    const setByElement = new Map(diagram.sets.flatMap((set) => set.elements.map((element) => [element, set.id])))
+    const scopeByElement = new Map(
+      infoschematicsInfoschematic.scopes.flatMap((scope) => scope.elements.map((element) => [element, scope.id]))
+    )
     const publicationCards = diagram.cards.filter(({ collection }) => collection === 'publication')
-    expect(new Set(publicationCards.map(({ id }) => setByElement.get(id)))).toEqual(
+    expect(new Set(publicationCards.map(({ id }) => scopeByElement.get(id)))).toEqual(
       new Set(['renderer-output', 'authored-examples', 'application-hosts'])
     )
 
@@ -160,7 +162,9 @@ describe('infoschematicsInfoschematic', () => {
     }
     const source = readFileSync(new URL('./index.ts', import.meta.url), 'utf8')
 
-    expect(packageJson.dependencies).toEqual({ '@infoschematics/domain-core': '0.1.0' })
+    expect(packageJson.dependencies).toEqual({
+      '@infoschematics/domain-core': '0.1.0'
+    })
     expect(source).not.toMatch(/from ['"]react|window\.|document\.|"renderer"\s*:/)
     expect(source).not.toMatch(/@infoschematics\/(view-|render-)/)
   })

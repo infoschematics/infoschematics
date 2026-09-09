@@ -49,6 +49,10 @@ ${defaultCalloutPositions.map(({ x, y }) => `    - { x: ${x}, y: ${y} }`).join('
           - { x: 470, y: 890 }
           - { x: 470, y: 810 }
       appearance: { line: dashed }
+scopes:
+  - id: DELIVERY
+    label: Delivery architecture
+    elements: [SRC, SNK]
 `
 
 const compact = `
@@ -89,6 +93,10 @@ diagram:
       labelAt: 0.8286
       waypoints: 470,890 470,810
       line: dashed
+scopes:
+  - id: DELIVERY
+    label: Delivery architecture
+    elements: [SRC, SNK]
 `
 
 const modelOf = (document: string) => {
@@ -103,8 +111,18 @@ describe('canonical authored form', () => {
     const compactModel = modelOf(compact)
 
     expect(compactModel).toEqual(structuredModel)
-    expect(compactModel.diagram.bounds).toEqual({ x: 0, y: 0, width: 800, height: 500 })
-    expect(compactModel.diagram.cards[0]?.ports).toEqual({ north: 0, east: 3, south: 7, west: 1 })
+    expect(compactModel.diagram.bounds).toEqual({
+      x: 0,
+      y: 0,
+      width: 800,
+      height: 500
+    })
+    expect(compactModel.diagram.cards[0]?.ports).toEqual({
+      north: 0,
+      east: 3,
+      south: 7,
+      west: 1
+    })
     expect(compactModel.diagram.flows[0]).toMatchObject({
       appearance: { line: 'dashed' },
       direction: 'forward',
@@ -129,6 +147,7 @@ describe('canonical authored form', () => {
     expect(yaml.indexOf('id: COMPACT')).toBeLessThan(yaml.indexOf('title: Compact authoring'))
     expect(yaml.indexOf('description: The structured equivalent.')).toBeLessThan(yaml.indexOf('diagram:'))
     expect(yaml.indexOf('bounds: 0 0 800 500')).toBeLessThan(yaml.indexOf('families:'))
+    expect(yaml.indexOf('diagram:')).toBeLessThan(yaml.indexOf('scopes:'))
     expect(yaml).toContain('link: SRC E2 -> SNK W2')
     expect(yaml).toContain('waypoints: 470,890 470,810')
     expect(yaml).toContain('line: dashed')

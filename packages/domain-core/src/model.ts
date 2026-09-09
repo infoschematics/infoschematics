@@ -222,18 +222,18 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         },
         id: region.id,
         label: region.label
-      })),
-      sets: definition.scopes.map((scope) => ({
-        description: scope.description,
-        elements: [
-          ...endpoints.filter((entry) => entry.scopes.includes(scope.id)).map((entry) => entry.code),
-          ...definition.graphics.filter((entry) => entry.scopes?.includes(scope.id)).map((entry) => entry.id)
-        ],
-        id: scope.id,
-        label: scope.label
       }))
     },
     id: config.id ?? 'INFOSCHEMATIC',
+    scopes: definition.scopes.map((scope) => ({
+      description: scope.description,
+      elements: [
+        ...endpoints.filter((entry) => entry.scopes.includes(scope.id)).map((entry) => entry.code),
+        ...definition.graphics.filter((entry) => entry.scopes?.includes(scope.id)).map((entry) => entry.id)
+      ],
+      id: scope.id,
+      label: scope.label
+    })),
     specifications: definition.specificationGroups.map((group) => ({
       description: group.note,
       document:
@@ -302,17 +302,22 @@ const requireReference = (references: ReadonlySet<string>, value: string, contex
 const validateSelection = (
   selection: ElementSelection | undefined,
   elementIds: ReadonlySet<string>,
-  setIds: ReadonlySet<string>,
+  scopeIds: ReadonlySet<string>,
   context: string
 ) => {
   for (const element of selection?.elements ?? []) requireReference(elementIds, element, context)
-  for (const set of selection?.sets ?? []) requireReference(setIds, set, context)
+  for (const scope of selection?.scopes ?? []) requireReference(scopeIds, scope, context)
 }
 
-const validateScene = (scene: Scene, elementIds: ReadonlySet<string>, setIds: ReadonlySet<string>, context: string) => {
-  validateSelection(scene.focus, elementIds, setIds, `${context} focus`)
-  validateSelection(scene.visibility?.show, elementIds, setIds, `${context} show`)
-  validateSelection(scene.visibility?.hide, elementIds, setIds, `${context} hide`)
+const validateScene = (
+  scene: Scene,
+  elementIds: ReadonlySet<string>,
+  scopeIds: ReadonlySet<string>,
+  context: string
+) => {
+  validateSelection(scene.focus, elementIds, scopeIds, `${context} focus`)
+  validateSelection(scene.visibility?.show, elementIds, scopeIds, `${context} show`)
+  validateSelection(scene.visibility?.hide, elementIds, scopeIds, `${context} hide`)
   const placement = scene.callout?.placement
   if (placement && 'element' in placement) requireReference(elementIds, placement.element, `${context} callout`)
 }
@@ -357,9 +362,9 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
         ...point,
         ports: point.ports ?? standardPorts
       })),
-      regions: input.diagram.regions ?? [],
-      sets: input.diagram.sets ?? []
+      regions: input.diagram.regions ?? []
     },
+    scopes: input.scopes ?? [],
     specifications: input.specifications ?? [],
     stories: input.stories ?? [],
     themes: input.themes ?? []
@@ -384,7 +389,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
   const elementIds = ids(visible)
   const collectionIds = ids(model.diagram.collections)
   const familyIds = ids(model.diagram.families)
-  const setIds = ids(model.diagram.sets)
+  const scopeIds = ids(model.scopes)
   const interfaceIds = ids(model.specifications.flatMap((specification) => specification.interfaces))
   const endpointById = new Map(
     [...model.diagram.cards, ...model.diagram.fabrics, ...model.diagram.points].map((element) => [element.id, element])
@@ -410,15 +415,15 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
       }
     }
   }
-  for (const set of model.diagram.sets) {
-    for (const element of set.elements) requireReference(elementIds, element, `Set ${set.id}`)
+  for (const scope of model.scopes) {
+    for (const element of scope.elements) requireReference(elementIds, element, `Architectural Scope ${scope.id}`)
   }
   for (const theme of model.themes) {
     const sceneIds = new Set<string>()
     for (const scene of theme.scenes) {
       if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Theme ${theme.id}: ${scene.id}`)
       sceneIds.add(scene.id)
-      validateScene(scene, elementIds, setIds, `Theme ${theme.id} Scene ${scene.id}`)
+      validateScene(scene, elementIds, scopeIds, `Theme ${theme.id} Scene ${scene.id}`)
     }
   }
   for (const story of model.stories) {
@@ -426,7 +431,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     for (const scene of story.scenes) {
       if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Story ${story.id}: ${scene.id}`)
       sceneIds.add(scene.id)
-      validateScene(scene, elementIds, setIds, `Story ${story.id} Scene ${scene.id}`)
+      validateScene(scene, elementIds, scopeIds, `Story ${story.id} Scene ${scene.id}`)
     }
   }
 

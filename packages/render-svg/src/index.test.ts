@@ -30,12 +30,39 @@ const representative: InfoschematicConfig = {
   infoschematic: {
     viewBox: { height: 240, width: 400, x: 0, y: 0 },
     scopes: [
-      { color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' },
-      { color: '#b45309', description: 'Two', fill: '#fef3c7', id: 'two', label: 'Two', prefix: 'TWO' }
+      {
+        color: '#2463eb',
+        description: 'One',
+        fill: '#dbeafe',
+        id: 'one',
+        label: 'One',
+        prefix: 'ONE'
+      },
+      {
+        color: '#b45309',
+        description: 'Two',
+        fill: '#fef3c7',
+        id: 'two',
+        label: 'Two',
+        prefix: 'TWO'
+      }
     ],
-    flowFamilies: [{ color: '#7c3aed', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
+    flowFamilies: [
+      {
+        color: '#7c3aed',
+        description: 'Calls',
+        id: 'calls',
+        label: 'Calls',
+        prefix: 'CALL'
+      }
+    ],
     regions: [
-      { box: { height: 200, width: 380, x: 10, y: 20 }, fill: '#f8fafc', id: 'runtime', label: 'Runtime' },
+      {
+        box: { height: 200, width: 380, x: 10, y: 20 },
+        fill: '#f8fafc',
+        id: 'runtime',
+        label: 'Runtime'
+      },
       {
         box: { height: 200, radius: 8, width: 380, x: 10, y: 20 },
         frame: { style: 'solid' },
@@ -59,7 +86,10 @@ const representative: InfoschematicConfig = {
         detail: 'Target',
         id: 'target',
         label: 'Target',
-        placement: { box: { height: 60, width: 120, x: 240, y: 80 }, ports: {} },
+        placement: {
+          box: { height: 60, width: 120, x: 240, y: 80 },
+          ports: {}
+        },
         scope: 'two',
         scopes: ['two']
       }
@@ -147,9 +177,9 @@ describe('renderInfoschematicSvg', () => {
         flows: [],
         overlays: [],
         points: [],
-        regions: [],
-        sets: []
+        regions: []
       },
+      scopes: [],
       specifications: [],
       stories: [],
       themes: []
@@ -163,7 +193,10 @@ describe('renderInfoschematicSvg', () => {
       ...representative,
       infoschematic: {
         ...representative.infoschematic,
-        flows: representative.infoschematic.flows.map((flow) => ({ ...flow, dashed: true }))
+        flows: representative.infoschematic.flows.map((flow) => ({
+          ...flow,
+          dashed: true
+        }))
       }
     }
     const svg = renderInfoschematicSvg(config, {
@@ -195,7 +228,12 @@ describe('renderInfoschematicSvg', () => {
       infoschematic: {
         ...representative.infoschematic,
         appearance: {
-          card: { compact: true, description: true, identity: true, stereotype: true },
+          card: {
+            compact: true,
+            description: true,
+            identity: true,
+            stereotype: true
+          },
           grid: 'major-plus-minor',
           surface: 'blueprint'
         },
@@ -209,8 +247,16 @@ describe('renderInfoschematicSvg', () => {
         ],
         regions: representative.infoschematic.regions.map((region) =>
           region.id === 'delivery'
-            ? { ...region, frame: { style: 'dashed' as const }, labelPlacement: 'north' as const }
-            : { ...region, frame: { style: 'dotted' as const }, labelPlacement: 'south-east' as const }
+            ? {
+                ...region,
+                frame: { style: 'dashed' as const },
+                labelPlacement: 'north' as const
+              }
+            : {
+                ...region,
+                frame: { style: 'dotted' as const },
+                labelPlacement: 'south-east' as const
+              }
         ),
         cards: representative.infoschematic.cards.map((card, index) =>
           index === 0 ? { ...card, domain: 'platform', stereotype: 'service' } : card
@@ -260,28 +306,54 @@ describe('renderInfoschematicSvg', () => {
       ...empty,
       infoschematic: {
         ...empty.infoschematic,
-        scopes: [{ color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' }],
+        scopes: [
+          {
+            color: '#2463eb',
+            description: 'One',
+            fill: '#dbeafe',
+            id: 'one',
+            label: 'One',
+            prefix: 'ONE'
+          }
+        ],
         fabrics: [
           {
             code: 'FAB-01',
             detail: 'Connectable midground',
             id: 'fabric',
             label: 'Event fabric',
-            placement: { box: { height: 40, width: 100, x: 10, y: 10 }, ports: {} },
+            placement: {
+              box: { height: 40, width: 100, x: 10, y: 10 },
+              ports: {}
+            },
             scope: 'one',
             scopes: ['one']
           }
         ],
-        graphics: [{ id: 'note', label: 'Note', placement: { height: 20, width: 60, x: 10, y: 55 }, renderer: 'note' }]
+        graphics: [
+          {
+            id: 'note',
+            label: 'Note',
+            placement: { height: 20, width: 60, x: 10, y: 55 },
+            renderer: 'note'
+          }
+        ]
       }
     }
     const asBlueprint: InfoschematicConfig = {
       ...withFabric,
-      infoschematic: { ...withFabric.infoschematic, appearance: { surface: 'blueprint' } }
+      infoschematic: {
+        ...withFabric.infoschematic,
+        appearance: { surface: 'blueprint' }
+      }
     }
 
-    const blueprint = renderInfoschematicSvg(asBlueprint, { visibility: { graphics: 'all' } })
-    const neutral = renderInfoschematicSvg(withFabric, { visibility: { graphics: 'all' } })
+    const blueprint = renderInfoschematicSvg(asBlueprint, {
+      visibility: { graphics: 'all' }
+    })
+    const neutral = renderInfoschematicSvg(withFabric, {
+      visibility: { graphics: 'all' }
+    })
 
     // The Canvas draws blueprint natively, so a Fabric or Graphic left on the
     // light output set here is a white slab on a dark backdrop in this renderer
@@ -335,7 +407,9 @@ describe('renderInfoschematicSvg', () => {
   it('emits Flow code annotations only when requested, at the shared placement', () => {
     expect(renderInfoschematicSvg(representative)).not.toContain('infoschematic-flow-annotation')
 
-    const annotated = renderInfoschematicSvg(representative, { annotations: true })
+    const annotated = renderInfoschematicSvg(representative, {
+      annotations: true
+    })
     expect(renderInfoschematicSvg(representative, { annotations: true })).toBe(annotated)
     expect(annotated).toContain('class="infoschematic-flow-annotation"')
     expect(annotated).toContain('>CALL-001</text>')
@@ -349,7 +423,10 @@ describe('renderInfoschematicSvg', () => {
         ...representative,
         infoschematic: {
           ...representative.infoschematic,
-          flows: representative.infoschematic.flows.map((flow) => ({ ...flow, label: { along: 0.25 } }))
+          flows: representative.infoschematic.flows.map((flow) => ({
+            ...flow,
+            label: { along: 0.25 }
+          }))
         }
       },
       { annotations: true }
@@ -374,10 +451,22 @@ describe('renderInfoschematicSvg', () => {
       infoschematic: {
         ...representative.infoschematic,
         appearance: {
-          card: { compact: true, description: true, identity: true, stereotype: true },
+          card: {
+            compact: true,
+            description: true,
+            identity: true,
+            stereotype: true
+          },
           surface: 'blueprint'
         },
-        domains: [{ color: '#9673a6', fill: '#0d1b2a', id: 'observe', label: 'Observe' }],
+        domains: [
+          {
+            color: '#9673a6',
+            fill: '#0d1b2a',
+            id: 'observe',
+            label: 'Observe'
+          }
+        ],
         cards: representative.infoschematic.cards.map((card, index) =>
           index === 0 ? { ...card, domain: 'observe', stereotype: 'stage' } : card
         ),
@@ -407,7 +496,9 @@ describe('renderInfoschematicSvg', () => {
     expect(focused).not.toContain('data-id="target"')
     expect(focused).not.toContain('data-id="call"')
 
-    const oneScope = renderInfoschematicSvg(representative, { visibility: { scopes: ['one'] } })
+    const oneScope = renderInfoschematicSvg(representative, {
+      visibility: { scopes: ['one'] }
+    })
     expect(oneScope).toContain('data-id="source"')
     expect(oneScope).not.toContain('data-id="target"')
     expect(oneScope).not.toContain('data-id="call"')

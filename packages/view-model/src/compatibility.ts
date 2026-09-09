@@ -13,7 +13,6 @@ import { portsForBox } from './ports.ts'
 
 const fallbackColor = '#64748b'
 const fallbackFill = '#f8fafc'
-const allSet = 'ALL'
 
 const primitiveProperties = (properties: Readonly<Record<string, JsonValue>> | undefined) =>
   properties
@@ -33,13 +32,20 @@ const adapterBoundsFor = (held: Box): Box => ({
 
 const focusOf = (
   selection: ElementSelection | undefined,
-  flows: ReadonlySet<string>,
-  overlays: ReadonlySet<string>
+  flowEndpoints: ReadonlyMap<string, { source: string; target: string }>,
+  overlays: ReadonlySet<string>,
+  scopeElements: ReadonlyMap<string, readonly string[]>
 ) => {
-  const elements = selection?.elements ?? []
+  const scopedElements = new Set((selection?.scopes ?? []).flatMap((scope) => scopeElements.get(scope) ?? []))
+  const derivedFlows = [...flowEndpoints]
+    .filter(([, endpoints]) => scopedElements.has(endpoints.source) && scopedElements.has(endpoints.target))
+    .map(([id]) => id)
+  const elements = [...(selection?.elements ?? []), ...scopedElements, ...derivedFlows].filter(
+    (id, index, selected) => selected.indexOf(id) === index
+  )
   return {
-    artefacts: elements.filter((id) => !flows.has(id) && !overlays.has(id)),
-    flows: elements.filter((id) => flows.has(id)),
+    artefacts: elements.filter((id) => !flowEndpoints.has(id) && !overlays.has(id)),
+    flows: elements.filter((id) => flowEndpoints.has(id)),
     graphics: elements.filter((id) => overlays.has(id))
   }
 }
@@ -68,41 +74,22 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
   if ('infoschematic' in input) return input
   const model: DefinedInfoschematic = input
   const diagram = model.diagram
-  const collectionById = new Map(diagram.collections.map((collection) => [collection.id, collection]))
+  const scopeElements = new Map(model.scopes.map((scope) => [scope.id, scope.elements]))
   const memberships = new Map<string, string[]>()
-  for (const set of diagram.sets) {
-    for (const element of set.elements) memberships.set(element, [...(memberships.get(element) ?? []), set.id])
+  for (const scope of model.scopes) {
+    for (const element of scope.elements) {
+      memberships.set(element, [...(memberships.get(element) ?? []), scope.id])
+    }
   }
-  const ungrouped = [...diagram.cards, ...diagram.fabrics, ...diagram.points, ...diagram.overlays].some(
-    (element) => !memberships.has(element.id)
-  )
-  const scopes = [
-    ...diagram.sets.map((set) => {
-      const identity = collectionById.get(set.id)?.appearance
-      return {
-        color: identity?.color ?? fallbackColor,
-        description: set.description ?? '',
-        fill: identity?.fill ?? fallbackFill,
-        icon: identity?.icon,
-        id: set.id,
-        label: set.label,
-        prefix: set.id
-      }
-    }),
-    ...(ungrouped
-      ? [
-          {
-            color: fallbackColor,
-            description: 'Elements without an authored visibility Set.',
-            fill: fallbackFill,
-            id: allSet,
-            label: 'All',
-            prefix: allSet
-          }
-        ]
-      : [])
-  ]
-  const scopesOf = (id: string) => memberships.get(id) ?? [allSet]
+  const scopes = model.scopes.map((scope) => ({
+    color: fallbackColor,
+    description: scope.description ?? '',
+    fill: fallbackFill,
+    id: scope.id,
+    label: scope.label,
+    prefix: scope.id
+  }))
+  const scopesOf = (id: string) => memberships.get(id) ?? []
   const compositionByCard = new Map(
     diagram.cards.flatMap((card) => {
       const held = card.adapts ?? card.wraps
@@ -138,13 +125,15 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
     if (!found) throw new Error(`Unknown Port ${port} on ${element}`)
     return found.at
   }
-  const flowIds = new Set(diagram.flows.map(({ id }) => id))
+  const flowEndpoints = new Map(
+    diagram.flows.map((flow) => [flow.id, { source: flow.source.element, target: flow.target.element }])
+  )
   const overlayIds = new Set(diagram.overlays.map(({ id }) => id))
   const sceneOf = (scene: Scene) => ({
     callout: calloutOf(scene.callout)?.callout,
     code: scene.id,
     description: scene.description,
-    focus: focusOf(scene.focus ?? scene.visibility?.show, flowIds, overlayIds),
+    focus: focusOf(scene.focus ?? scene.visibility?.show, flowEndpoints, overlayIds, scopeElements),
     id: scene.id,
     label: scene.label
   })
@@ -162,7 +151,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         id: card.id,
         label: card.label,
         placement: { box: card.bounds, ports: card.ports },
-        scope: scopesOf(card.id)[0] ?? allSet,
+        scope: scopesOf(card.id)[0] ?? '',
         scopeRule: compositionByCard.has(card.id) && scopesOf(card.id).length > 1 ? 'all' : undefined,
         scopes: scopesOf(card.id),
         services: card.provides,
@@ -192,7 +181,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
           id: fabric.id,
           label: fabric.label,
           placement: { box: fabric.bounds, ports: fabric.ports },
-          scope: scopesOf(fabric.id)[0] ?? allSet,
+          scope: scopesOf(fabric.id)[0] ?? '',
           scopes: scopesOf(fabric.id)
         }
       }),
@@ -281,7 +270,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       scenes: story.scenes.map((scene) => ({
         ...calloutOf(scene.callout),
         duration: scene.duration,
-        focus: focusOf(scene.focus ?? scene.visibility?.show, flowIds, overlayIds),
+        focus: focusOf(scene.focus ?? scene.visibility?.show, flowEndpoints, overlayIds, scopeElements),
         graphic: (scene.focus?.elements ?? []).find((id) => overlayIds.has(id)),
         id: scene.id,
         title: scene.label

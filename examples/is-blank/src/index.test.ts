@@ -6,7 +6,7 @@ describe('blankInfoschematic', () => {
     expect(blankInfoschematic.title).toBe('Infoschematics')
     expect(blankInfoschematic.diagram.collections).toEqual([])
     expect(blankInfoschematic.diagram.families).toEqual([])
-    expect(blankInfoschematic.diagram.sets).toEqual([])
+    expect(blankInfoschematic.scopes).toEqual([])
     expect(blankInfoschematic.diagram.regions).toEqual([])
     expect(blankInfoschematic.diagram.cards).toEqual([])
     expect(blankInfoschematic.diagram.fabrics).toEqual([])

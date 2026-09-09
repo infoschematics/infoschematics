@@ -9,21 +9,24 @@ export type VisualIdentity = { color?: string; fill?: string; icon?: string }
 
 export type FlowLineTreatment = 'solid' | 'dashed'
 
-export type Collection = {
+/** Shared semantic and visual identity for a kind of Card. */
+export type CardCollection = {
   id: string
   label: string
   description?: string
   appearance?: VisualIdentity
 }
 
-export type Family = {
+/** Shared semantic and visual identity for a kind of Flow. */
+export type FlowFamily = {
   id: string
   label: string
   description?: string
   appearance?: VisualIdentity & { line?: FlowLineTreatment }
 }
 
-export type ElementSet = {
+/** Presentation-oriented architectural view over named Diagram elements. */
+export type ArchitecturalScope = {
   id: string
   label: string
   description?: string
@@ -108,7 +111,7 @@ export type Overlay = {
 
 export type ElementSelection = {
   elements?: readonly string[]
-  sets?: readonly string[]
+  scopes?: readonly string[]
 }
 
 export type Callout = {
@@ -167,9 +170,8 @@ export type Diagram = {
   bounds: Box
   appearance?: InfoschematicAppearanceConfig
   calloutPositions?: readonly Coordinate[]
-  collections?: readonly Collection[]
-  families?: readonly Family[]
-  sets?: readonly ElementSet[]
+  collections?: readonly CardCollection[]
+  families?: readonly FlowFamily[]
   regions?: readonly Region[]
   cards?: readonly Card[]
   fabrics?: readonly Fabric[]
@@ -184,6 +186,7 @@ export type Infoschematic = {
   subtitle?: string
   description?: string
   diagram: Diagram
+  scopes?: readonly ArchitecturalScope[]
   themes?: readonly Theme[]
   stories?: readonly Story[]
   specifications?: readonly Specification[]
@@ -191,31 +194,25 @@ export type Infoschematic = {
 
 export type DefinedDiagram = Omit<
   Diagram,
-  | 'calloutPositions'
-  | 'cards'
-  | 'collections'
-  | 'fabrics'
-  | 'families'
-  | 'flows'
-  | 'overlays'
-  | 'points'
-  | 'regions'
-  | 'sets'
+  'calloutPositions' | 'cards' | 'collections' | 'fabrics' | 'families' | 'flows' | 'overlays' | 'points' | 'regions'
 > & {
   calloutPositions: readonly Coordinate[]
   cards: readonly Card[]
-  collections: readonly Collection[]
+  collections: readonly CardCollection[]
   fabrics: readonly Fabric[]
-  families: readonly Family[]
+  families: readonly FlowFamily[]
   flows: readonly Flow[]
   overlays: readonly Overlay[]
   points: readonly Point[]
   regions: readonly Region[]
-  sets: readonly ElementSet[]
 }
 
-export type DefinedInfoschematic = Omit<Infoschematic, 'diagram' | 'specifications' | 'stories' | 'themes'> & {
+export type DefinedInfoschematic = Omit<
+  Infoschematic,
+  'diagram' | 'scopes' | 'specifications' | 'stories' | 'themes'
+> & {
   diagram: DefinedDiagram
+  scopes: readonly ArchitecturalScope[]
   specifications: readonly Specification[]
   stories: readonly Story[]
   themes: readonly Theme[]

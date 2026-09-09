@@ -212,17 +212,17 @@ export const systemExample = defineInfoschematicModel({
         id: 'journey',
         label: 'Infoschematic'
       }
-    ],
-    sets: [
-      {
-        description: 'The system being explained',
-        elements: ['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'],
-        id: 'system',
-        label: 'System'
-      }
     ]
   },
   id: 'system-explained',
+  scopes: [
+    {
+      description: 'The system being explained',
+      elements: ['OBS-01', 'MAP-02', 'LIT-03', 'SEE-04'],
+      id: 'system',
+      label: 'System'
+    }
+  ],
   specifications: [],
   stories: [],
   subtitle: 'From observed signals to a shared view',

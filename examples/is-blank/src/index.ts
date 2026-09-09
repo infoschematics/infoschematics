@@ -25,10 +25,10 @@ export const blankInfoschematic = defineInfoschematicModel({
     flows: [],
     overlays: [],
     points: [],
-    regions: [],
-    sets: []
+    regions: []
   },
   id: 'INFOSCHEMATIC',
+  scopes: [],
   specifications: [],
   stories: [],
   themes: [],

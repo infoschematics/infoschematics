@@ -1,10 +1,10 @@
 import type { Box, Point as Coordinate } from '@infoschematics/domain-model/geometry'
 import type {
-  Collection,
+  CardCollection,
   Point as DiagramPoint,
   Fabric,
-  Family,
   Flow,
+  FlowFamily,
   Infoschematic,
   JsonValue,
   VisualIdentity
@@ -34,7 +34,12 @@ const coordinateText = numericText([2], 'two finite numbers: x y').transform((va
 })
 const coordinate = z.union([coordinateObject, coordinateText])
 
-const boxObject = z.strictObject({ x: number, y: number, width: number, height: number })
+const boxObject = z.strictObject({
+  x: number,
+  y: number,
+  width: number,
+  height: number
+})
 const boxText = numericText([4], 'four finite numbers: x y width height').transform((value): Box => {
   const [x = 0, y = 0, width = 0, height = 0] = numericParts(value)
   return { x, y, width, height }
@@ -69,7 +74,12 @@ const portCountsText = numericText([1, 2, 3, 4], 'one to four finite port counts
   }
   if (values.length === 2) {
     const [vertical = 0, horizontal = 0] = values
-    return { north: vertical, east: horizontal, south: vertical, west: horizontal }
+    return {
+      north: vertical,
+      east: horizontal,
+      south: vertical,
+      west: horizontal
+    }
   }
   if (values.length === 3) {
     const [north = 0, horizontal = 0, south = 0] = values
@@ -78,7 +88,14 @@ const portCountsText = numericText([1, 2, 3, 4], 'one to four finite port counts
   const [north = 0, east = 0, south = 0, west = 0] = values
   return { north, east, south, west }
 })
-const portCountsScalar = number.transform((all): PortCounts => ({ north: all, east: all, south: all, west: all }))
+const portCountsScalar = number.transform(
+  (all): PortCounts => ({
+    north: all,
+    east: all,
+    south: all,
+    west: all
+  })
+)
 const portCounts = z.union([portCountsObject, portCountsText, portCountsScalar])
 
 const portId = z.templateLiteral([z.enum(['N', 'E', 'S', 'W']), number])
@@ -129,11 +146,19 @@ const identityFields = {
 }
 
 const rejectMixedIdentity = (
-  value: { appearance?: unknown; color?: unknown; fill?: unknown; icon?: unknown },
+  value: {
+    appearance?: unknown
+    color?: unknown
+    fill?: unknown
+    icon?: unknown
+  },
   context: z.core.$RefinementCtx<unknown>
 ) => {
   if (value.appearance !== undefined && [value.color, value.fill, value.icon].some((entry) => entry !== undefined)) {
-    context.addIssue({ code: 'custom', message: 'Use appearance or unwrapped appearance fields, not both.' })
+    context.addIssue({
+      code: 'custom',
+      message: 'Use appearance or unwrapped appearance fields, not both.'
+    })
   }
 }
 
@@ -155,12 +180,14 @@ const collection = z
     ...identityFields
   })
   .superRefine(rejectMixedIdentity)
-  .transform(({ appearance: wrapped, color, fill, icon, ...value }): Collection => {
+  .transform(({ appearance: wrapped, color, fill, icon, ...value }): CardCollection => {
     const unwrapped = identityFrom({ color, fill, icon })
     return wrapped || unwrapped ? { ...value, appearance: wrapped ?? unwrapped } : value
   })
 
-const familyAppearance = visualIdentity.extend({ line: z.enum(['solid', 'dashed']).optional() })
+const familyAppearance = visualIdentity.extend({
+  line: z.enum(['solid', 'dashed']).optional()
+})
 const family = z
   .strictObject({
     id: z.string(),
@@ -173,17 +200,20 @@ const family = z
   .superRefine((value, context) => {
     rejectMixedIdentity(value, context)
     if (value.appearance !== undefined && value.line !== undefined) {
-      context.addIssue({ code: 'custom', message: 'Use appearance or unwrapped appearance fields, not both.' })
+      context.addIssue({
+        code: 'custom',
+        message: 'Use appearance or unwrapped appearance fields, not both.'
+      })
     }
   })
-  .transform(({ appearance: wrapped, color, fill, icon, line, ...value }): Family => {
+  .transform(({ appearance: wrapped, color, fill, icon, line, ...value }): FlowFamily => {
     const identity = identityFrom({ color, fill, icon })
     const unwrapped =
       identity || line !== undefined ? { ...identity, ...(line !== undefined ? { line } : {}) } : undefined
     return wrapped || unwrapped ? { ...value, appearance: wrapped ?? unwrapped } : value
   })
 
-const elementSet = z.strictObject({
+const architecturalScope = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
@@ -198,7 +228,12 @@ const region = z.strictObject({
     .strictObject({
       fill: z.string().optional(),
       cornerRadius: number.optional(),
-      frame: z.strictObject({ style: z.enum(['solid', 'dashed', 'dotted']), opacity: number.optional() }).optional(),
+      frame: z
+        .strictObject({
+          style: z.enum(['solid', 'dashed', 'dotted']),
+          opacity: number.optional()
+        })
+        .optional(),
       label: z
         .strictObject({
           placement: z
@@ -239,7 +274,10 @@ const card = z
   })
   .superRefine((value, context) => {
     if (value.adapts !== undefined && value.wraps !== undefined) {
-      context.addIssue({ code: 'custom', message: 'A Card cannot both adapt and wrap another Card.' })
+      context.addIssue({
+        code: 'custom',
+        message: 'A Card cannot both adapt and wrap another Card.'
+      })
     }
   })
 
@@ -276,7 +314,9 @@ const point = z
     return wrapped || unwrapped ? { ...value, appearance: wrapped ?? unwrapped } : value
   })
 
-const flowAppearance = z.strictObject({ line: z.enum(['solid', 'dashed']).optional() })
+const flowAppearance = z.strictObject({
+  line: z.enum(['solid', 'dashed']).optional()
+})
 const flowBase = {
   id: z.string(),
   family: z.string().optional(),
@@ -290,7 +330,12 @@ const structuredFlow = z.strictObject({
   source: endpoint,
   target: endpoint,
   direction: z.enum(['forward', 'bidirectional']).optional(),
-  route: z.strictObject({ waypoints: waypoints.optional(), labelAt: number.optional() }).optional()
+  route: z
+    .strictObject({
+      waypoints: waypoints.optional(),
+      labelAt: number.optional()
+    })
+    .optional()
 })
 const parsedLink = z
   .string()
@@ -313,7 +358,10 @@ const flow = z
   .union([compactFlow, structuredFlow])
   .superRefine((value, context) => {
     if (value.appearance !== undefined && value.line !== undefined) {
-      context.addIssue({ code: 'custom', message: 'Use appearance or line, not both.' })
+      context.addIssue({
+        code: 'custom',
+        message: 'Use appearance or line, not both.'
+      })
     }
   })
   .transform((authored): Flow => {
@@ -330,7 +378,10 @@ const flow = z
         ...(flowAppearanceValue ? { appearance: flowAppearanceValue } : {})
       }
     }
-    return { ...value, ...(flowAppearanceValue ? { appearance: flowAppearanceValue } : {}) }
+    return {
+      ...value,
+      ...(flowAppearanceValue ? { appearance: flowAppearanceValue } : {})
+    }
   })
 
 const overlay = z.strictObject({
@@ -344,7 +395,7 @@ const overlay = z.strictObject({
 
 const selection = z.strictObject({
   elements: identifiers.optional(),
-  sets: identifiers.optional()
+  scopes: identifiers.optional()
 })
 
 const callout = z.strictObject({
@@ -417,7 +468,6 @@ const diagram = z.strictObject({
   bounds: box,
   appearance: appearance.optional(),
   collections: z.array(collection).readonly().optional(),
-  sets: z.array(elementSet).readonly().optional(),
   families: z.array(family).readonly().optional(),
   cards: z.array(card).readonly().optional(),
   fabrics: z.array(fabric).readonly().optional(),
@@ -435,6 +485,7 @@ export const infoschematicSchema = z.strictObject({
   subtitle: z.string().optional(),
   description: z.string().optional(),
   diagram,
+  scopes: z.array(architecturalScope).readonly().optional(),
   specifications: z.array(specification).readonly().optional(),
   stories: z.array(story).readonly().optional(),
   themes: z.array(theme).readonly().optional()

@@ -836,47 +836,47 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
         id: 'panel-application-hosts',
         label: 'Application hosts'
       }
-    ],
-    sets: [
-      {
-        description: 'Dependency-free authored product types.',
-        elements: ['PKG-DM'],
-        id: 'domain-contract',
-        label: 'Domain contract'
-      },
-      {
-        description: 'Framework-neutral domain and visual calculations.',
-        elements: ['PKG-DC', 'PKG-VM'],
-        id: 'neutral-behaviour',
-        label: 'Framework-neutral behaviour'
-      },
-      {
-        description: 'Additive interactive Views.',
-        elements: ['PKG-VC', 'PKG-VP', 'PKG-VS'],
-        id: 'interactive-views',
-        label: 'Interactive Views'
-      },
-      {
-        description: 'Framework-neutral rendering output.',
-        elements: ['PKG-SVG'],
-        id: 'renderer-output',
-        label: 'Renderer output'
-      },
-      {
-        description: 'Independently authored Infoschematic definitions.',
-        elements: ['EX-IS'],
-        id: 'authored-examples',
-        label: 'Authored examples'
-      },
-      {
-        description: 'Deployable composition and publication hosts.',
-        elements: ['HOST-SITE'],
-        id: 'application-hosts',
-        label: 'Application hosts'
-      }
     ]
   },
   id: 'infoschematics-architecture',
+  scopes: [
+    {
+      description: 'Dependency-free authored product types.',
+      elements: ['PKG-DM'],
+      id: 'domain-contract',
+      label: 'Domain contract'
+    },
+    {
+      description: 'Framework-neutral domain and visual calculations.',
+      elements: ['PKG-DC', 'PKG-VM'],
+      id: 'neutral-behaviour',
+      label: 'Framework-neutral behaviour'
+    },
+    {
+      description: 'Additive interactive Views.',
+      elements: ['PKG-VC', 'PKG-VP', 'PKG-VS'],
+      id: 'interactive-views',
+      label: 'Interactive Views'
+    },
+    {
+      description: 'Framework-neutral rendering output.',
+      elements: ['PKG-SVG'],
+      id: 'renderer-output',
+      label: 'Renderer output'
+    },
+    {
+      description: 'Independently authored Infoschematic definitions.',
+      elements: ['EX-IS'],
+      id: 'authored-examples',
+      label: 'Authored examples'
+    },
+    {
+      description: 'Deployable composition and publication hosts.',
+      elements: ['HOST-SITE'],
+      id: 'application-hosts',
+      label: 'Application hosts'
+    }
+  ],
   specifications: [],
   stories: [
     {

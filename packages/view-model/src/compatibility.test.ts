@@ -121,8 +121,16 @@ describe('establishedInfoschematicOf', () => {
       diagram: {
         bounds: { x: 0, y: 0, width: 240, height: 100 },
         cards: [
-          { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 80, height: 60 } },
-          { id: 'SNK', label: 'Sink', bounds: { x: 140, y: 20, width: 80, height: 60 } }
+          {
+            id: 'SRC',
+            label: 'Source',
+            bounds: { x: 20, y: 20, width: 80, height: 60 }
+          },
+          {
+            id: 'SNK',
+            label: 'Sink',
+            bounds: { x: 140, y: 20, width: 80, height: 60 }
+          }
         ],
         families: [
           { id: 'implied', label: 'Implied', appearance: { line: 'dashed' } },
@@ -158,5 +166,89 @@ describe('establishedInfoschematicOf', () => {
       undefined,
       true
     ])
+  })
+
+  it('keeps Architectural Scopes independent from Card Collection appearance and derives scoped Flows', () => {
+    const canonical = defineInfoschematicModel({
+      id: 'architectural-scopes',
+      title: 'Architectural scopes',
+      diagram: {
+        bounds: { x: 0, y: 0, width: 240, height: 100 },
+        collections: [
+          {
+            id: 'delivery',
+            label: 'Delivery cards',
+            appearance: { color: '#123456', fill: '#abcdef', icon: 'delivery' }
+          }
+        ],
+        families: [{ id: 'data', label: 'Data', appearance: { color: '#ff00ff' } }],
+        cards: [
+          {
+            id: 'SRC',
+            label: 'Source',
+            collection: 'delivery',
+            bounds: { x: 20, y: 20, width: 80, height: 60 }
+          },
+          {
+            id: 'SNK',
+            label: 'Sink',
+            collection: 'delivery',
+            bounds: { x: 140, y: 20, width: 80, height: 60 }
+          }
+        ],
+        flows: [
+          {
+            id: 'DATA-01',
+            family: 'data',
+            source: { element: 'SRC', port: 'E1' },
+            target: { element: 'SNK', port: 'W1' }
+          }
+        ],
+        overlays: [{ id: 'NOTE', label: 'Note', kind: 'note' }]
+      },
+      scopes: [
+        {
+          id: 'delivery',
+          label: 'Delivery architecture',
+          elements: ['SRC', 'SNK']
+        }
+      ],
+      themes: [
+        {
+          id: 'architecture',
+          label: 'Architecture',
+          scenes: [
+            {
+              id: 'delivery',
+              label: 'Delivery',
+              focus: { scopes: ['delivery'] }
+            }
+          ]
+        }
+      ]
+    })
+
+    const adapted = establishedInfoschematicOf(canonical)
+
+    expect(adapted.infoschematic.scopes).toEqual([
+      {
+        color: '#64748b',
+        description: '',
+        fill: '#f8fafc',
+        id: 'delivery',
+        label: 'Delivery architecture',
+        prefix: 'delivery'
+      }
+    ])
+    expect(adapted.infoschematic.domains?.[0]).toMatchObject({
+      color: '#123456',
+      fill: '#abcdef'
+    })
+    expect(adapted.infoschematic.graphics[0]?.scopes).toEqual([])
+    expect(adapted.themes[0]?.scenes[0]?.focus).toEqual({
+      artefacts: ['SRC', 'SNK'],
+      flows: ['DATA-01'],
+      graphics: []
+    })
   })
 })

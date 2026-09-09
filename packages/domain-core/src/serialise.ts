@@ -6,13 +6,22 @@ import { defaultCalloutPositions, defineInfoschematicModel } from './model.ts'
 
 type Mapping = Record<string, unknown>
 
-const topLevelOrder = ['id', 'title', 'subtitle', 'description', 'diagram', 'specifications', 'stories', 'themes']
+const topLevelOrder = [
+  'id',
+  'title',
+  'subtitle',
+  'description',
+  'diagram',
+  'scopes',
+  'specifications',
+  'stories',
+  'themes'
+]
 
 const diagramOrder = [
   'bounds',
   'appearance',
   'collections',
-  'sets',
   'families',
   'cards',
   'fabrics',
@@ -36,7 +45,7 @@ const fieldOrder = [
   'owner',
   'question',
   'interfaces',
-  'sets',
+  'scopes',
   'elements',
   'provides',
   'adapts',
@@ -137,9 +146,9 @@ const isMapping = (value: unknown): value is Mapping =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const emptyCollectionIsDefault = (key: string, context: string): boolean =>
-  (context === '<root>' && ['specifications', 'stories', 'themes'].includes(key)) ||
+  (context === '<root>' && ['scopes', 'specifications', 'stories', 'themes'].includes(key)) ||
   (context === 'diagram' &&
-    ['collections', 'sets', 'families', 'cards', 'fabrics', 'points', 'regions', 'flows', 'overlays'].includes(key))
+    ['collections', 'families', 'cards', 'fabrics', 'points', 'regions', 'flows', 'overlays'].includes(key))
 
 const compactMapping = (input: Readonly<Mapping>, context: string): Mapping => {
   const value: Mapping = { ...input }

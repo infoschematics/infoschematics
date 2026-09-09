@@ -124,7 +124,7 @@ const membershipVisible = (
   entry: { scopes: readonly string[]; scopeRule?: 'all' | 'any' },
   visibleScopes: ReadonlySet<string>
 ) =>
-  entry.scopeRule === 'all'
+  entry.scopes.length === 0 || entry.scopeRule === 'all'
     ? entry.scopes.every((scope) => visibleScopes.has(scope))
     : entry.scopes.some((scope) => visibleScopes.has(scope))
 
@@ -145,13 +145,20 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     kind: 'fabric',
     ports: fabric.placement.ports
   }))
-  const flows: RuntimeFlow[] = definition.flows.map((flow) => ({ ...flow, d: routePath(flow.points) }))
+  const flows: RuntimeFlow[] = definition.flows.map((flow) => ({
+    ...flow,
+    d: routePath(flow.points)
+  }))
   const identities: RuntimeIdentity[] = [
     ...cards.map(({ placement: _placement, bounds: _bounds, ports: _ports, ...card }) => card),
     ...fabrics.map(
       ({ placement: _placement, bounds: _bounds, ports: _ports, appearance: _appearance, ...fabric }) => fabric
     ),
-    ...definition.points.map((point) => ({ ...point, detail: undefined, kind: 'point' as const }))
+    ...definition.points.map((point) => ({
+      ...point,
+      detail: undefined,
+      kind: 'point' as const
+    }))
   ]
   const register = registerOf(identities)
   const endpointCodes = new Map(identities.map(({ code, id }) => [id, code]))
@@ -345,7 +352,14 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
         ports[end] = to.port as typeof ports.source
       }
       points = normaliseRoute(points)
-      return { ...flow, ...ends, sourcePort: ports.source, targetPort: ports.target, d: routePath(points), points }
+      return {
+        ...flow,
+        ...ends,
+        sourcePort: ports.source,
+        targetPort: ports.target,
+        d: routePath(points),
+        points
+      }
     })
   }
 
@@ -393,7 +407,12 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
         width: visualTokens.canvas.output.annotationWidth
       },
       obstacles: cards.filter((card) => membershipVisible(card, visibleScopes)).map((card) => card.bounds),
-      routes: shownFlows.map((flow) => ({ d: flow.d, id: flow.id, key: flow.code, along: flow.label?.along }))
+      routes: shownFlows.map((flow) => ({
+        d: flow.d,
+        id: flow.id,
+        key: flow.code,
+        along: flow.label?.along
+      }))
     })
 
   const specificationSections = definition.specificationGroups
@@ -452,8 +471,20 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       const ports = shownFlows.flatMap((flow) => {
         const { start, end } = routeEndpoints(flow.d)
         return [
-          { flow: flow.code, endpoint: flow.source, point: start, port: flow.sourcePort, terminal: 'source' as const },
-          { flow: flow.code, endpoint: flow.target, point: end, port: flow.targetPort, terminal: 'target' as const }
+          {
+            flow: flow.code,
+            endpoint: flow.source,
+            point: start,
+            port: flow.sourcePort,
+            terminal: 'source' as const
+          },
+          {
+            flow: flow.code,
+            endpoint: flow.target,
+            point: end,
+            port: flow.targetPort,
+            terminal: 'target' as const
+          }
         ]
       })
       return { findings: auditPorts(ports, minimumPortGap), ports }
