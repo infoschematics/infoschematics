@@ -89,7 +89,7 @@ Canonical Infoschematic definitions can now be normalised, validated, and adapte
 
 - `packages/domain-model/src/model.ts` completes the directly authorable canonical shape needed by IBC, including Card interfaces and complete normalised result types.
 - `packages/domain-core/src/model.ts` validates global Diagram references, supplies one-Port canonical defaults, copies legacy source Scenes into their owners, and preserves legacy seven-Port geometry during projection.
-- Mixed legacy dashed and solid Flows are represented by separate canonical Families, keeping line treatment on Family without changing the rendered lines.
+- Mixed legacy dashed and solid Flows retain one semantic Family, with line treatment projected as a per-Flow override without changing the rendered lines.
 - `packages/view-model/src/compatibility.ts` derives the established view contract from canonical data, including Assembly geometry and full Flow routes.
 - `scripts/ibc-visual-compatibility.ts` accepts legacy or canonical IBC exports and renders both through the same canonical boundary.
 
@@ -97,7 +97,7 @@ Canonical Infoschematic definitions can now be normalised, validated, and adapte
 
 - Focused model, adapter, and compatibility-harness tests pass: 7 tests across 3 files.
 - All 39 post-adapter IBC PNG hashes exactly match the pre-adapter capture; no fuzzy allowance was required.
-- `bun run self:check` exits 0: 71 test files and 485 tests pass, every TypeScript workspace compiles, dependency boundaries pass, generated artefacts are current, and the production Site builds.
+- `bun run self:check` exits 0: 71 test files and 487 tests pass, every TypeScript workspace compiles, dependency boundaries pass, generated artefacts are current, and the production Site builds.
 
 ### Outstanding concerns
 
@@ -105,7 +105,7 @@ The adapter is deliberately temporary. Existing renderer and View packages still
 
 ### Post-change review
 
-The change remains inside the approved model and compatibility boundary. Documentation, Site source, examples, Playground, renderer internals, public schemas, and IBC source files are unchanged. The canonical model removes `sourceScene` relationships and per-Flow presentation while retaining exact legacy output through copied Scenes and derived Families.
+The change remains inside the approved model and compatibility boundary. Documentation, Site source, examples, Playground, renderer internals, public schemas, and IBC source files are unchanged. The canonical model removes `sourceScene` relationships while retaining exact legacy output through copied Scenes and per-Flow line treatment.
 
 ### Mini recap
 
@@ -119,7 +119,7 @@ Existing inputs continue through `defineInfoschematic`. Canonical inputs use an 
 
 ### Visual identity
 
-Canonical IDs are code-like and become the only element references. Collections and Families provide shared Card and Flow identity; Fabrics, Points, and Regions retain direct identity. Point remains a visible source-or-sink endpoint.
+Canonical IDs are code-like and become the only element references. Collections and Families provide shared Card and Flow identity; Fabrics, Points, and Regions retain direct identity. A Flow may override its Family's default line treatment without changing that semantic identity. Point remains a visible source-or-sink endpoint.
 
 ### Presentation model
 

@@ -208,7 +208,9 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         bidirectional: flow.direction === 'bidirectional' || undefined,
         code: flow.id,
         conformsTo: flow.interfaces,
-        dashed: diagram.families.find(({ id }) => id === flow.family)?.appearance?.line === 'dashed' || undefined,
+        dashed:
+          (flow.appearance?.line ?? diagram.families.find(({ id }) => id === flow.family)?.appearance?.line) ===
+            'dashed' || undefined,
         family: flow.family ?? '',
         id: flow.id,
         label: flow.route?.labelAt === undefined ? undefined : { along: flow.route.labelAt },

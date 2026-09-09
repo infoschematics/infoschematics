@@ -46,16 +46,6 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
   const flowId = new Map(definition.flows.map(({ code, id }) => [id, code]))
   const visibleId = (id: string) => elementId.get(id) ?? flowId.get(id) ?? id
   const scopeById = new Map(definition.scopes.map((scope) => [scope.id, scope]))
-  const dashedFamilyId = new Map(
-    definition.flowFamilies.flatMap((family) => {
-      const familyFlows = definition.flows.filter((flow) => flow.family === family.id)
-      const hasDashed = familyFlows.some((flow) => flow.dashed)
-      const hasSolid = familyFlows.some((flow) => !flow.dashed)
-
-      return hasDashed && hasSolid ? ([[family.id, `${family.id}-DASHED`]] as const) : []
-    })
-  )
-
   const selectionOf = (
     focus:
       | {
@@ -167,38 +157,16 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           }
         }
       }),
-      families: definition.flowFamilies.flatMap((family) => {
-        const dashedId = dashedFamilyId.get(family.id)
-        const appearance = { color: family.color }
-
-        return [
-          {
-            appearance: {
-              ...appearance,
-              line:
-                !dashedId && definition.flows.some((flow) => flow.family === family.id && flow.dashed)
-                  ? ('dashed' as const)
-                  : undefined
-            },
-            description: family.description,
-            id: family.id,
-            label: family.label
-          },
-          ...(dashedId
-            ? [
-                {
-                  appearance: { ...appearance, line: 'dashed' as const },
-                  description: family.description,
-                  id: dashedId,
-                  label: family.label
-                }
-              ]
-            : [])
-        ]
-      }),
+      families: definition.flowFamilies.map((family) => ({
+        appearance: { color: family.color },
+        description: family.description,
+        id: family.id,
+        label: family.label
+      })),
       flows: definition.flows.map((flow) => ({
+        appearance: flow.dashed ? { line: 'dashed' as const } : undefined,
         direction: flow.bidirectional ? ('bidirectional' as const) : ('forward' as const),
-        family: flow.dashed ? (dashedFamilyId.get(flow.family) ?? flow.family) : flow.family,
+        family: flow.family,
         id: flow.code,
         interfaces: flow.conformsTo,
         operation: flow.operation,

@@ -111,4 +111,50 @@ describe('establishedInfoschematicOf', () => {
     })
     expect(adapted.stories[0]?.scenes[0]).not.toHaveProperty('sourceScene')
   })
+
+  it('lets a Flow override its Family line treatment', () => {
+    const canonical = defineInfoschematicModel({
+      id: 'line-treatments',
+      title: 'Line treatments',
+      diagram: {
+        bounds: { x: 0, y: 0, width: 240, height: 100 },
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 80, height: 60 } },
+          { id: 'SNK', label: 'Sink', bounds: { x: 140, y: 20, width: 80, height: 60 } }
+        ],
+        families: [
+          { id: 'implied', label: 'Implied', appearance: { line: 'dashed' } },
+          { id: 'direct', label: 'Direct' }
+        ],
+        flows: [
+          {
+            id: 'DEFAULT-DASHED',
+            family: 'implied',
+            source: { element: 'SRC', port: 'E1' },
+            target: { element: 'SNK', port: 'W1' }
+          },
+          {
+            id: 'OVERRIDE-SOLID',
+            family: 'implied',
+            appearance: { line: 'solid' },
+            source: { element: 'SRC', port: 'E1' },
+            target: { element: 'SNK', port: 'W1' }
+          },
+          {
+            id: 'OVERRIDE-DASHED',
+            family: 'direct',
+            appearance: { line: 'dashed' },
+            source: { element: 'SRC', port: 'E1' },
+            target: { element: 'SNK', port: 'W1' }
+          }
+        ]
+      }
+    })
+
+    expect(establishedInfoschematicOf(canonical).infoschematic.flows.map(({ dashed }) => dashed)).toEqual([
+      true,
+      undefined,
+      true
+    ])
+  })
 })

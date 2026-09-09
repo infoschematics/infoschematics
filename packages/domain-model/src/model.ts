@@ -7,6 +7,8 @@ export type JsonValue = null | boolean | number | string | readonly JsonValue[] 
 
 export type VisualIdentity = { color?: string; fill?: string; icon?: string }
 
+export type FlowLineTreatment = 'solid' | 'dashed'
+
 export type Collection = {
   id: string
   label: string
@@ -18,7 +20,7 @@ export type Family = {
   id: string
   label: string
   description?: string
-  appearance?: VisualIdentity & { line?: 'solid' | 'dashed' }
+  appearance?: VisualIdentity & { line?: FlowLineTreatment }
 }
 
 export type ElementSet = {
@@ -81,6 +83,8 @@ export type FlowEndpoint = { element: string; port: PortId }
 export type Flow = {
   id: string
   family?: string
+  /** Overrides the Family default without changing the Flow's semantic identity. */
+  appearance?: { line?: FlowLineTreatment }
   source: FlowEndpoint
   target: FlowEndpoint
   operation?: string

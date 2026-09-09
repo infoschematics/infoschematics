@@ -141,7 +141,7 @@ describe('infoschematicModelOf', () => {
     })
   })
 
-  it('represents mixed legacy line treatments as separate families', () => {
+  it('preserves mixed legacy line treatments as Flow overrides', () => {
     const model = defineInfoschematicModel(
       infoschematicModelOf(
         defineInfoschematic({
@@ -236,13 +236,10 @@ describe('infoschematicModelOf', () => {
       )
     )
 
-    expect(model.diagram.families).toMatchObject([
-      { id: 'media', appearance: { color: '#ff00ff' } },
-      { id: 'media-DASHED', appearance: { color: '#ff00ff', line: 'dashed' } }
-    ])
+    expect(model.diagram.families).toMatchObject([{ id: 'media', appearance: { color: '#ff00ff' } }])
     expect(model.diagram.flows).toMatchObject([
       { id: 'MED-01', family: 'media' },
-      { id: 'MED-02', family: 'media-DASHED' }
+      { id: 'MED-02', family: 'media', appearance: { line: 'dashed' } }
     ])
     expect(model.diagram.collections.map(({ id }) => id)).toEqual(['edge'])
     expect(model.diagram.regions[0]).toMatchObject({
