@@ -3,10 +3,14 @@ import architectureMarkdown from '../../../docs/design/architecture.md?raw'
 import viewPresentDesignMarkdown from '../../../docs/design/view-present.md?raw'
 import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
 import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
-import authoringMarkdown from '../../../docs/guides/authoring.md?raw'
-import reactIntegrationMarkdown from '../../../docs/guides/react-integration.md?raw'
-import overviewMarkdown from '../../../docs/overview.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
+import authoringMarkdown from '../content/authoring.md?raw'
+import capabilitiesMarkdown from '../content/capabilities.md?raw'
+import gettingStartedMarkdown from '../content/getting-started.md?raw'
+import presentMarkdown from '../content/present.md?raw'
+import reactIntegrationMarkdown from '../content/react-integration.md?raw'
+import staticRenderingMarkdown from '../content/static-rendering.md?raw'
+import studioMarkdown from '../content/studio.md?raw'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import type { DocumentationRoute } from './routes.ts'
 import { documentationRoutes } from './routes.ts'
@@ -16,9 +20,13 @@ import './styles.css'
 const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
 
 const markdownBySourcePath: Record<string, string> = {
-  'docs/overview.md': overviewMarkdown,
-  'docs/guides/authoring.md': authoringMarkdown,
-  'docs/guides/react-integration.md': reactIntegrationMarkdown,
+  'apps/site/content/getting-started.md': gettingStartedMarkdown,
+  'apps/site/content/capabilities.md': capabilitiesMarkdown,
+  'apps/site/content/authoring.md': authoringMarkdown,
+  'apps/site/content/present.md': presentMarkdown,
+  'apps/site/content/studio.md': studioMarkdown,
+  'apps/site/content/static-rendering.md': staticRenderingMarkdown,
+  'apps/site/content/react-integration.md': reactIntegrationMarkdown,
   'docs/reference/vocabulary.md': vocabularyMarkdown,
   'docs/design/architecture.md': architectureMarkdown,
   'docs/design/visual-language.md': visualLanguageMarkdown,
@@ -136,7 +144,7 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
       <div className="docs-columns">
         <DocsSidebar currentPath={route.path} />
         <main id="document-content">
-          {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown under docs/, not user input */}
+          {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown, not user input */}
           <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
         </main>
         {contents.length > 0 ? (

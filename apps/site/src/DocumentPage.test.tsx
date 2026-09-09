@@ -24,7 +24,7 @@ describe('documentation pages', () => {
   })
 
   it('gives headings anchor ids and lists them in the page contents', () => {
-    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/guides/authoring.md')
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 
     if (!route) {
       throw new Error('The authoring documentation route is missing.')
@@ -43,7 +43,7 @@ describe('documentation pages', () => {
   })
 
   it('renders Markdown structure rather than exposing source text', () => {
-    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/guides/authoring.md')
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 
     if (!route) {
       throw new Error('The authoring documentation route is missing.')

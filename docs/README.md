@@ -1,13 +1,13 @@
 # Documentation
 
-Infoschematics keeps one canonical Markdown source for each document. The public site renders selected guides and reference material directly from this directory rather than maintaining copies.
+Infoschematics keeps one canonical Markdown source for each repository document. The public site renders selected reference and design material directly from this directory rather than maintaining copies; the consumer user guide is Site-owned content under `apps/site/content/`.
 
 Read the documentation by the question it answers:
 
 - [Decision records](decisions/) explain why the repository and product are shaped as they are.
 - [Specifications](specs/) state behaviour that is true now and identify its verification.
 - [Design documents](design/) describe where a surface is going, including intent not yet delivered.
-- [Guides](guides/) explain how to use Infoschematics.
+- [Guides](guides/) explain maintainer workflows such as hosting and releasing.
 - [Reference material](reference/) defines shared language and other facts readers need to look up.
 - [Roadmap records](roadmap/) say what work is planned, active, or awaiting review.
 
@@ -15,14 +15,9 @@ These instruments should link to one another rather than repeat one another. A r
 
 ## Public documentation
 
-The website publishes this directory's guides, reference material, design documents, and specifications under `/docs/`, mirroring this tree's structure:
+The consumer user guide is Site-owned content under [`apps/site/content/`](../apps/site/content/), published as an ordered progression under `/docs/` ([ADR-INFOSCHEMATICS-014](decisions/ADR-INFOSCHEMATICS-014-site-owned-user-guide.md)). From this directory the website renders selected documents directly:
 
-- [Getting started](overview.md), rendered as the documentation landing page;
-- [the interactive visual guide](/docs/visual-guide/), a Site-rendered reference to visible artefacts and treatments;
-- [the authoring guide](guides/authoring.md);
-- [the React integration guide](guides/react-integration.md);
-- [the vocabulary reference](reference/vocabulary.md);
-- [the architecture guide](design/architecture.md), [the visual language guide](design/visual-language.md), [the Present view design](design/view-present.md), and [the Studio view design](design/view-studio.md);
-- every specification under [`specs/`](specs/).
+- [the vocabulary reference](reference/vocabulary.md), rendered as Terminology;
+- [the architecture guide](design/architecture.md), [the visual language guide](design/visual-language.md), [the Present view design](design/view-present.md), and [the Studio view design](design/view-studio.md).
 
-Decision records and roadmap records remain maintainer-facing. The maintainer-facing [Cloudflare hosting guide](guides/cloudflare.md) and [releasing-packages guide](guides/releasing-packages.md) also stay off the public site.
+Decision records, specifications, and roadmap records remain maintainer-facing, as do the [Cloudflare hosting guide](guides/cloudflare.md) and the [releasing-packages guide](guides/releasing-packages.md).

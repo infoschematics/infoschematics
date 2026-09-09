@@ -35,7 +35,7 @@ export function InfoschematicPage() {
 }
 ```
 
-A title-only definition renders a blank canvas safely. An Infoschematic can equally be authored as a JSON or YAML document and loaded with `parseInfoschematic`, which validates it against the same contract and reports faults by path. See [the authoring guide](docs/guides/authoring.md) and [the React integration guide](docs/guides/react-integration.md) for the complete ownership boundary.
+A title-only definition renders a blank canvas safely. An Infoschematic can equally be authored as a JSON or YAML document and loaded with `parseInfoschematic`, which validates it against the same contract and reports faults by path. See [the authoring guide](apps/site/content/authoring.md) and [the React integration guide](apps/site/content/react-integration.md) for the complete ownership boundary.
 
 ## Package direction
 

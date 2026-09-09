@@ -10,86 +10,114 @@ export function playgroundPresetPath(preset: string) {
   return `${playgroundPath}?preset=${preset}`
 }
 
-export type DocumentSection = 'getting-started' | 'reference' | 'design'
+export type DocumentSection = 'guide' | 'reference' | 'design'
 
 export const sectionTitles: Record<DocumentSection, string> = {
-  'getting-started': 'Getting started',
+  guide: 'User guide',
   reference: 'Reference',
   design: 'Design'
 }
 
-export const documentSections: readonly DocumentSection[] = ['getting-started', 'reference', 'design']
+export const documentSections: readonly DocumentSection[] = ['guide', 'reference', 'design']
 
 interface PublishedDocument {
   sourcePath: string
+  path: string
   title: string
   summary: string
   section: DocumentSection
 }
 
+// The user guide's Markdown steps in reading order; the visual guide, a rendered specimen page rather than a
+// Markdown document, takes its place in the order in DocsSidebar.
 const publishedDocuments = [
   {
-    sourcePath: 'docs/overview.md',
+    sourcePath: 'apps/site/content/getting-started.md',
+    path: docsIndexPath,
     title: 'Getting started',
-    summary: 'Visible anatomy, the definition-to-output path, and where to begin.',
-    section: 'getting-started'
+    summary: 'What an Infoschematic is, what it is made of, and how this guide is organised.',
+    section: 'guide'
   },
   {
-    sourcePath: 'docs/guides/authoring.md',
-    title: 'Authoring Infoschematics',
+    sourcePath: 'apps/site/content/capabilities.md',
+    path: '/docs/capabilities/',
+    title: 'Capabilities',
+    summary: 'Scenes, Themes, Stories, Scopes, Graphics and Callouts beyond the diagram.',
+    section: 'guide'
+  },
+  {
+    sourcePath: 'apps/site/content/authoring.md',
+    path: '/docs/authoring/',
+    title: 'Authoring',
     summary: 'Write a serialisable Infoschematic definition from scratch.',
-    section: 'getting-started'
+    section: 'guide'
+  },
+  {
+    sourcePath: 'apps/site/content/present.md',
+    path: '/docs/present/',
+    title: 'Present view',
+    summary: 'Show an Infoschematic to an audience with filtering, focus and Story playback.',
+    section: 'guide'
+  },
+  {
+    sourcePath: 'apps/site/content/studio.md',
+    path: '/docs/studio/',
+    title: 'Studio view',
+    summary: 'Design the diagram and direct its presentation material in a structured editor.',
+    section: 'guide'
+  },
+  {
+    sourcePath: 'apps/site/content/static-rendering.md',
+    path: '/docs/static-rendering/',
+    title: 'Static rendering',
+    summary: 'Export deterministic SVG for documents and pipelines.',
+    section: 'guide'
+  },
+  {
+    sourcePath: 'apps/site/content/react-integration.md',
+    path: '/docs/react-integration/',
+    title: 'React integration',
+    summary: 'Mount an authored Infoschematic inside a host React application.',
+    section: 'guide'
   },
   {
     sourcePath: 'docs/reference/vocabulary.md',
+    path: '/docs/reference/vocabulary/',
     title: 'Terminology',
     summary: 'Canonical product terms used across every specification and guide.',
     section: 'reference'
   },
   {
-    sourcePath: 'docs/guides/react-integration.md',
-    title: 'React integration',
-    summary: 'Mount an authored Infoschematic inside a host React application.',
-    section: 'reference'
-  },
-  {
     sourcePath: 'docs/design/architecture.md',
+    path: '/docs/design/architecture/',
     title: 'Architecture',
     summary: 'Ownership roots, package boundaries and the dependency direction between them.',
     section: 'design'
   },
   {
     sourcePath: 'docs/design/visual-language.md',
+    path: '/docs/design/visual-language/',
     title: 'Visual language',
     summary: 'Composition, colour, routing, motion, and accessible visual treatment.',
     section: 'design'
   },
   {
     sourcePath: 'docs/design/view-present.md',
+    path: '/docs/design/view-present/',
     title: 'Present view design',
     summary: 'Audience-facing filtering, Scene focus and Story playback design.',
     section: 'design'
   },
   {
     sourcePath: 'docs/design/view-studio.md',
+    path: '/docs/design/view-studio/',
     title: 'Studio view design',
     summary: 'Generic editing session design: selection, drafts and consolidation.',
     section: 'design'
   }
 ] as const satisfies readonly PublishedDocument[]
 
-function documentPath(sourcePath: string): string {
-  if (sourcePath === 'docs/overview.md') {
-    return docsIndexPath
-  }
-
-  const withoutExtension = sourcePath.endsWith('.md') ? sourcePath.slice(0, -'.md'.length) : sourcePath
-  return `/${withoutExtension}/`.replace(/\/+/g, '/')
-}
-
-export const documentationRoutes: ReadonlyArray<PublishedDocument & { path: string }> = publishedDocuments.map(
-  (document) => ({ ...document, path: documentPath(document.sourcePath) })
-)
+export const documentationRoutes: readonly PublishedDocument[] = publishedDocuments
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
 

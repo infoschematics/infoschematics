@@ -151,21 +151,8 @@ The host owns:
 
 Studio View owns generic rendering, Producer controls, and runtime state derived from the configuration. It must not import a particular authored Infoschematic or its visual implementations.
 
-The public website demonstrates this boundary with two examples. `/examples/blank/` mounts the minimum title-only contract, while `/examples/infoschematics/` mounts the substantial [`@infoschematics/is-infoschematics`](../../examples/is-infoschematics/) definition through Studio so its Present, Design, and Direct controls remain available. The homepage consumes the same definition through `renderInfoschematicSvg`; the authored package imports neither React View nor Site code.
+The public website demonstrates this boundary with two examples. `/examples/blank/` mounts the minimum title-only contract, while `/examples/infoschematics/` mounts the substantial [`@infoschematics/is-infoschematics`](https://github.com/infoschematics/infoschematics/tree/main/examples/is-infoschematics/) definition through Studio so its Present, Design, and Direct controls remain available. The homepage consumes the same definition through `renderInfoschematicSvg`; the authored package imports neither React View nor Site code.
 
-## Monorepo development
+## Beyond the host
 
-Inside this repository, Bun resolves matching `0.1.0` package dependencies to local workspaces:
-
-```bash
-bun install
-bun run self:dev
-```
-
-The website runs from `apps/site`. The root verification gate runs all tests and type checks, checks dependency boundaries, and produces the site build:
-
-```bash
-bun run self:check
-```
-
-External consumers install compiled package entry points and import package stylesheet subpaths explicitly; they do not compile or vendor repository source. Maintainers coordinate every public package version and protected npm publication through the [package release guide](releasing-packages.md).
+External consumers install compiled package entry points and import package stylesheet subpaths explicitly; they do not compile or vendor repository source. For deterministic still output alongside an interactive view, see the [static rendering guide](/docs/static-rendering/).

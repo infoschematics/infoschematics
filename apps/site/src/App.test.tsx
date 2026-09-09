@@ -57,17 +57,26 @@ describe('website routes', () => {
     expect(getDocumentationRoute('/guides/unknown/')).toBeUndefined()
   })
 
-  it('derives each document path from its source path', () => {
-    expect(getDocumentationRoute('/docs/guides/authoring/')?.sourcePath).toBe('docs/guides/authoring.md')
+  it('publishes site-owned guide content and repository documentation at explicit paths', () => {
+    expect(getDocumentationRoute('/docs/authoring/')?.sourcePath).toBe('apps/site/content/authoring.md')
     expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
+    expect(getDocumentationRoute('/docs/guides/authoring/')).toBeUndefined()
   })
 
-  it('groups onboarding under getting started and leaves the rest as reference', () => {
+  it('orders the user guide as a step-by-step progression', () => {
     const titlesIn = (section: string) =>
       documentationRoutes.filter((route) => route.section === section).map((route) => route.title)
 
-    expect(titlesIn('getting-started')).toEqual(['Getting started', 'Authoring Infoschematics'])
-    expect(titlesIn('reference')).toEqual(['Terminology', 'React integration'])
+    expect(titlesIn('guide')).toEqual([
+      'Getting started',
+      'Capabilities',
+      'Authoring',
+      'Present view',
+      'Studio view',
+      'Static rendering',
+      'React integration'
+    ])
+    expect(titlesIn('reference')).toEqual(['Terminology'])
   })
 
   it('publishes guidance rather than the specifications, which stay in the repository', () => {
@@ -84,9 +93,9 @@ describe('website routes', () => {
     expect(isExamplesIndexPath('/')).toBe(false)
   })
 
-  it('renders the overview document at the docs index path', () => {
-    expect(getDocumentationRoute('/docs/')?.sourcePath).toBe('docs/overview.md')
-    expect(getDocumentationRoute('/docs')?.sourcePath).toBe('docs/overview.md')
+  it('renders the getting-started guide at the docs index path', () => {
+    expect(getDocumentationRoute('/docs/')?.sourcePath).toBe('apps/site/content/getting-started.md')
+    expect(getDocumentationRoute('/docs')?.sourcePath).toBe('apps/site/content/getting-started.md')
   })
 
   it('lists all three hosted examples on the examples index', () => {

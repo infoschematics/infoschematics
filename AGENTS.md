@@ -8,7 +8,7 @@ Authored Infoschematic definitions are serialisable data. They may contain stabl
 
 The public website is an outlet for this repository, not the owner of reusable product behaviour. Preserve the designed homepage, keep authored Infoschematics independent, and place reusable capability in Domain Model, Domain Core, View Model, or the appropriate renderer or View package before consuming it from Site.
 
-Canonical consumer documentation remains under `docs/`; Site renders selected Markdown rather than maintaining copies.
+The consumer user guide is Site-owned content under `apps/site/content/`; repository documentation remains canonical under `docs/`, with selected documents rendered by Site rather than copied.
 
 A passing suite is not evidence that output looks right. When changing visual treatment, render the result and look at it: a Flow arrowhead that was referenced but never defined, and a light slab painted onto the blueprint backdrop, both survived a fully green run.
 

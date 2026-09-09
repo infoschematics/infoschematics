@@ -37,9 +37,9 @@ describe('vocabulary citations', () => {
     expect(new Set(anchors)).toEqual(new Set(ids))
   })
 
-  it('resolves every vocabulary citation in repository documentation', async () => {
+  it('resolves every vocabulary citation in repository and site documentation', async () => {
     const ids = new Set(vocabularyIds(await readFile(vocabularyPath, 'utf8')))
-    const files = await markdownFiles('docs')
+    const files = [...(await markdownFiles('docs')), ...(await markdownFiles('apps/site/content'))]
     let citations = 0
 
     for (const file of files) {
