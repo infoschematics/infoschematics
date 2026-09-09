@@ -20,6 +20,7 @@ import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/t
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 import { type Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
+export type DiagramMinimapPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
 export type DiagramViewportController = Readonly<{
   fit: () => void
   zoomIn: () => void
@@ -30,7 +31,7 @@ import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } fro
 import { flowSignalKey } from './flow-signals.ts'
 import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
-import { panViewport, sameViewport, viewportZoomStep, zoomViewport } from './viewport.ts'
+import { centerViewportAt, panViewport, sameViewport, viewportZoomStep, zoomViewport } from './viewport.ts'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -44,6 +45,7 @@ type PanGesture = Readonly<{
   scaleY: number
   viewport: Box
 }>
+type MinimapGesture = Readonly<{ pointerId: number }>
 
 const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
   left?.kind === right.kind && left.id === right.id
@@ -163,6 +165,7 @@ export function InfoschematicDiagram({
   grid,
   graphic,
   visibleScopes,
+  minimap = 'top-right',
   viewportControllerRef,
   viewportControls = 'overlay'
 }: {
@@ -236,6 +239,8 @@ export function InfoschematicDiagram({
   /** A resolved Graphic drawn by the active Story Scene. */
   graphic?: GraphicConfig
   visibleScopes: ReadonlySet<string>
+  /** Overview map shown while zoomed; false disables it, otherwise selects its corner. */
+  minimap?: false | DiagramMinimapPosition
   /** Allows a host toolbar to operate this otherwise self-contained viewport. */
   viewportControllerRef?: Ref<DiagramViewportController>
   /** Studio supplies its own toolbar; ordinary Canvas hosts retain the overlay controls. */
@@ -430,14 +435,17 @@ export function InfoschematicDiagram({
   // a thing to change, and an unarmed pointer cannot alter it by accident.
   const [armed, setArmed] = useState(false)
   const infoschematic = useRef<SVGSVGElement>(null)
+  const minimapOverview = useRef<SVGSVGElement>(null)
   const zoomPointer = useRef<{ clientX: number; clientY: number } | null>(null)
   const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
   const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
+  const [minimapGesture, setMinimapGesture] = useState<MinimapGesture | null>(null)
   const lastAuthoredViewport = useRef(infoschematicViewBox)
   if (!sameViewport(lastAuthoredViewport.current, infoschematicViewBox)) {
     lastAuthoredViewport.current = infoschematicViewBox
     setViewport(infoschematicViewBox)
     if (panGesture) setPanGesture(null)
+    if (minimapGesture) setMinimapGesture(null)
   }
   const fitted = sameViewport(viewport, infoschematicViewBox)
   const zoomBy = useCallback(
@@ -526,6 +534,41 @@ export function InfoschematicDiagram({
     if (event.currentTarget.hasPointerCapture(event.pointerId))
       event.currentTarget.releasePointerCapture(event.pointerId)
     setPanGesture(null)
+  }
+  const moveFromMinimap = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const at = minimapOverview.current
+      ? pointInDiagram(minimapOverview.current, event.clientX, event.clientY)
+      : undefined
+    if (at) setViewport((current) => centerViewportAt(infoschematicViewBox, current, at))
+  }
+  const startMinimapPan = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (event.button !== 0) return
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    setMinimapGesture({ pointerId: event.pointerId })
+    moveFromMinimap(event)
+  }
+  const continueMinimapPan = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!minimapGesture || minimapGesture.pointerId !== event.pointerId) return
+    moveFromMinimap(event)
+  }
+  const stopMinimapPan = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!minimapGesture || minimapGesture.pointerId !== event.pointerId) return
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    setMinimapGesture(null)
+  }
+  const minimapKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const delta = {
+      ArrowDown: { x: 0, y: viewport.height / 10 },
+      ArrowLeft: { x: -viewport.width / 10, y: 0 },
+      ArrowRight: { x: viewport.width / 10, y: 0 },
+      ArrowUp: { x: 0, y: -viewport.height / 10 }
+    }[event.key]
+    if (!delta) return
+    event.preventDefault()
+    setViewport((current) => panViewport(infoschematicViewBox, current, delta))
   }
   // The last pointer position, since a key press does not carry one.
   const pointer = useRef<MouseEvent | null>(null)
@@ -1279,6 +1322,7 @@ export function InfoschematicDiagram({
   // Overlay Graphics annotate the working surface rather than being the thing
   // worked on, so design mode draws them behind the diagram while present mode
   // keeps them on top. One layer, two positions, rather than two renderings.
+  const minimapGraphicBounds = graphic ? graphicBounds(graphic, infoschematicViewBox) : null
   const graphicLayer = graphics.map((entry) => {
     const bounds = graphicBounds(entry, infoschematicViewBox)
     const selection = {
@@ -2169,6 +2213,76 @@ export function InfoschematicDiagram({
 
         {editing ? null : graphicLayer}
       </svg>
+      {!fitted && minimap ? (
+        <button
+          aria-label="Diagram minimap — click or drag to move the viewport"
+          className={`infoschematic-minimap ${minimap}${viewportControls === 'overlay' && minimap === 'top-right' ? ' below-controls' : ''}${minimapGesture ? ' dragging' : ''}`}
+          onKeyDown={minimapKeyDown}
+          onPointerCancel={minimapGesture ? stopMinimapPan : undefined}
+          onPointerDown={startMinimapPan}
+          onPointerMove={continueMinimapPan}
+          onPointerUp={minimapGesture ? stopMinimapPan : undefined}
+          title="Diagram minimap — click or drag to move the viewport"
+          type="button"
+        >
+          <svg
+            ref={minimapOverview}
+            aria-hidden="true"
+            focusable="false"
+            preserveAspectRatio="xMidYMid meet"
+            viewBox={`${infoschematicViewBox.x} ${infoschematicViewBox.y} ${infoschematicViewBox.width} ${infoschematicViewBox.height}`}
+          >
+            <rect
+              className="infoschematic-minimap-backdrop"
+              height={infoschematicViewBox.height}
+              width={infoschematicViewBox.width}
+              x={infoschematicViewBox.x}
+              y={infoschematicViewBox.y}
+            />
+            {infoschematicRegions.map((region) => (
+              <rect
+                className="infoschematic-minimap-region"
+                height={region.box.height}
+                key={region.id}
+                rx={region.box.radius ?? cornerRadius}
+                width={region.box.width}
+                x={region.box.x}
+                y={region.box.y}
+              />
+            ))}
+            {flows.map((flow) => (
+              <path className="infoschematic-minimap-flow" d={flow.d} key={flow.id} />
+            ))}
+            {placeables.map((placeable) => (
+              <rect
+                className="infoschematic-minimap-placeable"
+                height={placeable.box.height}
+                key={placeable.id}
+                rx={cornerRadius}
+                width={placeable.box.width}
+                x={placeable.box.x}
+                y={placeable.box.y}
+              />
+            ))}
+            {minimapGraphicBounds ? (
+              <rect
+                className="infoschematic-minimap-graphic"
+                height={minimapGraphicBounds.height}
+                width={minimapGraphicBounds.width}
+                x={minimapGraphicBounds.x}
+                y={minimapGraphicBounds.y}
+              />
+            ) : null}
+            <rect
+              className="infoschematic-minimap-viewport"
+              height={viewport.height}
+              width={viewport.width}
+              x={viewport.x}
+              y={viewport.y}
+            />
+          </svg>
+        </button>
+      ) : null}
       {viewportControls === 'overlay' ? (
         <div aria-label="Diagram zoom controls" className="infoschematic-viewport-controls" role="toolbar">
           <button aria-label="Zoom in" onClick={() => zoomBy(viewportZoomStep)} title="Zoom in (+)" type="button">

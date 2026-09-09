@@ -60,6 +60,100 @@
   opacity: 0.38;
 }
 
+.infoschematic-minimap {
+  appearance: none;
+  background: #071624e6;
+  border: 1px solid #79c9ff88;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px #02091266;
+  cursor: crosshair;
+  display: block;
+  line-height: 0;
+  padding: 4px;
+  pointer-events: auto;
+  position: absolute;
+  touch-action: none;
+  width: clamp(120px, 18%, 190px);
+  z-index: 5;
+}
+
+.infoschematic-minimap.top-left,
+.infoschematic-minimap.top-right {
+  inset-block-start: 12px;
+}
+
+.infoschematic-minimap.bottom-left,
+.infoschematic-minimap.bottom-right {
+  inset-block-end: 12px;
+}
+
+.infoschematic-minimap.bottom-left,
+.infoschematic-minimap.top-left {
+  inset-inline-start: 12px;
+}
+
+.infoschematic-minimap.bottom-right,
+.infoschematic-minimap.top-right {
+  inset-inline-end: 12px;
+}
+
+.infoschematic-minimap.top-right.below-controls {
+  inset-block-start: 54px;
+}
+
+.infoschematic-minimap svg {
+  display: block;
+  pointer-events: none;
+  width: 100%;
+}
+
+.infoschematic-minimap:focus-visible {
+  outline: 2px solid #79c9ff;
+  outline-offset: 3px;
+}
+
+.infoschematic-minimap.dragging {
+  cursor: grabbing;
+}
+
+.infoschematic-minimap-backdrop {
+  fill: #081725;
+}
+
+.infoschematic-minimap-region {
+  fill: #19314999;
+  stroke: #6689a8;
+  vector-effect: non-scaling-stroke;
+}
+
+.infoschematic-minimap-flow {
+  fill: none;
+  stroke: #79c9ff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.infoschematic-minimap-placeable {
+  fill: #21415d;
+  stroke: #a7c9e3;
+  vector-effect: non-scaling-stroke;
+}
+
+.infoschematic-minimap-graphic {
+  fill: #6f4aa055;
+  stroke: #b990e8;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.infoschematic-minimap-viewport {
+  fill: #79c9ff22;
+  pointer-events: none;
+  stroke: #e4f5ff;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
 .infoschematic-svg.zoomed {
   cursor: grab;
   touch-action: none;

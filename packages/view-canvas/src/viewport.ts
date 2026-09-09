@@ -14,6 +14,13 @@ export const panViewport = (bounds: Box, current: Box, delta: Point): Box => ({
   y: clamp(current.y + delta.y, bounds.y, bounds.y + bounds.height - current.height)
 })
 
+/** Centre a zoomed viewport on a point selected from an overview map. */
+export const centerViewportAt = (bounds: Box, current: Box, point: Point): Box =>
+  panViewport(bounds, current, {
+    x: point.x - current.x - current.width / 2,
+    y: point.y - current.y - current.height / 2
+  })
+
 /**
  * Zoom around a diagram coordinate while keeping the viewport inside the
  * authored bounds. Magnification above one zooms in; below one zooms out.

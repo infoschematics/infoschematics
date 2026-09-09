@@ -1,6 +1,13 @@
 import type { Box } from '@infoschematics/view-model/geometry'
 import { describe, expect, it } from 'vitest'
-import { panViewport, sameViewport, viewportMaximumScale, viewportZoomStep, zoomViewport } from './viewport.ts'
+import {
+  centerViewportAt,
+  panViewport,
+  sameViewport,
+  viewportMaximumScale,
+  viewportZoomStep,
+  zoomViewport
+} from './viewport.ts'
 
 const fitted: Box = { x: 0, y: 0, width: 1200, height: 800 }
 
@@ -59,6 +66,18 @@ describe('diagram viewport', () => {
       width: 960,
       height: 640
     })
+  })
+
+  it('centres a zoomed viewport from a minimap selection and clamps it at the edges', () => {
+    const zoomed: Box = { x: 120, y: 80, width: 480, height: 320 }
+
+    expect(centerViewportAt(fitted, zoomed, { x: 900, y: 600 })).toEqual({
+      x: 660,
+      y: 440,
+      width: 480,
+      height: 320
+    })
+    expect(centerViewportAt(fitted, zoomed, { x: 0, y: 0 })).toEqual({ x: 0, y: 0, width: 480, height: 320 })
   })
 
   it('recognises the fitted viewport', () => {
