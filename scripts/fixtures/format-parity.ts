@@ -76,7 +76,7 @@ export const formatParityDefinition: Infoschematic = {
           id: 'ALL',
           label: 'Everything',
           description: 'Everything at once.',
-          focus: { elements: ['SRC', 'SNK', 'LOAD'] }
+          focus: { elements: ['LOAD', 'SNK', 'SRC'] }
         }
       ]
     }

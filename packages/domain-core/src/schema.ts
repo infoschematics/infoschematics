@@ -48,6 +48,10 @@ const boxText = numericText([4], 'four finite numbers: x y width height').transf
 const box = z.union([boxObject, boxText])
 
 const identifiers = z.array(z.string()).readonly()
+const elementIdentifiers = z
+  .array(z.string())
+  .transform((values) => [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)))
+  .readonly()
 
 const jsonValue: z.ZodType<JsonValue> = z.lazy(() =>
   z.union([z.null(), z.boolean(), number, z.string(), z.array(jsonValue).readonly(), z.record(z.string(), jsonValue)])
@@ -219,7 +223,7 @@ const architecturalScope = z
     id: z.string(),
     label: z.string(),
     description: z.string().optional(),
-    elements: identifiers,
+    elements: elementIdentifiers,
     appearance: z.strictObject({ icon: z.string().optional() }).optional(),
     icon: z.string().optional()
   })
@@ -410,7 +414,7 @@ const overlay = z.strictObject({
 })
 
 const selection = z.strictObject({
-  elements: identifiers.optional(),
+  elements: elementIdentifiers.optional(),
   scopes: identifiers.optional()
 })
 

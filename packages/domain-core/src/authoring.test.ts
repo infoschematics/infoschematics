@@ -166,6 +166,30 @@ describe('canonical authored form', () => {
     expect(modelOf(json)).toEqual(model)
   })
 
+  it('normalises elements as sorted sets and serialises them stably', () => {
+    const authored = `${compact.replace('elements: [SRC, SNK]', 'elements: [SRC, ADP, SRC, SNK]')}
+themes:
+  - id: ORDER
+    label: Ordering
+    scenes:
+      - id: ORDER-1
+        label: Ordered focus
+        focus:
+          elements: [SNK, SRC, ADP, SNK]
+`
+    const model = modelOf(authored)
+
+    expect(model.scopes[0]?.elements).toEqual(['ADP', 'SNK', 'SRC'])
+    expect(model.themes[0]?.scenes[0]?.focus?.elements).toEqual(['ADP', 'SNK', 'SRC'])
+
+    const yaml = serialiseInfoschematicYaml(model)
+    const json = serialiseInfoschematicJson(model)
+    expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
+    expect(serialiseInfoschematicJson(modelOf(json))).toBe(json)
+    expect(JSON.parse(json).scopes[0].elements).toEqual(['ADP', 'SNK', 'SRC'])
+    expect(JSON.parse(json).themes[0].scenes[0].focus.elements).toEqual(['ADP', 'SNK', 'SRC'])
+  })
+
   it('keeps bidirectionality in the borrowed arrow notation', () => {
     const bidirectional = compact.replace('SRC E2 -> SNK W2', 'SRC E2 <-> SNK W2')
     expect(modelOf(bidirectional).diagram.flows[0]?.direction).toBe('bidirectional')
