@@ -986,6 +986,18 @@
             "items": {
               "type": "string"
             }
+          },
+          "appearance": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "icon": {
+            "type": "string"
           }
         },
         "required": [

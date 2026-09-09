@@ -178,7 +178,7 @@ describe('establishedInfoschematicOf', () => {
           {
             id: 'delivery',
             label: 'Delivery cards',
-            appearance: { color: '#123456', fill: '#abcdef', icon: 'delivery' }
+            appearance: { color: '#123456', fill: '#abcdef', icon: 'collection-icon' }
           }
         ],
         families: [{ id: 'data', label: 'Data', appearance: { color: '#ff00ff' } }],
@@ -210,7 +210,8 @@ describe('establishedInfoschematicOf', () => {
         {
           id: 'delivery',
           label: 'Delivery architecture',
-          elements: ['SRC', 'SNK']
+          elements: ['SRC', 'SNK'],
+          appearance: { icon: 'scope-icon' }
         }
       ],
       themes: [
@@ -235,6 +236,7 @@ describe('establishedInfoschematicOf', () => {
         color: '#64748b',
         description: '',
         fill: '#f8fafc',
+        icon: 'scope-icon',
         id: 'delivery',
         label: 'Delivery architecture',
         prefix: 'delivery'

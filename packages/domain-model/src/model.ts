@@ -31,6 +31,7 @@ export type ArchitecturalScope = {
   label: string
   description?: string
   elements: readonly string[]
+  appearance?: { icon?: string }
 }
 
 export type Region = {

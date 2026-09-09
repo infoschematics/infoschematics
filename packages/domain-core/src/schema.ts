@@ -1,5 +1,6 @@
 import type { Box, Point as Coordinate } from '@infoschematics/domain-model/geometry'
 import type {
+  ArchitecturalScope,
   CardCollection,
   Point as DiagramPoint,
   Fabric,
@@ -213,12 +214,27 @@ const family = z
     return wrapped || unwrapped ? { ...value, appearance: wrapped ?? unwrapped } : value
   })
 
-const architecturalScope = z.strictObject({
-  id: z.string(),
-  label: z.string(),
-  description: z.string().optional(),
-  elements: identifiers
-})
+const architecturalScope = z
+  .strictObject({
+    id: z.string(),
+    label: z.string(),
+    description: z.string().optional(),
+    elements: identifiers,
+    appearance: z.strictObject({ icon: z.string().optional() }).optional(),
+    icon: z.string().optional()
+  })
+  .superRefine((value, context) => {
+    if (value.appearance !== undefined && value.icon !== undefined) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Use appearance or the unwrapped icon field, not both.'
+      })
+    }
+  })
+  .transform(({ appearance: wrapped, icon, ...value }): ArchitecturalScope => {
+    const appearance = wrapped ?? (icon !== undefined ? { icon } : undefined)
+    return appearance ? { ...value, appearance } : value
+  })
 
 const region = z.strictObject({
   id: z.string(),

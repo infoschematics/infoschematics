@@ -85,6 +85,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
     color: fallbackColor,
     description: scope.description ?? '',
     fill: fallbackFill,
+    icon: scope.appearance?.icon,
     id: scope.id,
     label: scope.label,
     prefix: scope.id

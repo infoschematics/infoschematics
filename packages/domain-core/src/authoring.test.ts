@@ -53,6 +53,7 @@ scopes:
   - id: DELIVERY
     label: Delivery architecture
     elements: [SRC, SNK]
+    appearance: { icon: delivery }
 `
 
 const compact = `
@@ -97,6 +98,7 @@ scopes:
   - id: DELIVERY
     label: Delivery architecture
     elements: [SRC, SNK]
+    icon: delivery
 `
 
 const modelOf = (document: string) => {
@@ -137,6 +139,7 @@ describe('canonical authored form', () => {
       target: { element: 'SNK', port: 'W2' }
     })
     expect(compactModel.diagram.calloutPositions).toEqual(defaultCalloutPositions)
+    expect(compactModel.scopes[0]?.appearance).toEqual({ icon: 'delivery' })
   })
 
   it('emits compact semantic order and is idempotent in YAML and JSON', () => {
@@ -155,6 +158,7 @@ describe('canonical authored form', () => {
     expect(yaml).not.toContain('provides: []')
     expect(yaml).not.toContain('calloutPositions:')
     expect(yaml).not.toContain('appearance: { line:')
+    expect(yaml).toContain('icon: delivery')
 
     expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
     expect(serialiseInfoschematicJson(modelOf(json))).toBe(json)

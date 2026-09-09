@@ -173,7 +173,10 @@ const compactMapping = (input: Readonly<Mapping>, context: string): Mapping => {
     delete value.calloutPositions
   }
 
-  if (['collections', 'families', 'fabrics', 'points', 'flows'].includes(context) && isMapping(value.appearance)) {
+  if (
+    ['collections', 'families', 'fabrics', 'points', 'flows', 'scopes'].includes(context) &&
+    isMapping(value.appearance)
+  ) {
     const appearanceEntries = Object.entries(value.appearance).filter(([, entry]) => entry !== undefined)
     const [single] = appearanceEntries
     if (
