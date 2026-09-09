@@ -294,6 +294,7 @@ export function DetailsPanel({
   onAddWaypoint,
   onCreateCard,
   onResetRoute,
+  onSpecificationHover,
   presentation
 }: {
   /** Supplied by the app, which is the only place that can issue a code and find room for a card. */
@@ -306,6 +307,7 @@ export function DetailsPanel({
   /** Both need the Infoschematic: where there is room on a route, and where its ports are. */
   onAddWaypoint: () => void
   onResetRoute: () => void
+  onSpecificationHover: (id: string | null) => void
   editor: DetailsPanelEditor & {
     canRedo: boolean
     canUndo: boolean
@@ -843,7 +845,11 @@ export function DetailsPanel({
                         aria-pressed={selectedContract?.id === entry.id}
                         disabled={unrouted}
                         key={entry.id}
+                        onBlur={() => onSpecificationHover(null)}
                         onClick={() => setSelectedContract((current) => (current?.id === entry.id ? null : entry))}
+                        onFocus={() => onSpecificationHover(entry.id)}
+                        onPointerEnter={() => onSpecificationHover(entry.id)}
+                        onPointerLeave={() => onSpecificationHover(null)}
                         title={unrouted ? 'Nothing on the diagram reaches this specification yet.' : entry.description}
                         type="button"
                       >

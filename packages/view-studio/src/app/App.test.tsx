@@ -12,7 +12,7 @@ import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { App, designArrowPoint } from './App.tsx'
+import { App, designArrowPoint, specificationDiagramHighlight } from './App.tsx'
 import { SceneCallout } from './panels/SceneCallout.tsx'
 
 describe('App', () => {
@@ -46,6 +46,18 @@ describe('App', () => {
     ).toBeUndefined()
   })
 
+  it('highlights conforming Flows and keeps their endpoints as context', () => {
+    const highlight = specificationDiagramHighlight('SPEC-A', [
+      { conformsTo: ['SPEC-A'], id: 'flow-a', source: 'source', target: 'middle' },
+      { conformsTo: ['SPEC-B', 'SPEC-A'], id: 'flow-b', source: 'middle', target: 'sink' },
+      { conformsTo: ['SPEC-B'], id: 'flow-c', source: 'other', target: 'sink' }
+    ])
+
+    expect(highlight?.flows).toEqual(new Set(['flow-a', 'flow-b']))
+    expect(highlight?.endpoints).toEqual(new Set(['source', 'middle', 'sink']))
+    expect(specificationDiagramHighlight('SPEC-C', [])).toBeUndefined()
+  })
+
   it('wires all-six typed Design preview without replacing legacy handle callbacks', async () => {
     const source = await readFile(new URL('./App.tsx', import.meta.url), 'utf8')
 
@@ -67,6 +79,8 @@ describe('App', () => {
     expect(source).toContain('presentation.visibleScopes')
     expect(source).toContain('viewportControllerRef={diagramViewport}')
     expect(source).toContain('viewportControls="external"')
+    expect(source).toContain('highlight={diagramHighlight}')
+    expect(source).toContain('onSpecificationHover={setHoveredSpecification}')
     expect(source).toContain('presentation.overlays && runningStoryScene')
     expect(source).toContain('takeaways={runningStoryScene.takeaways}')
     expect(source).not.toContain('presentation.takeaways ?')

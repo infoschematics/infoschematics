@@ -72,6 +72,19 @@ function linesMeeting(
   return flows.filter((flow) => flow.source === card.id || flow.target === card.id).map((flow) => flow.code)
 }
 
+export function specificationDiagramHighlight(
+  specificationId: string | null,
+  flows: readonly { conformsTo?: readonly string[]; id: string; source: string; target: string }[]
+) {
+  if (!specificationId) return undefined
+  const conforming = flows.filter((flow) => flow.conformsTo?.includes(specificationId))
+  if (conforming.length === 0) return undefined
+  return {
+    endpoints: new Set(conforming.flatMap((flow) => [flow.source, flow.target])),
+    flows: new Set(conforming.map((flow) => flow.id))
+  }
+}
+
 /**
  * Where a port sits in the model, before any edit in hand.
  *
@@ -169,6 +182,7 @@ function AppContent() {
   const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
   const [shortcuts, setShortcuts] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
+  const [hoveredSpecification, setHoveredSpecification] = useState<string | null>(null)
   const [diagramWidth, setDiagramWidth] = useState<number | null>(null)
   const [panelWidth, setPanelWidth] = usePersistentState<number | null>(storage && `${storage}.panels.width`, null)
   const infoschematicPanel = useRef<HTMLDivElement>(null)
@@ -290,6 +304,10 @@ function AppContent() {
     // transient facades over stable React setters.
   }, [directTargetKey, presentation.mode])
   const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
+  const diagramHighlight = useMemo(
+    () => specificationDiagramHighlight(hoveredSpecification, visibleFlows) ?? highlight,
+    [highlight, hoveredSpecification, visibleFlows]
+  )
   const storyCallout = playing
     ? runtime.config.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
     : undefined
@@ -724,7 +742,7 @@ function AppContent() {
                 artefactOperations={editor.artefactOperations}
                 componentOffsets={movedComponents}
                 removals={editor.removals}
-                highlight={highlight}
+                highlight={diagramHighlight}
                 guides={editor.guides}
                 labelAlong={editor.labelPositions}
                 onAddWaypoint={editor.editing ? editor.addWaypoint : undefined}
@@ -877,6 +895,7 @@ function AppContent() {
             }}
             onAddWaypoint={addWaypoint}
             onCreateCard={createCard}
+            onSpecificationHover={setHoveredSpecification}
             onResetRoute={resetRoute}
             presentation={presentation}
           />
