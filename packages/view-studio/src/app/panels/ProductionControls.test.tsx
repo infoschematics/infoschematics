@@ -88,18 +88,18 @@ const presentation = (mode: 'present' | 'design' | 'direct') =>
     hasVisibleScopes: true,
     lightNothing: vi.fn(),
     mode,
+    overlays: true,
     playing: null,
     setMode: vi.fn(),
     showAllFamilies: vi.fn(),
     showAllScopes: vi.fn(),
     startStory: vi.fn(),
     stopStory: vi.fn(),
-    takeaways: true,
     thematicScene: null,
     toggleAnnotated: vi.fn(),
     toggleFamily: vi.fn(),
+    toggleOverlays: vi.fn(),
     toggleScope: vi.fn(),
-    toggleTakeaways: vi.fn(),
     toggleThematicScene: vi.fn(),
     visibleFamilies: new Set<string>(),
     visibleScopes: new Set(['scope-one'])
@@ -116,8 +116,11 @@ describe('production controls', () => {
         <TitleBar
           collapsed={false}
           fullscreen={false}
+          onFitDiagram={vi.fn()}
           onToggleCollapsed={vi.fn()}
           onToggleFullscreen={vi.fn()}
+          onZoomIn={vi.fn()}
+          onZoomOut={vi.fn()}
           presentation={presentation('present')}
         />
       )
@@ -127,22 +130,34 @@ describe('production controls', () => {
         <TitleBar
           collapsed={false}
           fullscreen={false}
+          onFitDiagram={vi.fn()}
           onToggleCollapsed={vi.fn()}
           onToggleFullscreen={vi.fn()}
+          onZoomIn={vi.fn()}
+          onZoomOut={vi.fn()}
           presentation={presentation('direct')}
         />
       )
     )
 
     expect(present).toContain('aria-label="Production mode"')
+    expect(present).toContain('aria-label="Diagram zoom"')
+    expect(present).toContain('aria-label="Reset zoom to fit"')
     expect(present).toContain('aria-label="Present mode" aria-pressed="true"')
     expect(present).toContain('aria-label="Design mode" aria-pressed="false"')
     expect(present).toContain('aria-label="Direct mode" aria-pressed="false"')
-    expect(present).toContain('aria-label="Annotate"')
-    expect(present).toContain('aria-label="Key takeaways"')
+    expect(present).toContain('aria-label="Show tags"')
+    expect(present).toContain('aria-label="Show overlays"')
+    expect(present).toContain('aria-label="Window and panels"')
+    expect(present.indexOf('aria-label="Diagram zoom"')).toBeLessThan(present.indexOf('aria-label="Display"'))
+    expect(present.indexOf('aria-label="Display"')).toBeLessThan(present.indexOf('aria-label="Production mode"'))
+    expect(present.indexOf('aria-label="Production mode"')).toBeLessThan(
+      present.indexOf('aria-label="Window and panels"')
+    )
+    expect(present.match(/class="tool-divider"/g)).toHaveLength(3)
     expect(direct).toContain('aria-label="Direct mode" aria-pressed="true"')
-    expect(direct).not.toContain('aria-label="Annotate"')
-    expect(direct).not.toContain('aria-label="Key takeaways"')
+    expect(direct).not.toContain('aria-label="Show tags"')
+    expect(direct).not.toContain('aria-label="Show overlays"')
   })
 
   it('removes Present controls in Producer modes', () => {

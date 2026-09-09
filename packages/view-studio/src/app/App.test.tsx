@@ -65,6 +65,11 @@ describe('App', () => {
     expect(source).toContain("presentation.mode === 'design'")
     expect(source).toContain('presentation.visibleFlows')
     expect(source).toContain('presentation.visibleScopes')
+    expect(source).toContain('viewportControllerRef={diagramViewport}')
+    expect(source).toContain('viewportControls="external"')
+    expect(source).toContain('presentation.overlays && runningStoryScene')
+    expect(source).toContain('takeaways={runningStoryScene.takeaways}')
+    expect(source).not.toContain('presentation.takeaways ?')
   })
 
   it('renders a title-only configuration as a safe blank canvas', () => {

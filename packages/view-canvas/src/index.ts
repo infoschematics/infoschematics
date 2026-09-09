@@ -15,7 +15,11 @@ export type {
 } from '@infoschematics/view-model/runtime'
 export type { FlowSignal } from '@infoschematics/view-model/signals'
 export { Canvas, type CanvasProps } from './Canvas.tsx'
-export { type CanvasMode, InfoschematicDiagram } from './InfoschematicDiagram.tsx'
+export {
+  type CanvasMode,
+  type DiagramViewportController,
+  InfoschematicDiagram
+} from './InfoschematicDiagram.tsx'
 export type {
   CalloutRendererDefinition,
   CalloutRendererProps,

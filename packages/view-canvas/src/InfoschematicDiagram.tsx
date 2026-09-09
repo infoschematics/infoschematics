@@ -18,8 +18,13 @@ import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { type Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
+export type DiagramViewportController = Readonly<{
+  fit: () => void
+  zoomIn: () => void
+  zoomOut: () => void
+}>
 
 import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
 import { flowSignalKey } from './flow-signals.ts'
@@ -157,7 +162,9 @@ export function InfoschematicDiagram({
   cardDetails,
   grid,
   graphic,
-  visibleScopes
+  visibleScopes,
+  viewportControllerRef,
+  viewportControls = 'overlay'
 }: {
   /** Authored Design operations previewed without changing the host configuration. */
   artefactOperations?: readonly ArtefactDraftOperation[]
@@ -229,6 +236,10 @@ export function InfoschematicDiagram({
   /** A resolved Graphic drawn by the active Story Scene. */
   graphic?: GraphicConfig
   visibleScopes: ReadonlySet<string>
+  /** Allows a host toolbar to operate this otherwise self-contained viewport. */
+  viewportControllerRef?: Ref<DiagramViewportController>
+  /** Studio supplies its own toolbar; ordinary Canvas hosts retain the overlay controls. */
+  viewportControls?: 'external' | 'overlay'
 }) {
   const hostRuntime = useInfoschematic()
   const previewing = artefactOperations.length > 0
@@ -435,6 +446,16 @@ export function InfoschematicDiagram({
     },
     [infoschematicViewBox]
   )
+  const fitViewport = useCallback(() => setViewport(infoschematicViewBox), [infoschematicViewBox])
+  useImperativeHandle(
+    viewportControllerRef,
+    () => ({
+      fit: fitViewport,
+      zoomIn: () => zoomBy(viewportZoomStep),
+      zoomOut: () => zoomBy(1 / viewportZoomStep)
+    }),
+    [fitViewport, zoomBy]
+  )
   const zoomAnchor = useCallback((): Point | undefined => {
     const svg = infoschematic.current
     const at = zoomPointer.current
@@ -449,7 +470,7 @@ export function InfoschematicDiagram({
 
       if (event.key === '0') {
         event.preventDefault()
-        setViewport(infoschematicViewBox)
+        fitViewport()
       } else if (event.key === '+') {
         event.preventDefault()
         zoomBy(viewportZoomStep, zoomAnchor())
@@ -460,7 +481,7 @@ export function InfoschematicDiagram({
     }
     window.addEventListener('keydown', keyDown)
     return () => window.removeEventListener('keydown', keyDown)
-  }, [infoschematicViewBox, zoomAnchor, zoomBy])
+  }, [fitViewport, zoomAnchor, zoomBy])
 
   const rememberZoomPointer = (event: React.PointerEvent<SVGSVGElement>) => {
     zoomPointer.current = { clientX: event.clientX, clientY: event.clientY }
@@ -2142,29 +2163,31 @@ export function InfoschematicDiagram({
 
         {editing ? null : graphicLayer}
       </svg>
-      <div aria-label="Diagram zoom controls" className="infoschematic-viewport-controls" role="toolbar">
-        <button aria-label="Zoom in" onClick={() => zoomBy(viewportZoomStep)} title="Zoom in (+)" type="button">
-          +
-        </button>
-        <button
-          aria-label="Zoom out"
-          disabled={fitted}
-          onClick={() => zoomBy(1 / viewportZoomStep)}
-          title="Zoom out (−)"
-          type="button"
-        >
-          −
-        </button>
-        <button
-          aria-label="Fit diagram to width"
-          disabled={fitted}
-          onClick={() => setViewport(infoschematicViewBox)}
-          title="Fit diagram to width (0)"
-          type="button"
-        >
-          0
-        </button>
-      </div>
+      {viewportControls === 'overlay' ? (
+        <div aria-label="Diagram zoom controls" className="infoschematic-viewport-controls" role="toolbar">
+          <button aria-label="Zoom in" onClick={() => zoomBy(viewportZoomStep)} title="Zoom in (+)" type="button">
+            +
+          </button>
+          <button
+            aria-label="Zoom out"
+            disabled={fitted}
+            onClick={() => zoomBy(1 / viewportZoomStep)}
+            title="Zoom out (−)"
+            type="button"
+          >
+            −
+          </button>
+          <button
+            aria-label="Fit diagram to width"
+            disabled={fitted}
+            onClick={fitViewport}
+            title="Fit diagram to width (0)"
+            type="button"
+          >
+            0
+          </button>
+        </div>
+      ) : null}
     </>
   )
 }

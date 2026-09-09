@@ -1,4 +1,5 @@
 import {
+  type DiagramViewportController,
   defineInfoschematicRenderers,
   InfoschematicContext,
   InfoschematicDiagram,
@@ -172,6 +173,7 @@ function AppContent() {
   const [panelWidth, setPanelWidth] = usePersistentState<number | null>(storage && `${storage}.panels.width`, null)
   const infoschematicPanel = useRef<HTMLDivElement>(null)
   const infoschematicControls = useRef<HTMLDivElement>(null)
+  const diagramViewport = useRef<DiagramViewportController>(null)
   const controlRoom = useRef<HTMLElement>(null)
   const [_connected, _setConnected] = useState(false)
 
@@ -688,8 +690,11 @@ function AppContent() {
       <TitleBar
         collapsed={collapsed}
         fullscreen={fullscreen}
+        onFitDiagram={() => diagramViewport.current?.fit()}
         onToggleCollapsed={() => setCollapsed((current) => !current)}
         onToggleFullscreen={toggleFullscreen}
+        onZoomIn={() => diagramViewport.current?.zoomIn()}
+        onZoomOut={() => diagramViewport.current?.zoomOut()}
         presentation={presentation}
       />
 
@@ -784,6 +789,8 @@ function AppContent() {
                 grid={editor.view.grid}
                 graphic={runningStoryScene?.graphic}
                 visibleScopes={visibleScopes}
+                viewportControllerRef={diagramViewport}
+                viewportControls="external"
               />
               {proposed ? (
                 <FamilyChoice
@@ -799,7 +806,7 @@ function AppContent() {
                   }}
                 />
               ) : null}
-              {runningStoryScene ? (
+              {presentation.overlays && runningStoryScene ? (
                 <SceneCallout
                   autoAdvance={presentation.autoAdvance}
                   body={runningStoryScene.caption}
@@ -811,10 +818,10 @@ function AppContent() {
                   step={runningStoryScene}
                   stepNumber={(playing?.step ?? 0) + 1}
                   stepTotal={runningStory?.steps.length ?? 0}
-                  takeaways={presentation.takeaways ? runningStoryScene.takeaways : undefined}
+                  takeaways={runningStoryScene.takeaways}
                   title={runningStoryScene.title}
                 />
-              ) : presentation.thematicScene ? (
+              ) : presentation.overlays && presentation.thematicScene ? (
                 /* The same card for a Thematic Scene, without the timer: its content is
                  read at the reader's pace, so it steps by hand and never on
                  its own. */
@@ -830,7 +837,7 @@ function AppContent() {
                   step={presentation.thematicScene}
                   stepNumber={thematicScenes.findIndex((entry) => entry.id === presentation.thematicScene?.id) + 1}
                   stepTotal={thematicScenes.length}
-                  takeaways={presentation.takeaways ? presentation.thematicScene.takeaways : undefined}
+                  takeaways={presentation.thematicScene.takeaways}
                   wide={presentation.thematicScene.cover}
                   title={presentation.thematicScene.headline}
                 />

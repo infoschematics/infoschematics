@@ -38,28 +38,19 @@ export function usePresentation() {
     true
   )
   const [storedAnnotated, setStoredAnnotated] = usePersistentState(storage && `${storage}.annotated`, false)
-  const [storedTakeaways, setStoredTakeaways] = usePersistentState(storage && `${storage}.takeaways`, true)
+  const [overlays, setOverlays] = usePersistentState(storage && `${storage}.overlays`, true)
   const [production, setProduction] = useState(() =>
     createProductionState({
       ...createPresentationState(runtime),
       annotated: storedAnnotated,
-      autoAdvance: storedAutoAdvance,
-      takeaways: storedTakeaways
+      autoAdvance: storedAutoAdvance
     })
   )
 
   useEffect(() => {
     setStoredAnnotated(production.presentation.annotated)
     setStoredAutoAdvance(production.presentation.autoAdvance)
-    setStoredTakeaways(production.presentation.takeaways)
-  }, [
-    production.presentation.annotated,
-    production.presentation.autoAdvance,
-    production.presentation.takeaways,
-    setStoredAnnotated,
-    setStoredAutoAdvance,
-    setStoredTakeaways
-  ])
+  }, [production.presentation.annotated, production.presentation.autoAdvance, setStoredAnnotated, setStoredAutoAdvance])
 
   const derived = useMemo(
     () => derivePresentation(runtime, production.presentation),
@@ -132,6 +123,7 @@ export function usePresentation() {
     highlight: derived.highlight,
     lightNothing: () => dispatchPresentation({ type: 'clear-focus' }),
     mode: production.mode,
+    overlays,
     playing: production.presentation.playing,
     reconcileDirectTargets: (availableTargets: readonly DirectTarget[]) =>
       dispatch({ availableTargets, type: 'reconcile-direct-target' }),
@@ -168,7 +160,6 @@ export function usePresentation() {
         type: 'step-theme'
       }),
     stopStory: () => dispatchPresentation({ type: 'stop-story' }),
-    takeaways: production.presentation.takeaways,
     thematicScene: derived.thematicScene,
     toggleAnnotated: () =>
       dispatchPresentation({
@@ -181,14 +172,10 @@ export function usePresentation() {
         value: !production.presentation.autoAdvance
       }),
     toggleFamily: (id: string) => dispatchPresentation({ id, type: 'toggle-family' }),
+    toggleOverlays: () => setOverlays((visible) => !visible),
     toggleScope: (id: string) => dispatchPresentation({ id, type: 'toggle-scope' }),
     toggleStandaloneScene: (scene: RuntimeStandaloneScene) =>
       dispatchPresentation({ scene, type: 'toggle-standalone-scene' }),
-    toggleTakeaways: () =>
-      dispatchPresentation({
-        type: 'set-takeaways',
-        value: !production.presentation.takeaways
-      }),
     toggleThematicScene: (scene: RuntimeThemeScene) => dispatchPresentation({ scene, type: 'toggle-theme-scene' }),
     visibleCards,
     visibleFabrics,
