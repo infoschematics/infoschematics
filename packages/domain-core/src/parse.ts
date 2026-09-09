@@ -1,45 +1,36 @@
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
-import { parse as parseYaml } from 'yaml'
-import { defineInfoschematic } from './define.ts'
-import { infoschematicConfigSchema } from './schema.ts'
-import { parseTypescriptDocument } from './typescript-document.ts'
+import type { DefinedInfoschematic } from '@infoschematics/domain-model/model'
+import { parseDocument } from 'yaml'
+import { defineInfoschematicModel } from './model.ts'
+import { infoschematicSchema } from './schema.ts'
 
-/** Serialised document formats an Infoschematic can be authored in. */
-export type InfoschematicFormat = 'json' | 'typescript' | 'yaml'
-
-/** One reason a document was rejected, addressed to whoever has to fix the document. */
+/** One reason a document was rejected, addressed to whoever can fix it. */
 export type InfoschematicIssue = Readonly<{
   /** Pathname of the offending document, when the caller supplied one. */
   document?: string
   message: string
-  /** Dotted path to the offending value, empty for the document itself. */
+  /** Dotted path to the offending value, or empty for the document itself. */
   path: string
 }>
 
 export type InfoschematicParseResult =
-  | Readonly<{ config: InfoschematicConfig; ok: true }>
+  | Readonly<{ model: DefinedInfoschematic; ok: true }>
   | Readonly<{ issues: readonly InfoschematicIssue[]; ok: false }>
 
 export type ParseInfoschematicOptions = Readonly<{
-  /** Explicit format. Inferred from `pathname` when omitted. */
-  format?: InfoschematicFormat
-  /** Pathname the text came from, used to infer the format and to address diagnostics. */
+  /** Pathname the text came from, used only to address diagnostics. */
   pathname?: string
 }>
 
-const extensions: Readonly<Record<string, InfoschematicFormat>> = {
-  '.json': 'json',
-  '.ts': 'typescript',
-  '.yaml': 'yaml',
-  '.yml': 'yaml'
-}
+const extensions = ['.yaml', '.yml', '.json'] as const
 
-/** The format a pathname declares by its extension, or `undefined` when it declares none this loader supports. */
-export const infoschematicFormatOf = (pathname: string): InfoschematicFormat | undefined =>
-  extensions[(/\.[^./\\]+$/.exec(pathname)?.[0] ?? '').toLowerCase()]
+/** Whether a pathname declares a YAML-based Infoschematic document. */
+export const infoschematicFormatOf = (pathname: string): 'yaml' | undefined =>
+  extensions.includes((/\.[^./\\]+$/.exec(pathname)?.[0] ?? '').toLowerCase() as (typeof extensions)[number])
+    ? 'yaml'
+    : undefined
 
-/** Every supported extension, in the order a usage message should list them. */
-export const infoschematicFormatExtensions: readonly string[] = Object.keys(extensions)
+/** Supported document extensions, ordered by the preferred authored form. */
+export const infoschematicFormatExtensions: readonly string[] = extensions
 
 const failure = (
   document: string | undefined,
@@ -49,8 +40,7 @@ const failure = (
   ok: false
 })
 
-// `$schema` is how a JSON document points an editor at its schema. It is editor metadata rather than part of the
-// contract, so the loader drops it instead of the strict schema rejecting it as an unknown key.
+// `$schema` is editor metadata rather than part of the domain contract.
 const withoutEditorMetadata = (document: unknown): unknown => {
   if (typeof document !== 'object' || document === null || Array.isArray(document)) return document
   if (!('$schema' in document)) return document
@@ -58,55 +48,82 @@ const withoutEditorMetadata = (document: unknown): unknown => {
   return rest
 }
 
-/** Render one issue as a single line addressed to whoever has to fix the document. */
+const jsonValueIssue = (
+  value: unknown,
+  path = '',
+  ancestors: ReadonlySet<object> = new Set()
+): Readonly<{ message: string; path: string }> | undefined => {
+  if (value === null || typeof value === 'string' || typeof value === 'boolean') return undefined
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? undefined : { message: 'Expected a finite JSON number.', path }
+  }
+  if (typeof value !== 'object') return { message: `Expected a JSON value, received ${typeof value}.`, path }
+  if (ancestors.has(value)) return { message: 'Cyclic YAML aliases are not supported.', path }
+
+  const prototype = Object.getPrototypeOf(value)
+  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+    return { message: `Expected a plain JSON object, received ${prototype?.constructor?.name ?? 'object'}.`, path }
+  }
+
+  const nestedAncestors = new Set(ancestors).add(value)
+  const entries: readonly [string, unknown][] = Array.isArray(value)
+    ? value.map((entry, index) => [String(index), entry])
+    : Object.entries(value)
+
+  for (const [key, entry] of entries) {
+    const issue = jsonValueIssue(entry, path ? `${path}.${key}` : key, nestedAncestors)
+    if (issue) return issue
+  }
+  return undefined
+}
+
+/** Render one issue as a printable line. */
 export const formatInfoschematicIssue = ({ document, message, path }: InfoschematicIssue): string =>
   `${document ? `${document}:` : ''}${path || '<document>'} ${message}`
 
-/**
- * Turn an authored TypeScript, JSON, or YAML document into a normalised Infoschematic. TypeScript documents are read
- * in the strict subset `parseTypescriptDocument` defines - matched as data, never executed.
- *
- * The result is discriminated rather than thrown, because the caller at a file boundary almost always wants to print a
- * diagnostic. Syntax errors, contract violations, and the normaliser's own referential checks all arrive in that one
- * shape, so a caller has a single thing to report.
- */
+/** Parse inert YAML 1.2 data, including JSON syntax, and normalise it into the canonical TypeScript model. */
 export function parseInfoschematic(text: string, options: ParseInfoschematicOptions = {}): InfoschematicParseResult {
   const { pathname } = options
-  const format = options.format ?? (pathname ? infoschematicFormatOf(pathname) : undefined)
-  if (!format) {
-    const supported = infoschematicFormatExtensions.join(', ')
-    const cause = pathname ? `${pathname} has no supported extension` : 'no format or pathname was given'
-    return failure(pathname, [{ message: `Cannot choose a parser: ${cause}. Supported: ${supported}.`, path: '' }])
-  }
 
-  let document: unknown
-  if (format === 'typescript') {
-    const parsed = parseTypescriptDocument(text)
-    if (!parsed.ok) return failure(pathname, parsed.issues)
-    document = parsed.value
-  } else {
-    try {
-      document = format === 'json' ? JSON.parse(text) : parseYaml(text)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error)
-      return failure(pathname, [{ message: `Malformed ${format.toUpperCase()}: ${message}`, path: '' }])
-    }
-  }
-
-  const validated = infoschematicConfigSchema.safeParse(withoutEditorMetadata(document))
-  if (!validated.success) {
-    return failure(
-      pathname,
-      validated.error.issues.map((issue) => ({ message: issue.message, path: issue.path.join('.') }))
-    )
-  }
-
-  // `defineInfoschematic` still owns the referential checks a shape schema cannot express, such as a Card naming a
-  // Domain that was never declared. Those become issues too, so one malformed document reports one way.
   try {
-    return { config: defineInfoschematic(validated.data), ok: true }
+    const document = parseDocument(text, {
+      intAsBigInt: false,
+      merge: false,
+      resolveKnownTags: false,
+      schema: 'core',
+      strict: true,
+      stringKeys: true,
+      uniqueKeys: true,
+      version: '1.2'
+    })
+    const diagnostics = [...document.errors, ...document.warnings]
+    if (diagnostics.length > 0) {
+      return failure(
+        pathname,
+        diagnostics.map(({ message }) => ({ message: `Malformed YAML: ${message}`, path: '' }))
+      )
+    }
+
+    const authored: unknown = document.toJS({ mapAsMap: false, maxAliasCount: 100 })
+    const jsonIssue = jsonValueIssue(authored)
+    if (jsonIssue) return failure(pathname, [jsonIssue])
+
+    const validated = infoschematicSchema.safeParse(withoutEditorMetadata(authored))
+    if (!validated.success) {
+      return failure(
+        pathname,
+        validated.error.issues.map((issue) => ({ message: issue.message, path: issue.path.join('.') }))
+      )
+    }
+
+    try {
+      return { model: defineInfoschematicModel(validated.data), ok: true }
+    } catch (error) {
+      return failure(pathname, [{ message: error instanceof Error ? error.message : String(error), path: 'diagram' }])
+    }
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    return failure(pathname, [{ message, path: 'infoschematic' }])
+    return failure(pathname, [
+      { message: `Malformed YAML: ${error instanceof Error ? error.message : String(error)}`, path: '' }
+    ])
   }
 }

@@ -15,7 +15,6 @@ export {
 export { defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
-  type InfoschematicFormat,
   type InfoschematicIssue,
   type InfoschematicParseResult,
   infoschematicFormatExtensions,
@@ -24,11 +23,7 @@ export {
   parseInfoschematic
 } from './parse.ts'
 export {
-  infoschematicConfigSchema,
+  infoschematicSchema,
   type SchemaMirrorsContract
 } from './schema.ts'
-export {
-  parseTypescriptDocument,
-  type TypescriptDocumentIssue,
-  type TypescriptDocumentResult
-} from './typescript-document.ts'
+export { serialiseInfoschematicJson, serialiseInfoschematicYaml } from './serialise.ts'

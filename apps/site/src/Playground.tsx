@@ -1,57 +1,38 @@
 import {
   formatInfoschematicIssue,
-  type InfoschematicFormat,
   type InfoschematicParseResult,
-  parseInfoschematic
+  parseInfoschematic,
+  serialiseInfoschematicYaml
 } from '@infoschematics/domain-core'
 import { blankInfoschematic } from '@infoschematics/is-blank'
 import { infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { establishedInfoschematicOf } from '@infoschematics/view-studio/compatibility'
 import { useEffect, useMemo, useState } from 'react'
-import jsonSeed from './playground/seeds/format-parity.json?raw'
-import typescriptSeed from './playground/seeds/format-parity.ts.txt?raw'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
-const formats: readonly { format: InfoschematicFormat; label: string }[] = [
-  { format: 'yaml', label: 'YAML' },
-  { format: 'json', label: 'JSON' },
-  { format: 'typescript', label: 'TypeScript' }
-]
-
 export type PlaygroundPreset = 'blank' | 'format-parity' | 'infoschematics' | 'system'
 
-const serialise = (config: Parameters<typeof establishedInfoschematicOf>[0]) =>
-  `${JSON.stringify(establishedInfoschematicOf(config), null, 2)}\n`
-
-/**
- * A preset fills one or more buffers and focuses one tab. The format-parity seed is authored in all three forms; an
- * example's normalised config serialises to a JSON document, so the hosted examples become definitions to play with
- * while their own pages stay curated views.
- */
+/** A preset replaces the YAML document while its own page remains a curated view. */
 export const presets: readonly {
   key: PlaygroundPreset
   label: string
-  buffers: Partial<Record<InfoschematicFormat, string>>
-  focus: InfoschematicFormat
+  document: string
 }[] = [
   {
     key: 'format-parity',
-    label: 'Format parity seed',
-    buffers: { json: jsonSeed, typescript: typescriptSeed, yaml: yamlSeed },
-    focus: 'yaml'
+    label: 'Source to sink',
+    document: yamlSeed
   },
   {
     key: 'infoschematics',
     label: 'Infoschematics',
-    buffers: { json: serialise(infoschematicsExample) },
-    focus: 'json'
+    document: serialiseInfoschematicYaml(infoschematicsExample)
   },
-  { key: 'system', label: 'A system, explained', buffers: { json: serialise(systemExample) }, focus: 'json' },
-  { key: 'blank', label: 'Blank Infoschematic', buffers: { json: serialise(blankInfoschematic) }, focus: 'json' }
+  { key: 'system', label: 'A system, explained', document: serialiseInfoschematicYaml(systemExample) },
+  { key: 'blank', label: 'Blank Infoschematic', document: serialiseInfoschematicYaml(blankInfoschematic) }
 ]
 
 /** The preset a `?preset=` query names, or `undefined` for anything it does not. */
@@ -62,13 +43,13 @@ export const presetFromSearch = (search: string): PlaygroundPreset | undefined =
 
 const parseDelay = 250
 
-function usePlaygroundParse(text: string, format: InfoschematicFormat): InfoschematicParseResult {
-  const [parsed, setParsed] = useState<InfoschematicParseResult>(() => parseInfoschematic(text, { format }))
+function usePlaygroundParse(text: string): InfoschematicParseResult {
+  const [parsed, setParsed] = useState<InfoschematicParseResult>(() => parseInfoschematic(text))
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setParsed(parseInfoschematic(text, { format })), parseDelay)
+    const timer = window.setTimeout(() => setParsed(parseInfoschematic(text)), parseDelay)
     return () => window.clearTimeout(timer)
-  }, [text, format])
+  }, [text])
 
   return parsed
 }
@@ -76,7 +57,7 @@ function usePlaygroundParse(text: string, format: InfoschematicFormat): Infosche
 /** Exported for the component test; the page is its only production consumer. */
 export function Preview({ parsed }: { parsed: InfoschematicParseResult }) {
   const [lastGood, setLastGood] = useState<string | undefined>(undefined)
-  const svg = useMemo(() => (parsed.ok ? renderInfoschematicSvg(parsed.config) : undefined), [parsed])
+  const svg = useMemo(() => (parsed.ok ? renderInfoschematicSvg(parsed.model) : undefined), [parsed])
 
   useEffect(() => {
     if (svg) setLastGood(svg)
@@ -113,28 +94,15 @@ export function Issues({ parsed }: { parsed: InfoschematicParseResult }) {
 const initialPreset = (): PlaygroundPreset =>
   (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'format-parity'
 
-const seedBuffers = (preset: PlaygroundPreset): Record<InfoschematicFormat, string> => ({
-  json: jsonSeed,
-  typescript: typescriptSeed,
-  yaml: yamlSeed,
-  ...presets.find(({ key }) => key === preset)?.buffers
-})
-
-/**
- * Three independent buffers, one per document format, each validated and rendered live through `parseInfoschematic` -
- * the same loader the CLI uses. The TypeScript tab reads the strict document subset as data; nothing is executed.
- */
+/** One inert YAML document, validated and rendered live through the same loader the CLI uses. */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {
-  const [active, setActive] = useState<InfoschematicFormat>(presets.find(({ key }) => key === preset)?.focus ?? 'yaml')
-  const [buffers, setBuffers] = useState<Record<InfoschematicFormat, string>>(() => seedBuffers(preset))
-  const text = buffers[active]
-  const parsed = usePlaygroundParse(text, active)
+  const [text, setText] = useState(() => presets.find(({ key }) => key === preset)?.document ?? yamlSeed)
+  const parsed = usePlaygroundParse(text)
 
   const loadPreset = (key: PlaygroundPreset) => {
     const wanted = presets.find((entry) => entry.key === key)
     if (!wanted) return
-    setBuffers((previous) => ({ ...previous, ...wanted.buffers }))
-    setActive(wanted.focus)
+    setText(wanted.document)
   }
 
   return (
@@ -143,19 +111,7 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
       <main className="playground-main" id="document-content">
         <h1 className="sr-only">Playground</h1>
         <div className="playground-toolbar">
-          <div aria-label="Document format" className="playground-tabs" role="tablist">
-            {formats.map(({ format, label }) => (
-              <button
-                aria-selected={format === active}
-                key={format}
-                onClick={() => setActive(format)}
-                role="tab"
-                type="button"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <p className="playground-format">YAML</p>
           <label className="playground-preset">
             Preset
             <select onChange={(event) => loadPreset(event.target.value as PlaygroundPreset)} value="">
@@ -170,16 +126,16 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
             </select>
           </label>
           <p className="playground-hint">
-            Validated and rendered live; TypeScript is a strict subset read as data, never executed. Loading a preset
-            replaces the buffer contents.
+            Validated and rendered live as inert data. JSON syntax is accepted too. Loading a preset replaces the
+            document.
           </p>
         </div>
         <div className="playground-panels">
           <div className="playground-editor-pane">
             <textarea
-              aria-label={`${formats.find((entry) => entry.format === active)?.label} document`}
+              aria-label="YAML document"
               className="playground-editor"
-              onChange={(event) => setBuffers((previous) => ({ ...previous, [active]: event.target.value }))}
+              onChange={(event) => setText(event.target.value)}
               spellCheck={false}
               value={text}
             />

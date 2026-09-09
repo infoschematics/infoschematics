@@ -13,20 +13,13 @@
     "subtitle": {
       "type": "string"
     },
-    "synopsis": {
+    "description": {
       "type": "string"
     },
-    "takeaways": {
-      "readOnly": true,
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "infoschematic": {
+    "diagram": {
       "type": "object",
       "properties": {
-        "viewBox": {
+        "bounds": {
           "type": "object",
           "properties": {
             "x": {
@@ -90,46 +83,27 @@
           },
           "additionalProperties": false
         },
-        "scopes": {
+        "calloutPositions": {
           "readOnly": true,
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
+              "x": {
+                "type": "number"
               },
-              "prefix": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "color": {
-                "type": "string"
-              },
-              "fill": {
-                "type": "string"
-              },
-              "icon": {
-                "type": "string"
+              "y": {
+                "type": "number"
               }
             },
             "required": [
-              "id",
-              "prefix",
-              "label",
-              "description",
-              "color",
-              "fill"
+              "x",
+              "y"
             ],
             "additionalProperties": false
           }
         },
-        "domains": {
+        "collections": {
           "readOnly": true,
           "type": "array",
           "items": {
@@ -144,23 +118,30 @@
               "description": {
                 "type": "string"
               },
-              "color": {
-                "type": "string"
-              },
-              "fill": {
-                "type": "string"
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "color": {
+                    "type": "string"
+                  },
+                  "fill": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
               }
             },
             "required": [
               "id",
-              "label",
-              "color",
-              "fill"
+              "label"
             ],
             "additionalProperties": false
           }
         },
-        "flowFamilies": {
+        "families": {
           "readOnly": true,
           "type": "array",
           "items": {
@@ -169,7 +150,49 @@
               "id": {
                 "type": "string"
               },
-              "prefix": {
+              "label": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "color": {
+                    "type": "string"
+                  },
+                  "fill": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  },
+                  "line": {
+                    "type": "string",
+                    "enum": [
+                      "solid",
+                      "dashed"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sets": {
+          "readOnly": true,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
                 "type": "string"
               },
               "label": {
@@ -178,16 +201,18 @@
               "description": {
                 "type": "string"
               },
-              "color": {
-                "type": "string"
+              "elements": {
+                "readOnly": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
               "id",
-              "prefix",
               "label",
-              "description",
-              "color"
+              "elements"
             ],
             "additionalProperties": false
           }
@@ -204,7 +229,7 @@
               "label": {
                 "type": "string"
               },
-              "box": {
+              "bounds": {
                 "type": "object",
                 "properties": {
                   "x": {
@@ -218,9 +243,6 @@
                   },
                   "width": {
                     "type": "number"
-                  },
-                  "radius": {
-                    "type": "number"
                   }
                 },
                 "required": [
@@ -231,59 +253,74 @@
                 ],
                 "additionalProperties": false
               },
-              "frame": {
+              "appearance": {
                 "type": "object",
                 "properties": {
-                  "style": {
-                    "type": "string",
-                    "enum": [
-                      "solid",
-                      "dashed",
-                      "dotted"
-                    ]
+                  "fill": {
+                    "type": "string"
                   },
-                  "opacity": {
+                  "cornerRadius": {
                     "type": "number"
+                  },
+                  "frame": {
+                    "type": "object",
+                    "properties": {
+                      "style": {
+                        "type": "string",
+                        "enum": [
+                          "solid",
+                          "dashed",
+                          "dotted"
+                        ]
+                      },
+                      "opacity": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "style"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "label": {
+                    "type": "object",
+                    "properties": {
+                      "placement": {
+                        "type": "string",
+                        "enum": [
+                          "none",
+                          "north-west",
+                          "north",
+                          "north-east",
+                          "west",
+                          "center",
+                          "east",
+                          "south-west",
+                          "south",
+                          "south-east"
+                        ]
+                      },
+                      "mount": {
+                        "type": "string",
+                        "enum": [
+                          "boundary",
+                          "internal"
+                        ]
+                      },
+                      "offset": {
+                        "type": "number"
+                      }
+                    },
+                    "additionalProperties": false
                   }
                 },
-                "required": [
-                  "style"
-                ],
                 "additionalProperties": false
-              },
-              "fill": {
-                "type": "string"
-              },
-              "labelPlacement": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "north-west",
-                  "north",
-                  "north-east",
-                  "west",
-                  "center",
-                  "east",
-                  "south-west",
-                  "south",
-                  "south-east"
-                ]
-              },
-              "labelMount": {
-                "type": "string",
-                "enum": [
-                  "boundary",
-                  "internal"
-                ]
-              },
-              "labelOffset": {
-                "type": "number"
               }
             },
             "required": [
               "id",
               "label",
-              "box"
+              "bounds"
             ],
             "additionalProperties": false
           }
@@ -297,115 +334,79 @@
               "id": {
                 "type": "string"
               },
-              "code": {
-                "type": "string"
-              },
               "label": {
                 "type": "string"
               },
-              "detail": {
-                "type": "string"
-              },
-              "scopes": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "scopeRule": {
-                "type": "string",
-                "enum": [
-                  "all",
-                  "any"
-                ]
-              },
-              "conformsTo": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "services": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "scope": {
-                "type": "string"
-              },
-              "domain": {
+              "description": {
                 "type": "string"
               },
               "stereotype": {
                 "type": "string"
               },
-              "wraps": {
+              "collection": {
                 "type": "string"
               },
-              "placement": {
+              "bounds": {
                 "type": "object",
                 "properties": {
-                  "box": {
-                    "type": "object",
-                    "properties": {
-                      "x": {
-                        "type": "number"
-                      },
-                      "y": {
-                        "type": "number"
-                      },
-                      "height": {
-                        "type": "number"
-                      },
-                      "width": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "x",
-                      "y",
-                      "height",
-                      "width"
-                    ],
-                    "additionalProperties": false
+                  "x": {
+                    "type": "number"
                   },
-                  "ports": {
-                    "type": "object",
-                    "properties": {
-                      "east": {
-                        "type": "number"
-                      },
-                      "north": {
-                        "type": "number"
-                      },
-                      "south": {
-                        "type": "number"
-                      },
-                      "west": {
-                        "type": "number"
-                      }
-                    },
-                    "additionalProperties": false
+                  "y": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number"
+                  },
+                  "width": {
+                    "type": "number"
                   }
                 },
                 "required": [
-                  "box"
+                  "x",
+                  "y",
+                  "height",
+                  "width"
                 ],
                 "additionalProperties": false
+              },
+              "ports": {
+                "type": "object",
+                "properties": {
+                  "east": {
+                    "type": "number"
+                  },
+                  "north": {
+                    "type": "number"
+                  },
+                  "south": {
+                    "type": "number"
+                  },
+                  "west": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "interfaces": {
+                "readOnly": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "provides": {
+                "readOnly": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
               "id",
-              "code",
               "label",
-              "detail",
-              "scopes",
-              "scope",
-              "placement"
+              "bounds"
             ],
             "additionalProperties": false
           }
@@ -419,138 +420,87 @@
               "id": {
                 "type": "string"
               },
-              "code": {
-                "type": "string"
-              },
               "label": {
                 "type": "string"
               },
-              "detail": {
+              "description": {
                 "type": "string"
               },
-              "scopes": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "scopeRule": {
-                "type": "string",
-                "enum": [
-                  "all",
-                  "any"
-                ]
-              },
-              "conformsTo": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "services": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "scope": {
-                "type": "string"
-              },
-              "placement": {
+              "bounds": {
                 "type": "object",
                 "properties": {
-                  "box": {
-                    "type": "object",
-                    "properties": {
-                      "x": {
-                        "type": "number"
-                      },
-                      "y": {
-                        "type": "number"
-                      },
-                      "height": {
-                        "type": "number"
-                      },
-                      "width": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "x",
-                      "y",
-                      "height",
-                      "width"
-                    ],
-                    "additionalProperties": false
+                  "x": {
+                    "type": "number"
                   },
-                  "ports": {
-                    "type": "object",
-                    "properties": {
-                      "east": {
-                        "type": "number"
-                      },
-                      "north": {
-                        "type": "number"
-                      },
-                      "south": {
-                        "type": "number"
-                      },
-                      "west": {
-                        "type": "number"
-                      }
-                    },
-                    "additionalProperties": false
+                  "y": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number"
+                  },
+                  "width": {
+                    "type": "number"
                   }
                 },
                 "required": [
-                  "box"
+                  "x",
+                  "y",
+                  "height",
+                  "width"
                 ],
                 "additionalProperties": false
+              },
+              "ports": {
+                "type": "object",
+                "properties": {
+                  "east": {
+                    "type": "number"
+                  },
+                  "north": {
+                    "type": "number"
+                  },
+                  "south": {
+                    "type": "number"
+                  },
+                  "west": {
+                    "type": "number"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "kind": {
+                "type": "string"
+              },
+              "properties": {
+                "readOnly": true,
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "$ref": "#/$defs/__schema0"
+                }
               },
               "appearance": {
                 "type": "object",
                 "properties": {
-                  "renderer": {
+                  "color": {
                     "type": "string"
                   },
-                  "caption": {
+                  "fill": {
                     "type": "string"
                   },
-                  "detail": {
+                  "icon": {
                     "type": "string"
-                  },
-                  "properties": {
-                    "readOnly": true,
-                    "type": "object",
-                    "propertyNames": {
-                      "type": "string"
-                    },
-                    "additionalProperties": {
-                      "type": [
-                        "boolean",
-                        "number",
-                        "string"
-                      ]
-                    }
                   }
                 },
-                "required": [
-                  "renderer"
-                ],
                 "additionalProperties": false
               }
             },
             "required": [
               "id",
-              "code",
               "label",
-              "detail",
-              "scopes",
-              "scope",
-              "placement"
+              "bounds"
             ],
             "additionalProperties": false
           }
@@ -564,20 +514,10 @@
               "id": {
                 "type": "string"
               },
-              "code": {
-                "type": "string"
-              },
               "label": {
                 "type": "string"
               },
-              "scopes": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "point": {
+              "at": {
                 "type": "object",
                 "properties": {
                   "x": {
@@ -610,14 +550,27 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "color": {
+                    "type": "string"
+                  },
+                  "fill": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
               }
             },
             "required": [
               "id",
-              "code",
               "label",
-              "scopes",
-              "point"
+              "at"
             ],
             "additionalProperties": false
           }
@@ -631,92 +584,112 @@
               "id": {
                 "type": "string"
               },
-              "code": {
-                "type": "string"
-              },
               "family": {
                 "type": "string"
               },
+              "appearance": {
+                "type": "object",
+                "properties": {
+                  "line": {
+                    "type": "string",
+                    "enum": [
+                      "solid",
+                      "dashed"
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
               "source": {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "element": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "string",
+                    "pattern": "^(N|E|S|W)-?\\d+(?:\\.\\d+)?$"
+                  }
+                },
+                "required": [
+                  "element",
+                  "port"
+                ],
+                "additionalProperties": false
               },
               "target": {
-                "type": "string"
-              },
-              "sourcePort": {
-                "type": "string",
-                "pattern": "^(N|E|S|W)-?\\d+(?:\\.\\d+)?$"
-              },
-              "targetPort": {
-                "type": "string",
-                "pattern": "^(N|E|S|W)-?\\d+(?:\\.\\d+)?$"
+                "type": "object",
+                "properties": {
+                  "element": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "string",
+                    "pattern": "^(N|E|S|W)-?\\d+(?:\\.\\d+)?$"
+                  }
+                },
+                "required": [
+                  "element",
+                  "port"
+                ],
+                "additionalProperties": false
               },
               "operation": {
                 "type": "string"
               },
-              "conformsTo": {
+              "interfaces": {
                 "readOnly": true,
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
               },
-              "over": {
-                "type": "string"
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "forward",
+                  "bidirectional"
+                ]
               },
-              "bidirectional": {
-                "type": "boolean"
-              },
-              "dashed": {
-                "type": "boolean"
-              },
-              "label": {
+              "route": {
                 "type": "object",
                 "properties": {
-                  "along": {
+                  "waypoints": {
+                    "readOnly": true,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "x": {
+                          "type": "number"
+                        },
+                        "y": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "x",
+                        "y"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "labelAt": {
                     "type": "number"
                   }
                 },
-                "required": [
-                  "along"
-                ],
                 "additionalProperties": false
-              },
-              "points": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "x": {
-                      "type": "number"
-                    },
-                    "y": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "x",
-                    "y"
-                  ],
-                  "additionalProperties": false
-                }
               }
             },
             "required": [
               "id",
-              "code",
-              "family",
               "source",
-              "target",
-              "sourcePort",
-              "targetPort",
-              "points"
+              "target"
             ],
             "additionalProperties": false
           }
         },
-        "graphics": {
+        "overlays": {
           "readOnly": true,
           "type": "array",
           "items": {
@@ -728,10 +701,13 @@
               "label": {
                 "type": "string"
               },
-              "renderer": {
+              "description": {
                 "type": "string"
               },
-              "placement": {
+              "kind": {
+                "type": "string"
+              },
+              "bounds": {
                 "type": "object",
                 "properties": {
                   "x": {
@@ -755,13 +731,6 @@
                 ],
                 "additionalProperties": false
               },
-              "scopes": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
               "properties": {
                 "readOnly": true,
                 "type": "object",
@@ -769,186 +738,93 @@
                   "type": "string"
                 },
                 "additionalProperties": {
-                  "type": [
-                    "boolean",
-                    "number",
-                    "string"
-                  ]
+                  "$ref": "#/$defs/__schema0"
                 }
               }
             },
             "required": [
               "id",
-              "renderer"
+              "label",
+              "kind"
             ],
             "additionalProperties": false
           }
         },
-        "interfaces": {
+        "assemblies": {
           "readOnly": true,
           "type": "array",
           "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "prefix": {
-                "type": "string"
-              },
-              "owner": {
-                "type": "string"
-              },
-              "document": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "ours",
-                  "theirs"
-                ]
-              },
-              "contract": {
-                "type": "string"
-              },
-              "href": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              },
-              "description": {
-                "type": "string"
-              },
-              "operations": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "summary": {
-                      "type": "string"
-                    }
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
                   },
-                  "required": [
-                    "id",
-                    "summary"
-                  ],
-                  "additionalProperties": false
-                }
+                  "label": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "adapter"
+                  },
+                  "interface": {
+                    "type": "string"
+                  },
+                  "adapter": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "interface",
+                  "adapter"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "wrapped"
+                  },
+                  "wrapper": {
+                    "type": "string"
+                  },
+                  "wrapped": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "kind",
+                  "wrapper",
+                  "wrapped"
+                ],
+                "additionalProperties": false
               }
-            },
-            "required": [
-              "id",
-              "prefix",
-              "owner",
-              "document",
-              "label",
-              "description"
-            ],
-            "additionalProperties": false
-          }
-        },
-        "specificationGroups": {
-          "readOnly": true,
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "label": {
-                "type": "string"
-              },
-              "note": {
-                "type": "string"
-              },
-              "owner": {
-                "type": "string"
-              },
-              "document": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "ours",
-                  "theirs"
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "label",
-              "note",
-              "owner",
-              "document"
-            ],
-            "additionalProperties": false
+            ]
           }
         }
       },
+      "required": [
+        "bounds"
+      ],
       "additionalProperties": false
-    },
-    "standaloneScenes": {
-      "readOnly": true,
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "short": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "focus": {
-            "type": "object",
-            "properties": {
-              "artefacts": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "flows": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "graphics": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "label",
-          "description",
-          "focus"
-        ],
-        "additionalProperties": false
-      }
     },
     "themes": {
       "readOnly": true,
@@ -959,7 +835,7 @@
           "id": {
             "type": "string"
           },
-          "title": {
+          "label": {
             "type": "string"
           },
           "description": {
@@ -974,36 +850,69 @@
                 "id": {
                   "type": "string"
                 },
-                "code": {
-                  "type": "string"
-                },
                 "label": {
-                  "type": "string"
-                },
-                "short": {
                   "type": "string"
                 },
                 "description": {
                   "type": "string"
                 },
+                "visibility": {
+                  "type": "object",
+                  "properties": {
+                    "show": {
+                      "type": "object",
+                      "properties": {
+                        "elements": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sets": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "hide": {
+                      "type": "object",
+                      "properties": {
+                        "elements": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sets": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
+                },
                 "focus": {
                   "type": "object",
                   "properties": {
-                    "artefacts": {
+                    "elements": {
                       "readOnly": true,
                       "type": "array",
                       "items": {
                         "type": "string"
                       }
                     },
-                    "flows": {
-                      "readOnly": true,
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "graphics": {
+                    "sets": {
                       "readOnly": true,
                       "type": "array",
                       "items": {
@@ -1029,23 +938,48 @@
                         "type": "string"
                       }
                     },
-                    "at": {
-                      "type": "object",
-                      "properties": {
-                        "x": {
-                          "type": "number"
+                    "placement": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "at"
+                          ],
+                          "additionalProperties": false
                         },
-                        "y": {
-                          "type": "number"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "element": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "element"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "required": [
-                        "x",
-                        "y"
-                      ],
-                      "additionalProperties": false
+                      ]
                     },
-                    "renderer": {
+                    "kind": {
                       "type": "string"
                     },
                     "properties": {
@@ -1055,11 +989,7 @@
                         "type": "string"
                       },
                       "additionalProperties": {
-                        "type": [
-                          "boolean",
-                          "number",
-                          "string"
-                        ]
+                        "$ref": "#/$defs/__schema0"
                       }
                     }
                   },
@@ -1071,9 +1001,7 @@
               },
               "required": [
                 "id",
-                "code",
-                "label",
-                "focus"
+                "label"
               ],
               "additionalProperties": false
             }
@@ -1081,7 +1009,7 @@
         },
         "required": [
           "id",
-          "title",
+          "label",
           "scenes"
         ],
         "additionalProperties": false
@@ -1096,13 +1024,10 @@
           "id": {
             "type": "string"
           },
-          "code": {
+          "label": {
             "type": "string"
           },
-          "title": {
-            "type": "string"
-          },
-          "short": {
+          "description": {
             "type": "string"
           },
           "question": {
@@ -1117,30 +1042,69 @@
                 "id": {
                   "type": "string"
                 },
-                "sourceScene": {
+                "label": {
                   "type": "string"
                 },
-                "title": {
+                "description": {
                   "type": "string"
+                },
+                "visibility": {
+                  "type": "object",
+                  "properties": {
+                    "show": {
+                      "type": "object",
+                      "properties": {
+                        "elements": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sets": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "hide": {
+                      "type": "object",
+                      "properties": {
+                        "elements": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "sets": {
+                          "readOnly": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "additionalProperties": false
                 },
                 "focus": {
                   "type": "object",
                   "properties": {
-                    "artefacts": {
+                    "elements": {
                       "readOnly": true,
                       "type": "array",
                       "items": {
                         "type": "string"
                       }
                     },
-                    "flows": {
-                      "readOnly": true,
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "graphics": {
+                    "sets": {
                       "readOnly": true,
                       "type": "array",
                       "items": {
@@ -1149,9 +1113,6 @@
                     }
                   },
                   "additionalProperties": false
-                },
-                "anchor": {
-                  "type": "string"
                 },
                 "callout": {
                   "type": "object",
@@ -1169,23 +1130,48 @@
                         "type": "string"
                       }
                     },
-                    "at": {
-                      "type": "object",
-                      "properties": {
-                        "x": {
-                          "type": "number"
+                    "placement": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "at": {
+                              "type": "object",
+                              "properties": {
+                                "x": {
+                                  "type": "number"
+                                },
+                                "y": {
+                                  "type": "number"
+                                }
+                              },
+                              "required": [
+                                "x",
+                                "y"
+                              ],
+                              "additionalProperties": false
+                            }
+                          },
+                          "required": [
+                            "at"
+                          ],
+                          "additionalProperties": false
                         },
-                        "y": {
-                          "type": "number"
+                        {
+                          "type": "object",
+                          "properties": {
+                            "element": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "element"
+                          ],
+                          "additionalProperties": false
                         }
-                      },
-                      "required": [
-                        "x",
-                        "y"
-                      ],
-                      "additionalProperties": false
+                      ]
                     },
-                    "renderer": {
+                    "kind": {
                       "type": "string"
                     },
                     "properties": {
@@ -1195,11 +1181,7 @@
                         "type": "string"
                       },
                       "additionalProperties": {
-                        "type": [
-                          "boolean",
-                          "number",
-                          "string"
-                        ]
+                        "$ref": "#/$defs/__schema0"
                       }
                     }
                   },
@@ -1208,49 +1190,169 @@
                   ],
                   "additionalProperties": false
                 },
-                "graphic": {
-                  "type": "string"
-                },
                 "duration": {
                   "type": "number"
                 }
               },
+              "required": [
+                "id",
+                "label"
+              ],
               "additionalProperties": false
             }
           }
         },
         "required": [
           "id",
-          "code",
-          "title",
+          "label",
           "scenes"
         ],
         "additionalProperties": false
       }
     },
-    "calloutPositions": {
+    "specifications": {
       "readOnly": true,
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "x": {
-            "type": "number"
+          "id": {
+            "type": "string"
           },
-          "y": {
-            "type": "number"
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "ownership": {
+                "type": "string",
+                "enum": [
+                  "ours",
+                  "theirs"
+                ]
+              },
+              "label": {
+                "type": "string"
+              },
+              "href": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ownership"
+            ],
+            "additionalProperties": false
+          },
+          "interfaces": {
+            "readOnly": true,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "document": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "href": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "operations": {
+                  "readOnly": true,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "summary": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "summary"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "label"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
-          "x",
-          "y"
+          "id",
+          "label",
+          "interfaces"
         ],
         "additionalProperties": false
       }
     }
   },
   "required": [
-    "title"
+    "id",
+    "title",
+    "diagram"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "__schema0": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "readOnly": true,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/__schema0"
+          }
+        },
+        {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/__schema0"
+          }
+        }
+      ]
+    }
+  }
 }

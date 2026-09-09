@@ -1,4 +1,5 @@
 # Deliberately wrong, so the loader's diagnostic has something to report.
+id: MALFORMED
 title: Malformed
-infoschematic:
-  viewBox: { x: 0, y: 0, width: wide, height: 20 }
+diagram:
+  bounds: { x: 0, y: 0, width: wide, height: 20 }

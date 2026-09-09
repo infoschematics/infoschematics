@@ -1,47 +1,37 @@
-import type { InfoschematicConfigInput } from '@infoschematics/domain-model'
+import type { Infoschematic, JsonValue } from '@infoschematics/domain-model/model'
 import { z } from 'zod'
 
 /**
- * A runtime mirror of the hand-written domain contract.
+ * Runtime mirror of the canonical, dependency-free Infoschematic contract.
  *
- * Domain Model stays the dependency-free owner of the types; this schema restates them so an untrusted document can be
- * checked at a file boundary, and {@link SchemaMirrorsContract} holds the two together at compile time.
- *
- * Every object is strict. A hand-edited document's most common defect is a misspelt key, and a permissive schema would
- * drop it silently and render a subtly wrong diagram instead of reporting the typo.
+ * Authored objects are strict so a misspelt key fails visibly instead of being dropped and changing the rendered result.
  */
 
-const point = z.strictObject({ x: z.number(), y: z.number() })
-
-const box = z.strictObject({ x: z.number(), y: z.number(), height: z.number(), width: z.number() })
-
+const number = z.number()
+const coordinate = z.strictObject({ x: number, y: number })
+const box = z.strictObject({ x: number, y: number, height: number, width: number })
 const identifiers = z.array(z.string()).readonly()
 
-const properties = z.record(z.string(), z.union([z.boolean(), z.number(), z.string()])).readonly()
+const jsonValue: z.ZodType<JsonValue> = z.lazy(() =>
+  z.union([z.null(), z.boolean(), number, z.string(), z.array(jsonValue).readonly(), z.record(z.string(), jsonValue)])
+)
 
-const portCounts = z.strictObject({
-  east: z.number().optional(),
-  north: z.number().optional(),
-  south: z.number().optional(),
-  west: z.number().optional()
+const properties = z.record(z.string(), jsonValue).readonly()
+
+const visualIdentity = z.strictObject({
+  color: z.string().optional(),
+  fill: z.string().optional(),
+  icon: z.string().optional()
 })
 
-// The contract states a port as a template literal type, and Zod restates it as one rather than as a hand-written
-// pattern, so the inferred type is the contract's own and the emitted JSON Schema carries the same rule.
-const portId = z.templateLiteral([z.enum(['N', 'E', 'S', 'W']), z.number()])
+const portCounts = z.strictObject({
+  east: number.optional(),
+  north: number.optional(),
+  south: number.optional(),
+  west: number.optional()
+})
 
-const placement = z.strictObject({ box, ports: portCounts.optional() })
-
-const artefactIdentity = {
-  id: z.string(),
-  code: z.string(),
-  label: z.string(),
-  detail: z.string(),
-  scopes: identifiers,
-  scopeRule: z.enum(['all', 'any']).optional(),
-  conformsTo: identifiers.optional(),
-  services: identifiers.optional()
-}
+const portId = z.templateLiteral([z.enum(['N', 'E', 'S', 'W']), number])
 
 const appearance = z.strictObject({
   surface: z.enum(['neutral', 'blueprint']).optional(),
@@ -56,238 +46,232 @@ const appearance = z.strictObject({
     .optional()
 })
 
-const scope = z.strictObject({
-  id: z.string(),
-  prefix: z.string(),
-  label: z.string(),
-  description: z.string(),
-  color: z.string(),
-  fill: z.string(),
-  icon: z.string().optional()
-})
-
-const domain = z.strictObject({
+const collection = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
-  color: z.string(),
-  fill: z.string()
+  appearance: visualIdentity.optional()
 })
 
-const flowFamily = z.strictObject({
+const family = z.strictObject({
   id: z.string(),
-  prefix: z.string(),
   label: z.string(),
-  description: z.string(),
-  color: z.string()
+  description: z.string().optional(),
+  appearance: visualIdentity.extend({ line: z.enum(['solid', 'dashed']).optional() }).optional()
+})
+
+const elementSet = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  elements: identifiers
 })
 
 const region = z.strictObject({
   id: z.string(),
   label: z.string(),
-  box: z.strictObject({
-    x: z.number(),
-    y: z.number(),
-    height: z.number(),
-    width: z.number(),
-    radius: z.number().optional()
-  }),
-  frame: z.strictObject({ style: z.enum(['solid', 'dashed', 'dotted']), opacity: z.number().optional() }).optional(),
-  fill: z.string().optional(),
-  labelPlacement: z
-    .enum(['none', 'north-west', 'north', 'north-east', 'west', 'center', 'east', 'south-west', 'south', 'south-east'])
-    .optional(),
-  labelMount: z.enum(['boundary', 'internal']).optional(),
-  labelOffset: z.number().optional()
-})
-
-const card = z.strictObject({
-  ...artefactIdentity,
-  scope: z.string(),
-  domain: z.string().optional(),
-  stereotype: z.string().optional(),
-  wraps: z.string().optional(),
-  placement
-})
-
-const fabric = z.strictObject({
-  ...artefactIdentity,
-  scope: z.string(),
-  placement,
+  bounds: box,
   appearance: z
     .strictObject({
-      renderer: z.string(),
-      caption: z.string().optional(),
-      detail: z.string().optional(),
-      properties: properties.optional()
+      fill: z.string().optional(),
+      cornerRadius: number.optional(),
+      frame: z.strictObject({ style: z.enum(['solid', 'dashed', 'dotted']), opacity: number.optional() }).optional(),
+      label: z
+        .strictObject({
+          placement: z
+            .enum([
+              'none',
+              'north-west',
+              'north',
+              'north-east',
+              'west',
+              'center',
+              'east',
+              'south-west',
+              'south',
+              'south-east'
+            ])
+            .optional(),
+          mount: z.enum(['boundary', 'internal']).optional(),
+          offset: number.optional()
+        })
+        .optional()
     })
     .optional()
 })
 
-const pointArtefact = z.strictObject({
+const card = z.strictObject({
   id: z.string(),
-  code: z.string(),
   label: z.string(),
-  scopes: identifiers,
-  point,
-  ports: portCounts.optional()
+  description: z.string().optional(),
+  stereotype: z.string().optional(),
+  collection: z.string().optional(),
+  bounds: box,
+  ports: portCounts.optional(),
+  interfaces: identifiers.optional(),
+  provides: identifiers.optional()
+})
+
+const fabric = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  bounds: box,
+  ports: portCounts.optional(),
+  kind: z.string().optional(),
+  properties: properties.optional(),
+  appearance: visualIdentity.optional()
+})
+
+const point = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  at: coordinate,
+  ports: portCounts.optional(),
+  appearance: visualIdentity.optional()
 })
 
 const flow = z.strictObject({
   id: z.string(),
-  code: z.string(),
-  family: z.string(),
-  source: z.string(),
-  target: z.string(),
-  sourcePort: portId,
-  targetPort: portId,
+  family: z.string().optional(),
+  appearance: z.strictObject({ line: z.enum(['solid', 'dashed']).optional() }).optional(),
+  source: z.strictObject({ element: z.string(), port: portId }),
+  target: z.strictObject({ element: z.string(), port: portId }),
   operation: z.string().optional(),
-  conformsTo: identifiers.optional(),
-  over: z.string().optional(),
-  bidirectional: z.boolean().optional(),
-  dashed: z.boolean().optional(),
-  label: z.strictObject({ along: z.number() }).optional(),
-  points: z.array(point).readonly()
-})
-
-const graphic = z.strictObject({
-  id: z.string(),
-  label: z.string().optional(),
-  renderer: z.string(),
-  placement: box.optional(),
-  scopes: identifiers.optional(),
-  properties: properties.optional()
-})
-
-const documentOwnership = z.enum(['none', 'ours', 'theirs'])
-
-const interfaceContract = z.strictObject({
-  id: z.string(),
-  prefix: z.string(),
-  owner: z.string(),
-  document: documentOwnership,
-  contract: z.string().optional(),
-  href: z.string().optional(),
-  label: z.string(),
-  description: z.string(),
-  operations: z
-    .array(z.strictObject({ id: z.string(), summary: z.string() }))
-    .readonly()
+  interfaces: identifiers.optional(),
+  direction: z.enum(['forward', 'bidirectional']).optional(),
+  route: z
+    .strictObject({
+      waypoints: z.array(coordinate).readonly().optional(),
+      labelAt: number.optional()
+    })
     .optional()
 })
 
-const specificationGroup = z.strictObject({
+const overlay = z.strictObject({
   id: z.string(),
   label: z.string(),
-  note: z.string(),
-  owner: z.string(),
-  document: documentOwnership
+  description: z.string().optional(),
+  kind: z.string(),
+  bounds: box.optional(),
+  properties: properties.optional()
 })
 
-const focus = z.strictObject({
-  artefacts: identifiers.optional(),
-  flows: identifiers.optional(),
-  graphics: identifiers.optional()
+const assemblyBase = {
+  id: z.string(),
+  label: z.string().optional(),
+  description: z.string().optional()
+}
+
+const assembly = z.discriminatedUnion('kind', [
+  z.strictObject({ ...assemblyBase, kind: z.literal('adapter'), interface: z.string(), adapter: z.string() }),
+  z.strictObject({ ...assemblyBase, kind: z.literal('wrapped'), wrapper: z.string(), wrapped: z.string() })
+])
+
+const selection = z.strictObject({
+  elements: identifiers.optional(),
+  sets: identifiers.optional()
 })
 
 const callout = z.strictObject({
   title: z.string().optional(),
   body: z.string(),
   takeaways: identifiers.optional(),
-  at: point.optional(),
-  renderer: z.string().optional(),
+  placement: z.union([z.strictObject({ at: coordinate }), z.strictObject({ element: z.string() })]).optional(),
+  kind: z.string().optional(),
   properties: properties.optional()
 })
 
-const standaloneScene = z.strictObject({
-  id: z.string(),
-  code: z.string(),
-  label: z.string(),
-  short: z.string().optional(),
-  description: z.string(),
-  focus
+const visibility = z.strictObject({
+  show: selection.optional(),
+  hide: selection.optional()
 })
 
-const thematicScene = z.strictObject({
+const sceneShape = {
   id: z.string(),
-  code: z.string(),
   label: z.string(),
-  short: z.string().optional(),
   description: z.string().optional(),
-  focus,
+  visibility: visibility.optional(),
+  focus: selection.optional(),
   callout: callout.optional()
-})
+}
+
+const scene = z.strictObject(sceneShape)
 
 const theme = z.strictObject({
   id: z.string(),
-  title: z.string(),
+  label: z.string(),
   description: z.string().optional(),
-  scenes: z.array(thematicScene).readonly()
-})
-
-const storyScene = z.strictObject({
-  id: z.string().optional(),
-  sourceScene: z.string().optional(),
-  title: z.string().optional(),
-  focus: focus.optional(),
-  anchor: z.string().optional(),
-  callout: callout.optional(),
-  graphic: z.string().optional(),
-  duration: z.number().optional()
+  scenes: z.array(scene).readonly()
 })
 
 const story = z.strictObject({
   id: z.string(),
-  code: z.string(),
-  title: z.string(),
-  short: z.string().optional(),
+  label: z.string(),
+  description: z.string().optional(),
   question: z.string().optional(),
-  scenes: z.array(storyScene).readonly()
+  scenes: z.array(z.strictObject({ ...sceneShape, duration: number.optional() })).readonly()
 })
 
-/** The complete Infoschematic definition, before an authored document is allowed to omit parts of it. */
-const infoschematicDefinition = z.strictObject({
-  viewBox: box,
+const interfaceContract = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  document: z.strictObject({ label: z.string().optional(), href: z.string().optional() }).optional(),
+  operations: z
+    .array(z.strictObject({ id: z.string(), summary: z.string() }))
+    .readonly()
+    .optional()
+})
+
+const specification = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  owner: z.string().optional(),
+  document: z
+    .strictObject({
+      ownership: z.enum(['ours', 'theirs']),
+      label: z.string().optional(),
+      href: z.string().optional()
+    })
+    .optional(),
+  interfaces: z.array(interfaceContract).readonly()
+})
+
+const diagram = z.strictObject({
+  bounds: box,
   appearance: appearance.optional(),
-  scopes: z.array(scope).readonly(),
-  domains: z.array(domain).readonly().optional(),
-  flowFamilies: z.array(flowFamily).readonly(),
-  regions: z.array(region).readonly(),
-  cards: z.array(card).readonly(),
-  fabrics: z.array(fabric).readonly(),
-  points: z.array(pointArtefact).readonly(),
-  flows: z.array(flow).readonly(),
-  graphics: z.array(graphic).readonly(),
-  interfaces: z.array(interfaceContract).readonly(),
-  specificationGroups: z.array(specificationGroup).readonly()
+  calloutPositions: z.array(coordinate).readonly().optional(),
+  collections: z.array(collection).readonly().optional(),
+  families: z.array(family).readonly().optional(),
+  sets: z.array(elementSet).readonly().optional(),
+  regions: z.array(region).readonly().optional(),
+  cards: z.array(card).readonly().optional(),
+  fabrics: z.array(fabric).readonly().optional(),
+  points: z.array(point).readonly().optional(),
+  flows: z.array(flow).readonly().optional(),
+  overlays: z.array(overlay).readonly().optional(),
+  assemblies: z.array(assembly).readonly().optional()
 })
 
-/** Validate an authored Infoschematic document against the domain contract. */
-export const infoschematicConfigSchema = z.strictObject({
-  id: z.string().optional(),
+/** Validate an authored Infoschematic document against the canonical domain contract. */
+export const infoschematicSchema = z.strictObject({
+  id: z.string(),
   title: z.string(),
   subtitle: z.string().optional(),
-  synopsis: z.string().optional(),
-  takeaways: identifiers.optional(),
-  infoschematic: infoschematicDefinition.partial().optional(),
-  standaloneScenes: z.array(standaloneScene).readonly().optional(),
+  description: z.string().optional(),
+  diagram,
   themes: z.array(theme).readonly().optional(),
   stories: z.array(story).readonly().optional(),
-  calloutPositions: z.array(point).readonly().optional()
+  specifications: z.array(specification).readonly().optional()
 })
 
-// The contract composes its shapes with intersections, `Partial`, and `Readonly`; a schema can only infer the flattened
-// result. Flattening both sides first compares what the two types mean rather than how each was written.
-/**
- * The JSON Schema for an authored Infoschematic document, projected from the schema above.
- *
- * An editor and the loader therefore agree by construction: there is no second generator and no second contract to keep
- * in step. `scripts/generate-schema.ts` commits the serialised form so an editor can consume it without a build.
- */
+/** JSON Schema projected from the same runtime contract used by the YAML loader. */
 export const infoschematicJsonSchema = (): Record<string, unknown> => ({
   $id: 'https://infoschematics.info/schema/infoschematic.schema.json',
   title: 'Infoschematic',
-  ...z.toJSONSchema(infoschematicConfigSchema, { io: 'input' })
+  ...z.toJSONSchema(infoschematicSchema, { io: 'input' })
 })
 
 type Flat<T> = T extends readonly (infer Item)[]
@@ -298,21 +282,12 @@ type Flat<T> = T extends readonly (infer Item)[]
     ? { [Key in keyof T]: Flat<T[Key]> }
     : T
 
-// Exact type identity rather than mutual assignability: two types that merely accept each other's values still differ
-// when one drops an optional field, and that is the drift this assertion exists to catch.
 type Mirrors<Inferred, Declared> =
   (<Probe>() => Probe extends Flat<Inferred> ? 1 : 2) extends <Probe>() => Probe extends Flat<Declared> ? 1 : 2
     ? true
     : false
 
-// The constraint is the assertion: instantiating it with `false` is the type error.
 type Parity<Held extends true> = Held
 
-/**
- * The compile-time bond between the schema and the contract it mirrors.
- *
- * Mutual assignability is checked in both directions on purpose: a field added to `InfoschematicConfigInput` and not to
- * the schema fails one direction, and a field added to the schema and not to the contract fails the other, so the
- * mirror cannot drift while the type-check still passes.
- */
-export type SchemaMirrorsContract = Parity<Mirrors<z.infer<typeof infoschematicConfigSchema>, InfoschematicConfigInput>>
+/** Compile-time bond between the runtime schema and the canonical TypeScript contract. */
+export type SchemaMirrorsContract = Parity<Mirrors<z.infer<typeof infoschematicSchema>, Infoschematic>>

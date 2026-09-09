@@ -30,7 +30,7 @@ const known = (subject: string) =>
 export const isDocumentSubject = (subject: string): boolean =>
   !(subject in renderableExamples) && extname(subject).length > 0
 
-/** Load one subject, whether it names a registered example or an authored JSON or YAML document. */
+/** Load one subject, whether it names a registered example or a YAML-based document. */
 export async function loadRenderable(subject: string): Promise<InfoschematicInput> {
   const registered = renderableExamples[subject]
   if (registered) return registered
@@ -39,7 +39,7 @@ export async function loadRenderable(subject: string): Promise<InfoschematicInpu
 
   const text = await readFile(resolve(subject), 'utf8')
   const parsed = parseInfoschematic(text, { pathname: subject })
-  if (parsed.ok) return parsed.config
+  if (parsed.ok) return parsed.model
   throw new Error(
     [`${subject} is not a valid Infoschematic:`, ...parsed.issues.map(formatInfoschematicIssue)].join('\n')
   )

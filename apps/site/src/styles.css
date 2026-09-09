@@ -816,27 +816,16 @@ a:focus-visible {
   font-size: 12px;
 }
 
-.playground-tabs {
-  display: flex;
-  gap: 8px;
-}
-
-.playground-tabs button {
+.playground-format {
+  margin: 0;
   padding: 7px 14px;
   border: 1px solid #ffffff1c;
   border-radius: 7px;
-  background: #0d2031;
-  color: #9db4c9;
+  background: #123048;
+  color: #e8f1f8;
   font: 600 11px/1 'DM Mono', monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  cursor: pointer;
-}
-
-.playground-tabs button[aria-selected='true'] {
-  border-color: #58c1ff66;
-  background: #123048;
-  color: #e8f1f8;
 }
 
 .playground-panels {
