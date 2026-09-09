@@ -44,7 +44,7 @@ export const formatParityDefinition: Infoschematic = {
         stereotype: 'service',
         collection: 'CORE',
         bounds: { x: 100, y: 160, width: 200, height: 120 },
-        ports: { east: 1, west: 1 }
+        ports: { north: 0, east: 1, south: 0, west: 1 }
       },
       {
         id: 'SNK',
@@ -53,7 +53,7 @@ export const formatParityDefinition: Infoschematic = {
         stereotype: 'store',
         collection: 'CORE',
         bounds: { x: 500, y: 160, width: 200, height: 120 },
-        ports: { east: 1, west: 1 }
+        ports: { north: 0, east: 1, south: 0, west: 1 }
       }
     ],
     flows: [

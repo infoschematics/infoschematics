@@ -12,7 +12,7 @@ export {
   defaultInfoschematicAppearance,
   defineInfoschematic
 } from './define.ts'
-export { defineInfoschematicModel, infoschematicModelOf } from './model.ts'
+export { defaultCalloutPositions, defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
   type InfoschematicIssue,

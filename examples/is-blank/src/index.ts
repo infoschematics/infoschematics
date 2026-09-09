@@ -12,7 +12,6 @@ export const blankInfoschematic = defineInfoschematicModel({
         description: false
       }
     },
-    assemblies: [],
     bounds: {
       x: 0,
       y: 0,

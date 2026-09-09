@@ -65,7 +65,7 @@ describe('Playground', () => {
   })
 
   it('shows canonical path-addressed issues for a broken document', () => {
-    const broken = yamlSeed.replace('width: 800', 'width: wide')
+    const broken = yamlSeed.replace('bounds: 0 0 800 500', 'bounds: { x: 0, y: 0, width: wide, height: 500 }')
     const parsed = parseInfoschematic(broken)
     const panel = renderToStaticMarkup(<Issues parsed={parsed} />)
 

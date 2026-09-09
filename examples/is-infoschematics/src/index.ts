@@ -14,7 +14,6 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
         description: false
       }
     },
-    assemblies: [],
     bounds: {
       height: 920,
       width: 1400,

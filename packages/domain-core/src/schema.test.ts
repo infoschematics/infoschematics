@@ -21,6 +21,25 @@ describe('infoschematicSchema', () => {
     expect(parsed.error?.issues[0]?.code).toBe('unrecognized_keys')
   })
 
+  it('folds composition into Cards and rejects the removed Diagram Assembly list', () => {
+    expect(
+      infoschematicSchema.safeParse({
+        ...minimal,
+        diagram: {
+          ...minimal.diagram,
+          cards: [
+            { id: 'INTERFACE', label: 'Interface', bounds: '0 0 10 10' },
+            { id: 'ADAPTER', label: 'Adapter', adapts: 'INTERFACE', bounds: '0 0 10 10' },
+            { id: 'WRAPPER', label: 'Wrapper', wraps: 'ADAPTER', bounds: '0 0 10 10' }
+          ]
+        }
+      }).success
+    ).toBe(true)
+    expect(infoschematicSchema.safeParse({ ...minimal, diagram: { ...minimal.diagram, assemblies: [] } }).success).toBe(
+      false
+    )
+  })
+
   it('reports a nested canonical path', () => {
     const parsed = infoschematicSchema.safeParse({
       ...minimal,

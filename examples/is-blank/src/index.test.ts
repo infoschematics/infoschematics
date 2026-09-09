@@ -13,7 +13,6 @@ describe('blankInfoschematic', () => {
     expect(blankInfoschematic.diagram.points).toEqual([])
     expect(blankInfoschematic.diagram.flows).toEqual([])
     expect(blankInfoschematic.diagram.overlays).toEqual([])
-    expect(blankInfoschematic.diagram.assemblies).toEqual([])
     expect(blankInfoschematic.specifications).toEqual([])
     expect(blankInfoschematic.themes).toEqual([])
     expect(blankInfoschematic.stories).toEqual([])

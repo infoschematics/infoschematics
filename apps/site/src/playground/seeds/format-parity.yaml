@@ -3,7 +3,7 @@ id: FORMAT-PARITY
 title: Format parity
 subtitle: One model, portable data
 diagram:
-  bounds: { x: 0, y: 0, width: 800, height: 500 }
+  bounds: 0 0 800 500
   appearance:
     surface: blueprint
     grid: major
@@ -17,37 +17,35 @@ diagram:
     - id: DATA
       label: Data
       description: Data movement.
-      appearance: { color: '#3fb950' }
-  regions:
-    - id: BAND
-      label: Band
-      bounds: { x: 40, y: 40, width: 720, height: 400 }
-      appearance:
-        cornerRadius: 8
-        frame: { style: dashed, opacity: 0.6 }
-        label: { placement: north-west, mount: boundary }
+      color: '#3fb950'
   cards:
     - id: SRC
       label: Source
       description: Emits records.
-      stereotype: service
       collection: CORE
-      bounds: { x: 100, y: 160, width: 200, height: 120 }
-      ports: { east: 1, west: 1 }
+      stereotype: service
+      bounds: 100 160 200 120
+      ports: 0 1 0 1
     - id: SNK
       label: Sink
       description: Stores records.
-      stereotype: store
       collection: CORE
-      bounds: { x: 500, y: 160, width: 200, height: 120 }
-      ports: { east: 1, west: 1 }
+      stereotype: store
+      bounds: 500 160 200 120
+      ports: 0 1 0 1
+  regions:
+    - id: BAND
+      label: Band
+      bounds: 40 40 720 400
+      appearance:
+        cornerRadius: 8
+        frame: { style: dashed, opacity: 0.6 }
+        label: { placement: north-west, mount: boundary }
   flows:
     - id: LOAD
       family: DATA
-      source: { element: SRC, port: E1 }
-      target: { element: SNK, port: W1 }
+      link: SRC E1 -> SNK W1
       operation: load
-      route: { waypoints: [] }
 themes:
   - id: OVERVIEW
     label: Overview

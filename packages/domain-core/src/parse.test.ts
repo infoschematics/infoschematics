@@ -91,7 +91,7 @@ describe('parseInfoschematic', () => {
 
     expect(parseInfoschematic(serialiseInfoschematicYaml(parsed.model))).toEqual(parsed)
     expect(parseInfoschematic(serialiseInfoschematicJson(parsed.model))).toEqual(parsed)
-    expect(JSON.parse(serialiseInfoschematicJson(parsed.model))).toEqual(parsed.model)
+    expect(JSON.parse(serialiseInfoschematicJson(parsed.model)).diagram.bounds).toBe('0 0 10 20')
   })
 })
 

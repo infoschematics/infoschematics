@@ -12,6 +12,25 @@ import type {
 const legacyPorts = Object.freeze({ east: 7, north: 7, south: 7, west: 7 })
 const standardPorts = Object.freeze({ east: 1, north: 1, south: 1, west: 1 })
 
+/** Generic callout candidates: three columns by five rows, ordered from the centre out. */
+export const defaultCalloutPositions = Object.freeze([
+  Object.freeze({ x: 0.5, y: 0.5 }),
+  Object.freeze({ x: 0.5, y: 0.28 }),
+  Object.freeze({ x: 0.5, y: 0.72 }),
+  Object.freeze({ x: 0.5, y: 0.16 }),
+  Object.freeze({ x: 0.5, y: 0.84 }),
+  Object.freeze({ x: 0.26, y: 0.5 }),
+  Object.freeze({ x: 0.74, y: 0.5 }),
+  Object.freeze({ x: 0.26, y: 0.28 }),
+  Object.freeze({ x: 0.74, y: 0.28 }),
+  Object.freeze({ x: 0.26, y: 0.72 }),
+  Object.freeze({ x: 0.74, y: 0.72 }),
+  Object.freeze({ x: 0.26, y: 0.16 }),
+  Object.freeze({ x: 0.74, y: 0.16 }),
+  Object.freeze({ x: 0.26, y: 0.84 }),
+  Object.freeze({ x: 0.74, y: 0.84 })
+])
+
 const propertiesOf = (
   properties: Readonly<Record<string, boolean | number | string>> | undefined
 ): Readonly<Record<string, JsonValue>> | undefined => properties
@@ -96,21 +115,10 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
     description: config.synopsis,
     diagram: {
       appearance: definition.appearance,
-      assemblies: definition.cards.flatMap((card) =>
-        card.wraps
-          ? [
-              {
-                adapter: card.code,
-                id: `${card.code}-ASSEMBLY`,
-                interface: visibleId(card.wraps),
-                kind: 'adapter' as const
-              }
-            ]
-          : []
-      ),
       bounds: definition.viewBox,
       calloutPositions: config.calloutPositions,
       cards: definition.cards.map((card) => ({
+        adapts: card.wraps ? visibleId(card.wraps) : undefined,
         bounds: card.placement.box,
         collection: card.domain ?? card.scope,
         description: card.detail,
@@ -327,11 +335,11 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     ...input,
     diagram: {
       ...input.diagram,
-      assemblies: input.diagram.assemblies ?? [],
-      calloutPositions: input.diagram.calloutPositions ?? [],
+      calloutPositions: input.diagram.calloutPositions ?? defaultCalloutPositions,
       cards: (input.diagram.cards ?? []).map((card) => ({
         ...card,
-        ports: card.ports ?? standardPorts
+        ports: card.ports ?? standardPorts,
+        provides: card.provides ?? []
       })),
       collections: input.diagram.collections ?? [],
       fabrics: (input.diagram.fabrics ?? []).map((fabric) => ({
@@ -366,7 +374,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     ...model.diagram.overlays
   ]
   const seen = new Set<string>()
-  for (const element of [...visible, ...model.diagram.assemblies]) {
+  for (const element of visible) {
     if (seen.has(element.id)) throw new Error(`Duplicate Diagram id: ${element.id}`)
     seen.add(element.id)
   }
@@ -385,15 +393,8 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
   for (const card of model.diagram.cards) {
     if (card.collection) requireReference(collectionIds, card.collection, `Card ${card.id}`)
     for (const contract of card.interfaces ?? []) requireReference(interfaceIds, contract, `Card ${card.id}`)
-  }
-  for (const assembly of model.diagram.assemblies) {
-    if (assembly.kind === 'adapter') {
-      requireReference(cardIds, assembly.adapter, `Assembly ${assembly.id}`)
-      requireReference(cardIds, assembly.interface, `Assembly ${assembly.id}`)
-    } else {
-      requireReference(cardIds, assembly.wrapper, `Assembly ${assembly.id}`)
-      requireReference(cardIds, assembly.wrapped, `Assembly ${assembly.id}`)
-    }
+    if (card.adapts) requireReference(cardIds, card.adapts, `Card ${card.id} adapts`)
+    if (card.wraps) requireReference(cardIds, card.wraps, `Card ${card.id} wraps`)
   }
   for (const flow of model.diagram.flows) {
     if (flow.family) requireReference(familyIds, flow.family, `Flow ${flow.id}`)

@@ -52,6 +52,10 @@ export type Card = {
   description?: string
   stereotype?: string
   collection?: string
+  /** Interface Card this Adapter Card adapts. */
+  adapts?: string
+  /** Card this Wrapper Card contains. */
+  wraps?: string
   bounds: Box
   ports?: PortCounts
   interfaces?: readonly string[]
@@ -101,12 +105,6 @@ export type Overlay = {
   bounds?: Box
   properties?: Readonly<Record<string, JsonValue>>
 }
-
-type AssemblyBase = { id: string; label?: string; description?: string }
-
-export type Assembly =
-  | (AssemblyBase & { kind: 'adapter'; interface: string; adapter: string })
-  | (AssemblyBase & { kind: 'wrapped'; wrapper: string; wrapped: string })
 
 export type ElementSelection = {
   elements?: readonly string[]
@@ -178,7 +176,6 @@ export type Diagram = {
   points?: readonly Point[]
   flows?: readonly Flow[]
   overlays?: readonly Overlay[]
-  assemblies?: readonly Assembly[]
 }
 
 export type Infoschematic = {
@@ -194,7 +191,6 @@ export type Infoschematic = {
 
 export type DefinedDiagram = Omit<
   Diagram,
-  | 'assemblies'
   | 'calloutPositions'
   | 'cards'
   | 'collections'
@@ -206,7 +202,6 @@ export type DefinedDiagram = Omit<
   | 'regions'
   | 'sets'
 > & {
-  assemblies: readonly Assembly[]
   calloutPositions: readonly Coordinate[]
   cards: readonly Card[]
   collections: readonly Collection[]

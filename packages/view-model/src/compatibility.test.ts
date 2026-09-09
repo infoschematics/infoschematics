@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { establishedInfoschematicOf } from './compatibility.ts'
 
 describe('establishedInfoschematicOf', () => {
-  it('preserves legacy geometry, ports, assemblies, and copied scenes', () => {
+  it('preserves legacy geometry, ports, Card composition, and copied scenes', () => {
     const legacy = defineInfoschematic({
       id: 'legacy',
       title: 'Compatibility',

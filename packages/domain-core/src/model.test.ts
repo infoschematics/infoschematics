@@ -1,4 +1,9 @@
-import { defineInfoschematic, defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
+import {
+  defaultCalloutPositions,
+  defineInfoschematic,
+  defineInfoschematicModel,
+  infoschematicModelOf
+} from '@infoschematics/domain-core'
 import { describe, expect, it } from 'vitest'
 
 describe('infoschematicModelOf', () => {
@@ -102,7 +107,10 @@ describe('infoschematicModelOf', () => {
       description: 'Existing authored input.',
       diagram: {
         calloutPositions: [{ x: 0.25, y: 0.75 }],
-        cards: [{ id: 'SNK', ports: { east: 7, north: 7, south: 7, west: 7 } }, { id: 'ADP' }],
+        cards: [
+          { id: 'SNK', ports: { east: 7, north: 7, south: 7, west: 7 } },
+          { id: 'ADP', adapts: 'SNK' }
+        ],
         points: [{ id: 'SRC', at: { x: 20, y: 50 } }],
         flows: [
           {
@@ -110,14 +118,6 @@ describe('infoschematicModelOf', () => {
             source: { element: 'SRC', port: 'E1' },
             target: { element: 'SNK', port: 'W1' },
             route: { waypoints: [{ x: 60, y: 50 }] }
-          }
-        ],
-        assemblies: [
-          {
-            id: 'ADP-ASSEMBLY',
-            kind: 'adapter',
-            interface: 'SNK',
-            adapter: 'ADP'
           }
         ]
       },
@@ -274,7 +274,7 @@ describe('infoschematicModelOf', () => {
       west: 1
     })
     expect(model.diagram.flows).toEqual([])
-    expect(model.diagram.calloutPositions).toEqual([])
+    expect(model.diagram.calloutPositions).toEqual(defaultCalloutPositions)
     expect(model.themes).toEqual([])
     expect(JSON.parse(JSON.stringify(model))).toEqual(model)
 

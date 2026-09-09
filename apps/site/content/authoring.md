@@ -161,6 +161,45 @@ title: My Infoschematic
 
 The `$schema` key is editor metadata; the loader removes it before validating. The schema is a repository file rather than a published package export, so a document outside this repository points at a copy or a checkout. `bun run self:examples:render infoschematic.yaml` renders a document straight to SVG. TypeScript authoring keeps its compile-time guarantee and remains the right choice for a definition that lives in a package.
 
+## Canonical YAML convention
+
+Prefer the compact YAML form for hand-authored canonical [Infoschematics](/docs/reference/vocabulary/#infoschematic). JSON syntax remains valid input, and typed TypeScript code can construct the same structured model. Shorthand exists only at the document boundary: parsing expands it before a View, Studio, or programmatic consumer receives the model.
+
+Order every mapping by meaning rather than alphabetically. Put identity first (`id`, `title` or `label`, `subtitle`, `description`), followed by classification, geometry, nested content, then appearance. At the document root use `id`, `title`, `subtitle`, `description`, `diagram`, `specifications`, `stories`, `themes`. Within `diagram`, use `bounds` and `appearance`; vocabularies (`collections`, `sets`, `families`); placeables (`cards`, `fabrics`, `points`, `regions`); wiring (`flows`, `overlays`); then `calloutPositions`.
+
+Use SVG view-box order for bounds, coordinate-pair notation for positions, CSS box shorthand clockwise from north for ports, SVG points syntax for waypoints, and an arrow for a Flow's endpoints:
+
+```yaml
+id: DELIVERY
+title: Delivery
+diagram:
+  bounds: 0 0 800 500
+  families:
+    - id: DATA
+      label: Data
+      color: '#3fb950'
+  cards:
+    - id: SRC
+      label: Source
+      bounds: 100 160 200 120
+      ports: 0 3 7 1
+    - id: SNK
+      label: Sink
+      bounds: 500 160 200 120
+      ports: 7 3
+  flows:
+    - id: LOAD
+      family: DATA
+      link: SRC E2 -> SNK W2
+      labelAt: 0.8286
+      waypoints: 470,890 470,810
+      line: dashed
+```
+
+Omit `direction: forward`, empty `waypoints`, and empty Card `provides`; Domain Core supplies those defaults. It also supplies the generic three-by-five callout lattice unless `calloutPositions` overrides it. A single appearance value may be unwrapped, such as `color` on a Family or `line` on a Flow. An Adapter Card declares `adapts: <card-id>`; a Wrapper Card declares `wraps: <card-id>`. Neither composition requires a diagram-level Assembly or a separately authored Assembly id.
+
+`serialiseInfoschematicYaml` emits this order and notation. Parsing that output and emitting it again is stable; structured object forms remain accepted and normalize to the same internal values.
+
 ## Keep configuration portable
 
 - Export one complete value created by `defineInfoschematic`.

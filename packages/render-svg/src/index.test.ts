@@ -138,7 +138,6 @@ describe('renderInfoschematicSvg', () => {
       id: 'BLANK',
       title: 'Canonical boundary',
       diagram: {
-        assemblies: [],
         bounds: established.infoschematic.viewBox,
         calloutPositions: [],
         cards: [],

@@ -14,7 +14,6 @@ export const systemExample = defineInfoschematicModel({
         description: true
       }
     },
-    assemblies: [],
     bounds: {
       height: 248,
       width: 1268,

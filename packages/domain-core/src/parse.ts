@@ -1,5 +1,6 @@
 import type { DefinedInfoschematic } from '@infoschematics/domain-model/model'
 import { parseDocument } from 'yaml'
+import type { ZodIssue } from 'zod'
 import { defineInfoschematicModel } from './model.ts'
 import { infoschematicSchema } from './schema.ts'
 
@@ -39,6 +40,20 @@ const failure = (
   issues: issues.map((issue) => (document ? { ...issue, document } : issue)),
   ok: false
 })
+
+const issueSpecificity = (issues: readonly ZodIssue[]): number =>
+  Math.max(0, ...issues.map((issue) => issue.path.length * 100 + (issue.code === 'custom' ? 10 : 0))) - issues.length
+
+const authoredIssuesOf = (
+  issue: ZodIssue,
+  prefix: readonly PropertyKey[] = []
+): readonly Readonly<{ message: string; path: string }>[] => {
+  if (issue.code === 'invalid_union') {
+    const branch = [...issue.errors].sort((left, right) => issueSpecificity(right) - issueSpecificity(left))[0] ?? []
+    return branch.flatMap((nested) => authoredIssuesOf(nested, [...prefix, ...issue.path]))
+  }
+  return [{ message: issue.message, path: [...prefix, ...issue.path].map(String).join('.') }]
+}
 
 // `$schema` is editor metadata rather than part of the domain contract.
 const withoutEditorMetadata = (document: unknown): unknown => {
@@ -112,7 +127,7 @@ export function parseInfoschematic(text: string, options: ParseInfoschematicOpti
     if (!validated.success) {
       return failure(
         pathname,
-        validated.error.issues.map((issue) => ({ message: issue.message, path: issue.path.join('.') }))
+        validated.error.issues.flatMap((issue) => authoredIssuesOf(issue))
       )
     }
 

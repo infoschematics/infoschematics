@@ -103,18 +103,17 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       : [])
   ]
   const scopesOf = (id: string) => memberships.get(id) ?? [allSet]
-  const assemblyByCard = new Map(
-    diagram.assemblies.flatMap((assembly) =>
-      assembly.kind === 'adapter'
-        ? [[assembly.adapter, assembly.interface] as const]
-        : [[assembly.wrapper, assembly.wrapped] as const]
-    )
+  const compositionByCard = new Map(
+    diagram.cards.flatMap((card) => {
+      const held = card.adapts ?? card.wraps
+      return held ? [[card.id, held] as const] : []
+    })
   )
   const cardById = new Map(diagram.cards.map((card) => [card.id, card]))
   const placedBox = (id: string) => {
     const card = cardById.get(id)
     if (!card) return undefined
-    const held = assemblyByCard.get(id)
+    const held = compositionByCard.get(id)
     return held ? adapterBoundsFor(cardById.get(held)?.bounds ?? card.bounds) : card.bounds
   }
   const endpointById = new Map<string, { box: Box; ports?: PortCounts } | { point: Point }>([
@@ -164,11 +163,11 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         label: card.label,
         placement: { box: card.bounds, ports: card.ports },
         scope: scopesOf(card.id)[0] ?? allSet,
-        scopeRule: assemblyByCard.has(card.id) && scopesOf(card.id).length > 1 ? 'all' : undefined,
+        scopeRule: compositionByCard.has(card.id) && scopesOf(card.id).length > 1 ? 'all' : undefined,
         scopes: scopesOf(card.id),
         services: card.provides,
         stereotype: card.stereotype,
-        wraps: assemblyByCard.get(card.id)
+        wraps: compositionByCard.get(card.id)
       })),
       domains: diagram.collections.map((collection) => ({
         color: collection.appearance?.color ?? fallbackColor,
