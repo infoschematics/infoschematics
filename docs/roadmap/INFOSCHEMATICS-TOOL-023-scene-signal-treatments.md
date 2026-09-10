@@ -7,7 +7,7 @@ horizon: future
 status: draft
 candidate: true
 blocks: []
-blocked_by: []
+blocked_by: [INFOSCHEMATICS-SITE-006]
 baseline_ref: null
 ---
 
