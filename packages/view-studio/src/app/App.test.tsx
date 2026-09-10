@@ -47,15 +47,18 @@ describe('App', () => {
   })
 
   it('highlights conforming Flows and keeps their endpoints as context', () => {
-    const highlight = specificationDiagramHighlight('SPEC-A', [
-      { conformsTo: ['SPEC-A'], id: 'flow-a', source: 'source', target: 'middle' },
-      { conformsTo: ['SPEC-B', 'SPEC-A'], id: 'flow-b', source: 'middle', target: 'sink' },
-      { conformsTo: ['SPEC-B'], id: 'flow-c', source: 'other', target: 'sink' }
-    ])
+    const highlight = specificationDiagramHighlight(
+      ['flow-a', 'flow-b'],
+      [
+        { id: 'flow-a', source: 'source', target: 'middle' },
+        { id: 'flow-b', source: 'middle', target: 'sink' },
+        { id: 'flow-c', source: 'other', target: 'sink' }
+      ]
+    )
 
     expect(highlight?.flows).toEqual(new Set(['flow-a', 'flow-b']))
     expect(highlight?.endpoints).toEqual(new Set(['source', 'middle', 'sink']))
-    expect(specificationDiagramHighlight('SPEC-C', [])).toBeUndefined()
+    expect(specificationDiagramHighlight([], [])).toBeUndefined()
   })
 
   it('wires all-six typed Design preview without replacing legacy handle callbacks', async () => {

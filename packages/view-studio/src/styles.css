@@ -1641,53 +1641,109 @@ h2 {
   margin-left: auto;
 }
 
-/* One group per state a specification can be in. The heading carries the gap
-   above it rather than the group carrying one below, so the first group sits
-   against the lead paragraph's rule instead of a row of empty space. */
-.specification-group + .specification-group .contract-meta {
-  margin-top: 14px;
-}
-
-.specification-group .contract-meta {
-  margin: 0 0 6px;
-}
-
-.api-links {
+.contract-body.specifications-body {
   display: grid;
-  gap: 5px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 0;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.1fr);
+  overflow: hidden;
+  padding: 0;
 }
 
-.api-links button {
+.specifications-selection,
+.specifications-detail {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px 14px;
+}
+
+.specifications-detail {
+  border-left: 1px solid #ffffff1c;
+}
+
+.specification-tree {
+  display: grid;
+  gap: 6px;
+}
+
+.specification-tree-row {
+  align-items: stretch;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  padding-left: calc(var(--specification-depth) * 12px);
+}
+
+.specification-disclosure,
+.specification-node {
   background: #10263b;
   border: 1px solid #ffffff1e;
-  border-radius: 6px;
   color: #cde8fb;
   cursor: pointer;
-  font:
-    500 10px "DM Mono",
-    monospace;
+}
+
+.specification-disclosure {
+  border-radius: 5px;
+  font: 600 12px "DM Mono", monospace;
+  padding: 0;
+}
+
+.specification-disclosure-spacer {
+  width: 24px;
+}
+
+.specification-node {
+  align-items: baseline;
+  border-radius: 6px;
+  display: flex;
+  font: 500 10px "DM Mono", monospace;
+  gap: 8px;
+  justify-content: space-between;
+  min-width: 0;
   padding: 7px 8px;
   text-align: left;
 }
 
-.api-links button:hover {
+.specification-node span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.specification-node small {
+  color: #7892ad;
+  font-size: 8px;
+  text-transform: uppercase;
+}
+
+.specification-node:hover,
+.specification-disclosure:hover,
+.specification-node[aria-pressed="true"] {
   background: #173653;
   border-color: #79c9ff;
 }
 
-.api-links button[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
+.specification-group-node {
   color: white;
+  font-weight: 600;
 }
 
-.api-links button:disabled {
-  background: #0d1c2b;
-  border-color: #ffffff10;
-  color: #55697d;
-  cursor: not-allowed;
+.specification-tree-children {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.specifications-detail .state-contract-heading {
+  align-items: flex-start;
+}
+
+.specifications-detail h2 {
+  color: white;
+  font-size: 14px;
+  margin: 2px 0 0;
+}
+
+.specification-detail-heading {
+  margin: 14px 0 0;
 }
 
 .state-summary {
@@ -1966,6 +2022,21 @@ h2 {
 }
 
 @media (width <= 700px) {
+  .contract-body.specifications-body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+
+  .specifications-selection,
+  .specifications-detail {
+    overflow: visible;
+  }
+
+  .specifications-detail {
+    border-left: 0;
+    border-top: 1px solid #ffffff1c;
+  }
+
   .callout-sides {
     grid-template-columns: minmax(0, 1fr);
   }

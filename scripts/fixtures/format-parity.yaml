@@ -53,7 +53,6 @@ diagram:
     - id: LOAD
       family: DATA
       link: SRC E1 -> SNK W1
-      operation: load
 themes:
   - id: OVERVIEW
     label: Overview

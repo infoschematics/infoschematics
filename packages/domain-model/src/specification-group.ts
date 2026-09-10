@@ -5,5 +5,7 @@ export type SpecificationGroupConfig = {
   label: string
   note: string
   owner: string
-  document: InterfaceConfig['document']
+  hasDocument: boolean
+  /** Full paths of the Specifications directly in this group. */
+  specifications?: readonly InterfaceConfig['id'][]
 }

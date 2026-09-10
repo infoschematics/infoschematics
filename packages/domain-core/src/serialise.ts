@@ -43,11 +43,16 @@ const fieldOrder = [
   'kind',
   'stereotype',
   'owner',
-  'question',
+  'document',
+  'code',
+  'href',
+  'version',
+  'realisedBy',
   'interfaces',
+  'operations',
+  'question',
   'scopes',
   'elements',
-  'provides',
   'adapts',
   'wraps',
   'bounds',
@@ -69,10 +74,6 @@ const fieldOrder = [
   'flows',
   'overlays',
   'calloutPositions',
-  'document',
-  'operations',
-  'ownership',
-  'href',
   'summary',
   'visibility',
   'show',
@@ -192,7 +193,6 @@ const compactMapping = (input: Readonly<Mapping>, context: string): Mapping => {
   const entries: [string, unknown][] = []
   for (const [key, entry] of Object.entries(value)) {
     if (entry === undefined) continue
-    if (key === 'provides' && Array.isArray(entry) && entry.length === 0) continue
     if (key === 'waypoints' && Array.isArray(entry) && entry.length === 0) continue
     if (Array.isArray(entry) && entry.length === 0 && emptyCollectionIsDefault(key, context)) continue
 

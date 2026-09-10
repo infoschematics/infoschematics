@@ -50,6 +50,6 @@ _Implementation surface: `infoschematicJsonSchema` in `packages/domain-core/src/
 
 ## Gaps
 
-- Validation covers shape, enumerations, and port identity. The referential and geographic rules listed as gaps in the [Domain Model specification](domain-model.md) remain unvalidated for documents as well as for TypeScript, apart from the Domain checks in CORE-001.
+- Validation covers shape, enumerations, port identity, Diagram references from Architectural Scopes, and Diagram references from every `realisedBy` declaration. The remaining geographic rules listed as gaps in the [Domain Model specification](domain-model.md) remain unvalidated for documents as well as TypeScript, apart from the Domain checks in CORE-001.
 - Strict objects mean a document authored against a newer contract is rejected rather than partially understood. No document-versioning or migration scheme is specified.
 - The loader is a library boundary. Publishing it as an installable command is separate work.

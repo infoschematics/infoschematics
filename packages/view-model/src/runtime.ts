@@ -421,16 +421,38 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
   const specificationSections = definition.specificationGroups
     .map((group) => ({
       group,
-      within: definition.interfaces.filter((entry) => entry.owner === group.owner && entry.document === group.document)
+      within: definition.interfaces.filter((entry) =>
+        group.specifications
+          ? group.specifications.some(
+              (specificationPath) => entry.id === specificationPath || entry.id.startsWith(`${specificationPath}/`)
+            )
+          : entry.owner === group.owner && entry.hasDocument === group.hasDocument
+      )
     }))
     .filter((section) => section.within.length > 0)
 
-  const flowsCarrying = (id: string) => flows.filter((flow) => flow.conformsTo?.includes(id))
-  const cardsOffering = (id: string) =>
-    register.all.filter((entry) => entry.kind === 'card' && entry.conformsTo?.includes(id))
-  const unroutedInterfaces = definition.interfaces.filter(
-    (entry) => flowsCarrying(entry.id).length === 0 && cardsOffering(entry.id).length === 0
+  const realisedBySpecification = new Map(
+    definition.interfaces.map((entry) => [entry.id, entry.realisedBy ?? []] as const)
   )
+  const flowsById = new Map(flows.map((flow) => [flow.id, flow]))
+  const identitiesById = new Map(register.all.map((entry) => [entry.id, entry]))
+  const flowsCarrying = (id: string) =>
+    (realisedBySpecification.get(id) ?? []).flatMap((element) => {
+      const flow = flowsById.get(element)
+      return flow ? [flow] : []
+    })
+  const cardsOffering = (id: string) =>
+    (realisedBySpecification.get(id) ?? []).flatMap((element) => {
+      const identity = identitiesById.get(element)
+      return identity?.kind === 'card' ? [identity] : []
+    })
+  const specificationsByElement = new Map<string, InterfaceConfig[]>()
+  for (const entry of definition.interfaces) {
+    for (const element of entry.realisedBy ?? []) {
+      specificationsByElement.set(element, [...(specificationsByElement.get(element) ?? []), entry])
+    }
+  }
+  const unroutedInterfaces = definition.interfaces.filter((entry) => (entry.realisedBy?.length ?? 0) === 0)
 
   return {
     config,
@@ -495,6 +517,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     infoschematicSpecificationSections: specificationSections,
     infoschematicFlowsCarrying: flowsCarrying,
     infoschematicCardsOffering: cardsOffering,
+    infoschematicSpecificationsFor: (element: string) => specificationsByElement.get(element) ?? [],
     infoschematicUnroutedInterfaces: unroutedInterfaces,
     stories,
     standaloneScenes,
@@ -505,7 +528,9 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
   }
 }
 
-export type InfoschematicRuntime = ReturnType<typeof createInfoschematicRuntime>
+type CompleteInfoschematicRuntime = ReturnType<typeof createInfoschematicRuntime>
+export type InfoschematicRuntime = Omit<CompleteInfoschematicRuntime, 'infoschematicSpecificationsFor'> &
+  Partial<Pick<CompleteInfoschematicRuntime, 'infoschematicSpecificationsFor'>>
 
 export type RuntimeScope = ScopeConfig
 export type RuntimeInterface = InterfaceConfig

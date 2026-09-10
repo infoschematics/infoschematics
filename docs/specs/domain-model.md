@@ -118,15 +118,15 @@ _Implementation surface: `packages/domain-model/src/option-catalogue.ts` and `do
 
 ### DOMAIN-009 — Relationship semantics and geometry are separate facts
 
-A flow MUST state its family and the two things it joins independently from the points used to draw it. Optional operation, conformance and transport references MUST remain semantic properties rather than being inferred from route geometry.
+A Flow MUST state its Family and the two things it joins independently of the points used to draw it. A Specification, Interface, or Operation MAY name that Flow in `realisedBy`; conformance MUST remain an explicit semantic relationship rather than be inferred from route geometry.
 
-_Implementation surface: `FlowConfig` in `packages/domain-model/src/flow.ts`._
+_Implementation surface: `Flow` and the specification hierarchy in `packages/domain-model/src/model.ts`._
 
 ### DOMAIN-010 — Component and flow conformance are distinct
 
-An artefact MAY name specifications that it offers. A flow MAY separately name specifications to which the carried interaction conforms. These claims MUST NOT be merged: an artefact capability and a relationship conformance describe different facts.
+A Specification, Interface, or Operation MAY name an artefact that realises it. It MAY separately name a Flow whose carried interaction realises it. These claims MUST NOT be merged: an artefact realising a capability and a Flow realising a conformance point describe different facts.
 
-_Implementation surface: `conformsTo` in `packages/domain-model/src/artefact.ts` and `packages/domain-model/src/flow.ts`._
+_Implementation surface: `realisedBy` in the specification hierarchy in `packages/domain-model/src/model.ts`._
 
 ### DOMAIN-011 — Containment is an authored relationship
 

@@ -45,6 +45,7 @@ import { useContractDetail } from './contracts.ts'
 import { InterfaceLines } from './InterfaceLines.tsx'
 import { ModelRegister } from './ModelRegister.tsx'
 import { SpecificationOverlay } from './SpecificationOverlay.tsx'
+import { SpecificationTree } from './SpecificationTree.tsx'
 import { SplitPane } from './SplitPane.tsx'
 
 type DirectKind = DirectTarget['kind']
@@ -307,7 +308,7 @@ export function DetailsPanel({
   /** Both need the Infoschematic: where there is room on a route, and where its ports are. */
   onAddWaypoint: () => void
   onResetRoute: () => void
-  onSpecificationHover: (id: string | null) => void
+  onSpecificationHover: (elements: readonly string[] | null) => void
   editor: DetailsPanelEditor & {
     canRedo: boolean
     canUndo: boolean
@@ -343,14 +344,7 @@ export function DetailsPanel({
   }
   presentation: Presentation
 }) {
-  const {
-    config,
-    infoschematicCardsOffering,
-    infoschematicFlowsCarrying,
-    infoschematicSpecificationSections,
-    infoschematicUnroutedInterfaces
-  } = useInfoschematic()
-  const unroutedInterfaceIds = new Set(infoschematicUnroutedInterfaces.map((entry) => entry.id))
+  const { config, infoschematicSpecificationSections } = useInfoschematic()
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const artefactContexts = useMemo(
     () => detailsArtefactContexts(config, editor),
@@ -425,20 +419,10 @@ export function DetailsPanel({
         ? firstCalloutTarget.owner
         : 'theme'
   const [selectedContract, setSelectedContract] = useState<InterfaceConfig | null>(null)
-  /* Which specification is open for reading, which is not the same as which is
-     selected: selecting one lists what conforms to it, reading one renders it. */
+  /* Reading opens the document overlay; selecting a tree node keeps detail in the panel. */
   const [reading, setReading] = useState<InterfaceConfig | null>(null)
   const { detail: contractDetail, failed: contractError } = useContractDetail(selectedContract)
-  const contractFlows = useMemo(
-    () => (selectedContract ? infoschematicFlowsCarrying(selectedContract.id) : []),
-    [infoschematicFlowsCarrying, selectedContract]
-  )
-  // What a card offers, which is the other half of the same question and the
-  // only answer there is for a specification no flow carries.
-  const contractCards = useMemo(
-    () => (selectedContract ? infoschematicCardsOffering(selectedContract.id) : []),
-    [infoschematicCardsOffering, selectedContract]
-  )
+  const selectedDocumentVersion = selectedContract?.version ?? contractDetail?.version
   const { runningStory, standaloneScene, thematicScene } = presentation
 
   const { mode, setMode } = editor
@@ -815,99 +799,86 @@ export function DetailsPanel({
           <ModelRegister hovered={editor.hovered} onPoint={editor.hover} />
         </div>
       ) : (
-        <div className="contract-body">
-          {/* Says what the tab is for, and nothing about what this diagram
-              happens to contain. The sentence here counted the interfaces and
-              apportioned them between one deployment's groups, which
-              is a fact about one deployment's model rather than about the
-              control, and was quoted to a visitor as though it were the point
-              of the panel. */}
-          <p className="register-note specification-lead">
-            What the Infoschematic conforms to, grouped by whose specification it is and whether there is a document to
-            read. Choose one to see what carries or offers it.
-          </p>
-
-          {/* A group per state rather than one flat list. The list was six
-              entries authored in the panel; it is now every specification the
-              model holds, which is why the grouping earns its place - twenty-six
-              buttons in one run says nothing about which of them are ours. */}
-          {infoschematicSpecificationSections.map(({ group, within }) => {
-            return (
-              <div className="specification-group" key={group.id}>
-                <p className="contract-meta" title={group.note}>
-                  {group.label}
-                </p>
-                <div className="api-links">
-                  {within.map((entry) => {
-                    const unrouted = unroutedInterfaceIds.has(entry.id)
-                    return (
-                      <button
-                        aria-pressed={selectedContract?.id === entry.id}
-                        disabled={unrouted}
-                        key={entry.id}
-                        onBlur={() => onSpecificationHover(null)}
-                        onClick={() => setSelectedContract((current) => (current?.id === entry.id ? null : entry))}
-                        onFocus={() => onSpecificationHover(entry.id)}
-                        onPointerEnter={() => onSpecificationHover(entry.id)}
-                        onPointerLeave={() => onSpecificationHover(null)}
-                        title={unrouted ? 'Nothing on the diagram reaches this specification yet.' : entry.description}
-                        type="button"
-                      >
-                        {entry.label}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })}
-
-          {selectedContract ? (
-            <>
-              <div className="compact-heading state-contract-heading">
-                <p className="eyebrow">{selectedContract.prefix}</p>
-                {selectedContract.href ? (
-                  <button className="link-button" onClick={() => setReading(selectedContract)} type="button">
-                    Read specification
-                  </button>
-                ) : null}
-              </div>
-
-              {/* A document is fetched only where there is one to fetch. Most
-                  specifications are somebody else's and are named here rather
-                  than published here, so their own description is what there is
-                  to say about them. */}
-              {!selectedContract.href ? (
-                <p>{selectedContract.description}</p>
-              ) : contractError ? (
-                <p className="contract-empty">Specification could not be loaded.</p>
-              ) : contractDetail ? (
-                <>
-                  <p className="contract-meta">
-                    {selectedContract.contract} · version {contractDetail.version}
-                  </p>
-                  {contractDetail.description ? <p>{contractDetail.description}</p> : null}
-                  <ul className="contract-operations">
-                    {contractDetail.operations.map((operation) => (
-                      <li key={`${operation.detail}-${operation.name}`}>
-                        <code>{operation.detail}</code>
-                        <span>{operation.name}</span>
-                        {operation.summary ? <em>{operation.summary}</em> : null}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p className="contract-empty">Loading specification…</p>
-              )}
-
-              <InterfaceLines cards={contractCards} flows={contractFlows} interfaceEntry={selectedContract} />
-            </>
-          ) : (
-            <p className="contract-empty specifications-empty">
-              Choose a specification to see what it defines, and what on the Infoschematic carries or offers it.
+        <div className="contract-body specifications-body">
+          <div className="specifications-selection">
+            <p className="register-note specification-lead">
+              Specifications are grouped by thematic area. Expand the tree to inspect conformance points and operations.
             </p>
-          )}
+            <SpecificationTree
+              onHover={onSpecificationHover}
+              onSelect={(entry) => setSelectedContract((current) => (current?.id === entry.id ? null : entry))}
+              sections={infoschematicSpecificationSections}
+              selected={selectedContract}
+            />
+          </div>
+
+          <div className="specifications-detail">
+            {selectedContract ? (
+              <>
+                <div className="compact-heading state-contract-heading">
+                  <div>
+                    <p className="eyebrow">{selectedContract.kind ?? 'group'}</p>
+                    <h2>{selectedContract.label}</h2>
+                  </div>
+                  {selectedContract.href ? (
+                    <button className="link-button" onClick={() => setReading(selectedContract)} type="button">
+                      Read specification
+                    </button>
+                  ) : null}
+                </div>
+
+                {selectedContract.owner || selectedContract.contract || selectedDocumentVersion ? (
+                  <p className="contract-meta">
+                    {[
+                      selectedContract.owner,
+                      selectedContract.contract,
+                      selectedDocumentVersion && `Version ${selectedDocumentVersion}`
+                    ]
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
+                ) : null}
+                {selectedContract.description || contractDetail?.description ? (
+                  <p>{selectedContract.description || contractDetail?.description}</p>
+                ) : null}
+                {contractError ? <p className="contract-empty">Specification document could not be loaded.</p> : null}
+
+                {(selectedContract.operations?.length ?? 0) > 0 ? (
+                  <>
+                    <p className="eyebrow specification-detail-heading">Operations</p>
+                    <ul className="contract-operations">
+                      {selectedContract.operations?.map((operation) => (
+                        <li key={operation.id}>
+                          <code>{operation.id.split('/').at(-1)}</code>
+                          <span>{operation.label}</span>
+                          {operation.description ? <em>{operation.description}</em> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : contractDetail && contractDetail.operations.length > 0 ? (
+                  <>
+                    <p className="eyebrow specification-detail-heading">Operations</p>
+                    <ul className="contract-operations">
+                      {contractDetail.operations.map((operation) => (
+                        <li key={`${operation.detail}-${operation.name}`}>
+                          <code>{operation.detail}</code>
+                          <span>{operation.name}</span>
+                          {operation.summary ? <em>{operation.summary}</em> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+
+                <InterfaceLines realisedBy={selectedContract.realisedBy ?? []} />
+              </>
+            ) : (
+              <p className="contract-empty specifications-empty">
+                Choose any node to see its document, description, operations and realising diagram elements.
+              </p>
+            )}
+          </div>
         </div>
       )}
 

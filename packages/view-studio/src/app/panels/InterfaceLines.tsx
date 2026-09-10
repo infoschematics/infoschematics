@@ -1,66 +1,58 @@
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import { type RuntimeFlow, type RuntimeIdentity, useInfoschematic } from '@infoschematics/view-canvas'
+import { useInfoschematic } from '@infoschematics/view-canvas'
 
-/*
- * What the Infoschematic answers for a specification.
- *
- * A Flow carries a specification, while a Card offers one whether or not a
- * drawn Flow calls it. Counting only routed specifications would report an
- * offered contract as unreachable even when its Card is in plain view.
- */
-export function InterfaceLines({
-  cards,
-  flows,
-  interfaceEntry
-}: {
-  cards: readonly RuntimeIdentity[]
-  flows: readonly RuntimeFlow[]
-  interfaceEntry: InterfaceConfig | undefined
-}) {
-  const { infoschematicEndpointLabels } = useInfoschematic()
-  if (!interfaceEntry) return null
+/** Diagram elements claimed by the selected specification node or branch. */
+export function InterfaceLines({ realisedBy }: { realisedBy: readonly string[] }) {
+  const { config, infoschematicEndpointLabels, infoschematicFlows, infoschematicRegister } = useInfoschematic()
+  const flows = new Map(infoschematicFlows.map((flow) => [flow.id, flow]))
+  const identities = new Map(infoschematicRegister.all.map((entry) => [entry.id, entry]))
+  const regions = new Map(config.infoschematic.regions.map((entry) => [entry.id, entry]))
+  const overlays = new Map(config.infoschematic.graphics.map((entry) => [entry.id, entry]))
 
-  const nothing = cards.length === 0 && flows.length === 0
+  if (realisedBy.length === 0) {
+    return <p className="contract-empty">No diagram elements currently realise this node.</p>
+  }
 
   return (
     <div className="contract-flows">
-      {flows.length > 0 ? (
-        <>
-          <p className="eyebrow">Flows that carry it</p>
-          <p className="contract-meta">
-            Annotated <code>{interfaceEntry.prefix}</code>, whatever colour the flow family gives them.
-          </p>
-          <ul className="contract-operations">
-            {flows.map((line) => (
-              <li key={line.id}>
-                <code>{line.code}</code>
+      <p className="eyebrow">Realised by</p>
+      <ul className="contract-operations">
+        {realisedBy.map((id) => {
+          const flow = flows.get(id)
+          if (flow) {
+            return (
+              <li key={id}>
+                <code>{flow.code}</code>
                 <span>
-                  {infoschematicEndpointLabels.get(line.source) ?? line.source} →{' '}
-                  {infoschematicEndpointLabels.get(line.target) ?? line.target}
+                  {infoschematicEndpointLabels.get(flow.source) ?? flow.source} →{' '}
+                  {infoschematicEndpointLabels.get(flow.target) ?? flow.target}
                 </span>
-                {line.operation ? <em>{line.operation}</em> : null}
+                <em>Flow</em>
               </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
+            )
+          }
 
-      {cards.length > 0 ? (
-        <>
-          <p className="eyebrow">Cards that offer it</p>
-          <ul className="contract-operations">
-            {cards.map((card) => (
-              <li key={card.code}>
-                <code>{card.code}</code>
-                <span>{card.label}</span>
-                {card.detail ? <em>{card.detail}</em> : null}
+          const identity = identities.get(id)
+          if (identity) {
+            return (
+              <li key={id}>
+                <code>{identity.code}</code>
+                <span>{identity.label}</span>
+                <em>{identity.kind[0]?.toUpperCase() + identity.kind.slice(1)}</em>
               </li>
-            ))}
-          </ul>
-        </>
-      ) : null}
+            )
+          }
 
-      {nothing ? <p className="contract-empty">{interfaceEntry.description}</p> : null}
+          const region = regions.get(id)
+          const overlay = overlays.get(id)
+          return (
+            <li key={id}>
+              <code>{id}</code>
+              <span>{region?.label ?? overlay?.label ?? id}</span>
+              <em>{region ? 'Region' : overlay ? 'Overlay' : 'Diagram element'}</em>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }

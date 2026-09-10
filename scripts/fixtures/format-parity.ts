@@ -62,7 +62,6 @@ export const formatParityDefinition: Infoschematic = {
         family: 'DATA',
         source: { element: 'SRC', port: 'E1' },
         target: { element: 'SNK', port: 'W1' },
-        operation: 'load',
         route: { waypoints: [] }
       }
     ]

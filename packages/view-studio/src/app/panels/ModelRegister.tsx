@@ -95,6 +95,7 @@ export function ModelRegister({
   const fabrics = infoschematicRegister.all.filter((entry) => entry.kind === 'fabric')
   const heldBy = new Map(cards.filter((card) => card.wraps).map((adapter) => [adapter.code, adapter.wraps as string]))
   const endpointName = (id: string) => infoschematicEndpointLabels.get(id) ?? id
+  const specificationName = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id
   const [shut, setShut] = usePersistentState<Record<string, boolean>>(config.id && `${config.id}.register.shut`, {})
   const toggle = (part: string) => setShut((current) => ({ ...current, [part]: !current[part] }))
 
@@ -123,10 +124,11 @@ export function ModelRegister({
               <dl className="register-rows">
                 {within.map((card) => {
                   const holds = heldBy.get(card.code)
-                  // Provides rather than implements: `services` is a grouping tag,
-                  // not a reference to anything. What a card implements is
-                  // `conformsTo`, and the Specifications tab is where it is read.
-                  const implement = card.services?.length ? `provides ${card.services.join(', ')}` : undefined
+                  // Canonical Specifications own these links; compatibility projects
+                  // specification-level Card realisations into `services` for this view.
+                  const implement = card.services?.length
+                    ? `realises ${card.services.map(specificationName).join(', ')}`
+                    : undefined
                   const held = holds ? `holds ${endpointName(holds)}` : undefined
                   return row(card.code, card.label, [card.detail, held, implement].filter(Boolean).join(' · '))
                 })}
@@ -150,7 +152,7 @@ export function ModelRegister({
 
       <Part
         count={infoschematicFlows.length}
-        note="Each flow names what it joins and the interface it carries. Two flows carrying the same interface are the same contract met by different components."
+        note="Each Flow names what it joins. Specification annotations are derived from the nodes that name that Flow in realisedBy."
         onToggle={() => toggle('flows')}
         open={!shut.flows}
         title="Flows"
@@ -166,22 +168,15 @@ export function ModelRegister({
               </p>
               <dl className="register-rows">
                 {carried.map((flow) => {
-                  /*
-                   * Two different relationships, told apart.
-                   *
-                   * `conformsTo` is alternatives: where a flow names two, the
-                   * theme decides which is true and the flow cannot. `over`
-                   * is a payload on a transport, which is not a choice at all.
-                   * Rendering these relationships differently avoids presenting
-                   * a transport relationship as an alternative.
-                   */
-                  const named = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id
-                  const alternatives = (flow.conformsTo ?? []).map(named).join(' or ')
-                  const conforms = flow.over ? `${alternatives} over ${named(flow.over)}` : alternatives
+                  /* Canonical realisation paths are projected into `conformsTo`.
+                   * Established configurations may still add the separate `over`
+                   * transport relationship consumed by this compatibility view. */
+                  const alternatives = (flow.conformsTo ?? []).map(specificationName).join(' or ')
+                  const conforms = flow.over ? `${alternatives} over ${specificationName(flow.over)}` : alternatives
                   return row(
                     flow.code,
                     `${endpointName(flow.source)} → ${endpointName(flow.target)}`,
-                    [conforms || 'Carriage, to no specification of its own', flow.operation].filter(Boolean).join(' · ')
+                    [conforms || 'No specification realisation', flow.operation].filter(Boolean).join(' · ')
                   )
                 })}
               </dl>

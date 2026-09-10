@@ -283,20 +283,6 @@
                     "type": "number"
                   }
                 ]
-              },
-              "interfaces": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "provides": {
-                "readOnly": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
               }
             },
             "required": [
@@ -652,16 +638,6 @@
                   "family": {
                     "type": "string"
                   },
-                  "operation": {
-                    "type": "string"
-                  },
-                  "interfaces": {
-                    "readOnly": true,
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
                   "appearance": {
                     "type": "object",
                     "properties": {
@@ -738,16 +714,6 @@
                   },
                   "family": {
                     "type": "string"
-                  },
-                  "operation": {
-                    "type": "string"
-                  },
-                  "interfaces": {
-                    "readOnly": true,
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
                   },
                   "appearance": {
                     "type": "object",
@@ -1023,32 +989,7 @@
           "description": {
             "type": "string"
           },
-          "owner": {
-            "type": "string"
-          },
-          "document": {
-            "type": "object",
-            "properties": {
-              "ownership": {
-                "type": "string",
-                "enum": [
-                  "ours",
-                  "theirs"
-                ]
-              },
-              "label": {
-                "type": "string"
-              },
-              "href": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "ownership"
-            ],
-            "additionalProperties": false
-          },
-          "interfaces": {
+          "specifications": {
             "readOnly": true,
             "type": "array",
             "items": {
@@ -1063,19 +1004,25 @@
                 "description": {
                   "type": "string"
                 },
+                "owner": {
+                  "type": "string"
+                },
                 "document": {
                   "type": "object",
                   "properties": {
-                    "label": {
+                    "code": {
                       "type": "string"
                     },
                     "href": {
+                      "type": "string"
+                    },
+                    "version": {
                       "type": "string"
                     }
                   },
                   "additionalProperties": false
                 },
-                "operations": {
+                "interfaces": {
                   "readOnly": true,
                   "type": "array",
                   "items": {
@@ -1084,15 +1031,62 @@
                       "id": {
                         "type": "string"
                       },
-                      "summary": {
+                      "label": {
                         "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "operations": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "label": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "realisedBy": {
+                              "readOnly": true,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "label"
+                          ],
+                          "additionalProperties": false
+                        }
+                      },
+                      "realisedBy": {
+                        "readOnly": true,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
                       }
                     },
                     "required": [
                       "id",
-                      "summary"
+                      "label"
                     ],
                     "additionalProperties": false
+                  }
+                },
+                "realisedBy": {
+                  "readOnly": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   }
                 }
               },
@@ -1107,7 +1101,7 @@
         "required": [
           "id",
           "label",
-          "interfaces"
+          "specifications"
         ],
         "additionalProperties": false
       }

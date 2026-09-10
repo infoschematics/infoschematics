@@ -288,9 +288,7 @@ const card = z
     adapts: z.string().optional(),
     wraps: z.string().optional(),
     bounds: box,
-    ports: portCounts.optional(),
-    interfaces: identifiers.optional(),
-    provides: identifiers.optional()
+    ports: portCounts.optional()
   })
   .superRefine((value, context) => {
     if (value.adapts !== undefined && value.wraps !== undefined) {
@@ -340,8 +338,6 @@ const flowAppearance = z.strictObject({
 const flowBase = {
   id: z.string(),
   family: z.string().optional(),
-  operation: z.string().optional(),
-  interfaces: identifiers.optional(),
   appearance: flowAppearance.optional(),
   line: z.enum(['solid', 'dashed']).optional()
 }
@@ -458,15 +454,21 @@ const story = z.strictObject({
   scenes: z.array(z.strictObject({ ...sceneShape, duration: number.optional() })).readonly()
 })
 
+const realising = { realisedBy: elementIdentifiers.optional() }
+
+const operation = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  ...realising
+})
+
 const interfaceContract = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
-  document: z.strictObject({ label: z.string().optional(), href: z.string().optional() }).optional(),
-  operations: z
-    .array(z.strictObject({ id: z.string(), summary: z.string() }))
-    .readonly()
-    .optional()
+  operations: z.array(operation).readonly().optional(),
+  ...realising
 })
 
 const specification = z.strictObject({
@@ -476,12 +478,20 @@ const specification = z.strictObject({
   owner: z.string().optional(),
   document: z
     .strictObject({
-      ownership: z.enum(['ours', 'theirs']),
-      label: z.string().optional(),
-      href: z.string().optional()
+      code: z.string().optional(),
+      href: z.string().optional(),
+      version: z.string().optional()
     })
     .optional(),
-  interfaces: z.array(interfaceContract).readonly()
+  interfaces: z.array(interfaceContract).readonly().optional(),
+  ...realising
+})
+
+const specificationGroup = z.strictObject({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional(),
+  specifications: z.array(specification).readonly()
 })
 
 const diagram = z.strictObject({
@@ -506,7 +516,7 @@ export const infoschematicSchema = z.strictObject({
   description: z.string().optional(),
   diagram,
   scopes: z.array(architecturalScope).readonly().optional(),
-  specifications: z.array(specification).readonly().optional(),
+  specifications: z.array(specificationGroup).readonly().optional(),
   stories: z.array(story).readonly().optional(),
   themes: z.array(theme).readonly().optional()
 })

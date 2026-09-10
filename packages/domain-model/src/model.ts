@@ -62,8 +62,6 @@ export type Card = {
   wraps?: string
   bounds: Box
   ports?: PortCounts
-  interfaces?: readonly string[]
-  provides?: readonly string[]
 }
 
 export type Fabric = {
@@ -95,8 +93,6 @@ export type Flow = {
   appearance?: { line?: FlowLineTreatment }
   source: FlowEndpoint
   target: FlowEndpoint
-  operation?: string
-  interfaces?: readonly string[]
   direction?: 'forward' | 'bidirectional'
   route?: { waypoints?: readonly Coordinate[]; labelAt?: number }
 }
@@ -150,21 +146,35 @@ export type Story = {
   scenes: readonly StoryScene[]
 }
 
-export type Interface = {
+type Realising = { realisedBy?: readonly string[] }
+
+export type Operation = Realising & {
   id: string
   label: string
   description?: string
-  document?: { label?: string; href?: string }
-  operations?: readonly { id: string; summary: string }[]
 }
 
-export type Specification = {
+export type Interface = Realising & {
+  id: string
+  label: string
+  description?: string
+  operations?: readonly Operation[]
+}
+
+export type Specification = Realising & {
   id: string
   label: string
   description?: string
   owner?: string
-  document?: { ownership: 'ours' | 'theirs'; label?: string; href?: string }
-  interfaces: readonly Interface[]
+  document?: { code?: string; href?: string; version?: string }
+  interfaces?: readonly Interface[]
+}
+
+export type SpecificationGroup = {
+  id: string
+  label: string
+  description?: string
+  specifications: readonly Specification[]
 }
 
 export type Diagram = {
@@ -190,7 +200,7 @@ export type Infoschematic = {
   scopes?: readonly ArchitecturalScope[]
   themes?: readonly Theme[]
   stories?: readonly Story[]
-  specifications?: readonly Specification[]
+  specifications?: readonly SpecificationGroup[]
 }
 
 export type DefinedDiagram = Omit<
@@ -214,7 +224,7 @@ export type DefinedInfoschematic = Omit<
 > & {
   diagram: DefinedDiagram
   scopes: readonly ArchitecturalScope[]
-  specifications: readonly Specification[]
+  specifications: readonly SpecificationGroup[]
   stories: readonly Story[]
   themes: readonly Theme[]
 }

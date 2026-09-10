@@ -26,7 +26,6 @@ ${defaultCalloutPositions.map(({ x, y }) => `    - { x: ${x}, y: ${y} }`).join('
       collection: CORE
       bounds: { x: 100, y: 160, width: 200, height: 120 }
       ports: { north: 0, east: 3, south: 7, west: 1 }
-      provides: []
     - id: SNK
       label: Sink
       collection: CORE

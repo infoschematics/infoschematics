@@ -7,6 +7,7 @@ import type {
   JsonValue,
   Scene
 } from '@infoschematics/domain-model'
+import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { PortCounts } from '@infoschematics/domain-model/ports'
 import type { Box, Point } from './geometry.ts'
 import { portsForBox } from './ports.ts'
@@ -74,6 +75,73 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
   if ('infoschematic' in input) return input
   const model: DefinedInfoschematic = input
   const diagram = model.diagram
+  const specificationNodes: InterfaceConfig[] = model.specifications.flatMap((group) =>
+    group.specifications.flatMap((specification) => {
+      const specificationPath = `${group.id}/${specification.id}`
+      const shared = {
+        contract: specification.document?.code,
+        hasDocument: Boolean(specification.document?.href),
+        href: specification.document?.href,
+        owner: specification.owner ?? '',
+        version: specification.document?.version
+      }
+      return [
+        {
+          ...shared,
+          description: specification.description ?? '',
+          id: specificationPath,
+          kind: 'specification' as const,
+          label: specification.label,
+          parent: group.id,
+          prefix: specification.id,
+          realisedBy: specification.realisedBy
+        },
+        ...(specification.interfaces ?? []).flatMap((interfaceEntry) => {
+          const interfacePath = `${specificationPath}/${interfaceEntry.id}`
+          return [
+            {
+              ...shared,
+              description: interfaceEntry.description ?? '',
+              id: interfacePath,
+              kind: 'interface' as const,
+              label: interfaceEntry.label,
+              operations: interfaceEntry.operations,
+              parent: specificationPath,
+              prefix: interfaceEntry.id,
+              realisedBy: interfaceEntry.realisedBy
+            },
+            ...(interfaceEntry.operations ?? []).map((operation) => ({
+              ...shared,
+              description: operation.description ?? '',
+              id: `${interfacePath}/${operation.id}`,
+              kind: 'operation' as const,
+              label: operation.label,
+              parent: interfacePath,
+              prefix: operation.id,
+              realisedBy: operation.realisedBy
+            }))
+          ]
+        })
+      ]
+    })
+  )
+  const specificationPathsByElement = new Map<string, string[]>()
+  for (const node of specificationNodes) {
+    for (const element of node.realisedBy ?? []) {
+      specificationPathsByElement.set(element, [...(specificationPathsByElement.get(element) ?? []), node.id])
+    }
+  }
+  const operationByElement = new Map(
+    specificationNodes
+      .filter((node) => node.kind === 'operation')
+      .flatMap((node) => (node.realisedBy ?? []).map((element) => [element, node.prefix] as const))
+  )
+  const offeredByElement = new Map<string, string[]>()
+  for (const node of specificationNodes.filter((entry) => entry.kind === 'specification')) {
+    for (const element of node.realisedBy ?? []) {
+      offeredByElement.set(element, [...(offeredByElement.get(element) ?? []), node.id])
+    }
+  }
   const scopeElements = new Map(model.scopes.map((scope) => [scope.id, scope.elements]))
   const memberships = new Map<string, string[]>()
   for (const scope of model.scopes) {
@@ -146,7 +214,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       appearance: diagram.appearance,
       cards: diagram.cards.map((card) => ({
         code: card.id,
-        conformsTo: card.interfaces,
+        conformsTo: specificationPathsByElement.get(card.id),
         detail: card.description ?? '',
         domain: card.collection,
         id: card.id,
@@ -155,7 +223,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         scope: scopesOf(card.id)[0] ?? '',
         scopeRule: compositionByCard.has(card.id) && scopesOf(card.id).length > 1 ? 'all' : undefined,
         scopes: scopesOf(card.id),
-        services: card.provides,
+        services: offeredByElement.get(card.id),
         stereotype: card.stereotype,
         wraps: compositionByCard.get(card.id)
       })),
@@ -196,14 +264,14 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       flows: diagram.flows.map((flow) => ({
         bidirectional: flow.direction === 'bidirectional' || undefined,
         code: flow.id,
-        conformsTo: flow.interfaces,
+        conformsTo: specificationPathsByElement.get(flow.id),
         dashed:
           (flow.appearance?.line ?? diagram.families.find(({ id }) => id === flow.family)?.appearance?.line) ===
             'dashed' || undefined,
         family: flow.family ?? '',
         id: flow.id,
         label: flow.route?.labelAt === undefined ? undefined : { along: flow.route.labelAt },
-        operation: flow.operation,
+        operation: operationByElement.get(flow.id),
         points: [
           portAt(flow.source.element, flow.source.port),
           ...(flow.route?.waypoints ?? []),
@@ -222,19 +290,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         renderer: overlay.kind,
         scopes: scopesOf(overlay.id)
       })),
-      interfaces: model.specifications.flatMap((specification) =>
-        specification.interfaces.map((contract) => ({
-          contract: contract.document?.label,
-          description: contract.description ?? '',
-          document: specification.document?.ownership ?? ('none' as const),
-          href: contract.document?.href ?? specification.document?.href,
-          id: contract.id,
-          label: contract.label,
-          operations: contract.operations,
-          owner: specification.owner ?? '',
-          prefix: contract.id
-        }))
-      ),
+      interfaces: specificationNodes,
       points: diagram.points.map((point) => ({
         code: point.id,
         id: point.id,
@@ -254,12 +310,13 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         labelPlacement: region.appearance?.label?.placement
       })),
       scopes,
-      specificationGroups: model.specifications.map((specification) => ({
-        document: specification.document?.ownership ?? 'none',
-        id: specification.id,
-        label: specification.label,
-        note: specification.description ?? '',
-        owner: specification.owner ?? ''
+      specificationGroups: model.specifications.map((group) => ({
+        hasDocument: group.specifications.some((specification) => Boolean(specification.document?.href)),
+        id: group.id,
+        label: group.label,
+        note: group.description ?? '',
+        owner: '',
+        specifications: group.specifications.map((specification) => `${group.id}/${specification.id}`)
       })),
       viewBox: diagram.bounds
     },

@@ -24,3 +24,4 @@ Decision records explain why Infoschematics is shaped as it is. They state the c
 20. [ADR-INFOSCHEMATICS-013](ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md) — a Zod schema in Domain Core mirrors the dependency-free contract under a compile-time parity assertion, and is the single source of both document validation and the published JSON Schema.
 21. [PDR-INFOSCHEMATICS-004](PDR-INFOSCHEMATICS-004-product-messaging.md) — one canonical set of messaging lines and tone rules governs every surface that describes the product.
 22. [ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) — the consumer user guide is Site-owned content, while repository documentation stays canonical under `docs/`.
+23. [ADR-INFOSCHEMATICS-015](ADR-INFOSCHEMATICS-015-specifications-own-realisations.md) — Specification nodes point to the Diagram elements that realise them, keeping the Diagram self-contained.

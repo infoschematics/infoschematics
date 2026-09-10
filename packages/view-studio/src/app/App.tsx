@@ -73,14 +73,18 @@ function linesMeeting(
 }
 
 export function specificationDiagramHighlight(
-  specificationId: string | null,
-  flows: readonly { conformsTo?: readonly string[]; id: string; source: string; target: string }[]
+  realisedBy: readonly string[] | null,
+  flows: readonly { id: string; source: string; target: string }[]
 ) {
-  if (!specificationId) return undefined
-  const conforming = flows.filter((flow) => flow.conformsTo?.includes(specificationId))
-  if (conforming.length === 0) return undefined
+  if (!realisedBy || realisedBy.length === 0) return undefined
+  const realised = new Set(realisedBy)
+  const conforming = flows.filter((flow) => realised.has(flow.id))
+  const flowIds = new Set(flows.map((flow) => flow.id))
   return {
-    endpoints: new Set(conforming.flatMap((flow) => [flow.source, flow.target])),
+    endpoints: new Set([
+      ...realisedBy.filter((element) => !flowIds.has(element)),
+      ...conforming.flatMap((flow) => [flow.source, flow.target])
+    ]),
     flows: new Set(conforming.map((flow) => flow.id))
   }
 }
@@ -182,7 +186,7 @@ function AppContent() {
   const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
   const [shortcuts, setShortcuts] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
-  const [hoveredSpecification, setHoveredSpecification] = useState<string | null>(null)
+  const [hoveredSpecification, setHoveredSpecification] = useState<readonly string[] | null>(null)
   const [diagramWidth, setDiagramWidth] = useState<number | null>(null)
   const [panelWidth, setPanelWidth] = usePersistentState<number | null>(storage && `${storage}.panels.width`, null)
   const infoschematicPanel = useRef<HTMLDivElement>(null)

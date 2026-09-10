@@ -4,7 +4,6 @@ import type {
   ElementSelection,
   Infoschematic,
   InfoschematicConfig,
-  Interface,
   JsonValue,
   Scene
 } from '@infoschematics/domain-model'
@@ -103,14 +102,6 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
     }
   }
 
-  const interfaces: Interface[] = definition.interfaces.map((entry) => ({
-    description: entry.description,
-    document: entry.contract || entry.href ? { href: entry.href, label: entry.contract } : undefined,
-    id: entry.id,
-    label: entry.label,
-    operations: entry.operations
-  }))
-
   return {
     description: config.synopsis,
     diagram: {
@@ -123,10 +114,8 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         collection: card.domain ?? card.scope,
         description: card.detail,
         id: card.code,
-        interfaces: card.conformsTo,
         label: card.label,
         ports: card.placement.ports ?? legacyPorts,
-        provides: card.services,
         stereotype: card.stereotype
       })),
       collections: [
@@ -177,8 +166,6 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         direction: flow.bidirectional ? ('bidirectional' as const) : ('forward' as const),
         family: flow.family,
         id: flow.code,
-        interfaces: flow.conformsTo,
-        operation: flow.operation,
         route: {
           labelAt: flow.label?.along,
           waypoints: flow.points.slice(1, -1)
@@ -233,24 +220,6 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
       ],
       id: scope.id,
       label: scope.label
-    })),
-    specifications: definition.specificationGroups.map((group) => ({
-      description: group.note,
-      document:
-        group.document === 'none'
-          ? undefined
-          : {
-              ownership: group.document,
-              label: group.label
-            },
-      id: group.id,
-      interfaces: interfaces.filter(
-        (entry) =>
-          definition.interfaces.find((candidate) => candidate.id === entry.id)?.owner === group.owner &&
-          definition.interfaces.find((candidate) => candidate.id === entry.id)?.document === group.document
-      ),
-      label: group.label,
-      owner: group.owner
     })),
     stories: config.stories.map((story) => ({
       id: story.code,
@@ -334,6 +303,14 @@ const portCount = (ports: { north?: number; east?: number; south?: number; west?
   return true
 }
 
+const normaliseRealisedBy = <T extends { realisedBy?: readonly string[] }>(value: T): T =>
+  value.realisedBy
+    ? {
+        ...value,
+        realisedBy: [...new Set(value.realisedBy)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+      }
+    : value
+
 /** Normalise and validate a directly authored canonical Infoschematic. */
 export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschematic => {
   const model: DefinedInfoschematic = {
@@ -343,8 +320,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
       calloutPositions: input.diagram.calloutPositions ?? defaultCalloutPositions,
       cards: (input.diagram.cards ?? []).map((card) => ({
         ...card,
-        ports: card.ports ?? standardPorts,
-        provides: card.provides ?? []
+        ports: card.ports ?? standardPorts
       })),
       collections: input.diagram.collections ?? [],
       fabrics: (input.diagram.fabrics ?? []).map((fabric) => ({
@@ -365,7 +341,20 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
       regions: input.diagram.regions ?? []
     },
     scopes: input.scopes ?? [],
-    specifications: input.specifications ?? [],
+    specifications: (input.specifications ?? []).map((group) => ({
+      ...group,
+      specifications: group.specifications.map((specification) =>
+        normaliseRealisedBy({
+          ...specification,
+          interfaces: specification.interfaces?.map((interfaceEntry) =>
+            normaliseRealisedBy({
+              ...interfaceEntry,
+              operations: interfaceEntry.operations?.map(normaliseRealisedBy)
+            })
+          )
+        })
+      )
+    })),
     stories: input.stories ?? [],
     themes: input.themes ?? []
   }
@@ -390,20 +379,17 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
   const collectionIds = ids(model.diagram.collections)
   const familyIds = ids(model.diagram.families)
   const scopeIds = ids(model.scopes)
-  const interfaceIds = ids(model.specifications.flatMap((specification) => specification.interfaces))
   const endpointById = new Map(
     [...model.diagram.cards, ...model.diagram.fabrics, ...model.diagram.points].map((element) => [element.id, element])
   )
 
   for (const card of model.diagram.cards) {
     if (card.collection) requireReference(collectionIds, card.collection, `Card ${card.id}`)
-    for (const contract of card.interfaces ?? []) requireReference(interfaceIds, contract, `Card ${card.id}`)
     if (card.adapts) requireReference(cardIds, card.adapts, `Card ${card.id} adapts`)
     if (card.wraps) requireReference(cardIds, card.wraps, `Card ${card.id} wraps`)
   }
   for (const flow of model.diagram.flows) {
     if (flow.family) requireReference(familyIds, flow.family, `Flow ${flow.id}`)
-    for (const contract of flow.interfaces ?? []) requireReference(interfaceIds, contract, `Flow ${flow.id}`)
     for (const [terminal, endpoint] of [
       ['source', flow.source],
       ['target', flow.target]
@@ -417,6 +403,32 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
   }
   for (const scope of model.scopes) {
     for (const element of scope.elements) requireReference(elementIds, element, `Architectural Scope ${scope.id}`)
+  }
+  const specificationPaths = new Set<string>()
+  const registerSpecificationPath = (path: string) => {
+    if (specificationPaths.has(path)) throw new Error(`Duplicate Specification path: ${path}`)
+    specificationPaths.add(path)
+  }
+  const validateRealisation = (realisedBy: readonly string[] | undefined, context: string) => {
+    for (const element of realisedBy ?? []) requireReference(elementIds, element, context)
+  }
+  for (const group of model.specifications) {
+    registerSpecificationPath(group.id)
+    for (const specification of group.specifications) {
+      const specificationPath = `${group.id}/${specification.id}`
+      registerSpecificationPath(specificationPath)
+      validateRealisation(specification.realisedBy, `Specification ${specificationPath}`)
+      for (const interfaceEntry of specification.interfaces ?? []) {
+        const interfacePath = `${specificationPath}/${interfaceEntry.id}`
+        registerSpecificationPath(interfacePath)
+        validateRealisation(interfaceEntry.realisedBy, `Interface ${interfacePath}`)
+        for (const operation of interfaceEntry.operations ?? []) {
+          const operationPath = `${interfacePath}/${operation.id}`
+          registerSpecificationPath(operationPath)
+          validateRealisation(operation.realisedBy, `Operation ${operationPath}`)
+        }
+      }
+    }
   }
   for (const theme of model.themes) {
     const sceneIds = new Set<string>()
