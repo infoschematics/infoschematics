@@ -18,16 +18,7 @@ import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
-import {
-  type Ref,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { type Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 export type DiagramMinimapPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
 export type DiagramViewportController = Readonly<{
@@ -40,14 +31,7 @@ import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } fro
 import { flowSignalKey } from './flow-signals.ts'
 import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
-import {
-  centerViewportAt,
-  fitViewportToWidth,
-  panViewport,
-  sameViewport,
-  viewportZoomStep,
-  zoomViewport
-} from './viewport.ts'
+import { centerViewportAt, panViewport, sameViewport, viewportZoomStep, zoomViewport } from './viewport.ts'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -453,51 +437,24 @@ export function InfoschematicDiagram({
   const infoschematic = useRef<SVGSVGElement>(null)
   const minimapOverview = useRef<SVGSVGElement>(null)
   const zoomPointer = useRef<{ clientX: number; clientY: number } | null>(null)
-  const authoredAspect = infoschematicViewBox.height > 0 ? infoschematicViewBox.width / infoschematicViewBox.height : 1
-  const [surfaceAspect, setSurfaceAspect] = useState(authoredAspect)
-  const fittedViewport = useMemo(
-    () => fitViewportToWidth(infoschematicViewBox, surfaceAspect),
-    [infoschematicViewBox, surfaceAspect]
-  )
-  const [viewport, setViewport] = useState<Box>(fittedViewport)
+  const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
   const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
   const [minimapGesture, setMinimapGesture] = useState<MinimapGesture | null>(null)
   const lastAuthoredViewport = useRef(infoschematicViewBox)
   if (!sameViewport(lastAuthoredViewport.current, infoschematicViewBox)) {
     lastAuthoredViewport.current = infoschematicViewBox
-    setViewport(fittedViewport)
+    setViewport(infoschematicViewBox)
     if (panGesture) setPanGesture(null)
     if (minimapGesture) setMinimapGesture(null)
   }
-  const lastFittedViewport = useRef(fittedViewport)
-  useLayoutEffect(() => {
-    const previous = lastFittedViewport.current
-    lastFittedViewport.current = fittedViewport
-    setViewport((current) => (sameViewport(current, previous) ? fittedViewport : current))
-  }, [fittedViewport])
-  useLayoutEffect(() => {
-    const svg = infoschematic.current
-    if (!svg) return
-    const measure = () => {
-      const bounds = svg.getBoundingClientRect()
-      if (bounds.width <= 0 || bounds.height <= 0) return
-      const measured = bounds.width / bounds.height
-      setSurfaceAspect((current) => (Math.abs(current - measured) < 0.0001 ? current : measured))
-    }
-    measure()
-    if (typeof ResizeObserver === 'undefined') return
-    const observer = new ResizeObserver(measure)
-    observer.observe(svg)
-    return () => observer.disconnect()
-  }, [])
-  const fitted = sameViewport(viewport, fittedViewport)
+  const fitted = sameViewport(viewport, infoschematicViewBox)
   const zoomBy = useCallback(
     (magnification: number, anchor?: Point) => {
-      setViewport((current) => zoomViewport(infoschematicViewBox, current, magnification, anchor, fittedViewport))
+      setViewport((current) => zoomViewport(infoschematicViewBox, current, magnification, anchor))
     },
-    [fittedViewport, infoschematicViewBox]
+    [infoschematicViewBox]
   )
-  const fitViewport = useCallback(() => setViewport(fittedViewport), [fittedViewport])
+  const fitViewport = useCallback(() => setViewport(infoschematicViewBox), [infoschematicViewBox])
   useImperativeHandle(
     viewportControllerRef,
     () => ({
@@ -2341,10 +2298,10 @@ export function InfoschematicDiagram({
             −
           </button>
           <button
-            aria-label="Fit diagram to width"
+            aria-label="Fit whole diagram"
             disabled={fitted}
             onClick={fitViewport}
-            title="Fit diagram to width (0)"
+            title="Fit whole diagram (0)"
             type="button"
           >
             0
