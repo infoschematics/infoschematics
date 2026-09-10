@@ -1,36 +1,24 @@
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
 
 export const blankInfoschematic = defineInfoschematicModel({
+  id: 'INFOSCHEMATIC',
+  title: 'Infoschematics',
   diagram: {
-    appearance: {
-      surface: 'neutral',
-      grid: 'none',
-      card: {
-        compact: false,
-        identity: false,
-        stereotype: false,
-        description: false
-      }
-    },
     bounds: {
       x: 0,
       y: 0,
-      width: 1200,
-      height: 800
+      width: 1920,
+      height: 1080
     },
-    cards: [],
-    collections: [],
-    fabrics: [],
-    families: [],
-    flows: [],
-    overlays: [],
-    points: [],
-    regions: []
-  },
-  id: 'INFOSCHEMATIC',
-  scopes: [],
-  specifications: [],
-  stories: [],
-  themes: [],
-  title: 'Infoschematics'
+    appearance: {
+      surface: 'blueprint',
+      grid: 'major-plus-minor',
+      card: {
+        description: false,
+        stereotype: false,
+        compact: false,
+        identity: false
+      }
+    }
+  }
 })

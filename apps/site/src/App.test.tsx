@@ -43,7 +43,9 @@ describe('website routes', () => {
     expect(isBlankExamplePath('/')).toBe(false)
     expect(page).toContain('<h1>Infoschematics</h1>')
     expect(page).toContain('<svg')
-    expect(page).toContain('viewBox="0 0 1200 800"')
+    expect(page).toContain('viewBox="0 0 1920 1080"')
+    expect(page).toContain('data-surface-treatment="blueprint"')
+    expect(page).toContain('data-grid-treatment="major-plus-minor"')
     expect(page).not.toContain('5G-EMERGE')
   })
 
