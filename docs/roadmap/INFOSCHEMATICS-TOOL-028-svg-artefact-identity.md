@@ -3,8 +3,8 @@ id: INFOSCHEMATICS-TOOL-028
 area: TOOL
 title: SVG artefact identity
 theme: tool
-horizon: soon
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -29,6 +29,60 @@ This item does not implement diagram dynamics, expose renderer component structu
 Standardise the outer owning SVG group on `data-artefact-id` and `data-artefact-kind`, then document which authored artefact kinds participate. Audit consumers of static `data-id` before choosing removal, compatibility duplication, or migration. Add cross-renderer contract tests and specification requirements that assert identity without freezing child markup or output ordering.
 
 Before promotion to Next, decide the canonical kind names, the compatibility policy for `data-id`, whether a root diagram identity is required when `InfoschematicConfig.id` is present, and whether visible port markers need a composite identity contract. Confirm that custom Graphics retain the authored Graphic ID on their host-owned outer group regardless of renderer output.
+
+## Current state
+
+Canvas already emits `data-artefact-id` and `data-artefact-kind` on the owning group for all six visual element types, except its compatibility-shaped Graphic value still emits `graphic`. Static SVG emits only `data-id` on the same groups. Neither renderer specification defines the attributes as a stable host-facing contract.
+
+The canonical kind values are `region`, `fabric`, `flow`, `card`, `point` and `overlay`. Static SVG retains its existing `data-id` attribute for compatibility while adding the shared pair. Root Diagram and visible Port identity remain outside this first contract because neither is one of the six visual element types.
+
+## Steps
+
+- [ ] Add `data-artefact-id` and canonical `data-artefact-kind` attributes to every outer visual-element group in static SVG.
+- [ ] Retain static SVG `data-id` compatibility and keep renderer-owned native SVG `id` values unchanged.
+- [ ] Emit canonical `overlay` metadata from Canvas while retaining its internal compatibility selection kind.
+- [ ] Add renderer-specific contract tests covering all six visual element kinds and collision-safe authored IDs.
+- [ ] Document the shared metadata contract in the Canvas and Static Renderer specifications.
+- [ ] Run focused renderer tests and the complete repository verification gate.
+
+## Files touched
+
+- `packages/render-svg/src/index.ts`
+- `packages/render-svg/src/index.test.ts`
+- `packages/view-canvas/src/InfoschematicDiagram.tsx`
+- `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx`
+- `docs/specs/render-svg.md`
+- `docs/specs/view-canvas.md`
+- This work record
+
+## Verify
+
+- `bunx vitest run packages/render-svg packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx`
+- `bun run self:check`
+- `ki repo audit --skill ki-work-roadmap --repo .`
+- `ki repo audit --skill ki-authoring --repo .`
+
+## Dependencies / blocks
+
+Canonical visual-element names and authored identity are already established. Diagram dynamics may consume this contract later but do not block it.
+
+## Documentation impact
+
+### Decision Records
+
+No new decision record is needed because this is an additive renderer contract that follows canonical vocabulary and preserves the existing static attribute.
+
+### Specifications
+
+Canvas and Static Renderer specifications will define the shared collision-safe outer-group metadata pair and its six canonical kind values.
+
+### Guides
+
+No guide change is needed; the attributes are integration and inspection metadata rather than visible diagram treatment.
+
+### Roadmap
+
+This record will close the output identity prerequisite without widening Diagram dynamics or Port identity work.
 
 ## Discussion
 
