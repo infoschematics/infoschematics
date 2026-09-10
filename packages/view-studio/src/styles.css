@@ -498,9 +498,6 @@ h2 {
 }
 
 .infoschematic-panel {
-  /* Opaque canvas backdrop, not the translucent panel wash: the diagram keeps
-     a 3/2 aspect, so a wider panel pillarboxes it and the bars must read as
-     the same surface as the canvas rather than the page gradient behind. */
   background: #081725;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
@@ -508,6 +505,16 @@ h2 {
   position: relative;
   min-width: 0;
   overflow: hidden;
+}
+
+/* Studio owns a resizable panel, so its Canvas fills that live surface rather
+ * than retaining the standalone Canvas component's preferred 3/2 frame. */
+.infoschematic-panel > .infoschematic {
+  aspect-ratio: auto;
+  height: 100%;
+  margin-inline: 0;
+  max-width: none;
+  width: 100%;
 }
 
 .quiet {
@@ -550,9 +557,10 @@ h2 {
 }
 
 .infoschematic-svg {
-  aspect-ratio: 3 / 2;
   display: block;
-  height: auto;
+  height: 100%;
+  inset: 0;
+  position: absolute;
   width: 100%;
 }
 
@@ -2351,7 +2359,7 @@ button:focus-visible,
   }
 }
 
-@media (max-width: 1199px), (max-height: 799px) {
+@media (max-width: 1199px) {
   body {
     overflow: auto;
   }
