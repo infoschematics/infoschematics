@@ -3,10 +3,31 @@ import type { Box, Point } from '@infoschematics/view-model/geometry'
 export const viewportZoomStep = 1.25
 export const viewportMaximumScale = 8
 
+export type SurfaceSize = Readonly<{ height: number; width: number }>
+
 const clamp = (value: number, minimum: number, maximum: number): number => Math.min(Math.max(value, minimum), maximum)
 
 export const sameViewport = (left: Box, right: Box): boolean =>
   left.x === right.x && left.y === right.y && left.width === right.width && left.height === right.height
+
+/** Fit all authored content inside a live surface without cropping or stretching it. */
+export const containSurface = (surface: SurfaceSize, content: SurfaceSize): SurfaceSize => {
+  if (
+    !Number.isFinite(surface.width) ||
+    !Number.isFinite(surface.height) ||
+    !Number.isFinite(content.width) ||
+    !Number.isFinite(content.height) ||
+    surface.width <= 0 ||
+    surface.height <= 0 ||
+    content.width <= 0 ||
+    content.height <= 0
+  ) {
+    return { height: Math.max(0, surface.height), width: Math.max(0, surface.width) }
+  }
+
+  const scale = Math.min(surface.width / content.width, surface.height / content.height)
+  return { height: content.height * scale, width: content.width * scale }
+}
 
 export const panViewport = (bounds: Box, current: Box, delta: Point): Box => ({
   ...current,

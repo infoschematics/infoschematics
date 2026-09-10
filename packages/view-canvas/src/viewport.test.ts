@@ -2,6 +2,7 @@ import type { Box } from '@infoschematics/view-model/geometry'
 import { describe, expect, it } from 'vitest'
 import {
   centerViewportAt,
+  containSurface,
   panViewport,
   sameViewport,
   viewportMaximumScale,
@@ -12,6 +13,12 @@ import {
 const fitted: Box = { x: 0, y: 0, width: 1200, height: 800 }
 
 describe('diagram viewport', () => {
+  it('contains the authored aspect ratio in wide and tall surfaces', () => {
+    expect(containSurface({ height: 900, width: 1600 }, fitted)).toEqual({ height: 900, width: 1350 })
+    expect(containSurface({ height: 800, width: 900 }, fitted)).toEqual({ height: 600, width: 900 })
+    expect(containSurface({ height: 800, width: 1200 }, fitted)).toEqual({ height: 800, width: 1200 })
+  })
+
   it('zooms around the pointer coordinate', () => {
     expect(zoomViewport(fitted, fitted, viewportZoomStep, { x: 900, y: 200 })).toEqual({
       x: 180,

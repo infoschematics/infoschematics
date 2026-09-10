@@ -98,6 +98,7 @@ describe('App', () => {
 
     expect(markup).toContain('<h1>Infoschematics</h1>')
     expect(markup).toContain('<svg')
+    expect(markup).toContain('class="infoschematic-frame"')
     expect(markup).toContain('viewBox="0 0 1200 800"')
     expect(markup).not.toContain('infoschematic-service')
     expect(localStorage.getItem).not.toHaveBeenCalled()

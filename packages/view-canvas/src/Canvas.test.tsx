@@ -10,6 +10,8 @@ describe('Canvas', () => {
 
     expect(markup).toContain('aria-label="Infoschematics Infoschematic"')
     expect(markup).toContain('<svg')
+    expect(markup).toContain('class="infoschematic-frame"')
+    expect(markup).toContain('aspect-ratio:1200 / 800')
     expect(markup).toContain('viewBox="0 0 1200 800"')
     expect(markup).toContain('preserveAspectRatio="xMidYMid meet"')
     expect(markup).toContain('aria-label="Diagram zoom controls"')

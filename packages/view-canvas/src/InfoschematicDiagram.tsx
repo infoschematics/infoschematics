@@ -18,7 +18,17 @@ import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
-import { type Ref, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import {
+  type CSSProperties,
+  type Ref,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 export type DiagramMinimapPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
 export type DiagramViewportController = Readonly<{
@@ -31,7 +41,14 @@ import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } fro
 import { flowSignalKey } from './flow-signals.ts'
 import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
-import { centerViewportAt, panViewport, sameViewport, viewportZoomStep, zoomViewport } from './viewport.ts'
+import {
+  centerViewportAt,
+  containSurface,
+  panViewport,
+  sameViewport,
+  viewportZoomStep,
+  zoomViewport
+} from './viewport.ts'
 
 type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
@@ -435,11 +452,48 @@ export function InfoschematicDiagram({
   // a thing to change, and an unarmed pointer cannot alter it by accident.
   const [armed, setArmed] = useState(false)
   const infoschematic = useRef<SVGSVGElement>(null)
+  const diagramFrame = useRef<HTMLDivElement>(null)
   const minimapOverview = useRef<SVGSVGElement>(null)
   const zoomPointer = useRef<{ clientX: number; clientY: number } | null>(null)
+  const [surfaceSize, setSurfaceSize] = useState<{ height: number; width: number } | null>(null)
   const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
   const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
   const [minimapGesture, setMinimapGesture] = useState<MinimapGesture | null>(null)
+  const frameSize = useMemo(
+    () => (surfaceSize ? containSurface(surfaceSize, infoschematicViewBox) : null),
+    [infoschematicViewBox, surfaceSize]
+  )
+  const frameStyle: CSSProperties = frameSize
+    ? { height: frameSize.height, width: frameSize.width }
+    : {
+        aspectRatio: `${infoschematicViewBox.width} / ${infoschematicViewBox.height}`,
+        height: '100%',
+        width: '100%'
+      }
+
+  useLayoutEffect(() => {
+    const surface = diagramFrame.current?.parentElement
+    if (!surface) return
+
+    const measure = (width: number, height: number) => {
+      if (width <= 0 || height <= 0) return
+      setSurfaceSize((current) =>
+        current && Math.abs(current.width - width) < 0.1 && Math.abs(current.height - height) < 0.1
+          ? current
+          : { height, width }
+      )
+    }
+
+    measure(surface.clientWidth, surface.clientHeight)
+    if (typeof ResizeObserver === 'undefined') return
+
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) measure(entry.contentRect.width, entry.contentRect.height)
+    })
+    observer.observe(surface)
+    return () => observer.disconnect()
+  }, [])
+
   const lastAuthoredViewport = useRef(infoschematicViewBox)
   if (!sameViewport(lastAuthoredViewport.current, infoschematicViewBox)) {
     lastAuthoredViewport.current = infoschematicViewBox
@@ -1390,7 +1444,7 @@ export function InfoschematicDiagram({
   })
 
   return (
-    <>
+    <div className="infoschematic-frame" ref={diagramFrame} style={frameStyle}>
       <svg
         ref={infoschematic}
         aria-label={`${config.title} structural Infoschematic`}
@@ -2308,6 +2362,6 @@ export function InfoschematicDiagram({
           </button>
         </div>
       ) : null}
-    </>
+    </div>
   )
 }
