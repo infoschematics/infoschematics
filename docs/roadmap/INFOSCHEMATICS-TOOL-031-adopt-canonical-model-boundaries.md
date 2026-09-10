@@ -4,7 +4,7 @@ area: TOOL
 title: Adopt canonical model boundaries
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 85f9a75de7daa6e606e8a33f7d41ef507adafc97
@@ -118,6 +118,10 @@ The rollout remains within code-side model boundaries and authored examples. Doc
 ### Mini recap
 
 Completed the repository-wide consumer boundary and example migration after the IBC proof, with byte-identical visuals and legacy compatibility intact. Human review is required before closure; no push or release has occurred.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

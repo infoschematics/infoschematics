@@ -4,7 +4,7 @@ area: SITE
 title: Interactive visual guide
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 532cdbfcb4d1a762b70500f65ed11b06ac6ddfe2
@@ -135,6 +135,10 @@ The page is ready for content and interaction review.
 ### Mini recap
 
 Delivered a MUI-style visual-guide foundation with anatomy, grouping explanations, live treatment examples, complete option coverage, responsive styling, and a substantially clearer Getting Started overview. Verification is clean. The remaining reviewer action is qualitative: read the flow and exercise representative controls in a normal browser.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: TOOL
 title: Enable canonical authoring
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6697d617eed10cfa4e4786a4e0b2f6bd2a559164
@@ -111,6 +111,10 @@ The change remains inside the approved model and compatibility boundary. Documen
 ### Mini recap
 
 Established the minimal canonical authoring path, preserved all existing IBC visual output exactly, and prepared a strict semantic, grid-topology, and raster baseline for the IBC-2026 data migration. Human review is required before lifecycle closure; no push or release has occurred.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

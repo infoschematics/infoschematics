@@ -4,7 +4,7 @@ area: TOOL
 title: Adopt YAML authoring
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 7b4cd95fb3073e5d26a593fb94ae2587f1c30670
@@ -110,6 +110,10 @@ The implementation stays within the agreed document boundary. Existing TypeScrip
 ### Mini recap
 
 Reduced authoring to one YAML-based inert-data contract, moved validation onto the canonical model, retained JSON input and export, removed the synthetic TypeScript document language, and simplified Playground accordingly. Human review is required before closure.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

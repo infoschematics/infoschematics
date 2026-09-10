@@ -4,7 +4,7 @@ area: TOOL
 title: Prove model compatibility
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 46c7c7168118aeaeda2a3e54c47248b52da6c7e8
@@ -108,6 +108,10 @@ The item meets its bounded producer goal: there is now evidence that the agreed 
 ### Mini recap
 
 Established the future model boundary, retained Points as source-and-sink endpoints, protected 39 IBC views with semantic and grid-topology checks, allowed bounded perceptual fuzziness, and proved the generated files remain byte-identical in this change. No existing configuration or public documentation was migrated.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

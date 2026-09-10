@@ -4,7 +4,7 @@ area: TOOL
 title: Catalogue appearance options
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 421dd6f9896ea4ab7d933f2d8c3eda937ca2a736
@@ -138,6 +138,10 @@ Worth flagging for `INFOSCHEMATICS-SITE-011`: `appearanceOptions` describes Regi
 ### Mini recap
 
 Delivered under INFOSCHEMATICS-TOOL-026: a runtime catalogue of all twelve authored appearance options, two new domain tuples, stable ids for all 31 vocabulary terms, Studio repointed off its hand-written lists, a new spec requirement, and two new test files. Verified by `bun run self:check` (455 tests, clean cruise) plus a hand probe proving an uncatalogued option fails to compile. Outstanding: four control kinds instead of two, ids added corpus-wide rather than only where cited, and the implicit patch target noted above for SITE-011. Proposed learning route: none beyond this record — DOMAIN-019 and the vocabulary reference already carry the durable statements.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 

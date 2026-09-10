@@ -4,7 +4,7 @@ area: SITE
 title: Scope site development
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: bd9b6c3be8c5514ff06b9181c9044532d6b3d037
@@ -90,6 +90,10 @@ The change meets the capability-key goal without changing runtime behaviour. Its
 ### Mini recap
 
 The repository and selected app package now share the `ki:site:dev` key, and the necessary `self:dev` reference follows the rename. All scoped gates pass; the known baseline Knip defect and existing bundle-size warning remain explicit future maintenance routes.
+
+## Done
+
+Accepted 2026-09-10 by Kris Brown on the review packet above.
 
 ## Discussion
 
