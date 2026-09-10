@@ -1644,7 +1644,8 @@ h2 {
 
 .contract-body.specifications-body {
   display: grid;
-  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(150px, 0.9fr) minmax(0, 1.1fr);
   overflow: hidden;
   padding: 0;
 }
@@ -1657,7 +1658,7 @@ h2 {
 }
 
 .specifications-detail {
-  border-left: 1px solid #ffffff1c;
+  border-top: 1px solid #ffffff1c;
 }
 
 .specification-tree {
@@ -1683,7 +1684,9 @@ h2 {
 
 .specification-disclosure {
   border-radius: 5px;
-  font: 600 12px "DM Mono", monospace;
+  font:
+    600 12px "DM Mono",
+    monospace;
   padding: 0;
 }
 
@@ -1695,7 +1698,9 @@ h2 {
   align-items: baseline;
   border-radius: 6px;
   display: flex;
-  font: 500 10px "DM Mono", monospace;
+  font:
+    500 10px "DM Mono",
+    monospace;
   gap: 8px;
   justify-content: space-between;
   min-width: 0;
@@ -2030,7 +2035,7 @@ h2 {
 
 @media (width <= 700px) {
   .contract-body.specifications-body {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
     overflow-y: auto;
   }
 
@@ -2040,7 +2045,6 @@ h2 {
   }
 
   .specifications-detail {
-    border-left: 0;
     border-top: 1px solid #ffffff1c;
   }
 
