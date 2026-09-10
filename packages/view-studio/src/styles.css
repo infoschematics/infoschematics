@@ -2210,7 +2210,7 @@ h2 {
   border-radius: 5px;
   display: grid;
   gap: 9px;
-  grid-template-columns: max-content minmax(0, 1fr);
+  grid-template-columns: 72px minmax(0, 1fr);
   margin: 0 -6px;
   padding: 3px 6px;
 }
@@ -2234,6 +2234,8 @@ h2 {
     monospace;
   letter-spacing: 0.04em;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

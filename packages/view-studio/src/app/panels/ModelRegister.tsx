@@ -107,7 +107,7 @@ export function ModelRegister({
     <div className="model-register">
       <Part
         count={cards.length}
-        note="Cards that originate, transform or consume flows, grouped by the Scope their code prefix names. An Adapter is listed under its own Scope and names the Card it holds."
+        note="Cards that originate, transform or consume flows, grouped by collection. An Adapter names the Card it holds."
         onToggle={() => toggle('cards')}
         open={!shut.cards}
         title="Cards"
