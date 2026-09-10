@@ -78,12 +78,14 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
   const specificationNodes: InterfaceConfig[] = model.specifications.flatMap((group) =>
     group.specifications.flatMap((specification) => {
       const specificationPath = `${group.id}/${specification.id}`
+      const primaryDocument = specification.documents?.[0]
       const shared = {
-        contract: specification.document?.code,
-        hasDocument: Boolean(specification.document?.href),
-        href: specification.document?.href,
+        contract: primaryDocument?.code,
+        documents: specification.documents,
+        hasDocument: specification.documents?.some(({ href }) => Boolean(href)) ?? false,
+        href: primaryDocument?.href,
         owner: specification.owner ?? '',
-        version: specification.document?.version
+        version: primaryDocument?.version
       }
       return [
         {
@@ -311,7 +313,9 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       })),
       scopes,
       specificationGroups: model.specifications.map((group) => ({
-        hasDocument: group.specifications.some((specification) => Boolean(specification.document?.href)),
+        hasDocument: group.specifications.some((specification) =>
+          specification.documents?.some(({ href }) => Boolean(href))
+        ),
         id: group.id,
         label: group.label,
         note: group.description ?? '',

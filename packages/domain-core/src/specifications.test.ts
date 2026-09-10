@@ -29,7 +29,10 @@ const definition = () => ({
           id: 'registry',
           label: 'Registry',
           owner: 'federation',
-          document: { code: 'API-REGISTRY-001', href: '/registry.yaml', version: '1.0' },
+          documents: [
+            { code: 'API-REGISTRY-001', href: '/registry.yaml', version: '1.0' },
+            { code: 'API-REGISTRY-BINDING-001', href: '/registry-binding.yaml' }
+          ],
           realisedBy: ['SNK', 'SRC', 'SNK'],
           interfaces: [
             {
@@ -60,7 +63,7 @@ describe('canonical specifications', () => {
     const parsed = parseInfoschematic(yaml)
     expect(parsed.ok).toBe(true)
     if (parsed.ok) expect(parsed.model).toEqual(model)
-    expect(yaml.indexOf('document:')).toBeLessThan(yaml.indexOf('realisedBy:'))
+    expect(yaml.indexOf('documents:')).toBeLessThan(yaml.indexOf('realisedBy:'))
     expect(yaml.indexOf('realisedBy:')).toBeLessThan(yaml.indexOf('interfaces:'))
   })
 

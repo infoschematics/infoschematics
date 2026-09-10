@@ -161,12 +161,18 @@ export type Interface = Realising & {
   operations?: readonly Operation[]
 }
 
+export type SpecificationDocument = {
+  code?: string
+  href?: string
+  version?: string
+}
+
 export type Specification = Realising & {
   id: string
   label: string
   description?: string
   owner?: string
-  document?: { code?: string; href?: string; version?: string }
+  documents?: readonly SpecificationDocument[]
   interfaces?: readonly Interface[]
 }
 

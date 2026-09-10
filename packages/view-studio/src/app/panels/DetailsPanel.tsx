@@ -423,6 +423,16 @@ export function DetailsPanel({
   const [reading, setReading] = useState<InterfaceConfig | null>(null)
   const { detail: contractDetail, failed: contractError } = useContractDetail(selectedContract)
   const selectedDocumentVersion = selectedContract?.version ?? contractDetail?.version
+  const selectedDocuments =
+    selectedContract?.documents ??
+    (selectedContract?.contract || selectedContract?.href || selectedContract?.version
+      ? [{ code: selectedContract.contract, href: selectedContract.href, version: selectedContract.version }]
+      : [])
+  const selectedDocumentSummary = selectedDocuments
+    ?.map(({ code, version }) => [code, version && `Version ${version}`].filter(Boolean).join(' · '))
+    .filter(Boolean)
+    .join(' · ')
+  const selectedDocumentMeta = selectedDocuments.length === 1 ? selectedDocumentSummary : undefined
   const { runningStory, standaloneScene, thematicScene } = presentation
 
   const { mode, setMode } = editor
@@ -820,19 +830,25 @@ export function DetailsPanel({
                     <p className="eyebrow">{selectedContract.kind ?? 'group'}</p>
                     <h2>{selectedContract.label}</h2>
                   </div>
-                  {selectedContract.href ? (
+                  {selectedDocuments.length === 1 && selectedContract.href ? (
                     <button className="link-button" onClick={() => setReading(selectedContract)} type="button">
                       Read specification
                     </button>
                   ) : null}
                 </div>
 
-                {selectedContract.owner || selectedContract.contract || selectedDocumentVersion ? (
+                {selectedContract.owner ||
+                selectedDocumentMeta ||
+                selectedContract.contract ||
+                selectedDocumentVersion ? (
                   <p className="contract-meta">
                     {[
                       selectedContract.owner,
-                      selectedContract.contract,
-                      selectedDocumentVersion && `Version ${selectedDocumentVersion}`
+                      selectedDocumentMeta || (selectedDocuments.length === 0 && selectedContract.contract),
+                      !selectedDocumentMeta &&
+                        selectedDocuments.length === 0 &&
+                        selectedDocumentVersion &&
+                        `Version ${selectedDocumentVersion}`
                     ]
                       .filter(Boolean)
                       .join(' · ')}
@@ -842,6 +858,36 @@ export function DetailsPanel({
                   <p>{selectedContract.description || contractDetail?.description}</p>
                 ) : null}
                 {contractError ? <p className="contract-empty">Specification document could not be loaded.</p> : null}
+
+                {selectedDocuments.length > 1 ? (
+                  <>
+                    <p className="eyebrow specification-detail-heading">Documents</p>
+                    <ul className="contract-operations">
+                      {selectedDocuments.map((document) => (
+                        <li key={`${document.code ?? ''}:${document.href ?? ''}:${document.version ?? ''}`}>
+                          <code>{document.code ?? 'Document'}</code>
+                          <span>{document.version ? `Version ${document.version}` : 'Published binding'}</span>
+                          {document.href ? (
+                            <button
+                              className="link-button"
+                              onClick={() =>
+                                setReading({
+                                  ...selectedContract,
+                                  contract: document.code,
+                                  href: document.href,
+                                  version: document.version
+                                })
+                              }
+                              type="button"
+                            >
+                              Read
+                            </button>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
 
                 {(selectedContract.operations?.length ?? 0) > 0 ? (
                   <>

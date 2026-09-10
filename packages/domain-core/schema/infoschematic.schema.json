@@ -1007,20 +1007,24 @@
                 "owner": {
                   "type": "string"
                 },
-                "document": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "string"
+                "documents": {
+                  "readOnly": true,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "string"
+                      },
+                      "href": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
                     },
-                    "href": {
-                      "type": "string"
-                    },
-                    "version": {
-                      "type": "string"
-                    }
-                  },
-                  "additionalProperties": false
+                    "additionalProperties": false
+                  }
                 },
                 "interfaces": {
                   "readOnly": true,

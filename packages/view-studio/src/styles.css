@@ -1595,6 +1595,7 @@ h2 {
 
 .details-panel {
   align-self: stretch;
+  container-type: inline-size;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
@@ -1643,7 +1644,7 @@ h2 {
 
 .contract-body.specifications-body {
   display: grid;
-  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.1fr);
+  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 1.1fr);
   overflow: hidden;
   padding: 0;
 }
@@ -1848,7 +1849,7 @@ h2 {
   border-top: 1px solid #ffffff12;
   display: grid;
   gap: 8px;
-  grid-template-columns: 52px minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   padding-top: 5px;
 }
 
@@ -1857,6 +1858,12 @@ h2 {
   font:
     600 10px "DM Mono",
     monospace;
+  white-space: nowrap;
+}
+
+.contract-operations .link-button {
+  grid-column: 2;
+  justify-self: start;
 }
 
 .contract-operations span {
@@ -2046,6 +2053,16 @@ h2 {
     border-top: 1px solid #ffffff1a;
     padding-left: 0;
     padding-top: 12px;
+  }
+}
+
+@container (width <= 520px) {
+  .specification-node small {
+    display: none;
+  }
+
+  .specification-tree-row {
+    padding-left: calc(var(--specification-depth) * 6px);
   }
 }
 

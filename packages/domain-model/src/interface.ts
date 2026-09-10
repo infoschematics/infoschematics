@@ -5,6 +5,8 @@ export type InterfaceConfig = {
   prefix: string
   owner: string
   hasDocument: boolean
+  documents?: readonly { code?: string; href?: string; version?: string }[]
+  /** First document projected for established single-document readers. */
   contract?: string
   href?: string
   version?: string

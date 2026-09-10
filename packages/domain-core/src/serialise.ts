@@ -43,7 +43,7 @@ const fieldOrder = [
   'kind',
   'stereotype',
   'owner',
-  'document',
+  'documents',
   'code',
   'href',
   'version',

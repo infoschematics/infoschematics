@@ -29,7 +29,10 @@ const canonical = defineInfoschematicModel({
           id: 'registry',
           label: 'Registry',
           owner: 'federation',
-          document: { code: 'API-REGISTRY-001', href: '/registry.yaml', version: '1.0' },
+          documents: [
+            { code: 'API-REGISTRY-001', href: '/registry.yaml', version: '1.0' },
+            { code: 'API-REGISTRY-BINDING-001', href: '/registry-binding.yaml' }
+          ],
           realisedBy: ['SRC'],
           interfaces: [
             {
@@ -59,6 +62,7 @@ describe('specification view compatibility', () => {
       id: 'federation',
       specifications: ['federation/registry']
     })
+    expect(adapted.infoschematic.interfaces[0]?.documents).toHaveLength(2)
     expect(adapted.infoschematic.cards[0]?.services).toEqual(['federation/registry'])
     expect(adapted.infoschematic.cards[1]?.conformsTo).toEqual(['federation/registry/discovery'])
     expect(adapted.infoschematic.flows[0]).toMatchObject({

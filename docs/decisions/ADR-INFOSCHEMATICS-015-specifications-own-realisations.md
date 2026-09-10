@@ -20,7 +20,7 @@ Architectural Scopes already use the inverse direction: the additive view names 
 
 Specifications form a four-level tree: Specification Group, Specification, optional Interface, and optional Operation. Specification, Interface, and Operation MAY each declare `realisedBy`, containing Diagram element ids. Those references MUST resolve, while an element with no realisation claim remains valid.
 
-Identity is the full group/specification/interface/operation path. An id therefore needs to be unique only within its parent. Ownership and document metadata live once on the Specification. The Diagram carries no Specification, Interface, or Operation back-reference.
+Identity is the full group/specification/interface/operation path. An id therefore needs to be unique only within its parent. Ownership and document metadata live on the Specification; `documents` is a collection because one logical specification can have multiple published bindings. The Diagram carries no Specification, Interface, or Operation back-reference.
 
 Views derive flat compatibility data, element-to-Specification indexes, and aggregate branch highlights from this tree. The canonical direction remains Specification to Diagram element.
 

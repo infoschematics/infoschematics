@@ -471,18 +471,18 @@ const interfaceContract = z.strictObject({
   ...realising
 })
 
+const specificationDocument = z.strictObject({
+  code: z.string().optional(),
+  href: z.string().optional(),
+  version: z.string().optional()
+})
+
 const specification = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
   owner: z.string().optional(),
-  document: z
-    .strictObject({
-      code: z.string().optional(),
-      href: z.string().optional(),
-      version: z.string().optional()
-    })
-    .optional(),
+  documents: z.array(specificationDocument).readonly().optional(),
   interfaces: z.array(interfaceContract).readonly().optional(),
   ...realising
 })
