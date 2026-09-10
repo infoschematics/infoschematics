@@ -111,6 +111,7 @@ a:focus-visible {
 .brand-mark__signal {
   fill: none;
   stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .brand-mark__rail {
@@ -128,12 +129,16 @@ a:focus-visible {
   stroke-width: 2.5;
 }
 
-.brand-mark__node--first {
+.brand-mark__node--violet {
   stroke: #9673a6;
 }
 
-.brand-mark__node--last {
+.brand-mark__node--green {
   stroke: #82b366;
+}
+
+.brand-mark__junction {
+  fill: #79c9ff;
 }
 
 .hero {
