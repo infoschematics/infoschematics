@@ -20,56 +20,32 @@ export function PresentationControls({
 
   return (
     <section className="isp-controls" aria-label="Infoschematic presentation controls">
-      <section className="isp-control-bank" aria-label="Scopes">
-        <span>Scopes</span>
+      <section className="isp-control-bank" aria-label="Architectural scopes">
+        <span>Architectural scopes</span>
         {runtime.infoschematicScopes.map((scope) => (
           <span key={scope.id} style={{ '--isp-accent': scope.color } as CSSProperties}>
             {control(
               scope.label,
               state.visibleScopes.has(scope.id),
               () => dispatch({ type: 'toggle-scope', id: scope.id }),
-              scope.description
+              `Architectural scope: ${scope.description}`
             )}
           </span>
         ))}
-        <button
-          onClick={() =>
-            dispatch({
-              type: 'show-all-scopes',
-              ids: runtime.infoschematicScopes.map((scope) => scope.id),
-              value: state.visibleScopes.size === 0
-            })
-          }
-          type="button"
-        >
-          {state.visibleScopes.size > 0 ? 'Hide all' : 'Show all'}
-        </button>
       </section>
 
-      <section className="isp-control-bank" aria-label="Families">
-        <span>Families</span>
+      <section className="isp-control-bank" aria-label="Flow families">
+        <span>Flow families</span>
         {runtime.infoschematicFamilies.map((family) => (
           <span key={family.id} style={{ '--isp-accent': family.color } as CSSProperties}>
             {control(
               family.label,
               state.visibleFamilies.has(family.id),
               () => dispatch({ type: 'toggle-family', id: family.id }),
-              family.description
+              `Flow family: ${family.description}`
             )}
           </span>
         ))}
-        <button
-          onClick={() =>
-            dispatch({
-              type: 'show-all-families',
-              ids: runtime.infoschematicFamilies.map((family) => family.id),
-              value: state.visibleFamilies.size === 0
-            })
-          }
-          type="button"
-        >
-          {state.visibleFamilies.size > 0 ? 'Hide all' : 'Show all'}
-        </button>
       </section>
 
       {runtime.stories.length ? (

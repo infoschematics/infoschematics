@@ -1505,11 +1505,10 @@ h2 {
   grid-column: 1 / -1;
 }
 
-/* Fixed rather than sized to the word, so the first button of every bank starts
-   at the same place down the column. Narrowed with the labels themselves: they
-   were Components and Connections and are now Scopes and Families. */
+/* A shared term width keeps the first button aligned while allowing the
+   canonical Architectural scopes label to remain on one line. */
 .producer-label {
-  flex: 0 0 58px;
+  flex: 0 0 120px;
   margin-right: 3px;
   white-space: nowrap;
 }

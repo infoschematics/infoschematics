@@ -19,7 +19,7 @@ export function PanelRail({
 
   return (
     <div className="panel-rail">
-      <section className="rail-group" aria-label="Scopes">
+      <section className="rail-group" aria-label="Architectural scopes">
         {infoschematicScopes.map((scope) => {
           const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
           return (
@@ -29,24 +29,16 @@ export function PanelRail({
               className="rail-scope"
               key={scope.id}
               onClick={() => presentation.toggleScope(scope.id)}
-              title={`${scope.label} — ${scope.description}`}
+              title={`Architectural scope: ${scope.label} — ${scope.description}`}
               type="button"
             >
               {ScopeIcon ? <ScopeIcon aria-hidden={true} size={16} /> : scope.prefix}
             </button>
           )
         })}
-        <button
-          className="rail-toggle"
-          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
-          title={presentation.hasVisibleScopes ? 'Hide all components' : 'Show all components'}
-          type="button"
-        >
-          {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
-        </button>
       </section>
 
-      <section className="rail-group" aria-label="Families">
+      <section className="rail-group" aria-label="Flow families">
         {infoschematicFamilies.map((family) => (
           <button
             aria-label={family.label}
@@ -55,18 +47,10 @@ export function PanelRail({
             key={family.id}
             onClick={() => presentation.toggleFamily(family.id)}
             style={{ '--family-color': family.color } as React.CSSProperties}
-            title={`${family.label} — ${family.description}`}
+            title={`Flow family: ${family.label} — ${family.description}`}
             type="button"
           />
         ))}
-        <button
-          className="rail-toggle"
-          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
-          title={presentation.hasVisibleFamilies ? 'Hide all flows' : 'Show all flows'}
-          type="button"
-        >
-          {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
-        </button>
       </section>
 
       <section className="rail-group" aria-label="Stories">

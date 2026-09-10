@@ -21,8 +21,8 @@ export function ProducerControls({
 
   return (
     <section aria-label="Infoschematic controls" className="producer-controls legend" ref={ref}>
-      <section className="producer-bank" aria-label="Scopes">
-        <span className="producer-label">Scopes</span>
+      <section className="producer-bank" aria-label="Architectural scopes">
+        <span className="producer-label">Architectural scopes</span>
         {infoschematicScopes.map((scope) => {
           const ScopeIcon = scope.icon ? scopeIcons?.[scope.icon] : undefined
           return (
@@ -33,7 +33,7 @@ export function ProducerControls({
               key={scope.id}
               onClick={() => presentation.toggleScope(scope.id)}
               style={{ '--family-color': scope.color } as React.CSSProperties}
-              title={`${scope.label} — ${scope.description}`}
+              title={`Architectural scope: ${scope.label} — ${scope.description}`}
               type="button"
             >
               {ScopeIcon ? <ScopeIcon aria-hidden={true} size={13} /> : null}
@@ -41,17 +41,10 @@ export function ProducerControls({
             </button>
           )
         })}
-        <button
-          className="action-button"
-          onClick={() => presentation.showAllScopes(!presentation.hasVisibleScopes)}
-          type="button"
-        >
-          {presentation.hasVisibleScopes ? 'Hide' : 'Show'}
-        </button>
       </section>
 
-      <section className="producer-bank" aria-label="Families">
-        <span className="producer-label">Families</span>
+      <section className="producer-bank" aria-label="Flow families">
+        <span className="producer-label">Flow families</span>
         {infoschematicFamilies.map((family) => (
           <button
             aria-label={family.label}
@@ -60,20 +53,13 @@ export function ProducerControls({
             key={family.id}
             onClick={() => presentation.toggleFamily(family.id)}
             style={{ '--family-color': family.color } as React.CSSProperties}
-            title={`${family.label} — ${family.description}`}
+            title={`Flow family: ${family.label} — ${family.description}`}
             type="button"
           >
             <i aria-hidden="true" style={{ background: family.color }} />
             {family.prefix}
           </button>
         ))}
-        <button
-          className="action-button"
-          onClick={() => presentation.showAllFamilies(!presentation.hasVisibleFamilies)}
-          type="button"
-        >
-          {presentation.hasVisibleFamilies ? 'Hide' : 'Show'}
-        </button>
       </section>
 
       <section className="producer-bank" aria-label="Stories">

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import type { Presentation } from '../hooks/use-presentation.ts'
+import { PanelRail } from './PanelRail.tsx'
 import { ProducerControls } from './ProducerControls.tsx'
 import { TitleBar } from './TitleBar.tsx'
 
@@ -21,6 +22,15 @@ const runtime = createInfoschematicRuntime(
           placement: { box: { height: 80, width: 120, x: 20, y: 20 } },
           scope: 'scope-one',
           scopes: ['scope-one']
+        }
+      ],
+      flowFamilies: [
+        {
+          color: '#44cc88',
+          description: 'A flow family',
+          id: 'family-one',
+          label: 'Family one',
+          prefix: 'FLOW'
         }
       ],
       scopes: [
@@ -84,15 +94,11 @@ const runtime = createInfoschematicRuntime(
 const presentation = (mode: 'present' | 'design' | 'direct') =>
   ({
     annotated: false,
-    hasVisibleFamilies: false,
-    hasVisibleScopes: true,
     lightNothing: vi.fn(),
     mode,
     overlays: true,
     playing: null,
     setMode: vi.fn(),
-    showAllFamilies: vi.fn(),
-    showAllScopes: vi.fn(),
     startStory: vi.fn(),
     stopStory: vi.fn(),
     thematicScene: null,
@@ -166,6 +172,28 @@ describe('production controls', () => {
     )
 
     expect(markup).toBe('')
+  })
+
+  it('names architectural scopes and flow families without bulk vocabulary controls', () => {
+    const expanded = renderToStaticMarkup(
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
+    )
+    const compact = renderToStaticMarkup(
+      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
+    )
+
+    for (const markup of [expanded, compact]) {
+      expect(markup).toContain('aria-label="Architectural scopes"')
+      expect(markup).toContain('title="Architectural scope: Scope one — A scope"')
+      expect(markup).toContain('title="Flow family: Family one — A flow family"')
+      expect(markup).not.toContain('Hide all components')
+      expect(markup).not.toContain('Show all components')
+      expect(markup).not.toContain('Hide all flows')
+      expect(markup).not.toContain('Show all flows')
+    }
+
+    expect(expanded).toContain('aria-label="Flow families"')
+    expect(compact).toContain('aria-label="Flow families"')
   })
 
   it('disables empty and stale activation while retaining ready work', () => {

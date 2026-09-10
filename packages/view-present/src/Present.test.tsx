@@ -64,7 +64,11 @@ describe('Present', () => {
 
     const markup = renderToStaticMarkup(<Present config={config} />)
 
-    expect(markup).toContain('aria-label="Scopes"')
+    expect(markup).toContain('aria-label="Architectural scopes"')
+    expect(markup).toContain('aria-label="Flow families"')
+    expect(markup).toContain('title="Architectural scope: A scope"')
+    expect(markup).not.toContain('>Hide all</button>')
+    expect(markup).not.toContain('>Show all</button>')
     expect(markup).toContain('aria-label="Scenes"')
     expect(markup).toContain('aria-label="Themes"')
     expect(markup).toContain('aria-label="Stories"')

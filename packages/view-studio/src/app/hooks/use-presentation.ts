@@ -118,8 +118,6 @@ export function usePresentation() {
     autoAdvance: production.presentation.autoAdvance,
     directTarget: production.directTarget,
     designing: production.mode === 'design',
-    hasVisibleFamilies: visibleFamilies.size > 0,
-    hasVisibleScopes: visibleScopes.size > 0,
     highlight: derived.highlight,
     lightNothing: () => dispatchPresentation({ type: 'clear-focus' }),
     mode: production.mode,
@@ -133,18 +131,6 @@ export function usePresentation() {
     setDirectTarget: (target: DirectTarget | null) => dispatch({ target, type: 'set-direct-target' }),
     setMode,
     setPlaying,
-    showAllFamilies: (show: boolean) =>
-      dispatchPresentation({
-        ids: allFamilyIds,
-        type: 'show-all-families',
-        value: show
-      }),
-    showAllScopes: (show: boolean) =>
-      dispatchPresentation({
-        ids: allScopeIds,
-        type: 'show-all-scopes',
-        value: show
-      }),
     standaloneScene: derived.standaloneScene,
     startStory: (story: RuntimeStory) => dispatchPresentation({ story, type: 'start-story' }),
     stepStory: (delta: number) =>

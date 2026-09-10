@@ -141,15 +141,19 @@ const runtime = () =>
   )
 
 describe('presentation state', () => {
-  it('filters Cards and their Flows through audience visibility', () => {
+  it('shows all filters initially and hides cross-Scope Flows when either endpoint is hidden', () => {
     const source = runtime()
     const initial = createPresentationState(source)
+    const initiallyShown = derivePresentation(source, initial)
     const hidden = reducePresentation(initial, {
       type: 'toggle-scope',
       id: 'two'
     })
     const shown = derivePresentation(source, hidden)
 
+    expect(initial.visibleScopes).toEqual(new Set(['one', 'two']))
+    expect(initial.visibleFamilies).toEqual(new Set(['delivery']))
+    expect(initiallyShown.visibleFlows.map((flow) => flow.id)).toEqual(['delivery-flow', 'return-flow'])
     expect(shown.visibleCards.map((card) => card.id)).toEqual(['source'])
     expect(shown.visibleFlows).toEqual([])
   })

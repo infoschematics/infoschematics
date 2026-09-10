@@ -57,3 +57,11 @@ The admitted item may reach `awaiting-review` only through its complete implemen
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-005-RUN-001 6ae177eec831db0e6e701f8faa264f40f875c7f364bae84e7666c435eea52452 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-TOOL-036` | ready | awaiting-review | `c3b71f0e` baseline; focused tests, package build, full repository gate and roadmap/authoring audits passed | Review terminology, removed bulk controls and expanded desktop layout |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Present and Studio now distinguish Architectural Scopes from Flow Families, expose only individual vocabulary controls, preserve initial all-visible state and retain lower-level compatibility actions. Automated browser control was unavailable, so the review packet explicitly retains desktop visual inspection as the only concern. No acceptance, pruning, deployment, release or post-baseline push was performed.

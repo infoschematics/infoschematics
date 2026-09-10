@@ -1,6 +1,6 @@
 # Present View specification
 
-_Vocabulary: [Audience](/docs/reference/vocabulary/#audience), [Present](/docs/reference/vocabulary/#present), [Scene](/docs/reference/vocabulary/#scene), and [Story](/docs/reference/vocabulary/#story)._
+_Vocabulary: [Audience](/docs/reference/vocabulary/#audience), [Present](/docs/reference/vocabulary/#present), [Scene](/docs/reference/vocabulary/#scene), [Story](/docs/reference/vocabulary/#story), [Scope](/docs/reference/vocabulary/#scope), and [Flow Family](/docs/reference/vocabulary/#flow-family)._
 
 Present View adds audience-facing filtering, Scene focus, Story playback and explanatory controls around Canvas. `packages/view-present` owns the reusable Audience component and pure presentation state; Studio composes it as the `present` member of the shared transient production mode.
 
@@ -24,11 +24,11 @@ _Verification: `packages/view-present/src/production.test.ts` covers every mode-
 
 ## Visibility and focus
 
-### PRESENT-001 — Filter banks can be cleared
+### PRESENT-001 — Filter banks are individually controlled
 
-Each scope and flow-family filter bank MUST allow all of its members to be hidden and subsequently restored. The expanded Producer controls and collapsed rail MUST operate on the same visibility state.
+Every Architectural Scope and Flow Family MUST have an independently toggleable presentation control. A new presentation MUST begin with every control selected. The vocabulary banks MUST NOT append show-all or hide-all actions as though those actions were another Scope or Family; resetting the presentation MAY restore the initial all-visible state outside those banks.
 
-_Implementation surface: `showAllScopes` and `showAllFamilies` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/ProducerControls.tsx` and `packages/view-studio/src/app/panels/PanelRail.tsx`._
+_Implementation surface: initial selection and individual toggle actions in `packages/view-present/src/presentation.ts`; controls in `packages/view-present/src/PresentationControls.tsx`, `packages/view-studio/src/app/panels/ProducerControls.tsx` and `packages/view-studio/src/app/panels/PanelRail.tsx`._
 
 ### PRESENT-002 — No Scene means full-strength rendering
 
@@ -132,7 +132,7 @@ _Implementation surface: `packages/view-studio/src/app/panels/ShortcutOverlay.ts
 
 ### PRESENT-009 — The Infoschematic can take the available canvas
 
-Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable scope, flow-family, Story and Thematic Scene controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
+Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable Architectural Scope, Flow Family, Story and Thematic Scene controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
 
 _Implementation surface: collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`._
 

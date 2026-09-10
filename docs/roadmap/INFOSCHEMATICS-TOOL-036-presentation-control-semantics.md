@@ -4,10 +4,10 @@ area: TOOL
 title: Presentation control semantics
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: c3b71f0e75677261453665985907ebf98a287b81
 ---
 
 ## Goal
@@ -30,13 +30,13 @@ Present and Studio expose the right Scope icons and Flow Family colours, but lab
 
 ## Steps
 
-- [ ] Label the reusable Present and Studio control banks as Architectural Scopes and Flow Families.
-- [ ] Make control descriptions and tooltips state whether a choice is an Architectural Scope or a Flow Family.
-- [ ] Remove trailing global show/hide actions from expanded and compact control banks while retaining individual toggles and initial all-visible state.
-- [ ] Remove Studio-only bulk-control plumbing that no longer has a consumer without narrowing the reusable presentation reducer contract.
-- [ ] Add focused rendered-control and runtime tests for the vocabulary, absence of unexplained bulk actions, and two-ended Scope Flow visibility rule.
-- [ ] Rewrite the Present View specification to state the deliberate selection and reset behaviour.
-- [ ] Run the focused package tests and complete repository verification gate.
+- [x] Label the reusable Present and Studio control banks as Architectural Scopes and Flow Families.
+- [x] Make control descriptions and tooltips state whether a choice is an Architectural Scope or a Flow Family.
+- [x] Remove trailing global show/hide actions from expanded and compact control banks while retaining individual toggles and initial all-visible state.
+- [x] Remove Studio-only bulk-control plumbing that no longer has a consumer without narrowing the reusable presentation reducer contract.
+- [x] Add focused rendered-control and runtime tests for the vocabulary, absence of unexplained bulk actions, and two-ended Scope Flow visibility rule.
+- [x] Rewrite the Present View specification to state the deliberate selection and reset behaviour.
+- [x] Run the focused package tests and complete repository verification gate.
 
 ## Files touched
 
@@ -46,6 +46,7 @@ Present and Studio expose the right Scope icons and Flow Family colours, but lab
 - `packages/view-studio/src/app/panels/PanelRail.tsx`
 - `packages/view-studio/src/app/panels/ProducerControls.tsx`
 - `packages/view-studio/src/app/panels/ProductionControls.test.tsx`
+- `packages/view-studio/src/styles.css`
 - `docs/specs/view-present.md`
 - This work record
 
@@ -76,6 +77,41 @@ No guide change is needed because the controls remain self-describing and the vi
 ### Roadmap
 
 This record will capture the final control semantics. Sequence playback and canonical View internals remain separate work.
+
+## Review
+
+### Delivered
+
+Present and Studio now expose Architectural Scopes and Flow Families as distinct individually toggleable vocabularies in both expanded and compact controls. Trailing show/hide-all buttons have been removed, while a new presentation still starts with every Scope and Family visible and the reusable reducer retains its existing bulk actions for compatibility. The immutable implementation baseline is `c3b71f0e75677261453665985907ebf98a287b81`.
+
+### Summary of changes
+
+- `packages/view-present/src/PresentationControls.tsx` names both vocabularies explicitly, qualifies their descriptions and removes bulk buttons.
+- `packages/view-studio/src/app/panels/ProducerControls.tsx` and `PanelRail.tsx` apply the same terms, tooltips and control boundary.
+- `packages/view-studio/src/app/hooks/use-presentation.ts` removes Studio-only bulk-control projections that no longer have consumers.
+- `packages/view-studio/src/styles.css` widens the shared producer label column so the canonical Scope term remains on one line.
+- Present and Studio tests prove initial visibility, two-ended Scope filtering, rendered vocabulary and absence of bulk controls.
+- `docs/specs/view-present.md` now states individual selection, initial all-visible state and the vocabulary-bank boundary.
+
+### Verification
+
+- `bunx vitest run packages/view-present packages/view-studio/src/app/panels/ProductionControls.test.tsx` passed.
+- `bun run self:packages:build` passed.
+- `bun run self:check` passed.
+- `ki repo audit --skill ki-work-roadmap --repo .` passed.
+- `ki repo audit --skill ki-authoring --repo .` passed.
+
+### Outstanding concerns
+
+Automated browser control could not initialize in this session, so there is no fresh browser screenshot. Server-rendered expanded, compact and reusable Present markup is covered, and the only layout adjustment is the explicitly widened no-wrap producer label column. A reviewer should still inspect the expanded IBC controls at a normal desktop viewport.
+
+### Post-change review
+
+The item’s goal and boundary are met without changing authored data, membership, Scene playback, zoom, Specification highlighting or the reusable reducer contract. The controls no longer imply that global actions are Scope or Family members, and their names now match the domain vocabulary consistently. The change is ready for product and visual review.
+
+### Mini recap
+
+Delivered explicit Architectural Scope and Flow Family control semantics across Present and Studio, removed unexplained bulk actions, preserved initial visibility and compatibility state actions, and added focused regression coverage. All required automated gates pass; only a normal-browser visual inspection remains for the reviewer.
 
 ## Discussion
 
