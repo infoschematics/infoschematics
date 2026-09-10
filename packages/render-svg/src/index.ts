@@ -432,6 +432,8 @@ export const renderInfoschematicSvg = (
           ['aria-label', `Region ${region.label}`],
           ['class', 'infoschematic-region'],
           ['data-frame-treatment', treatment.frame],
+          ['data-artefact-id', region.id],
+          ['data-artefact-kind', 'region'],
           ['data-id', region.id],
           ['data-label-placement', treatment.label ?? 'none'],
           ['data-label-treatment', treatment.labelTreatment]
@@ -474,6 +476,8 @@ export const renderInfoschematicSvg = (
         [
           ['class', `infoschematic-fabric${focusClass(fabric.id, focus?.artefacts, unfocused)}`],
           ['data-code', fabric.code],
+          ['data-artefact-id', fabric.id],
+          ['data-artefact-kind', 'fabric'],
           ['data-id', fabric.id],
           [
             'opacity',
@@ -533,6 +537,8 @@ export const renderInfoschematicSvg = (
         [
           ['class', `infoschematic-flow${dimmed}${signalled ? ' is-signalled' : ''}`],
           ['data-code', flow.code],
+          ['data-artefact-id', flow.id],
+          ['data-artefact-kind', 'flow'],
           ['data-id', flow.id],
           ['data-signalled', signalled || undefined],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
@@ -737,6 +743,8 @@ export const renderInfoschematicSvg = (
           ['data-compact', visualTreatment.card.compact || undefined],
           ['data-code', card.code],
           ['data-domain', domain?.id],
+          ['data-artefact-id', card.id],
+          ['data-artefact-kind', 'card'],
           ['data-id', card.id],
           ['data-ink', ink],
           ['data-stereotype', card.stereotype],
@@ -757,6 +765,8 @@ export const renderInfoschematicSvg = (
         [
           ['class', `infoschematic-point${dimmed}`],
           ['data-code', point.code],
+          ['data-artefact-id', point.id],
+          ['data-artefact-kind', 'point'],
           ['data-id', point.id],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
@@ -784,6 +794,8 @@ export const renderInfoschematicSvg = (
         1,
         [
           ['class', `infoschematic-graphic${dimmed}`],
+          ['data-artefact-id', graphic.id],
+          ['data-artefact-kind', 'overlay'],
           ['data-id', graphic.id],
           ['data-renderer', graphic.renderer],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]

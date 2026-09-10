@@ -92,6 +92,12 @@ Signal measurements shared with deterministic still output MUST come from View M
 
 _Verification: pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry._
 
+### CANVAS-011 — Visual elements expose authored identity
+
+The outer owning SVG group for every rendered Region, Fabric, Flow, Card, Point and Overlay MUST expose its authored identifier as `data-artefact-id` and its canonical kind as `data-artefact-kind`. Kind values MUST be exactly `region`, `fabric`, `flow`, `card`, `point` or `overlay`. Canvas MUST NOT copy authored identifiers into native SVG `id` attributes, whose document-wide namespace remains renderer- and host-owned. The metadata contract identifies the authored element without promising child markup, output order or CSS structure.
+
+_Verification: `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` covers all six kinds and collision-safe identifiers._
+
 ## Dependency boundary
 
 Canvas MAY depend on Domain Model and View Model. It MUST NOT depend on Present, Studio, a particular authored Infoschematic, or a host's renderer implementations.

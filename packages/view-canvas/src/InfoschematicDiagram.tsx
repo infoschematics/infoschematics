@@ -1388,7 +1388,7 @@ export function InfoschematicDiagram({
           artefactSelected(selection, legacyKey) ? ' selected' : ''
         }`}
         data-artefact-id={selection.id}
-        data-artefact-kind={selection.kind}
+        data-artefact-kind="overlay"
         key={entry.id}
         onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
         onPointerDown={

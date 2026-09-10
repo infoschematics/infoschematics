@@ -162,6 +162,51 @@ describe('renderInfoschematicSvg', () => {
     expect(first).not.toContain('Source <entry>')
   })
 
+  it('exposes authored identity for every canonical visual element kind', () => {
+    const identified: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        fabrics: [
+          {
+            code: 'FAB-001',
+            detail: 'Shared transport',
+            id: 'fabric/shared',
+            label: 'Shared fabric',
+            placement: { box: { height: 24, width: 80, x: 20, y: 210 }, ports: {} },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        points: [
+          {
+            code: 'PNT-001',
+            id: 'point/shared',
+            label: 'Shared point',
+            point: { x: 200, y: 210 },
+            scopes: ['one']
+          }
+        ]
+      }
+    }
+
+    const svg = renderInfoschematicSvg(identified, { visibility: { graphics: 'all' } })
+    const expected = [
+      ['region', 'runtime'],
+      ['fabric', 'fabric/shared'],
+      ['flow', 'call'],
+      ['card', 'source'],
+      ['point', 'point/shared'],
+      ['overlay', 'note']
+    ] as const
+
+    for (const [kind, id] of expected) {
+      expect(svg).toContain(`data-artefact-id="${id}" data-artefact-kind="${kind}"`)
+      expect(svg).toContain(`data-id="${id}"`)
+      expect(svg).not.toContain(` id="${id}"`)
+    }
+  })
+
   it('renders canonical and established inputs identically', () => {
     const established = blank('Canonical boundary')
     const canonical: DefinedInfoschematic = {

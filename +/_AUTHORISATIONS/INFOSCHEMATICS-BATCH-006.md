@@ -55,3 +55,11 @@ The admitted item may reach `awaiting-review` only through complete implementati
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-006-RUN-001 6315f05dd1f2c1f02d0d91c220a09a63a00d14fe3459b7481db34070a1ecb5b2 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-TOOL-028` | ready | awaiting-review | `40d39468` baseline; focused renderer tests, full repository gate and roadmap/authoring audits passed | Review metadata names, compatibility policy and documented exclusions |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Static SVG and Canvas now expose authored identity on all six canonical visual element groups through one collision-safe metadata pair, while static `data-id` and renderer-owned native IDs remain unchanged. The older Graphic vocabulary anchor remains an explicitly recorded documentation follow-up. No acceptance, pruning, deployment, release or post-baseline push was performed.

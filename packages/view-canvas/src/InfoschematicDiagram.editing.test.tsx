@@ -127,8 +127,10 @@ describe('InfoschematicDiagram Design editing', () => {
     const markup = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
 
     for (const selection of selections) {
-      expect(markup).toContain(`data-artefact-kind="${selection.kind}"`)
+      const renderedKind = selection.kind === 'graphic' ? 'overlay' : selection.kind
+      expect(markup).toContain(`data-artefact-kind="${renderedKind}"`)
       expect(markup).toContain(`data-artefact-id="${selection.id}"`)
+      expect(markup).not.toContain(` id="${selection.id}"`)
     }
     expect(markup.match(/tabindex="0"/g)?.length).toBeGreaterThanOrEqual(selections.length)
     expect(markup).toContain('aria-label="Region Delivery"')

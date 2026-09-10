@@ -1,6 +1,6 @@
 # Static Renderer specification
 
-_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Scene](/docs/reference/vocabulary/#scene), and [Graphic](/docs/reference/vocabulary/#graphic)._
+_Vocabulary: [Infoschematic](/docs/reference/vocabulary/#infoschematic), [Scene](/docs/reference/vocabulary/#scene), and [Overlay](/docs/reference/vocabulary/#graphic)._
 
 The static SVG renderer produces deterministic, framework-neutral output from serialisable Infoschematic configuration. It consumes Domain Model and View Model only and does not emulate interactive or Producer state.
 
@@ -79,6 +79,12 @@ Static output MUST place Card label, description, stereotype, and identity text 
 It MUST draw the text the layout fits, including one line per fitted label line, rather than fit or wrap text of its own.
 
 _Verification: `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions._
+
+### SVG-013 — Visual elements expose authored identity
+
+The outer owning SVG group for every rendered Region, Fabric, Flow, Card, Point and Overlay MUST expose its authored identifier as `data-artefact-id` and its canonical kind as `data-artefact-kind`. Kind values MUST be exactly `region`, `fabric`, `flow`, `card`, `point` or `overlay`. The renderer MUST NOT copy authored identifiers into native SVG `id` attributes, whose document-wide namespace remains renderer- and host-owned. Static SVG MAY retain `data-id` as a compatibility duplicate.
+
+_Verification: `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers._
 
 ## Dependency boundary
 
