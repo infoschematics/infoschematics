@@ -94,7 +94,7 @@ export function Issues({ parsed }: { parsed: InfoschematicParseResult }) {
 const initialPreset = (): PlaygroundPreset =>
   (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'format-parity'
 
-/** One inert YAML document, validated and rendered live through the same loader the CLI uses. */
+/** One inert Infoschematic document, validated and rendered live through the same loader the CLI uses. */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {
   const [text, setText] = useState(() => presets.find(({ key }) => key === preset)?.document ?? yamlSeed)
   const parsed = usePlaygroundParse(text)
@@ -110,30 +110,26 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
       <SiteNav section="playground" />
       <main className="playground-main" id="document-content">
         <h1 className="sr-only">Playground</h1>
-        <div className="playground-toolbar">
-          <p className="playground-format">YAML</p>
-          <label className="playground-preset">
-            Preset
-            <select onChange={(event) => loadPreset(event.target.value as PlaygroundPreset)} value="">
-              <option disabled value="">
-                Load a definition…
-              </option>
-              {presets.map(({ key, label }) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <p className="playground-hint">
-            Validated and rendered live as inert data. JSON syntax is accepted too. Loading a preset replaces the
-            document.
-          </p>
-        </div>
         <div className="playground-panels">
+          <Preview parsed={parsed} />
           <div className="playground-editor-pane">
+            <div className="playground-toolbar">
+              <label className="playground-preset">
+                Preset
+                <select onChange={(event) => loadPreset(event.target.value as PlaygroundPreset)} value="">
+                  <option disabled value="">
+                    Load a definition…
+                  </option>
+                  {presets.map(({ key, label }) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <textarea
-              aria-label="YAML document"
+              aria-label="Infoschematic document"
               className="playground-editor"
               onChange={(event) => setText(event.target.value)}
               spellCheck={false}
@@ -141,7 +137,6 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
             />
             <Issues parsed={parsed} />
           </div>
-          <Preview parsed={parsed} />
         </div>
       </main>
     </div>

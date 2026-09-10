@@ -794,6 +794,7 @@ a:focus-visible {
   flex-wrap: wrap;
   gap: 14px;
   align-items: center;
+  justify-content: flex-end;
 }
 
 .playground-preset {
@@ -815,28 +816,10 @@ a:focus-visible {
   font: 600 11px/1 'DM Mono', monospace;
 }
 
-.playground-hint {
-  margin: 0;
-  color: #9db4c9;
-  font-size: 12px;
-}
-
-.playground-format {
-  margin: 0;
-  padding: 7px 14px;
-  border: 1px solid #ffffff1c;
-  border-radius: 7px;
-  background: #123048;
-  color: #e8f1f8;
-  font: 600 11px/1 'DM Mono', monospace;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
 .playground-panels {
   display: grid;
   flex: 1;
-  grid-template-columns: minmax(320px, 560px) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 560px);
   gap: 20px;
   min-height: 0;
 }
@@ -893,6 +876,10 @@ a:focus-visible {
 
   .playground-panels {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .playground-editor-pane {
+    order: -1;
   }
 
   .playground-editor {

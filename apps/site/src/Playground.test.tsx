@@ -6,13 +6,18 @@ import { Issues, Playground, Preview, presetFromSearch, presets } from './Playgr
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 
 describe('Playground', () => {
-  it('presents one YAML document with a live preview', () => {
+  it('presents one document editor to the right of its live preview', () => {
     const page = renderToStaticMarkup(<Playground />)
+    const previewPosition = page.indexOf('playground-preview')
+    const editorPosition = page.indexOf('playground-editor-pane')
 
-    expect(page).toContain('>YAML</p>')
+    expect(previewPosition).toBeGreaterThan(-1)
+    expect(editorPosition).toBeGreaterThan(previewPosition)
+    expect(page).not.toContain('>YAML</p>')
     expect(page).not.toContain('>TypeScript<')
     expect(page).not.toContain('aria-label="JSON document"')
-    expect(page).toContain('aria-label="YAML document"')
+    expect(page).toContain('aria-label="Infoschematic document"')
+    expect(page).not.toContain('Validated and rendered live as inert data')
     expect(page).toContain('data:image/svg+xml')
   })
 
@@ -42,10 +47,10 @@ describe('Playground', () => {
     for (const preset of presets) expect(parseInfoschematic(preset.document).ok, preset.key).toBe(true)
   })
 
-  it('renders a selected preset from the same YAML editor', () => {
+  it('renders a selected preset from the same document editor', () => {
     const page = renderToStaticMarkup(<Playground preset="system" />)
 
-    expect(page).toContain('aria-label="YAML document"')
+    expect(page).toContain('aria-label="Infoschematic document"')
     expect(page).toContain('data:image/svg+xml')
   })
 
