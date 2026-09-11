@@ -2180,9 +2180,21 @@ h2 {
 
 .model-register .contract-meta {
   align-items: center;
+  display: grid;
+  gap: 9px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  margin: 0 0 5px;
+}
+
+.register-group-identity {
+  align-items: center;
   display: flex;
   gap: 6px;
-  margin: 0 0 5px;
+  min-width: 0;
+}
+
+.register-group-label {
+  min-width: 0;
 }
 
 .register-swatch {

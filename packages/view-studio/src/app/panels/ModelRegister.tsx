@@ -117,9 +117,13 @@ export function ModelRegister({
           if (within.length === 0) return null
           return (
             <div className="register-group" key={scope.id}>
-              <p className="contract-meta">
-                <span className="register-swatch" style={{ background: scope.color }} />
-                {scope.prefix} · {scope.label}
+              <p className="contract-meta register-group-heading">
+                <span className="register-group-identity">
+                  <span className="register-swatch" style={{ background: scope.color }} />
+                  <span>{scope.prefix}</span>
+                  <span aria-hidden="true">·</span>
+                </span>
+                <span className="register-group-label">{scope.label}</span>
               </p>
               <dl className="register-rows">
                 {within.map((card) => {
@@ -162,9 +166,13 @@ export function ModelRegister({
           if (carried.length === 0) return null
           return (
             <div className="register-group" key={family.id}>
-              <p className="contract-meta">
-                <span className="register-rule" style={{ background: family.color }} />
-                {family.prefix} · {family.label}
+              <p className="contract-meta register-group-heading">
+                <span className="register-group-identity">
+                  <span className="register-rule" style={{ background: family.color }} />
+                  <span>{family.prefix}</span>
+                  <span aria-hidden="true">·</span>
+                </span>
+                <span className="register-group-label">{family.label}</span>
               </p>
               <dl className="register-rows">
                 {carried.map((flow) => {
