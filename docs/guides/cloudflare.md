@@ -26,11 +26,11 @@ The target URL must be the dynamic expression, not static text — a static `htt
 
 Workers Builds is connected under Settings → Build → Git repository `infoschematics/infoschematics`, branch `main`, so a push to `main` triggers Cloudflare to build and deploy automatically:
 
-- Build command: `bun run build`
+- Build command: `bun run self:cf:build`
 - Deploy command: `bun run ki:site:deploy`
 - Root directory: `/`
 
-`bun run build` (the root package-lifecycle script, not `ki:site:build`) is required: it runs `packages:build` before the site build, producing the `dist/` output the workspace packages (`@infoschematics/view-studio` and siblings) need to resolve. `dist/` is gitignored everywhere, so a fresh Workers Builds clone has none of it — a site-only build command fails to resolve those packages during the Vite build.
+`self:cf:build` is the repository-owned Cloudflare build entry point. It builds every package before the site, producing the `dist/` output that workspace packages such as `@infoschematics/view-studio` need to resolve. Those outputs are gitignored, so a fresh Workers Builds clone has none of them and a site-only build command fails during the Vite build.
 
 A manual deploy from the repository root remains available when needed:
 
