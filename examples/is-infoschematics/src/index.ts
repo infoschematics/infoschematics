@@ -1,5 +1,7 @@
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
 
+export { homepageInfoschematic } from './overview.ts'
+
 export const infoschematicsInfoschematic = defineInfoschematicModel({
   description:
     'The repository separates its authored contract, framework-neutral behaviour, interactive Views, renderers, examples, and hosts with dependencies pointing toward lower-level packages.',

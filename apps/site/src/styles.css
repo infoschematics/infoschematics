@@ -202,7 +202,7 @@ a:focus-visible {
  * The rendered Infoschematic already carries the blueprint backdrop, a near
  * match for the page. Framing it in a card fought that, so the preview is
  * masked into the background instead: content keeps a 24-unit margin inside
- * the 1268x248 viewBox, which the fades below stay clear of. No box-shadow
+ * the 1268x408 viewBox, whose edge fades stay clear of the copy. No box-shadow
  * here — a shadow follows the border box, not the mask, and would restore the
  * hard rectangle the mask exists to dissolve.
  */
@@ -217,7 +217,7 @@ a:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 1268 / 248;
+  aspect-ratio: 1268 / 408;
   object-fit: contain;
   background: transparent;
   -webkit-mask-image:

@@ -77,7 +77,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
-- `examples/is-infoschematics` owns the independently authored, serialisable self-description used by interactive and static hosts and depends only on Domain Core.
+- `examples/is-infoschematics` owns independently authored, serialisable homepage-overview and self-description definitions used by static and interactive hosts and depends only on Domain Core.
 - `examples/is-system` owns the independently authored, serialisable four-stage journey definition and depends only on Domain Core.
 - `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 

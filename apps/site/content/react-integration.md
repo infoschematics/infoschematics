@@ -149,7 +149,7 @@ The host owns:
 
 Studio View owns generic rendering, Producer controls, and runtime state derived from the configuration. It must not import a particular authored Infoschematic or its visual implementations.
 
-The public website demonstrates this boundary with two examples. `/examples/blank/` mounts the minimum title-only contract, while `/examples/infoschematics/` mounts the substantial [`@infoschematics/is-infoschematics`](https://github.com/infoschematics/infoschematics/tree/main/examples/is-infoschematics/) definition through Studio so its [Present](/docs/reference/vocabulary/#present), [Design](/docs/reference/vocabulary/#design), and [Direct](/docs/reference/vocabulary/#direct) controls remain available. The homepage consumes the same definition through `renderInfoschematicSvg`; the authored package imports neither React View nor Site code.
+The public website demonstrates the boundary with several independently authored definitions. `/examples/blank/` mounts the minimum title-only contract, while `/examples/infoschematics/` mounts the substantial [`@infoschematics/is-infoschematics`](https://github.com/infoschematics/infoschematics/tree/main/examples/is-infoschematics/) self-description through Studio so its [Present](/docs/reference/vocabulary/#present), [Design](/docs/reference/vocabulary/#design), and [Direct](/docs/reference/vocabulary/#direct) controls remain available. The homepage consumes a concise overview from the same authored package through `renderInfoschematicSvg`; the package imports neither a React View nor Site code.
 
 ## Beyond the host
 

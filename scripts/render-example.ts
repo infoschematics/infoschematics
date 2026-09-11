@@ -10,7 +10,7 @@ import {
 } from '@infoschematics/domain-core'
 import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { blankInfoschematic } from '@infoschematics/is-blank'
-import { infoschematicsExample } from '@infoschematics/is-infoschematics'
+import { homepageInfoschematic, infoschematicsExample } from '@infoschematics/is-infoschematics'
 import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -19,6 +19,7 @@ import { type CliSpec, CliUsageError, isDirectInvocation, runCli } from './cli.t
 /** Authored examples this repository can render without a browser or dev server. */
 export const renderableExamples: Readonly<Record<string, InfoschematicInput>> = {
   blank: blankInfoschematic,
+  homepage: homepageInfoschematic,
   infoschematics: infoschematicsExample,
   system: systemExample
 }

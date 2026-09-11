@@ -1,10 +1,10 @@
-import { systemExample } from '@infoschematics/is-system'
+import { homepageInfoschematic } from '@infoschematics/is-infoschematics'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
 const sharedPreviewSource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-  renderInfoschematicSvg(systemExample, { annotations: true })
+  renderInfoschematicSvg(homepageInfoschematic, { annotations: true })
 )}`
 
 export function App() {
@@ -28,7 +28,7 @@ export function App() {
 
         <div className="shared-preview">
           <img
-            alt={`${systemExample.title} rendered through shared SVG output`}
+            alt={`${homepageInfoschematic.title} rendered through shared SVG output`}
             className="shared-preview__image"
             src={sharedPreviewSource}
           />
