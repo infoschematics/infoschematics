@@ -4,7 +4,7 @@ area: TOOL
 title: Presentation control semantics
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: c3b71f0e75677261453665985907ebf98a287b81
@@ -112,6 +112,10 @@ The item’s goal and boundary are met without changing authored data, membershi
 ### Mini recap
 
 Delivered explicit Architectural Scope and Flow Family control semantics across Present and Studio, removed unexplained bulk actions, preserved initial visibility and compatibility state actions, and added focused regression coverage. All required automated gates pass; only a normal-browser visual inspection remains for the reviewer.
+
+## Done
+
+Accepted 2026-09-11 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: TOOL
 title: Refresh public documentation
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 3102a8c5398647ca675d6176cd38186a17bb15ef
@@ -131,6 +131,10 @@ The documentation is ready for qualitative review as one reader journey from Get
 ### Mini recap
 
 Delivered explicit stable vocabulary anchors, corpus-wide public citations, a citation gate, current Site summaries, YAML-first documentation wording, and a complete decision-record review with four focused rewrites. Verification is clean. Remaining reviewer work is editorial judgment, not missing implementation.
+
+## Done
+
+Accepted 2026-09-11 by Kris Brown on the review packet above.
 
 ## Discussion
 

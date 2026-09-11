@@ -4,7 +4,7 @@ area: TOOL
 title: SVG artefact identity
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 40d39468bced5200820a80959241d9cbd94581cc
@@ -116,6 +116,10 @@ The item’s additive identity contract is complete and collision-safe without c
 ### Mini recap
 
 Delivered one documented metadata pair across both SVG renderers for all six visual element types, canonicalised Overlay output, retained static compatibility and added contract coverage. All automated gates pass; only the separate documentation terminology migration remains.
+
+## Done
+
+Accepted 2026-09-11 by Kris Brown on the review packet above.
 
 ## Discussion
 
