@@ -3,7 +3,12 @@ import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
-import { advanceFlowSignalAnnouncement, flowSignalKey, reconcileFlowSignals } from './flow-signals.ts'
+import {
+  advanceFlowSignalAnnouncement,
+  flowSignalKey,
+  reconcileFlowSignals,
+  retireFlowSignals
+} from './flow-signals.ts'
 
 const config = defineInfoschematic({
   title: 'Signal reference',
@@ -67,8 +72,9 @@ describe('Canvas Flow signals', () => {
     expect(markup).toContain('class="infoschematic-flow-signal"')
     expect(markup).toContain('aria-hidden="true"')
     expect(markup).toContain('class="infoschematic-flow-signal-pulse" opacity="0" r="5"')
-    expect(markup).toContain('<animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0"></animate>')
-    expect(markup).toContain('<animateMotion dur="900ms" fill="freeze" path="M140 70 H260"></animateMotion>')
+    expect(markup).toContain('<animate attributeName="opacity" dur="900ms" values="0;1;1;0"></animate>')
+    expect(markup).toContain('<animateMotion dur="900ms" path="M140 70 H260"></animateMotion>')
+    expect(markup).not.toContain('fill="freeze"')
     expect(markup).toContain('class="infoschematic-route" d="M140 70 H260"')
     expect(markup).toContain('class="infoschematic-route-hit" d="M140 70 H260"')
     expect(markup).toContain('aria-live="polite"')
@@ -142,6 +148,32 @@ describe('Canvas Flow signals', () => {
       activeSignals: [replay, simultaneous]
     })
     expect(cancelled).toEqual({ acceptedSignals: [], activeSignals: [] })
+  })
+
+  it('bounds signal history and retires visual nodes through repeated walkthrough cycles', () => {
+    const flowsPerStep = [11, 15, 22, 22, 16, 7, 6, 4, 3, 14, 34]
+    const shown = new Set(Array.from({ length: 34 }, (_, index) => `flow-${index}`))
+    const seen = new Set<string>()
+    let active: readonly { flowId: string; occurrenceKey: string }[] = []
+    let peakActive = 0
+
+    for (let occurrence = 1; occurrence <= flowsPerStep.length * 100; occurrence += 1) {
+      const count = flowsPerStep[(occurrence - 1) % flowsPerStep.length] ?? 0
+      const supplied = Array.from({ length: count }, (_, index) => ({
+        flowId: `flow-${index}`,
+        occurrenceKey: `present-scene-${occurrence}`
+      }))
+      const next = reconcileFlowSignals(active, supplied, shown, seen)
+      active = next.activeSignals
+      peakActive = Math.max(peakActive, active.length)
+
+      expect(seen.size).toBe(supplied.length)
+      active = retireFlowSignals(active, next.acceptedSignals)
+      expect(active).toHaveLength(0)
+    }
+
+    expect(peakActive).toBe(34)
+    expect(seen.size).toBe(34)
   })
 
   it('announces only newly accepted occurrences and revises same-Flow replay messages', () => {

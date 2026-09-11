@@ -2,7 +2,13 @@ import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
-import { advanceFlowSignalAnnouncement, type FlowSignalAnnouncement, reconcileFlowSignals } from './flow-signals.ts'
+import {
+  advanceFlowSignalAnnouncement,
+  type FlowSignalAnnouncement,
+  flowSignalDuration,
+  reconcileFlowSignals,
+  retireFlowSignals
+} from './flow-signals.ts'
 import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
 import {
   defineInfoschematicRenderers,
@@ -73,6 +79,17 @@ function CanvasContent({
     announcedInitialSignals.current = true
     setAnnouncement((current) => advanceFlowSignalAnnouncement(current, newlyAccepted, next.activeSignals))
   }, [shownFlowIds, signals])
+
+  useEffect(() => {
+    if (activeSignals.length === 0) return
+    const retiring = activeSignals
+    const timer = window.setTimeout(() => {
+      const retained = retireFlowSignals(activeSignalsRef.current, retiring)
+      activeSignalsRef.current = retained
+      setActiveSignals(retained)
+    }, flowSignalDuration)
+    return () => window.clearTimeout(timer)
+  }, [activeSignals])
 
   return (
     <section

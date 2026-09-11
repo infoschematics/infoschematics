@@ -38,7 +38,7 @@ export type DiagramViewportController = Readonly<{
 }>
 
 import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
-import { flowSignalKey } from './flow-signals.ts'
+import { flowSignalDuration, flowSignalKey } from './flow-signals.ts'
 import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
 import {
@@ -1233,8 +1233,8 @@ export function InfoschematicDiagram({
             >
               <path className="infoschematic-flow-signal-still" d={flow.d} />
               <circle className="infoschematic-flow-signal-pulse" opacity="0" r={signalRadius}>
-                <animate attributeName="opacity" dur="900ms" fill="freeze" values="0;1;1;0" />
-                <animateMotion dur="900ms" fill="freeze" path={flow.d} />
+                <animate attributeName="opacity" dur={`${flowSignalDuration}ms`} values="0;1;1;0" />
+                <animateMotion dur={`${flowSignalDuration}ms`} path={flow.d} />
               </circle>
             </g>
           ))}

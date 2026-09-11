@@ -1,5 +1,7 @@
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 
+export const flowSignalDuration = 900
+
 /**
  * A JSON tuple keeps the two independently authored identifiers distinct even
  * when either contains punctuation used by the other.
@@ -26,6 +28,14 @@ export type FlowSignalAnnouncement = Readonly<{
   signals: readonly FlowSignal[]
 }>
 
+export const retireFlowSignals = (
+  current: readonly FlowSignal[],
+  retiring: readonly FlowSignal[]
+): readonly FlowSignal[] => {
+  const retiringKeys = new Set(retiring.map(flowSignalKey))
+  return current.filter((signal) => !retiringKeys.has(flowSignalKey(signal)))
+}
+
 /**
  * Advances the live-region input only for newly accepted occurrences. The
  * revision makes a same-Flow replay a distinct text mutation for assistive
@@ -44,8 +54,9 @@ export const advanceFlowSignalAnnouncement = (
 
 /**
  * Reconciles host-owned occurrences without allowing a consumed occurrence to
- * restart when visibility changes. `seenSignals` deliberately records hidden
- * occurrences too: making a Flow visible later is not a new occurrence.
+ * restart when visibility changes. `seenSignals` records every currently
+ * supplied occurrence, including hidden ones, but releases occurrences the
+ * host has withdrawn so an indefinitely running Story remains bounded.
  */
 export const reconcileFlowSignals = (
   current: readonly FlowSignal[],
@@ -57,7 +68,9 @@ export const reconcileFlowSignals = (
   const uniqueSupplied = uniqueFlowSignals(suppliedSignals)
   const suppliedKeys = new Set(uniqueSupplied.map(flowSignalKey))
 
-  for (const signal of uniqueCurrent) seenSignals.add(flowSignalKey(signal))
+  for (const key of seenSignals) {
+    if (!suppliedKeys.has(key)) seenSignals.delete(key)
+  }
 
   const acceptedSignals = uniqueSupplied.filter((signal) => {
     const key = flowSignalKey(signal)
