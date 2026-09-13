@@ -1,26 +1,23 @@
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { useState } from 'react'
-import { AppearanceControl } from './AppearanceControl.tsx'
-import type { AppearanceOptionKey } from './curriculum.ts'
-import {
-  type AppearanceOptionValue,
-  appearanceOptionValue,
-  treatmentSpecimen,
-  withAppearanceOption
-} from './specimens.ts'
+import type { GuidePropertyKey, SpecimenKind } from './curriculum.ts'
+import { PropertyControl } from './PropertyControl.tsx'
+import { type GuidePropertyValue, guidePropertyValue, specimenFor, withGuideProperty } from './specimens.ts'
 
 export function InteractiveSpecimen({
-  optionKeys,
+  kind,
+  propertyKeys,
   title
 }: {
-  optionKeys: readonly AppearanceOptionKey[]
+  kind: SpecimenKind
+  propertyKeys: readonly GuidePropertyKey[]
   title: string
 }) {
-  const [config, setConfig] = useState(treatmentSpecimen)
+  const [config, setConfig] = useState(() => specimenFor(kind))
   const source = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderInfoschematicSvg(config, { annotations: true, visibility: { graphics: 'all' } }))}`
 
-  const changeOption = (key: AppearanceOptionKey, value: AppearanceOptionValue) => {
-    setConfig((current) => withAppearanceOption(current, key, value))
+  const changeProperty = (key: GuidePropertyKey, value: GuidePropertyValue) => {
+    setConfig((current) => withGuideProperty(current, key, value))
   }
 
   return (
@@ -29,16 +26,16 @@ export function InteractiveSpecimen({
         <img alt={`${title} example`} src={source} />
       </div>
       <fieldset className="interactive-specimen__controls">
-        <legend>Try the treatments</legend>
-        {optionKeys.map((key) => (
-          <AppearanceControl
+        <legend>Change properties</legend>
+        {propertyKeys.map((key) => (
+          <PropertyControl
             key={key}
-            onChange={(value) => changeOption(key, value)}
-            optionKey={key}
-            value={appearanceOptionValue(config, key)}
+            onChange={(value) => changeProperty(key, value)}
+            propertyKey={key}
+            value={guidePropertyValue(config, key)}
           />
         ))}
-        <button onClick={() => setConfig(treatmentSpecimen())} type="button">
+        <button onClick={() => setConfig(specimenFor(kind))} type="button">
           Reset example
         </button>
       </fieldset>

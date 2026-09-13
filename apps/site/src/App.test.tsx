@@ -77,6 +77,7 @@ describe('website routes', () => {
     ])
     expect(documentationRoutes.filter((route) => route.section === 'usage').map((route) => route.title)).toEqual([
       'Authoring',
+      'Explanation',
       'Present view',
       'Studio view',
       'Static rendering',

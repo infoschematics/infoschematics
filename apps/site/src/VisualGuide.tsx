@@ -2,20 +2,15 @@ import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
-import { presentationConcepts, treatmentSections, visualArtefacts, visualGroupings } from './visual-guide/curriculum.ts'
+import { componentSections } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import { anatomySpecimen } from './visual-guide/specimens.ts'
 import './styles.css'
 
 export const componentsGuideContents = [
-  { depth: 2, slug: 'anatomy', label: 'Anatomy of an Infoschematic' },
-  { depth: 2, slug: 'groupings', label: 'Groupings' },
-  { depth: 2, slug: 'treatments', label: 'Treatments' },
-  { depth: 3, slug: 'canvas-treatments', label: 'Canvas treatments' },
-  { depth: 3, slug: 'region-treatments', label: 'Region treatments' },
-  { depth: 3, slug: 'card-treatments', label: 'Card treatments' },
-  { depth: 2, slug: 'explanation', label: 'Explanation and presentation' },
-  { depth: 2, slug: 'presentation-states', label: 'Presentation states' }
+  { depth: 2, slug: 'labelled-example', label: 'A labelled Infoschematic' },
+  ...componentSections.map(({ id, title }) => ({ depth: 2 as const, slug: id, label: title })),
+  { depth: 2, slug: 'where-next', label: 'Where next' }
 ] as const
 
 export function VisualGuide() {
@@ -35,96 +30,82 @@ export function VisualGuide() {
           <article aria-label="Components" className="document-content">
             <h1>Components</h1>
             <p>
-              Learn what each visible part of an Infoschematic means, how the parts layer together, and which authored
-              treatments change their appearance. Every example is generated from the same serialisable definition used
-              by each renderer.
+              Start with one complete Infoschematic, then inspect each part on its own. Every focused example is
+              generated from the same serialisable properties used by Canvas and static SVG.
             </p>
 
-            <section aria-labelledby="anatomy" className="visual-guide__section">
-              <h2 id="anatomy">Anatomy of an Infoschematic</h2>
+            <section aria-labelledby="labelled-example" className="visual-guide__section">
+              <h2 id="labelled-example">A labelled Infoschematic</h2>
               <p>
-                An Infoschematic is a layered structural diagram. Regions establish background geography, Fabrics occupy
-                the midground, and Cards, Flows, Points, and Graphics form the foreground. Routes and Ports describe how
-                a Flow travels; they are geometry, not extra artefact kinds.
+                The Canvas is the background. Regions establish geography, Fabrics sit in the midground, and Cards,
+                Flows, Points, and Graphics make up the foreground. In this example the Point is connected, so it acts
+                as a real endpoint rather than an unexplained dot.
               </p>
-              <figure className="visual-guide__anatomy">
-                <img
-                  alt="An Infoschematic containing a Region, Fabric, Card, Flow, Point, and Graphic"
-                  src={anatomySource}
+              <div className="visual-guide__anatomy-layout">
+                <figure className="visual-guide__anatomy">
+                  <img
+                    alt="A labelled Infoschematic showing its Canvas, Region, Fabric, Card, Flows, connected Point, and Graphic"
+                    src={anatomySource}
+                  />
+                  <figcaption>All seven visible parts shown together in one deterministic SVG.</figcaption>
+                </figure>
+                <ol aria-label="Labels for the complete example" className="visual-guide__anatomy-key">
+                  {componentSections.map((component, index) => (
+                    <li key={component.id}>
+                      <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                      <div>
+                        <strong>{component.title}</strong>
+                        <p>{component.summary}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </section>
+
+            {componentSections.map((component) => (
+              <section
+                aria-labelledby={component.id}
+                className="visual-guide__section visual-guide__component"
+                key={component.id}
+              >
+                <p className="visual-guide__layer">{component.layer}</p>
+                <h2 id={component.id}>{component.title}</h2>
+                <p>{component.summary}</p>
+                <InteractiveSpecimen
+                  kind={component.id}
+                  propertyKeys={component.propertyKeys}
+                  title={`${component.title} properties`}
                 />
-                <figcaption>The six primary artefact kinds in one deterministic SVG output.</figcaption>
-              </figure>
-              <div className="visual-guide__reference-grid">
-                {visualArtefacts.map((artefact) => (
-                  <article className="visual-guide__reference-card" key={artefact.id}>
-                    <p className="visual-guide__layer">{artefact.layer}</p>
-                    <h3>{artefact.title}</h3>
-                    <p>{artefact.summary}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
+                {component.id === 'canvas' ? (
+                  <p className="visual-guide__property-note">
+                    Canvas colour currently comes from a surface preset. Arbitrary Canvas colour and opacity are not yet
+                    part of the portable definition; Region fill already supports both.
+                  </p>
+                ) : null}
+                <div className="visual-guide__property-reference">
+                  <h3>Property reference</h3>
+                  <dl>
+                    {component.properties.map((property) => (
+                      <div key={property.name}>
+                        <dt>
+                          <code>{property.name}</code>
+                        </dt>
+                        <dd>{property.summary}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              </section>
+            ))}
 
-            <section aria-labelledby="groupings" className="visual-guide__section">
-              <h2 id="groupings">Groupings</h2>
+            <section aria-labelledby="where-next" className="visual-guide__section">
+              <h2 id="where-next">Where next</h2>
               <p>
-                Scope, Domain, and Flow Family classify different facts. They may influence colour or visibility, but
-                none is another box on the diagram and none substitutes for another.
-              </p>
-              <div className="visual-guide__reference-grid visual-guide__reference-grid--three">
-                {visualGroupings.map((grouping) => (
-                  <article className="visual-guide__reference-card" key={grouping.id}>
-                    <h3>{grouping.title}</h3>
-                    <p>{grouping.summary}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section aria-labelledby="treatments" className="visual-guide__section">
-              <h2 id="treatments">Treatments</h2>
-              <p>
-                Treatments are stable presentation intent stored with the definition. They change how the same structure
-                is drawn; they do not change what the structure means. Use the controls to compare the available values
-                in place.
-              </p>
-              {treatmentSections.map((section) => (
-                <section aria-labelledby={section.id} className="visual-guide__treatment" key={section.id}>
-                  <h3 id={section.id}>{section.title}</h3>
-                  <p>{section.summary}</p>
-                  <InteractiveSpecimen optionKeys={section.optionKeys} title={section.title} />
-                </section>
-              ))}
-            </section>
-
-            <section aria-labelledby="explanation" className="visual-guide__section">
-              <h2 id="explanation">Explanation and presentation</h2>
-              <p>
-                These concepts tailor one stable diagram to a subject, audience, or guided explanation. They change
-                visibility and emphasis without changing the underlying geometry.
-              </p>
-              <div className="visual-guide__reference-grid">
-                {presentationConcepts.map((concept) => (
-                  <article className="visual-guide__reference-card" key={concept.id}>
-                    <h3>{concept.title}</h3>
-                    <p>{concept.summary}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-
-            <section aria-labelledby="presentation-states" className="visual-guide__section">
-              <h2 id="presentation-states">Presentation states</h2>
-              <p>
-                Scenes can focus existing artefacts and reveal Graphics. Flow signalling can briefly emphasise movement.
-                These are presentation states, not authored appearance options: the underlying Cards, Regions, and
-                routes remain the same and a still output remains understandable without motion.
-              </p>
-              <p>
-                Continue with the <a href="/docs/approach/visual-language/">visual-language approach</a> for
-                composition, colour, routing, motion, and accessibility principles, or open the{' '}
-                <a href="/playground/">Playground</a> to edit a complete definition. When you need exact contract
-                language, use the <a href="/docs/reference/vocabulary/">canonical terminology</a>.
+                Continue to <a href="/docs/explanation/">Explanation</a> for Scopes, Scenes, Themes, Stories, Callouts,
+                and presentation state. Use <a href="/docs/authoring/">Authoring</a> for complete TypeScript, YAML, and
+                JSON examples, or the <a href="/docs/reference/vocabulary/">canonical terminology</a> when you need the
+                exact contract language.
               </p>
             </section>
           </article>

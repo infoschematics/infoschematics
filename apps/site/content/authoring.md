@@ -27,9 +27,9 @@ Populate the structural `infoschematic` field:
 
 Coordinates use the `Box` and `Point` shapes exposed through Domain Model configuration types. Placement and routing algorithms remain View Model behaviour; authored output remains plain data.
 
-## Configure visual treatments
+## Configure appearance properties
 
-Appearance is optional serialisable presentation intent. This fragment opts into the blueprint treatment, uses a visible grid, and asks every renderer for compact Cards with authored metadata defaults:
+Appearance is optional serialisable presentation intent. This fragment selects the blueprint surface, uses a visible grid, and asks every renderer for compact Cards with authored metadata defaults:
 
 ```ts
 infoschematic: {
@@ -46,7 +46,7 @@ infoschematic: {
 }
 ```
 
-A Region authors its frame, fill and label treatment on the record itself, each independently of the others:
+A Region authors its frame, fill, and label properties on the record itself, each independently of the others:
 
 ```ts
 {
@@ -62,7 +62,7 @@ A Region authors its frame, fill and label treatment on the record itself, each 
 
 Omit `frame` for no frame, or use `style: 'solid'`, `'dashed'`, or `'dotted'` with an optional `opacity`. Omit `fill` for no fill; alpha travels in the hex. Place the label at `north-west`, `north`, `north-east`, `west`, `center`, `east`, `south-west`, `south`, or `south-east`; use `labelPlacement: 'none'` to hide it, and `labelOffset` to pull it along its edge. A label mounted on the `boundary` sits on the frame line and is notched out of a visible frame; an `internal` label (the default) is set down inside the Region. A hidden or empty label never leaves an unexplained notch. When appearance is omitted, Cards remain non-compact and no authored grid is shown; a Region with nothing authored beyond its box and label is unframed and unfilled with a plain label.
 
-Use `grid: 'none'`, `'major'`, `'major-plus-minor'`, or `'dots'`. The `dots` treatment marks each grid intersection instead of drawing line strokes, at the same `gridSize` spacing as the line grids.
+Use `grid: 'none'`, `'major'`, `'major-plus-minor'`, or `'dots'`. The `dots` value marks each grid intersection instead of drawing line strokes, at the same `gridSize` spacing as the line grids.
 
 Classify Cards with a Domain independently of their Scope:
 

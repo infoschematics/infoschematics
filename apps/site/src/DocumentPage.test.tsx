@@ -41,6 +41,7 @@ describe('documentation pages', () => {
       'Installation',
       'Components',
       'Authoring',
+      'Explanation',
       'Present view',
       'Studio view',
       'Static rendering',

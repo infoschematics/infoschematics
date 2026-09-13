@@ -50,6 +50,13 @@ const publishedDocuments = [
     section: 'usage'
   },
   {
+    sourcePath: 'apps/site/content/explanation.md',
+    path: '/docs/explanation/',
+    title: 'Explanation',
+    summary: 'Use Scopes, Scenes, Themes, Stories, Callouts, and Graphics to explain one stable diagram.',
+    section: 'usage'
+  },
+  {
     sourcePath: 'apps/site/content/present.md',
     path: '/docs/present/',
     title: 'Present view',
@@ -95,7 +102,7 @@ const publishedDocuments = [
     sourcePath: 'docs/design/visual-language.md',
     path: '/docs/approach/visual-language/',
     title: 'Visual language',
-    summary: 'Composition, colour, routing, motion, and accessible visual treatment.',
+    summary: 'Composition, colour, routing, motion, and accessible visual presentation.',
     section: 'approach'
   },
   {

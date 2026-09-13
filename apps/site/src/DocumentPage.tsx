@@ -5,6 +5,7 @@ import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
 import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
 import authoringMarkdown from '../content/authoring.md?raw'
+import explanationMarkdown from '../content/explanation.md?raw'
 import gettingStartedMarkdown from '../content/getting-started.md?raw'
 import installationMarkdown from '../content/installation.md?raw'
 import presentMarkdown from '../content/present.md?raw'
@@ -23,6 +24,7 @@ const markdownBySourcePath: Record<string, string> = {
   'apps/site/content/getting-started.md': gettingStartedMarkdown,
   'apps/site/content/installation.md': installationMarkdown,
   'apps/site/content/authoring.md': authoringMarkdown,
+  'apps/site/content/explanation.md': explanationMarkdown,
   'apps/site/content/present.md': presentMarkdown,
   'apps/site/content/studio.md': studioMarkdown,
   'apps/site/content/static-rendering.md': staticRenderingMarkdown,

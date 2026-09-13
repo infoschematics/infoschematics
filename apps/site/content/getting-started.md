@@ -39,6 +39,7 @@ Changing the way you use an Infoschematic does not require you to rewrite its un
 - **I want to write a definition** — follow the [Authoring guide](/docs/authoring/).
 - **I need a still image** — use [Static rendering](/docs/static-rendering/).
 - **I need an interactive site** — follow [React integration](/docs/react-integration/).
+- **I want to explain the diagram** — learn how [Explanation](/docs/explanation/) uses Scopes, Scenes, Themes, Stories, and Callouts.
 - **I want to guide an audience** — learn about [Present view](/docs/present/).
 - **I want a structured editor** — learn about [Studio view](/docs/studio/).
 

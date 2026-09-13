@@ -1,59 +1,48 @@
 import { defineInfoschematic, type InfoschematicConfig } from '@infoschematics/domain-core'
-import type { AppearanceOptionKey } from './curriculum.ts'
+import type { GuidePropertyKey, SpecimenKind } from './curriculum.ts'
 
-export type AppearanceOptionValue = boolean | number | string
+export type GuidePropertyValue = boolean | number | string
 
 const viewBox = { x: 0, y: 0, width: 720, height: 400 }
 
-const baseDefinition = () =>
+const completeSpecimen = () =>
   defineInfoschematic({
-    title: 'Visual guide specimen',
-    subtitle: 'A small system showing the visible parts of an Infoschematic.',
+    title: 'Labelled Infoschematic example',
+    subtitle: 'Every visible diagram component shown in context.',
     infoschematic: {
       viewBox,
-      // Blueprint with a full grid is the treatment the authored examples reach
-      // for, so the guide opens on what the renderers can actually do rather
-      // than on the bare neutral surface a definition falls back to.
       appearance: {
         surface: 'blueprint',
         grid: 'major-plus-minor',
         card: { compact: false, description: true, identity: true, stereotype: true }
       },
-      // Blueprint reads as ink on a drawing: every Scope and Domain shares the
-      // one dark fill and separates by stroke colour alone. A light fill here
-      // turns each Card into a sticker on the surface instead of a part of it.
       scopes: [
         {
-          id: 'core',
-          label: 'Core',
-          prefix: 'CORE',
-          description: 'Core platform scope',
+          id: 'primary',
+          label: 'Primary',
+          prefix: 'PRI',
+          description: 'Primary guide scope',
           color: '#79c9ff',
           fill: '#0d1b2a'
         },
         {
-          id: 'edge',
-          label: 'Edge',
-          prefix: 'EDGE',
-          description: 'Customer-facing scope',
+          id: 'secondary',
+          label: 'Secondary',
+          prefix: 'SEC',
+          description: 'Secondary guide scope',
           color: '#48c6a8',
           fill: '#0d1b2a'
         }
       ],
-      domains: [
-        { id: 'platform', label: 'Platform', color: '#6c8ebf', fill: '#0d1b2a' },
-        { id: 'experience', label: 'Experience', color: '#82b366', fill: '#0d1b2a' }
-      ],
+      domains: [{ id: 'example', label: 'Example', color: '#82b366', fill: '#0d1b2a' }],
       flowFamilies: [
-        { id: 'request', label: 'Request', prefix: 'REQ', description: 'A request path', color: '#79c9ff' }
+        { id: 'connection', label: 'Flow', prefix: 'FLOW', description: 'A meaningful connection', color: '#79c9ff' }
       ],
       regions: [
         {
           id: 'region',
-          label: 'Service boundary',
-          box: { x: 28, y: 30, width: 664, height: 332, radius: 12 },
-          // Barely-there fill: the grid reads through the Region, so the panel
-          // sits on the drawing rather than masking it.
+          label: 'Region',
+          box: { x: 34, y: 32, width: 652, height: 330, radius: 12 },
           fill: '#12273b24',
           frame: { style: 'solid', opacity: 1 },
           labelMount: 'boundary',
@@ -65,131 +54,325 @@ const baseDefinition = () =>
         {
           id: 'fabric',
           code: 'FAB-01',
-          label: 'Event fabric',
-          detail: 'Connectable midground',
-          scopes: ['core'],
-          scope: 'core',
-          placement: { box: { x: 78, y: 120, width: 220, height: 120 }, ports: { east: 1 } },
-          appearance: { renderer: 'default', caption: 'Event fabric' }
+          label: 'Fabric',
+          detail: 'Connectable plane',
+          scopes: ['primary'],
+          scope: 'primary',
+          placement: { box: { x: 76, y: 112, width: 214, height: 118 }, ports: { east: 1 } },
+          appearance: { renderer: 'default', caption: 'Fabric' }
         }
       ],
       cards: [
         {
           id: 'card',
           code: 'CARD-01',
-          label: 'Customer API',
-          detail: 'A foreground component',
-          scopes: ['edge'],
-          scope: 'edge',
-          domain: 'experience',
-          stereotype: 'Service',
-          placement: { box: { x: 410, y: 120, width: 230, height: 120 }, ports: { west: 1 } }
+          label: 'Card',
+          detail: 'Placed component',
+          scopes: ['secondary'],
+          scope: 'secondary',
+          domain: 'example',
+          stereotype: 'Component',
+          placement: {
+            box: { x: 430, y: 112, width: 214, height: 118 },
+            ports: { west: 1, south: 1 }
+          }
         }
       ],
-      points: [{ id: 'point', code: 'PT-01', label: 'External entry', scopes: ['edge'], point: { x: 188, y: 309 } }],
+      points: [
+        {
+          id: 'point',
+          code: 'POINT-01',
+          label: 'Point',
+          scopes: ['secondary'],
+          point: { x: 536, y: 314 },
+          ports: { north: 1 }
+        }
+      ],
       flows: [
         {
           id: 'flow',
-          code: 'REQ-01',
-          family: 'request',
+          code: 'FLOW-01',
+          family: 'connection',
           source: 'fabric',
           sourcePort: 'E1',
           target: 'card',
           targetPort: 'W1',
-          // One straight run between facing Ports: the guide's first Flow shows
-          // the route, not a detour around an avoidable misalignment.
           label: { along: 0.5 },
           points: [
-            { x: 298, y: 180 },
-            { x: 410, y: 180 }
+            { x: 290, y: 171 },
+            { x: 430, y: 171 }
+          ]
+        },
+        {
+          id: 'point-flow',
+          code: 'FLOW-02',
+          family: 'connection',
+          source: 'card',
+          sourcePort: 'S1',
+          target: 'point',
+          targetPort: 'N1',
+          label: { along: 0.55 },
+          points: [
+            { x: 537, y: 230 },
+            { x: 537, y: 314 }
           ]
         }
       ],
       graphics: [
         {
           id: 'graphic',
-          label: 'Graphic overlay',
+          label: 'Graphic',
           renderer: 'guide-graphic',
-          placement: { x: 410, y: 278, width: 230, height: 62 },
-          scopes: ['edge']
+          placement: { x: 76, y: 276, width: 214, height: 64 },
+          scopes: ['primary']
         }
       ]
     }
   })
 
-export const anatomySpecimen = baseDefinition()
+const withDiagramParts = (
+  config: InfoschematicConfig,
+  parts: Partial<
+    Pick<InfoschematicConfig['infoschematic'], 'regions' | 'fabrics' | 'cards' | 'flows' | 'points' | 'graphics'>
+  >
+): InfoschematicConfig => ({
+  ...config,
+  infoschematic: {
+    ...config.infoschematic,
+    regions: [],
+    fabrics: [],
+    cards: [],
+    flows: [],
+    points: [],
+    graphics: [],
+    ...parts
+  }
+})
 
-export const treatmentSpecimen = () => baseDefinition()
+export const anatomySpecimen = completeSpecimen()
 
-export const appearanceOptionValue = (config: InfoschematicConfig, key: AppearanceOptionKey): AppearanceOptionValue => {
-  const appearance = config.infoschematic.appearance
-  const region = config.infoschematic.regions[0]
+export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
+  const config = completeSpecimen()
+  const { regions, fabrics, cards, flows, points, graphics } = config.infoschematic
+
+  switch (kind) {
+    case 'canvas':
+      return withDiagramParts(config, {})
+    case 'region':
+      return withDiagramParts(config, { regions })
+    case 'fabric':
+      return withDiagramParts(config, { fabrics })
+    case 'card':
+      return withDiagramParts(config, { cards })
+    case 'flow':
+      return withDiagramParts(config, { fabrics, cards, flows: flows.slice(0, 1) })
+    case 'point':
+      return withDiagramParts(config, { cards, flows: flows.slice(1), points })
+    case 'graphic':
+      return withDiagramParts(config, { graphics })
+  }
+}
+
+const regionFill = (config: InfoschematicConfig) => config.infoschematic.regions[0]?.fill ?? '#12273b24'
+
+const colourWithoutAlpha = (value: string) => (/^#[0-9a-f]{8}$/i.test(value) ? value.slice(0, 7) : value)
+
+const opacityFromColour = (value: string) =>
+  /^#[0-9a-f]{8}$/i.test(value) ? Number.parseInt(value.slice(7), 16) / 255 : 1
+
+const colourWithOpacity = (value: string, opacity: number) => {
+  const colour = /^#[0-9a-f]{6}$/i.test(value) ? value : '#12273b'
+  const alpha = Math.round(Math.min(1, Math.max(0, opacity)) * 255)
+    .toString(16)
+    .padStart(2, '0')
+  return `${colour}${alpha}`
+}
+
+export const guidePropertyValue = (config: InfoschematicConfig, key: GuidePropertyKey): GuidePropertyValue => {
+  const diagram = config.infoschematic
+  const region = diagram.regions[0]
+  const fabric = diagram.fabrics[0]
+  const card = diagram.cards[0]
+  const flow = diagram.flows[0]
+  const point = diagram.points[0]
+  const graphic = diagram.graphics[0]
 
   switch (key) {
-    case 'surface':
-      return appearance?.surface ?? 'neutral'
-    case 'grid':
-      return appearance?.grid ?? 'none'
-    case 'card.compact':
-      return appearance?.card?.compact ?? false
-    case 'card.description':
-      return appearance?.card?.description ?? false
-    case 'card.identity':
-      return appearance?.card?.identity ?? false
-    case 'card.stereotype':
-      return appearance?.card?.stereotype ?? false
+    case 'canvas.surface':
+      return diagram.appearance?.surface ?? 'neutral'
+    case 'canvas.grid':
+      return diagram.appearance?.grid ?? 'none'
+    case 'region.width':
+      return region?.box.width ?? 0
+    case 'region.height':
+      return region?.box.height ?? 0
+    case 'region.radius':
+      return region?.box.radius ?? 0
     case 'region.fill':
-      return region?.fill ?? '#12273b24'
-    case 'region.frame.opacity':
-      return region?.frame?.opacity ?? 1
+      return colourWithoutAlpha(regionFill(config))
+    case 'region.fillOpacity':
+      return opacityFromColour(regionFill(config))
     case 'region.frame.style':
       return region?.frame?.style ?? 'solid'
+    case 'region.frame.opacity':
+      return region?.frame?.opacity ?? 1
+    case 'region.labelPlacement':
+      return region?.labelPlacement ?? 'north-west'
     case 'region.labelMount':
       return region?.labelMount ?? 'boundary'
     case 'region.labelOffset':
       return region?.labelOffset ?? 0
-    case 'region.labelPlacement':
-      return region?.labelPlacement ?? 'north-west'
+    case 'fabric.width':
+      return fabric?.placement.box.width ?? 0
+    case 'fabric.height':
+      return fabric?.placement.box.height ?? 0
+    case 'fabric.caption':
+      return fabric?.appearance?.caption ?? ''
+    case 'card.width':
+      return card?.placement.box.width ?? 0
+    case 'card.height':
+      return card?.placement.box.height ?? 0
+    case 'card.compact':
+      return diagram.appearance?.card?.compact ?? false
+    case 'card.identity':
+      return diagram.appearance?.card?.identity ?? false
+    case 'card.stereotype':
+      return diagram.appearance?.card?.stereotype ?? false
+    case 'card.description':
+      return diagram.appearance?.card?.description ?? false
+    case 'flow.dashed':
+      return flow?.dashed ?? false
+    case 'flow.bidirectional':
+      return flow?.bidirectional ?? false
+    case 'flow.labelAlong':
+      return flow?.label?.along ?? 0.5
+    case 'point.x':
+      return point?.point.x ?? 0
+    case 'point.y':
+      return point?.point.y ?? 0
+    case 'graphic.width':
+      return graphic?.placement?.width ?? 0
+    case 'graphic.height':
+      return graphic?.placement?.height ?? 0
   }
 }
 
-export const withAppearanceOption = (
-  config: InfoschematicConfig,
-  key: AppearanceOptionKey,
-  value: AppearanceOptionValue
-): InfoschematicConfig => {
-  const appearance = config.infoschematic.appearance ?? {}
+const updateFirst = <T>(items: readonly T[], update: (item: T) => T): readonly T[] =>
+  items.map((item, index) => (index === 0 ? update(item) : item))
 
-  if (key === 'surface' || key === 'grid') {
+export const withGuideProperty = (
+  config: InfoschematicConfig,
+  key: GuidePropertyKey,
+  value: GuidePropertyValue
+): InfoschematicConfig => {
+  const diagram = config.infoschematic
+  const appearance = diagram.appearance ?? {}
+
+  if (key === 'canvas.surface' || key === 'canvas.grid') {
+    const field = key.slice('canvas.'.length)
     return {
       ...config,
-      infoschematic: { ...config.infoschematic, appearance: { ...appearance, [key]: value } }
+      infoschematic: { ...diagram, appearance: { ...appearance, [field]: value } }
     } as InfoschematicConfig
+  }
+
+  if (key.startsWith('region.')) {
+    const regions = updateFirst(diagram.regions, (region) => {
+      if (key === 'region.width' || key === 'region.height' || key === 'region.radius') {
+        const field = key.slice('region.'.length)
+        return { ...region, box: { ...region.box, [field]: Number(value) } }
+      }
+      if (key === 'region.fill') {
+        return { ...region, fill: colourWithOpacity(String(value), opacityFromColour(regionFill(config))) }
+      }
+      if (key === 'region.fillOpacity') {
+        return { ...region, fill: colourWithOpacity(colourWithoutAlpha(regionFill(config)), Number(value)) }
+      }
+      if (key === 'region.frame.opacity') {
+        return { ...region, frame: { style: region.frame?.style ?? 'solid', opacity: Number(value) } }
+      }
+      if (key === 'region.frame.style') {
+        const style = String(value) as NonNullable<typeof region.frame>['style']
+        return { ...region, frame: { ...region.frame, style } }
+      }
+      return { ...region, [key.slice('region.'.length)]: value }
+    })
+    return { ...config, infoschematic: { ...diagram, regions } } as InfoschematicConfig
+  }
+
+  if (key.startsWith('fabric.')) {
+    const fabrics = updateFirst(diagram.fabrics, (fabric) => {
+      const field = key.slice('fabric.'.length)
+      if (field === 'caption') {
+        return {
+          ...fabric,
+          appearance: {
+            ...fabric.appearance,
+            renderer: fabric.appearance?.renderer ?? 'default',
+            caption: String(value)
+          }
+        }
+      }
+      return {
+        ...fabric,
+        placement: { ...fabric.placement, box: { ...fabric.placement.box, [field]: Number(value) } }
+      }
+    })
+    return { ...config, infoschematic: { ...diagram, fabrics } } as InfoschematicConfig
   }
 
   if (key.startsWith('card.')) {
     const field = key.slice('card.'.length)
+    if (field === 'width' || field === 'height') {
+      const cards = updateFirst(diagram.cards, (card) => ({
+        ...card,
+        placement: { ...card.placement, box: { ...card.placement.box, [field]: Number(value) } }
+      }))
+      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+    }
     return {
       ...config,
       infoschematic: {
-        ...config.infoschematic,
-        appearance: { ...appearance, card: { ...appearance.card, [field]: value } }
+        ...diagram,
+        appearance: { ...appearance, card: { ...appearance.card, [field]: Boolean(value) } }
       }
     } as InfoschematicConfig
   }
 
-  const regions = config.infoschematic.regions.map((region, index) => {
-    if (index !== 0) return region
-    if (key === 'region.fill') return { ...region, fill: String(value) }
-    if (key === 'region.frame.opacity') {
-      return { ...region, frame: { style: region.frame?.style ?? 'solid', opacity: Number(value) } }
-    }
-    if (key === 'region.frame.style') {
-      return { ...region, frame: { ...region.frame, style: String(value) } }
-    }
-    const field = key.slice('region.'.length)
-    return { ...region, [field]: value }
-  })
+  if (key.startsWith('flow.')) {
+    const field = key.slice('flow.'.length)
+    const flows = updateFirst(diagram.flows, (flow) =>
+      field === 'labelAlong' ? { ...flow, label: { along: Number(value) } } : { ...flow, [field]: Boolean(value) }
+    )
+    return { ...config, infoschematic: { ...diagram, flows } } as InfoschematicConfig
+  }
 
-  return { ...config, infoschematic: { ...config.infoschematic, regions } } as InfoschematicConfig
+  if (key.startsWith('point.')) {
+    const axis = key.slice('point.'.length) as 'x' | 'y'
+    const points = updateFirst(diagram.points, (point) => ({
+      ...point,
+      point: { ...point.point, [axis]: Number(value) }
+    }))
+    const movedPoint = points[0]?.point
+    const flows = movedPoint
+      ? updateFirst(diagram.flows, (flow) => ({
+          ...flow,
+          points: flow.points.map((routePoint, index) => (index === flow.points.length - 1 ? movedPoint : routePoint))
+        }))
+      : diagram.flows
+    return { ...config, infoschematic: { ...diagram, flows, points } } as InfoschematicConfig
+  }
+
+  const field = key.slice('graphic.'.length)
+  const graphics = updateFirst(diagram.graphics, (graphic) => ({
+    ...graphic,
+    placement: {
+      x: graphic.placement?.x ?? 76,
+      y: graphic.placement?.y ?? 276,
+      width: graphic.placement?.width ?? 214,
+      height: graphic.placement?.height ?? 64,
+      [field]: Number(value)
+    }
+  }))
+  return { ...config, infoschematic: { ...diagram, graphics } } as InfoschematicConfig
 }

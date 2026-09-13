@@ -1,34 +1,48 @@
 import { describe, expect, it } from 'vitest'
-import { guideAppearanceOptionKeys, guideAppearanceOptions } from './curriculum.ts'
-import { anatomySpecimen, appearanceOptionValue, treatmentSpecimen, withAppearanceOption } from './specimens.ts'
+import { guideProperties, guidePropertyKeys } from './curriculum.ts'
+import { anatomySpecimen, guidePropertyValue, specimenFor, withGuideProperty } from './specimens.ts'
 
-describe('visual guide specimens', () => {
-  it('contains every primary artefact kind in the anatomy specimen', () => {
+describe('components guide specimens', () => {
+  it('contains every primary artefact kind and connects the Point in the labelled example', () => {
     const definition = anatomySpecimen.infoschematic
+
     expect(definition.regions).toHaveLength(1)
     expect(definition.fabrics).toHaveLength(1)
     expect(definition.cards).toHaveLength(1)
-    expect(definition.flows).toHaveLength(1)
+    expect(definition.flows).toHaveLength(2)
     expect(definition.points).toHaveLength(1)
     expect(definition.graphics).toHaveLength(1)
+    expect(definition.flows.some(({ source, target }) => source === 'point' || target === 'point')).toBe(true)
   })
 
-  it('opens the guide on the blueprint treatment rather than the bare fallback', () => {
-    expect(anatomySpecimen.infoschematic.appearance?.surface).toBe('blueprint')
-    expect(anatomySpecimen.infoschematic.appearance?.grid).toBe('major-plus-minor')
+  it('isolates Region and Card specimens from unrelated diagram parts', () => {
+    const region = specimenFor('region').infoschematic
+    const card = specimenFor('card').infoschematic
+
+    expect(region.regions).toHaveLength(1)
+    expect(region.cards).toHaveLength(0)
+    expect(region.flows).toHaveLength(0)
+    expect(card.cards).toHaveLength(1)
+    expect(card.regions).toHaveLength(0)
+    expect(card.flows).toHaveLength(0)
   })
 
-  it.each(guideAppearanceOptionKeys)('round-trips the %s guide control', (key) => {
-    const descriptor = guideAppearanceOptions[key]
+  it.each(guidePropertyKeys)('round-trips the %s guide control', (key) => {
+    const descriptor = guideProperties[key]
+    const sectionKind = key.slice(0, key.indexOf('.')) as Parameters<typeof specimenFor>[0]
+    const original = specimenFor(sectionKind)
     const value =
       descriptor.control === 'flag'
-        ? !appearanceOptionValue(treatmentSpecimen(), key)
+        ? !guidePropertyValue(original, key)
         : descriptor.control === 'number'
           ? (descriptor.range?.max ?? 1)
           : descriptor.control === 'colour'
             ? '#654ea3'
-            : (descriptor.values.at(-1) ?? '')
-    const updated = withAppearanceOption(treatmentSpecimen(), key, value)
-    expect(appearanceOptionValue(updated, key)).toBe(value)
+            : descriptor.control === 'text'
+              ? 'Updated caption'
+              : (descriptor.values?.at(-1) ?? '')
+    const updated = withGuideProperty(original, key, value)
+
+    expect(guidePropertyValue(updated, key)).toBe(value)
   })
 })

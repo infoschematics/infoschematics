@@ -1,30 +1,14 @@
-export type AppearanceOptionKey =
-  | 'card.compact'
-  | 'card.description'
-  | 'card.identity'
-  | 'card.stereotype'
-  | 'grid'
-  | 'region.fill'
-  | 'region.frame.opacity'
-  | 'region.frame.style'
-  | 'region.labelMount'
-  | 'region.labelOffset'
-  | 'region.labelPlacement'
-  | 'surface'
+export type SpecimenKind = 'canvas' | 'region' | 'fabric' | 'card' | 'flow' | 'point' | 'graphic'
 
-type GuideAppearanceOption = {
-  control: 'choice' | 'colour' | 'flag' | 'number'
-  range?: Readonly<{ max: number; min: number }>
-  values: readonly string[]
-}
-
-export const guideAppearanceOptions: Readonly<Record<AppearanceOptionKey, GuideAppearanceOption>> = {
-  surface: { control: 'choice', values: ['neutral', 'blueprint'] },
-  grid: { control: 'choice', values: ['none', 'major', 'major-plus-minor', 'dots'] },
+// This author-facing projection stays byte-for-byte aligned with Domain Model's
+// appearance catalogue. The broader guideProperties collection below adds
+// geometry controls used only to teach the surrounding component records.
+export const guideAppearanceOptions = {
   'card.compact': { control: 'flag', values: [] },
   'card.description': { control: 'flag', values: [] },
   'card.identity': { control: 'flag', values: [] },
   'card.stereotype': { control: 'flag', values: [] },
+  grid: { control: 'choice', values: ['none', 'major', 'major-plus-minor', 'dots'] },
   'region.fill': { control: 'colour', values: [] },
   'region.frame.opacity': { control: 'number', range: { max: 1, min: 0 }, values: [] },
   'region.frame.style': { control: 'choice', values: ['solid', 'dashed', 'dotted'] },
@@ -33,149 +17,250 @@ export const guideAppearanceOptions: Readonly<Record<AppearanceOptionKey, GuideA
   'region.labelPlacement': {
     control: 'choice',
     values: ['north-west', 'north', 'north-east', 'west', 'center', 'east', 'south-west', 'south', 'south-east']
-  }
+  },
+  surface: { control: 'choice', values: ['neutral', 'blueprint'] }
+} as const
+
+export type GuidePropertyKey =
+  | 'canvas.grid'
+  | 'canvas.surface'
+  | 'card.compact'
+  | 'card.description'
+  | 'card.height'
+  | 'card.identity'
+  | 'card.stereotype'
+  | 'card.width'
+  | 'fabric.caption'
+  | 'fabric.height'
+  | 'fabric.width'
+  | 'flow.bidirectional'
+  | 'flow.dashed'
+  | 'flow.labelAlong'
+  | 'graphic.height'
+  | 'graphic.width'
+  | 'point.x'
+  | 'point.y'
+  | 'region.fill'
+  | 'region.fillOpacity'
+  | 'region.frame.opacity'
+  | 'region.frame.style'
+  | 'region.height'
+  | 'region.labelMount'
+  | 'region.labelOffset'
+  | 'region.labelPlacement'
+  | 'region.radius'
+  | 'region.width'
+
+export type GuidePropertyDescriptor = Readonly<{
+  control: 'choice' | 'colour' | 'flag' | 'number' | 'text'
+  range?: Readonly<{ max: number; min: number; step?: number }>
+  values?: readonly string[]
+}>
+
+export const guideProperties: Readonly<Record<GuidePropertyKey, GuidePropertyDescriptor>> = {
+  'canvas.surface': { control: 'choice', values: ['neutral', 'blueprint'] },
+  'canvas.grid': { control: 'choice', values: ['none', 'major', 'major-plus-minor', 'dots'] },
+  'region.width': { control: 'number', range: { min: 240, max: 620, step: 10 } },
+  'region.height': { control: 'number', range: { min: 140, max: 320, step: 10 } },
+  'region.radius': { control: 'number', range: { min: 0, max: 40, step: 2 } },
+  'region.fill': { control: 'colour' },
+  'region.fillOpacity': { control: 'number', range: { min: 0, max: 1, step: 0.05 } },
+  'region.frame.style': { control: 'choice', values: ['solid', 'dashed', 'dotted'] },
+  'region.frame.opacity': { control: 'number', range: { min: 0, max: 1, step: 0.05 } },
+  'region.labelPlacement': {
+    control: 'choice',
+    values: ['north-west', 'north', 'north-east', 'west', 'center', 'east', 'south-west', 'south', 'south-east']
+  },
+  'region.labelMount': { control: 'choice', values: ['boundary', 'internal'] },
+  'region.labelOffset': { control: 'number', range: { min: -200, max: 200, step: 5 } },
+  'fabric.width': { control: 'number', range: { min: 160, max: 480, step: 10 } },
+  'fabric.height': { control: 'number', range: { min: 80, max: 240, step: 10 } },
+  'fabric.caption': { control: 'text' },
+  'card.width': { control: 'number', range: { min: 150, max: 420, step: 10 } },
+  'card.height': { control: 'number', range: { min: 70, max: 220, step: 10 } },
+  'card.compact': { control: 'flag' },
+  'card.identity': { control: 'flag' },
+  'card.stereotype': { control: 'flag' },
+  'card.description': { control: 'flag' },
+  'flow.dashed': { control: 'flag' },
+  'flow.bidirectional': { control: 'flag' },
+  'flow.labelAlong': { control: 'number', range: { min: 0.1, max: 0.9, step: 0.1 } },
+  'point.x': { control: 'number', range: { min: 220, max: 500, step: 10 } },
+  'point.y': { control: 'number', range: { min: 100, max: 300, step: 10 } },
+  'graphic.width': { control: 'number', range: { min: 120, max: 420, step: 10 } },
+  'graphic.height': { control: 'number', range: { min: 60, max: 220, step: 10 } }
 }
 
-export const guideAppearanceOptionKeys = Object.keys(guideAppearanceOptions) as readonly AppearanceOptionKey[]
+export const propertyLabels: Readonly<Record<GuidePropertyKey, string>> = {
+  'canvas.surface': 'Surface preset',
+  'canvas.grid': 'Grid',
+  'region.width': 'Width',
+  'region.height': 'Height',
+  'region.radius': 'Corner radius',
+  'region.fill': 'Fill colour',
+  'region.fillOpacity': 'Fill opacity',
+  'region.frame.style': 'Frame style',
+  'region.frame.opacity': 'Frame opacity',
+  'region.labelPlacement': 'Label placement',
+  'region.labelMount': 'Label mount',
+  'region.labelOffset': 'Label offset',
+  'fabric.width': 'Width',
+  'fabric.height': 'Height',
+  'fabric.caption': 'Caption',
+  'card.width': 'Width',
+  'card.height': 'Height',
+  'card.compact': 'Compact layout',
+  'card.identity': 'Identity code',
+  'card.stereotype': 'Stereotype',
+  'card.description': 'Description',
+  'flow.dashed': 'Dashed line',
+  'flow.bidirectional': 'Bidirectional',
+  'flow.labelAlong': 'Label position',
+  'point.x': 'Horizontal position',
+  'point.y': 'Vertical position',
+  'graphic.width': 'Width',
+  'graphic.height': 'Height'
+}
 
-export type VisualArtefact = {
-  id: 'card' | 'fabric' | 'flow' | 'graphic' | 'point' | 'region'
+export type PropertyReference = Readonly<{
+  name: string
+  summary: string
+}>
+
+export type ComponentSection = Readonly<{
+  id: SpecimenKind
   title: string
   layer: 'background' | 'midground' | 'foreground'
   summary: string
-}
+  propertyKeys: readonly GuidePropertyKey[]
+  properties: readonly PropertyReference[]
+}>
 
-export const visualArtefacts: readonly VisualArtefact[] = [
+export const componentSections: readonly ComponentSection[] = [
+  {
+    id: 'canvas',
+    title: 'Canvas',
+    layer: 'background',
+    summary:
+      'The Canvas is the drawing area behind every element. Its view box sets the coordinate space; its surface and grid set the backdrop.',
+    propertyKeys: ['canvas.surface', 'canvas.grid'],
+    properties: [
+      { name: 'viewBox', summary: 'The x, y, width, and height of the shared diagram coordinate space.' },
+      { name: 'appearance.surface', summary: 'The neutral or blueprint surface preset.' },
+      { name: 'appearance.grid', summary: 'No grid, major lines, major plus minor lines, or dots.' }
+    ]
+  },
   {
     id: 'region',
     title: 'Region',
     layer: 'background',
-    summary: 'Authored geography: a labelled box with an optional fill and frame.'
-  },
-  {
-    id: 'fabric',
-    title: 'Fabric',
-    layer: 'midground',
-    summary: 'A connectable plane or backdrop that can participate in Flows and Scene focus.'
-  },
-  {
-    id: 'card',
-    title: 'Card',
-    layer: 'foreground',
-    summary: 'A placed component with identity, scope, optional domain, and optional descriptive detail.'
-  },
-  {
-    id: 'flow',
-    title: 'Flow',
-    layer: 'foreground',
-    summary: 'A semantic connection whose family, endpoints, direction, and route remain authored data.'
-  },
-  {
-    id: 'point',
-    title: 'Point',
-    layer: 'foreground',
-    summary: 'A labelled junction or anchor placed directly on the diagram.'
-  },
-  {
-    id: 'graphic',
-    title: 'Graphic',
-    layer: 'foreground',
-    summary: 'A renderer-selected overlay, normally revealed by a Scene rather than always visible.'
-  }
-]
-
-export const visualGroupings = [
-  { id: 'scope', title: 'Scope', summary: 'Controls which scoped artefacts are applicable or visible.' },
-  { id: 'domain', title: 'Domain', summary: 'Classifies Cards by sphere of concern and supplies a visual treatment.' },
-  {
-    id: 'flow-family',
-    title: 'Flow Family',
-    summary: 'Classifies what a Flow carries and supplies its colour and identity.'
-  }
-] as const
-
-export const presentationConcepts = [
-  {
-    id: 'scene',
-    title: 'Scene',
-    summary: 'Focuses named artefacts and Flows, can reveal Graphics, and may carry one explanatory Callout.'
-  },
-  {
-    id: 'theme',
-    title: 'Theme',
-    summary: 'Groups related Scenes so an audience can explore a subject without changing the diagram.'
-  },
-  {
-    id: 'story',
-    title: 'Story',
-    summary: 'Orders Scenes into a guided explanation that can be stepped through or played.'
-  },
-  {
-    id: 'callout',
-    title: 'Callout',
-    summary: 'Places explanatory content over the composition without moving the diagram beneath it.'
-  },
-  {
-    id: 'signal',
-    title: 'Flow signal',
-    summary: 'Briefly emphasises meaningful movement while the still diagram continues to carry the meaning.'
-  }
-] as const
-
-export type TreatmentSection = {
-  id: 'canvas-treatments' | 'region-treatments' | 'card-treatments'
-  title: string
-  termId: 'infoschematic' | 'region' | 'standard-card'
-  summary: string
-  optionKeys: readonly AppearanceOptionKey[]
-}
-
-export const treatmentSections: readonly TreatmentSection[] = [
-  {
-    id: 'canvas-treatments',
-    title: 'Canvas treatments',
-    termId: 'infoschematic',
-    summary: 'Surface establishes the overall backdrop; grid adds coordinate texture without changing structure.',
-    optionKeys: ['surface', 'grid']
-  },
-  {
-    id: 'region-treatments',
-    title: 'Region treatments',
-    termId: 'region',
-    summary: 'Fill and frame establish geography while label placement, mount, and offset keep its name legible.',
-    optionKeys: [
+    summary:
+      'A Region gives part of the Canvas a named boundary. It establishes geography; it is not a connectable component.',
+    propertyKeys: [
+      'region.width',
+      'region.height',
+      'region.radius',
       'region.fill',
+      'region.fillOpacity',
       'region.frame.style',
       'region.frame.opacity',
       'region.labelPlacement',
       'region.labelMount',
       'region.labelOffset'
+    ],
+    properties: [
+      { name: 'id, label', summary: 'Stable identity and the visible name.' },
+      { name: 'box', summary: 'Position, width, height, and optional corner radius.' },
+      { name: 'fill', summary: 'Optional colour; an alpha channel makes it translucent.' },
+      { name: 'frame', summary: 'Optional solid, dashed, or dotted border with opacity.' },
+      { name: 'labelPlacement', summary: 'One of nine compass positions, or none.' },
+      {
+        name: 'labelMount, labelOffset',
+        summary: 'Whether the label sits inside or on the boundary, and its edge offset.'
+      }
     ]
   },
   {
-    id: 'card-treatments',
-    title: 'Card treatments',
-    termId: 'standard-card',
-    summary: 'Card options control composition and optional visible metadata without deleting authored information.',
-    optionKeys: ['card.compact', 'card.identity', 'card.stereotype', 'card.description']
+    id: 'fabric',
+    title: 'Fabric',
+    layer: 'midground',
+    summary:
+      'A Fabric is a connectable plane or shared substrate. Unlike a Region, it can be the source or target of a Flow.',
+    propertyKeys: ['fabric.width', 'fabric.height', 'fabric.caption'],
+    properties: [
+      { name: 'id, code, label, detail', summary: 'Stable identity and reader-facing text.' },
+      { name: 'scope, scopes, scopeRule', summary: 'Default scope and the applicability rule.' },
+      { name: 'conformsTo, services', summary: 'Optional specifications and services associated with the Fabric.' },
+      { name: 'placement', summary: 'A box plus optional ports on its four sides.' },
+      { name: 'appearance.renderer', summary: 'The stable renderer key used by the host.' },
+      { name: 'appearance.caption, detail, properties', summary: 'Portable values passed to that renderer.' }
+    ]
+  },
+  {
+    id: 'card',
+    title: 'Card',
+    layer: 'foreground',
+    summary:
+      'A Card is a placed component. It carries identity and meaning, and its ports make it connectable to Flows.',
+    propertyKeys: ['card.width', 'card.height', 'card.compact', 'card.identity', 'card.stereotype', 'card.description'],
+    properties: [
+      { name: 'id, code, label, detail', summary: 'Stable identity and reader-facing text.' },
+      { name: 'scope, scopes, scopeRule', summary: 'Default scope and the applicability rule.' },
+      { name: 'conformsTo, services', summary: 'Optional specifications and services associated with the Card.' },
+      { name: 'domain, stereotype, wraps', summary: 'Optional classification and composition metadata.' },
+      { name: 'placement', summary: 'A box plus optional ports on its four sides.' },
+      { name: 'appearance.card', summary: 'Shared compactness and metadata-visibility defaults.' }
+    ]
+  },
+  {
+    id: 'flow',
+    title: 'Flow',
+    layer: 'foreground',
+    summary:
+      'A Flow is a meaningful connection between ports. Its authored points preserve the route instead of asking a renderer to invent one.',
+    propertyKeys: ['flow.dashed', 'flow.bidirectional', 'flow.labelAlong'],
+    properties: [
+      { name: 'id, code, family', summary: 'Stable identity and the Flow Family that supplies its visual identity.' },
+      { name: 'source, sourcePort, target, targetPort', summary: 'The two connected artefacts and their named ports.' },
+      { name: 'points', summary: 'The authored route through diagram coordinates.' },
+      { name: 'label.along', summary: 'The label position along the route, from 0 to 1.' },
+      { name: 'operation, conformsTo, over', summary: 'Optional semantics and specification references.' },
+      { name: 'bidirectional, dashed', summary: 'Direction and line-style properties.' }
+    ]
+  },
+  {
+    id: 'point',
+    title: 'Point',
+    layer: 'foreground',
+    summary:
+      'A Point is a labelled junction or anchor. It becomes useful when Flows meet, split, or need an explicit waypoint with identity.',
+    propertyKeys: ['point.x', 'point.y'],
+    properties: [
+      { name: 'id, code, label', summary: 'Stable identity and visible text.' },
+      { name: 'scopes', summary: 'The scopes in which the Point is applicable.' },
+      { name: 'point', summary: 'Its x and y position in diagram coordinates.' },
+      { name: 'ports', summary: 'Optional connectable positions on its four sides.' }
+    ]
+  },
+  {
+    id: 'graphic',
+    title: 'Graphic',
+    layer: 'foreground',
+    summary:
+      'A Graphic reserves a placed visual supplied by a renderer. Scenes can reveal it when an explanation needs more than the structural diagram.',
+    propertyKeys: ['graphic.width', 'graphic.height'],
+    properties: [
+      { name: 'id, label', summary: 'Stable identity and an optional accessible name.' },
+      { name: 'renderer', summary: 'The stable renderer key used by the host.' },
+      { name: 'placement', summary: 'An optional x, y, width, and height.' },
+      { name: 'scopes', summary: 'Optional scope applicability.' },
+      { name: 'properties', summary: 'Portable string, number, or boolean values for the renderer.' }
+    ]
   }
 ]
 
-export const optionLabels: Readonly<Record<AppearanceOptionKey, string>> = {
-  surface: 'Surface',
-  grid: 'Grid',
-  'card.compact': 'Compact composition',
-  'card.description': 'Description',
-  'card.identity': 'Identity code',
-  'card.stereotype': 'Stereotype',
-  'region.fill': 'Fill',
-  'region.frame.opacity': 'Frame opacity',
-  'region.frame.style': 'Frame style',
-  'region.labelMount': 'Label mount',
-  'region.labelOffset': 'Label offset',
-  'region.labelPlacement': 'Label placement'
-}
+export const guidePropertyKeys = Object.keys(guideProperties) as readonly GuidePropertyKey[]
 
-export const uncataloguedGuideOptions = guideAppearanceOptionKeys.filter(
-  (key) => !treatmentSections.some((section) => section.optionKeys.includes(key))
+export const uncataloguedGuideProperties = guidePropertyKeys.filter(
+  (key) => !componentSections.some((section) => section.propertyKeys.includes(key))
 )

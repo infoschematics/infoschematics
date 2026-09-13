@@ -81,7 +81,7 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
 - **`visibility`** selects visible [Scopes](/docs/reference/vocabulary/#scope) (all when omitted), chooses whether unfocused content is dimmed, hidden, or shown, and controls which [Graphics](/docs/reference/vocabulary/#graphic) render.
 - **`cardDetails`** overrides identity, stereotype, and description visibility without touching the authored definition — never compactness, which is authored because it changes a Card's composition.
 - **`annotations`** draws each visible [Flow](/docs/reference/vocabulary/#flow)'s code chip at the shared placement Canvas uses; a Flow can pin its chip with an authored `label: { along: 0.5 }`.
-- **`signals`** names Flows to emphasise with a deterministic, non-animated still treatment; unknown identifiers are ignored, and the renderer never infers signals from Scene focus or authored data.
+- **`signals`** names Flows to emphasise in a deterministic, non-animated still output; unknown identifiers are ignored, and the renderer never infers signals from Scene focus or authored data.
 - **`resourceIdPrefix`** namespaces renderer-owned marker and pattern IDs. Its default preserves standalone output; use a unique letter-or-underscore-prefixed value for every SVG inserted into the same document.
 
 Output shares the Canvas's visual language — the same tokens, appearance resolution, Region geometry, Card layout, and luminance-resolved text ink — so a static export and the interactive Canvas read as the same diagram.

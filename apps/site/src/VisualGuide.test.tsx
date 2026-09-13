@@ -3,35 +3,48 @@ import { describe, expect, it } from 'vitest'
 import { VisualGuide } from './VisualGuide.tsx'
 
 describe('components guide', () => {
-  it('uses the standard documentation treatment', () => {
+  it('uses the standard documentation layout and expands every component in the sidebar', () => {
     const page = renderToStaticMarkup(<VisualGuide />)
 
     expect(page).toContain('<article aria-label="Components" class="document-content">')
     expect(page).toContain('<h1>Components</h1>')
-    expect(page).toContain('class="skip-link"')
     expect(page).toContain('aria-label="Components sections"')
-    expect(page).toContain('href="#anatomy"')
-    expect(page).toContain('href="#card-treatments"')
-    expect(page).not.toContain('visual-guide__intro')
-    expect(page).not.toContain('visual-guide__contents')
-    expect(page).not.toContain('visual-guide__section--callout')
+    for (const slug of [
+      'labelled-example',
+      'canvas',
+      'region',
+      'fabric',
+      'card',
+      'flow',
+      'point',
+      'graphic',
+      'where-next'
+    ]) {
+      expect(page).toContain(`href="#${slug}"`)
+    }
   })
 
-  it('combines visible anatomy, groupings, treatments and explanatory capabilities', () => {
+  it('uses a labelled whole example followed by isolated property specimens', () => {
     const page = renderToStaticMarkup(<VisualGuide />)
 
-    expect(page).toContain('Anatomy of an Infoschematic')
-    expect(page).toContain('Groupings')
-    expect(page).toContain('Treatments')
-    expect(page).toContain('Explanation and presentation')
-    expect(page).toContain('Flow signal')
-    expect(page).toContain('Presentation states')
+    expect(page).toContain('A labelled Infoschematic')
+    expect(page).toContain('Labels for the complete example')
+    expect(page).toContain('acts as a real endpoint')
+    expect(page.match(/<legend>Change properties<\/legend>/g)).toHaveLength(7)
+    expect(page).toContain('Fill opacity')
+    expect(page).toContain('Property reference')
+    expect(page).not.toContain('Explanation and presentation')
+    expect(page).not.toContain('Presentation states')
+    expect(page).not.toContain('Treatments')
+    expect(page).not.toContain('Service boundary')
+    expect(page).not.toContain('Event fabric')
+    expect(page).not.toContain('Customer API')
   })
 
-  it('keeps terminology available after the guided explanation instead of linking every concept away', () => {
+  it('routes explanation elsewhere and keeps precise terminology available once', () => {
     const page = renderToStaticMarkup(<VisualGuide />)
 
+    expect(page).toContain('href="/docs/explanation/"')
     expect(page.match(/href="\/docs\/reference\/vocabulary\//g)).toHaveLength(1)
-    expect(page).toContain('href="/docs/approach/visual-language/"')
   })
 })

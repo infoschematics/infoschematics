@@ -1,31 +1,29 @@
 import { describe, expect, it } from 'vitest'
-import {
-  guideAppearanceOptionKeys,
-  presentationConcepts,
-  treatmentSections,
-  uncataloguedGuideOptions,
-  visualArtefacts,
-  visualGroupings
-} from './curriculum.ts'
+import { componentSections, guideProperties, guidePropertyKeys, uncataloguedGuideProperties } from './curriculum.ts'
 
-describe('visual guide curriculum', () => {
-  it('teaches each primary artefact exactly once', () => {
-    expect(visualArtefacts.map(({ id }) => id)).toEqual(['region', 'fabric', 'card', 'flow', 'point', 'graphic'])
-    expect(new Set(visualArtefacts.map(({ id }) => id))).toHaveLength(visualArtefacts.length)
+describe('components guide curriculum', () => {
+  it('teaches the Canvas and each primary artefact in reading order', () => {
+    expect(componentSections.map(({ id }) => id)).toEqual([
+      'canvas',
+      'region',
+      'fabric',
+      'card',
+      'flow',
+      'point',
+      'graphic'
+    ])
+    expect(new Set(componentSections.map(({ id }) => id))).toHaveLength(componentSections.length)
   })
 
-  it('distinguishes all three independent groupings', () => {
-    expect(visualGroupings.map(({ id }) => id)).toEqual(['scope', 'domain', 'flow-family'])
+  it('gives every interactive property exactly one component section', () => {
+    const sectionKeys = componentSections.flatMap(({ propertyKeys }) => propertyKeys)
+
+    expect(uncataloguedGuideProperties).toEqual([])
+    expect(new Set(sectionKeys)).toHaveLength(sectionKeys.length)
+    expect(new Set(sectionKeys)).toEqual(new Set(guidePropertyKeys))
   })
 
-  it('introduces the explanation and presentation concepts in one place', () => {
-    expect(presentationConcepts.map(({ id }) => id)).toEqual(['scene', 'theme', 'story', 'callout', 'signal'])
-  })
-
-  it('gives every catalogued appearance option one treatment section', () => {
-    const guideKeys = treatmentSections.flatMap(({ optionKeys }) => optionKeys)
-    expect(uncataloguedGuideOptions).toEqual([])
-    expect(new Set(guideKeys)).toHaveLength(guideKeys.length)
-    expect(new Set(guideKeys)).toEqual(new Set(guideAppearanceOptionKeys))
+  it('gives every property a control descriptor', () => {
+    expect(Object.keys(guideProperties)).toEqual(expect.arrayContaining([...guidePropertyKeys]))
   })
 })
