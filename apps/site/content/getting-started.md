@@ -1,43 +1,44 @@
 # Getting started
 
-An [Infoschematic](/docs/reference/vocabulary/#infoschematic) combines a diagrammatic representation, using shapes and lines to show the main parts and connections of a system, with supplemental information directly in the diagram. It shows what exists, how things interrelate, and what moves between them.
+An Infoschematic combines a structural diagram with the information needed to explain, tailor and present it. It shows what exists, how the parts relate and what moves between them, then lets one authored definition serve a still document, an interactive exploration, an audience presentation or a Studio session.
 
-This simple diagram is then turned into a live, explorable view that can be tailored to multiple audiences and is clear enough to present to anyone.
+## What goes into an Infoschematic
 
-## What makes up an Infoschematic
+The diagram is built from visible artefacts:
 
-The diagram itself is built from five visual element types:
+- **Regions** establish labelled geography behind the composition.
+- **Fabrics** provide connectable planes or backdrops.
+- **Cards** show placed components with identity and meaning.
+- **Flows** connect artefacts with authored direction and routes.
+- **Points** mark labelled junctions or anchors.
+- **Graphics** add renderer-selected explanatory material.
 
-- [**Region**](/docs/reference/vocabulary/#region) establishes background geography with a labelled box, optional fill, and optional frame.
-- [**Fabric**](/docs/reference/vocabulary/#fabric) is a connectable midground plane or backdrop.
-- [**Card**](/docs/reference/vocabulary/#standard-card) is a placed foreground component.
-- [**Flow**](/docs/reference/vocabulary/#flow) connects Cards and Fabrics through authored endpoints and route geometry.
-- [**Graphic**](/docs/reference/vocabulary/#graphic) is a renderer-selected visual, commonly revealed by a Scene.
+The same definition also carries Scopes, Scenes, Themes, Stories and Callouts. These tailor what an audience sees and how an explanation unfolds without moving the underlying diagram.
 
-An Infoschematic is more than its diagram. [**Scenes**](/docs/reference/vocabulary/#scene) focus or reveal parts of it, [**Themes**](/docs/reference/vocabulary/#theme) and [**Stories**](/docs/reference/vocabulary/#story) arrange those Scenes for explanation and presentation, and [**Scopes**](/docs/reference/vocabulary/#scope) control what is applicable for a given audience. Everything is one serialisable definition — plain data a host application selects and mounts.
+The [visual guide](/docs/visual-guide/) shows these parts together before you need to learn their exact schema names.
 
 ## From definition to output
 
-The same data moves through four layers:
+One serialisable definition moves through four layers:
 
-1. **Domain Model** defines the serialisable product contract and stable renderer keys.
-2. **Domain Core** normalises TypeScript, JSON, or YAML input and validates it against the published schema.
-3. **View Model** derives geometry, routes, ports, focus, and editing calculations without choosing a UI framework.
-4. **Views and renderers** turn the derived model into Canvas, Present, Studio, or static SVG output.
+1. **Domain Model** defines the plain-data product contract and stable renderer keys.
+2. **Domain Core** normalises TypeScript, JSON or YAML input and validates it against the published schema.
+3. **View Model** derives geometry, routes, ports, focus and editing calculations without choosing a UI framework.
+4. **Views and renderers** turn the result into Canvas, Present, Studio or deterministic SVG output.
 
-One definition therefore drives consistent outputs: static renderings for documents, an interactive Canvas for exploration, a Present view for an audience, and a Studio view for producers.
+Your host application chooses the surface and supplies any runtime renderers. The authored definition never contains React components, browser state or callbacks.
 
-## How this guide is organised
+## Follow the guide
 
-Each step builds on the one before it:
+Each step has one job:
 
-1. **Getting started** — this page: what an Infoschematic is and how its parts fit together.
-2. [Visual guide](/docs/visual-guide/) — the diagram's visible anatomy and every authored appearance treatment, shown live.
-3. [Capabilities](/docs/capabilities/) — Scenes, Themes, Stories, and Scopes: the machinery beyond the diagram.
-4. [Authoring](/docs/authoring/) — write a complete definition, in TypeScript or as a YAML or JSON document.
-5. [Present view](/docs/present/) — show an Infoschematic to an audience with filtering, focus, and Story playback.
-6. [Studio view](/docs/studio/) — design the diagram and direct its presentation material in a structured editor.
-7. [Static rendering](/docs/static-rendering/) — export deterministic SVG for documents and pipelines.
-8. [React integration](/docs/react-integration/) — mount any of the views in your own application.
+1. **Getting started** — understand the overall model and choose a route through the guide.
+2. [Installation](/docs/installation/) — choose the smallest package for the output you need.
+3. [Visual guide](/docs/visual-guide/) — see the anatomy, groupings, treatments and presentation concepts.
+4. [Authoring](/docs/authoring/) — write a complete definition in TypeScript, YAML or JSON.
+5. [Present](/docs/present/) — guide an audience with filtering, focus and Story playback.
+6. [Studio](/docs/studio/) — design the diagram and direct its presentation material.
+7. [Static rendering](/docs/static-rendering/) — create deterministic SVG for documents and pipelines.
+8. [React integration](/docs/react-integration/) — mount Canvas, Present or Studio in a host application.
 
-To experiment before reading further, open the [Playground](/playground/) — its formats are ordered from most portable to most expressive: YAML, JSON, then TypeScript — or explore the [hosted examples](/examples/) to see complete Infoschematics in operation.
+Try the [Playground](/playground/) when you want to inspect and edit a complete definition. Use the [canonical terminology](/docs/reference/vocabulary/) when you need exact contract language rather than a guided introduction.

@@ -4,12 +4,12 @@ area: SITE
 title: Guide information architecture
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-SITE-016]
 blocked_by: []
-baseline_ref: null
+baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
 created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T15:51:48Z
+updated_at: 2026-09-13T16:01:44Z
 ---
 
 # Guide information architecture
@@ -32,13 +32,13 @@ Site routes expose User guide, Reference, and Design sections. The visual guide 
 
 ## Steps
 
-- [ ] Reorder the User guide as Getting started, Installation, Visual guide, Authoring, Present, Studio, Static rendering, and React integration.
-- [ ] Add concise installation guidance for package selection and the first supported setup.
-- [ ] Fold useful Capabilities material into the Visual guide and retire the separate Capabilities route with a compatible redirect.
-- [ ] Rename the public Design section and URLs to Approach while preserving compatible redirects from existing Design URLs.
-- [ ] Remove Reference and Vocabulary from primary documentation navigation while retaining canonical vocabulary content for stable deep links.
-- [ ] Revise Getting started and section introductions so practical guide links precede reference terminology.
-- [ ] Update routing, sidebar, document, and visual-guide tests for the new hierarchy and compatibility paths.
+- [x] Reorder the User guide as Getting started, Installation, Visual guide, Authoring, Present, Studio, Static rendering, and React integration.
+- [x] Add concise installation guidance for package selection and the first supported setup.
+- [x] Fold useful Capabilities material into the Visual guide and retire the separate Capabilities route with a compatible redirect.
+- [x] Rename the public Design section and URLs to Approach while preserving compatible redirects from existing Design URLs.
+- [x] Remove Reference and Vocabulary from primary documentation navigation while retaining canonical vocabulary content for stable deep links.
+- [x] Revise Getting started and section introductions so practical guide links precede reference terminology.
+- [x] Update routing, sidebar, document, and visual-guide tests for the new hierarchy and compatibility paths.
 
 ## Files touched
 

@@ -4,21 +4,22 @@ export const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
 export const visualGuidePath = '/docs/visual-guide/'
+export const installationPath = '/docs/installation/'
 export const playgroundPath = '/playground/'
 
 export function playgroundPresetPath(preset: string) {
   return `${playgroundPath}?preset=${preset}`
 }
 
-export type DocumentSection = 'guide' | 'reference' | 'design'
+export type DocumentSection = 'guide' | 'reference' | 'approach'
 
 export const sectionTitles: Record<DocumentSection, string> = {
   guide: 'User guide',
   reference: 'Reference',
-  design: 'Design'
+  approach: 'Approach'
 }
 
-export const documentSections: readonly DocumentSection[] = ['guide', 'reference', 'design']
+export const documentSections = ['guide', 'approach'] as const satisfies readonly DocumentSection[]
 
 interface PublishedDocument {
   sourcePath: string
@@ -39,10 +40,10 @@ const publishedDocuments = [
     section: 'guide'
   },
   {
-    sourcePath: 'apps/site/content/capabilities.md',
-    path: '/docs/capabilities/',
-    title: 'Capabilities',
-    summary: 'Scenes, Themes, Stories, Scopes, Graphics and Callouts beyond the diagram.',
+    sourcePath: 'apps/site/content/installation.md',
+    path: installationPath,
+    title: 'Installation',
+    summary: 'Choose and install the packages needed for static, interactive or authoring use.',
     section: 'guide'
   },
   {
@@ -89,37 +90,51 @@ const publishedDocuments = [
   },
   {
     sourcePath: 'docs/design/architecture.md',
-    path: '/docs/design/architecture/',
+    path: '/docs/approach/architecture/',
     title: 'Architecture',
     summary: 'Ownership roots, package boundaries and the dependency direction between them.',
-    section: 'design'
+    section: 'approach'
   },
   {
     sourcePath: 'docs/design/visual-language.md',
-    path: '/docs/design/visual-language/',
+    path: '/docs/approach/visual-language/',
     title: 'Visual language',
     summary: 'Composition, colour, routing, motion, and accessible visual treatment.',
-    section: 'design'
+    section: 'approach'
   },
   {
     sourcePath: 'docs/design/view-present.md',
-    path: '/docs/design/view-present/',
+    path: '/docs/approach/view-present/',
     title: 'Present view design',
     summary: 'Audience-facing filtering, Scene focus and Story playback design.',
-    section: 'design'
+    section: 'approach'
   },
   {
     sourcePath: 'docs/design/view-studio.md',
-    path: '/docs/design/view-studio/',
+    path: '/docs/approach/view-studio/',
     title: 'Studio view design',
     summary: 'Generic editing session design: selection, drafts and consolidation.',
-    section: 'design'
+    section: 'approach'
   }
 ] as const satisfies readonly PublishedDocument[]
 
 export const documentationRoutes: readonly PublishedDocument[] = publishedDocuments
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
+
+const legacyPathAliases: Readonly<Record<string, string>> = {
+  '/docs/capabilities/': visualGuidePath,
+  '/docs/design/architecture/': '/docs/approach/architecture/',
+  '/docs/design/visual-language/': '/docs/approach/visual-language/',
+  '/docs/design/view-present/': '/docs/approach/view-present/',
+  '/docs/design/view-studio/': '/docs/approach/view-studio/'
+}
+
+/** Return a canonical path for a retired public route, preserving unrelated paths unchanged. */
+export function canonicalSitePath(pathname: string) {
+  const normalised = pathname.endsWith('/') ? pathname : `${pathname}/`
+  return legacyPathAliases[normalised] ?? pathname
+}
 
 export function isBlankExamplePath(pathname: string) {
   return pathname === blankExamplePath || pathname === blankExamplePath.slice(0, -1)
@@ -150,5 +165,6 @@ export function isPlaygroundPath(pathname: string) {
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {
-  return documentationRoutes.find((route) => pathname === route.path || pathname === route.path.slice(0, -1))
+  const canonicalPath = canonicalSitePath(pathname)
+  return documentationRoutes.find((route) => canonicalPath === route.path || canonicalPath === route.path.slice(0, -1))
 }

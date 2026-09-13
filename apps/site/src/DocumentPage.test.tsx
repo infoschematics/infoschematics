@@ -13,14 +13,22 @@ describe('documentation pages', () => {
     expect(page).toContain('href="/docs/"')
   })
 
-  it.each(documentationRoutes)('lists every article in the sidebar and marks $sourcePath current', (route) => {
+  it.each(documentationRoutes)('lists the primary journey in the sidebar for $sourcePath', (route) => {
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
+    const primaryRoutes = documentationRoutes.filter((candidate) => candidate.section !== 'reference')
 
     expect(page).toContain('aria-label="Documentation"')
-    for (const other of documentationRoutes) {
+    for (const other of primaryRoutes) {
       expect(page).toContain(`>${other.title}</a>`)
     }
-    expect(page).toContain(`aria-current="page" href="${route.path}"`)
+    expect(page).toContain('>Visual guide</a>')
+    expect(page).not.toContain('>Terminology</a>')
+    expect(page).not.toContain('>Reference</h2>')
+    if (route.section === 'reference') {
+      expect(page).not.toContain(`aria-current="page" href="${route.path}"`)
+    } else {
+      expect(page).toContain(`aria-current="page" href="${route.path}"`)
+    }
   })
 
   it('gives headings anchor ids and lists them in the page contents', () => {

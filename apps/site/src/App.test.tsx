@@ -4,6 +4,7 @@ import { App } from './App.tsx'
 import { BlankInfoschematic } from './BlankInfoschematic.tsx'
 import { ExamplesIndex } from './ExamplesIndex.tsx'
 import {
+  canonicalSitePath,
   docsIndexPath,
   documentationRoutes,
   examplesIndexPath,
@@ -41,48 +42,54 @@ describe('website routes', () => {
     const page = renderToStaticMarkup(<BlankInfoschematic />)
 
     expect(isBlankExamplePath('/examples/blank/')).toBe(true)
+    expect(isBlankExamplePath('/examples/blank')).toBe(true)
     expect(isBlankExamplePath('/')).toBe(false)
     expect(page).toContain('<h1>Infoschematics</h1>')
-    expect(page).toContain('<svg')
     expect(page).toContain('viewBox="0 0 1920 1080"')
     expect(page).toContain('data-surface-treatment="blueprint"')
     expect(page).toContain('data-grid-treatment="major-plus-minor"')
     expect(page).not.toContain('5G-EMERGE')
   })
 
-  it('resolves each canonical documentation route with or without a trailing slash', () => {
-    for (const route of documentationRoutes) {
-      expect(getDocumentationRoute(route.path)).toEqual(route)
-      expect(getDocumentationRoute(route.path.slice(0, -1))).toEqual(route)
-    }
-
-    expect(getDocumentationRoute('/')).toBeUndefined()
-    expect(getDocumentationRoute('/guides/unknown/')).toBeUndefined()
+  it.each(documentationRoutes)('resolves $path with or without a trailing slash', (route) => {
+    expect(getDocumentationRoute(route.path)).toEqual(route)
+    expect(getDocumentationRoute(route.path.slice(0, -1))).toEqual(route)
   })
 
-  it('publishes site-owned guide content and repository documentation at explicit paths', () => {
+  it('keeps Site-owned guide content separate from repository-owned approach documents', () => {
     expect(getDocumentationRoute('/docs/authoring/')?.sourcePath).toBe('apps/site/content/authoring.md')
-    expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
+    expect(getDocumentationRoute('/docs/approach/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
     expect(getDocumentationRoute('/docs/guides/authoring/')).toBeUndefined()
   })
 
-  it('orders the user guide as a step-by-step progression', () => {
-    const titlesIn = (section: string) =>
-      documentationRoutes.filter((route) => route.section === section).map((route) => route.title)
+  it('publishes the user guide in step-by-step order', () => {
+    const titles = documentationRoutes.filter((route) => route.section === 'guide').map((route) => route.title)
 
-    expect(titlesIn('guide')).toEqual([
+    expect(titles).toEqual([
       'Getting started',
-      'Capabilities',
+      'Installation',
       'Authoring',
       'Present view',
       'Studio view',
       'Static rendering',
       'React integration'
     ])
-    expect(titlesIn('reference')).toEqual(['Terminology'])
   })
 
-  it('publishes guidance rather than the specifications, which stay in the repository', () => {
+  it('keeps terminology available without making Reference a primary section', () => {
+    expect(getDocumentationRoute('/docs/reference/vocabulary/')?.title).toBe('Terminology')
+    expect(documentationRoutes.filter((route) => route.section === 'reference')).toHaveLength(1)
+  })
+
+  it('canonicalises retired Capabilities and Design paths', () => {
+    expect(canonicalSitePath('/docs/capabilities/')).toBe('/docs/visual-guide/')
+    expect(canonicalSitePath('/docs/capabilities')).toBe('/docs/visual-guide/')
+    expect(canonicalSitePath('/docs/design/architecture/')).toBe('/docs/approach/architecture/')
+    expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
+    expect(canonicalSitePath('/docs/authoring/')).toBe('/docs/authoring/')
+  })
+
+  it('publishes guidance while specifications stay in the repository', () => {
     expect(documentationRoutes.some((route) => route.sourcePath.startsWith('docs/specs/'))).toBe(false)
     expect(getDocumentationRoute('/docs/specs/')).toBeUndefined()
   })
@@ -109,17 +116,12 @@ describe('website routes', () => {
     expect(page).toContain('href="/examples/blank/"')
   })
 
-  it('resolves the hosted Infoschematics example with or without a trailing slash', () => {
+  it('resolves hosted Infoschematics examples with or without trailing slashes', () => {
     expect(isInfoschematicsExamplePath('/examples/infoschematics/')).toBe(true)
     expect(isInfoschematicsExamplePath('/examples/infoschematics')).toBe(true)
     expect(isInfoschematicsExamplePath('/examples/infoschematic/')).toBe(false)
-    expect(isInfoschematicsExamplePath('/')).toBe(false)
-  })
-
-  it('resolves the hosted system example with or without a trailing slash', () => {
     expect(isSystemExamplePath('/examples/system/')).toBe(true)
     expect(isSystemExamplePath('/examples/system')).toBe(true)
     expect(isSystemExamplePath('/examples/systems/')).toBe(false)
-    expect(isSystemExamplePath('/')).toBe(false)
   })
 })

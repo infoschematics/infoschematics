@@ -1,6 +1,7 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import {
+  canonicalSitePath,
   getDocumentationRoute,
   isBlankExamplePath,
   isExamplesIndexPath,
@@ -58,6 +59,10 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
 const rootElement = document.getElementById('root')
 
 if (rootElement) {
-  const page = await resolvePage(window.location.pathname)
+  const canonicalPath = canonicalSitePath(window.location.pathname)
+  if (canonicalPath !== window.location.pathname) {
+    window.history.replaceState(null, '', `${canonicalPath}${window.location.search}${window.location.hash}`)
+  }
+  const page = await resolvePage(canonicalPath)
   createRoot(rootElement).render(<StrictMode>{page}</StrictMode>)
 }

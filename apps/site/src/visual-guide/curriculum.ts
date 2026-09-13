@@ -94,6 +94,34 @@ export const visualGroupings = [
   }
 ] as const
 
+export const presentationConcepts = [
+  {
+    id: 'scene',
+    title: 'Scene',
+    summary: 'Focuses named artefacts and Flows, can reveal Graphics, and may carry one explanatory Callout.'
+  },
+  {
+    id: 'theme',
+    title: 'Theme',
+    summary: 'Groups related Scenes so an audience can explore a subject without changing the diagram.'
+  },
+  {
+    id: 'story',
+    title: 'Story',
+    summary: 'Orders Scenes into a guided explanation that can be stepped through or played.'
+  },
+  {
+    id: 'callout',
+    title: 'Callout',
+    summary: 'Places explanatory content over the composition without moving the diagram beneath it.'
+  },
+  {
+    id: 'signal',
+    title: 'Flow signal',
+    summary: 'Briefly emphasises meaningful movement while the still diagram continues to carry the meaning.'
+  }
+] as const
+
 export type TreatmentSection = {
   id: 'canvas-treatments' | 'region-treatments' | 'card-treatments'
   title: string

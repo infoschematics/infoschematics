@@ -5,8 +5,8 @@ import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
 import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
 import authoringMarkdown from '../content/authoring.md?raw'
-import capabilitiesMarkdown from '../content/capabilities.md?raw'
 import gettingStartedMarkdown from '../content/getting-started.md?raw'
+import installationMarkdown from '../content/installation.md?raw'
 import presentMarkdown from '../content/present.md?raw'
 import reactIntegrationMarkdown from '../content/react-integration.md?raw'
 import staticRenderingMarkdown from '../content/static-rendering.md?raw'
@@ -21,7 +21,7 @@ const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
 
 const markdownBySourcePath: Record<string, string> = {
   'apps/site/content/getting-started.md': gettingStartedMarkdown,
-  'apps/site/content/capabilities.md': capabilitiesMarkdown,
+  'apps/site/content/installation.md': installationMarkdown,
   'apps/site/content/authoring.md': authoringMarkdown,
   'apps/site/content/present.md': presentMarkdown,
   'apps/site/content/studio.md': studioMarkdown,

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   guideAppearanceOptionKeys,
+  presentationConcepts,
   treatmentSections,
   uncataloguedGuideOptions,
   visualArtefacts,
@@ -15,6 +16,10 @@ describe('visual guide curriculum', () => {
 
   it('distinguishes all three independent groupings', () => {
     expect(visualGroupings.map(({ id }) => id)).toEqual(['scope', 'domain', 'flow-family'])
+  })
+
+  it('introduces the explanation and presentation concepts in one place', () => {
+    expect(presentationConcepts.map(({ id }) => id)).toEqual(['scene', 'theme', 'story', 'callout', 'signal'])
   })
 
   it('gives every catalogued appearance option one treatment section', () => {

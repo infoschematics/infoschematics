@@ -3,6 +3,7 @@ import {
   docsIndexPath,
   documentationRoutes,
   documentSections,
+  installationPath,
   sectionTitles,
   visualGuidePath
 } from './routes.ts'
@@ -27,8 +28,8 @@ function documentEntry(path: string): SidebarEntry {
 // document, so its entry is declared here alongside the Markdown steps.
 const guideEntries: readonly SidebarEntry[] = [
   documentEntry(docsIndexPath),
+  documentEntry(installationPath),
   { path: visualGuidePath, title: 'Visual guide' },
-  documentEntry('/docs/capabilities/'),
   documentEntry('/docs/authoring/'),
   documentEntry('/docs/present/'),
   documentEntry('/docs/studio/'),

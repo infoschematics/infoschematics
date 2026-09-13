@@ -2,12 +2,10 @@ import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { visualGuidePath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
-import { treatmentSections, visualArtefacts, visualGroupings } from './visual-guide/curriculum.ts'
+import { presentationConcepts, treatmentSections, visualArtefacts, visualGroupings } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import { anatomySpecimen } from './visual-guide/specimens.ts'
 import './styles.css'
-
-const vocabularyHref = (id: string) => `/docs/reference/vocabulary/#${id}`
 
 export function VisualGuide() {
   const anatomySource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
@@ -32,6 +30,7 @@ export function VisualGuide() {
               <a href="#anatomy">Anatomy</a>
               <a href="#groupings">Groupings</a>
               <a href="#treatments">Treatments</a>
+              <a href="#explanation">Explanation</a>
               <a href="#presentation-states">Presentation states</a>
             </nav>
           </header>
@@ -55,9 +54,7 @@ export function VisualGuide() {
               {visualArtefacts.map((artefact) => (
                 <article className="visual-guide__reference-card" key={artefact.id}>
                   <p className="visual-guide__layer">{artefact.layer}</p>
-                  <h3>
-                    <a href={vocabularyHref(artefact.id)}>{artefact.title}</a>
-                  </h3>
+                  <h3>{artefact.title}</h3>
                   <p>{artefact.summary}</p>
                 </article>
               ))}
@@ -74,9 +71,7 @@ export function VisualGuide() {
             <div className="visual-guide__reference-grid visual-guide__reference-grid--three">
               {visualGroupings.map((grouping) => (
                 <article className="visual-guide__reference-card" key={grouping.id}>
-                  <h3>
-                    <a href={vocabularyHref(grouping.id)}>{grouping.title}</a>
-                  </h3>
+                  <h3>{grouping.title}</h3>
                   <p>{grouping.summary}</p>
                 </article>
               ))}
@@ -93,13 +88,28 @@ export function VisualGuide() {
             </p>
             {treatmentSections.map((section) => (
               <section aria-labelledby={section.id} className="visual-guide__treatment" key={section.id}>
-                <h3 id={section.id}>
-                  <a href={vocabularyHref(section.termId)}>{section.title}</a>
-                </h3>
+                <h3 id={section.id}>{section.title}</h3>
                 <p>{section.summary}</p>
                 <InteractiveSpecimen optionKeys={section.optionKeys} title={section.title} />
               </section>
             ))}
+          </section>
+
+          <section aria-labelledby="explanation" className="visual-guide__section">
+            <p className="visual-guide__eyebrow">Beyond the diagram</p>
+            <h2 id="explanation">Explanation and presentation</h2>
+            <p>
+              These concepts tailor one stable diagram to a subject, audience, or guided explanation. They change
+              visibility and emphasis without changing the underlying geometry.
+            </p>
+            <div className="visual-guide__reference-grid">
+              {presentationConcepts.map((concept) => (
+                <article className="visual-guide__reference-card" key={concept.id}>
+                  <h3>{concept.title}</h3>
+                  <p>{concept.summary}</p>
+                </article>
+              ))}
+            </div>
           </section>
 
           <section
@@ -109,15 +119,15 @@ export function VisualGuide() {
             <p className="visual-guide__eyebrow">Same structure, different moment</p>
             <h2 id="presentation-states">Presentation states</h2>
             <p>
-              <a href={vocabularyHref('scene')}>Scenes</a> can focus existing artefacts and reveal Graphics. Flow
-              signalling can briefly emphasise movement. These are presentation states, not authored appearance options:
-              the underlying Cards, Regions, and routes remain the same and a still output remains understandable
-              without motion.
+              Scenes can focus existing artefacts and reveal Graphics. Flow signalling can briefly emphasise movement.
+              These are presentation states, not authored appearance options: the underlying Cards, Regions, and routes
+              remain the same and a still output remains understandable without motion.
             </p>
             <p>
-              Continue with the <a href="/docs/design/visual-language/">visual-language guide</a> for composition,
-              colour, routing, motion, and accessibility principles, or open the <a href="/playground/">Playground</a>
-              to edit a complete definition.
+              Continue with the <a href="/docs/approach/visual-language/">visual-language approach</a> for composition,
+              colour, routing, motion, and accessibility principles, or open the <a href="/playground/">Playground</a>{' '}
+              to edit a complete definition. When you need exact contract language, use the{' '}
+              <a href="/docs/reference/vocabulary/">canonical terminology</a>.
             </p>
           </section>
         </main>
