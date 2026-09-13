@@ -1,15 +1,6 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import {
-  canonicalSitePath,
-  getDocumentationRoute,
-  isBlankExamplePath,
-  isExamplesIndexPath,
-  isInfoschematicsExamplePath,
-  isPlaygroundPath,
-  isSystemExamplePath,
-  isVisualGuidePath
-} from './routes.ts'
+import { canonicalSiteLocation, getDocumentationRoute, isPlaygroundPath, isVisualGuidePath } from './routes.ts'
 
 async function resolvePage(pathname: string): Promise<ReactNode> {
   const documentationRoute = getDocumentationRoute(pathname)
@@ -32,37 +23,20 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
     return <Playground />
   }
 
-  if (isExamplesIndexPath(pathname)) {
-    const { ExamplesIndex } = await import('./ExamplesIndex.tsx')
-    document.title = 'Examples · Infoschematics'
-    return <ExamplesIndex />
-  }
-
-  if (isBlankExamplePath(pathname)) {
-    const { BlankInfoschematic } = await import('./BlankInfoschematic.tsx')
-    return <BlankInfoschematic />
-  }
-
-  if (isInfoschematicsExamplePath(pathname)) {
-    const { InfoschematicsExample } = await import('./InfoschematicsExample.tsx')
-    return <InfoschematicsExample />
-  }
-
-  if (isSystemExamplePath(pathname)) {
-    const { SystemExample } = await import('./SystemExample.tsx')
-    return <SystemExample />
-  }
-
   const { App } = await import('./App.tsx')
   return <App />
 }
 const rootElement = document.getElementById('root')
 
 if (rootElement) {
-  const canonicalPath = canonicalSitePath(window.location.pathname)
-  if (canonicalPath !== window.location.pathname) {
-    window.history.replaceState(null, '', `${canonicalPath}${window.location.search}${window.location.hash}`)
+  const canonicalLocation = canonicalSiteLocation(window.location.pathname, window.location.search)
+  if (canonicalLocation.pathname !== window.location.pathname || canonicalLocation.search !== window.location.search) {
+    window.history.replaceState(
+      null,
+      '',
+      `${canonicalLocation.pathname}${canonicalLocation.search}${window.location.hash}`
+    )
   }
-  const page = await resolvePage(canonicalPath)
+  const page = await resolvePage(canonicalLocation.pathname)
   createRoot(rootElement).render(<StrictMode>{page}</StrictMode>)
 }

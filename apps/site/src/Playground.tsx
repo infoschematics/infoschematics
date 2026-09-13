@@ -5,15 +5,14 @@ import {
   serialiseInfoschematicYaml
 } from '@infoschematics/domain-core'
 import { blankInfoschematic } from '@infoschematics/is-blank'
-import { infoschematicsExample } from '@infoschematics/is-infoschematics'
-import { systemExample } from '@infoschematics/is-system'
+import { homepageInfoschematic } from '@infoschematics/is-infoschematics'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { useEffect, useMemo, useState } from 'react'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
-export type PlaygroundPreset = 'blank' | 'format-parity' | 'infoschematics' | 'system'
+export type PlaygroundPreset = 'blank' | 'explained' | 'source-to-sink'
 
 /** A preset replaces the YAML document while its own page remains a curated view. */
 export const presets: readonly {
@@ -22,23 +21,28 @@ export const presets: readonly {
   document: string
 }[] = [
   {
-    key: 'format-parity',
+    key: 'source-to-sink',
     label: 'Source to sink',
     document: yamlSeed
   },
   {
-    key: 'infoschematics',
-    label: 'Infoschematics',
-    document: serialiseInfoschematicYaml(infoschematicsExample)
+    key: 'explained',
+    label: 'An Infoschematic explained',
+    document: serialiseInfoschematicYaml(homepageInfoschematic)
   },
-  { key: 'system', label: 'A system, explained', document: serialiseInfoschematicYaml(systemExample) },
   { key: 'blank', label: 'Blank Infoschematic', document: serialiseInfoschematicYaml(blankInfoschematic) }
 ]
+
+const legacyPresetAliases: Readonly<Record<string, PlaygroundPreset>> = {
+  'format-parity': 'source-to-sink',
+  infoschematics: 'explained',
+  system: 'explained'
+}
 
 /** The preset a `?preset=` query names, or `undefined` for anything it does not. */
 export const presetFromSearch = (search: string): PlaygroundPreset | undefined => {
   const wanted = new URLSearchParams(search).get('preset')
-  return presets.find(({ key }) => key === wanted)?.key
+  return presets.find(({ key }) => key === wanted)?.key ?? (wanted ? legacyPresetAliases[wanted] : undefined)
 }
 
 const parseDelay = 250
@@ -92,7 +96,7 @@ export function Issues({ parsed }: { parsed: InfoschematicParseResult }) {
 }
 
 const initialPreset = (): PlaygroundPreset =>
-  (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'format-parity'
+  (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'source-to-sink'
 
 /** One inert Infoschematic document, validated and rendered live through the same loader the CLI uses. */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {

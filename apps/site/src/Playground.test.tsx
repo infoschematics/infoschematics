@@ -48,15 +48,19 @@ describe('Playground', () => {
   })
 
   it('renders a selected preset from the same document editor', () => {
-    const page = renderToStaticMarkup(<Playground preset="system" />)
+    const page = renderToStaticMarkup(<Playground preset="explained" />)
 
     expect(page).toContain('aria-label="Infoschematic document"')
     expect(page).toContain('data:image/svg+xml')
+    expect(page).toContain('What makes an Infoschematic')
   })
 
   it('selects a preset from the query string and refuses one it does not know', () => {
-    expect(presetFromSearch('?preset=system')).toBe('system')
+    expect(presetFromSearch('?preset=source-to-sink')).toBe('source-to-sink')
+    expect(presetFromSearch('?preset=explained')).toBe('explained')
     expect(presetFromSearch('?preset=blank')).toBe('blank')
+    expect(presetFromSearch('?preset=system')).toBe('explained')
+    expect(presetFromSearch('?preset=format-parity')).toBe('source-to-sink')
     expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()
     expect(presetFromSearch('')).toBeUndefined()
   })

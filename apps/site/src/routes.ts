@@ -122,38 +122,37 @@ export const documentationRoutes: readonly PublishedDocument[] = publishedDocume
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
 
-const legacyPathAliases: Readonly<Record<string, string>> = {
-  '/docs/capabilities/': visualGuidePath,
-  '/docs/design/architecture/': '/docs/approach/architecture/',
-  '/docs/design/visual-language/': '/docs/approach/visual-language/',
-  '/docs/design/view-present/': '/docs/approach/view-present/',
-  '/docs/design/view-studio/': '/docs/approach/view-studio/'
+interface SiteLocation {
+  pathname: string
+  search: string
 }
 
-/** Return a canonical path for a retired public route, preserving unrelated paths unchanged. */
-export function canonicalSitePath(pathname: string) {
+const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
+  '/docs/capabilities/': { pathname: visualGuidePath, search: '' },
+  '/docs/design/architecture/': { pathname: '/docs/approach/architecture/', search: '' },
+  '/docs/design/visual-language/': { pathname: '/docs/approach/visual-language/', search: '' },
+  '/docs/design/view-present/': { pathname: '/docs/approach/view-present/', search: '' },
+  '/docs/design/view-studio/': { pathname: '/docs/approach/view-studio/', search: '' },
+  [examplesIndexPath]: { pathname: playgroundPath, search: '?preset=source-to-sink' },
+  [blankExamplePath]: { pathname: playgroundPath, search: '?preset=blank' },
+  [infoschematicsExamplePath]: { pathname: playgroundPath, search: '?preset=explained' },
+  [systemExamplePath]: { pathname: playgroundPath, search: '?preset=explained' }
+}
+
+/** Return the canonical browser location for a retired public route. */
+export function canonicalSiteLocation(pathname: string, search = ''): SiteLocation {
   const normalised = pathname.endsWith('/') ? pathname : `${pathname}/`
-  return legacyPathAliases[normalised] ?? pathname
+  const alias = legacyLocationAliases[normalised]
+  return alias ?? { pathname, search }
 }
 
-export function isBlankExamplePath(pathname: string) {
-  return pathname === blankExamplePath || pathname === blankExamplePath.slice(0, -1)
-}
-
-export function isInfoschematicsExamplePath(pathname: string) {
-  return pathname === infoschematicsExamplePath || pathname === infoschematicsExamplePath.slice(0, -1)
-}
-
-export function isSystemExamplePath(pathname: string) {
-  return pathname === systemExamplePath || pathname === systemExamplePath.slice(0, -1)
+/** Return only the canonical path when query selection is not needed by the caller. */
+export function canonicalSitePath(pathname: string) {
+  return canonicalSiteLocation(pathname).pathname
 }
 
 export function isDocsIndexPath(pathname: string) {
   return pathname === docsIndexPath || pathname === docsIndexPath.slice(0, -1)
-}
-
-export function isExamplesIndexPath(pathname: string) {
-  return pathname === examplesIndexPath || pathname === examplesIndexPath.slice(0, -1)
 }
 
 export function isVisualGuidePath(pathname: string) {

@@ -1,19 +1,13 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
-import { BlankInfoschematic } from './BlankInfoschematic.tsx'
-import { ExamplesIndex } from './ExamplesIndex.tsx'
 import {
+  canonicalSiteLocation,
   canonicalSitePath,
   docsIndexPath,
   documentationRoutes,
-  examplesIndexPath,
   getDocumentationRoute,
-  isBlankExamplePath,
-  isDocsIndexPath,
-  isExamplesIndexPath,
-  isInfoschematicsExamplePath,
-  isSystemExamplePath
+  isDocsIndexPath
 } from './routes.ts'
 
 describe('website routes', () => {
@@ -35,20 +29,8 @@ describe('website routes', () => {
     expect(page).not.toContain('system-card')
     expect(page).not.toContain('flow-connector')
     expect(page).toContain(`href="${docsIndexPath}"`)
-    expect(page).toContain(`href="${examplesIndexPath}"`)
-  })
-
-  it('renders the title-only Infoschematic at its blank example route', () => {
-    const page = renderToStaticMarkup(<BlankInfoschematic />)
-
-    expect(isBlankExamplePath('/examples/blank/')).toBe(true)
-    expect(isBlankExamplePath('/examples/blank')).toBe(true)
-    expect(isBlankExamplePath('/')).toBe(false)
-    expect(page).toContain('<h1>Infoschematics</h1>')
-    expect(page).toContain('viewBox="0 0 1920 1080"')
-    expect(page).toContain('data-surface-treatment="blueprint"')
-    expect(page).toContain('data-grid-treatment="major-plus-minor"')
-    expect(page).not.toContain('5G-EMERGE')
+    expect(page).toContain('href="/playground/"')
+    expect(page).not.toContain('href="/examples/"')
   })
 
   it.each(documentationRoutes)('resolves $path with or without a trailing slash', (route) => {
@@ -89,39 +71,35 @@ describe('website routes', () => {
     expect(canonicalSitePath('/docs/authoring/')).toBe('/docs/authoring/')
   })
 
+  it('maps legacy example pages to curated Playground presets', () => {
+    expect(canonicalSiteLocation('/examples/')).toEqual({
+      pathname: '/playground/',
+      search: '?preset=source-to-sink'
+    })
+    expect(canonicalSiteLocation('/examples/blank')).toEqual({ pathname: '/playground/', search: '?preset=blank' })
+    expect(canonicalSiteLocation('/examples/infoschematics/')).toEqual({
+      pathname: '/playground/',
+      search: '?preset=explained'
+    })
+    expect(canonicalSiteLocation('/examples/system')).toEqual({
+      pathname: '/playground/',
+      search: '?preset=explained'
+    })
+  })
+
   it('publishes guidance while specifications stay in the repository', () => {
     expect(documentationRoutes.some((route) => route.sourcePath.startsWith('docs/specs/'))).toBe(false)
     expect(getDocumentationRoute('/docs/specs/')).toBeUndefined()
   })
 
-  it('resolves the docs and examples indexes with or without a trailing slash', () => {
+  it('resolves the docs index with or without a trailing slash', () => {
     expect(isDocsIndexPath('/docs/')).toBe(true)
     expect(isDocsIndexPath('/docs')).toBe(true)
     expect(isDocsIndexPath('/')).toBe(false)
-    expect(isExamplesIndexPath('/examples/')).toBe(true)
-    expect(isExamplesIndexPath('/examples')).toBe(true)
-    expect(isExamplesIndexPath('/')).toBe(false)
   })
 
   it('renders the getting-started guide at the docs index path', () => {
     expect(getDocumentationRoute('/docs/')?.sourcePath).toBe('apps/site/content/getting-started.md')
     expect(getDocumentationRoute('/docs')?.sourcePath).toBe('apps/site/content/getting-started.md')
-  })
-
-  it('lists all three hosted examples on the examples index', () => {
-    const page = renderToStaticMarkup(<ExamplesIndex />)
-
-    expect(page).toContain('href="/examples/infoschematics/"')
-    expect(page).toContain('href="/examples/system/"')
-    expect(page).toContain('href="/examples/blank/"')
-  })
-
-  it('resolves hosted Infoschematics examples with or without trailing slashes', () => {
-    expect(isInfoschematicsExamplePath('/examples/infoschematics/')).toBe(true)
-    expect(isInfoschematicsExamplePath('/examples/infoschematics')).toBe(true)
-    expect(isInfoschematicsExamplePath('/examples/infoschematic/')).toBe(false)
-    expect(isSystemExamplePath('/examples/system/')).toBe(true)
-    expect(isSystemExamplePath('/examples/system')).toBe(true)
-    expect(isSystemExamplePath('/examples/systems/')).toBe(false)
   })
 })

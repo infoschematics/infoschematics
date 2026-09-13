@@ -4,12 +4,12 @@ area: SITE
 title: Playground example presets
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: []
-baseline_ref: null
+baseline_ref: 021f4863a5f603d264d48863bff6c5cf2818edb3
 created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T15:51:48Z
+updated_at: 2026-09-13T16:05:28Z
 ---
 
 # Playground example presets
@@ -32,12 +32,12 @@ Top-level navigation includes Examples and Playground. Three dedicated example r
 
 ## Steps
 
-- [ ] Reduce Playground presets to Source to sink, An Infoschematic explained using the homepage definition, and Blank.
-- [ ] Remove the obsolete Infoschematics package-architecture and old system presets from Site imports and selection UI.
-- [ ] Remove Examples from primary navigation and retire the Examples index and dedicated rendering pages.
-- [ ] Redirect legacy `/examples/` and `/examples/*` URLs to the corresponding Playground preset or its default.
-- [ ] Update guide links and Site tests so examples are described consistently as Playground presets.
-- [ ] Remove now-unused Site dependencies only when no other Site-owned import requires them.
+- [x] Reduce Playground presets to Source to sink, An Infoschematic explained using the homepage definition, and Blank.
+- [x] Remove the obsolete Infoschematics package-architecture and old system presets from Site imports and selection UI.
+- [x] Remove Examples from primary navigation and retire the Examples index and dedicated rendering pages.
+- [x] Redirect legacy `/examples/` and `/examples/*` URLs to the corresponding Playground preset or its default.
+- [x] Update guide links and Site tests so examples are described consistently as Playground presets.
+- [x] Remove now-unused Site dependencies only when no other Site-owned import requires them.
 
 ## Files touched
 
