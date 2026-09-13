@@ -4,7 +4,7 @@ area: SITE
 title: Homepage guide pathways
 theme: site-experience
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
@@ -87,19 +87,19 @@ Added `HomepageGuideDiagram`, using `resourceIdPrefix="homepage"` to consume the
 
 ### Verification
 
-`bunx biome check apps/site/src/App.tsx apps/site/src/App.test.tsx apps/site/src/HomepageGuideDiagram.tsx apps/site/src/styles.css` passed. `bunx tsc --noEmit -p apps/site` passed. `bunx vitest run apps/site/src/App.test.tsx apps/site/src/InlineSvgReference.test.tsx` passed with 2 files and 26 tests. `bun run --cwd apps/site build` passed. Chromium inspection at 1440 by 1000 and through a true 390 by 844 device-metric override confirmed the CTA placement, proportional faded diagram, wrapped controls, visible focusable button semantics, and `scrollWidth` equal to the 390-pixel viewport. A delegated SVG click reached `/docs/static-rendering/`, the Presented control reached `/docs/present/`, and pointer entry and exit updated and cleared the polite status. `bun run self:check` was run but currently stops at the other agent's uncommitted Canvas browser test, whose pointer-path expectation fails; its incomplete fixture also prevents the repository-wide TypeScript phase from completing.
+`bunx biome check apps/site/src/App.tsx apps/site/src/App.test.tsx apps/site/src/HomepageGuideDiagram.tsx apps/site/src/styles.css` passed. `bunx tsc --noEmit -p apps/site` passed. `bunx vitest run apps/site/src/App.test.tsx apps/site/src/InlineSvgReference.test.tsx` passed with 2 files and 26 tests. `bun run --cwd apps/site build` and the final `bun run self:check` pass. Chromium inspection at 1440 by 1000 and through a true 390 by 844 device-metric override confirmed the CTA placement, proportional faded diagram, wrapped controls, visible focusable button semantics, and `scrollWidth` equal to the 390-pixel viewport. A delegated SVG click reached `/docs/static-rendering/`, the Presented control reached `/docs/present/`, and pointer entry and exit updated and cleared the polite status.
 
 ### Outstanding concerns
 
-The Site implementation has no known concern, but the required full repository gate is not green while the concurrent non-Site browser-test work remains incomplete. Visual verification used temporary ports 4317 and 9322, which were stopped immediately afterward; ports 4173, 4317, and 9322 were confirmed free.
+None. The concurrent non-Site browser-test work that temporarily prevented the full gate from completing has landed and the combined repository now passes. Visual verification used temporary ports 4317 and 9322, which were stopped immediately afterward; ports 4173, 4317, and 9322 were confirmed free.
 
 ### Post-change review
 
-The goal is met without changing the authored definition or renderer contract. The inline SVG remains the generated 1268 × 408 blueprint treatment and keeps the accepted vertical spacing and fade. Navigation is Site-owned, limited to the five authorised identities, paired with visible native controls and global focus styling, and has been exercised in Chromium at desktop and narrow widths. The item remains in progress until the required repository gate can complete after the concurrent non-Site work settles.
+The goal is met without changing the authored definition or renderer contract. The inline SVG remains the generated 1268 × 408 blueprint treatment and keeps the accepted vertical spacing and fade. Navigation is Site-owned, limited to the five authorised identities, paired with visible native controls and global focus styling, and has been exercised in Chromium at desktop and narrow widths. The item is ready for acceptance review.
 
 ### Mini recap
 
-Homepage visitors now have a direct Getting started CTA plus five interactive diagram pathways with keyboard-equivalent named controls. Focused checks, rendered inspection, and the production Site build pass; only the out-of-scope concurrent repository-gate failure remains before review.
+Homepage visitors now have a direct Getting started CTA plus five interactive diagram pathways with keyboard-equivalent named controls. Focused checks, rendered inspection, the production Site build, and the full repository gate pass; no follow-up concern was found.
 
 ## Discussion
 

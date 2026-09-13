@@ -60,3 +60,11 @@ The admitted record may reach `awaiting-review` only through complete implementa
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-008-RUN-001 5a2f570e824a66f71e28dbccbebe022b2b7121f8a79e93f1dd3efb3967c7f055 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-SITE-016` | ready | awaiting-review | `6e2c957a` baseline; `1bca0ba7` implementation; focused tests, Site build, desktop/390px browser checks, and the final combined repository gate passed | Review the CTA, five guide mappings, and visible keyboard-equivalent controls |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. The homepage now uses real inline SVG, offers a Getting started action beneath the lede, and maps its five authored cards to stable guide destinations through Site-owned pointer navigation and named keyboard controls. Authored data, renderer navigation, persistent DOM editing, acceptance, pruning, deployment, and release remain outside this run.
