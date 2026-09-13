@@ -109,6 +109,16 @@ const config: IConfiguration = {
       }
     },
     {
+      name: 'renderer-command-stays-thin',
+      comment: 'The Node command may parse canonical documents and render SVG, but owns no model or view behaviour.',
+      severity: 'error',
+      from: { path: '^packages/cli/' },
+      to: {
+        path: workspace,
+        pathNot: owners('cli', 'domain-core', 'render-svg')
+      }
+    },
+    {
       name: 'view-model-stays-generic',
       comment: 'The view model may consume domain data, but never application, authored-example or deployment code.',
       severity: 'error',

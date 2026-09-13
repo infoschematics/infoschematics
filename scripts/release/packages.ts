@@ -14,6 +14,7 @@ export const releasePackages: readonly ReleasePackage[] = Object.freeze([
   { cssExports: [], directory: 'packages/domain-core', name: '@infoschematics/domain-core' },
   { cssExports: ['./tokens.css'], directory: 'packages/view-model', name: '@infoschematics/view-model' },
   { cssExports: [], directory: 'packages/render-svg', name: '@infoschematics/render-svg' },
+  { cssExports: [], directory: 'packages/cli', name: '@infoschematics/cli' },
   { cssExports: ['./styles.css'], directory: 'packages/view-canvas', name: '@infoschematics/view-canvas' },
   { cssExports: ['./styles.css'], directory: 'packages/view-present', name: '@infoschematics/view-present' },
   { cssExports: ['./styles.css'], directory: 'packages/view-studio', name: '@infoschematics/view-studio' }
@@ -23,6 +24,7 @@ export const releasePackageNames = new Set(releasePackages.map(({ name }) => nam
 export const releaseRepositoryUrl = 'git+https://github.com/infoschematics/infoschematics.git'
 
 export type PackageManifest = Readonly<{
+  bin?: Readonly<Record<string, string>> | string
   dependencies?: Readonly<Record<string, string>>
   description?: string
   devDependencies?: Readonly<Record<string, string>>

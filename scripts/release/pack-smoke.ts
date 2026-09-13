@@ -20,12 +20,14 @@ export type PackedPackage = Readonly<{
   tarball: string
 }>
 
-const run = async (command: readonly string[], cwd: string) => {
+type CommandOutcome = Readonly<{ exitCode: number | null; stderr: string; stdout: string }>
+
+const runOutcome = async (command: readonly string[], cwd: string, stdin?: string): Promise<CommandOutcome> => {
   const executable = command[0]
   if (!executable) throw new Error('Cannot run an empty command')
 
-  return new Promise<string>((resolvePromise, reject) => {
-    const child = spawn(executable, command.slice(1), { cwd, stdio: ['ignore', 'pipe', 'pipe'] })
+  return new Promise<CommandOutcome>((resolvePromise, reject) => {
+    const child = spawn(executable, command.slice(1), { cwd, stdio: ['pipe', 'pipe', 'pipe'] })
     let stdout = ''
     let stderr = ''
     child.stdout.setEncoding('utf8')
@@ -37,14 +39,17 @@ const run = async (command: readonly string[], cwd: string) => {
       stderr += chunk
     })
     child.on('error', reject)
-    child.on('close', (exitCode) => {
-      if (exitCode !== 0) {
-        reject(new Error(`${command.join(' ')} failed in ${cwd}:\n${stderr || stdout}`))
-        return
-      }
-      resolvePromise(stdout.trim())
-    })
+    child.on('close', (exitCode) => resolvePromise({ exitCode, stderr, stdout }))
+    child.stdin.end(stdin)
   })
+}
+
+const run = async (command: readonly string[], cwd: string) => {
+  const outcome = await runOutcome(command, cwd)
+  if (outcome.exitCode !== 0) {
+    throw new Error(`${command.join(' ')} failed in ${cwd}:\n${outcome.stderr || outcome.stdout}`)
+  }
+  return outcome.stdout.trim()
 }
 
 const tarEntries = async (tarball: string) =>
@@ -150,6 +155,12 @@ export function validatePackedPackage(
     }
   }
 
+  const binaries = typeof manifest.bin === 'string' ? { [entry.name]: manifest.bin } : (manifest.bin ?? {})
+  for (const [name, target] of Object.entries(binaries)) {
+    if (!target.startsWith('./dist/')) errors.push(`${name} binary must target dist, received ${target}`)
+    if (!files.includes(target.replace(/^\.\//, ''))) errors.push(`${name} binary target is missing: ${target}`)
+  }
+
   return errors
 }
 
@@ -244,6 +255,48 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   )
   await writeFile(join(directory, 'smoke.ts'), consumerSource(javascript, styles))
   await run(['bun', 'install', '--production', '--ignore-scripts'], directory)
+
+  const cli = join(directory, 'node_modules', '.bin', 'infoschematics')
+  const yaml = 'id: CLI\ntitle: Release CLI smoke\ndiagram:\n  bounds: 0 0 100 100\n'
+  const json = `${JSON.stringify({ id: 'CLI', title: 'Release CLI smoke', diagram: { bounds: '0 0 100 100' } })}\n`
+  await writeFile(join(directory, 'model.yaml'), yaml)
+  await writeFile(join(directory, 'model.json'), json)
+  await writeFile(join(directory, 'malformed.yaml'), 'id: [\n')
+
+  const yamlRender = await runOutcome([cli, 'render', 'model.yaml'], directory)
+  const jsonRender = await runOutcome([cli, 'render', 'model.json'], directory)
+  const stdinRender = await runOutcome([cli, 'render', '-'], directory, yaml)
+  if (
+    yamlRender.exitCode !== 0 ||
+    jsonRender.exitCode !== 0 ||
+    stdinRender.exitCode !== 0 ||
+    yamlRender.stderr ||
+    jsonRender.stderr ||
+    stdinRender.stderr ||
+    !yamlRender.stdout.startsWith('<svg') ||
+    yamlRender.stdout !== jsonRender.stdout ||
+    yamlRender.stdout !== stdinRender.stdout
+  ) {
+    throw new Error('Packed renderer command did not produce byte-identical clean SVG from YAML, JSON, and stdin.')
+  }
+
+  const fileRender = await runOutcome([cli, 'render', 'model.yaml', '--output', 'model.svg'], directory)
+  if (fileRender.exitCode !== 0 || fileRender.stdout || fileRender.stderr) {
+    throw new Error('Packed renderer command did not keep explicit file output off standard streams.')
+  }
+  if ((await readFile(join(directory, 'model.svg'), 'utf8')) !== yamlRender.stdout) {
+    throw new Error('Packed renderer command file output differs from standard output.')
+  }
+
+  const failures = await Promise.all([
+    runOutcome([cli, 'render', 'malformed.yaml'], directory),
+    runOutcome([cli, 'render', 'missing.yaml'], directory),
+    runOutcome([cli, 'render', 'model.ts'], directory)
+  ])
+  if (failures.some((outcome) => outcome.exitCode === 0 || outcome.stdout || !outcome.stderr)) {
+    throw new Error('Packed renderer command failure diagnostics contaminated standard output or returned success.')
+  }
+
   return run(['bun', 'run', 'smoke.ts'], directory)
 }
 

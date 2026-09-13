@@ -6,6 +6,7 @@
       "name": "infoschematics",
       "devDependencies": {
         "@biomejs/biome": "^2.5.12",
+        "@infoschematics/cli": "0.1.0",
         "@infoschematics/domain-core": "0.1.0",
         "@infoschematics/domain-model": "0.1.0",
         "@infoschematics/is-blank": "0.1.0",
@@ -76,6 +77,17 @@
       "version": "0.1.0",
       "dependencies": {
         "@infoschematics/domain-core": "0.1.0",
+      },
+    },
+    "packages/cli": {
+      "name": "@infoschematics/cli",
+      "version": "0.1.0",
+      "bin": {
+        "infoschematics": "./dist/bin.js",
+      },
+      "dependencies": {
+        "@infoschematics/domain-core": "0.1.0",
+        "@infoschematics/render-svg": "0.1.0",
       },
     },
     "packages/domain-core": {
@@ -385,6 +397,8 @@
     "@img/sharp-win32-ia32": ["@img/sharp-win32-ia32@0.35.2", "", { "os": "win32", "cpu": "ia32" }, "sha512-YYEhx9PImCC7T0tI8JDMi4DB9LwLCXCU5OWNYEXAxh5Q1ShKkyC6byxzoBJ3gEFDnH2lQckWuDe70G7mB2XJog=="],
 
     "@img/sharp-win32-x64": ["@img/sharp-win32-x64@0.35.2", "", { "os": "win32", "cpu": "x64" }, "sha512-imoOyBcoM/iiUr4J6VPpCNjPnjvP/Gks95898yB8YqoGGYmHYbOyCuNv9FMhFgtaiHFGbHW8bxKqRV6VjtXThQ=="],
+
+    "@infoschematics/cli": ["@infoschematics/cli@workspace:packages/cli"],
 
     "@infoschematics/domain-core": ["@infoschematics/domain-core@workspace:packages/domain-core"],
 

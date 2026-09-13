@@ -1,0 +1,40 @@
+{
+  "name": "@infoschematics/cli",
+  "description": "Command-line rendering for canonical YAML and JSON Infoschematics.",
+  "version": "0.1.0",
+  "bin": {
+    "infoschematics": "./dist/bin.js"
+  },
+  "dependencies": {
+    "@infoschematics/domain-core": "0.1.0",
+    "@infoschematics/render-svg": "0.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/infoschematics/infoschematics.git",
+    "directory": "packages/cli"
+  },
+  "scripts": {
+    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs ../../LICENSE dist/LICENSE",
+    "clean": "node build.mjs --clean"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts"
+}

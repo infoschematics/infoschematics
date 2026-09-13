@@ -9,6 +9,7 @@ import {
 } from './packages.ts'
 
 const dependencies: Readonly<Record<string, readonly string[]>> = {
+  '@infoschematics/cli': ['@infoschematics/domain-core', '@infoschematics/render-svg'],
   '@infoschematics/domain-core': ['@infoschematics/domain-model'],
   '@infoschematics/domain-model': [],
   '@infoschematics/render-svg': ['@infoschematics/domain-model', '@infoschematics/view-model'],
@@ -42,12 +43,13 @@ const manifestFor = (entry: ReleasePackage, version = '1.2.3'): PackageManifest 
 })
 
 describe('coordinated release manifests', () => {
-  it('fixes seven packages in deterministic dependency-first order', () => {
+  it('fixes eight packages in deterministic dependency-first order', () => {
     expect(releasePackages.map(({ name }) => name)).toEqual([
       '@infoschematics/domain-model',
       '@infoschematics/domain-core',
       '@infoschematics/view-model',
       '@infoschematics/render-svg',
+      '@infoschematics/cli',
       '@infoschematics/view-canvas',
       '@infoschematics/view-present',
       '@infoschematics/view-studio'
