@@ -5,7 +5,7 @@ title: Guide information architecture
 theme: site-experience
 horizon: next
 status: awaiting-review
-blocks: [INFOSCHEMATICS-SITE-016]
+blocks: []
 blocked_by: []
 baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
 ---

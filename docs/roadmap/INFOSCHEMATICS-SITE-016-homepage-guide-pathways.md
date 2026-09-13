@@ -4,9 +4,9 @@ area: SITE
 title: Homepage guide pathways
 theme: site-experience
 horizon: next
-status: draft
+status: ready
 blocks: []
-blocked_by: [INFOSCHEMATICS-SITE-017, INFOSCHEMATICS-TOOL-038]
+blocked_by: []
 baseline_ref: null
 ---
 
@@ -50,6 +50,12 @@ Run focused homepage and inline-SVG component tests, `bun run --cwd apps/site bu
 ## Dependencies / blocks
 
 `INFOSCHEMATICS-SITE-017` must establish stable guide destinations. `INFOSCHEMATICS-TOOL-038` must establish the safe inline-SVG host pattern and artefact-event boundary. `INFOSCHEMATICS-SITE-015` is related visual tuning but is not a build-order dependency.
+
+Both build-order dependencies have landed: the guide routes are stable and the supported inline-SVG reference host is available. The homepage can now consume those results without defining a second interaction boundary.
+
+## Delegation
+
+A bounded Site implementation lane may add the homepage CTA, artefact-to-guide mapping, keyboard-equivalent controls, styling, and focused tests. The primary agent retains integration, visual inspection, full verification, lifecycle evidence, and the commit boundary.
 
 ## Documentation impact
 

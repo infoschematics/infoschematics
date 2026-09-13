@@ -5,7 +5,7 @@ title: Inline SVG integration
 theme: tool
 horizon: next
 status: awaiting-review
-blocks: [INFOSCHEMATICS-SITE-016]
+blocks: []
 blocked_by: []
 baseline_ref: 7646468507d3bc10e80b414a8f1d5661d7a82346
 ---

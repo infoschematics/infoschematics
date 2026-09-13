@@ -61,3 +61,11 @@ The admitted record may reach `awaiting-review` only through complete implementa
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-007-RUN-001 2d365a27ff822a4965aaed0348e7a37efb90f9b77b299d81c1d6b748ea1dee4b -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-TOOL-038` | ready | awaiting-review | `76464685` baseline; `d18a0f88` result; 18 focused tests, Site build, full repository gate, and roadmap/specification/authoring audits passed | Review the inline trust, resource namespace, host lifecycle, and disclosed browser-control limitation |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Hosts now have a config-based inline SVG reference pattern, scoped artefact interaction and teardown, named keyboard equivalents, and deterministic native-resource prefixes for multiple diagrams. Product-specific homepage mappings, persistent DOM editing, acceptance, pruning, deployment, and release remain outside this run.
