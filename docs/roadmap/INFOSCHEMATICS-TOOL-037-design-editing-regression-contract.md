@@ -4,10 +4,10 @@ area: TOOL
 title: Harden Design interactions
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
 ---
 
 # Harden Design interactions
@@ -28,11 +28,13 @@ This item hardens behaviour already required by the Studio specification. It doe
 
 Design composes typed artefact operations with established component-offset, route, waypoint, attachment, port-count, label, creation, and removal drafts. Canvas owns pointer and keyboard interaction and SVG coordinate conversion; Studio owns semantic edit consolidation. The existing test environment does not execute the full rendered pointer lifecycle.
 
+The reported Card-movement defect is reproduced at both materialiser and rendered-preview altitude. View Model now moves each attached Flow end by the displacement of its named port and keeps the resulting route orthogonal. The broader browser interaction and change-set matrix remains open.
+
 ## Steps
 
 - [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions.
 - [ ] Build the operation matrix required by DESIGN-015 across authored and created Cards, Fabrics and Flows, composed Cards, applicable routes, and each supported input surface; assert unsupported cells are unavailable.
-- [ ] Add the known failing Card-movement case first and enforce projection order from effective component geometry through ports, attachments, interior route geometry, and route labels.
+- [ ] Add the known failing Card-movement case first and enforce projection order from effective component geometry through ports, attachments, interior route geometry, and route labels. The ordinary authored Card case is complete; composed and created endpoint cases remain.
 - [ ] Cover moves and resizes with plain routes, interior Waypoints, existing route drafts, reattached ends, Wrapper and Adapter composition, and newly created endpoints.
 - [ ] Cover port-count changes, typed and established draft composition, creation, pending removal, individual change removal, whole-draft discard, undo, and redo as coherent semantic edits.
 - [ ] Cover pointer release outside Canvas, selection changes during a gesture, unmount cancellation, pointer and keyboard equivalence, numeric placement, zoom, pan, fit, panel layout, and stable coordinate conversion.
@@ -88,6 +90,8 @@ Pure route tests remain useful for orthogonality and normalisation. Browser-rend
 ### Projection order
 
 The known defect is a dependency-order failure. Effective component and port geometry must precede endpoint attachment, interior route geometry, and label placement so a later draft layer cannot restore stale coordinates.
+
+The first correction applies that order inside the typed draft materialiser and is protected by a rendered Canvas regression. Reviewable derived Flow changes and all interaction surfaces still need the complete matrix before EDIT-012 can stop being divergent.
 
 ### Removal semantics
 

@@ -437,6 +437,21 @@ describe('InfoschematicDiagram draft preview', () => {
     expect(markup).toContain('dashed')
   })
 
+  it('moves the rendered Flow end with its Card port', () => {
+    const initial = config()
+    const operations: readonly ArtefactDraftOperation[] = [
+      {
+        geometry: { box: { height: 50, width: 100, x: 120, y: 180 }, role: 'box' },
+        operation: 'move',
+        target: selection.cardA
+      }
+    ]
+
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
+
+    expect(markup).toContain('d="M220 205 H360 V195"')
+  })
+
   it('ignores rejected operations and preserves the active Present Graphic', () => {
     const initial = config()
     const duplicate: ArtefactOperation = {

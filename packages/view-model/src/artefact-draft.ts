@@ -6,7 +6,6 @@ import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import type { StorySceneConfig } from '@infoschematics/domain-model/story'
-
 import type {
   ArtefactKind,
   ArtefactOperation,
@@ -14,6 +13,8 @@ import type {
   ArtefactValueByKind,
   BoxGeometry
 } from './editable.ts'
+import { portsForBox } from './ports.ts'
+import { moveRouteEnd } from './routing.ts'
 
 type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
 
@@ -90,6 +91,43 @@ const withDefinition = (
   config: InfoschematicConfig,
   infoschematic: InfoschematicConfig['infoschematic']
 ): InfoschematicConfig => ({ ...config, infoschematic })
+
+type EndpointPlacement = CardConfig['placement']
+
+const moveAttachedFlowEnds = (
+  flows: readonly FlowConfig[],
+  endpointId: string,
+  before: EndpointPlacement,
+  after: EndpointPlacement
+): readonly FlowConfig[] => {
+  const beforePorts = portsForBox(before.box, before.ports)
+  const afterPorts = portsForBox(after.box, after.ports)
+  const deltaFor = (portId: string) => {
+    const from = beforePorts.find((port) => port.id === portId)?.at
+    const to = afterPorts.find((port) => port.id === portId)?.at
+    return from && to ? { dx: to.x - from.x, dy: to.y - from.y } : undefined
+  }
+
+  return flows.map((flow) => {
+    let points = flow.points
+    let changed = false
+    if (flow.source === endpointId) {
+      const delta = deltaFor(flow.sourcePort)
+      if (delta && (delta.dx !== 0 || delta.dy !== 0)) {
+        points = moveRouteEnd(points, 'start', delta)
+        changed = true
+      }
+    }
+    if (flow.target === endpointId) {
+      const delta = deltaFor(flow.targetPort)
+      if (delta && (delta.dx !== 0 || delta.dy !== 0)) {
+        points = moveRouteEnd(points, 'end', delta)
+        changed = true
+      }
+    }
+    return changed ? { ...flow, points } : flow
+  })
+}
 
 const valuesForKind = (config: InfoschematicConfig, kind: ArtefactKind): readonly { id: string; code?: string }[] => {
   switch (kind) {
@@ -185,7 +223,11 @@ const applyGeometry = (
         ...value,
         placement: { ...value.placement, box: cloneSerialisable(operation.geometry.box) }
       }
-      return withDefinition(config, { ...definition, [key]: replaceAt(values, index, updated) })
+      return withDefinition(config, {
+        ...definition,
+        [key]: replaceAt(values, index, updated),
+        flows: moveAttachedFlowEnds(definition.flows, value.id, value.placement, updated.placement)
+      })
     }
     case 'graphic': {
       if (operation.geometry.role !== 'box' || !validBoxGeometry(operation.geometry)) {

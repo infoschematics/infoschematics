@@ -322,6 +322,42 @@ describe('applyArtefactOperations', () => {
     expect(result.config.infoschematic.flowFamilies).toEqual(initial.infoschematic.flowFamilies)
   })
 
+  it('moves attached Flow ends with their Card ports', () => {
+    const base = config()
+    const baseFlow = base.infoschematic.flows[0]
+    if (!baseFlow) throw new Error('fixture requires a Flow')
+    const initial: InfoschematicConfig = {
+      ...base,
+      infoschematic: {
+        ...base.infoschematic,
+        flows: [
+          {
+            ...baseFlow,
+            points: [
+              { x: 200, y: 100 },
+              { x: 300, y: 100 }
+            ]
+          }
+        ]
+      }
+    }
+
+    const result = applyArtefactOperations(initial, [
+      {
+        geometry: { box: { height: 60, width: 100, x: 150, y: 120 }, role: 'box' },
+        operation: 'move',
+        target: selections.card
+      }
+    ])
+
+    expect(result.rejected).toEqual([])
+    expect(result.config.infoschematic.flows[0]?.points).toEqual([
+      { x: 250, y: 140 },
+      { x: 300, y: 140 },
+      { x: 300, y: 100 }
+    ])
+  })
+
   it('replaces all five authored values, including Flow route properties', () => {
     const initial = config()
     const originalRegion = initial.infoschematic.regions[0]
