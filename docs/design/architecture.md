@@ -121,6 +121,8 @@ Canvas owns the reusable Infoschematic component. Present wraps Canvas with Audi
 
 Hosts choose the narrowest surface that provides the behaviour they need. Canvas accepts optional visibility, flow, interaction, and renderer inputs; Present owns Audience session behaviour; Studio adds authoring controls. Static consumers call `renderInfoschematicSvg` without a DOM or React runtime.
 
+A host may display static SVG as an inert image or insert the generated string into its own document for scoped inspection. In the inline mode the host owns a unique renderer-resource prefix, event listeners, transient state, accessible controls, replacement, and teardown. It may rely only on the outer `data-artefact-id` and `data-artefact-kind` metadata contract, not renderer child markup or document-wide native IDs. Inline DOM mutation never updates the authored model; persistent editing still flows through Canvas or Studio followed by rerendering.
+
 ## Renderer boundary
 
 [ADR-INFOSCHEMATICS-009](../decisions/ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Graphics, and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.

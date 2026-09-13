@@ -207,6 +207,41 @@ describe('renderInfoschematicSvg', () => {
     }
   })
 
+  it('keeps inline resource references unique when the host supplies prefixes', () => {
+    const first = renderInfoschematicSvg(representative, {
+      resourceIdPrefix: 'diagram-one',
+      visibility: { graphics: 'all' }
+    })
+    const second = renderInfoschematicSvg(representative, {
+      resourceIdPrefix: 'diagram-two',
+      visibility: { graphics: 'all' }
+    })
+
+    expect(first).toContain('id="diagram-one-arrow-0"')
+    expect(first).toContain('marker-end="url(#diagram-one-arrow-0)"')
+    expect(first).not.toContain('diagram-two-arrow-0')
+    expect(second).toContain('id="diagram-two-arrow-0"')
+    expect(second).toContain('marker-end="url(#diagram-two-arrow-0)"')
+    expect(second).not.toContain('diagram-one-arrow-0')
+    expect(() => renderInfoschematicSvg(representative, { resourceIdPrefix: 'unsafe prefix' })).toThrow(
+      /SVG resource id prefixes/
+    )
+  })
+
+  it('emits no executable markup when authored values resemble HTML handlers', () => {
+    const hostile = blank('<script>alert(1)</script> onload="alert(2)"')
+    hostile.subtitle = '<img src=x onerror="alert(3)">'
+    const svg = renderInfoschematicSvg(hostile)
+
+    expect(svg).toContain('&lt;script&gt;alert(1)&lt;/script&gt;')
+    expect(svg).not.toMatch(/<script\b/i)
+    for (const line of svg.split('\n')) {
+      const openingTag = line.slice(0, line.indexOf('>') + 1)
+      const attributeNames = [...openingTag.matchAll(/\s([A-Za-z_:][\w:.-]*)="[^"]*"/g)].map((match) => match[1])
+      expect(attributeNames.some((name) => /^on/i.test(name))).toBe(false)
+    }
+  })
+
   it('renders canonical and established inputs identically', () => {
     const established = blank('Canonical boundary')
     const canonical: DefinedInfoschematic = {

@@ -122,13 +122,13 @@ _Evidence:_ `packages/render-svg/src/index.test.ts` snapshots title-only and rep
 
 ### STATIC-012 — Text and attributes are safe
 
-All authored text and attribute values MUST be XML escaped. Numeric geometry MUST be finite before serialisation.
+All authored text and attribute values MUST be XML escaped, generated output MUST NOT contain script elements or inline event attributes, and numeric geometry MUST be finite before serialisation.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers XML-significant text and invalid coordinates.
+_Verify:_ `packages/render-svg/src/index.test.ts` covers XML-significant text, handler-shaped authored values, absent executable markup, and invalid coordinates.
 
-_Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text and invalid coordinates.
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text, handler-shaped authored values, absent executable markup, and invalid coordinates.
 
 ### STATIC-013 — Static output uses shared visual semantics
 
@@ -147,3 +147,13 @@ _Conformance:_ conforming
 _Verify:_ inspect the render-svg dependency graph and run repository dependency-boundary checks.
 
 _Evidence:_ `packages/render-svg/package.json` declares only Domain Model and View Model workspace dependencies; `bun run lint:deps` enforces package boundaries.
+
+### STATIC-015 — Inline resources can be host-namespaced
+
+When static SVG is inserted into a host document, the renderer MUST accept a deterministic host-owned resource prefix and apply it consistently to every native SVG marker and pattern identifier and reference without copying authored artefact identifiers into that namespace.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` renders the same definition with two prefixes and checks isolated marker identifiers and references; `apps/site/src/InlineSvgReference.test.tsx` scopes repeated authored identifiers to separate host SVGs.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` and `apps/site/src/InlineSvgReference.test.tsx` cover distinct renderer-resource namespaces and host-scoped authored identity resolution.

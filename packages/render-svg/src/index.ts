@@ -37,6 +37,8 @@ export type RenderInfoschematicSvgOptions = {
   scene?: SvgSceneSelection
   /** Flow ids to emphasise deterministically without serialising animation. */
   signals?: readonly string[]
+  /** Host-owned prefix for internal SVG resource ids. Use a unique value for each inline SVG. */
+  resourceIdPrefix?: string
   visibility?: SvgVisibilityOptions
 }
 
@@ -61,6 +63,16 @@ const xmlAttribute = (value: string) => xmlText(value).replaceAll('"', '&quot;')
 const number = (value: number) => {
   if (!Number.isFinite(value)) throw new TypeError(`SVG coordinates must be finite numbers; received ${value}`)
   return Object.is(value, -0) ? '0' : String(value)
+}
+
+const svgResourcePrefix = (value: string | undefined) => {
+  const prefix = value ?? 'infoschematic'
+  if (!/^[A-Za-z_][A-Za-z0-9_.-]*$/.test(prefix)) {
+    throw new TypeError(
+      `SVG resource id prefixes must start with a letter or underscore and contain only letters, digits, underscores, dots or hyphens; received ${prefix}`
+    )
+  }
+  return prefix
 }
 
 const attributes = (values: Attributes) =>
@@ -181,6 +193,7 @@ export const renderInfoschematicSvg = (
   const visibleScopes = new Set(options.visibility?.scopes ?? definition.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
   const graphicVisibility = options.visibility?.graphics ?? 'scene'
+  const resourceIdPrefix = svgResourcePrefix(options.resourceIdPrefix)
   const focus = resolveFocus(config, options.scene)
   const scopes = new Map(definition.scopes.map((scope) => [scope.id, scope]))
   const domains = definition.domains ?? []
@@ -248,7 +261,7 @@ export const renderInfoschematicSvg = (
         3,
         'marker',
         [
-          ['id', `infoschematic-arrow-${index}`],
+          ['id', `${resourceIdPrefix}-arrow-${index}`],
           ['markerHeight', 32],
           ['markerUnits', 'userSpaceOnUse'],
           ['markerWidth', 32],
@@ -269,7 +282,7 @@ export const renderInfoschematicSvg = (
 
   if (visualTreatment.grid !== 'none') {
     const gridStroke = regionStroke
-    const patternId = `infoschematic-grid-${visualTreatment.grid}`
+    const patternId = `${resourceIdPrefix}-grid-${visualTreatment.grid}`
     const defs: string[] =
       visualTreatment.grid === 'dots'
         ? // A dot marks each major intersection, so the same lattice the major
@@ -298,7 +311,7 @@ export const renderInfoschematicSvg = (
               ? [
                   `    <pattern${attributes([
                     ['height', canvasTokens.geometry.gridSize],
-                    ['id', 'infoschematic-grid-minor'],
+                    ['id', `${resourceIdPrefix}-grid-minor`],
                     ['patternUnits', 'userSpaceOnUse'],
                     ['width', canvasTokens.geometry.gridSize]
                   ])}>`,
@@ -323,7 +336,7 @@ export const renderInfoschematicSvg = (
             ...(visualTreatment.grid === 'major-plus-minor'
               ? [
                   line(3, 'rect', [
-                    ['fill', 'url(#infoschematic-grid-minor)'],
+                    ['fill', `url(#${resourceIdPrefix}-grid-minor)`],
                     ['height', canvasTokens.geometry.gridMajorSize],
                     ['width', canvasTokens.geometry.gridMajorSize]
                   ])
@@ -493,7 +506,7 @@ export const renderInfoschematicSvg = (
   for (const flow of flows) {
     const resolved = families.get(flow.family)
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
-    const marker = resolved ? `url(#infoschematic-arrow-${resolved.index})` : undefined
+    const marker = resolved ? `url(#${resourceIdPrefix}-arrow-${resolved.index})` : undefined
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
     const signalled = signalledFlows.has(flow.id)
     const content = [

@@ -25,6 +25,14 @@ Choose the narrowest public View for the host:
 
 Each package owns a stylesheet entry at `@infoschematics/<package>/styles.css`. Present includes Canvas styles, and Studio's compatibility stylesheet includes the lower View styles.
 
+## Host an inspectable static SVG
+
+When a React page needs deterministic SVG plus host-owned inspection, render from the configuration inside the component and insert only that generated value. Give each instance a unique `resourceIdPrefix`, attach delegated pointer listeners to its own container in an effect, and remove them when the value changes or the component unmounts. Keep selection, hover, navigation, and detail state in React rather than authored data.
+
+The Site's `InlineSvgReference` demonstrates that pattern: it resolves the nearest outer `data-artefact-id` and `data-artefact-kind` group inside the mounted SVG, pairs click outcomes with named surrounding buttons, and clears listeners and transient state when the render is replaced. It deliberately accepts an Infoschematic configuration, not arbitrary SVG or HTML.
+
+Inline SVG inspection does not make the static result an editor. Moving or rewriting a rendered DOM node changes only that browser tree and is lost on the next render. Persistent geometry and content changes must update the authored model through Canvas or Studio and then render again.
+
 ## Host renderers
 
 Authored Fabrics, Graphics, and Callouts carry stable renderer keys and serialisable properties. React implementations, property validators, diagnostics, shared SVG definitions, and Scope icons stay in the host. Supply them through the `renderers` application prop rather than a process-global registry:

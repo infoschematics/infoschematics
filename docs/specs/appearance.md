@@ -136,6 +136,8 @@ _Verify:_ `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` cover
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` covers all six kinds and collision-safe identifiers.
 
+An inline host resolves this cross-renderer identity within its mounted SVG rather than querying document-wide native IDs. This preserves repeated authored identifiers across independent diagrams without expanding the contract to child markup.
+
 ### APPEAR-013 — Component-scale shapes share the radius token
 
 Rectangular component-scale shapes rendered by the supplied view library MUST use the shared `cornerRadius` token rather than define unrelated local radii.
