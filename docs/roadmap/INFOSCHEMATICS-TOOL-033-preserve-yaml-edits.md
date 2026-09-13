@@ -5,7 +5,7 @@ title: Preserve YAML edits
 theme: tool
 horizon: next
 status: ready
-blocks: []
+blocks: [INFOSCHEMATICS-TOOL-043]
 blocked_by: []
 baseline_ref: null
 ---
