@@ -9,6 +9,7 @@ import type {
 } from '@infoschematics/domain-model'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { PortCounts } from '@infoschematics/domain-model/ports'
+import { adapterBoundsFor } from './assembly.ts'
 import type { Box, Point } from './geometry.ts'
 import { portsForBox } from './ports.ts'
 
@@ -23,13 +24,6 @@ const primitiveProperties = (properties: Readonly<Record<string, JsonValue>> | u
         )
       )
     : undefined
-
-const adapterBoundsFor = (held: Box): Box => ({
-  height: held.height * 0.5 + 40,
-  width: held.width + 40,
-  x: held.x - 20,
-  y: held.y + held.height * 0.5
-})
 
 const focusOf = (
   selection: ElementSelection | undefined,

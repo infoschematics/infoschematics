@@ -30,6 +30,8 @@ Design composes typed artefact operations with established component-offset, rou
 
 The reported Card-movement defect is reproduced at materialiser, rendered-preview, and browser-interaction altitude. View Model now moves each attached Flow end by the displacement of its named port and keeps the resulting route orthogonal. A dedicated headless Chromium project exercises native SVG coordinate transforms and pointer events; the broader operation and change-set matrix remains open.
 
+The composed movement slice now uses one shared Adapter-bounds calculation across compatibility, runtime, and draft projection. Moving a held Card carries Flow ends attached either to that Card or to its derived Adapter; focused tests also cover newly created Card/Flow pairs and route-property drafts applied before movement. A real Chromium gesture proves dragging the Adapter moves its held Card and the Adapter-attached route together.
+
 ## Steps
 
 - [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions. The Canvas pointer surface and CI runtime are complete; Studio and the remaining helpers are open.

@@ -6,6 +6,7 @@ import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import type { StorySceneConfig } from '@infoschematics/domain-model/story'
+import { adapterBoundsFor } from './assembly.ts'
 import type {
   ArtefactKind,
   ArtefactOperation,
@@ -129,6 +130,24 @@ const moveAttachedFlowEnds = (
   })
 }
 
+const moveCardAndAssemblyFlowEnds = (
+  cards: readonly CardConfig[],
+  flows: readonly FlowConfig[],
+  moved: CardConfig,
+  placement: EndpointPlacement
+): readonly FlowConfig[] => {
+  let updated = moveAttachedFlowEnds(flows, moved.id, moved.placement, placement)
+  for (const wrapper of cards.filter((card) => card.wraps === moved.id)) {
+    updated = moveAttachedFlowEnds(
+      updated,
+      wrapper.id,
+      { ...wrapper.placement, box: adapterBoundsFor(moved.placement.box) },
+      { ...wrapper.placement, box: adapterBoundsFor(placement.box) }
+    )
+  }
+  return updated
+}
+
 const valuesForKind = (config: InfoschematicConfig, kind: ArtefactKind): readonly { id: string; code?: string }[] => {
   switch (kind) {
     case 'region':
@@ -226,7 +245,7 @@ const applyGeometry = (
       return withDefinition(config, {
         ...definition,
         [key]: replaceAt(values, index, updated),
-        flows: moveAttachedFlowEnds(definition.flows, value.id, value.placement, updated.placement)
+        flows: moveCardAndAssemblyFlowEnds(definition.cards, definition.flows, value, updated.placement)
       })
     }
     case 'graphic': {

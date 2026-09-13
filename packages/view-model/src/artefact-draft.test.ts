@@ -5,9 +5,10 @@ import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import { describe, expect, it } from 'vitest'
-
 import { type ArtefactDraftOperation, applyArtefactOperations } from './artefact-draft.ts'
+import { adapterBoundsFor } from './assembly.ts'
 import type { ArtefactSelection } from './editable.ts'
+import { portsForBox } from './ports.ts'
 
 const region = (id: string, x: number): RegionConfig => ({
   box: { height: 160, radius: 8, width: 80, x, y: 40 },
@@ -355,6 +356,121 @@ describe('applyArtefactOperations', () => {
       { x: 250, y: 140 },
       { x: 300, y: 140 },
       { x: 300, y: 100 }
+    ])
+  })
+
+  it('moves Flow ends attached to an Adapter when its wrapped Card moves', () => {
+    const initial = config()
+    const held = initial.infoschematic.cards[0]
+    if (!held) throw new Error('fixture requires a held Card')
+    const adapter = card('adapter-one', 'A1', 0, held.id)
+    const beforeAdapter = adapterBoundsFor(held.placement.box)
+    const beforePort = portsForBox(beforeAdapter, adapter.placement.ports).find(({ id }) => id === 'E1')
+    if (!beforePort) throw new Error('fixture requires an Adapter east port')
+    initial.infoschematic.cards = [...initial.infoschematic.cards, adapter]
+    initial.infoschematic.flows = [
+      {
+        ...flow('flow-adapter', 'LA', adapter.id, 'card-two'),
+        points: [beforePort.at, { x: 300, y: beforePort.at.y }]
+      }
+    ]
+
+    const movedBox = { ...held.placement.box, x: 150, y: 120 }
+    const afterPort = portsForBox(adapterBoundsFor(movedBox), adapter.placement.ports).find(({ id }) => id === 'E1')
+    if (!afterPort) throw new Error('fixture requires a moved Adapter east port')
+    const result = applyArtefactOperations(initial, [
+      {
+        geometry: { box: movedBox, role: 'box' },
+        operation: 'move',
+        target: selections.card
+      }
+    ])
+
+    expect(result.rejected).toEqual([])
+    expect(result.config.infoschematic.flows[0]?.points).toEqual([
+      afterPort.at,
+      { x: 300, y: afterPort.at.y },
+      { x: 300, y: beforePort.at.y }
+    ])
+  })
+
+  it('moves a newly created Flow with its newly created Card', () => {
+    const initial = config()
+    initial.infoschematic.cards = []
+    initial.infoschematic.flows = []
+    const source = card('card-created-source', 'CS', 100)
+    const target = card('card-created-target', 'CT', 300)
+    const createdFlow = {
+      ...flow('flow-created', 'LC', source.id, target.id),
+      points: [
+        { x: 200, y: 100 },
+        { x: 300, y: 100 }
+      ]
+    }
+    const sourceSelection = {
+      code: source.code,
+      geometry: 'box',
+      id: source.id,
+      kind: 'card'
+    } as const
+
+    const result = applyArtefactOperations(initial, [
+      { at: 0, operation: 'create', target: sourceSelection, value: source },
+      {
+        at: 1,
+        operation: 'create',
+        target: { code: target.code, geometry: 'box', id: target.id, kind: 'card' },
+        value: target
+      },
+      {
+        at: 0,
+        operation: 'create',
+        target: { code: createdFlow.code, geometry: 'route', id: createdFlow.id, kind: 'flow' },
+        value: createdFlow
+      },
+      {
+        geometry: { box: { ...source.placement.box, x: 150, y: 120 }, role: 'box' },
+        operation: 'move',
+        target: sourceSelection
+      }
+    ])
+
+    expect(result.rejected).toEqual([])
+    expect(result.config.infoschematic.flows[0]?.points).toEqual([
+      { x: 250, y: 140 },
+      { x: 300, y: 140 },
+      { x: 300, y: 100 }
+    ])
+  })
+
+  it('carries an attached end after an earlier route property draft', () => {
+    const initial = config()
+    const original = initial.infoschematic.flows[0]
+    if (!original) throw new Error('fixture requires a Flow')
+    const draftedFlow = {
+      ...original,
+      points: [
+        { x: 200, y: 100 },
+        { x: 250, y: 100 },
+        { x: 250, y: 180 },
+        { x: 300, y: 180 }
+      ]
+    }
+    const result = applyArtefactOperations(initial, [
+      { operation: 'replace-properties', target: selections.flow, value: draftedFlow },
+      {
+        geometry: { box: { height: 60, width: 100, x: 150, y: 120 }, role: 'box' },
+        operation: 'move',
+        target: selections.card
+      }
+    ])
+
+    expect(result.rejected).toEqual([])
+    expect(result.config.infoschematic.flows[0]?.points).toEqual([
+      { x: 250, y: 140 },
+      { x: 250, y: 140 },
+      { x: 250, y: 180 },
+      { x: 300, y: 180 }
     ])
   })
 

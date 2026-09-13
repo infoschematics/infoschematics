@@ -4,6 +4,7 @@ import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
 import type { ThematicSceneConfig } from '@infoschematics/domain-model/theme'
+import { adapterBoundsFor, adapterFloor } from './assembly.ts'
 import { establishedInfoschematicOf } from './compatibility.ts'
 import type { AttachedEnd, CreatedComponent, CreatedFlow } from './editable.ts'
 import type { Box, Offset, Point } from './geometry.ts'
@@ -90,17 +91,6 @@ export type RuntimeDrafts = {
   portCounts?: Readonly<Record<string, PortCounts>>
   created?: readonly CreatedComponent[]
 }
-
-const adapterGrip = 20
-const adapterFloor = 40
-const adapterReach = 0.5
-
-const adapterBoundsFor = (held: Box): Box => ({
-  height: held.height * (1 - adapterReach) + adapterFloor,
-  width: held.width + adapterGrip * 2,
-  x: held.x - adapterGrip,
-  y: held.y + held.height * adapterReach
-})
 
 const registerOf = (entries: readonly RuntimeIdentity[]) => {
   const byCode = new Map<string, RuntimeIdentity>()
