@@ -32,6 +32,8 @@ The reported Card-movement defect is reproduced at materialiser, rendered-previe
 
 The composed movement slice now uses one shared Adapter-bounds calculation across compatibility, runtime, and draft projection. Moving a held Card carries Flow ends attached either to that Card or to its derived Adapter; focused tests also cover newly created Card/Flow pairs and route-property drafts applied before movement. A real Chromium gesture proves dragging the Adapter moves its held Card and the Adapter-attached route together.
 
+Pointer-driven Design gestures now share one listener lifecycle. Pointer release and cancellation remove move, up, and cancel listeners; cancellation closes an edit already in motion, and component unmount removes every active gesture without invoking stale callbacks. Chromium coverage proves both cancellation and unmount cleanup.
+
 ## Steps
 
 - [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions. The Canvas pointer surface and CI runtime are complete; Studio and the remaining helpers are open.

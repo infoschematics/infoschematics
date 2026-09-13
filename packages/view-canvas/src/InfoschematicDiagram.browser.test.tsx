@@ -2,7 +2,7 @@ import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
 import { useState } from 'react'
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Canvas } from './Canvas.tsx'
 
@@ -91,14 +91,15 @@ const cardA = {
   kind: 'card'
 } as const satisfies ArtefactSelection
 
-function EditingHarness() {
+function EditingHarness({ onMove, onRelease }: { onMove?: () => void; onRelease?: () => void } = {}) {
   const [operations, setOperations] = useState<readonly ArtefactDraftOperation[]>([])
   return (
     <Canvas
       artefactOperations={operations}
       config={config}
       mode="design"
-      onArtefactMove={(selection, point) =>
+      onArtefactMove={(selection, point) => {
+        onMove?.()
         setOperations([
           {
             geometry: {
@@ -109,7 +110,8 @@ function EditingHarness() {
             target: selection
           }
         ])
-      }
+      }}
+      onArtefactRelease={onRelease}
       onArtefactSelect={() => undefined}
       selectedArtefact={cardA}
     />
@@ -165,4 +167,48 @@ test('dragging an Adapter moves its held Card and the Flow attached to the Adapt
   await expect
     .poll(() => container.querySelector('[data-artefact-id="flow-adapter"] .infoschematic-route')?.getAttribute('d'))
     .toBe('M240 237.5 H280 V195 H360')
+})
+
+test('pointer cancellation and unmount remove active drag listeners', async () => {
+  const moved = vi.fn()
+  const released = vi.fn()
+  const first = await render(<EditingHarness onMove={moved} onRelease={released} />)
+  const svg = first.container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const card = first.container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  if (!svg || !card) throw new Error('rendered cancellation fixture is incomplete')
+  const matrix = svg.getScreenCTM()
+  if (!matrix) throw new Error('rendered SVG has no screen transform')
+  const at = (x: number, y: number) => {
+    const point = svg.createSVGPoint()
+    point.x = x
+    point.y = y
+    const screen = point.matrixTransform(matrix)
+    return { clientX: screen.x, clientY: screen.y }
+  }
+
+  card.dispatchEvent(new PointerEvent('pointerdown', { ...at(130, 195), bubbles: true, pointerId: 3 }))
+  window.dispatchEvent(new PointerEvent('pointermove', { ...at(170, 205), bubbles: true, pointerId: 3 }))
+  window.dispatchEvent(new PointerEvent('pointercancel', { ...at(170, 205), bubbles: true, pointerId: 3 }))
+  window.dispatchEvent(new PointerEvent('pointermove', { ...at(190, 215), bubbles: true, pointerId: 3 }))
+  expect(moved).toHaveBeenCalledTimes(1)
+  expect(released).toHaveBeenCalledTimes(1)
+  await first.unmount()
+
+  const movedAfterUnmount = vi.fn()
+  const second = await render(<EditingHarness onMove={movedAfterUnmount} />)
+  const secondSvg = second.container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const secondCard = second.container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  if (!secondSvg || !secondCard) throw new Error('rendered unmount fixture is incomplete')
+  const secondMatrix = secondSvg.getScreenCTM()
+  if (!secondMatrix) throw new Error('rendered SVG has no screen transform')
+  const start = secondSvg.createSVGPoint()
+  start.x = 130
+  start.y = 195
+  const screenStart = start.matrixTransform(secondMatrix)
+  secondCard.dispatchEvent(
+    new PointerEvent('pointerdown', { bubbles: true, clientX: screenStart.x, clientY: screenStart.y, pointerId: 4 })
+  )
+  await second.unmount()
+  window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 300, clientY: 220, pointerId: 4 }))
+  expect(movedAfterUnmount).not.toHaveBeenCalled()
 })

@@ -454,11 +454,44 @@ export function InfoschematicDiagram({
   const infoschematic = useRef<SVGSVGElement>(null)
   const diagramFrame = useRef<HTMLDivElement>(null)
   const minimapOverview = useRef<SVGSVGElement>(null)
+  const pointerGestureCleanups = useRef(new Set<() => void>())
   const zoomPointer = useRef<{ clientX: number; clientY: number } | null>(null)
   const [surfaceSize, setSurfaceSize] = useState<{ height: number; width: number } | null>(null)
   const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
   const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
   const [minimapGesture, setMinimapGesture] = useState<MinimapGesture | null>(null)
+
+  const listenForPointerGesture = useCallback(
+    (move: (event: PointerEvent) => void, release: (event: PointerEvent) => void, cancel: () => void) => {
+      const cleanup = () => {
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', finish)
+        window.removeEventListener('pointercancel', abort)
+        pointerGestureCleanups.current.delete(cleanup)
+      }
+      const finish = (event: PointerEvent) => {
+        cleanup()
+        release(event)
+      }
+      const abort = () => {
+        cleanup()
+        cancel()
+      }
+      pointerGestureCleanups.current.add(cleanup)
+      window.addEventListener('pointermove', move)
+      window.addEventListener('pointerup', finish)
+      window.addEventListener('pointercancel', abort)
+    },
+    []
+  )
+
+  useEffect(
+    () => () => {
+      for (const cleanup of pointerGestureCleanups.current) cleanup()
+      pointerGestureCleanups.current.clear()
+    },
+    []
+  )
   const frameSize = useMemo(
     () => (surfaceSize ? containSurface(surfaceSize, infoschematicViewBox) : null),
     [infoschematicViewBox, surfaceSize]
@@ -703,13 +736,10 @@ export function InfoschematicDiagram({
           y: axes.y ? point.y : origin.y
         })
       }
-      const stop = () => {
+      const release = () => {
         if (dragging) onArtefactRelease?.()
-        window.removeEventListener('pointermove', move)
-        window.removeEventListener('pointerup', stop)
       }
-      window.addEventListener('pointermove', move)
-      window.addEventListener('pointerup', stop)
+      listenForPointerGesture(move, release, release)
     }
 
   const ResizeHandle = ({
@@ -764,13 +794,10 @@ export function InfoschematicDiagram({
             const point = eventPoint(element, moved.clientX, moved.clientY)
             if (point) resize(point)
           }
-          const stop = () => {
+          const release = () => {
             if (dragging) onArtefactRelease?.()
-            window.removeEventListener('pointermove', move)
-            window.removeEventListener('pointerup', stop)
           }
-          window.addEventListener('pointermove', move)
-          window.addEventListener('pointerup', stop)
+          listenForPointerGesture(move, release, release)
         }}
         role="button"
         tabIndex={0}
@@ -941,13 +968,10 @@ export function InfoschematicDiagram({
         }
         onMove(key, toDiagram(moved.clientX, moved.clientY))
       }
-      const stop = () => {
+      const release = () => {
         if (dragging) onRelease?.()
-        window.removeEventListener('pointermove', move)
-        window.removeEventListener('pointerup', stop)
       }
-      window.addEventListener('pointermove', move)
-      window.addEventListener('pointerup', stop)
+      listenForPointerGesture(move, release, release)
     }
 
   /**
@@ -1011,11 +1035,8 @@ export function InfoschematicDiagram({
         const over = nearestTo(released.clientX, released.clientY)
         if (over) onAttach(flow.code, end, over.id, over.endpoint)
         setDropPort(null)
-        window.removeEventListener('pointermove', track)
-        window.removeEventListener('pointerup', stop)
       }
-      window.addEventListener('pointermove', track)
-      window.addEventListener('pointerup', stop)
+      listenForPointerGesture(track, stop, () => setDropPort(null))
     }
 
   /**
@@ -1059,11 +1080,11 @@ export function InfoschematicDiagram({
         if (over && onAttach) onAttach(flow.code, end === 'start' ? 'source' : 'target', over.id, over.endpoint)
         else if (dragging) onRouteRelease?.()
         setDropPort(null)
-        window.removeEventListener('pointermove', move)
-        window.removeEventListener('pointerup', stop)
       }
-      window.addEventListener('pointermove', move)
-      window.addEventListener('pointerup', stop)
+      listenForPointerGesture(move, stop, () => {
+        if (dragging) onRouteRelease?.()
+        setDropPort(null)
+      })
     }
 
   /**
@@ -1123,11 +1144,11 @@ export function InfoschematicDiagram({
       }
       setDropPort(null)
       setDrawing(null)
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', stop)
     }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', stop)
+    listenForPointerGesture(move, stop, () => {
+      setDropPort(null)
+      setDrawing(null)
+    })
   }
 
   const dragLabel = (code: string) => dragHandle(code, onLabelMove, onLabelRelease)
