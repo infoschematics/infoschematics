@@ -21,3 +21,7 @@ The consumer user guide is Site-owned content under [`apps/site/content/`](../ap
 - [the architecture guide](design/architecture.md), [the visual language guide](design/visual-language.md), [the Present view design](design/view-present.md), and [the Studio view design](design/view-studio.md).
 
 Decision records, specifications, and roadmap records remain maintainer-facing, as do the [Cloudflare hosting guide](guides/cloudflare.md) and the [releasing-packages guide](guides/releasing-packages.md).
+
+## Product research
+
+[Related tools and inspiration](reference/related-tools.md) collects adjacent projects and the specific design ideas that make them worth revisiting as Infoschematics evolves.
