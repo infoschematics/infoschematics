@@ -38,6 +38,10 @@ The reasons for this direction are recorded in [the framework-neutral library de
 ├── @infoschematics/domain-model
 └── @infoschematics/view-model
 
+@infoschematics/cli
+├── @infoschematics/domain-core
+└── @infoschematics/render-svg
+
 @infoschematics/is-blank
 └── @infoschematics/domain-core
 
@@ -76,6 +80,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `packages/view-present` owns Audience filtering, Scene focus, Story playback, Callouts, and presentation details over Canvas.
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
+- `packages/cli` owns Node command parsing, streams, files, and exit behaviour over Domain Core and the static renderer.
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
 - `examples/is-infoschematics` owns independently authored, serialisable homepage-overview and self-description definitions used by static and interactive hosts and depends only on Domain Core.
 - `examples/is-system` owns the independently authored, serialisable four-stage journey definition and depends only on Domain Core.
@@ -88,14 +93,14 @@ Authored Infoschematic examples use the `is-` prefix. Reusable packages and host
 A host imports one complete `InfoschematicConfig`, owns the document title, and passes the definition into a view:
 
 ```tsx
-import { defineInfoschematic } from '@infoschematics/domain-core'
-import { App } from '@infoschematics/view-studio'
-import '@infoschematics/view-studio/styles.css'
+import { defineInfoschematic } from "@infoschematics/domain-core";
+import { App } from "@infoschematics/view-studio";
+import "@infoschematics/view-studio/styles.css";
 
-const config = defineInfoschematic({ title: 'My Infoschematic' })
+const config = defineInfoschematic({ title: "My Infoschematic" });
 
 export function Page() {
-  return <App config={config} />
+  return <App config={config} />;
 }
 ```
 
