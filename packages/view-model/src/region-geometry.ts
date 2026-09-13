@@ -35,10 +35,10 @@ export type RegionGeometryInput = Readonly<{
 export const regionGeometryDefaults = Object.freeze({
   // Matches the canvas region-label metrics (13px/600 code face + 1.6px tracking);
   // notched text is pinned to this via textLength so the notch stays symmetric.
-  characterWidth: 9.4,
-  labelHeight: 14,
-  labelInset: 16,
-  notchPadding: 10
+  characterWidth: visualTokens.canvas.geometry.regionLabelCharacterWidth,
+  labelHeight: visualTokens.canvas.geometry.regionLabelHeight,
+  labelInset: visualTokens.canvas.geometry.regionLabelInset,
+  notchPadding: visualTokens.canvas.geometry.regionNotchPadding
 })
 
 const number = (value: number) => String(Number(value.toFixed(3)))
@@ -175,10 +175,19 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
       : null
   if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
   if (treatment.labelTreatment !== 'notched' || !resolvedLabel) {
-    return { label: resolvedLabel, notch: null, outline: roundedFrame(box, resolvedRadius) }
+    return {
+      label: resolvedLabel,
+      notch: null,
+      outline: roundedFrame(box, resolvedRadius)
+    }
   }
   const fitted = fitNotch(box, resolvedRadius, resolvedLabel, label)
-  if (!fitted) return { label: resolvedLabel, notch: null, outline: roundedFrame(box, resolvedRadius) }
+  if (!fitted)
+    return {
+      label: resolvedLabel,
+      notch: null,
+      outline: roundedFrame(box, resolvedRadius)
+    }
   return {
     label: fitted.label,
     notch: fitted.notch,

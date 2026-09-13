@@ -21,6 +21,10 @@
   --infoschematic-canvas-geometry-grid-minor-stroke-width: 0.5;
   --infoschematic-canvas-geometry-grid-size: 10;
   --infoschematic-canvas-geometry-point-radius: 6;
+  --infoschematic-canvas-geometry-region-label-character-width: 9.4;
+  --infoschematic-canvas-geometry-region-label-height: 14;
+  --infoschematic-canvas-geometry-region-label-inset: 16;
+  --infoschematic-canvas-geometry-region-notch-padding: 10;
   --infoschematic-canvas-output-annotation-fill: #06101ee8;
   --infoschematic-canvas-output-annotation-font-size: 9;
   --infoschematic-canvas-output-annotation-height: 20;

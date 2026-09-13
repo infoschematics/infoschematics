@@ -20,7 +20,11 @@ export const visualTokens = Object.freeze({
       gridMajorSize: 50,
       gridMinorStrokeWidth: 0.5,
       gridSize: 10,
-      pointRadius: 6
+      pointRadius: 6,
+      regionLabelCharacterWidth: 9.4,
+      regionLabelHeight: 14,
+      regionLabelInset: 16,
+      regionNotchPadding: 10
     }),
     surfaces: tokenGroup({
       backdrop: '#081725',

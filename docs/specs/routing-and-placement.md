@@ -184,6 +184,8 @@ _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers untouched short
 
 View Model MUST derive Region label length, frame notch, and outline solely from shared deterministic metrics. It MUST NOT depend on browser or host-font measurement. Canvas and static SVG MUST consume the same resolved geometry, and authored `labelOffset` MUST remain a placement-only override.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
 _Verify:_ Compare resolved geometry and both renderer outputs for short, long, narrow, mixed-case, numeric, and non-ASCII labels across compass placements and internal and boundary mounts.
+
+_Evidence:_ `packages/view-model/src/region-geometry.test.ts` covers shared values, representative label classes, compass placements, internal and boundary mounts, and constrained frames; `scripts/visual-treatment-parity.test.ts` compares Canvas and static SVG geometry.
