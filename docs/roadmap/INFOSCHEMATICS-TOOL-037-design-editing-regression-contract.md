@@ -28,11 +28,11 @@ This item hardens behaviour already required by the Studio specification. It doe
 
 Design composes typed artefact operations with established component-offset, route, waypoint, attachment, port-count, label, creation, and removal drafts. Canvas owns pointer and keyboard interaction and SVG coordinate conversion; Studio owns semantic edit consolidation. The existing test environment does not execute the full rendered pointer lifecycle.
 
-The reported Card-movement defect is reproduced at both materialiser and rendered-preview altitude. View Model now moves each attached Flow end by the displacement of its named port and keeps the resulting route orthogonal. The broader browser interaction and change-set matrix remains open.
+The reported Card-movement defect is reproduced at materialiser, rendered-preview, and browser-interaction altitude. View Model now moves each attached Flow end by the displacement of its named port and keeps the resulting route orthogonal. A dedicated headless Chromium project exercises native SVG coordinate transforms and pointer events; the broader operation and change-set matrix remains open.
 
 ## Steps
 
-- [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions.
+- [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions. The Canvas pointer surface and CI runtime are complete; Studio and the remaining helpers are open.
 - [ ] Build the operation matrix required by DESIGN-015 across authored and created Cards, Fabrics and Flows, composed Cards, applicable routes, and each supported input surface; assert unsupported cells are unavailable.
 - [ ] Add the known failing Card-movement case first and enforce projection order from effective component geometry through ports, attachments, interior route geometry, and route labels. The ordinary authored Card case is complete; composed and created endpoint cases remain.
 - [ ] Cover moves and resizes with plain routes, interior Waypoints, existing route drafts, reattached ends, Wrapper and Adapter composition, and newly created endpoints.

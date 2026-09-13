@@ -13,6 +13,7 @@ export default defineConfig({
   test: {
     // Both extensions: a component test has to be .tsx, and leaving it out of
     // the pattern meant one could be written and silently never run.
+    exclude: [fileURLToPath(new URL('./**/*.browser.test.{ts,tsx}', import.meta.url))],
     include: [
       fileURLToPath(new URL('./packages/*/src/**/*.test.ts', import.meta.url)),
       fileURLToPath(new URL('./packages/*/src/**/*.test.tsx', import.meta.url)),

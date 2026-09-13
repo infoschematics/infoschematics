@@ -20,17 +20,20 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/browser-playwright": "^4.0.3",
     "dependency-cruiser": "^18.2.0",
     "husky": "^9.1.7",
     "knip": "^6.34.0",
     "lint-staged": "^17.4.1",
+    "playwright": "^1.63.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "rumdl": "^0.2.64",
     "syncpack": "^15.3.3",
     "typescript": "^5.9.3",
     "vite": "^7.1.12",
-    "vitest": "^4.0.3"
+    "vitest": "^4.0.3",
+    "vitest-browser-react": "^2.3.0"
   },
   "engines": {
     "bun": ">=1.3.0",
@@ -71,7 +74,7 @@
     "ki:site:preview": "bun run --cwd apps/site preview",
     "prepare": "husky",
     "self:cf:build": "bun run self:packages:build && bun run ki:site:build",
-    "self:check": "bun run self:packages:build && bun run self:verify:visual-tokens && bun run self:verify:schema && bun run test && bun run self:verify:typecheck && bun run self:verify:depcruise && bun run --cwd apps/site build",
+    "self:check": "bun run self:packages:build && bun run self:verify:visual-tokens && bun run self:verify:schema && bun run test && bun run test:browser && bun run self:verify:typecheck && bun run self:verify:depcruise && bun run --cwd apps/site build",
     "self:dev": "bun run self:packages:build && bun run --cwd apps/site ki:site:dev",
     "self:examples:render": "bun scripts/render-example.ts",
     "self:packages:build": "bun run self:packages:check-versions && bun run --cwd packages/domain-model build && bun run --cwd packages/domain-core build && bun run --cwd packages/view-model build && bun run --cwd packages/render-svg build && bun run --cwd packages/view-canvas build && bun run --cwd packages/view-present build && bun run --cwd packages/view-studio build",
@@ -85,7 +88,8 @@
     "self:verify:schema": "bun scripts/generate-schema.ts --check",
     "self:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/view-canvas && tsc --noEmit -p packages/view-present && tsc --noEmit -p packages/view-studio && tsc --noEmit -p packages/render-svg && tsc --noEmit -p examples/is-blank && tsc --noEmit -p examples/is-infoschematics && tsc --noEmit -p examples/is-system && tsc --noEmit -p apps/site && tsc --noEmit -p tsconfig.scripts.json",
     "self:verify:visual-tokens": "bun scripts/generate-visual-tokens.ts --check",
-    "test": "vitest run --root ."
+    "test": "vitest run --root .",
+    "test:browser": "vitest run --config vitest.browser.config.ts"
   },
   "type": "module",
   "workspaces": [

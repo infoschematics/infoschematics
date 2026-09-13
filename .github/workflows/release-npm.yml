@@ -44,6 +44,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Install browser-test runtime
+        run: bunx playwright install --with-deps chromium
+
       - name: Verify tag and coordinated versions
         env:
           RELEASE_TAG: ${{ inputs.tag }}
