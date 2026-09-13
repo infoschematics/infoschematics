@@ -156,6 +156,16 @@ _Verify:_ render short and long Flow identities and assert each annotation badge
 
 _Evidence:_ `packages/view-model/src/tokens.test.ts` and `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` cover deterministic long-label sizing.
 
+### APPEAR-015 — Region surfaces compose predictably
+
+Each renderer MUST paint the diagram backdrop, authored grid, and Regions in that order; Regions MUST retain authored order, and each Region MUST paint its fill behind its frame and label before remaining diagram elements. The portable Region surface vocabulary MUST remain limited to serialisable colour fill, solid, dashed, or dotted frame with opacity, corner radius, and label treatment until another treatment has renderer-parity and accessibility evidence.
+
+_Conformance:_ conforming
+
+_Verify:_ render overlapping filled and framed Regions over neutral and blueprint surfaces in Canvas and static SVG, then compare layer order and treatment parity.
+
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx`, `packages/render-svg/src/index.test.ts`, and `scripts/visual-treatment-parity.test.ts` cover the current surface, grid, Region fill, and frame vocabulary across renderers.
+
 ## Gaps
 
-- Responsive output density and additional Region surface treatments remain candidate appearance contracts.
+- Responsive output density remains a candidate appearance contract.
