@@ -177,3 +177,13 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name.
 
 _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name.
+
+## Quality properties
+
+### ROUTE-018 — Region labels use deterministic shared metrics
+
+View Model MUST derive Region label length, frame notch, and outline solely from shared deterministic metrics. It MUST NOT depend on browser or host-font measurement. Canvas and static SVG MUST consume the same resolved geometry, and authored `labelOffset` MUST remain a placement-only override.
+
+_Conformance:_ pending
+
+_Verify:_ Compare resolved geometry and both renderer outputs for short, long, narrow, mixed-case, numeric, and non-ASCII labels across compass placements and internal and boundary mounts.

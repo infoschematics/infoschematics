@@ -32,8 +32,9 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 20. [ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) — let Site own the interactive consumer-guide journey while repository documents remain canonical.
 21. [ADR-INFOSCHEMATICS-015](ADR-INFOSCHEMATICS-015-specifications-own-realisations.md) — keep the Diagram self-contained by placing realisation claims in the optional Specifications overlay.
 22. [ADR-INFOSCHEMATICS-016](ADR-INFOSCHEMATICS-016-keep-region-bounds-explicit.md) — keep each Region's geometry independent and explicit.
+23. [ADR-INFOSCHEMATICS-017](ADR-INFOSCHEMATICS-017-use-deterministic-region-label-metrics.md) — keep Region label geometry deterministic and name its shared metrics.
 
 ## Repository operation
 
-23. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-24. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+24. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+25. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
