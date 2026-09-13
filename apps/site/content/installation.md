@@ -57,8 +57,8 @@ bun install --frozen-lockfile
 bun run self:check
 ```
 
-## What the host owns
+## Move between modes
 
-Your application owns the React root, route, document title, assets, renderer implementations, and persistence. The Infoschematic definition stays plain serialisable data: do not put React components, browser state, callbacks, or files into it.
+You can start in the Playground, save the definition in your project, render it as SVG, or add an interactive view later. The same definition works across each mode, so you do not need to rewrite it as your needs change.
 
 Continue to the [visual guide](/docs/visual-guide/) to learn the visible parts, or go straight to [authoring](/docs/authoring/) to define a complete Infoschematic.
