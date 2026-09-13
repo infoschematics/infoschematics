@@ -33,7 +33,7 @@ describe('website routes', () => {
     expect(page).not.toContain('flow-connector')
     expect(page).toContain(`href="${docsIndexPath}"`)
     expect(page).toContain('Getting started')
-    expect(page).toContain('Structure — visual guide')
+    expect(page).toContain('Structure — components')
     expect(page).toContain('Presentation — authoring')
     expect(page).toContain('Infoschematic — getting started')
     expect(page).toContain('Rendered — static rendering')
@@ -51,7 +51,7 @@ describe('website routes', () => {
 
   it('keeps homepage artefact pathways on the approved guide destinations', () => {
     expect(homepageGuideActions.map(({ id, href }) => ({ href, id }))).toEqual([
-      { href: '/docs/visual-guide/#anatomy', id: 'STR-01' },
+      { href: '/docs/components/#anatomy', id: 'STR-01' },
       { href: '/docs/authoring/#add-presentation-material', id: 'PRS-02' },
       { href: '/docs/', id: 'INFO-03' },
       { href: '/docs/static-rendering/', id: 'OUT-04' },
@@ -70,12 +70,12 @@ describe('website routes', () => {
     expect(getDocumentationRoute('/docs/guides/authoring/')).toBeUndefined()
   })
 
-  it('publishes the user guide in step-by-step order', () => {
-    const titles = documentationRoutes.filter((route) => route.section === 'guide').map((route) => route.title)
-
-    expect(titles).toEqual([
+  it('separates introductory guidance from ways to use Infoschematics', () => {
+    expect(documentationRoutes.filter((route) => route.section === 'guide').map((route) => route.title)).toEqual([
       'Getting started',
-      'Installation',
+      'Installation'
+    ])
+    expect(documentationRoutes.filter((route) => route.section === 'usage').map((route) => route.title)).toEqual([
       'Authoring',
       'Present view',
       'Studio view',
@@ -89,9 +89,11 @@ describe('website routes', () => {
     expect(documentationRoutes.filter((route) => route.section === 'reference')).toHaveLength(1)
   })
 
-  it('canonicalises retired Capabilities and Design paths', () => {
-    expect(canonicalSitePath('/docs/capabilities/')).toBe('/docs/visual-guide/')
-    expect(canonicalSitePath('/docs/capabilities')).toBe('/docs/visual-guide/')
+  it('canonicalises retired Capabilities, Visual guide and Design paths', () => {
+    expect(canonicalSitePath('/docs/capabilities/')).toBe('/docs/components/')
+    expect(canonicalSitePath('/docs/capabilities')).toBe('/docs/components/')
+    expect(canonicalSitePath('/docs/visual-guide/')).toBe('/docs/components/')
+    expect(canonicalSitePath('/docs/visual-guide')).toBe('/docs/components/')
     expect(canonicalSitePath('/docs/design/architecture/')).toBe('/docs/approach/architecture/')
     expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
     expect(canonicalSitePath('/docs/authoring/')).toBe('/docs/authoring/')

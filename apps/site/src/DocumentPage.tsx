@@ -11,7 +11,7 @@ import presentMarkdown from '../content/present.md?raw'
 import reactIntegrationMarkdown from '../content/react-integration.md?raw'
 import staticRenderingMarkdown from '../content/static-rendering.md?raw'
 import studioMarkdown from '../content/studio.md?raw'
-import { DocsSidebar } from './DocsSidebar.tsx'
+import { type DocsPageOutlineEntry, DocsSidebar } from './DocsSidebar.tsx'
 import type { DocumentationRoute } from './routes.ts'
 import { documentationRoutes } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
@@ -90,15 +90,12 @@ const slugify = (text: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
-interface ContentsEntry {
-  depth: number
-  slug: string
-  label: string
-}
-
-function renderDocument(route: DocumentationRoute): { html: string; contents: readonly ContentsEntry[] } {
+function renderDocument(route: DocumentationRoute): {
+  html: string
+  contents: readonly DocsPageOutlineEntry[]
+} {
   const markdown = markdownBySourcePath[route.sourcePath]
-  const contents: ContentsEntry[] = []
+  const contents: DocsPageOutlineEntry[] = []
   const slugCounts = new Map<string, number>()
   const headingIds = new WeakMap<Tokens.Heading, string>()
 
@@ -117,7 +114,11 @@ function renderDocument(route: DocumentationRoute): { html: string; contents: re
         const slug = seen === 0 ? base : `${base}-${seen}`
         headingIds.set(heading, slug)
         if (heading.depth === 2 || heading.depth === 3) {
-          contents.push({ depth: heading.depth, slug, label: heading.text.replace(/`/g, '') })
+          contents.push({
+            depth: heading.depth,
+            slug,
+            label: heading.text.replace(/`/g, '')
+          })
         }
       }
     },
@@ -142,25 +143,11 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
       </a>
       <SiteNav section="docs" />
       <div className="docs-columns">
-        <DocsSidebar currentPath={route.path} />
+        <DocsSidebar currentPageOutline={contents} currentPath={route.path} />
         <main id="document-content">
           {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown, not user input */}
           <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
         </main>
-        {contents.length > 0 ? (
-          <aside className="docs-toc">
-            <nav aria-label="On this page">
-              <h2>On this page</h2>
-              <ul>
-                {contents.map((entry) => (
-                  <li className={entry.depth === 3 ? 'docs-toc__sub' : undefined} key={entry.slug}>
-                    <a href={`#${entry.slug}`}>{entry.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </aside>
-        ) : null}
       </div>
     </div>
   )

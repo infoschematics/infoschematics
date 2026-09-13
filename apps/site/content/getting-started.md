@@ -15,7 +15,7 @@ The diagram is built from visible artefacts:
 
 The same definition also carries Scopes, Scenes, Themes, Stories and Callouts. These tailor what an audience sees and how an explanation unfolds without moving the underlying diagram.
 
-The [visual guide](/docs/visual-guide/) shows these parts together before you need to learn their exact schema names.
+The [Components guide](/docs/components/) shows these parts together before you need to learn their exact schema names.
 
 ## From definition to output
 
@@ -34,7 +34,7 @@ Each step has one job:
 
 1. **Getting started** — understand the overall model and choose a route through the guide.
 2. [Installation](/docs/installation/) — choose a hosted no-install workflow or the smallest local package for the output you need.
-3. [Visual guide](/docs/visual-guide/) — see the anatomy, groupings, treatments and presentation concepts.
+3. [Components](/docs/components/) — see the anatomy, groupings, treatments and presentation concepts.
 4. [Authoring](/docs/authoring/) — write a complete definition in TypeScript, YAML or JSON.
 5. [Present](/docs/present/) — guide an audience with filtering, focus and Story playback.
 6. [Studio](/docs/studio/) — design the diagram and direct its presentation material.

@@ -61,4 +61,4 @@ bun run self:check
 
 You can start in the Playground, save the definition in your project, render it as SVG, or add an interactive view later. The same definition works across each mode, so you do not need to rewrite it as your needs change.
 
-Continue to the [visual guide](/docs/visual-guide/) to learn the visible parts, or go straight to [authoring](/docs/authoring/) to define a complete Infoschematic.
+Continue to [Components](/docs/components/) to learn the visible parts, or go straight to [authoring](/docs/authoring/) to define a complete Infoschematic.

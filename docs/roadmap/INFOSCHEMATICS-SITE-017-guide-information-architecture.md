@@ -14,7 +14,7 @@ baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
 
 ## Goal
 
-Give readers a progressive user guide that starts with adoption and visual understanding before leading into authoring, product modes, rendering, and integration.
+Give readers a progressive user guide that starts with adoption and component understanding before leading into authoring, views, rendering, and integration.
 
 ## Context
 
@@ -37,16 +37,24 @@ Site routes expose User guide, Reference, and Design sections. The visual guide 
 - [x] Remove Reference and Vocabulary from primary documentation navigation while retaining canonical vocabulary content for stable deep links.
 - [x] Revise Getting started and section introductions so practical guide links precede reference terminology.
 - [x] Update routing, sidebar, document, and visual-guide tests for the new hierarchy and compatibility paths.
+- [x] Expand the active page in the left sidebar with its second- and third-level headings, replacing the separate right-hand contents column.
+- [x] Rename Visual guide to Components, give it the standard documentation-page treatment, and preserve the old route as a compatibility alias.
+- [x] Separate Getting started, Installation, and Components from the pages about authoring, views, rendering, and integration.
+- [x] Remove the `Vocabulary:` lead-in from each Approach page while retaining useful terminology links in the opening prose.
 
 ## Files touched
 
 - `apps/site/src/routes.ts`
 - `apps/site/src/DocsSidebar.tsx`
-- `apps/site/src/DocsPage.tsx`
+- `apps/site/src/DocumentPage.tsx`
 - `apps/site/src/VisualGuide.tsx`
 - `apps/site/content/getting-started.md`
 - `apps/site/content/installation.md`
 - `apps/site/content/capabilities.md`
+- `docs/design/architecture.md`
+- `docs/design/visual-language.md`
+- `docs/design/view-present.md`
+- `docs/design/view-studio.md`
 - focused Site route, sidebar, document, and visual-guide tests
 
 ## Verify
@@ -87,10 +95,13 @@ From baseline `d843d88d50c4ddcb0f09172042051dc97368a00b`, commit `021f4863` esta
 - Consolidated Capabilities into the Visual guide and kept the retired path useful.
 - Renamed public Design routes and navigation to Approach while preserving old inbound paths.
 - Removed Reference and Vocabulary from the primary journey without removing canonical content.
+- Expanded the active page's headings in the left sidebar and removed the duplicate right-hand contents column.
+- Renamed Visual guide to Components, normalised its layout, and separated the introductory User guide from the Use Infoschematics section.
+- Reworked Approach introductions so terminology links read naturally rather than appearing as `Vocabulary:` labels.
 
 ### Verification
 
-Focused Site route, document, visual-guide, and sidebar tests pass, including exact guide-order and legacy-path coverage. `bun run --cwd apps/site build` and `bun run self:check` pass. Chromium inspection at desktop and a 390 by 844 device-metric override confirmed the guide and visual guide remain readable, correctly stacked, and free of horizontal overflow.
+Focused Site route, document, Components, and sidebar tests pass, including exact section order and legacy-path coverage. The Site typecheck and production build pass. Chromium inspection at 1440 by 1000 confirmed the three left-navigation groups, expanded Components outline, standard article treatment, and absence of the old right-hand contents column. Inspection at 390 by 844 confirmed the page remains readable and has no horizontal overflow. The full repository gate is rerun before each review commit.
 
 ### Outstanding concerns
 
@@ -98,7 +109,7 @@ None. Compatibility is implemented as client-side canonicalisation inside the st
 
 ### Post-change review
 
-The public journey now leads with adoption and practical use while canonical repository documents remain the source of truth. Stable destinations required by `INFOSCHEMATICS-SITE-016` are available, and the item is ready for acceptance review. Incorporating human review feedback, Installation now explains the distinct ways to use Infoschematics before showing package commands: the hosted no-install Playground, creating an authored definition, deterministic static rendering, and interactive Canvas, Present, or Studio use. A focused document assertion keeps this order and the hosted create/edit/copy outcome visible.
+The public journey now leads with adoption and practical use while canonical repository documents remain the source of truth. Stable destinations required by `INFOSCHEMATICS-SITE-016` are available, and the item is ready for acceptance review. Incorporating human review feedback, Installation now explains the distinct ways to use Infoschematics before showing package commands: the hosted no-install Playground, creating an authored definition, deterministic static rendering, and interactive Canvas, Present, or Studio use. The latest review increment moves page outlines into the active left-navigation item, gives Components the same page treatment as the rest of the guide, divides introductory and usage material into distinct sections, and removes formal vocabulary labels from Approach pages.
 
 ### Mini recap
 

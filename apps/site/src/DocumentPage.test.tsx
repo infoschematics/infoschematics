@@ -21,13 +21,13 @@ describe('documentation pages', () => {
     for (const other of primaryRoutes) {
       expect(page).toContain(`>${other.title}</a>`)
     }
-    expect(page).toContain('>Visual guide</a>')
+    expect(page).toContain('>Components</a>')
     expect(page).not.toContain('>Terminology</a>')
     expect(page).not.toContain('>Reference</h2>')
     if (route.section === 'reference') {
       expect(page).not.toContain(`aria-current="page" href="${route.path}"`)
     } else {
-      expect(page).toContain(`aria-current="page" href="${route.path}"`)
+      expect(page).toMatch(new RegExp(`aria-current="page"[^>]*href="${route.path}"`))
     }
   })
 
@@ -39,7 +39,7 @@ describe('documentation pages', () => {
     const titles = [
       'Getting started',
       'Installation',
-      'Visual guide',
+      'Components',
       'Authoring',
       'Present view',
       'Studio view',
@@ -69,7 +69,7 @@ describe('documentation pages', () => {
     expect(packages).toBeGreaterThan(hosted)
   })
 
-  it('gives headings anchor ids and lists them in the page contents', () => {
+  it('gives headings anchor ids and expands them beneath the active page in the sidebar', () => {
     const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 
     if (!route) {
@@ -82,7 +82,8 @@ describe('documentation pages', () => {
 
     expect(ids.length).toBeGreaterThan(0)
     expect(new Set(ids).size).toBe(ids.length)
-    expect(page).toContain('aria-label="On this page"')
+    expect(page).toContain('aria-label="Authoring sections"')
+    expect(page).not.toContain('aria-label="On this page"')
     for (const id of ids) {
       expect(page).toContain(`href="#${id}"`)
     }

@@ -4,7 +4,7 @@ import { type InlineSvgAction, InlineSvgReference } from './InlineSvgReference.t
 type HomepageGuideAction = InlineSvgAction & Readonly<{ href: string }>
 
 export const homepageGuideActions = [
-  { href: '/docs/visual-guide/#anatomy', id: 'STR-01', kind: 'card', label: 'Structure — visual guide' },
+  { href: '/docs/components/#anatomy', id: 'STR-01', kind: 'card', label: 'Structure — components' },
   { href: '/docs/authoring/#add-presentation-material', id: 'PRS-02', kind: 'card', label: 'Presentation — authoring' },
   { href: '/docs/', id: 'INFO-03', kind: 'card', label: 'Infoschematic — getting started' },
   { href: '/docs/static-rendering/', id: 'OUT-04', kind: 'card', label: 'Rendered — static rendering' },

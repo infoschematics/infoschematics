@@ -3,19 +3,20 @@ const infoschematicsExamplePath = '/examples/infoschematics/'
 const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
-export const visualGuidePath = '/docs/visual-guide/'
+export const componentsPath = '/docs/components/'
 export const installationPath = '/docs/installation/'
 export const playgroundPath = '/playground/'
 
-export type DocumentSection = 'guide' | 'reference' | 'approach'
+export type DocumentSection = 'guide' | 'usage' | 'reference' | 'approach'
 
 export const sectionTitles: Record<DocumentSection, string> = {
   guide: 'User guide',
+  usage: 'Use Infoschematics',
   reference: 'Reference',
   approach: 'Approach'
 }
 
-export const documentSections = ['guide', 'approach'] as const satisfies readonly DocumentSection[]
+export const documentSections = ['guide', 'usage', 'approach'] as const satisfies readonly DocumentSection[]
 
 interface PublishedDocument {
   sourcePath: string
@@ -25,8 +26,7 @@ interface PublishedDocument {
   section: DocumentSection
 }
 
-// The user guide's Markdown steps in reading order; the visual guide, a rendered specimen page rather than a
-// Markdown document, takes its place in the order in DocsSidebar.
+// Components is a rendered specimen page rather than a Markdown document, so DocsSidebar places it after Installation.
 const publishedDocuments = [
   {
     sourcePath: 'apps/site/content/getting-started.md',
@@ -47,35 +47,35 @@ const publishedDocuments = [
     path: '/docs/authoring/',
     title: 'Authoring',
     summary: 'Write a serialisable Infoschematic definition from scratch.',
-    section: 'guide'
+    section: 'usage'
   },
   {
     sourcePath: 'apps/site/content/present.md',
     path: '/docs/present/',
     title: 'Present view',
     summary: 'Show an Infoschematic to an audience with filtering, focus and Story playback.',
-    section: 'guide'
+    section: 'usage'
   },
   {
     sourcePath: 'apps/site/content/studio.md',
     path: '/docs/studio/',
     title: 'Studio view',
     summary: 'Design the diagram and direct its presentation material in a structured editor.',
-    section: 'guide'
+    section: 'usage'
   },
   {
     sourcePath: 'apps/site/content/static-rendering.md',
     path: '/docs/static-rendering/',
     title: 'Static rendering',
     summary: 'Export deterministic SVG for documents and pipelines.',
-    section: 'guide'
+    section: 'usage'
   },
   {
     sourcePath: 'apps/site/content/react-integration.md',
     path: '/docs/react-integration/',
     title: 'React integration',
     summary: 'Mount an authored Infoschematic inside a host React application.',
-    section: 'guide'
+    section: 'usage'
   },
   {
     sourcePath: 'docs/reference/vocabulary.md',
@@ -124,7 +124,8 @@ interface SiteLocation {
 }
 
 const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
-  '/docs/capabilities/': { pathname: visualGuidePath, search: '' },
+  '/docs/capabilities/': { pathname: componentsPath, search: '' },
+  '/docs/visual-guide/': { pathname: componentsPath, search: '' },
   '/docs/design/architecture/': { pathname: '/docs/approach/architecture/', search: '' },
   '/docs/design/visual-language/': { pathname: '/docs/approach/visual-language/', search: '' },
   '/docs/design/view-present/': { pathname: '/docs/approach/view-present/', search: '' },
@@ -155,8 +156,8 @@ export function isDocsIndexPath(pathname: string) {
   return pathname === docsIndexPath || pathname === docsIndexPath.slice(0, -1)
 }
 
-export function isVisualGuidePath(pathname: string) {
-  return pathname === visualGuidePath || pathname === visualGuidePath.slice(0, -1)
+export function isComponentsPath(pathname: string) {
+  return pathname === componentsPath || pathname === componentsPath.slice(0, -1)
 }
 
 export function isPlaygroundPath(pathname: string) {

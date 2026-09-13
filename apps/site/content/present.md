@@ -40,4 +40,4 @@ Entering a Scene produces one transient signal per focused Flow by default — t
 
 ## Where next
 
-Present is one of three mount choices — the [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present and Studio and supplying host renderers. To understand Scenes and Stories before authoring them, see the [visual guide](/docs/visual-guide/) and then continue to [authoring](/docs/authoring/).
+Present is one of three mount choices — the [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present and Studio and supplying host renderers. To understand Scenes and Stories before authoring them, see [Components](/docs/components/) and then continue to [authoring](/docs/authoring/).
