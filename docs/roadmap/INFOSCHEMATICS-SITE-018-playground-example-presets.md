@@ -4,7 +4,7 @@ area: SITE
 title: Playground example presets
 theme: site-experience
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: []
 baseline_ref: 021f4863a5f603d264d48863bff6c5cf2818edb3
@@ -74,6 +74,35 @@ Replace hosted-example links with Playground preset links and describe the Playg
 ### Roadmap
 
 Unblock the Studio-backed Playground after the curated preset contract lands. Record removal of independently published example packages separately if it remains desirable beyond Site cleanup.
+
+## Review
+
+### Delivered
+
+From baseline `021f4863a5f603d264d48863bff6c5cf2818edb3`, commit `9922258a` made Playground the sole public example journey with three curated presets and retired the duplicate Examples pages. The final review extends compatibility so any unknown retired `/examples/*` path reaches the default Source to sink preset rather than a dead route.
+
+### Summary of changes
+
+- Kept Source to sink, An Infoschematic explained from the homepage definition, and Blank as the complete preset set.
+- Removed obsolete Site preset imports, Examples navigation, index, and dedicated example pages.
+- Canonicalised known saved example URLs to their matching preset and unknown retired example URLs to Source to sink.
+- Removed Site dependencies made unused by the consolidation.
+
+### Verification
+
+Focused Site navigation, routing, Playground, document, and homepage tests pass. `bun run --cwd apps/site build` and `bun run self:check` pass. Chromium inspection at desktop and a 390 by 844 device-metric override confirmed the explained preset renders the homepage model and the editor and preview stack without horizontal overflow.
+
+### Outstanding concerns
+
+The YAML pane remains the deliberately bespoke early editor until the reusable Studio source-panel dependency for `INFOSCHEMATICS-SITE-019` lands; that work is outside this item's boundary.
+
+### Post-change review
+
+The implementation leaves independently authored examples reusable, removes only duplicate Site journeys, and preserves saved links through thin Playground aliases. The curated preset contract is stable and ready for acceptance review.
+
+### Mini recap
+
+Examples are now Playground presets rather than a competing public section. The next Playground change can build on exactly three complete authored documents.
 
 ## Discussion
 

@@ -31,6 +31,27 @@ describe('documentation pages', () => {
     }
   })
 
+  it('keeps the complete user-guide journey in reading order', () => {
+    const route = documentationRoutes.find(({ path }) => path === '/docs/')
+    if (!route) throw new Error('The getting-started route is missing.')
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+    const titles = [
+      'Getting started',
+      'Installation',
+      'Visual guide',
+      'Authoring',
+      'Present view',
+      'Studio view',
+      'Static rendering',
+      'React integration'
+    ]
+    const positions = titles.map((title) => page.indexOf(`>${title}</a>`))
+
+    expect(positions.every((position) => position >= 0)).toBe(true)
+    expect(positions).toEqual([...positions].sort((left, right) => left - right))
+  })
+
   it('gives headings anchor ids and lists them in the page contents', () => {
     const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 

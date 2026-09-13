@@ -4,7 +4,7 @@ area: SITE
 title: Guide information architecture
 theme: site-experience
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-SITE-016]
 blocked_by: []
 baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
@@ -74,6 +74,35 @@ Add Installation, consolidate Capabilities into the Visual guide, and revise the
 ### Roadmap
 
 Unblock homepage guide pathways after stable public routes land. Leave repository-wide guide-index conformance to `INFOSCHEMATICS-TOOL-040`.
+
+## Review
+
+### Delivered
+
+From baseline `d843d88d50c4ddcb0f09172042051dc97368a00b`, commit `021f4863` established the requested progressive public guide, retained stable reference deep links outside primary navigation, and renamed the public Design journey to Approach with compatibility aliases. The current review also adds an explicit assertion for the complete sidebar order.
+
+### Summary of changes
+
+- Published Getting started, Installation, Visual guide, Authoring, Present, Studio, Static rendering, and React integration in reading order.
+- Consolidated Capabilities into the Visual guide and kept the retired path useful.
+- Renamed public Design routes and navigation to Approach while preserving old inbound paths.
+- Removed Reference and Vocabulary from the primary journey without removing canonical content.
+
+### Verification
+
+Focused Site route, document, visual-guide, and sidebar tests pass, including exact guide-order and legacy-path coverage. `bun run --cwd apps/site build` and `bun run self:check` pass. Chromium inspection at desktop and a 390 by 844 device-metric override confirmed the guide and visual guide remain readable, correctly stacked, and free of horizontal overflow.
+
+### Outstanding concerns
+
+None. Compatibility is implemented as client-side canonicalisation inside the static application rather than server-issued HTTP redirects, which matches the existing Site deployment model.
+
+### Post-change review
+
+The public journey now leads with adoption and practical use while canonical repository documents remain the source of truth. Stable destinations required by `INFOSCHEMATICS-SITE-016` are available, and the item is ready for acceptance review.
+
+### Mini recap
+
+The Site now offers one progressive user guide and a rationale-oriented Approach section. No additional documentation migration is required for this item.
 
 ## Discussion
 

@@ -95,6 +95,10 @@ describe('website routes', () => {
       pathname: '/playground/',
       search: '?preset=explained'
     })
+    expect(canonicalSiteLocation('/examples/retired-example/')).toEqual({
+      pathname: '/playground/',
+      search: '?preset=source-to-sink'
+    })
   })
 
   it('publishes guidance while specifications stay in the repository', () => {

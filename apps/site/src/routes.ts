@@ -143,7 +143,11 @@ const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
 export function canonicalSiteLocation(pathname: string, search = ''): SiteLocation {
   const normalised = pathname.endsWith('/') ? pathname : `${pathname}/`
   const alias = legacyLocationAliases[normalised]
-  return alias ?? { pathname, search }
+  if (alias) return alias
+  if (normalised.startsWith(examplesIndexPath)) {
+    return { pathname: playgroundPath, search: '?preset=source-to-sink' }
+  }
+  return { pathname, search }
 }
 
 /** Return only the canonical path when query selection is not needed by the caller. */

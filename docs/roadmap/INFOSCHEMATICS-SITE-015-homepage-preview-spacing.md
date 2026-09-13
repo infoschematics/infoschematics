@@ -4,7 +4,7 @@ area: SITE
 title: Homepage preview spacing
 theme: site-experience
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 9922258aaeb2351e60b34b2f3912687988e7aabd
@@ -30,11 +30,11 @@ The homepage image uses a 1268 by 408 authored view box and applies horizontal a
 
 ## Steps
 
-- [ ] Capture baseline desktop and narrow screenshots that show the top and bottom frame loss.
+- [x] Capture baseline desktop and narrow screenshots that show the top and bottom frame loss.
 - [x] Adjust the Site-owned preview wrapper spacing and vertical mask stops so the outer framing remains readable without exposing a hard rectangular SVG edge.
 - [x] Change authored overview geometry or view-box padding only if the same clipping remains when the SVG is viewed outside the homepage treatment.
 - [x] Extend the homepage regression coverage for the selected wrapper and mask contract.
-- [ ] Inspect the final homepage at desktop and narrow widths, including the transition into surrounding copy and footer.
+- [x] Inspect the final homepage at desktop and narrow widths, including the transition into surrounding copy and footer.
 
 ## Files touched
 
@@ -67,6 +67,34 @@ No guide changes are needed because the adjustment does not change authoring or 
 ### Roadmap
 
 Record any renderer-level spacing defect as a separate Tool item rather than expanding this Site item.
+
+## Review
+
+### Delivered
+
+From baseline `9922258aaeb2351e60b34b2f3912687988e7aabd`, commit `466cf593` added Site-owned vertical breathing room and softened the vertical fade without changing the authored overview or renderer contract. The pre-change treatment was reconstructed from the baseline CSS for comparison, and the resulting homepage was inspected at desktop and a true 390-pixel CSS viewport.
+
+### Summary of changes
+
+- Added responsive block padding around the shared homepage preview.
+- Moved the vertical mask's opaque stops from 7/93 percent to 3/97 percent so the outer framing remains legible.
+- Added a focused regression assertion for the wrapper and mask contract.
+
+### Verification
+
+`bunx vitest run apps/site/src/App.test.tsx examples/is-infoschematics/src/overview.test.ts`, `bun run --cwd apps/site build`, and `bun run self:check` pass. Chromium inspection at 1440 by 1000 and through a 390 by 844 DevTools device-metric override confirmed readable Inputs and Outputs framing, dissolved edges, correct wrapping, and no horizontal document overflow.
+
+### Outstanding concerns
+
+None. The narrow visual comparison must use device emulation because headless Chrome otherwise enforces a 500-pixel minimum window and produces a misleading cropped screenshot.
+
+### Post-change review
+
+The change remains within the homepage outlet, leaves the accepted 1268 by 408 authored geometry intact, and preserves the frameless blueprint treatment. The focused CSS assertion and rendered inspection cover the regression risk, so the item is ready for acceptance review.
+
+### Mini recap
+
+The homepage preview now has enough space for its input and output framing to read clearly at desktop and narrow widths. No renderer-level defect or follow-up was found.
 
 ## Discussion
 
