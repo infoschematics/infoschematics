@@ -108,9 +108,9 @@ A fabric with authored placement and ports MUST be selectable and editable throu
 
 _Implementation surface: placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`._
 
-### EDIT-079 — Design exposes the five-kind capability contract
+### EDIT-079 — Design exposes the six-kind capability contract
 
-Design MUST use discriminated Region, Fabric, Card, Flow and Graphic selections shared with Canvas and View Model. Region, Fabric, Card and Graphic MUST be pointer-selectable and keyboard-selectable, movable, resizable, property-editable, removable and reorderable. Flow MUST be pointer-selectable and keyboard-selectable, property-editable, removable and reorderable, but MUST use endpoint and waypoint tools instead of generic move or resize.
+Design MUST use discriminated Region, Fabric, Card, Flow, Point and Overlay selections shared with Canvas and View Model. Region, Fabric, Card and Overlay MUST be pointer-selectable and keyboard-selectable, movable, resizable, property-editable, removable and reorderable. Point MUST be pointer-selectable and keyboard-selectable, movable, property-editable, removable and reorderable, but MUST NOT expose box resize. Flow MUST be pointer-selectable and keyboard-selectable, property-editable, removable and reorderable, but MUST use endpoint and waypoint tools instead of generic move or resize.
 
 The selected kind MUST determine the Properties controls. A stale or empty selection MUST render a total empty state rather than interpreting an identifier as another kind.
 
@@ -162,11 +162,11 @@ _Implementation surface: waypoint actions in `packages/view-studio/src/app/edito
 
 ### EDIT-080 — Artefact geometry follows kind constraints
 
-Region, Fabric, Card and Graphic boxes MUST move and resize on both axes and respect View Model minima. Flow MUST retain route-specific editing.
+Region, Fabric, Card and Overlay boxes MUST move and resize on both axes and respect View Model minima. Point MUST move as a coordinate and MUST NOT acquire box geometry. Flow MUST retain route-specific editing.
 
-Reorder MUST change authored order only inside the selected kind. Studio MUST NOT expose cross-family z-order. Adapter interaction MUST direct movement to the wrapped Card and MUST NOT offer independent Adapter resize.
+Reorder MUST change authored order only inside the selected kind. Studio MUST NOT expose cross-family z-order. Adapter interaction MUST direct movement to the composed Card and MUST NOT offer independent Adapter resize.
 
-_Verification: Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover five-kind selection, constraints, actions and Flow or Adapter exclusions._
+_Verification: Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover six-kind selection, constraints, actions and Flow, Point or Adapter exclusions._
 
 ## Undo and drafts
 
@@ -254,7 +254,9 @@ _Implementation surface: `CreatedComponent` in `packages/view-model/src/editable
 
 ### EDIT-071 — Moving a component carries attached presentation
 
-Moving a component MUST carry route ends attached to it. When a wrapping card derives its placement from a wrapped card, moving either interactive representation MUST preserve that containment relationship rather than creating a second independent placement.
+Moving or resizing a Card or Fabric MUST carry every Flow route end attached to it to the effective position of its named port in the same preview frame. The nearest route run MAY change as required to remain orthogonal, but unrelated interior Waypoints and the opposite route end MUST remain stable. This invariant MUST hold for authored and newly created artefacts, with or without an existing route or attachment draft, and for pointer, keyboard and numeric placement.
+
+When an Adapter or Wrapper Card derives its placement from another Card, moving either interactive representation MUST preserve the composition relationship rather than creating a second independent placement. A Flow attached to either constituent Card MUST follow the constituent Card whose port it names.
 
 _Implementation surface: derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
 
@@ -271,6 +273,8 @@ _Verification: `packages/view-studio/src/app/editor/library.test.ts`, `packages/
 Design MUST start from complete authored content rather than Audience filters and MUST materialise typed operations into a derived runtime for Canvas. Creates, movement, resize, property replacement, within-kind reorder and safe removal MUST be visible without mutating the host configuration. Existing component-offset, route, waypoint and attachment drafts MUST remain effective later overlays.
 
 Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Story Graphic independently of Design's complete-content Graphic preview.
+
+Draft projection MUST follow dependency order: effective component geometry, effective port geometry, endpoint attachment, interior route geometry, then route-label placement. A later draft layer MUST NOT restore an endpoint coordinate made stale by an earlier component move, resize or port-count change. Combining typed artefact operations with established draft fields MUST produce one coherent preview and one coherent change set rather than whichever representation happened to render last.
 
 _Implementation surface: composition in `packages/view-studio/src/app/App.tsx` and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`._
 
@@ -289,6 +293,26 @@ Every treatment a selected artefact authors MUST be editable through a typed con
 Clearing an optional treatment MUST remove the authored member rather than write an empty or null value into the record, and MUST NOT be offered for a required one. A control value the artefact cannot carry MUST leave the artefact as it stands.
 
 _Verification: `packages/view-studio/src/app/editor/region-treatments.test.ts` covers the control values, patches and clears, and `packages/view-studio/src/app/editor/artefact-operations.test.ts` covers member removal._
+
+### EDIT-086 — Port-count edits preserve attachments
+
+Changing one side's port count MUST leave every attached Flow on a valid port of the same component. Where the former port position still exists, the Flow SHOULD retain that geometric position even if its port number changes. Where it does not, Studio MUST choose the nearest valid replacement deterministically and update both attachment identity and rendered route together. Reducing a side to zero ports MUST NOT leave a Flow claiming a port that is no longer offered; Studio MUST either require a valid replacement or surface a reviewable validation issue.
+
+_Implementation surface: port reseating in `packages/view-studio/src/app/editor/infoschematic-editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`._
+
+### EDIT-087 — Placement inputs have equivalent semantics
+
+Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY use guides, grid-enabled keyboard movement MAY step by one grid unit, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
+
+Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the authored Canvas coordinate resulting from a pointer placement. A drag begun before a viewport change MUST either finish against one stable coordinate transform or cancel without recording a partial edit.
+
+_Implementation surface: coordinate conversion in `packages/view-canvas/src/InfoschematicDiagram.tsx`, placement commands in `packages/view-studio/src/app/App.tsx`, and draft construction in `packages/view-studio/src/app/editor/use-editor.ts`._
+
+### EDIT-088 — Created artefacts enter the complete editing lifecycle
+
+Once created, a Card, Fabric or Flow MUST support every operation its authored counterpart supports: selection, movement or route editing, property editing, attachment changes, removal, undo, redo, discard and deterministic change consolidation. Dependent geometry MUST resolve created identities and ports without relying on a register built only from authored configuration. Creating and then removing an artefact in one draft MUST leave no orphaned dependent operation.
+
+_Verification: creation tests cover the full lifecycle after creation, including moving a created endpoint artefact and observing a connected created Flow._
 
 ## Host rendering
 
@@ -314,12 +338,16 @@ _Verification: Canvas integration tests under `packages/view-canvas/src/` cover 
 
 ### EDIT-059 — The rendered editor is tested
 
-Studio MUST have a rendered component test covering both read-only and editing-capable composition. Model-only tests MUST NOT be the sole verification for controls whose behaviour depends on rendered layering or pointer interaction.
+Studio MUST have rendered interaction tests covering both read-only and editing-capable composition. Model-only and static-markup tests MUST NOT be the sole verification for controls whose behaviour depends on rendered layering, pointer capture, coordinate conversion or interaction between draft layers.
 
-_Verification: `packages/view-studio/src/app/App.test.tsx` renders the application against blank and structural configurations. Pointer interaction coverage remains a gap below._
+At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal and whole-draft discard. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
+
+_Verification: rendered tests under `packages/view-canvas/src/` and `packages/view-studio/src/app/` drive interaction events and inspect resulting SVG geometry and change-set state._
 
 ## Gaps
 
-- Most interaction requirements are represented in implementation but do not yet have rendered interaction tests.
+- EDIT-059's rendered interaction matrix is not complete. Static markup and pure View Model tests currently leave pointer lifecycle, draft composition and dependent geometry exposed to integration regressions.
+- The typed artefact-operation path and the established component, route, attachment, port and label draft paths coexist. EDIT-083 requires them to compose, but their cross-product is not covered systematically.
+- Point and canonical Overlay editing remain behind the established five-kind `Graphic` compatibility vocabulary. Their migration belongs to `INFOSCHEMATICS-TOOL-035`; the interaction matrix must be extended when each kind enters the shared capability contract.
 - Studio currently derives persistence keys from Infoschematic identity and provides no host-owned persistence policy or storage-adapter contract.
 - Accessible keyboard operation, focus management and announcements for selection, creation, removal and undo require explicit requirements and tests.
