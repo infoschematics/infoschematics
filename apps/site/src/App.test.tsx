@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
@@ -11,6 +12,8 @@ import {
 } from './routes.ts'
 
 describe('website routes', () => {
+  const siteStyles = readFileSync(new URL('./styles.css', import.meta.url), 'utf8')
+
   it('keeps the designed Infoschematics homepage at the root route', () => {
     const page = renderToStaticMarkup(<App />)
 
@@ -31,6 +34,13 @@ describe('website routes', () => {
     expect(page).toContain(`href="${docsIndexPath}"`)
     expect(page).toContain('href="/playground/"')
     expect(page).not.toContain('href="/examples/"')
+  })
+
+  it('gives the homepage preview vertical breathing room before its edge fade', () => {
+    expect(siteStyles).toContain('padding-block: clamp(12px, 2vh, 24px)')
+    expect(siteStyles.match(/linear-gradient\(to bottom, transparent, #000 3%, #000 97%, transparent\)/g)).toHaveLength(
+      2
+    )
   })
 
   it.each(documentationRoutes)('resolves $path with or without a trailing slash', (route) => {

@@ -201,16 +201,18 @@ a:focus-visible {
 /*
  * The rendered Infoschematic already carries the blueprint backdrop, a near
  * match for the page. Framing it in a card fought that, so the preview is
- * masked into the background instead: content keeps a 24-unit margin inside
- * the 1268x408 viewBox, whose edge fades stay clear of the copy. No box-shadow
- * here — a shadow follows the border box, not the mask, and would restore the
- * hard rectangle the mask exists to dissolve.
+ * masked into the background instead. Extra block spacing separates it from
+ * the copy and footer, while the short vertical fade reaches full opacity
+ * before the outer Region frames. No box-shadow here — a shadow follows the
+ * border box, not the mask, and would restore the hard rectangle the mask
+ * exists to dissolve.
  */
 .shared-preview {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   gap: clamp(14px, 1.4vw, 20px);
   min-width: 0;
+  padding-block: clamp(12px, 2vh, 24px);
 }
 
 .shared-preview__image {
@@ -222,10 +224,10 @@ a:focus-visible {
   background: transparent;
   -webkit-mask-image:
     linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
-    linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    linear-gradient(to bottom, transparent, #000 3%, #000 97%, transparent);
   mask-image:
     linear-gradient(to right, transparent, #000 2%, #000 98%, transparent),
-    linear-gradient(to bottom, transparent, #000 7%, #000 93%, transparent);
+    linear-gradient(to bottom, transparent, #000 3%, #000 97%, transparent);
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
 }

@@ -4,10 +4,10 @@ area: SITE
 title: Homepage preview spacing
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 9922258aaeb2351e60b34b2f3912687988e7aabd
 ---
 
 # Homepage preview spacing
@@ -31,9 +31,9 @@ The homepage image uses a 1268 by 408 authored view box and applies horizontal a
 ## Steps
 
 - [ ] Capture baseline desktop and narrow screenshots that show the top and bottom frame loss.
-- [ ] Adjust the Site-owned preview wrapper spacing and vertical mask stops so the outer framing remains readable without exposing a hard rectangular SVG edge.
-- [ ] Change authored overview geometry or view-box padding only if the same clipping remains when the SVG is viewed outside the homepage treatment.
-- [ ] Extend the homepage regression coverage for the selected wrapper and mask contract.
+- [x] Adjust the Site-owned preview wrapper spacing and vertical mask stops so the outer framing remains readable without exposing a hard rectangular SVG edge.
+- [x] Change authored overview geometry or view-box padding only if the same clipping remains when the SVG is viewed outside the homepage treatment.
+- [x] Extend the homepage regression coverage for the selected wrapper and mask contract.
 - [ ] Inspect the final homepage at desktop and narrow widths, including the transition into surrounding copy and footer.
 
 ## Files touched
