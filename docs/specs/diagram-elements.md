@@ -87,3 +87,13 @@ _Conformance:_ conforming
 _Verify:_ inspect relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`. against this requirement.
 
 _Evidence:_ relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`.
+
+### DIAGRAM-009 — Region bounds stay explicit
+
+Every authored Region MUST own complete `bounds`; the canonical model MUST NOT derive any axis from another Region. An authoring tool MAY copy, align, or distribute Region geometry, but it MUST materialise the result as complete bounds on every affected Region.
+
+_Conformance:_ conforming
+
+_Verify:_ parse and render Regions with repeated axes, move or remove one Region, and assert no other Region geometry changes.
+
+_Evidence:_ `packages/domain-model/src/model.ts` requires complete Region `bounds`; `packages/domain-core/src/schema.ts` validates them independently; both renderers consume resolved independent Region boxes.
