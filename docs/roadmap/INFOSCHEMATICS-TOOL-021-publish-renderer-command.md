@@ -4,10 +4,10 @@ area: TOOL
 title: Publish renderer command
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: f8c2fd38a659797573432ae6b187808eee875823
 ---
 
 ## Goal
@@ -30,13 +30,13 @@ The repository script can render only definitions imported through its fixed exa
 
 ## Steps
 
-- [ ] Add a publishable `@infoschematics/cli` workspace with a Node 22 ESM binary named `infoschematics` and one `render` subcommand.
-- [ ] Implement `infoschematics render <input>` for `.yaml`, `.yml`, and `.json`, accept `-` for standard input, write SVG to standard output by default, and support `--output <path>` for an explicit file.
-- [ ] Parse exclusively through Domain Core, render through `@infoschematics/render-svg`, send diagnostics to standard error, and use stable non-zero exit codes for usage, input, validation, and write failures.
-- [ ] Reject TypeScript modules and raster output with clear guidance to use the programmatic library or an external SVG conversion tool.
-- [ ] Reuse the repository CLI argument idiom where it is package-safe, without exporting internal script registries or coupling the published command to repository examples.
-- [ ] Extend package metadata, dependency-boundary checks, version checks, and release pack-smoke so a clean consumer installs the tarball and executes the packed binary against YAML and JSON fixtures.
-- [ ] Add concise CLI reference and getting-started examples, including pipes, file output, diagnostics, and the publication boundary.
+- [x] Add a publishable `@infoschematics/cli` workspace with a Node 22 ESM binary named `infoschematics` and one `render` subcommand.
+- [x] Implement `infoschematics render <input>` for `.yaml`, `.yml`, and `.json`, accept `-` for standard input, write SVG to standard output by default, and support `--output <path>` for an explicit file.
+- [x] Parse exclusively through Domain Core, render through `@infoschematics/render-svg`, send diagnostics to standard error, and use stable non-zero exit codes for usage, input, validation, and write failures.
+- [x] Reject TypeScript modules and raster output with clear guidance to use the programmatic library or an external SVG conversion tool.
+- [x] Reuse the repository CLI argument idiom where it is package-safe, without exporting internal script registries or coupling the published command to repository examples.
+- [x] Extend package metadata, dependency-boundary checks, version checks, and release pack-smoke so a clean consumer installs the tarball and executes the packed binary against YAML and JSON fixtures.
+- [x] Add concise CLI reference and getting-started examples, including pipes, file output, diagnostics, and the publication boundary.
 
 ## Files touched
 
@@ -71,6 +71,32 @@ Add installation and command examples to Getting Started and link the full CLI r
 ### Roadmap
 
 Keep registry publication in the separately reshaped hardening/release work; this item stops with a verified publishable package.
+
+## Review
+
+### Delivered
+
+Implemented the approved command boundary from baseline `f8c2fd38a659797573432ae6b187808eee875823` in commits `6df2a02e` and `74239c97`. The new package is release-ready, but no package was published and no registry or trusted-publishing state changed.
+
+### Summary of changes
+
+Added the Node 22 ESM `@infoschematics/cli` package and `infoschematics render` command for YAML, JSON, and standard input. Successful output is deterministic SVG on standard output or an explicit file; failure classes use stable statuses and standard error. The coordinated release registry, version checks, dependency boundaries, clean-consumer pack smoke, architecture guide, release guide, command guide, decision record, and CLI specification now include the package.
+
+### Verification
+
+Focused CLI and release tests passed. `bun run self:release:verify` built and packed all eight public packages, installed their tarballs into a clean consumer, and executed the packed binary against byte-identical YAML, JSON, stdin, and file-output cases plus malformed, missing, and unsupported inputs. `bun run self:check` passed 79 Node test files with 545 tests, the Chromium pointer test, every workspace typecheck, generated artefact checks, dependency cruise, package builds, and the production Site build.
+
+### Outstanding concerns
+
+None within the approved boundary. The package is deliberately unpublished; publication remains a separate explicit release action. Raster conversion, watch mode, servers, and executable TypeScript input remain excluded.
+
+### Post-change review
+
+The implementation keeps filesystem and process concerns out of Domain Core and the renderer, and imports only their public surfaces. The packed-binary smoke closes the gap between source tests and what an npm consumer actually executes. Diagnostics cannot contaminate successful SVG streams in the covered file and pipe paths.
+
+### Mini recap
+
+External callers can now install one thin command package and render canonical YAML or JSON to SVG without cloning the monorepo or writing a host. The same canonical parser and static renderer remain the only model and rendering paths.
 
 ## Discussion
 
