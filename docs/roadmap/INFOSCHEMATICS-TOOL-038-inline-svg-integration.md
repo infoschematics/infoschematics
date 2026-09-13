@@ -18,7 +18,7 @@ Let a host place deterministic SVG output inline, inspect rendered artefacts by 
 
 ## Context
 
-renderInfoschematicSvg returns a serialised SVG string whose outer artefact groups expose data-artefact-id and data-artefact-kind under the contract delivered by [SVG artefact identity](INFOSCHEMATICS-TOOL-028-svg-artefact-identity.md). An image element is suitable for inert display but makes SVG descendants unavailable to the parent document for inspection or event delegation.
+renderInfoschematicSvg returns a serialised SVG string whose outer artefact groups expose data-artefact-id and data-artefact-kind under the contract delivered by `INFOSCHEMATICS-TOOL-028`. An image element is suitable for inert display but makes SVG descendants unavailable to the parent document for inspection or event delegation.
 
 ## Boundary
 
@@ -54,7 +54,7 @@ Run focused bunx vitest run suites for static SVG identity and escaping plus the
 
 ## Dependencies / blocks
 
-[SVG artefact identity](INFOSCHEMATICS-TOOL-028-svg-artefact-identity.md) has landed and supplies the stable outer-group metadata. Existing renderInfoschematicSvg output is the only accepted markup source, so no renderer API or browser dependency is required.
+`INFOSCHEMATICS-TOOL-028` has landed and supplies the stable outer-group metadata. Existing renderInfoschematicSvg output is the only accepted markup source, so no renderer API or browser dependency is required.
 
 ## Documentation impact
 
