@@ -4,10 +4,10 @@ area: TOOL
 title: Repository conformance pass
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 7646468507d3bc10e80b414a8f1d5661d7a82346
 ---
 
 # Repository conformance pass

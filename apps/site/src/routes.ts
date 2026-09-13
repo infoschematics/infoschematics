@@ -1,15 +1,11 @@
-export const blankExamplePath = '/examples/blank/'
-export const infoschematicsExamplePath = '/examples/infoschematics/'
-export const systemExamplePath = '/examples/system/'
+const blankExamplePath = '/examples/blank/'
+const infoschematicsExamplePath = '/examples/infoschematics/'
+const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
 export const visualGuidePath = '/docs/visual-guide/'
 export const installationPath = '/docs/installation/'
 export const playgroundPath = '/playground/'
-
-export function playgroundPresetPath(preset: string) {
-  return `${playgroundPath}?preset=${preset}`
-}
 
 export type DocumentSection = 'guide' | 'reference' | 'approach'
 
