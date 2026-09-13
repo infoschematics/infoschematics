@@ -72,3 +72,7 @@ areas.TOOL = "tool"
 memberships.hnr = { home = "https://github.com/krisb/kit-hnr", role = "maintainer" }
 
 [skills.ki-specs]
+
+[skills.ki-decision-records]
+
+[skills.ki-guides]
