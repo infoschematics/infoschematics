@@ -1,6 +1,6 @@
 ---
 id: ADR-INFOSCHEMATICS-007
-title: Site as the public outlet
+title: Site as public outlet
 date: 2026-09-02
 status: current
 decision_type: architecture
@@ -8,18 +8,18 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [GDR-INFOSCHEMATICS-001, ADR-INFOSCHEMATICS-004]
 ---
 
-# ADR-INFOSCHEMATICS-007: Site as the public outlet
+# ADR-INFOSCHEMATICS-007: Site as public outlet
 
 ## Context
 
-The public site, package examples, and consumer documentation need one repository boundary. Keeping a second copy of guides on the site would create two sources of truth, while placing reusable behaviour inside the site would reverse package ownership.
+The public website must present package APIs, examples, and guidance without becoming the owner of reusable product behaviour or duplicating canonical repository knowledge.
 
 ## Decision
 
-The Site application at `apps/site` is the public outlet for this repository. It composes published package APIs, independently authored `is-*` examples, and selected canonical Markdown from `docs/`.
+`apps/site` is the public outlet for this repository. It composes published package APIs, independently authored examples, Site-owned consumer-guide content, and selected canonical repository documents. It owns navigation, page metadata, layout, and deployment, but reusable Infoschematic behaviour belongs in the appropriate package first.
 
-Documentation remains authored once under `docs/`. The site renders consumer guides and reference material at stable public routes. Maintainer-facing decisions, architecture, specifications, and roadmap records remain repository documents unless explicitly selected for publication.
+[ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) defines the narrower consumer-guide ownership boundary.
 
 ## Consequences
 
-Website presentation can improve without duplicating product knowledge. Examples prove public package seams and remain reusable outside the site. The Site application may own navigation, page metadata, layout, and deployment, but any general Infoschematic behaviour must move into the appropriate package before the site consumes it.
+The website can evolve as a publication without forking product capability or maintainer documentation. Examples continue to prove the same public seams available to external hosts.

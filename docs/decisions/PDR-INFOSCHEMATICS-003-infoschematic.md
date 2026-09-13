@@ -1,6 +1,6 @@
 ---
 id: PDR-INFOSCHEMATICS-003
-title: The product is called Infoschematic
+title: Infoschematic
 date: 2026-08-31
 status: current
 decision_type: product
@@ -8,20 +8,16 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [PDR-INFOSCHEMATICS-001]
 ---
 
-# PDR-INFOSCHEMATICS-003: The product is called Infoschematic
+# PDR-INFOSCHEMATICS-003: Infoschematic
 
 ## Context
 
-The reusable library and the authored thing it produces need a shared name. The product shows how a system is put together and what moves through it: more structural than an infographic and more explanatory than an implementation diagram.
-
-Names based on `schema` were rejected because this repository also handles configuration and interface specifications, where schema already has a precise meaning.
+The reusable library and the authored product need a shared name. The product explains how a system is structured and how things move through it; it is more specific than a generic diagram and broader than a schema.
 
 ## Decision
 
-The tool is **Infoschematics** and an authored product is **an Infoschematic**. The plural names the organisation and package scope; the singular names one complete authored product.
-
-`infoschematic` is the naming stem for repositories, packages, types, and public documentation where a more specific role name is not clearer.
+The tool is **Infoschematics** and one complete authored product is **an Infoschematic**. Use `infoschematic` as the naming stem unless a more specific role name is clearer.
 
 ## Consequences
 
-Every contract can name its subject directly. The name places charts, mind maps, and unconstrained drawing outside the product boundary. Package names remain role-based under `@infoschematics/*` rather than repeating the product name in every package.
+The name provides one subject for the model, documentation, and public API. Charts, mind maps, and unconstrained drawings remain outside the product boundary. Packages keep responsibility-based names under `@infoschematics/*`.

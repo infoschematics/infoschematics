@@ -1,6 +1,6 @@
 ---
 id: ADR-INFOSCHEMATICS-004
-title: Source sorted by ownership before kind
+title: Source sorted by ownership
 date: 2026-09-02
 status: current
 decision_type: architecture
@@ -8,27 +8,18 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [PDR-INFOSCHEMATICS-001, KDR-INFOSCHEMATICS-001]
 ---
 
-# ADR-INFOSCHEMATICS-004: Source sorted by ownership before kind
+# ADR-INFOSCHEMATICS-004: Source sorted by ownership
 
 ## Context
 
-A tree sorted only by file kind says what a file is but not who owns it. A generic-looking directory can still contain hard-coded realisation material, while reusable behaviour can be scattered between model, application, and component folders. Import cleanliness alone cannot detect literals owned by a particular Infoschematic.
+File kind alone does not reveal who owns behaviour. Reusable calculations, host composition, and authored example data can all be TypeScript or YAML while having different dependency and change boundaries.
 
 ## Decision
 
-Ownership boundaries state purpose first; file kind sorts within an owner:
+Sort source by ownership before file kind. Domain Model owns serialisable types; Domain Core owns framework-neutral domain behaviour; View Model owns framework-neutral visual and editing derivations; each View or renderer owns output-specific behaviour; examples own authored Infoschematics; applications own hosting and publication composition. Dependencies point from consumers toward reusable owners, never back toward a particular host or example.
 
-- Domain Model owns dependency-free serialisable product types.
-- Domain Core owns framework-neutral domain behaviour.
-- View Model owns framework-neutral derived visual and editing calculations.
-- renderer and View packages own output-specific behaviour.
-- `is-*` example packages own authored Infoschematic configurations.
-- Site owns publication and composition, not reusable product behaviour.
-
-Physical roots make those boundaries visible: independently consumable libraries live under `packages/`, deployable composition roots under `apps/`, and independently authored Infoschematic examples under `examples/`.
-
-Dependency Cruiser enforces import direction. Review remains responsible for ownership violations hidden in literals.
+Physical workspace roots make those boundaries visible as specified by [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).
 
 ## Consequences
 
-Reusable capability moves or publishes by ownership unit rather than file-by-file triage. A feature used by one example still belongs in a reusable package when its concept is general. Application composition may depend on lower layers, while lower layers never import a host, site, or authored Infoschematic.
+Generic-looking folders no longer justify misplaced product-specific literals, and reusable capability cannot hide inside an application. Reviews can reason about dependency direction from ownership before considering implementation form.

@@ -1,6 +1,6 @@
 ---
 id: PDR-INFOSCHEMATICS-001
-title: A framework-neutral Infoschematic library
+title: Framework-neutral library
 date: 2026-08-22
 status: current
 decision_type: product
@@ -8,18 +8,16 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [GDR-INFOSCHEMATICS-001]
 ---
 
-# PDR-INFOSCHEMATICS-001: A framework-neutral Infoschematic library
+# PDR-INFOSCHEMATICS-001: Framework-neutral library
 
 ## Context
 
-Infoschematics provides geometry, routing, placement, editing, presentation, and rendering concepts that apply across independently authored products. Tying those concepts to one realisation would make every new Infoschematic repeat the same work or vendor source.
+Infoschematics provides a reusable model for structure, geometry, presentation, editing, and rendering. Binding that model to one UI framework or authored example would make every consumer repeat the same work and would prevent parallel renderers from sharing a contract.
 
 ## Decision
 
-Infoschematics is a reusable library. Its Domain Model is serialisable and framework-neutral. Domain Core supplies domain behaviour without visualisation or framework dependencies. View Model derives geometry and editing primitives without React. Renderers and interactive views sit above those layers, while each authored Infoschematic and host application remains independently owned.
-
-Dependencies point from a realisation toward the reusable library, never from the library toward a realisation.
+Infoschematics is a framework-neutral library. Domain Model owns dependency-free serialisable types; Domain Core owns domain behaviour; View Model owns derived visual and editing calculations. Interactive views and static renderers depend on those layers. Authored Infoschematics and host applications remain independent consumers, and reusable packages never depend on a particular example or host.
 
 ## Consequences
 
-Each realisation is a consumer rather than the owner of the tool. Generic packages use generic vocabulary even when only one realisation exercises a capability. The abstraction is intentional: it creates an importable product boundary and lets SVG, React, and future outputs share one model.
+React, SVG, and future outputs can share one model without importing one another. New reusable behaviour belongs in the lowest layer that can own it; application-specific composition remains outside the library.

@@ -1,27 +1,38 @@
 # Decision records
 
-Decision records explain why Infoschematics is shaped as it is. They state the current decisions governing this repository; delivery history belongs in roadmap records and Git.
+Decision Records explain why Infoschematics has its current shape. Read them in this reveal order: product intent first, then model and interaction choices, then ownership and outputs, and finally repository operation. Each record is a concise living decision; delivery history belongs in roadmap records and Git.
 
-1. [GDR-INFOSCHEMATICS-001](GDR-INFOSCHEMATICS-001-adopt-decision-records.md) — the repository adopts decision records and keeps each documentation instrument focused on one question.
-2. [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-framework-neutral-library.md) — Infoschematics is a framework-neutral library with adapters and applications above it.
-3. [ADR-INFOSCHEMATICS-001](ADR-INFOSCHEMATICS-001-routes-authored-as-points.md) — route points are authored; rendered path strings are derived.
-4. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — architectural judgment stays with the coordinator while bounded mechanical work can be delegated.
-5. [ADR-INFOSCHEMATICS-002](ADR-INFOSCHEMATICS-002-undo-by-snapshot.md) — Studio undo restores snapshots of authored draft state.
-6. [ADR-INFOSCHEMATICS-003](ADR-INFOSCHEMATICS-003-authored-identity-codes.md) — identity codes are authored and stable rather than derived from list position.
-7. [PDR-INFOSCHEMATICS-002](PDR-INFOSCHEMATICS-002-a-structured-editor-not-a-drawing-tool.md) — Studio edits the Infoschematic model rather than offering unrestricted drawing operations.
-8. [PDR-INFOSCHEMATICS-003](PDR-INFOSCHEMATICS-003-infoschematic.md) — the library and its authored product use the Infoschematic name.
-9. [KDR-INFOSCHEMATICS-001](KDR-INFOSCHEMATICS-001-product-vocabulary.md) — one product and production vocabulary is canonical.
-10. [ADR-INFOSCHEMATICS-004](ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md) — ownership boundaries precede source-file kind.
-11. [ADR-INFOSCHEMATICS-005](ADR-INFOSCHEMATICS-005-host-owned-configuration.md) — a host owns one complete serialisable configuration.
-12. [ADR-INFOSCHEMATICS-006](ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) — interactive views are additive and static renderers consume the same derived View Model.
-13. [ADR-INFOSCHEMATICS-007](ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) — the site publishes canonical repository documentation and examples without owning reusable behaviour.
-14. [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md) — consumable packages, deployable applications, and authored examples use distinct monorepo roots.
-15. [ADR-INFOSCHEMATICS-009](ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) — hosts provide immutable, versioned renderer definitions while authored Infoschematics remain serialisable.
-16. [ADR-INFOSCHEMATICS-010](ADR-INFOSCHEMATICS-010-coordinated-package-release-contract.md) — the dependency-closed public package set shares one compiled, human-authorised release contract.
-17. [ADR-INFOSCHEMATICS-011](ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md) — authored presentation intent, output-specific Card detail, invariant tokens, Domain classification, and Scope applicability remain separate concerns.
-18. [ADR-INFOSCHEMATICS-012](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) — Flow signals are host- or Scene-owned runtime occurrences with deterministic accessible fallbacks.
-19. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — the root build tsconfig is a shared base file, not the standard's per-workspace shape marker.
-20. [ADR-INFOSCHEMATICS-013](ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md) — a Zod schema in Domain Core mirrors the dependency-free contract under a compile-time parity assertion, and is the single source of both document validation and the published JSON Schema.
-21. [PDR-INFOSCHEMATICS-004](PDR-INFOSCHEMATICS-004-product-messaging.md) — one canonical set of messaging lines and tone rules governs every surface that describes the product.
-22. [ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) — the consumer user guide is Site-owned content, while repository documentation stays canonical under `docs/`.
-23. [ADR-INFOSCHEMATICS-015](ADR-INFOSCHEMATICS-015-specifications-own-realisations.md) — Specification nodes point to the Diagram elements that realise them, keeping the Diagram self-contained.
+## Product foundation
+
+1. [GDR-INFOSCHEMATICS-001](GDR-INFOSCHEMATICS-001-adopt-decision-records.md) — separate why, what, how, facts, design, and delivery into their owning instruments.
+2. [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-framework-neutral-library.md) — keep the reusable product model independent of hosts, examples, and UI frameworks.
+3. [PDR-INFOSCHEMATICS-002](PDR-INFOSCHEMATICS-002-a-structured-editor-not-a-drawing-tool.md) — make Studio a structured Infoschematic editor rather than a general drawing tool.
+4. [PDR-INFOSCHEMATICS-003](PDR-INFOSCHEMATICS-003-infoschematic.md) — name one complete authored product an Infoschematic.
+5. [KDR-INFOSCHEMATICS-001](KDR-INFOSCHEMATICS-001-product-vocabulary.md) — use one canonical vocabulary across model, production, code, and documentation.
+6. [PDR-INFOSCHEMATICS-004](PDR-INFOSCHEMATICS-004-product-messaging.md) — govern the product promise and tone from one record.
+
+## Model and interaction
+
+7. [ADR-INFOSCHEMATICS-001](ADR-INFOSCHEMATICS-001-routes-authored-as-points.md) — author Flow routes as points and derive renderer paths.
+8. [ADR-INFOSCHEMATICS-002](ADR-INFOSCHEMATICS-002-undo-by-snapshot.md) — undo a complete Producer gesture through one authored-state snapshot.
+9. [ADR-INFOSCHEMATICS-003](ADR-INFOSCHEMATICS-003-authored-identity-codes.md) — author stable human-readable identities rather than deriving them from order.
+
+## Ownership and outputs
+
+10. [ADR-INFOSCHEMATICS-004](ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md) — sort source by who owns behaviour before its implementation form.
+11. [ADR-INFOSCHEMATICS-005](ADR-INFOSCHEMATICS-005-host-owned-configuration.md) — let the host select complete serialisable authored data and own runtime composition.
+12. [ADR-INFOSCHEMATICS-006](ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) — compose interactive Views additively and keep static renderers parallel.
+13. [ADR-INFOSCHEMATICS-007](ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) — use Site as the public outlet without making it the reusable product owner.
+14. [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md) — separate consumable packages, deployable applications, and authored examples physically.
+15. [ADR-INFOSCHEMATICS-009](ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) — let hosts supply validated renderer extensions without executable authored data.
+16. [ADR-INFOSCHEMATICS-010](ADR-INFOSCHEMATICS-010-coordinated-package-release-contract.md) — publish the dependency-closed package set under one coordinated release contract.
+17. [ADR-INFOSCHEMATICS-011](ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md) — keep semantic authored identity separate from output-detail policy.
+18. [ADR-INFOSCHEMATICS-012](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) — model Flow signals as accessible runtime occurrences rather than authored state.
+19. [ADR-INFOSCHEMATICS-013](ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md) — validate preferred YAML and compatible JSON against a runtime mirror of the canonical types.
+20. [ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) — let Site own the interactive consumer-guide journey while repository documents remain canonical.
+21. [ADR-INFOSCHEMATICS-015](ADR-INFOSCHEMATICS-015-specifications-own-realisations.md) — keep the Diagram self-contained by placing realisation claims in the optional Specifications overlay.
+
+## Repository operation
+
+22. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+23. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
