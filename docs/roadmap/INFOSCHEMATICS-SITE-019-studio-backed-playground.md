@@ -8,8 +8,6 @@ status: draft
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-018, INFOSCHEMATICS-TOOL-043]
 baseline_ref: null
-created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T15:51:48Z
 ---
 
 # Studio-backed playground

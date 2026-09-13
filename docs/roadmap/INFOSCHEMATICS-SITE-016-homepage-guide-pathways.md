@@ -8,8 +8,6 @@ status: draft
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-017, INFOSCHEMATICS-TOOL-038]
 baseline_ref: null
-created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T15:51:48Z
 ---
 
 # Homepage guide pathways

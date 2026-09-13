@@ -8,8 +8,6 @@ status: in-progress
 blocks: [INFOSCHEMATICS-SITE-016]
 blocked_by: []
 baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
-created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T16:01:44Z
 ---
 
 # Guide information architecture

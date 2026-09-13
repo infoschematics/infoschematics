@@ -8,8 +8,6 @@ status: in-progress
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: []
 baseline_ref: 021f4863a5f603d264d48863bff6c5cf2818edb3
-created_at: 2026-09-13T15:51:48Z
-updated_at: 2026-09-13T16:05:28Z
 ---
 
 # Playground example presets
