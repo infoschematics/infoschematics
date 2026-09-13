@@ -1,0 +1,149 @@
+# Static rendering — STATIC
+
+Deterministic, accessible, framework-neutral SVG output from the canonical model and View Model. Part of the [Specifications corpus](index.md).
+
+## User-observable behaviours
+
+### STATIC-001 — Scene visibility is explicit
+
+The caller MAY select a Standalone Scene, Thematic Scene, or Story Scene. The renderer MUST apply the selected Scene's focus deterministically and MUST make the treatment of unfocused content explicit through options rather than interactive state.
+
+_Conformance:_ pending
+
+_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+
+### STATIC-002 — Scope visibility is explicit
+
+The caller MAY select visible Scopes. When omitted, all configured Scopes MUST be visible. Flow visibility MUST continue to respect both its family and endpoint visibility.
+
+_Conformance:_ pending
+
+_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+
+### STATIC-003 — Overlays remain serialisable
+
+Placed Overlays MUST resolve from authored configuration. The framework-neutral renderer MUST provide labelled fallback output without importing host React renderers or executing authored callbacks.
+
+_Conformance:_ pending
+
+_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+
+### STATIC-004 — Static output honours resolved visual treatments
+
+Static SVG MUST use View Model's visual-treatment and region-geometry resolvers for authored surface and grid; absent, solid, dashed, and dotted Region frames; independently plain or notched Region labels and their placement; Card compactness; optional Card metadata; and Domain semantic colour. It MUST NOT implement a second set of appearance defaults or notch calculations. Omitted appearance MUST retain neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, and unframed, unfilled Regions with plain labels.
+
+The `cardDetails` option MAY override identity, stereotype, and description visibility without mutating authored data. It MUST NOT override Card compactness. Domain colour MUST remain independent of Scope visibility, with existing Scope treatment available as the fallback for an unclassified Card.
+
+The standalone SVG root MUST retain its accessible role, title, and whole-diagram label. Its description MUST summarise visible Card identity, stereotype, and description so visually hidden detail remains available at the image boundary. Each Card's accessible label and `<title>` MUST retain the same useful authored detail. Output MUST expose stable semantic treatment attributes sufficient to compare representative Canvas and SVG fixtures without relying on browser CSS.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`.
+
+### STATIC-005 — Explicit signals have deterministic still treatment
+
+The `signals` render option MAY identify configured Flows that should receive signalled emphasis. Static SVG MUST emit a deterministic, non-animated still treatment for each known identifier. Unknown identifiers MUST be ignored, and duplicate identifiers MUST NOT change output.
+
+Omitting `signals`, or supplying an empty list, MUST preserve the ordinary motion-free output. Static SVG MUST NOT derive signals from Scene focus, filtering, or authored Flow data. It MUST NOT serialise occurrence keys, animation elements, timers, callbacks, browser preferences, or runtime completion state.
+
+Signalled emphasis MUST leave the normal Flow route, direction, accessible label, authored geometry, and output ordering intact. It MUST use the shared signal still-treatment token so Canvas reduced-motion and static output interpret the emphasis consistently without requiring byte-identical markup.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output.
+
+### STATIC-006 — Flow annotations are opt-in and deterministic
+
+The `annotations` render option MAY request a code chip for each visible Flow. When enabled, each chip MUST render the authored Flow code verbatim at the shared annotation placement from View Model, so static output and Canvas agree on position without a second placement algorithm. An authored `label.along` fraction MUST be honoured. Chips MUST use the shared annotation output tokens, MUST dim with Scene focus alongside their Flow, and MUST NOT change output for hidden Flows. Omitting the option MUST leave output free of annotation markup.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming.
+
+### STATIC-007 — Ink resolves from the fill it sits on
+
+Card and Region-label text colour MUST resolve through View Model's readable-ink resolution against the fill the text is drawn over, not against the surface treatment. Output MUST expose the resolved ink as a `data-ink` attribute on Card groups and on plain Region labels drawn over an authored fill so Canvas and static SVG can be compared without browser CSS, and Canvas MUST resolve the same ink from the same fills. Labels on unfilled Regions and the Flow pipe underlay MAY remain surface-conditional because they sit on the surface itself.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers.
+
+### STATIC-008 — A dots grid treatment renders intersection marks
+
+Authored `grid: 'dots'` MUST render a mark at each grid intersection, sized from the same `gridSize` token as the line grids, as a deterministic alternative to `major` and `major-plus-minor`. It MUST use the shared `data-grid-treatment` attribute and MUST NOT change output for any other authored grid value.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers.
+
+### STATIC-009 — Card internals use the shared layout
+
+Static output MUST place Card label, description, stereotype, and identity text through View Model's Card layout rather than from constants of its own, and MUST draw those elements with a middle dominant baseline. An element the layout withholds — metadata a small Card has no room for — MUST NOT be emitted.
+
+It MUST draw the text the layout fits, including one line per fitted label line, rather than fit or wrap text of its own.
+
+_Conformance:_ conforming
+
+_Verify:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
+
+_Evidence:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
+
+### STATIC-010 — Visual elements expose authored identity
+
+The outer owning SVG group for every rendered Region, Fabric, Flow, Card, Point and Overlay MUST expose its authored identifier as `data-artefact-id` and its canonical kind as `data-artefact-kind`. Kind values MUST be exactly `region`, `fabric`, `flow`, `card`, `point` or `overlay`. The renderer MUST NOT copy authored identifiers into native SVG `id` attributes, whose document-wide namespace remains renderer- and host-owned. Static SVG MAY retain `data-id` as a compatibility duplicate.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers.
+
+## Quality properties
+
+### STATIC-011 — Output is deterministic
+
+The same configuration and options MUST produce byte-for-byte identical SVG. Output ordering MUST follow authored order and MUST NOT depend on object enumeration outside declared authored collections.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` snapshots title-only and representative configured output.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` snapshots title-only and representative configured output.
+
+### STATIC-012 — Text and attributes are safe
+
+All authored text and attribute values MUST be XML escaped. Numeric geometry MUST be finite before serialisation.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/render-svg/src/index.test.ts` covers XML-significant text and invalid coordinates.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text and invalid coordinates.
+
+### STATIC-013 — Static output uses shared visual semantics
+
+Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and output-default values directly from View Model's readonly `visualTokens` manifest. It MUST NOT duplicate those literals or import generated CSS. Equivalent built-in Canvas artefacts MUST retain the same semantic treatment across interactive and static output, while authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig`.
+
+_Conformance:_ pending
+
+_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+
+### STATIC-014 — Static rendering stays framework-neutral
+
+The static SVG renderer MUST NOT depend on React, browser state, or an interactive View package.
+
+_Conformance:_ conforming
+
+_Verify:_ inspect the render-svg dependency graph and run repository dependency-boundary checks.
+
+_Evidence:_ `packages/render-svg/package.json` declares only Domain Model and View Model workspace dependencies; `bun run lint:deps` enforces package boundaries.

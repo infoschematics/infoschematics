@@ -31,7 +31,7 @@ Design composes typed artefact operations with established component-offset, rou
 ## Steps
 
 - [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions.
-- [ ] Build the operation matrix required by EDIT-059 across authored and created Cards, Fabrics and Flows, composed Cards, applicable routes, and each supported input surface; assert unsupported cells are unavailable.
+- [ ] Build the operation matrix required by DESIGN-015 across authored and created Cards, Fabrics and Flows, composed Cards, applicable routes, and each supported input surface; assert unsupported cells are unavailable.
 - [ ] Add the known failing Card-movement case first and enforce projection order from effective component geometry through ports, attachments, interior route geometry, and route labels.
 - [ ] Cover moves and resizes with plain routes, interior Waypoints, existing route drafts, reattached ends, Wrapper and Adapter composition, and newly created endpoints.
 - [ ] Cover port-count changes, typed and established draft composition, creation, pending removal, individual change removal, whole-draft discard, undo, and redo as coherent semantic edits.
@@ -51,7 +51,7 @@ Design composes typed artefact operations with established component-offset, rou
 
 ## Verify
 
-Run the dedicated Vitest browser project for the EDIT-059 matrix in its supported browser, focused pure suites for View Model geometry and Studio operations, bun run self:packages:build, and bun run self:check. The matrix must assert both rendered SVG geometry and the reviewable change set, include at least one zoomed and panned movement, and prove undo and cancellation leave no partial edit.
+Run the dedicated Vitest browser project for the DESIGN-015 matrix in its supported browser, focused pure suites for View Model geometry and Studio operations, bun run self:packages:build, and bun run self:check. The matrix must assert both rendered SVG geometry and the reviewable change set, include at least one zoomed and panned movement, and prove undo and cancellation leave no partial edit.
 
 ## Dependencies / blocks
 
@@ -65,7 +65,7 @@ No new decision record is expected because this work enforces existing ownership
 
 ### Specifications
 
-Update EDIT-059 verification links and remove covered gaps. Preserve EDIT-067 pending-removal reviewability and EDIT-083 dependency ordering.
+Update DESIGN-015 verification links and remove covered gaps. Preserve EDIT-009 pending-removal reviewability and EDIT-014 dependency ordering.
 
 ### Guides
 
@@ -91,4 +91,4 @@ The known defect is a dependency-order failure. Effective component and port geo
 
 ### Removal semantics
 
-EDIT-067 resolves the earlier ambiguity: pending authored removals remain visible and reviewable with a distinct treatment. Application performs the actual cascade; the draft names affected Flows and can be lifted before application.
+EDIT-009 resolves the earlier ambiguity: pending authored removals remain visible and reviewable with a distinct treatment. Application performs the actual cascade; the draft names affected Flows and can be lifted before application.

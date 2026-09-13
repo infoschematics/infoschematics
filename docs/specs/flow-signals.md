@@ -1,0 +1,61 @@
+# Flow signals — SIGNAL
+
+Finite runtime Flow occurrences, replay, cancellation, announcements, and reduced-motion treatment. Part of the [Specifications corpus](index.md).
+
+## User-observable behaviours
+
+### SIGNAL-001 — Signals are finite keyed occurrences
+
+Canvas MAY receive framework-neutral `FlowSignal` occurrences from Present or its host through the `signals` prop. Each occurrence MUST identify one configured Flow through `flowId` and one host-owned `occurrenceKey`. Re-rendering the same pair MUST NOT restart a completed signal; a new occurrence key MAY replay that Flow. Simultaneous occurrences for different Flows MUST remain independent.
+
+Canvas MUST cancel an obsolete occurrence when the occurrence is removed. Cancellation and completion MUST leave the underlying Flow route, hit target, selection behaviour, and authored routing geometry unchanged. Filtering, hover, focus, and selection MUST NOT synthesize occurrences. An occurrence for an unknown or currently unavailable Flow MUST NOT make content visible or destabilise rendering.
+
+The travelling pulse MUST be finite and presentational. Signal graphics MUST be hidden from assistive technology and MUST NOT become the only evidence that a Flow was signalled.
+
+_Conformance:_ conforming
+
+_Verify:_ inspect signal props in `packages/view-canvas/src/Canvas.tsx` and signal rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+
+_Evidence:_ signal props in `packages/view-canvas/src/Canvas.tsx` and signal rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
+
+### SIGNAL-002 — Scene entry can signal focused Flows once
+
+Present MUST expose a `signalPolicy` prop accepting `focused-flows` or `none`. Under `focused-flows`, entering a Standalone Scene, Thematic Scene, or Story Scene MUST derive one framework-neutral signal occurrence for each resolved focused Flow. The occurrence key MUST distinguish that Scene entry from earlier entries while remaining stable across ordinary renders of the same entry.
+
+Re-rendering, filtering, hover, selection, and focus inspection MUST NOT create a new occurrence. Stepping to another Story Scene or entering another Scene MAY create new occurrences for its resolved focused Flows, including a Flow signalled by an earlier entry.
+
+Under `none`, Present MUST derive no automatic occurrences. The policy MUST NOT prevent a host from supplying explicit occurrences directly through the Canvas boundary. Signal policy and active occurrences MUST remain transient host or Present state rather than authored Infoschematic or process-global state.
+
+_Conformance:_ conforming
+
+_Verify:_ inspect signal derivation in `packages/view-model/src/signals.ts` and Scene-entry coordination in `packages/view-present`. against this requirement.
+
+_Evidence:_ signal derivation in `packages/view-model/src/signals.ts` and Scene-entry coordination in `packages/view-present`.
+
+### SIGNAL-003 — Scene changes cancel obsolete signals
+
+Clearing a Scene MUST cancel its active occurrences. Replacing the active Standalone Scene, Thematic Scene, or Story Scene MUST cancel occurrences not owned by the new entry before deriving new ones. A completed occurrence MUST NOT resume merely because Present re-renders or the same Scene remains active.
+
+Unknown Flow identifiers MUST be ignored by focused-Flow resolution. Scene signal derivation MUST remain pure, framework-neutral, and independent of timers; Canvas owns finite rendering and accessible announcement.
+
+_Conformance:_ conforming
+
+_Verify:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Story stepping, cancellation, and filtering without signalling.
+
+_Evidence:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Story stepping, cancellation, and filtering without signalling.
+
+## Quality properties
+
+### SIGNAL-004 — Signal meaning survives motion preferences
+
+Canvas MUST announce each newly received known Flow occurrence through a concise live region identifying the Flow. Re-rendering the same occurrence MUST NOT repeat its announcement. Removing or cancelling an occurrence MUST NOT announce new activity.
+
+Under `prefers-reduced-motion`, Canvas MUST replace spatial pulse travel with finite in-place emphasis on the same Flow route. The reduced-motion treatment MUST preserve the announcement, occurrence identity, cancellation, and static route semantics.
+
+Signal measurements shared with deterministic still output MUST come from View Model tokens. Canvas MAY own interaction-specific duration and easing while no other renderer depends on those values.
+
+_Conformance:_ conforming
+
+_Verify:_ pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry.
+
+_Evidence:_ pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry.
