@@ -1,5 +1,5 @@
 ---
-areas: { SITE: 15, TOOL: 38 }
+areas: { SITE: 15, TOOL: 42 }
 ---
 
 # Roadmap issue ledger
@@ -7,4 +7,4 @@ areas: { SITE: 15, TOOL: 38 }
 This ledger reserves fixed issuing-area namespaces. Allocate the next work item in its area as one greater than that area's high-water mark; never lower a value or reuse an issued number after a record is pruned. Areas are not mutable themes or groups.
 
 - `SITE` reserves through `015`.
-- `TOOL` reserves through `038`.
+- `TOOL` reserves through `042`.

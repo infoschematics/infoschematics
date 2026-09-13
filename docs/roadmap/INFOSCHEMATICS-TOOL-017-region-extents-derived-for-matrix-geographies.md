@@ -1,34 +1,86 @@
 ---
 id: INFOSCHEMATICS-TOOL-017
 area: TOOL
-title: Derive region extents
+title: Region extent decision
 theme: tool
-horizon: future
-status: draft
-candidate: true
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 ---
 
+# Region extent decision
+
 ## Goal
 
-Let a Region optionally take part of its extent from another Region — a column clipped to its row, a row clipped to its column — so matrix geographies can be authored without hand-duplicating coordinates, while the model keeps no containment hierarchy.
+Decide whether Region extents should derive from another Region, expand through an authoring helper, or remain explicit, using real matrix-geography evidence and a recorded product boundary.
 
 ## Context
 
-The region model deliberately has no row/column notion and no containment: a Region is a panel with an explicit box, and nesting is read from the geometry. That simplicity has an authoring cost the 5G-EMERGE IBC 2026 migration made concrete: each of its eight column regions repeats its row's `y` and `height` by hand (`y: 20, height: 610` five times, `y: 640, height: 490` three times), and resizing a row means re-authoring every column inside it. The original IBC2026-DBD-020 shaping sketched "a region may be declared within another region's extent (clipping to it) or independently" and increment B landed without it, resolving the model more simply; the idea remains worth its own decision.
+The Region model deliberately has no row, column, containment, or nesting concept. The 5G-EMERGE IBC migration exposed repeated geometry: each column Region duplicates the y and height of its row. Resizing a row therefore requires coordinated edits across every column. A derivation mechanism could reduce that cost, but it could also introduce hidden containment semantics into an otherwise explicit geometry model.
 
 ## Boundary
 
-Whatever mechanism is chosen must stay serialisable and must not reintroduce lane/zone-style kinds, mandatory nesting, or a containment hierarchy the renderer walks. A Region with a fully explicit box remains the primary form; derivation is an authoring convenience over it.
+This item makes and records the contract decision. It does not implement a new Region field or renderer behaviour, reintroduce lane or zone kinds, create mandatory nesting, or make renderers walk a containment hierarchy. If implementation is selected, it receives a separately scoped work item.
 
-## Shaping
+## Current state
 
-- Decide the mechanism as a design question first: a reference field (`within: 'media-streaming'` supplying the cross-axis extent), authoring-time helpers in the definition package that expand to explicit boxes, or true render-time clipping.
-- Decide what the editor does when a referenced region moves or resizes — whether dependent extents follow live or are re-derived on save.
-- Weigh whether the two authored consumers (the IBC definition and `examples/is-infoschematics`) actually earn the mechanism, or whether a documented authoring idiom (shared constants in the definition source) is enough; that answer can close this item without code.
+Every Region owns a complete explicit box. TypeScript definitions can share constants, but YAML and JSON documents repeat coordinates. The IBC definition and the Infoschematics self-description are the only known matrix-style consumers.
+
+## Steps
+
+- [ ] Measure duplicated Region coordinates and representative resize changes in the two known matrix-style definitions.
+- [ ] Compare an authored reference, a definition-time expansion helper, render-time clipping, and documented explicit geometry against serialisability, cycle detection, editor behaviour, renderer parity, and YAML usability.
+- [ ] Prototype only enough data and geometry resolution to expose ambiguity, error handling, and cross-axis semantics; do not land a public field in this decision item.
+- [ ] Record one decision that either retains explicit boxes or selects a precise derivation owner, syntax, validation rules, and editor response.
+- [ ] Update affected specification gaps and capture one bounded implementation record only if the selected decision requires production change.
+
+## Files touched
+
+- docs/decisions/
+- docs/decisions/README.md
+- docs/specs/domain-model.md
+- docs/specs/domain-core.md
+- docs/specs/view-model.md
+- docs/roadmap/
+
+## Verify
+
+Review the decision against both known definitions and confirm it answers ownership, serialisation, invalid references, cycles, editor movement, and renderer parity. Run ki repo audit --skill ki-work-roadmap --repo . and bun run self:check after documentation changes.
+
+## Dependencies / blocks
+
+The explicit Region box contract and both proving definitions have landed. No implementation dependency is required for this decision.
+
+## Documentation impact
+
+### Decision Records
+
+Add an architecture decision recording the selected Region extent model and rejected alternatives.
+
+### Specifications
+
+Update only the affected gaps or requirements needed to reflect the decision; do not specify an unselected implementation.
+
+### Guides
+
+If explicit geometry remains the contract, add the shared-constant TypeScript authoring idiom. Otherwise defer user guidance to the implementation item.
+
+### Roadmap
+
+Create a separate implementation record only when the decision selects new product behaviour.
 
 ## Discussion
 
-Decide whether the authoring cost justifies a new derivation mechanism or only documented shared constants.
+### Decision criteria
+
+The preferred outcome minimises duplicated authoring without making geometric containment implicit. A feature used only by TypeScript definitions may not justify a document-level contract.
+
+### Candidate mechanisms
+
+An authored reference is portable but adds reference validation and editor coupling. A definition helper keeps the canonical model explicit but does not help plain YAML. Render-time clipping is the most powerful option and carries the greatest semantic cost.
+
+### Completion outcome
+
+A supported decision to retain explicit boxes is a valid completion. This record exists to settle the product boundary, not to presume a feature.

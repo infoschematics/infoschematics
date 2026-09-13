@@ -3,13 +3,14 @@ id: INFOSCHEMATICS-TOOL-035
 area: TOOL
 title: Canonical view internals
 theme: tool
-horizon: future
+horizon: next
 status: draft
-candidate: true
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-034]
 baseline_ref: null
 ---
+
+# Canonical view internals
 
 ## Goal
 
@@ -17,24 +18,76 @@ Make View Model, Canvas, Present, and Studio operate on the canonical Infoschema
 
 ## Context
 
-Canonical YAML, JSON-compatible input, typed TypeScript authoring, and public View boundaries now exist, but `establishedInfoschematicOf` still projects definitions into the earlier `InfoschematicConfig` shape. Runtime and Studio internals consequently retain names and structures such as domains, groups, flow families, graphics, source-oriented presentation records, and duplicated compatibility fields that no longer describe the canonical model directly.
-
-The compatibility adapter was an intentional migration seam, not the final internal architecture. Canonical model values should be normalised once at the authoring boundary, after which Views, Studio, and programmatic emitters should see the same structured concepts.
+Canonical YAML, JSON-compatible input, typed TypeScript authoring, and public View boundaries exist, but establishedInfoschematicOf still projects definitions into the earlier InfoschematicConfig shape. Runtime and Studio internals consequently retain Domains, Groups, Flow Families, Graphics, source-oriented presentation records, and duplicated compatibility fields that no longer describe the canonical model directly.
 
 ## Boundary
 
-This item does not remove established public input support without a separately reviewed compatibility policy. It does not change authored shorthand syntax, visual treatments, diagram geometry, or presentation concepts being reconsidered by `INFOSCHEMATICS-TOOL-034`.
+This item does not remove established public input support, change authored shorthand syntax, redesign visual treatments or geometry, reopen the Sequence presentation semantics owned by [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md), or make YAML document trees part of View state.
+
+## Current state
+
+Domain Core parses canonical documents, but View entry points accept a union and immediately adapt canonical values into the established configuration. Canvas and Studio editing APIs therefore depend on legacy naming and five-kind Graphic compatibility, while Point and Overlay do not yet share the complete editing capability contract.
+
+## Steps
+
+- [ ] Inventory every establishedInfoschematicOf call and every legacy-only type or field crossing View Model, Canvas, Present, Studio, and static renderer boundaries.
+- [ ] Define one canonical runtime input and lookup layer for Scopes, Regions, Fabrics, Flows, Cards, Points, Overlays, Sequences, Scenes, and renderer references.
+- [ ] Move established input projection to one compatibility adapter at the public boundary and prevent downstream packages from importing legacy configuration shapes.
+- [ ] Migrate View Model derivation and Canvas rendering in dependency order, preserving geometry, visibility, accessibility, signals, and static parity.
+- [ ] Migrate Present and Studio state, controls, selection, change sets, and Direct output to canonical concepts without converting canonical input back to legacy records.
+- [ ] Bring Point and Overlay selection and editing through the same typed six-kind capability contract, retaining kind-specific constraints.
+- [ ] Remove obsolete compatibility-only registries and duplicate fields after all consumers use the canonical layer.
+- [ ] Add import-boundary, compatibility-input, canonical-input, visual-parity, and Studio interaction regression tests, then update architecture and public guidance.
+
+## Files touched
+
+- packages/domain-model/src/
+- packages/domain-core/src/ only where canonical input helpers are owned
+- packages/view-model/src/
+- packages/view-canvas/src/
+- packages/view-present/src/
+- packages/view-studio/src/
+- packages/render-svg/src/
+- examples/ and apps/site/src/ proving consumers
+- .dependency-cruiser.ts
+- docs/design/, docs/decisions/, docs/specs/, docs/reference/, and affected guides
+
+## Verify
+
+After [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) lands, run focused bunx vitest run suites for compatibility projection, canonical runtime, Canvas, Present, Studio, static SVG, editable capabilities, and visual parity; run bun run self:packages:build and bun run self:check. Add a dependency assertion that View packages do not import the legacy configuration module outside the named boundary, and compare established and canonical inputs for equivalent output.
+
+## Dependencies / blocks
+
+[Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) must first establish canonical Sequence and presentation semantics. Migrating internals earlier would encode the Theme and Story split that this work is meant to remove. The established public input remains a supported adapter after the dependency lands.
+
+## Documentation impact
+
+### Decision Records
+
+Update the additive-view and source-ownership decisions to identify the single compatibility boundary; add a decision only if migration exposes a new public compatibility policy.
+
+### Specifications
+
+Update View Model, Canvas, Present, Studio, and static renderer requirements to name canonical inputs and six visual artefact kinds directly.
+
+### Guides
+
+Update integration guidance so canonical input is primary and established input is clearly described as compatibility support.
+
+### Roadmap
+
+Remove the dependency and transition this item to Ready only after [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) has landed. Capture removal of established public input separately if a later compatibility policy authorises it.
 
 ## Discussion
 
 ### Compatibility boundary
 
-Legacy definitions may continue entering through a compatibility adapter, but canonical definitions should not be converted away from their own model before every renderer and editor operation. The migration should identify one boundary where legacy data becomes canonical and keep compatibility aliases out of lower-layer runtime state.
+Legacy definitions may continue entering through one adapter, but canonical definitions should not be converted away from their own model before rendering or editing. The adapter remains testable and deliberately narrow.
 
-### Vocabulary alignment
+### Migration order
 
-Internal types and APIs should distinguish Card Collections, Flow Families, architectural Scopes, Overlays, Assemblies, and independently identified artefacts using the same vocabulary as the domain contract. Renaming alone is insufficient where an older field carries different semantics; each projection must be replaced with the canonical relationship it represented.
+View Model must move before interactive Views so geometry and lookup semantics remain shared. Present and Studio follow Canvas, then obsolete registries can be removed once no consumer observes them.
 
-### Incremental migration
+### Six-kind editing
 
-The work should preserve existing configuration support and IBC visual compatibility while packages migrate in dependency order. Focused contract tests should prove no renderer or Studio boundary observes YAML scalar shorthand, document-tree state, or obsolete compatibility-only relationships.
+Point and Overlay should enter the common typed selection and operation machinery while retaining their distinct capabilities. Canonicalisation is not permission to pretend every artefact supports the same geometry.

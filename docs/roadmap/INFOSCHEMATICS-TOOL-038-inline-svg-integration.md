@@ -3,8 +3,8 @@ id: INFOSCHEMATICS-TOOL-038
 area: TOOL
 title: Inline SVG integration
 theme: tool
-horizon: soon
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -18,30 +18,76 @@ Let a host place deterministic SVG output inline, inspect rendered artefacts by 
 
 ## Context
 
-`renderInfoschematicSvg` returns a serialised SVG string whose outer artefact groups expose `data-artefact-id` and `data-artefact-kind` under the contract delivered by `INFOSCHEMATICS-TOOL-028`. The homepage wraps that output in an image data URI, which is suitable for inert display but makes SVG descendants unavailable to the parent document for inspection or event delegation.
+renderInfoschematicSvg returns a serialised SVG string whose outer artefact groups expose data-artefact-id and data-artefact-kind under the contract delivered by [SVG artefact identity](INFOSCHEMATICS-TOOL-028-svg-artefact-identity.md). An image element is suitable for inert display but makes SVG descendants unavailable to the parent document for inspection or event delegation.
 
 ## Boundary
 
-This item does not make renderer child markup stable, copy authored IDs into native SVG `id`, add callbacks or browser state to `InfoschematicConfig`, treat DOM mutation as model editing, or replace Canvas, Present, and Studio as the interactive and authoring surfaces.
+This item does not add browser globals to the static renderer, make child markup stable, copy authored IDs into native SVG id attributes, put callbacks or runtime state in InfoschematicConfig, treat DOM mutation as model editing, or replace Canvas, Present, and Studio as interactive and authoring surfaces.
 
-## Shaping
+## Current state
 
-Define the supported delivery choices between inert image output and inline same-document SVG. Decide whether hosts need documented insertion and event-delegation guidance, a reusable framework-neutral helper, a React integration component, or a deliberately small combination. Specify click, pointer, focus, and keyboard semantics against outer artefact metadata; review safe insertion, multiple-Infoschematic identity, accessibility, and cleanup. Decide whether the homepage should become a reference consumer or remain separate follow-on work. Promote to Next once the public surface, trust boundary, specification impact, and verification strategy are agreed.
+Static output is deterministic, standalone, XML-escaped, and carries stable metadata on the six outer visual-artefact groups. The Site homepage and visual guide embed data-URI image elements. Public guidance shows string rendering but does not define inline insertion, scoped event delegation, trust, accessibility, or cleanup.
+
+## Steps
+
+- [ ] Specify two supported delivery modes: inert image output for display and same-document inline insertion when the host needs SVG descendant access.
+- [ ] Document a framework-neutral insertion and teardown pattern that accepts only output produced by renderInfoschematicSvg, scopes all queries and listeners to one host container, and tolerates multiple Infoschematics on a page.
+- [ ] Define event delegation against the nearest outer data-artefact-id and data-artefact-kind group without promising child elements, CSS classes, native IDs, or tree position.
+- [ ] Add a Site-owned reference component that renders generated markup inline and exposes selected or hovered artefact metadata through host state, with listeners removed on replacement and unmount.
+- [ ] Provide keyboard-equivalent surrounding controls for click actions and accessible status or detail content; do not automatically turn every SVG group into a generic button.
+- [ ] Prove text and authored identifiers remain escaped, generated output carries no script or inline event attributes, event resolution stays inside the mounted SVG, and duplicate authored IDs in separate diagrams do not collide.
+- [ ] Update static-rendering and React integration guidance and clarify that persistent movement or editing must update the authored model through Canvas or Studio and rerender.
+
+## Files touched
+
+- packages/render-svg/src/index.test.ts
+- apps/site/src/ inline SVG reference component and focused tests
+- apps/site/content/static-rendering.md
+- apps/site/content/react-integration.md
+- docs/design/architecture.md
+- docs/specs/render-svg.md
+- docs/specs/view-canvas.md only if cross-renderer identity wording needs alignment
+
+## Verify
+
+Run focused bunx vitest run suites for static SVG identity and escaping plus the Site reference component, bun run --cwd apps/site build, and bun run self:check. In a browser, mount two inline Infoschematics with repeated authored IDs, confirm hover and click resolve only inside the correct host, confirm the keyboard-equivalent control exposes the same result, replace one render, and confirm stale listeners and state are removed.
+
+## Dependencies / blocks
+
+[SVG artefact identity](INFOSCHEMATICS-TOOL-028-svg-artefact-identity.md) has landed and supplies the stable outer-group metadata. Existing renderInfoschematicSvg output is the only accepted markup source, so no renderer API or browser dependency is required.
+
+## Documentation impact
+
+### Decision Records
+
+No new decision record is expected because the static renderer remains DOM-free and Site remains an outlet. Add one only if implementation needs a reusable browser package or changes those ownership boundaries.
+
+### Specifications
+
+Clarify the static renderer metadata and safe-output guarantees needed by inline hosts without freezing child markup.
+
+### Guides
+
+Add complete inert-image and inline-integration examples, event delegation, accessibility, lifecycle cleanup, and editing-boundary guidance.
+
+### Roadmap
+
+Keep product-specific click outcomes or homepage storytelling interactions as separate Site work once their audience behaviour is defined.
 
 ## Discussion
 
 ### Identity contract
 
-`INFOSCHEMATICS-TOOL-028` provides collision-safe stable hooks on the six outer artefact groups. This work should consume that contract rather than expose internal child nodes or introduce a parallel selector scheme.
+Outer data attributes are the public hooks. Native SVG IDs remain document-owned because several inline Infoschematics may contain the same authored identity.
 
 ### Interaction ownership
 
-The host owns listeners, transient UI state, and any surrounding details or navigation. Authored product data remains serialisable and renderer output remains deterministic.
+The host owns listeners, transient selection, navigation, details, and announcements. Authored product data remains serialisable and static renderer output remains deterministic.
+
+### Accessibility
+
+Pointer inspection can decorate surrounding content without changing SVG semantics. Any action available by clicking an artefact needs a keyboard-equivalent host control and visible focus, named according to the action rather than assigning a generic role to every group.
 
 ### Editing boundary
 
-Inline DOM access can support inspection and host interaction, but direct movement of SVG nodes would not update the authored model. Persistent geometry changes continue through configuration, Canvas, or Studio followed by rerendering.
-
-### Open integration choices
-
-A documentation-only pattern is smallest. A helper or component can improve safety and typing but creates a new public API. Keyboard parity and safe generated-markup insertion must be resolved before selecting either route.
+Inline DOM access supports inspection and host interaction, but moving an SVG node does not update the authored model. Persistent geometry changes continue through configuration, Canvas, or Studio followed by rerendering.

@@ -3,8 +3,8 @@ id: INFOSCHEMATICS-TOOL-037
 area: TOOL
 title: Harden Design interactions
 theme: tool
-horizon: soon
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -14,55 +14,81 @@ baseline_ref: null
 
 ## Goal
 
-Make every existing Design interaction preserve the same valid Infoschematic relationships regardless of whether the Producer uses the Canvas, keyboard or property controls, and prove those behaviours through rendered regression tests.
+Make every existing Design interaction preserve the same valid Infoschematic relationships whether a Producer uses Canvas, keyboard, or property controls, and prove those behaviours through rendered regression tests.
 
 ## Context
 
-The Studio specification already says component movement carries attached Flow ends (`EDIT-071`) and typed operations compose with established drafts (`EDIT-083`). A current failure shows a moved Card while its connected Flow remains at the old port. The behaviour was specified, but the integration seam was not protected by a rendered interaction test.
-
-Design currently composes two editing generations. Typed artefact operations materialise Card, Fabric, Region, Flow and Graphic values, while established draft fields still carry component offsets, route points, attachments, port counts, labels, text, creations and removals. Canvas receives both callback families. Static-markup tests cover capability exposure and pure View Model tests cover individual geometry functions, but no complete test drives the user interaction through Studio and asserts the resulting Card, ports, Flow route, undo state and change set together.
-
-The audit identified these regression surfaces:
-
-- moving or resizing an authored Card or Fabric while a connected Flow has no route draft, has interior Waypoints, has an existing route draft or has a reattached end;
-- moving a wrapped Card through either its own Card surface or its Adapter or Wrapper interaction, including Flows attached to either constituent;
-- changing port counts while existing and newly created Flows name affected ports;
-- mixing typed geometry operations with established route, attachment, label and component-offset drafts, where render order can restore stale coordinates;
-- pointer dragging, keyboard movement and numeric placement entering different draft paths;
-- coordinate conversion while zoomed, panned, fitted or displayed beside different panel layouts;
-- moving newly created endpoint artefacts whose identities are absent from an authored-only register;
-- undo, redo, individual change removal and whole-draft discard after a dependent geometry update;
-- selection changes during a pointer gesture, pointer release outside Canvas and unmount during a gesture;
-- removal preview and dependency cascades disagreeing about whether pending artefacts remain visible and selectable;
-- persistence migration loading an older partial draft into the current combined envelope;
-- Point and canonical Overlay capabilities entering a five-kind compatibility editor without the same interaction coverage.
+Studio already specifies that component movement carries attached Flow ends and that typed operations compose with established drafts. A current failure leaves a connected Flow on an old port after its Card moves. Pure View Model tests and static-markup tests cover individual calculations and exposed controls, but no complete test drives interaction through Studio and asserts Card, port, Flow route, change set, and undo state together.
 
 ## Boundary
 
-This item hardens behaviour already promised by the Studio specification. It does not add a free-form drawing tool, redesign Direct mode, implement lossless YAML patching, remove established input compatibility or complete the canonical View-internals migration. It may add a reusable DOM interaction harness, but it does not introduce browser-only production dependencies merely to test pure geometry.
+This item hardens behaviour already required by the Studio specification. It does not add a free-form drawing tool, redesign Direct mode, implement lossless YAML editing, remove established input compatibility, complete canonical View migration, or add Point and Overlay capabilities still gated by [Canonical view internals](INFOSCHEMATICS-TOOL-035-canonical-view-internals.md).
 
-## Shaping
+## Current state
 
-Start with a contract matrix whose rows are operations and whose columns are authored Card, created Card, Fabric, composed Card, Flow, Point and Overlay as applicable. For each supported cell, name the input surfaces, expected Canvas geometry, expected draft or change-set representation and undo result. Unsupported cells must be asserted unavailable rather than left untested.
+Design composes typed artefact operations with established component-offset, route, waypoint, attachment, port-count, label, creation, and removal drafts. Canvas owns pointer and keyboard interaction and SVG coordinate conversion; Studio owns semantic edit consolidation. The existing test environment does not execute the full rendered pointer lifecycle.
 
-Implement the smallest rendered interaction harness capable of pointer movement and release, keyboard commands, numeric property changes and viewport transforms. Add failing tests before changing projection order. Keep route calculations in View Model; Canvas should translate interaction events and render the effective result, while Studio should consolidate one semantic edit.
+## Steps
 
-Promote this item to Next when the matrix is reviewed, pending-removal visibility is reconciled between `EDIT-067` and materialised removal preview, and the test environment for SVG coordinate transforms is selected.
+- [ ] Add a Vitest browser test surface for Canvas and Studio using the repository's supported browser runner, real SVG geometry stubs only where the browser cannot provide layout, and helpers for pointer, keyboard, property, viewport, undo, and change-set assertions.
+- [ ] Build the operation matrix required by EDIT-059 across authored and created Cards, Fabrics and Flows, composed Cards, applicable routes, and each supported input surface; assert unsupported cells are unavailable.
+- [ ] Add the known failing Card-movement case first and enforce projection order from effective component geometry through ports, attachments, interior route geometry, and route labels.
+- [ ] Cover moves and resizes with plain routes, interior Waypoints, existing route drafts, reattached ends, Wrapper and Adapter composition, and newly created endpoints.
+- [ ] Cover port-count changes, typed and established draft composition, creation, pending removal, individual change removal, whole-draft discard, undo, and redo as coherent semantic edits.
+- [ ] Cover pointer release outside Canvas, selection changes during a gesture, unmount cancellation, pointer and keyboard equivalence, numeric placement, zoom, pan, fit, panel layout, and stable coordinate conversion.
+- [ ] Keep an authored artefact marked for removal visible, selectable, and visibly pending until the mark is lifted or applied; name dependent Flow removals in the reviewable change set.
+- [ ] Fix production seams exposed by each failing matrix cell without moving geometry or dependency logic out of View Model.
+- [ ] Update verification hooks and close specification gaps only when the rendered matrix proves the required behaviour.
+
+## Files touched
+
+- package.json, bun.lock, and Vitest browser configuration
+- packages/view-model/src/ editable geometry and operation helpers
+- packages/view-canvas/src/ interaction code and browser-rendered tests
+- packages/view-studio/src/app/ editor projection, controls, and browser-rendered tests
+- docs/specs/view-studio.md
+- docs/guides/ only if the visible pending-removal treatment changes Producer guidance
+
+## Verify
+
+Run the dedicated Vitest browser project for the EDIT-059 matrix in its supported browser, focused pure suites for View Model geometry and Studio operations, bun run self:packages:build, and bun run self:check. The matrix must assert both rendered SVG geometry and the reviewable change set, include at least one zoomed and panned movement, and prove undo and cancellation leave no partial edit.
+
+## Dependencies / blocks
+
+All behaviours in scope are already specified and their current production paths exist. [Canonical view internals](INFOSCHEMATICS-TOOL-035-canonical-view-internals.md) will later extend the same matrix to Point and Overlay but is not required to harden the existing paths.
+
+## Documentation impact
+
+### Decision Records
+
+No new decision record is expected because this work enforces existing ownership and editing decisions. Record one only if a fix requires changing those durable boundaries.
+
+### Specifications
+
+Update EDIT-059 verification links and remove covered gaps. Preserve EDIT-067 pending-removal reviewability and EDIT-083 dependency ordering.
+
+### Guides
+
+Update Studio guidance only if the visible pending-removal state or a supported interaction changes for Producers.
+
+### Roadmap
+
+Capture newly discovered capabilities separately; defects inside the approved matrix remain part of this hardening item.
 
 ## Discussion
 
-### Known first defect
+### Contract matrix
 
-Card movement and Flow routing are not one atomic preview when a later route draft restores coordinates from before the Card moved. The first repair should establish dependency order rather than special-case one IBC Flow: component geometry, port geometry, endpoint attachment, interior route geometry, then label placement.
+Rows describe semantic operations and input surfaces. Columns describe authored, created, composed, routed, and viewport states. Each supported cell proves rendered geometry, one consolidated change, and reversal; unsupported cells prove the control is absent.
 
 ### Test altitude
 
-Pure route tests remain valuable for orthogonality and normalisation, and static markup remains valuable for capability exposure. Neither can prove the real pointer handler selected the right artefact, used the current viewport transform, updated the correct draft layer and closed one undo gesture. Those behaviours require a rendered interaction test at Canvas or Studio altitude.
+Pure route tests remain useful for orthogonality and normalisation. Browser-rendered Canvas or Studio tests are required for pointer capture, event ordering, SVG coordinate conversion, selection, and interaction between draft layers.
 
-### Compatibility seam
+### Projection order
 
-The regression suite should protect the current mixed editor while `INFOSCHEMATICS-TOOL-035` removes compatibility-shaped internals. The same assertions then become migration gates: replacing a legacy draft path is safe only when its supported matrix cells remain green.
+The known defect is a dependency-order failure. Effective component and port geometry must precede endpoint attachment, interior route geometry, and label placement so a later draft layer cannot restore stale coordinates.
 
 ### Removal semantics
 
-`EDIT-067` requires an authored artefact marked for removal to remain reviewable, while typed materialisation can remove it from the Design preview immediately. Before implementation, choose one visible contract and state whether reviewability lives on Canvas, in the change set or both. Tests should then lock that decision rather than preserving accidental behaviour.
+EDIT-067 resolves the earlier ambiguity: pending authored removals remain visible and reviewable with a distinct treatment. Application performs the actual cascade; the draft names affected Flows and can be lifted before application.

@@ -3,46 +3,94 @@ id: INFOSCHEMATICS-TOOL-023
 area: TOOL
 title: Scene signal treatments
 theme: tool
-horizon: future
+horizon: next
 status: draft
-candidate: true
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-006]
 baseline_ref: null
 ---
 
+# Scene signal treatments
+
 ## Goal
 
-A scene can author how activity is animated while it holds: pulses travelling its focused flows (once, repeated through the scene's duration, or continuously), the receiving component pulsing as a signal arrives, and sequenced cascades where arrivals trigger onward signals — so a story step shows traffic moving through the system rather than a static highlight.
+Let a Scene declaratively play named Diagram Dynamics once, repeatedly, continuously, or in an ordered cascade so a presentation can show activity arriving and progressing through an Infoschematic.
 
 ## Context
 
-The signal machinery half exists. `view-model/signals.ts` resolves one occurrence per focused flow for a scene, and `view-canvas` renders it as a one-shot 900ms dot travelling the flow path (`animateMotion`, with a reduced-motion still fallback). But only `view-present` wires the `signals` prop; `view-studio` never passes it, so a studio-hosted dashboard has never shown a signal at all. There is one policy (`focused-flows`), one occurrence per flow per scene, no repetition, no component-side response, and no ordering.
-
-The motivating example is the 5G-EMERGE IBC 2026 full walkthrough. Its telemetry step wants multiple pulses running from the edge cache and the player down into the telemetry plane for as long as the scene holds; the next step wants those arrivals passed visibly into prediction and popularity — with the receiving component itself pulsing on receipt, not just the arrow; the decision step wants catalogue, prediction and popularity signals converging to pulse demand control, which in turn sends signals onward to the supply adapters; and the closing feedback-loop scene wants continuous circulation around the whole cycle.
+The current Scene signal path emits one transient occurrence for every focused Flow and Canvas renders a single 900 millisecond travelling marker. Present wires that path, Studio does not, and the authored model cannot express repetition, component receipt, or ordered propagation. The 5G-EMERGE walkthrough needs telemetry pulses during a long hold, visible receipt by prediction Cards, convergence into demand control, and a closing circulation loop.
 
 ## Boundary
 
-The treatments, model vocabulary, studio wiring and worked examples land here. Authoring them onto the 5G-EMERGE scenes stays in that repository, and happens only after the treatments are demonstrated in the visual guide. No changes to flow routing, families, or the focus/highlight model.
+This item composes the named Dynamics delivered by [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md). It does not create a parallel animation vocabulary, expose arbitrary timelines or offsets, change Flow routing, make motion the only carrier of meaning, infer activity from focus, or add callbacks and timers to authored data.
+
+## Current state
+
+View Model can resolve one FlowSignal occurrence from focused Flow IDs. Canvas has full-motion and reduced-motion treatments, while Present creates occurrences from an active Scene. There is no Scene field referencing a named Dynamic, no playback policy, no component receipt convention, and no Studio pass-through.
+
+## Steps
+
+- [ ] Add a Scene dynamics list whose entries reference a stable Diagram Dynamic ID and choose once, repeat, or continuous playback plus an optional non-negative cascade stage.
+- [ ] Validate Dynamic references and stage values in Domain Core, preserve compact stable serialisation, and reject wrong-kind or duplicate cue identities.
+- [ ] Derive stage timing from Scene duration and ordered stage groups, with no authored millisecond offsets; use the existing Scene hold fallback when duration is absent.
+- [ ] Make Present create host-owned occurrence keys for initial play, repeats, replay, cancellation, Scene changes, and ordered cascade stages.
+- [ ] Route resolved occurrences through Studio and Canvas so signal-flow and emphasise-elements Dynamics provide travelling pulses, receiving-component emphasis, reduced-motion still treatment, and accessible announcements.
+- [ ] Keep static SVG deterministic and motionless, rendering a Dynamic treatment only when its caller explicitly selects an occurrence rather than inferring an active timeline.
+- [ ] Add visual-guide and repository examples for once, repeated, continuous, receipt, and cascade treatments before applying them to a consumer walkthrough.
+- [ ] Update the model, runtime, presentation, Studio, accessibility, and authoring contracts.
+
+## Files touched
+
+- packages/domain-model/src/
+- packages/domain-core/src/ and packages/domain-core/schema/
+- packages/view-model/src/
+- packages/view-canvas/src/
+- packages/view-present/src/
+- packages/view-studio/src/
+- packages/render-svg/src/
+- examples/ and apps/site/src/visual-guide/
+- docs/decisions/, docs/specs/, docs/reference/, and affected guides
+
+## Verify
+
+After [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) lands, run bun run self:verify:schema, focused bunx vitest run suites for Scene parsing, cue scheduling, Present replay and cancellation, Canvas treatments, Studio pass-through, reduced motion, accessibility, and static SVG explicit occurrences, then bun run self:packages:build and bun run self:check. Inspect all five visual-guide treatments in full and reduced motion and confirm a Scene change cancels the prior schedule.
+
+## Dependencies / blocks
+
+[Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) must first deliver named Diagram Dynamics, DynamicOccurrence resolution, and renderer interpretations. Until that contract exists this plan is complete but cannot truthfully enter Ready.
+
+## Documentation impact
+
+### Decision Records
+
+Update the transient Dynamics decision with Scene-owned cue composition, derived cascade timing, and host-owned occurrence scheduling.
+
+### Specifications
+
+Add Scene cue, validation, runtime scheduling, renderer treatment, reduced-motion, static-output, and accessibility requirements.
+
+### Guides
+
+Add authored examples for playback policies and explain that focus and Dynamics remain separate concepts.
+
+### Roadmap
+
+Remove the dependency and transition this item to Ready only after [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) has landed.
 
 ## Discussion
 
-### Treatment options, not one behaviour
+### Cue vocabulary
 
-These are different rhetorical effects and should be separately authorable, most likely as scene-based treatment keys (serialisable primitives, per the definition/host boundary): a one-shot pulse (today's behaviour), repeated pulses fitted to the scene's duration, continuous circulation for cycle scenes, component receipt pulses, and sequenced cascade (source flows, then receiving component, then onward flows). A scene might combine several; a story should be able to default them.
+Scenes reference product-owned Dynamic IDs. Playback policy describes when an occurrence is created; it does not restate target geometry or renderer technique.
 
-### Component receipt pulse
+### Cascade timing
 
-Pulsing the receiving card is half the storytelling — the arrival must be seen to land. Needs a card-level animation idiom in `view-canvas` (the signal-emphasis keyframe pattern and the reduced-motion fallback already set the idiom) keyed off the same occurrence identity the flow pulse uses, so arrow and card read as one event.
+Cascade stages are ordered integers. Present divides the available Scene duration across the ordered stages, avoiding a general-purpose timeline and keeping authored YAML reviewable.
 
-### Sequencing and cascades
+### Receipt semantics
 
-The cascade (telemetry → prediction/popularity → demand control → supply adapters) needs staged delays derived from authored order rather than a hand-tuned timeline. Worth deciding whether stage timing is derived (equal shares of scene duration) or authored (explicit offsets); derived is likely enough for the walkthrough and far cheaper to keep coherent.
+Receiving-component pulses use an emphasise-elements Dynamic rather than a Flow-specific special case. This lets the same semantic event retain full-motion, reduced-motion, static, and accessible interpretations.
 
 ### Studio wiring
 
-Whatever lands, `view-studio` must pass `signals` through to the diagram (present mode at minimum) or none of it is visible in the dashboard host that motivated the work.
-
-### Visual guide first
-
-Deliver the treatments into the visual guide / examples before any consumer authors them, so the vocabulary is demonstrated and reviewable on its own terms.
+Studio must pass the same occurrence state through its Present surface. Design mode may inspect authored cues, but it does not run a separate scheduling engine.
