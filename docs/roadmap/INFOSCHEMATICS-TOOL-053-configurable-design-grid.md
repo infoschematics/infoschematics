@@ -9,49 +9,58 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-13T20:08:57Z
+updated_at: 2026-09-13T20:11:33Z
 ---
 
 # Configurable Design grid
 
 ## Goal
 
-Let Producers choose the [Design](../reference/vocabulary.md#design) editing-grid increment, using ten diagram units by default, one as the finest active grid, and zero to turn grid snapping off.
+Let authors declare the diagram's grid size in YAML, using ten diagram units by default, one as the finest active grid, and zero to disable the grid and grid snapping.
 
 ## Context
 
-Design currently stores `grid` as a boolean and takes the ten-unit increment from a visual token. Turning the grid on affects the editing-grid overlay, pointer placement, creation, and resize steps; alignment-guide snapping is controlled separately. A configurable diagram-coordinate increment gives precise placement without requiring a different model scale or viewport size.
+[Design](../reference/vocabulary.md#design) currently stores `grid` as transient boolean state and takes the ten-unit increment from a visual token. Turning the grid on affects the editing-grid overlay, pointer placement, creation, and resize steps; alignment-guide snapping is controlled separately. The grid is part of the authored diagram's coordinate system, so its size must travel with the model rather than depend on a particular Studio session.
+
+The canonical YAML should expose a diagram-level `gridSize`. Omitting it retains the compact default of `10`; `1` permits unit placement; `0` means that no coordinate grid is active. The authored appearance treatment can still decide whether an active grid is visible outside Design.
 
 ## Boundary
 
-This item does not change authored Canvas grid appearance, the canonical diagram coordinate system, port-spacing rules, alignment-guide thresholds, keyboard nudging's exact-placement contract, or persist an editing preference in authored YAML.
+This item does not change diagram bounds, rescale existing coordinates, change port-spacing rules, alter alignment-guide thresholds, or merge grid size with the appearance choice for major or minor grid treatment. It does not make Studio preferences part of the Infoschematic document beyond the shared diagram grid itself.
 
 ## Current state
 
-Entering Design enables a fixed ten-unit grid and guide snapping. The toolbar can only toggle the grid, and Canvas and Studio read the shared ten-unit visual token as both drawing geometry and editing behaviour.
+Entering Design enables a fixed ten-unit grid and guide snapping. The toolbar can only toggle the transient grid, while Canvas and Studio read the shared ten-unit visual token as both drawing geometry and editing behaviour. Canonical YAML has no grid-size field.
 
 ## Steps
 
-- [ ] Replace the Design-session grid boolean with a validated numeric increment: `10` by default, `0` disabled, and active values constrained to `1` or greater.
-- [ ] Add an accessible compact grid-size control to the Design tools, preserving a quick way to switch snapping off and restore the default.
-- [ ] Parameterise the editing-grid overlay, pointer placement, creation, and resize snapping from the selected increment instead of the fixed visual token.
+- [ ] Add canonical `diagram.gridSize` model and schema support, accepting `0` or values of `1` and greater, defaulting omitted values to `10` internally.
+- [ ] Place `gridSize` with diagram geometry in compact serialisation, omit the default, and cover YAML and JSON structural and shorthand round trips.
+- [ ] Replace the Design-session grid boolean with the resolved authored size and let Studio edit `diagram.gridSize` as a reviewable, undoable model change.
+- [ ] Add an accessible compact grid-size control to the Design tools, preserving a quick way to choose `0` and restore the default.
+- [ ] Parameterise the editing-grid overlay, authored grid pattern, pointer placement, creation, and resize snapping from the resolved diagram grid instead of the fixed visual token.
 - [ ] Keep alignment-guide snapping independent and document how guides and a non-zero grid interact when both are enabled.
 - [ ] Keep keyboard nudging and numeric placement exact unless the Producer explicitly chooses a grid-stepped operation already covered by the editing contract.
-- [ ] Cover default, one-unit, custom, and zero-grid behaviour across move, resize, create, mode changes, zoom, and pan.
-- [ ] Update routing, placement, Design-session, and Producer guidance with the configurable-grid contract.
+- [ ] Cover omitted, one-unit, custom, and zero-grid behaviour across parse, serialise, move, resize, create, mode changes, zoom, pan, Canvas, and static SVG.
+- [ ] Update the canonical model, routing, placement, Design-session, appearance, and authoring guidance with the diagram-grid contract.
 
 ## Files touched
 
-- `packages/view-model/src/` for parameterised grid projection where framework-neutral calculation is needed
+- `packages/domain-model/src/` for the canonical Diagram field
+- `packages/domain-core/src/` for validation, defaulting, ordering, and serialisation
+- `packages/view-model/src/` for resolved grid projection
 - `packages/view-canvas/src/InfoschematicDiagram.tsx` and focused Canvas tests
-- `packages/view-studio/src/app/editor/` for Design-session state and controls
+- `packages/view-studio/src/app/editor/` for authored Design controls and draft history
+- `packages/render-svg/src/` for authored grid rendering parity
+- `docs/specs/domain-model.md`
 - `docs/specs/routing-and-placement.md`
 - `docs/specs/design-editing.md`
-- affected Producer guidance under `docs/guides/`
+- `docs/specs/appearance.md`
+- affected authoring and Producer guidance under `docs/guides/`
 
 ## Verify
 
-Run focused View Model, Canvas, and Studio tests plus `bun run self:check`. In a browser fixture, confirm a fresh Design session uses ten-unit snapping, `1` permits unit placement, a custom increment is reflected by both overlay and pointer operations, `0` removes the editing grid and grid rounding, guide snapping remains independently controllable, and no setting changes authored YAML.
+Run focused Domain Core, View Model, Canvas, Studio, and static-renderer tests plus `bun run self:check`. Prove omitted YAML normalises to `10` without serialising boilerplate, `1` permits unit placement, a custom value drives editing and rendered grid geometry, and `0` disables grid rendering and grid rounding while guide snapping remains independently controllable. Confirm a Studio grid-size edit appears in its reviewable YAML change and undo restores the previous value.
 
 ## Dependencies / blocks
 
@@ -61,15 +70,15 @@ No hard dependency is known. Coordinate its browser cases with [Design editing r
 
 ### Decision Records
 
-No new decision record is expected because this extends the existing diagram-coordinate editing-grid decision. Add one only if grid size becomes authored model data or changes ownership between View Model and Studio.
+Update the diagram-coordinate editing decision, or add a focused decision if none currently owns the distinction between authored grid geometry, appearance treatment, and Studio interaction.
 
 ### Specifications
 
-Update the routing and Design editing requirements to define default, minimum active value, disabled value, affected operations, guide interaction, and exact-placement exceptions.
+Update the canonical model, routing, Design editing, and appearance requirements to define field ownership, default, minimum active value, disabled value, affected operations, renderer behaviour, guide interaction, and exact-placement exceptions.
 
 ### Guides
 
-Explain how Producers choose coarse, fine, custom, or disabled grid snapping and distinguish the editing grid from authored Canvas appearance.
+Explain how authors declare coarse, fine, custom, or disabled grid geometry in YAML and how Producers change it through Studio.
 
 ### Roadmap
 
@@ -77,14 +86,14 @@ Keep general selection-layer behaviour in `INFOSCHEMATICS-TOOL-045` and existing
 
 ## Discussion
 
-### Scale independence
+### Authored geometry
 
-The increment is expressed in diagram coordinates. Authors who want finer relative placement can use a larger coordinate space, but they should not need to rescale a model merely to make an occasional off-ten placement.
+Grid size is a property of the diagram's coordinate lattice. Carrying it in canonical YAML makes the same geometry and editing behaviour portable across Studio instances and renderers.
+
+### Appearance and interaction
+
+An active grid size does not require a visible grid in every output. Appearance controls whether and how the lattice is drawn; Design uses the same authored size for its editing overlay and snapping. A size of zero suppresses both because no lattice exists to display or snap to.
 
 ### Zero and one
 
 Zero is the unambiguous disabled state. One is the finest active grid and preserves integer-coordinate determinism without pretending that no snapping is occurring.
-
-### Session ownership
-
-Grid size is an editing preference, not Diagram semantics. It belongs to transient Studio state unless a later host-preference contract deliberately supplies persistence outside the Infoschematic document.
