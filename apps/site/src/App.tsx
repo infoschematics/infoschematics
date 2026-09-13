@@ -22,7 +22,7 @@ export function App() {
               explorable view &mdash; precise enough for the engineer, clear enough to present to anyone.
             </p>
             <a className="hero__cta" href={docsIndexPath}>
-              Getting started <span aria-hidden="true">↗</span>
+              Overview <span aria-hidden="true">↗</span>
             </a>
           </div>
         </div>

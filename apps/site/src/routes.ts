@@ -31,8 +31,8 @@ const publishedDocuments = [
   {
     sourcePath: 'apps/site/content/getting-started.md',
     path: docsIndexPath,
-    title: 'Getting started',
-    summary: 'What an Infoschematic is, what it is made of, and how this guide is organised.',
+    title: 'Overview',
+    summary: 'Understand the core model, the available outcomes, and where to go next.',
     section: 'guide'
   },
   {

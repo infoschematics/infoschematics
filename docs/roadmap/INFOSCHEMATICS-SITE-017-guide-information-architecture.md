@@ -41,6 +41,7 @@ Site routes expose User guide, Reference, and Design sections. The visual guide 
 - [x] Rename Visual guide to Components, give it the standard documentation-page treatment, and preserve the old route as a compatibility alias.
 - [x] Separate Getting started, Installation, and Components from the pages about authoring, views, rendering, and integration.
 - [x] Remove the `Vocabulary:` lead-in from each Approach page while retaining useful terminology links in the opening prose.
+- [x] Rename Getting started to Overview and reshape it around the core idea, available outcomes, a simple workflow, and goal-based next steps.
 
 ## Files touched
 
@@ -98,6 +99,7 @@ From baseline `d843d88d50c4ddcb0f09172042051dc97368a00b`, commit `021f4863` esta
 - Expanded the active page's headings in the left sidebar and removed the duplicate right-hand contents column.
 - Renamed Visual guide to Components, normalised its layout, and separated the introductory User guide from the Use Infoschematics section.
 - Reworked Approach introductions so terminology links read naturally rather than appearing as `Vocabulary:` labels.
+- Replaced the page-by-page Getting started tour with an Overview that explains the model first and routes readers according to what they want to achieve.
 
 ### Verification
 

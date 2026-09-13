@@ -32,10 +32,10 @@ describe('website routes', () => {
     expect(page).not.toContain('system-card')
     expect(page).not.toContain('flow-connector')
     expect(page).toContain(`href="${docsIndexPath}"`)
-    expect(page).toContain('Getting started')
+    expect(page).toContain('Overview')
     expect(page).toContain('Structure — components')
     expect(page).toContain('Presentation — authoring')
-    expect(page).toContain('Infoschematic — getting started')
+    expect(page).toContain('Infoschematic — overview')
     expect(page).toContain('Rendered — static rendering')
     expect(page).toContain('Presented — present view')
     expect(page).toContain('href="/playground/"')
@@ -72,7 +72,7 @@ describe('website routes', () => {
 
   it('separates introductory guidance from ways to use Infoschematics', () => {
     expect(documentationRoutes.filter((route) => route.section === 'guide').map((route) => route.title)).toEqual([
-      'Getting started',
+      'Overview',
       'Installation'
     ])
     expect(documentationRoutes.filter((route) => route.section === 'usage').map((route) => route.title)).toEqual([

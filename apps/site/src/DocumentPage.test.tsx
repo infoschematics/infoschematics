@@ -37,7 +37,7 @@ describe('documentation pages', () => {
 
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
     const titles = [
-      'Getting started',
+      'Overview',
       'Installation',
       'Components',
       'Authoring',

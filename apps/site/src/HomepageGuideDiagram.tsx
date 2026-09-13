@@ -6,7 +6,7 @@ type HomepageGuideAction = InlineSvgAction & Readonly<{ href: string }>
 export const homepageGuideActions = [
   { href: '/docs/components/#anatomy', id: 'STR-01', kind: 'card', label: 'Structure — components' },
   { href: '/docs/authoring/#add-presentation-material', id: 'PRS-02', kind: 'card', label: 'Presentation — authoring' },
-  { href: '/docs/', id: 'INFO-03', kind: 'card', label: 'Infoschematic — getting started' },
+  { href: '/docs/', id: 'INFO-03', kind: 'card', label: 'Infoschematic — overview' },
   { href: '/docs/static-rendering/', id: 'OUT-04', kind: 'card', label: 'Rendered — static rendering' },
   { href: '/docs/present/', id: 'OUT-05', kind: 'card', label: 'Presented — present view' }
 ] as const satisfies readonly HomepageGuideAction[]

@@ -1,44 +1,45 @@
-# Getting started
+# Overview
 
-An Infoschematic combines a structural diagram with the information needed to explain, tailor and present it. It shows what exists, how the parts relate and what moves between them, then lets one authored definition serve a still document, an interactive exploration, an audience presentation or a Studio session.
+An Infoschematic brings a system's structure and the explanation around it into one portable definition. The same definition can become a still SVG, an interactive view, a guided presentation, or an editable Studio workspace.
 
-## What goes into an Infoschematic
+## The basic idea
 
-The diagram is built from visible artefacts:
+Most diagrams show boxes and arrows. An Infoschematic also records how the diagram should be explored and explained, so the picture, presentation material, and interactive behaviour stay connected.
 
-- **Regions** establish labelled geography behind the composition.
-- **Fabrics** provide connectable planes or backdrops.
-- **Cards** show placed components with identity and meaning.
-- **Flows** connect artefacts with authored direction and routes.
-- **Points** mark labelled junctions or anchors.
-- **Graphics** add renderer-selected explanatory material.
+The definition has two complementary parts:
 
-The same definition also carries Scopes, Scenes, Themes, Stories and Callouts. These tailor what an audience sees and how an explanation unfolds without moving the underlying diagram.
+- **The diagram** describes the visible structure using Regions, Fabrics, Cards, Flows, Points, and Graphics.
+- **The explanation** uses Scopes, Scenes, Themes, Stories, and Callouts to tailor what an audience sees and how a guided narrative unfolds.
 
 The [Components guide](/docs/components/) shows these parts together before you need to learn their exact schema names.
 
-## From definition to output
+## One definition, several outcomes
 
-One serialisable definition moves through four layers:
+Start with only the parts you need. You can use the same definition to:
 
-1. **Domain Model** defines the plain-data product contract and stable renderer keys.
-2. **Domain Core** normalises TypeScript, JSON or YAML input and validates it against the published schema.
-3. **View Model** derives geometry, routes, ports, focus and editing calculations without choosing a UI framework.
-4. **Views and renderers** turn the result into Canvas, Present, Studio or deterministic SVG output.
+- experiment in the [Playground](/playground/) without installing anything;
+- produce deterministic SVG for documents, websites, and build pipelines;
+- let people explore the diagram interactively in Canvas;
+- guide an audience through Scenes and Stories in Present;
+- design the diagram and its presentation material in Studio.
 
-Your host application chooses the surface and supplies any runtime renderers. The authored definition never contains React components, browser state or callbacks.
+Changing the way you use an Infoschematic does not require you to rewrite its underlying information.
 
-## Follow the guide
+## A simple workflow
 
-Each step has one job:
+1. **Describe the system** — add the places, components, connections, and supporting graphics that make up the diagram.
+2. **Add the explanation** — define the scopes, moments, themes, or story needed for a particular audience.
+3. **Choose the experience** — render a still document, mount an interactive view, present a guided explanation, or continue editing in Studio.
 
-1. **Getting started** — understand the overall model and choose a route through the guide.
-2. [Installation](/docs/installation/) — choose a hosted no-install workflow or the smallest local package for the output you need.
-3. [Components](/docs/components/) — see the anatomy, groupings, treatments and presentation concepts.
-4. [Authoring](/docs/authoring/) — write a complete definition in TypeScript, YAML or JSON.
-5. [Present](/docs/present/) — guide an audience with filtering, focus and Story playback.
-6. [Studio](/docs/studio/) — design the diagram and direct its presentation material.
-7. [Static rendering](/docs/static-rendering/) — create deterministic SVG for documents and pipelines.
-8. [React integration](/docs/react-integration/) — mount Canvas, Present or Studio in a host application.
+## Choose your next step
 
-Try the [Playground](/playground/) when you want to inspect and edit a complete definition. Use the [canonical terminology](/docs/reference/vocabulary/) when you need exact contract language rather than a guided introduction.
+- **I want to try it first** — open the [Playground](/playground/).
+- **I want to understand the visual parts** — continue to [Components](/docs/components/).
+- **I want to add it to a project** — choose a route in [Installation](/docs/installation/).
+- **I want to write a definition** — follow the [Authoring guide](/docs/authoring/).
+- **I need a still image** — use [Static rendering](/docs/static-rendering/).
+- **I need an interactive site** — follow [React integration](/docs/react-integration/).
+- **I want to guide an audience** — learn about [Present view](/docs/present/).
+- **I want a structured editor** — learn about [Studio view](/docs/studio/).
+
+When you need the precise contract language behind a concept, use the [canonical terminology](/docs/reference/vocabulary/).

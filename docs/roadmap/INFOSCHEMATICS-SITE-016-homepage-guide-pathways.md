@@ -30,7 +30,7 @@ The hero ends with descriptive text before a data-URI SVG image. Neither the led
 
 ## Steps
 
-- [x] Add a clear “Getting started” call to action beneath the homepage lede.
+- [x] Add a clear “Overview” call to action beneath the homepage lede.
 - [x] Replace the inert homepage image with the supported Site-owned inline SVG host from `INFOSCHEMATICS-TOOL-038`.
 - [x] Map `STR-01`, `PRS-02`, `INFO-03`, `OUT-04`, and `OUT-05` to stable guide destinations owned by `INFOSCHEMATICS-SITE-017`.
 - [x] Provide focusable, named keyboard equivalents for every pointer-activated artefact pathway.
