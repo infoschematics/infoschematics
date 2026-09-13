@@ -5,7 +5,7 @@ title: Playground example presets
 theme: site-experience
 horizon: next
 status: awaiting-review
-blocks: [INFOSCHEMATICS-SITE-019]
+blocks: []
 blocked_by: []
 baseline_ref: 021f4863a5f603d264d48863bff6c5cf2818edb3
 ---

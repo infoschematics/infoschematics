@@ -6,7 +6,7 @@ theme: site-experience
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-SITE-018, INFOSCHEMATICS-TOOL-043]
+blocked_by: [INFOSCHEMATICS-TOOL-043]
 baseline_ref: null
 ---
 
@@ -51,7 +51,7 @@ Run focused Playground and Studio integration tests, `bun run --cwd apps/site bu
 
 ## Dependencies / blocks
 
-`INFOSCHEMATICS-SITE-018` must establish the curated preset contract and compatibility routes. `INFOSCHEMATICS-TOOL-043` must provide the reusable Studio source panel. The Site should consume those capabilities rather than reimplement them.
+`INFOSCHEMATICS-SITE-018` has established the curated preset contract and compatibility routes. `INFOSCHEMATICS-TOOL-043` remains the sole build-order dependency and must provide the reusable Studio source panel. The Site should consume that capability rather than reimplement it.
 
 ## Documentation impact
 
