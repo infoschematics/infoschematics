@@ -98,7 +98,7 @@ None. Compatibility is implemented as client-side canonicalisation inside the st
 
 ### Post-change review
 
-The public journey now leads with adoption and practical use while canonical repository documents remain the source of truth. Stable destinations required by `INFOSCHEMATICS-SITE-016` are available, and the item is ready for acceptance review.
+The public journey now leads with adoption and practical use while canonical repository documents remain the source of truth. Stable destinations required by `INFOSCHEMATICS-SITE-016` are available, and the item is ready for acceptance review. Incorporating human review feedback, Installation now explains the distinct ways to use Infoschematics before showing package commands: the hosted no-install Playground, creating an authored definition, deterministic static rendering, and interactive Canvas, Present, or Studio use. A focused document assertion keeps this order and the hosted create/edit/copy outcome visible.
 
 ### Mini recap
 

@@ -14,7 +14,7 @@ baseline_ref: null
 
 ## Goal
 
-Turn the Playground into a focused host for the real Studio experience so visitors can explore presets, edit visually or in source, and copy their work without learning a separate editor.
+Turn the Playground into a focused host for the real Studio experience so visitors can explore presets, edit visually or in source, and copy their work without learning a separate editor. The hosted, no-install editor is a first-class outcome: creating, editing, and copying must work in the browser without local packages.
 
 ## Context
 
@@ -26,11 +26,11 @@ This item does not add server persistence, accounts, collaboration, filesystem a
 
 ## Current state
 
-Playground parses YAML locally, renders static SVG into an image, and owns preset replacement and validation feedback. Studio is demonstrated elsewhere, while its future source panel and the curated preset set have not yet landed.
+Playground already provides a hosted, no-install source-editing path: it parses YAML locally, renders static SVG into an image, and owns preset replacement and validation feedback. Studio is demonstrated elsewhere, while its future source panel and the curated preset set have not yet landed. The remaining work is to make that editor experience Studio-backed and provide an explicit way to copy the authored source.
 
 ## Steps
 
-- [ ] Replace the bespoke Playground editor with a Site host around the supported Studio and source-panel APIs.
+- [ ] Replace the bespoke Playground editor with a Site host around the supported Studio and source-panel APIs, preserving a first-class no-install browser path for create, edit, and copy.
 - [ ] Load the three curated presets from `INFOSCHEMATICS-SITE-018` as complete authored documents.
 - [ ] Preserve copy, source replacement, validation feedback, and reset-to-preset behaviour through Studio-owned contracts.
 - [ ] Keep routing, page metadata, responsive layout, and any browser persistence Site-owned.

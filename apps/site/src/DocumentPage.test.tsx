@@ -52,6 +52,23 @@ describe('documentation pages', () => {
     expect(positions).toEqual([...positions].sort((left, right) => left - right))
   })
 
+  it('explains hosted and local ways to use Infoschematics before package setup', () => {
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/installation.md')
+    if (!route) throw new Error('The installation documentation route is missing.')
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+    const hosted = page.indexOf('Hosted editor (no install)')
+    const packages = page.indexOf('Install a published package')
+
+    expect(hosted).toBeGreaterThanOrEqual(0)
+    expect(page).toContain('create, edit, and copy an Infoschematic in your browser')
+    expect(page).toContain('@infoschematics/render-svg')
+    expect(page).toContain('@infoschematics/view-canvas')
+    expect(page).toContain('@infoschematics/view-present')
+    expect(page).toContain('@infoschematics/view-studio')
+    expect(packages).toBeGreaterThan(hosted)
+  })
+
   it('gives headings anchor ids and lists them in the page contents', () => {
     const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 

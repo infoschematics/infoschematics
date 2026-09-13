@@ -39,7 +39,7 @@ const publishedDocuments = [
     sourcePath: 'apps/site/content/installation.md',
     path: installationPath,
     title: 'Installation',
-    summary: 'Choose and install the packages needed for static, interactive or authoring use.',
+    summary: 'Choose a hosted no-install workflow or the packages needed for static and interactive use.',
     section: 'guide'
   },
   {
