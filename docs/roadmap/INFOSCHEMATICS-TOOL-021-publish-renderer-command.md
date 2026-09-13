@@ -4,7 +4,7 @@ area: TOOL
 title: Publish renderer command
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f8c2fd38a659797573432ae6b187808eee875823
@@ -97,6 +97,10 @@ The implementation keeps filesystem and process concerns out of Domain Core and 
 ### Mini recap
 
 External callers can now install one thin command package and render canonical YAML or JSON to SVG without cloning the monorepo or writing a host. The same canonical parser and static renderer remain the only model and rendering paths.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

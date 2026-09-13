@@ -4,7 +4,7 @@ area: SITE
 title: Homepage guide pathways
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
@@ -100,6 +100,10 @@ The goal is met without changing the authored definition or renderer contract. T
 ### Mini recap
 
 Homepage visitors now have a direct Getting started CTA plus five interactive diagram pathways with keyboard-equivalent named controls. Focused checks, rendered inspection, the production Site build, and the full repository gate pass; no follow-up concern was found.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

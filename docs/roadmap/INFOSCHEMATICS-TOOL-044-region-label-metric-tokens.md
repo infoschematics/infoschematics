@@ -4,7 +4,7 @@ area: TOOL
 title: Region label tokens
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: c5d86818b7f2de7f49e42521f6fa1b8fe0a5488a
@@ -97,6 +97,10 @@ The token manifest is now the single source for the four values. View Model stil
 ### Mini recap
 
 Region label metrics are named, shared, generated, and tested. The refactor changes ownership, not pixels.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: SITE
 title: Guide information architecture
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: d843d88d50c4ddcb0f09172042051dc97368a00b
@@ -116,6 +116,10 @@ The public journey now leads with adoption and practical use while canonical rep
 ### Mini recap
 
 The Site now offers one progressive user guide and a rationale-oriented Approach section. No additional documentation migration is required for this item.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

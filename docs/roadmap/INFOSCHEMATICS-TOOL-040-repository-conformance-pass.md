@@ -4,7 +4,7 @@ area: TOOL
 title: Repository conformance pass
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 7646468507d3bc10e80b414a8f1d5661d7a82346
@@ -95,6 +95,10 @@ The repository configuration now matches actual root-script dependencies and man
 ### Mini recap
 
 All 18 configured Knowledge Islands skills resolve and pass. Five paths received bounded mechanical corrections, and no material follow-on finding was hidden or improvised.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

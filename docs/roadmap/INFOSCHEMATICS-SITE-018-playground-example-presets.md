@@ -4,7 +4,7 @@ area: SITE
 title: Playground example presets
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 021f4863a5f603d264d48863bff6c5cf2818edb3
@@ -103,6 +103,10 @@ The implementation leaves independently authored examples reusable, removes only
 ### Mini recap
 
 Examples are now Playground presets rather than a competing public section. The next Playground change can build on exactly three complete authored documents.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

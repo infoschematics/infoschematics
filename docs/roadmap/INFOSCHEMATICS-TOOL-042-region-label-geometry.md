@@ -4,7 +4,7 @@ area: TOOL
 title: Region label geometry
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6f53607ff64f6a088271ea652829e9a2b9d18828
@@ -98,6 +98,10 @@ The selected contract keeps View Model framework-neutral and prevents Canvas and
 ### Mini recap
 
 Region label geometry remains deterministic. Four existing measurements become shared tokens in the follow-on, while all calculated and rendered output stays fixed.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

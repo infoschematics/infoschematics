@@ -4,7 +4,7 @@ area: SITE
 title: Homepage preview spacing
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 9922258aaeb2351e60b34b2f3912687988e7aabd
@@ -95,6 +95,10 @@ The change remains within the homepage outlet, leaves the accepted 1268 by 408 a
 ### Mini recap
 
 The homepage preview now has enough space for its input and output framing to read clearly at desktop and narrow widths. No renderer-level defect or follow-up was found.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

@@ -4,7 +4,7 @@ area: TOOL
 title: Region extent decision
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 769a539773045bffa518e57ee4b4f9782e82c09e
@@ -96,6 +96,10 @@ The result meets the goal with no runtime or migration risk. It answers ownershi
 ### Mini recap
 
 Region geometry remains explicit and independent. Programmatic examples may share constants before model construction, while canonical documents and editor outputs always contain complete bounds.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

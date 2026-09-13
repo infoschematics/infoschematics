@@ -4,7 +4,7 @@ area: TOOL
 title: Region surface treatments
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 763e5ae42c8422deefaf74d724357579bdf8ffb5
@@ -93,6 +93,10 @@ The result establishes a deterministic cross-renderer surface contract without a
 ### Mini recap
 
 The diagram surface is the background, its grid sits above it, Regions follow in authored order, and ordinary diagram elements follow Regions. The existing serialisable Region treatment vocabulary is sufficient.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 

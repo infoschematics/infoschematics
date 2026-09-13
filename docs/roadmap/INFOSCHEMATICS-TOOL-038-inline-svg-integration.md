@@ -4,7 +4,7 @@ area: TOOL
 title: Inline SVG integration
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 7646468507d3bc10e80b414a8f1d5661d7a82346
@@ -101,6 +101,10 @@ The implementation meets the goal without moving interaction state into authored
 ### Mini recap
 
 Hosts can now choose inert images or inspectable same-document SVG, resolve only the supported outer identity hook, pair actions with accessible external controls, and clean up safely. The next planned consumer is `INFOSCHEMATICS-SITE-016`; no separate learning or remedial roadmap item is required unless review finds browser-specific behaviour not represented by the focused tests.
+
+## Done
+
+Accepted 2026-09-13 by the project owner on the review packet above.
 
 ## Discussion
 
