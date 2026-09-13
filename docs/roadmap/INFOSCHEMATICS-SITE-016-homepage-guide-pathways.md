@@ -4,10 +4,10 @@ area: SITE
 title: Homepage guide pathways
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
 ---
 
 # Homepage guide pathways
@@ -30,11 +30,11 @@ The hero ends with descriptive text before a data-URI SVG image. Neither the led
 
 ## Steps
 
-- [ ] Add a clear “Getting started” call to action beneath the homepage lede.
-- [ ] Replace the inert homepage image with the supported Site-owned inline SVG host from `INFOSCHEMATICS-TOOL-038`.
-- [ ] Map `STR-01`, `PRS-02`, `INFO-03`, `OUT-04`, and `OUT-05` to stable guide destinations owned by `INFOSCHEMATICS-SITE-017`.
-- [ ] Provide focusable, named keyboard equivalents for every pointer-activated artefact pathway.
-- [ ] Preserve the existing visual treatment and verify the pathways across desktop and narrow layouts.
+- [x] Add a clear “Getting started” call to action beneath the homepage lede.
+- [x] Replace the inert homepage image with the supported Site-owned inline SVG host from `INFOSCHEMATICS-TOOL-038`.
+- [x] Map `STR-01`, `PRS-02`, `INFO-03`, `OUT-04`, and `OUT-05` to stable guide destinations owned by `INFOSCHEMATICS-SITE-017`.
+- [x] Provide focusable, named keyboard equivalents for every pointer-activated artefact pathway.
+- [x] Preserve the existing visual treatment and verify the pathways across desktop and narrow layouts.
 
 ## Files touched
 
@@ -74,6 +74,32 @@ Use only stable destinations established by the guide information architecture; 
 ### Roadmap
 
 Keep future homepage storytelling changes separate from the reusable inline-SVG integration work.
+
+## Review
+
+### Delivered
+
+From baseline `6e2c957ac37f4349d3e70bc213d17ea777fde986`, the approved homepage pathway work is implemented within Site-owned scope. `apps/site/src/App.tsx` now places a Getting started CTA beneath the hero lede and replaces the data-URI image with the committed `InlineSvgReference` host. `apps/site/src/HomepageGuideDiagram.tsx` maps all five authored card identities to the locked guide destinations and routes pointer activation through named host controls. `apps/site/src/styles.css` preserves the blueprint preview mask and adds responsive CTA/control treatment with visible focus states. `apps/site/src/App.test.tsx` now covers inline SVG output, all five identities, CTA, and named controls. Renderer, generic inline host, authored Infoschematic data, non-Site roadmap items, and non-Site files were not changed by this implementation.
+
+### Summary of changes
+
+Added `HomepageGuideDiagram`, using `resourceIdPrefix="homepage"` to consume the safe inline renderer result and the host-owned action boundary. The locked destinations are Structure → `/docs/visual-guide/#anatomy`, Presentation → `/docs/authoring/#add-presentation-material`, Infoschematic → `/docs/`, Rendered → `/docs/static-rendering/`, and Presented → `/docs/present/`. Each destination has a visible native button supplied by `InlineSvgReference`, so keyboard users have an equivalent named control; pointer activation of each matching outer SVG artefact invokes the same route callback. No approved deviation was required.
+
+### Verification
+
+`bunx biome check apps/site/src/App.tsx apps/site/src/App.test.tsx apps/site/src/HomepageGuideDiagram.tsx apps/site/src/styles.css` passed. `bunx tsc --noEmit -p apps/site` passed. `bunx vitest run apps/site/src/App.test.tsx apps/site/src/InlineSvgReference.test.tsx` passed with 2 files and 26 tests. `bun run --cwd apps/site build` passed. Chromium inspection at 1440 by 1000 and through a true 390 by 844 device-metric override confirmed the CTA placement, proportional faded diagram, wrapped controls, visible focusable button semantics, and `scrollWidth` equal to the 390-pixel viewport. A delegated SVG click reached `/docs/static-rendering/`, the Presented control reached `/docs/present/`, and pointer entry and exit updated and cleared the polite status. `bun run self:check` was run but currently stops at the other agent's uncommitted Canvas browser test, whose pointer-path expectation fails; its incomplete fixture also prevents the repository-wide TypeScript phase from completing.
+
+### Outstanding concerns
+
+The Site implementation has no known concern, but the required full repository gate is not green while the concurrent non-Site browser-test work remains incomplete. Visual verification used temporary ports 4317 and 9322, which were stopped immediately afterward; ports 4173, 4317, and 9322 were confirmed free.
+
+### Post-change review
+
+The goal is met without changing the authored definition or renderer contract. The inline SVG remains the generated 1268 × 408 blueprint treatment and keeps the accepted vertical spacing and fade. Navigation is Site-owned, limited to the five authorised identities, paired with visible native controls and global focus styling, and has been exercised in Chromium at desktop and narrow widths. The item remains in progress until the required repository gate can complete after the concurrent non-Site work settles.
+
+### Mini recap
+
+Homepage visitors now have a direct Getting started CTA plus five interactive diagram pathways with keyboard-equivalent named controls. Focused checks, rendered inspection, and the production Site build pass; only the out-of-scope concurrent repository-gate failure remains before review.
 
 ## Discussion
 

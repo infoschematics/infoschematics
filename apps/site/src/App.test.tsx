@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
+import { homepageGuideActions } from './HomepageGuideDiagram.tsx'
 import {
   canonicalSiteLocation,
   canonicalSitePath,
@@ -18,20 +19,25 @@ describe('website routes', () => {
     const page = renderToStaticMarkup(<App />)
 
     expect(page).toContain('See how it')
-    expect(page).toContain('rendered through shared SVG output')
-    expect(page).toContain('src="data:image/svg+xml;charset=utf-8,%3Csvg')
-    expect(page).toContain('viewBox%3D%220%200%201268%20408%22')
-    expect(page).toContain('%3ESTR-01%3C')
-    expect(page).toContain('%3ESHAPE%3C')
-    expect(page).toContain('%3EDIRECT%3C')
-    expect(page).toContain('%3ERENDER%3C')
-    expect(page).toContain('%3EPRESENT%3C')
+    expect(page).toContain('<section aria-label="Inline Infoschematic reference">')
+    expect(page).toContain('<svg xmlns="http://www.w3.org/2000/svg"')
+    expect(page).toContain('viewBox="0 0 1268 408"')
+    for (const id of ['STR-01', 'PRS-02', 'INFO-03', 'OUT-04', 'OUT-05']) {
+      expect(page).toContain(`data-artefact-id="${id}" data-artefact-kind="card"`)
+    }
+    expect(page).not.toContain('data:image/svg+xml')
     expect(page).not.toContain('comparison-lane')
     expect(page).not.toContain('data-treatment')
     expect(page).not.toContain('Bespoke homepage treatment')
     expect(page).not.toContain('system-card')
     expect(page).not.toContain('flow-connector')
     expect(page).toContain(`href="${docsIndexPath}"`)
+    expect(page).toContain('Getting started')
+    expect(page).toContain('Structure — visual guide')
+    expect(page).toContain('Presentation — authoring')
+    expect(page).toContain('Infoschematic — getting started')
+    expect(page).toContain('Rendered — static rendering')
+    expect(page).toContain('Presented — present view')
     expect(page).toContain('href="/playground/"')
     expect(page).not.toContain('href="/examples/"')
   })
@@ -41,6 +47,16 @@ describe('website routes', () => {
     expect(siteStyles.match(/linear-gradient\(to bottom, transparent, #000 3%, #000 97%, transparent\)/g)).toHaveLength(
       2
     )
+  })
+
+  it('keeps homepage artefact pathways on the approved guide destinations', () => {
+    expect(homepageGuideActions.map(({ id, href }) => ({ href, id }))).toEqual([
+      { href: '/docs/visual-guide/#anatomy', id: 'STR-01' },
+      { href: '/docs/authoring/#add-presentation-material', id: 'PRS-02' },
+      { href: '/docs/', id: 'INFO-03' },
+      { href: '/docs/static-rendering/', id: 'OUT-04' },
+      { href: '/docs/present/', id: 'OUT-05' }
+    ])
   })
 
   it.each(documentationRoutes)('resolves $path with or without a trailing slash', (route) => {
