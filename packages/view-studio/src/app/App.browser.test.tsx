@@ -1,4 +1,5 @@
 import { defineInfoschematic, parseInfoschematicDocument } from '@infoschematics/domain-core'
+import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
@@ -176,7 +177,10 @@ sequences:
 `)
   if (!parsed.ok) throw new Error('hosted Sequence fixture should parse')
   const changed = vi.fn()
-  const { container } = await render(<Studio document={parsed.document} onDocumentChange={changed} />)
+  const replaced = vi.fn()
+  const { container } = await render(
+    <Studio document={parsed.document} onDocumentChange={changed} onDocumentReplace={replaced} />
+  )
   const direct = container.querySelector<HTMLButtonElement>('button[aria-label^="Direct"]')
   if (!direct) throw new Error('Studio has no Direct mode control')
   direct.click()
@@ -201,4 +205,108 @@ sequences:
     { id: 'SCN-01' },
     { field: 'label' }
   ])
+
+  const sourceTab = [...container.querySelectorAll<HTMLButtonElement>('.panel-tabs button')].find(
+    (button) => button.textContent?.trim() === 'Source'
+  )
+  if (!sourceTab) throw new Error('Direct mode did not retain the Source tab')
+  sourceTab.click()
+  await expect
+    .poll(() => container.querySelector<HTMLTextAreaElement>('.source-panel textarea')?.value ?? '')
+    .toContain('label: Edited opening')
+})
+
+test('Studio source panel validates, replaces, copies, undoes and redoes one retained document', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`# retained heading
+id: SOURCE
+title: Initial source
+diagram:
+  bounds: 0 0 640 320
+`)
+  if (!parsed.ok) throw new Error('source panel fixture should parse')
+  const initialDocument = parsed.document
+  const replacements = vi.fn()
+  const copied = vi.fn(async () => undefined)
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: copied } })
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return (
+      <Studio
+        document={document}
+        onDocumentChange={(change) => setDocument(change.document)}
+        onDocumentReplace={(replacement) => {
+          replacements(replacement)
+          setDocument(replacement.document)
+        }}
+      />
+    )
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const sourceTab = [...container.querySelectorAll<HTMLButtonElement>('.panel-tabs button')].find(
+    (button) => button.textContent?.trim() === 'Source'
+  )
+  if (!sourceTab) throw new Error('Studio did not render Source tab for an authored document')
+  sourceTab.click()
+
+  await expect.poll(() => container.querySelector('.source-panel textarea')).not.toBeNull()
+  const source = container.querySelector<HTMLTextAreaElement>('.source-panel textarea')
+  if (!source) throw new Error('Studio did not render YAML source editor')
+  expect(source.value).toContain('# retained heading')
+  const setTextAreaValue = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
+  if (!setTextAreaValue) throw new Error('browser has no native textarea value setter')
+
+  setTextAreaValue.call(
+    source,
+    `id: SOURCE
+title: Invalid source
+diagram:
+  bounds: no
+`
+  )
+  source.dispatchEvent(new Event('input', { bubbles: true }))
+  const apply = [...container.querySelectorAll<HTMLButtonElement>('.source-panel button')].find(
+    (button) => button.textContent?.trim() === 'Apply source'
+  )
+  if (!apply) throw new Error('Studio did not render source apply action')
+  apply.click()
+  await expect.poll(() => container.querySelector('[role="alert"]')?.textContent ?? '').toContain('not applied')
+  expect(container.querySelector('h1')?.textContent).toContain('Initial source')
+  expect(replacements).not.toHaveBeenCalled()
+
+  setTextAreaValue.call(
+    source,
+    `# retained replacement
+id: SOURCE
+title: Replaced source
+diagram:
+  bounds: 0 0 640 320
+`
+  )
+  source.dispatchEvent(new Event('input', { bubbles: true }))
+  apply.click()
+  await expect.poll(() => container.querySelector('h1')?.textContent ?? '').toContain('Replaced source')
+  expect(replacements).toHaveBeenCalledTimes(1)
+  expect(replacements.mock.calls[0]?.[0].source).toContain('# retained replacement')
+
+  const copy = [...container.querySelectorAll<HTMLButtonElement>('.source-panel button')].find(
+    (button) => button.textContent?.trim() === 'Copy YAML'
+  )
+  const undo = [...container.querySelectorAll<HTMLButtonElement>('.source-panel button')].find(
+    (button) => button.textContent?.trim() === 'Undo'
+  )
+  const redo = [...container.querySelectorAll<HTMLButtonElement>('.source-panel button')].find(
+    (button) => button.textContent?.trim() === 'Redo'
+  )
+  if (!copy || !undo || !redo) throw new Error('Studio did not render source copy and history actions')
+  copy.click()
+  await expect.poll(() => copied.mock.calls.length).toBe(1)
+  expect(copied).toHaveBeenCalledWith(expect.stringContaining('# retained replacement'))
+
+  undo.click()
+  await expect.poll(() => container.querySelector('h1')?.textContent ?? '').toContain('Initial source')
+  redo.click()
+  await expect.poll(() => container.querySelector('h1')?.textContent ?? '').toContain('Replaced source')
 })

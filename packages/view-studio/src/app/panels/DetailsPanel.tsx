@@ -17,6 +17,7 @@ import { ArtefactControls, type ArtefactControlsEditor } from '../editor/Artefac
 import { type ArtefactFactoryContext, createFactoryIdentityAllocator } from '../editor/artefact-factories.ts'
 import type { ArtefactPropertiesPatch } from '../editor/artefact-operations.ts'
 import { ChangePane } from '../editor/ChangePane.tsx'
+import type { StudioSourcePanelController } from '../editor/document-history.ts'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
 import { EditorTools } from '../editor/EditorTools.tsx'
 import {
@@ -44,6 +45,7 @@ import type { Presentation } from '../hooks/use-presentation.ts'
 import { useContractDetail } from './contracts.ts'
 import { InterfaceLines } from './InterfaceLines.tsx'
 import { ModelRegister } from './ModelRegister.tsx'
+import { SourcePanel } from './SourcePanel.tsx'
 import { SpecificationOverlay } from './SpecificationOverlay.tsx'
 import { SpecificationTree } from './SpecificationTree.tsx'
 import { SplitPane } from './SplitPane.tsx'
@@ -296,7 +298,8 @@ export function DetailsPanel({
   onCreateCard,
   onResetRoute,
   onSpecificationHover,
-  presentation
+  presentation,
+  sourcePanel
 }: {
   /** Supplied by the app, which is the only place that can issue a code and find room for a card. */
   onCreateCard: (kind: 'adapter' | 'card') => void
@@ -309,6 +312,7 @@ export function DetailsPanel({
   onAddWaypoint: () => void
   onResetRoute: () => void
   onSpecificationHover: (elements: readonly string[] | null) => void
+  sourcePanel?: StudioSourcePanelController
   editor: DetailsPanelEditor & {
     canRedo: boolean
     canUndo: boolean
@@ -363,6 +367,7 @@ export function DetailsPanel({
     config.id && `${config.id}.panel.tab.present`,
     'showing'
   )
+  const [sourceOpen, setSourceOpen] = useState(false)
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
   const directOptions = useMemo<readonly DirectOption[]>(() => {
     const standaloneScenes = scenes.library.map((scene) => ({
@@ -641,35 +646,50 @@ export function DetailsPanel({
         {(presentation.mode === 'present'
           ? ([
               ['showing', 'Info'],
-              ['specifications', 'Specifications']
+              ['specifications', 'Specifications'],
+              ...(sourcePanel ? ([['source', 'Source']] as const) : [])
             ] as const)
           : presentation.mode === 'design'
-            ? ([['design', 'Design']] as const)
-            : directKinds
+            ? ([['design', 'Design'], ...(sourcePanel ? ([['source', 'Source']] as const) : [])] as const)
+            : ([...directKinds, ...(sourcePanel ? ([['source', 'Source']] as const) : [])] as const)
         ).map(([id, label]) => (
           <button
             aria-selected={
-              presentation.mode === 'present'
-                ? presentTab === id
-                : presentation.mode === 'design'
-                  ? id === 'design'
-                  : directKind === id
+              id === 'source'
+                ? sourceOpen
+                : sourceOpen
+                  ? false
+                  : presentation.mode === 'present'
+                    ? presentTab === id
+                    : presentation.mode === 'design'
+                      ? id === 'design'
+                      : directKind === id
             }
             className={
-              presentation.mode === 'present'
-                ? presentTab === id
+              id === 'source'
+                ? sourceOpen
                   ? 'active'
                   : ''
-                : presentation.mode === 'design'
-                  ? 'active'
-                  : directKind === id
-                    ? 'active'
-                    : ''
+                : sourceOpen
+                  ? ''
+                  : presentation.mode === 'present'
+                    ? presentTab === id
+                      ? 'active'
+                      : ''
+                    : presentation.mode === 'design'
+                      ? 'active'
+                      : directKind === id
+                        ? 'active'
+                        : ''
             }
             key={id}
             onClick={() => {
-              if (id === 'showing' || id === 'specifications') setPresentTab(id)
-              else if (id !== 'design') chooseDirectKind(id)
+              if (id === 'source') setSourceOpen(true)
+              else {
+                setSourceOpen(false)
+                if (id === 'showing' || id === 'specifications') setPresentTab(id)
+                else if (id !== 'design') chooseDirectKind(id)
+              }
             }}
             role="tab"
             type="button"
@@ -679,7 +699,9 @@ export function DetailsPanel({
         ))}
       </div>
 
-      {presentation.mode !== 'present' ? (
+      {sourceOpen && sourcePanel ? (
+        <SourcePanel controller={sourcePanel} />
+      ) : presentation.mode !== 'present' ? (
         <div className="editor-tab">
           {/* The tab is a two-row grid. Direct mode adds a target chooser, so it
               joins the tools in one header row rather than claiming an implicit

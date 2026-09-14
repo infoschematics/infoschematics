@@ -29,6 +29,10 @@ export type { PresentProps } from '@infoschematics/view-present'
 export { Present } from '@infoschematics/view-present'
 export type { StudioProps } from './app/App.tsx'
 export { App, Studio } from './app/App.tsx'
+export type {
+  StudioDocumentReplacement,
+  StudioDocumentReplacementHandler
+} from './app/editor/document-history.ts'
 export {
   applyStudioDocumentOperations,
   isStudioDocumentAcknowledgement,

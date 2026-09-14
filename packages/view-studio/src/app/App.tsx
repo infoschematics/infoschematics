@@ -27,6 +27,7 @@ import {
 } from '@infoschematics/view-model/runtime'
 import type { PresentProps } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
 import {
   isStudioDocumentAcknowledgement,
   projectStudioDocumentOperations,
@@ -181,12 +182,15 @@ export type StudioProps = Omit<PresentProps, 'config'> &
   Readonly<{
     /** Receives validated edits and source; the host decides whether to persist. */
     onDocumentChange?: StudioDocumentChangeHandler
+    /** Receives a validated whole-document replacement selected in the source panel or its history. */
+    onDocumentReplace?: StudioDocumentReplacementHandler
   }>
 
 export function Studio({
   config,
   document: authoredDocument,
   onDocumentChange,
+  onDocumentReplace,
   renderers,
   responsiveCardDetails = false
 }: StudioProps) {
@@ -200,6 +204,7 @@ export function Studio({
         <AppContent
           authoredDocument={authoredDocument}
           onDocumentChange={onDocumentChange}
+          onDocumentReplace={onDocumentReplace}
           responsiveCardDetails={responsiveCardDetails}
         />
       </InfoschematicContext>
@@ -213,13 +218,16 @@ export const App = Studio
 function AppContent({
   authoredDocument,
   onDocumentChange,
+  onDocumentReplace,
   responsiveCardDetails
 }: {
   authoredDocument?: InfoschematicDocument
   onDocumentChange?: StudioDocumentChangeHandler
+  onDocumentReplace?: StudioDocumentReplacementHandler
   responsiveCardDetails: boolean
 }) {
   const runtime = useInfoschematic()
+  const documentTimeline = useDocumentTimeline(authoredDocument, onDocumentReplace)
   const {
     compatibilityConfig,
     flowsAfterCreations,
@@ -350,6 +358,7 @@ function AppContent({
         : undefined,
       source: applied.source
     }
+    documentTimeline.record(applied.document)
     onDocumentChange({ ...applied, edit: projection.edit })
   }, [
     authoredDocument,
@@ -358,6 +367,7 @@ function AppContent({
     editor.artefactOperations,
     editor.discardOne,
     editor.pending,
+    documentTimeline.record,
     onDocumentChange,
     presentationEdited,
     sceneLibrary.edited,
@@ -1098,6 +1108,7 @@ function AppContent({
             onSpecificationHover={setHoveredSpecification}
             onResetRoute={resetRoute}
             presentation={presentation}
+            sourcePanel={documentTimeline.panel}
           />
         </aside>
       </section>

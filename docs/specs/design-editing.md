@@ -233,3 +233,13 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers five artefact kinds, create, remove, reorder, geometry and property edits, collateral Scope membership, compact and structured Flows, comments, and accepted-document acknowledgement.
 
 _Evidence:_ `projectStudioDocumentOperations` in `packages/view-studio/src/app/editor/document-operations.ts` reads the retained source shape and emits granular `link`, `waypoints`, `labelAt`, or structured route operations as appropriate.
+
+### EDIT-022 — Structured and source edits share document history
+
+In document mode, Studio MUST present valid structured edits and whole-source replacements as one undoable and redoable retained-document timeline while leaving persistence and replacement acceptance to the host.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/document-history.test.ts` covers timeline branching and acknowledgement; `packages/view-studio/src/app/App.browser.test.tsx` covers source replacement, undo and redo through a host-controlled document.
+
+_Evidence:_ `useDocumentTimeline` records structured document results from `AppContent`, records validated Source-tab replacements, and emits prior or later validated documents through `onDocumentReplace`.

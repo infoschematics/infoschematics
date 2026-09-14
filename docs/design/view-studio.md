@@ -164,6 +164,12 @@ Removal planning and materialisation keep relationships safe. Applied Card remov
 
 Design renders complete authored content with the materialised draft layered into a derived runtime. Creates, movement, resize, property replacement, authored reordering and safe removal are visible before handoff without mutating the host configuration. Existing component-offset, route and waypoint drafts remain the final transient overlay. Present continues to resolve its active Sequence Overlay independently.
 
+## Source panel
+
+When a host supplies an opaque authored document, Studio adds Source as another panel view in Present, Design and Direct modes. The panel shows the exact retained YAML, allows copying, and holds invalid replacement text with addressed diagnostics while the diagram continues to use the last valid document.
+
+Structured document edits and validated whole-source replacements advance one session-local document timeline. Undo and redo select a validated document from that timeline and ask the host to accept it. Studio does not write files or resolve conflicts; the host feeds an accepted document back through the `document` prop.
+
 ## Session boundary
 
 Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. The `ProductionMode`, active Direct target, selection, presentation focus and playback are transient; reload always returns to Present with no active focus or running Sequence. Undo history can remain session-local even where drafts persist.

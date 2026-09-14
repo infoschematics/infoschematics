@@ -74,3 +74,15 @@ Studio derives structural and presentation selections from the canonical runtime
 Direct mode adapts canonical expanded and collapsed Sequences to its focused editor panels. Sequence and Scene changes return through field and stable-ID document paths, so changing one Scene label or focus does not replace the containing Sequence or the top-level presentation collection. Unexposed fields such as presentation switches, Scene visibility and Callout properties survive the edit.
 
 When the host supplies the emitted document as the new input, Studio discards only drafts represented by that accepted edit. YAML syntax trees remain inside Domain Core; View packages receive only the validated canonical model and document-edit results.
+
+To enable direct source replacement, also handle `onDocumentReplace`. Studio calls it only with a fully validated document:
+
+```tsx
+<Studio
+  document={document}
+  onDocumentChange={(change) => setDocument(change.document)}
+  onDocumentReplace={(replacement) => setDocument(replacement.document)}
+/>
+```
+
+The Source tab is then available in every Studio mode. Invalid YAML remains in the textarea with diagnostics and does not replace the rendered model. Valid replacements, structured edits, undo and redo share one session-local document history. Copy uses the browser clipboard; persistence remains a host responsibility.

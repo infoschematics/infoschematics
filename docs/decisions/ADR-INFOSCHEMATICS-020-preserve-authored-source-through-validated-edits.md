@@ -22,13 +22,13 @@ Domain Core retains authored YAML behind an opaque `InfoschematicDocument`. Publ
 
 Document changes use a versioned inert envelope containing `add`, `remove`, `replace`, and `move` operations. Paths contain field segments and stable-ID selectors; collection ordering uses stable before-or-after ID anchors. Domain Core applies a complete envelope to a cloned document, normalises edited `elements` sets, validates the full canonical result, and publishes nothing when any operation or reference is invalid.
 
-Every successful edit returns an inverse. The inverse carries a semantically verified source snapshot when exact concrete syntax is required to restore comments and scalar presentation. Studio may project its typed draft operations into this protocol and emit a validated result, but the host alone accepts, persists, and reconciles source.
+Every successful edit returns an inverse. The inverse carries a semantically verified source snapshot when exact concrete syntax is required to restore comments and scalar presentation. Studio may project its typed draft operations into this protocol and emit a validated result. Its Source panel may also parse a whole-document replacement and keep both forms of valid change in one session-local document timeline, but the host alone accepts, persists, and reconciles source.
 
 ## Consequences
 
 Untouched authored choices survive structured edits, undo can restore exact source, and change addresses remain stable across collection reordering. Runtimes and renderers continue to receive only canonical data. Studio adapts canonical Sequence categories into focused Direct editors and projects their changes as field or stable-ID member operations; it does not replace the complete presentation tree merely because an editor holds an ordered collection draft.
 
-Inverse envelopes may be larger than forward envelopes because exact restoration can require a source snapshot. Collaboration transport and merge policy remain separate concerns; this protocol defines deterministic local edits, not concurrent authority.
+Inverse envelopes may be larger than forward envelopes because exact restoration can require a source snapshot. Collaboration transport and merge policy remain separate concerns; this protocol defines deterministic local edits, not concurrent authority. Source-panel undo and redo select validated retained documents and request host acceptance rather than bypassing that authority.
 
 ## References
 

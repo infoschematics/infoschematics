@@ -163,3 +163,13 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers granular Sequence and Scene projection, comment retention, stable insertion, and idempotent reapplication; `App.browser.test.tsx` covers a canonical YAML Scene edit through Direct mode.
 
 _Evidence:_ `sequencesWithEditorDrafts` in `packages/view-studio/src/app/editor/sequence-editing.ts` retains unexposed canonical fields, while `sequenceOperations` in `document-operations.ts` emits field and stable-ID member operations.
+
+### AUTHOR-016 — Source replacement validates the whole document
+
+Studio MUST validate a source-panel replacement as a complete canonical Infoschematic before it can become the current retained document; an invalid draft MUST remain inspectable with addressed diagnostics while the last valid model remains active.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/App.browser.test.tsx` submits invalid and valid YAML through the Source tab and observes the rendered model and accessible error state.
+
+_Evidence:_ `useDocumentTimeline` in `packages/view-studio/src/app/editor/document-history.ts` parses replacements through Domain Core and invokes the host only for a validated document.
