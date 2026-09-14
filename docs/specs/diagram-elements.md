@@ -80,13 +80,13 @@ _Evidence:_ collections in `packages/domain-model/src/infoschematic.ts` and `pac
 
 An applied configuration change MUST NOT retain a Flow whose source or target artefact was removed. Removing a Card MUST also remove Adapter Cards that directly or transitively wrap it before dependent Flows are retained. Removing a Region MUST NOT cascade to any other artefact.
 
-A Overlay referenced directly by a Story Scene MUST either block the authored removal before application or clear the Story Scene reference atomically. Focus collections in Standalone Scenes, Thematic Scenes and Story Scenes MUST NOT retain the removed Overlay after an applied cleanup.
+An Overlay referenced directly by a Sequence Scene MUST either block the authored removal before application or clear the Sequence Scene reference atomically. Focus collections in Standalone Scenes and Sequence Scenes MUST NOT retain the removed Overlay after an applied cleanup.
 
 _Conformance:_ conforming
 
-_Verify:_ inspect relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`. against this requirement.
+_Verify:_ inspect relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/sequence.ts` against this requirement.
 
-_Evidence:_ relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`.
+_Evidence:_ relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/sequence.ts`.
 
 ### DIAGRAM-009 — Region bounds stay explicit
 

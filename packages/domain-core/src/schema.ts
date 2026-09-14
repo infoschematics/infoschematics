@@ -450,20 +450,15 @@ const sceneShape = {
   callout: callout.optional()
 }
 
-const scene = z.strictObject(sceneShape)
-
-const theme = z.strictObject({
+const sequence = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
-  scenes: z.array(scene).readonly()
-})
-
-const story = z.strictObject({
-  id: z.string(),
-  label: z.string(),
-  description: z.string().optional(),
-  question: z.string().optional(),
+  presentation: z.strictObject({
+    display: z.enum(['expanded', 'collapsed']),
+    timed: z.boolean(),
+    callouts: z.boolean()
+  }),
   scenes: z.array(z.strictObject({ ...sceneShape, duration: number.optional() })).readonly()
 })
 
@@ -530,8 +525,7 @@ export const infoschematicSchema = z.strictObject({
   diagram,
   scopes: z.array(architecturalScope).readonly().optional(),
   specifications: z.array(specificationGroup).readonly().optional(),
-  stories: z.array(story).readonly().optional(),
-  themes: z.array(theme).readonly().optional()
+  sequences: z.array(sequence).readonly().optional()
 })
 
 /** JSON Schema projected from the same runtime contract used by the YAML loader. */

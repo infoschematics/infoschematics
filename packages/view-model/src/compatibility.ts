@@ -4,8 +4,7 @@ import type {
   ElementSelection,
   InfoschematicConfig,
   InfoschematicInput,
-  JsonValue,
-  Scene
+  JsonValue
 } from '@infoschematics/domain-model'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import type { PortCounts } from '@infoschematics/domain-model/ports'
@@ -194,15 +193,6 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
     diagram.flows.map((flow) => [flow.id, { source: flow.source.element, target: flow.target.element }])
   )
   const overlayIds = new Set(diagram.overlays.map(({ id }) => id))
-  const sceneOf = (scene: Scene) => ({
-    callout: calloutOf(scene.callout)?.callout,
-    code: scene.id,
-    description: scene.description,
-    focus: focusOf(scene.focus ?? scene.visibility?.show, flowEndpoints, overlayIds, scopeElements),
-    id: scene.id,
-    label: scene.label
-  })
-
   return {
     calloutPositions: diagram.calloutPositions,
     id: model.id,
@@ -319,28 +309,27 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       viewBox: diagram.bounds
     },
     standaloneScenes: [],
-    stories: model.stories.map((story) => ({
-      code: story.id,
-      id: story.id,
-      question: story.question,
-      scenes: story.scenes.map((scene) => ({
+    sequences: (model.sequences ?? []).map((sequence) => ({
+      code: sequence.id,
+      description: sequence.description,
+      id: sequence.id,
+      label: sequence.label,
+      presentation: sequence.presentation,
+      scenes: sequence.scenes.map((scene) => ({
         ...calloutOf(scene.callout),
+        code: scene.id,
+        description: scene.description,
         duration: scene.duration,
         focus: focusOf(scene.focus ?? scene.visibility?.show, flowEndpoints, overlayIds, scopeElements),
         graphic: (scene.focus?.elements ?? []).find((id) => overlayIds.has(id)),
         id: scene.id,
-        title: scene.label
-      })),
-      title: story.label
+        label: scene.label
+      }))
     })),
+    stories: [],
     subtitle: model.subtitle,
     synopsis: model.description,
-    themes: model.themes.map((theme) => ({
-      description: theme.description,
-      id: theme.id,
-      scenes: theme.scenes.map(sceneOf),
-      title: theme.label
-    })),
+    themes: [],
     title: model.title
   }
 }

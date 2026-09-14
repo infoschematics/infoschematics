@@ -1,7 +1,9 @@
 import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/domain-model'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
+import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
+import type { SequenceConfig, SequencePresentationConfig } from '@infoschematics/domain-model/sequence'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
 import type { ThematicSceneConfig } from '@infoschematics/domain-model/theme'
 import { adapterBoundsFor, adapterFloor } from './assembly.ts'
@@ -86,6 +88,37 @@ export type RuntimeThemeScene = Omit<ThematicSceneConfig, 'callout' | 'descripti
   callout?: Point
 }
 
+export type RuntimeSequenceScene = {
+  id: string
+  code: string
+  label: string
+  description: string
+  caption: string
+  headline: string
+  hold: number
+  components: readonly string[]
+  flows: readonly string[]
+  graphic?: GraphicConfig
+  callout?: Point
+  calloutConfig?: CalloutConfig
+  takeaways?: readonly string[]
+  profile?: readonly string[]
+  cover?: true
+  logo?: string
+}
+
+export type RuntimeSequence = {
+  id: string
+  code: string
+  label: string
+  description: string
+  presentation: SequencePresentationConfig
+  scenes: readonly RuntimeSequenceScene[]
+}
+
+/** Safe readable fallback for timed Scenes without an authored duration. */
+export const defaultSceneDuration = 3100
+
 export type RuntimeDrafts = {
   offsets?: ReadonlyMap<string, Offset>
   portCounts?: Readonly<Record<string, PortCounts>>
@@ -163,6 +196,80 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
   }))
   const standaloneById = new Map(standaloneScenes.map((scene) => [scene.id, scene]))
   const graphicById = new Map(definition.graphics.map((graphic) => [graphic.id, graphic]))
+  const sequenceConfigs: readonly SequenceConfig[] = [
+    ...(config.sequences ?? []),
+    ...config.themes.map((theme) => ({
+      code: theme.id,
+      description: theme.description,
+      id: theme.id,
+      label: theme.title,
+      presentation: { callouts: true, display: 'expanded' as const, timed: false },
+      scenes: theme.scenes.map((scene) => ({
+        ...scene,
+        description: scene.description,
+        label: scene.label
+      }))
+    })),
+    ...config.stories.map((story) => ({
+      code: story.code,
+      description: story.question,
+      id: story.id,
+      label: story.title,
+      presentation: { callouts: true, display: 'collapsed' as const, timed: true },
+      scenes: story.scenes.map((scene, index) => {
+        const source = scene.sourceScene ? standaloneById.get(scene.sourceScene) : undefined
+        return {
+          ...scene,
+          code: scene.id ?? `${story.code}-${index + 1}`,
+          description: source?.description,
+          focus: {
+            artefacts: scene.focus?.artefacts ?? source?.components,
+            flows: scene.focus?.flows ?? source?.flows,
+            graphics: scene.focus?.graphics
+          },
+          id: scene.id ?? `${story.id}-${index + 1}`,
+          label: scene.title ?? source?.label ?? `Scene ${index + 1}`
+        }
+      })
+    }))
+  ]
+  const sequences: RuntimeSequence[] = sequenceConfigs.map((sequence) => ({
+    code: sequence.code,
+    description: sequence.description ?? '',
+    id: sequence.id,
+    label: sequence.label,
+    presentation: sequence.presentation,
+    scenes: sequence.scenes.map((scene) => {
+      const properties = scene.callout?.properties
+      let profile: readonly string[] | undefined
+      if (typeof properties?.profile === 'string') {
+        try {
+          const parsed: unknown = JSON.parse(properties.profile)
+          if (Array.isArray(parsed) && parsed.every((entry) => typeof entry === 'string')) profile = parsed
+        } catch {
+          profile = undefined
+        }
+      }
+      return {
+        id: scene.id,
+        code: scene.code,
+        label: scene.label,
+        description: scene.description ?? scene.callout?.body ?? '',
+        caption: scene.callout?.body ?? '',
+        headline: scene.callout?.title ?? scene.label,
+        hold: scene.duration ?? defaultSceneDuration,
+        components: scene.focus.artefacts ?? [],
+        flows: scene.focus.flows ?? [],
+        graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
+        callout: scene.callout?.at,
+        calloutConfig: scene.callout,
+        takeaways: scene.callout?.takeaways,
+        profile,
+        cover: properties?.wide === true ? true : undefined,
+        logo: typeof properties?.logo === 'string' ? properties.logo : undefined
+      }
+    })
+  }))
   const stories: RuntimeStory[] = config.stories.map((story: StoryConfig) => ({
     id: story.id,
     code: story.code,
@@ -174,7 +281,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       return {
         ...scene,
         caption: scene.callout?.body ?? '',
-        hold: scene.duration ?? 0,
+        hold: scene.duration ?? defaultSceneDuration,
         components: scene.focus?.artefacts ?? source?.components ?? [],
         flows: scene.focus?.flows ?? source?.flows ?? [],
         graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
@@ -510,6 +617,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     infoschematicSpecificationsFor: (element: string) => specificationsByElement.get(element) ?? [],
     infoschematicUnroutedInterfaces: unroutedInterfaces,
     stories,
+    sequences,
     standaloneScenes,
     thematicScenes,
     calloutPorts: config.calloutPositions,

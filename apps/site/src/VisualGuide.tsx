@@ -151,18 +151,19 @@ export function VisualGuide() {
                 <li>Flow endpoint markers, cardinality, and a coherent data-flow-diagram vocabulary.</li>
               </ul>
               <p>
-                The existing <strong>Theme</strong> concept groups related Scenes; it is not a colour theme. Any visual
-                theme or inherited surface contract needs a distinct name and an explicit model boundary.
+                A <strong>Sequence</strong> groups related Scenes and selects their display, timing, and Callout
+                behaviour. Any visual theme or inherited surface contract needs a distinct name and an explicit model
+                boundary.
               </p>
             </section>
 
             <section aria-labelledby="where-next" className="visual-guide__section">
               <h2 id="where-next">Where next</h2>
               <p>
-                Continue to <a href="/docs/explanation/">Explanation</a> for Scopes, Scenes, Themes, Stories, Callouts,
-                and presentation state. Use <a href="/docs/authoring/">Authoring</a> for complete TypeScript, YAML, and
-                JSON examples, or the <a href="/docs/reference/vocabulary/">canonical terminology</a> when you need the
-                exact contract language.
+                Continue to <a href="/docs/explanation/">Explanation</a> for Scopes, Scenes, Sequences, Callouts, and
+                presentation state. Use <a href="/docs/authoring/">Authoring</a> for complete TypeScript, YAML, and JSON
+                examples, or the <a href="/docs/reference/vocabulary/">canonical terminology</a> when you need the exact
+                contract language.
               </p>
             </section>
           </article>

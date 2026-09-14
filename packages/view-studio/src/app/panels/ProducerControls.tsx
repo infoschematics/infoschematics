@@ -1,21 +1,23 @@
 import { type RuntimeStory, useInfoschematic, useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import type { Ref } from 'react'
-import { storyCanActivate, storyForEditing } from '../editor/scenes.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { ThemeStrip } from './ThemeStrip.tsx'
 
 export function ProducerControls({
-  onPlay,
+  onPlay: _onPlay,
   ref,
   presentation
 }: {
-  onPlay: (story: RuntimeStory) => void
+  onPlay?: (story: RuntimeStory) => void
   ref: Ref<HTMLElement>
   presentation: Presentation
 }) {
-  const { config, infoschematicFamilies, infoschematicScopes, stories } = useInfoschematic()
+  const { infoschematicFamilies, infoschematicFlows, infoschematicRegister, infoschematicScopes, sequences } =
+    useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
-  const standaloneSceneIds = new Set(config.standaloneScenes.map((scene) => scene.id))
+  const validElements = new Set(infoschematicRegister.all.map(({ id }) => id))
+  const validFlows = new Set(infoschematicFlows.map(({ id }) => id))
+  const sceneCanActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
+    scene.components.some((id) => validElements.has(id)) || scene.flows.some((id) => validFlows.has(id))
 
   if (presentation.mode !== 'present') return null
 
@@ -62,49 +64,64 @@ export function ProducerControls({
         ))}
       </section>
 
-      <section className="producer-bank" aria-label="Stories">
-        <span className="producer-label">Stories</span>
-        {stories.map((story) => {
-          const authored = config.stories.find((candidate) => candidate.id === story.id)
-          const enabled = authored
-            ? storyCanActivate(storyForEditing(authored, config.standaloneScenes), standaloneSceneIds)
-            : false
-          return (
-            <button
-              aria-pressed={presentation.playing?.id === story.id}
-              className="toggle-button"
-              disabled={!enabled}
-              key={story.id}
-              onClick={() => onPlay(story)}
-              title={`${story.code} — ${story.question}`}
-              type="button"
-            >
-              {story.label}
-            </button>
-          )
-        })}
-        <button
-          className="action-button"
-          disabled={!presentation.playing}
-          onClick={presentation.stopStory}
-          type="button"
-        >
-          Clear
-        </button>
-      </section>
-
-      <section className="producer-bank" aria-label="Themes">
-        <span className="producer-label">Themes</span>
-        <ThemeStrip presentation={presentation} />
-        <button
-          className="action-button"
-          disabled={!presentation.thematicScene}
-          onClick={presentation.lightNothing}
-          type="button"
-        >
-          Clear
-        </button>
-      </section>
+      {sequences.length ? (
+        <section className="producer-bank" aria-label="Sequences">
+          <span className="producer-label">Sequences</span>
+          {sequences.flatMap((sequence) => {
+            const selectors =
+              sequence.presentation.display === 'expanded'
+                ? sequence.scenes.map((scene, step) => (
+                    <button
+                      aria-pressed={presentation.playing?.id === sequence.id && presentation.playing.step === step}
+                      className="toggle-button"
+                      disabled={!sceneCanActivate(scene)}
+                      key={`${sequence.id}/${scene.id}`}
+                      onClick={() => presentation.activateSequence(sequence, step)}
+                      title={`${sequence.label} — ${scene.description}`}
+                      type="button"
+                    >
+                      {scene.label}
+                    </button>
+                  ))
+                : [
+                    <button
+                      aria-pressed={presentation.playing?.id === sequence.id}
+                      className="toggle-button"
+                      disabled={!sequence.scenes.some(sceneCanActivate)}
+                      key={sequence.id}
+                      onClick={() => presentation.activateSequence(sequence)}
+                      title={`${sequence.code} — ${sequence.description}`}
+                      type="button"
+                    >
+                      {sequence.label}
+                    </button>
+                  ]
+            return sequence.presentation.display === 'expanded' && sequence.presentation.timed
+              ? [
+                  <button
+                    aria-pressed={presentation.playing?.id === sequence.id && presentation.autoAdvance}
+                    className="toggle-button"
+                    disabled={!sequence.scenes.some(sceneCanActivate)}
+                    key={`${sequence.id}/play`}
+                    onClick={() => presentation.activateSequence(sequence)}
+                    type="button"
+                  >
+                    Play {sequence.label}
+                  </button>,
+                  ...selectors
+                ]
+              : selectors
+          })}
+          <button
+            className="action-button"
+            disabled={!presentation.playing}
+            onClick={presentation.stopSequence}
+            type="button"
+          >
+            Clear
+          </button>
+        </section>
+      ) : null}
     </section>
   )
 }

@@ -6,10 +6,10 @@ theme: tool
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-034]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-13T15:39:09Z
+updated_at: 2026-09-14T02:50:33Z
 ---
 
 # Canonical view internals

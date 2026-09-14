@@ -1,5 +1,6 @@
 import type {
   InfoschematicRuntime,
+  RuntimeSequence,
   RuntimeStandaloneScene,
   RuntimeStory,
   RuntimeThemeScene
@@ -38,6 +39,13 @@ export type PresentationAction =
       value: boolean
     }>
   | Readonly<{ type: 'start-story'; story: RuntimeStory }>
+  | Readonly<{ type: 'start-sequence'; sequence: RuntimeSequence; step?: number }>
+  | Readonly<{ type: 'toggle-sequence-scene'; sequence: RuntimeSequence; step: number }>
+  | Readonly<{
+      type: 'step-sequence'
+      sequences: readonly RuntimeSequence[]
+      delta: number
+    }>
   | Readonly<{
       type: 'step-story'
       stories: readonly RuntimeStory[]
@@ -49,6 +57,7 @@ export type PresentationAction =
       delta: number
     }>
   | Readonly<{ type: 'stop-story' }>
+  | Readonly<{ type: 'stop-sequence' }>
   | Readonly<{ type: 'toggle-family'; id: string }>
   | Readonly<{ type: 'toggle-scope'; id: string }>
   | Readonly<{ type: 'toggle-standalone-scene'; scene: RuntimeStandaloneScene }>
@@ -107,6 +116,38 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
         standaloneSceneId: null,
         thematicSceneId: null
       }
+    case 'start-sequence':
+      if (action.sequence.scenes.length === 0) return state
+      return {
+        ...state,
+        playing: { id: action.sequence.id, step: action.step ?? 0 },
+        sceneOccurrence: state.sceneOccurrence + 1,
+        standaloneSceneId: null,
+        thematicSceneId: null
+      }
+    case 'toggle-sequence-scene':
+      if (action.sequence.scenes.length === 0 || !action.sequence.scenes[action.step]) return state
+      if (state.playing?.id === action.sequence.id && state.playing.step === action.step) {
+        return { ...state, playing: null }
+      }
+      return {
+        ...state,
+        playing: { id: action.sequence.id, step: action.step },
+        sceneOccurrence: state.sceneOccurrence + 1,
+        standaloneSceneId: null,
+        thematicSceneId: null
+      }
+    case 'step-sequence': {
+      if (!state.playing) return state
+      const sequence = action.sequences.find((entry) => entry.id === state.playing?.id)
+      if (!sequence || sequence.scenes.length === 0) return { ...state, playing: null }
+      const step = (state.playing.step + action.delta + sequence.scenes.length) % sequence.scenes.length
+      return {
+        ...state,
+        playing: { ...state.playing, step },
+        sceneOccurrence: state.sceneOccurrence + 1
+      }
+    }
     case 'step-story': {
       if (!state.playing) return state
       const story = action.stories.find((entry) => entry.id === state.playing?.id)
@@ -132,6 +173,7 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
         : state
     }
     case 'stop-story':
+    case 'stop-sequence':
       return { ...state, playing: null }
     case 'toggle-family':
       return {
@@ -179,18 +221,26 @@ export const derivePresentation = (
   )
   const runningStory = state.playing ? runtime.stories.find((entry) => entry.id === state.playing?.id) : undefined
   const runningStoryScene = state.playing ? runningStory?.steps[state.playing.step] : undefined
+  const activeSequence = state.playing ? runtime.sequences.find((entry) => entry.id === state.playing?.id) : undefined
+  const activeSequenceScene = state.playing ? activeSequence?.scenes[state.playing.step] : undefined
   const thematicScene = state.thematicSceneId
     ? runtime.thematicScenes.find((entry) => entry.id === state.thematicSceneId)
     : undefined
   const standaloneScene = state.standaloneSceneId
     ? runtime.standaloneScenes.find((entry) => entry.id === state.standaloneSceneId)
     : undefined
-  const focusedScene = runningStoryScene ?? thematicScene ?? standaloneScene
+  const focusedScene = activeSequenceScene ?? runningStoryScene ?? thematicScene ?? standaloneScene
   const thematicThemeId = thematicScene
     ? runtime.config.themes.find((theme) => theme.scenes.some((scene) => scene.id === thematicScene.id))?.id
     : undefined
   let signalSelection: SceneSignalSelection | undefined
-  if (state.playing) {
+  if (activeSequence && state.playing) {
+    signalSelection = {
+      kind: 'sequence',
+      sceneIndex: state.playing.step,
+      sequenceId: activeSequence.id
+    }
+  } else if (state.playing) {
     signalSelection = {
       kind: 'story',
       sceneIndex: state.playing.step,
@@ -206,9 +256,13 @@ export const derivePresentation = (
     signalSelection = { kind: 'standalone', sceneId: standaloneScene.id }
   }
   const signals =
-    signalPolicy === 'focused-flows' && signalSelection
-      ? resolveSceneFlowSignals(runtime.config, signalSelection, `present-scene-${state.sceneOccurrence}`)
-      : []
+    signalPolicy === 'focused-flows' && activeSequenceScene
+      ? [...new Set(activeSequenceScene.flows)]
+          .filter((flowId) => runtime.infoschematicFlows.some(({ id }) => id === flowId))
+          .map((flowId) => ({ flowId, occurrenceKey: `present-scene-${state.sceneOccurrence}` }))
+      : signalPolicy === 'focused-flows' && signalSelection
+        ? resolveSceneFlowSignals(runtime.config, signalSelection, `present-scene-${state.sceneOccurrence}`)
+        : []
   const focusedFlows = focusedScene
     ? visibleFlows.filter((flow) => focusedScene.flows.includes(flow.id)).map((flow) => flow.id)
     : []
@@ -221,6 +275,8 @@ export const derivePresentation = (
       : undefined
 
   return {
+    activeSequence,
+    activeSequenceScene,
     focusedScene,
     highlight,
     runningStory,

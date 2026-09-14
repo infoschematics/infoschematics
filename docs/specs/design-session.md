@@ -36,7 +36,7 @@ _Evidence:_ mode transitions in `packages/view-studio/src/app/editor/use-editor.
 
 ### DESIGN-004 — Mode transitions clean up presentation activity
 
-Entering `design` or `direct` MUST stop Story playback and clear the active presentation focus without discarding Audience filters or Producer drafts. Returning to `present` MUST preserve Audience filters and MUST NOT restart playback or reactivate a previous Standalone Scene, Thematic Scene or Story.
+Entering `design` or `direct` MUST stop Sequence playback and clear the active presentation focus without discarding Audience filters or Producer drafts. Returning to `present` MUST preserve Audience filters and MUST NOT restart playback or reactivate a previous Standalone or Sequence Scene.
 
 Audience preferences and filters, presentation focus and playback, and Producer editing state MUST remain separate state areas so a mode transition cannot reset unrelated state accidentally.
 

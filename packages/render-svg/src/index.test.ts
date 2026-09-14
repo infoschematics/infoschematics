@@ -262,8 +262,7 @@ describe('renderInfoschematicSvg', () => {
       },
       scopes: [],
       specifications: [],
-      stories: [],
-      themes: []
+      sequences: []
     }
 
     expect(renderInfoschematicSvg(canonical)).toBe(renderInfoschematicSvg(established))

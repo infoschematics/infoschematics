@@ -16,6 +16,7 @@ export type SceneSignalSelection =
   | Readonly<{ kind: 'standalone'; sceneId: string }>
   | Readonly<{ kind: 'theme'; sceneId: string; themeId: string }>
   | Readonly<{ kind: 'story'; sceneIndex: number; storyId: string }>
+  | Readonly<{ kind: 'sequence'; sceneIndex: number; sequenceId: string }>
 
 const focusedFlowIds = (config: InfoschematicConfig, selection: SceneSignalSelection): readonly string[] => {
   if (selection.kind === 'standalone') {
@@ -26,6 +27,13 @@ const focusedFlowIds = (config: InfoschematicConfig, selection: SceneSignalSelec
     return (
       config.themes.find(({ id }) => id === selection.themeId)?.scenes.find(({ id }) => id === selection.sceneId)?.focus
         .flows ?? []
+    )
+  }
+
+  if (selection.kind === 'sequence') {
+    if (!Number.isInteger(selection.sceneIndex) || selection.sceneIndex < 0) return []
+    return (
+      config.sequences?.find(({ id }) => id === selection.sequenceId)?.scenes[selection.sceneIndex]?.focus.flows ?? []
     )
   }
 

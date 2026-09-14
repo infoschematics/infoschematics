@@ -167,9 +167,10 @@ describe('canonical authored form', () => {
 
   it('normalises elements as sorted sets and serialises them stably', () => {
     const authored = `${compact.replace('elements: [SRC, SNK]', 'elements: [SRC, ADP, SRC, SNK]')}
-themes:
+sequences:
   - id: ORDER
     label: Ordering
+    presentation: { display: expanded, timed: false, callouts: false }
     scenes:
       - id: ORDER-1
         label: Ordered focus
@@ -179,14 +180,14 @@ themes:
     const model = modelOf(authored)
 
     expect(model.scopes[0]?.elements).toEqual(['ADP', 'SNK', 'SRC'])
-    expect(model.themes[0]?.scenes[0]?.focus?.elements).toEqual(['ADP', 'SNK', 'SRC'])
+    expect(model.sequences[0]?.scenes[0]?.focus?.elements).toEqual(['ADP', 'SNK', 'SRC'])
 
     const yaml = serialiseInfoschematicYaml(model)
     const json = serialiseInfoschematicJson(model)
     expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
     expect(serialiseInfoschematicJson(modelOf(json))).toBe(json)
     expect(JSON.parse(json).scopes[0].elements).toEqual(['ADP', 'SNK', 'SRC'])
-    expect(JSON.parse(json).themes[0].scenes[0].focus.elements).toEqual(['ADP', 'SNK', 'SRC'])
+    expect(JSON.parse(json).sequences[0].scenes[0].focus.elements).toEqual(['ADP', 'SNK', 'SRC'])
   })
 
   it('keeps bidirectionality in the borrowed arrow notation', () => {

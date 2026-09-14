@@ -121,15 +121,15 @@ describe('infoschematicModelOf', () => {
           }
         ]
       },
-      themes: [
+      sequences: [
         {
           id: 'OVERVIEW',
+          presentation: { callouts: false, display: 'expanded', timed: false },
           scenes: [{ id: 'OVR', focus: { elements: ['SRC', 'SNK', 'MED-01'] } }]
-        }
-      ],
-      stories: [
+        },
         {
           id: 'STY',
+          presentation: { callouts: true, display: 'collapsed', timed: true },
           scenes: [
             {
               id: 'STY-1',
@@ -275,7 +275,7 @@ describe('infoschematicModelOf', () => {
     })
     expect(model.diagram.flows).toEqual([])
     expect(model.diagram.calloutPositions).toEqual(defaultCalloutPositions)
-    expect(model.themes).toEqual([])
+    expect(model.sequences).toEqual([])
     expect(JSON.parse(JSON.stringify(model))).toEqual(model)
 
     expect(() =>

@@ -34,7 +34,6 @@ describe('blankInfoschematic', () => {
     expect(blankInfoschematic.diagram.flows).toEqual([])
     expect(blankInfoschematic.diagram.overlays).toEqual([])
     expect(blankInfoschematic.specifications).toEqual([])
-    expect(blankInfoschematic.themes).toEqual([])
-    expect(blankInfoschematic.stories).toEqual([])
+    expect(blankInfoschematic.sequences).toEqual([])
   })
 })

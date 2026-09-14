@@ -11,7 +11,7 @@ The strongest fit is a system view in which:
 - [Ports](/docs/reference/vocabulary/#port) identify where a component offers or consumes an interaction;
 - [Flows](/docs/reference/vocabulary/#flow) connect those Ports;
 - interfaces and specification groups record the technical contracts around the visible structure;
-- Scopes, Scenes, Themes, Stories, and Callouts explain the same structure to different audiences.
+- Scopes, Scenes, Sequences, and Callouts explain the same structure to different Audiences.
 
 That combination—structure, contracts, and explanation—is what distinguishes an Infoschematic from a general-purpose flowchart.
 

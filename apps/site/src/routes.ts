@@ -60,7 +60,7 @@ const publishedDocuments = [
     sourcePath: 'apps/site/content/explanation.md',
     path: '/docs/explanation/',
     title: 'Explanation',
-    summary: 'Use Scopes, Scenes, Themes, Stories, Callouts, and Graphics to explain one stable diagram.',
+    summary: 'Use Scopes, Scenes, Sequences, Callouts, and Overlays to explain one stable Diagram.',
     section: 'usage'
   },
   {

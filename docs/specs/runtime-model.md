@@ -50,7 +50,7 @@ _Evidence:_ `packages/view-model/src/artefact-draft.test.ts` covers all six kind
 
 ### RUNTIME-005 — Removal materialisation preserves references
 
-Removing a Card MUST remove direct and transitive Adapter Cards that wrap it and every Flow ending on a removed Card. Removing a Fabric MUST remove its endpoint Flows. Removing a Region MUST NOT cascade to any other artefact. Removing a Overlay MUST clear direct Story Scene Overlay references and remove it from Standalone Scene, Thematic Scene and Story Scene focus collections.
+Removing a Card MUST remove direct and transitive Adapter Cards that wrap it and every Flow ending on a removed Card. Removing a Fabric MUST remove its endpoint Flows. Removing a Region MUST NOT cascade to any other artefact. Removing an Overlay MUST clear direct Sequence Scene Overlay references and remove it from Standalone and Sequence Scene focus collections.
 
 Unrelated Scopes, Flow families, renderer keys, renderer properties and authored route data MUST survive materialisation unchanged.
 

@@ -75,7 +75,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `packages/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
 - `packages/view-model` owns runtime derivation, geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
 - `packages/view-canvas` owns the interactive React Infoschematic surface, renderer bindings, and Canvas interaction contract.
-- `packages/view-present` owns Audience filtering, Scene focus, Story playback, Callouts, and presentation details over Canvas.
+- `packages/view-present` owns Audience filtering, Scene focus, Sequence playback, Callouts, and presentation details over Canvas.
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `packages/cli` owns Node command parsing, streams, files, and exit behaviour over Domain Core and the static renderer.

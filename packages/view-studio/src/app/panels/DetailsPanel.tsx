@@ -433,7 +433,7 @@ export function DetailsPanel({
     .filter(Boolean)
     .join(' · ')
   const selectedDocumentMeta = selectedDocuments.length === 1 ? selectedDocumentSummary : undefined
-  const { runningStory, standaloneScene, thematicScene } = presentation
+  const { activeSequence, activeSequenceScene, runningStory, standaloneScene, thematicScene } = presentation
 
   const { mode, setMode } = editor
   const directUsesStories =
@@ -790,7 +790,12 @@ export function DetailsPanel({
         </div>
       ) : presentTab === 'showing' ? (
         <div className="contract-body">
-          {runningStory ? (
+          {activeSequence ? (
+            <>
+              <p className="theme-headline">{activeSequenceScene?.headline ?? activeSequence.label}</p>
+              <p>{activeSequence.description || activeSequenceScene?.description}</p>
+            </>
+          ) : runningStory ? (
             <p>{runningStory.question}</p>
           ) : thematicScene ? (
             <>

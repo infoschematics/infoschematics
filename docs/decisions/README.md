@@ -34,8 +34,9 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 22. [ADR-INFOSCHEMATICS-016](ADR-INFOSCHEMATICS-016-keep-region-bounds-explicit.md) — keep each Region's geometry independent and explicit.
 23. [ADR-INFOSCHEMATICS-017](ADR-INFOSCHEMATICS-017-use-deterministic-region-label-metrics.md) — keep Region label geometry deterministic and name its shared metrics.
 24. [ADR-INFOSCHEMATICS-018](ADR-INFOSCHEMATICS-018-keep-renderer-command-thin.md) — publish document rendering as a thin Node command over canonical libraries.
+25. [ADR-INFOSCHEMATICS-019](ADR-INFOSCHEMATICS-019-unify-presentation-sequences.md) — express expanded or collapsed, timed or manual presentation through one Sequence concept.
 
 ## Repository operation
 
-25. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-26. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+26. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+27. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.

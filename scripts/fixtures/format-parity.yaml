@@ -53,9 +53,13 @@ diagram:
     - id: LOAD
       family: DATA
       link: SRC E1 -> SNK W1
-themes:
+sequences:
   - id: OVERVIEW
     label: Overview
+    presentation:
+      display: expanded
+      timed: false
+      callouts: false
     scenes:
       - id: ALL
         label: Everything

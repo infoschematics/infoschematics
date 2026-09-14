@@ -1,49 +1,46 @@
 # Explanation
 
-An Infoschematic keeps its structural diagram stable while changing what an audience sees and what the author says about it. [Scopes](/docs/reference/vocabulary/#scope), [Scenes](/docs/reference/vocabulary/#scene), [Themes](/docs/reference/vocabulary/#theme), [Stories](/docs/reference/vocabulary/#story), [Callouts](/docs/reference/vocabulary/#callout), and [Graphics](/docs/reference/vocabulary/#graphic) provide that explanatory layer.
+An Infoschematic keeps its structural Diagram stable while changing what the Audience sees and what the Producer says about it. [Scopes](/docs/reference/vocabulary/#scope), [Scenes](/docs/reference/vocabulary/#scene), [Sequences](/docs/reference/vocabulary/#sequence), [Callouts](/docs/reference/vocabulary/#callout), and [Overlays](/docs/reference/vocabulary/#graphic) provide that explanatory layer.
 
-## Start with the stable diagram
+## Start with a stable Diagram
 
-Explanation does not move Cards, Regions, Fabrics, Points, or Flow routes. The audience can change focus without losing its spatial memory of the system, and a still rendering remains understandable without interaction or motion.
+Explanation does not move Cards, Regions, Fabrics, Points, or Flow routes. The Audience can change focus without losing its spatial memory of the system, and a still rendering remains understandable without interaction or motion.
 
-Scopes decide which scoped artefacts are applicable. Domain and Flow Family classify what Cards and Flows mean; they may supply colour, but they do not create additional boxes on the diagram.
+Scopes decide which grouped artefacts are applicable. Card Collections and Flow Families classify what Cards and Flows mean and may supply their visual identity, but do not create additional boxes on the Diagram.
 
 ## Use Scenes for one moment
 
-A Scene describes one focused reading of the diagram. It can bring named artefacts and Flows forward, reveal supporting Graphics, and show one Callout. Everything else remains in place and recedes visually.
+A Scene describes one focused reading of the Diagram. It can bring named artefacts and Flows forward, reveal supporting Overlays, and show one Callout. Everything else remains in place and recedes visually.
 
-There are three ways to use a Scene:
+There are two ways to use a Scene:
 
-- a **Standalone Scene** is an independent moment;
-- a **Thematic Scene** belongs to a Theme and can be explored with related moments;
-- a **Story Scene** is a step in an ordered Story.
+- A **Standalone Scene** is an independent moment.
+- A **Sequence Scene** is one owned step in a Sequence.
 
-Only one Scene has active focus. Story focus takes precedence over Thematic Scene focus, which takes precedence over Standalone Scene focus.
+Only one Scene is active for focus. Activating a Standalone Scene or Sequence Scene clears the other focus source.
 
-## Group exploration with Themes
+## Choose Sequence presentation
 
-A Theme collects related Scenes without imposing an order. It is useful when readers should choose which aspect of the system to explore, such as security, data movement, or operational ownership.
+A Sequence owns ordered Scenes and independently chooses how the Audience selects and advances them. Use `display: expanded` when every Scene should be directly selectable, or `display: collapsed` when the Sequence should appear as one entry. Use `timed: true` for automatic progression or `timed: false` for manual progression.
 
-A Theme does not duplicate the diagram. Its Scenes refer to the stable IDs of existing content.
+These switches support expanded manual exploration, expanded playback, a collapsed manual walkthrough, and a collapsed timed walkthrough without changing the Diagram.
 
-## Guide an audience with Stories
+Set `callouts: true` when the Sequence's authored Scene Callouts should render, independently of display and timing. A timed Scene may carry a duration, while previous and next actions keep the Audience in control.
 
-A Story puts Scenes into a deliberate sequence. Each step can carry a duration for automatic playback, while ordinary previous and next actions keep the audience in control.
+Every Sequence owns its Scenes directly. Reusing a Scene is a Studio copy operation, so changing one copy never changes another Sequence at a distance.
 
-Use a Story when order matters: establish context, focus on a component, trace a Flow, then reveal the consequence. Use a Theme when the reader should choose the route.
+## Add a Callout or Overlay
 
-## Add Callouts and Graphics
+A Callout explains the current Scene. It belongs to the Scene, stays separate from Diagram geometry, and can be positioned in an authored slot without moving the elements beneath it.
 
-A Callout is explanatory content placed over the composition. It belongs to a Scene, stays separate from diagram geometry, and can be positioned in an authored slot without moving the elements beneath it.
-
-A Graphic is a renderer-selected visual with serialisable properties. It can stay hidden until a Scene needs it, which makes it useful for annotations, keys, charts, or other material that would clutter the base diagram.
+An Overlay is renderer-selected visual material with serialisable properties. It can stay hidden until a Scene needs it, making it useful for annotations, keys, charts, and other material that would clutter the base Diagram.
 
 ## Understand presentation state
 
-Filtering is subtractive: it decides what remains visible. Scene focus is emphatic: it brings part of what remains forward. Flow signals are temporary emphasis. These states never rewrite the authored diagram.
+Filtering is subtractive: it decides what remains visible. Scene focus is emphatic: it brings part of what remains forward. Flow signals are temporary emphasis. These states never rewrite the authored Diagram.
 
-The [Present view guide](/docs/present/) covers the audience controls, focus precedence, Story playback, keyboard interaction, and reduced-motion behaviour. The [Authoring guide](/docs/authoring/#add-presentation-material) shows the corresponding serialisable data.
+The [Present View guide](/docs/present/) covers Audience controls, Sequence playback, keyboard interaction, and reduced-motion behaviour. The [Authoring guide](/docs/authoring/#add-presentation-material) shows the corresponding serialisable data.
 
 ## Where next
 
-Return to [Components](/docs/components/) for the visible diagram parts, continue to [Present view](/docs/present/) to use the audience experience, or open [Studio view](/docs/studio/) to direct explanation material visually.
+Return to [Components](/docs/components/) for the visible Diagram parts, continue to [Present View](/docs/present/) for the Audience experience, or open [Studio View](/docs/studio/) to direct explanation material visually.

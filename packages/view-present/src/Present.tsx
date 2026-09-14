@@ -29,9 +29,7 @@ export function Present({
   const established = runtime.config
   const presentation = usePresentation(runtime, signalPolicy)
   const { derived, dispatch, state } = presentation
-  const storyCallout = state.playing
-    ? established.stories.find((story) => story.id === state.playing?.id)?.scenes[state.playing.step]?.callout
-    : undefined
+  const sequenceCallout = derived.activeSequenceScene?.calloutConfig
   const thematicCallout = derived.thematicScene
     ? established.themes.flatMap((theme) => theme.scenes).find((scene) => scene.id === derived.thematicScene?.id)
         ?.callout
@@ -44,6 +42,10 @@ export function Present({
     (delta: number) => dispatch({ type: 'step-story', stories: runtime.stories, delta }),
     [dispatch, runtime.stories]
   )
+  const stepSequence = useCallback(
+    (delta: number) => dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta }),
+    [dispatch, runtime.sequences]
+  )
   const stepTheme = useCallback(
     (delta: number) => dispatch({ type: 'step-theme', scenes: runtime.thematicScenes, delta }),
     [dispatch, runtime.thematicScenes]
@@ -52,46 +54,44 @@ export function Present({
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   useEffect(() => {
     const { playing } = state
-    const { runningStory, runningStoryScene } = derived
-    if (!playing || !runningStory || !runningStoryScene || !state.autoAdvance) return
+    const { activeSequence, activeSequenceScene } = derived
+    if (!playing || !activeSequence || !activeSequenceScene || !activeSequence.presentation.timed || !state.autoAdvance)
+      return
     const timer = window.setTimeout(
       () => {
-        dispatch({ type: 'step-story', stories: runtime.stories, delta: 1 })
+        dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta: 1 })
       },
-      Math.max(0, runningStoryScene.hold)
+      Math.max(0, activeSequenceScene.hold)
     )
     return () => window.clearTimeout(timer)
-  }, [derived.runningStory, derived.runningStoryScene, dispatch, runtime.stories, state.autoAdvance, state.playing])
+  }, [
+    derived.activeSequence,
+    derived.activeSequenceScene,
+    dispatch,
+    runtime.sequences,
+    state.autoAdvance,
+    state.playing
+  ])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
       if (target?.closest('input, textarea, select, [role="tablist"]')) return
-      if (!state.playing && state.thematicSceneId) {
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-          event.preventDefault()
-          stepTheme(event.key === 'ArrowRight' ? 1 : -1)
-        } else if (event.key === 'Escape') {
-          event.preventDefault()
-          dispatch({ type: 'clear-focus' })
-        }
-        return
-      }
       if (!state.playing) return
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault()
-        stepStory(event.key === 'ArrowRight' ? 1 : -1)
+        stepSequence(event.key === 'ArrowRight' ? 1 : -1)
       } else if (event.key === ' ' || event.key === 'Spacebar') {
         event.preventDefault()
         dispatch({ type: 'set-auto-advance', value: !state.autoAdvance })
       } else if (event.key === 'Escape') {
         event.preventDefault()
-        dispatch({ type: 'stop-story' })
+        dispatch({ type: 'stop-sequence' })
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [dispatch, state.autoAdvance, state.playing, state.thematicSceneId, stepStory, stepTheme])
+  }, [dispatch, state.autoAdvance, state.playing, stepSequence])
 
   useEffect(() => {
     const sync = () => setFullscreen(document.fullscreenElement === root.current)
@@ -107,8 +107,12 @@ export function Present({
     }
   }
 
-  const playStory = (story: (typeof runtime.stories)[number]) => {
-    dispatch(state.playing?.id === story.id ? { type: 'stop-story' } : { type: 'start-story', story })
+  const activateSequence = (sequence: (typeof runtime.sequences)[number], step?: number) => {
+    if (step !== undefined) {
+      dispatch({ type: 'toggle-sequence-scene', sequence, step })
+    } else {
+      dispatch(state.playing?.id === sequence.id ? { type: 'stop-sequence' } : { type: 'start-sequence', sequence })
+    }
   }
 
   return (
@@ -156,18 +160,41 @@ export function Present({
             className="isp-canvas"
             config={config}
             flows={derived.visibleFlows}
-            graphic={derived.runningStoryScene?.graphic}
+            graphic={derived.activeSequenceScene?.graphic ?? derived.runningStoryScene?.graphic}
             highlight={derived.highlight}
             renderers={renderers}
             responsiveCardDetails={responsiveCardDetails}
             signals={derived.signals}
             visibleScopes={state.visibleScopes}
           >
-            {derived.runningStoryScene && derived.runningStory ? (
+            {derived.activeSequenceScene && derived.activeSequence?.presentation.callouts ? (
+              <SceneCallout
+                autoAdvance={derived.activeSequence.presentation.timed ? state.autoAdvance : undefined}
+                body={derived.activeSequenceScene.caption || derived.activeSequenceScene.description}
+                calloutConfig={sequenceCallout}
+                eyebrow={derived.activeSequence.label}
+                logo={derived.activeSequenceScene.logo}
+                onExit={() => dispatch({ type: 'stop-sequence' })}
+                onStep={stepSequence}
+                onToggleAuto={
+                  derived.activeSequence.presentation.timed
+                    ? () => dispatch({ type: 'set-auto-advance', value: !state.autoAdvance })
+                    : undefined
+                }
+                profile={derived.activeSequenceScene.profile}
+                runtime={runtime}
+                scene={derived.activeSequenceScene}
+                stepNumber={(state.playing?.step ?? 0) + 1}
+                stepTotal={derived.activeSequence.scenes.length}
+                takeaways={state.takeaways ? derived.activeSequenceScene.takeaways : undefined}
+                title={derived.activeSequenceScene.headline}
+                wide={derived.activeSequenceScene.cover}
+              />
+            ) : derived.runningStoryScene && derived.runningStory ? (
               <SceneCallout
                 autoAdvance={state.autoAdvance}
                 body={derived.runningStoryScene.caption}
-                calloutConfig={storyCallout}
+                calloutConfig={undefined}
                 eyebrow={derived.runningStory.label}
                 onExit={() => dispatch({ type: 'stop-story' })}
                 onStep={stepStory}
@@ -203,7 +230,7 @@ export function Present({
               />
             ) : null}
           </Canvas>
-          <PresentationControls onPlay={playStory} presentation={presentation} runtime={runtime} />
+          <PresentationControls onActivateSequence={activateSequence} presentation={presentation} runtime={runtime} />
         </div>
         {detailsVisible ? <PresentationDetails presentation={presentation} runtime={runtime} /> : null}
       </div>

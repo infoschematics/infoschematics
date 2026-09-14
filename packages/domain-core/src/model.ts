@@ -222,19 +222,13 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
       id: scope.id,
       label: scope.label
     })),
-    stories: config.stories.map((story) => ({
-      id: story.code,
-      label: story.title,
-      question: story.question,
-      scenes: story.scenes.map((scene, index) => storySceneOf(story.code, scene, index))
-    })),
-    subtitle: config.subtitle,
-    themes: [
+    sequences: [
       ...(config.standaloneScenes.length > 0
         ? [
             {
               id: 'OVERVIEW',
               label: 'Overview',
+              presentation: { callouts: false, display: 'expanded' as const, timed: false },
               scenes: config.standaloneScenes.map(
                 (scene): Scene => ({
                   description: scene.description,
@@ -250,6 +244,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         description: theme.description,
         id: theme.id,
         label: theme.title,
+        presentation: { callouts: true, display: 'expanded' as const, timed: false },
         scenes: theme.scenes.map((scene) => ({
           callout: calloutOf(scene.callout),
           description: scene.description,
@@ -257,8 +252,30 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           id: scene.code,
           label: scene.label
         }))
+      })),
+      ...config.stories.map((story) => ({
+        description: story.question,
+        id: story.code,
+        label: story.title,
+        presentation: { callouts: true, display: 'collapsed' as const, timed: true },
+        scenes: story.scenes.map((scene, index) => storySceneOf(story.code, scene, index))
+      })),
+      ...(config.sequences ?? []).map((sequence) => ({
+        description: sequence.description,
+        id: sequence.id,
+        label: sequence.label,
+        presentation: sequence.presentation,
+        scenes: sequence.scenes.map((scene) => ({
+          callout: calloutOf(scene.callout, scene.anchor ? { element: visibleId(scene.anchor) } : undefined),
+          description: scene.description,
+          duration: scene.duration,
+          focus: selectionOf(scene.focus, scene.graphic ? [scene.graphic] : []),
+          id: scene.id,
+          label: scene.label
+        }))
       }))
     ],
+    subtitle: config.subtitle,
     title: config.title
   }
 }
@@ -356,8 +373,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
         })
       )
     })),
-    stories: input.stories ?? [],
-    themes: input.themes ?? []
+    sequences: input.sequences ?? []
   }
 
   const visible = [
@@ -431,20 +447,12 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
       }
     }
   }
-  for (const theme of model.themes) {
+  for (const sequence of model.sequences) {
     const sceneIds = new Set<string>()
-    for (const scene of theme.scenes) {
-      if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Theme ${theme.id}: ${scene.id}`)
+    for (const scene of sequence.scenes) {
+      if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Sequence ${sequence.id}: ${scene.id}`)
       sceneIds.add(scene.id)
-      validateScene(scene, elementIds, scopeIds, `Theme ${theme.id} Scene ${scene.id}`)
-    }
-  }
-  for (const story of model.stories) {
-    const sceneIds = new Set<string>()
-    for (const scene of story.scenes) {
-      if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Story ${story.id}: ${scene.id}`)
-      sceneIds.add(scene.id)
-      validateScene(scene, elementIds, scopeIds, `Story ${story.id} Scene ${scene.id}`)
+      validateScene(scene, elementIds, scopeIds, `Sequence ${sequence.id} Scene ${scene.id}`)
     }
   }
 

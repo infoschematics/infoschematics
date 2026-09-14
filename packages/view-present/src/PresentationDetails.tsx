@@ -12,7 +12,11 @@ export function PresentationDetails({
   const [tab, setTab] = useState<'info' | 'specifications'>('info')
   const { derived } = presentation
   const focus =
-    derived.runningStory?.question ?? derived.thematicScene?.description ?? derived.standaloneScene?.description
+    derived.activeSequence?.description ||
+    derived.activeSequenceScene?.description ||
+    derived.runningStory?.question ||
+    derived.thematicScene?.description ||
+    derived.standaloneScene?.description
 
   return (
     <aside className="isp-details" aria-label="Presentation details">
@@ -26,7 +30,7 @@ export function PresentationDetails({
       {tab === 'info' ? (
         <div className="isp-details-body">
           <p className={focus ? undefined : 'isp-muted'}>
-            {focus ?? 'Nothing is in focus. Choose a Scene or Theme, or run a Story.'}
+            {focus || 'Nothing is in focus. Choose a Scene or Sequence.'}
           </p>
           <dl className="isp-register">
             {runtime.infoschematicRegister.all.map((entry) => (

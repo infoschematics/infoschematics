@@ -17,6 +17,7 @@ import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/t
 const canvasTokens = visualTokens.canvas
 
 export type SvgSceneSelection =
+  | { kind: 'sequence'; sceneIndex: number; sequenceId: string }
   | { kind: 'standalone'; sceneId: string }
   | { kind: 'theme'; sceneId: string; themeId: string }
   | { kind: 'story'; sceneIndex: number; storyId: string }
@@ -123,6 +124,14 @@ const resolveFocus = (
     const scene = theme.scenes.find((candidate) => candidate.id === selection.sceneId)
     if (!scene) throw new Error(`Unknown Thematic Scene in ${selection.themeId}: ${selection.sceneId}`)
     return focusOf(scene.focus)
+  }
+
+  if (selection.kind === 'sequence') {
+    const sequence = config.sequences?.find((candidate) => candidate.id === selection.sequenceId)
+    if (!sequence) throw new Error(`Unknown Sequence: ${selection.sequenceId}`)
+    const scene = sequence.scenes[selection.sceneIndex]
+    if (!scene) throw new Error(`Unknown Sequence Scene in ${selection.sequenceId}: ${selection.sceneIndex}`)
+    return focusOf(scene.focus, scene.graphic)
   }
 
   const story = config.stories.find((candidate) => candidate.id === selection.storyId)

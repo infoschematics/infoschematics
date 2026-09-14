@@ -224,8 +224,7 @@ export const systemExample = defineInfoschematicModel({
     }
   ],
   specifications: [],
-  stories: [],
+  sequences: [],
   subtitle: 'From observed signals to a shared view',
-  themes: [],
   title: 'A system, explained'
 })

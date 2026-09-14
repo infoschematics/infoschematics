@@ -1,6 +1,6 @@
 {
   "name": "@infoschematics/view-present",
-  "description": "The audience-facing Infoschematic view: presentation controls, scene focus and Story playback over Canvas.",
+  "description": "The audience-facing Infoschematic view: presentation controls, Scene focus and Sequence playback over Canvas.",
   "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-model": "0.1.0",

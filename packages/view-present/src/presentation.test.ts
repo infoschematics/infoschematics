@@ -1,4 +1,4 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { describe, expect, it } from 'vitest'
 import { createPresentationState, derivePresentation, reducePresentation } from './presentation.ts'
@@ -141,6 +141,42 @@ const runtime = () =>
   )
 
 describe('presentation state', () => {
+  it('supports all four Sequence display and timing combinations', () => {
+    const source = createInfoschematicRuntime(
+      defineInfoschematicModel({
+        id: 'SEQUENCES',
+        title: 'Sequence combinations',
+        diagram: { bounds: { x: 0, y: 0, width: 100, height: 100 } },
+        sequences: (
+          [
+            ['expanded-manual', 'expanded', false],
+            ['expanded-timed', 'expanded', true],
+            ['collapsed-manual', 'collapsed', false],
+            ['collapsed-timed', 'collapsed', true]
+          ] as const
+        ).map(([id, display, timed]) => ({
+          id,
+          label: id,
+          presentation: { callouts: id !== 'expanded-manual', display, timed },
+          scenes: [{ id: `${id}-scene`, label: 'Scene', duration: 1200 }]
+        }))
+      })
+    )
+
+    expect(source.sequences.map(({ presentation }) => presentation)).toEqual([
+      { callouts: false, display: 'expanded', timed: false },
+      { callouts: true, display: 'expanded', timed: true },
+      { callouts: true, display: 'collapsed', timed: false },
+      { callouts: true, display: 'collapsed', timed: true }
+    ])
+
+    for (const sequence of source.sequences) {
+      const state = reducePresentation(createPresentationState(source), { type: 'start-sequence', sequence })
+      expect(derivePresentation(source, state).activeSequence?.id).toBe(sequence.id)
+      expect(derivePresentation(source, state).activeSequence?.presentation.timed).toBe(sequence.presentation.timed)
+    }
+  })
+
   it('shows all filters initially and hides cross-Scope Flows when either endpoint is hidden', () => {
     const source = runtime()
     const initial = createPresentationState(source)

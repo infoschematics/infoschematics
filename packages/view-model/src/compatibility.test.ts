@@ -102,16 +102,20 @@ describe('establishedInfoschematicOf', () => {
       ]
     })
     expect(adapted.standaloneScenes).toEqual([])
-    expect(adapted.themes[0]?.scenes[0]).toMatchObject({
+    expect(adapted.sequences?.map(({ presentation }) => presentation)).toEqual([
+      { callouts: false, display: 'expanded', timed: false },
+      { callouts: true, display: 'collapsed', timed: true }
+    ])
+    expect(adapted.sequences?.[0]?.scenes[0]).toMatchObject({
       id: 'OVR',
       focus: { artefacts: ['SRC', 'SNK'], flows: ['MED-01'] }
     })
-    expect(adapted.stories[0]?.scenes[0]).toMatchObject({
+    expect(adapted.sequences?.[1]?.scenes[0]).toMatchObject({
       id: 'STY-1',
       duration: 3,
       focus: { artefacts: ['SRC', 'SNK'], flows: ['MED-01'] }
     })
-    expect(adapted.stories[0]?.scenes[0]).not.toHaveProperty('sourceScene')
+    expect(adapted.sequences?.[1]?.scenes[0]).not.toHaveProperty('sourceScene')
   })
 
   it('lets a Flow override its Family line treatment', () => {
@@ -214,10 +218,11 @@ describe('establishedInfoschematicOf', () => {
           appearance: { icon: 'scope-icon' }
         }
       ],
-      themes: [
+      sequences: [
         {
           id: 'architecture',
           label: 'Architecture',
+          presentation: { callouts: true, display: 'expanded', timed: false },
           scenes: [
             {
               id: 'delivery',
@@ -248,7 +253,7 @@ describe('establishedInfoschematicOf', () => {
     })
     expect(adapted.infoschematic.graphics[0]?.scopes).toEqual([])
     expect(adapted.infoschematic.graphics[0]?.renderer).toEqual({ key: 'note', version: 1 })
-    expect(adapted.themes[0]?.scenes[0]?.focus).toEqual({
+    expect(adapted.sequences?.[0]?.scenes[0]?.focus).toEqual({
       artefacts: ['SRC', 'SNK'],
       flows: ['DATA-01'],
       graphics: []

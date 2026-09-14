@@ -66,10 +66,11 @@ export const formatParityDefinition: Infoschematic = {
       }
     ]
   },
-  themes: [
+  sequences: [
     {
       id: 'OVERVIEW',
       label: 'Overview',
+      presentation: { display: 'expanded', timed: false, callouts: false },
       scenes: [
         {
           id: 'ALL',

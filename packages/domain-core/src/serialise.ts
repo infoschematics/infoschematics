@@ -6,17 +6,7 @@ import { defaultCalloutPositions, defineInfoschematicModel } from './model.ts'
 
 type Mapping = Record<string, unknown>
 
-const topLevelOrder = [
-  'id',
-  'title',
-  'subtitle',
-  'description',
-  'diagram',
-  'scopes',
-  'specifications',
-  'stories',
-  'themes'
-]
+const topLevelOrder = ['id', 'title', 'subtitle', 'description', 'diagram', 'scopes', 'specifications', 'sequences']
 
 const diagramOrder = [
   'bounds',
@@ -51,7 +41,6 @@ const fieldOrder = [
   'realisedBy',
   'interfaces',
   'operations',
-  'question',
   'scopes',
   'elements',
   'adapts',
@@ -64,8 +53,7 @@ const fieldOrder = [
   'waypoints',
   'diagram',
   'specifications',
-  'stories',
-  'themes',
+  'sequences',
   'collections',
   'families',
   'cards',
@@ -80,6 +68,10 @@ const fieldOrder = [
   'show',
   'hide',
   'focus',
+  'presentation',
+  'display',
+  'timed',
+  'callouts',
   'scenes',
   'callout',
   'duration',
@@ -148,7 +140,7 @@ const isMapping = (value: unknown): value is Mapping =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
 const emptyCollectionIsDefault = (key: string, context: string): boolean =>
-  (context === '<root>' && ['scopes', 'specifications', 'stories', 'themes'].includes(key)) ||
+  (context === '<root>' && ['scopes', 'specifications', 'sequences'].includes(key)) ||
   (context === 'diagram' &&
     ['collections', 'families', 'cards', 'fabrics', 'points', 'regions', 'flows', 'overlays'].includes(key))
 

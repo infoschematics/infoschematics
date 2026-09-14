@@ -6,7 +6,7 @@ Deterministic, accessible, framework-neutral SVG output from the canonical model
 
 ### STATIC-001 — Scene visibility is explicit
 
-The caller MAY select a Standalone Scene, Thematic Scene, or Story Scene. The renderer MUST apply the selected Scene's focus deterministically and MUST make the treatment of unfocused content explicit through options rather than interactive state.
+The caller MAY select a Standalone Scene or a Sequence Scene. The renderer MUST apply the selected Scene's focus deterministically and MUST make the treatment of unfocused content explicit through options rather than interactive state.
 
 _Conformance:_ pending
 

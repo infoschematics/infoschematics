@@ -880,11 +880,12 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
     }
   ],
   specifications: [],
-  stories: [
+  sequences: [
     {
       id: 'STORY-01',
       label: 'From contract to Audience',
-      question: 'How does one authored Infoschematic reach its Audience?',
+      description: 'How does one authored Infoschematic reach its Audience?',
+      presentation: { display: 'collapsed', timed: true, callouts: true },
       scenes: [
         {
           callout: {
@@ -965,13 +966,11 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
           label: 'Publish through a host'
         }
       ]
-    }
-  ],
-  subtitle: 'One serialisable product from authored data to public host',
-  themes: [
+    },
     {
       id: 'OVERVIEW',
       label: 'Overview',
+      presentation: { display: 'expanded', timed: false, callouts: false },
       scenes: [
         {
           description: 'The dependency-free contract supports two independent framework-neutral behaviour packages.',
@@ -1065,6 +1064,7 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
       ]
     }
   ],
+  subtitle: 'One serialisable product from authored data to public host',
   title: 'An Infoschematic of Infoschematics'
 })
 

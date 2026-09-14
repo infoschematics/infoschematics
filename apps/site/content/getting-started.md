@@ -9,7 +9,7 @@ Most diagrams show boxes and arrows. An Infoschematic also records how the diagr
 The definition has two complementary parts:
 
 - **The diagram** describes the visible structure using Regions, Fabrics, Cards, Flows, Points, and Graphics.
-- **The explanation** uses Scopes, Scenes, Themes, Stories, and Callouts to tailor what an audience sees and how a guided narrative unfolds.
+- **The explanation** uses Scopes, Scenes, Sequences, and Callouts to tailor what an Audience sees and how a guided narrative unfolds.
 
 The [Components guide](/docs/components/) shows these parts together before you need to learn their exact schema names.
 
@@ -26,7 +26,7 @@ Start with only the parts you need. You can use the same definition to:
 - experiment in the [Playground](/playground/) without installing anything;
 - produce deterministic SVG for documents, websites, and build pipelines;
 - let people explore the diagram interactively in Canvas;
-- guide an audience through Scenes and Stories in Present;
+- guide an Audience through Scenes and Sequences in Present;
 - design the diagram and its presentation material in Studio.
 
 Changing the way you use an Infoschematic does not require you to rewrite its underlying information.
@@ -34,7 +34,7 @@ Changing the way you use an Infoschematic does not require you to rewrite its un
 ## A simple workflow
 
 1. **Describe the system** — add the places, components, connections, and supporting graphics that make up the diagram.
-2. **Add the explanation** — define the scopes, moments, themes, or story needed for a particular audience.
+2. **Add the explanation** — define the Scopes, moments, and Sequences needed for a particular Audience.
 3. **Choose the experience** — render a still document, mount an interactive view, present a guided explanation, or continue editing in Studio.
 
 ## Choose your next step
@@ -46,7 +46,7 @@ Changing the way you use an Infoschematic does not require you to rewrite its un
 - **I want to write a definition** — follow the [Authoring guide](/docs/authoring/).
 - **I need a still image** — use [Static rendering](/docs/static-rendering/).
 - **I need an interactive site** — follow [React integration](/docs/react-integration/).
-- **I want to explain the diagram** — learn how [Explanation](/docs/explanation/) uses Scopes, Scenes, Themes, Stories, and Callouts.
+- **I want to explain the diagram** — learn how [Explanation](/docs/explanation/) uses Scopes, Scenes, Sequences, and Callouts.
 - **I want to guide an audience** — learn about [Present view](/docs/present/).
 - **I want a structured editor** — learn about [Studio view](/docs/studio/).
 

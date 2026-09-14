@@ -38,15 +38,15 @@ _Verify:_ renderer and Canvas integration tests under `packages/view-canvas/src/
 
 _Evidence:_ renderer and Canvas integration tests under `packages/view-canvas/src/` cover configured, unknown, unsupported and invalid Fabric renderers.
 
-### EXTEND-004 — Story Overlays resolve through authored data
+### EXTEND-004 — Sequence Overlays resolve through authored data
 
-A Story Overlay reference MUST resolve to a Overlay in the serialisable Infoschematic definition before Studio invokes the matching host renderer. An unresolved reference MUST NOT be treated as a renderer key or produce embedded fallback narrative.
+A Sequence Scene Overlay reference MUST resolve to an Overlay in the serialisable Infoschematic definition before Studio invokes the matching host renderer. An unresolved reference MUST NOT be treated as a renderer key or produce embedded fallback narrative.
 
 _Conformance:_ conforming
 
-_Verify:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Story Overlay references and accessible fallback rendering.
+_Verify:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Sequence Scene Overlay references and accessible fallback rendering.
 
-_Evidence:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Story Overlay references and accessible fallback rendering.
+_Evidence:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Sequence Scene Overlay references and accessible fallback rendering.
 
 ## Quality properties
 

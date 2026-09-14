@@ -307,7 +307,16 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
     // The target is the dependency: editor callbacks are intentionally
     // transient facades over stable React setters.
   }, [directTargetKey, presentation.mode])
-  const { highlight, playing, runningStory, runningStoryScene, visibleFlows, visibleScopes } = presentation
+  const {
+    activeSequence,
+    activeSequenceScene,
+    highlight,
+    playing,
+    runningStory,
+    runningStoryScene,
+    visibleFlows,
+    visibleScopes
+  } = presentation
   const diagramHighlight = useMemo(
     () => specificationDiagramHighlight(hoveredSpecification, visibleFlows) ?? highlight,
     [highlight, hoveredSpecification, visibleFlows]
@@ -464,6 +473,10 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
   }, [editor.setRoute, portAt, selectedRoute])
 
   useEffect(() => {
+    if (playing && activeSequence?.presentation.timed && activeSequenceScene && presentation.autoAdvance) {
+      const timer = window.setTimeout(presentation.stepSequence, activeSequenceScene.hold, 1)
+      return () => window.clearTimeout(timer)
+    }
     if (!playing || !runningStory || !presentation.autoAdvance) return
     const step = runningStory.steps[playing.step]
     if (!step) {
@@ -480,7 +493,16 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
     }, step.hold)
 
     return () => window.clearTimeout(timer)
-  }, [playing, presentation.autoAdvance, presentation.setPlaying, presentation.stopStory, runningStory])
+  }, [
+    activeSequence,
+    activeSequenceScene,
+    playing,
+    presentation.autoAdvance,
+    presentation.setPlaying,
+    presentation.stepSequence,
+    presentation.stopStory,
+    runningStory
+  ])
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -594,13 +616,15 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
 
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         event.preventDefault()
-        presentation.stepStory(event.key === 'ArrowRight' ? 1 : -1)
+        activeSequence
+          ? presentation.stepSequence(event.key === 'ArrowRight' ? 1 : -1)
+          : presentation.stepStory(event.key === 'ArrowRight' ? 1 : -1)
       } else if (event.key === ' ' || event.key === 'Spacebar') {
         event.preventDefault()
         presentation.toggleAutoAdvance()
       } else if (event.key === 'Escape') {
         event.preventDefault()
-        presentation.stopStory()
+        activeSequence ? presentation.stopSequence() : presentation.stopStory()
       }
     }
 
@@ -619,6 +643,9 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
     editor.artefactGeometry,
     editor.view.grid,
     playing,
+    activeSequence,
+    presentation.stepSequence,
+    presentation.stopSequence,
     presentation.stepStory,
     presentation.stopStory,
     presentation.toggleAutoAdvance,
@@ -809,7 +836,7 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
                 selectedArtefact={editor.selectedArtefact}
                 annotated={presentation.annotated}
                 grid={editor.view.grid}
-                graphic={runningStoryScene?.graphic}
+                graphic={activeSequenceScene?.graphic ?? runningStoryScene?.graphic}
                 responsiveCardDetails={responsiveCardDetails}
                 visibleScopes={visibleScopes}
                 viewportControllerRef={diagramViewport}
@@ -829,7 +856,25 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
                   }}
                 />
               ) : null}
-              {presentation.overlays && runningStoryScene ? (
+              {presentation.overlays && activeSequenceScene && activeSequence?.presentation.callouts ? (
+                <SceneCallout
+                  autoAdvance={activeSequence.presentation.timed ? presentation.autoAdvance : undefined}
+                  body={activeSequenceScene.caption || activeSequenceScene.description}
+                  calloutConfig={activeSequenceScene.calloutConfig}
+                  eyebrow={activeSequence.label}
+                  logo={activeSequenceScene.logo}
+                  onExit={presentation.stopSequence}
+                  onStep={presentation.stepSequence}
+                  onToggleAuto={activeSequence.presentation.timed ? presentation.toggleAutoAdvance : undefined}
+                  profile={activeSequenceScene.profile}
+                  step={activeSequenceScene}
+                  stepNumber={(playing?.step ?? 0) + 1}
+                  stepTotal={activeSequence.scenes.length}
+                  takeaways={activeSequenceScene.takeaways}
+                  title={activeSequenceScene.headline}
+                  wide={activeSequenceScene.cover}
+                />
+              ) : presentation.overlays && runningStoryScene ? (
                 <SceneCallout
                   autoAdvance={presentation.autoAdvance}
                   body={runningStoryScene.caption}

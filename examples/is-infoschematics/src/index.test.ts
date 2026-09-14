@@ -116,10 +116,12 @@ describe('infoschematicsInfoschematic', () => {
     const regionIds = diagram.regions.map((region) => region.id)
     const cardIds = diagram.cards.map((card) => card.id)
     const flowIds = diagram.flows.map((flow) => flow.id)
-    const sceneIds = infoschematicsInfoschematic.themes.flatMap((theme) => theme.scenes.map((scene) => scene.id))
-    const storyIds = infoschematicsInfoschematic.stories.map((story) => story.id)
+    const sceneIds = infoschematicsInfoschematic.sequences.flatMap((sequence) =>
+      sequence.scenes.map((scene) => scene.id)
+    )
+    const sequenceIds = infoschematicsInfoschematic.sequences.map((sequence) => sequence.id)
 
-    for (const ids of [regionIds, cardIds, flowIds, sceneIds, storyIds]) {
+    for (const ids of [regionIds, cardIds, flowIds, sceneIds, sequenceIds]) {
       expectUnique(ids)
     }
     const cards = new Set(cardIds)
@@ -133,24 +135,23 @@ describe('infoschematicsInfoschematic', () => {
       expect(flow.family && flowFamilies.has(flow.family)).toBe(true)
     }
 
-    for (const scene of infoschematicsInfoschematic.themes.flatMap((theme) => theme.scenes)) {
+    for (const scene of infoschematicsInfoschematic.sequences.flatMap((sequence) => sequence.scenes)) {
       for (const element of scene.focus?.elements ?? []) expect(cards.has(element) || flows.has(element)).toBe(true)
     }
 
-    for (const story of infoschematicsInfoschematic.stories) {
-      for (const scene of story.scenes) {
+    for (const sequence of infoschematicsInfoschematic.sequences) {
+      for (const scene of sequence.scenes) {
         const placement = scene.callout?.placement
         if (placement && 'element' in placement) expect(cards.has(placement.element)).toBe(true)
       }
     }
   })
 
-  it('provides several reusable scenes and one concise story', () => {
-    expect(infoschematicsInfoschematic.themes).toHaveLength(1)
-    expect(infoschematicsInfoschematic.themes[0]?.scenes).toHaveLength(4)
-    expect(infoschematicsInfoschematic.stories).toHaveLength(1)
-    expect(infoschematicsInfoschematic.stories[0]?.scenes).toHaveLength(3)
-    expect(infoschematicsInfoschematic.stories[0]?.scenes.every((scene) => scene.focus?.elements?.length)).toBe(true)
+  it('provides expanded and collapsed sequences', () => {
+    expect(infoschematicsInfoschematic.sequences).toHaveLength(2)
+    expect(infoschematicsInfoschematic.sequences[0]?.scenes).toHaveLength(3)
+    expect(infoschematicsInfoschematic.sequences[1]?.scenes).toHaveLength(4)
+    expect(infoschematicsInfoschematic.sequences[0]?.scenes.every((scene) => scene.focus?.elements?.length)).toBe(true)
   })
 
   it('remains framework-neutral serialisable authored data', () => {

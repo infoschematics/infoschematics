@@ -16,7 +16,7 @@ _Evidence:_ `ProductionMode` and `createProductionState` in `packages/view-prese
 
 ### PRESENT-002 — Mode changes preserve preferences, not presentation activity
 
-Audience preferences and filters, active presentation focus and Story playback, and Producer editing state MUST remain independently owned. Entering `design` or `direct` MUST stop Story playback and clear the active Standalone Scene, Thematic Scene or Story while retaining Scope and Flow-family filters and other Audience preferences. Returning to `present` MUST retain those preferences and MUST NOT resume playback or restore cleared focus automatically.
+Audience preferences and filters, active Sequence focus and playback, and Producer editing state MUST remain independently owned. Entering `design` or `direct` MUST stop Sequence playback and clear the active Standalone or Sequence Scene while retaining Scope and Flow-family filters and other Audience preferences. Returning to `present` MUST retain those preferences and MUST NOT resume playback or restore cleared focus automatically.
 
 Reasserting the current mode MUST leave all three state areas unchanged.
 
@@ -38,7 +38,7 @@ _Evidence:_ initial selection and individual toggle actions in `packages/view-pr
 
 ### PRESENT-004 — No Scene means full-strength rendering
 
-When no Standalone Scene, Thematic Scene or Story Scene is active, every visible artefact and Flow MUST render without Scene dimming. Selecting one focus source MUST clear the other focus sources.
+When no Standalone Scene or Sequence Scene is active, every visible artefact and Flow MUST render without Scene dimming. Selecting one focus source MUST clear the other focus source.
 
 _Conformance:_ conforming
 
@@ -80,7 +80,7 @@ _Evidence:_ `packages/view-studio/src/app/panels/ModelRegister.tsx` reads the ru
 
 ### PRESENT-008 — Keyboard help reflects presentation controls
 
-Present View MUST expose in-view keyboard help for Story stepping, automatic-advance control and exit, and for Thematic Scene stepping and clearing. The corresponding Callout actions MUST also be available as labelled buttons.
+Present View MUST expose in-view keyboard help for Sequence stepping and exit, plus automatic-advance control for timed Sequences. The corresponding Callout actions MUST also be available as labelled buttons.
 
 _Conformance:_ conforming
 
@@ -90,7 +90,7 @@ _Evidence:_ `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages
 
 ### PRESENT-009 — The Infoschematic can take the available canvas
 
-Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable Architectural Scope, Flow Family, Story and Thematic Scene controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
+Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable Architectural Scope, Flow Family and Sequence controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
 
 _Conformance:_ conforming
 

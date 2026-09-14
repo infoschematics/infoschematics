@@ -181,6 +181,13 @@ const focusOf = (config: InfoschematicConfig, selection: SvgSceneSelection | und
     )
   }
 
+  if (selection.kind === 'sequence') {
+    return (
+      config.sequences?.find((sequence) => sequence.id === selection.sequenceId)?.scenes[selection.sceneIndex]?.focus ??
+      null
+    )
+  }
+
   const scene = config.stories.find((story) => story.id === selection.storyId)?.scenes[selection.sceneIndex]
   if (!scene) return null
   const source = scene.sourceScene

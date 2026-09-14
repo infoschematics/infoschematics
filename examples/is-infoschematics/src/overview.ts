@@ -23,7 +23,7 @@ export const homepageInfoschematic = defineInfoschematicModel({
       {
         bounds: { height: 120, width: 240, x: 64, y: 224 },
         collection: 'presentation',
-        description: 'Scenes, themes, stories',
+        description: 'Scenes and sequences',
         id: 'PRS-02',
         label: 'Presentation',
         ports: { east: 1 },
@@ -185,8 +185,7 @@ export const homepageInfoschematic = defineInfoschematicModel({
     }
   ],
   specifications: [],
-  stories: [],
+  sequences: [],
   subtitle: 'Structure and presentation, rendered or presented',
-  themes: [],
   title: 'What makes an Infoschematic'
 })

@@ -5,7 +5,7 @@ Studio adds [Producer](/docs/reference/vocabulary/#producer) capability to [Pres
 Studio supports two closely related loops:
 
 - [**Design**](/docs/reference/vocabulary/#design) shapes the Infoschematic itself: its artefacts, geography, identity, layout, ports, and Flows.
-- [**Direct**](/docs/reference/vocabulary/#direct) shapes its presentation material: Scenes, Themes, Stories, Callouts, and Graphics.
+- [**Direct**](/docs/reference/vocabulary/#direct) shapes its presentation material: Scenes, Sequences, Callouts, and Overlays.
 
 A session always starts in Present — the audience experience — and a Producer switches into Design or Direct deliberately. Design and Direct work on the complete authored content rather than the audience's filtered projection, so a hidden artefact never becomes unreachable while editing.
 

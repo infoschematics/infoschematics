@@ -12,7 +12,7 @@ export const myInfoschematic = defineInfoschematic({
 })
 ```
 
-This produces a 1200-by-800 blank canvas with empty artefact, [Scene](/docs/reference/vocabulary/#scene), [Theme](/docs/reference/vocabulary/#theme), and [Story](/docs/reference/vocabulary/#story) collections. Add an `id` only when the host needs a stable namespace for local editorial preferences or drafts.
+This produces a 1200-by-800 blank canvas with empty artefact, [Scene](/docs/reference/vocabulary/#scene), and [Sequence](/docs/reference/vocabulary/#sequence) collections. Add an `id` only when the host needs a stable namespace for local editorial preferences or drafts.
 
 ## Add structure
 
@@ -108,9 +108,25 @@ Static SVG hosts can additionally pass `renderInfoschematicSvg(config, { annotat
 
 ## Add presentation material
 
-Use `standaloneScenes`, `themes`, and `stories` beside the structural `infoschematic` field. A Scene focuses artefacts and Flows, reveals Graphics, and may carry one [Callout](/docs/reference/vocabulary/#callout).
+Use `sequences` beside the structural `diagram` field. Every Sequence owns its Scenes and requires explicit display, timing, and Callout presentation settings:
 
-Copying a Standalone Scene into a Theme or Story creates independently owned material. Do not retain hidden object links or runtime references between them.
+```yaml
+sequences:
+  - id: OVERVIEW
+    label: Architecture overview
+    description: How the parts fit together
+    presentation:
+      display: expanded
+      timed: false
+      callouts: true
+    scenes:
+      - id: DELIVERY
+        label: Delivery path
+        focus:
+          elements: [CDN, PLAYER, MEDIA-01]
+```
+
+Use `display: expanded` or `collapsed`, combine either with `timed: true` or `false`, and use `callouts` to control authored Callout rendering independently. Copying a Scene between Sequences creates independently owned material; do not retain hidden object links, inheritance, or runtime references between them.
 
 ## Keep Flow signals outside authored data
 
@@ -126,7 +142,7 @@ Open Design when you want the complete authored Infoschematic rather than the Au
 
 The Library provides Card, Fabric and Flow starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
 
-Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Story Scene's direct Graphic reference before removing that Graphic through Studio.
+Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
 
 ## Author as a document: YAML, JSON, or TypeScript
 
@@ -165,7 +181,7 @@ The `$schema` key is editor metadata; the loader removes it before validating. T
 
 Prefer the compact YAML form for hand-authored canonical [Infoschematics](/docs/reference/vocabulary/#infoschematic). JSON syntax remains valid input, and typed TypeScript code can construct the same structured model. Shorthand exists only at the document boundary: parsing expands it before a View, Studio, or programmatic consumer receives the model.
 
-Order every mapping by meaning rather than alphabetically. Put identity first (`id`, `title` or `label`, `subtitle`, `description`), followed by classification, geometry, nested content, then appearance. At the document root use `id`, `title`, `subtitle`, `description`, `diagram`, `specifications`, `stories`, `themes`. Within `diagram`, use `bounds` and `appearance`; vocabularies (`collections`, `sets`, `families`); placeables (`cards`, `fabrics`, `points`, `regions`); wiring (`flows`, `overlays`); then `calloutPositions`.
+Order every mapping by meaning rather than alphabetically. Put identity first (`id`, `title` or `label`, `subtitle`, `description`), followed by classification, geometry, nested content, then appearance. At the document root use `id`, `title`, `subtitle`, `description`, `diagram`, `scopes`, `specifications`, `sequences`. Within `diagram`, use `bounds` and `appearance`; vocabularies (`collections`, `families`); placeables (`cards`, `fabrics`, `points`, `regions`); wiring (`flows`, `overlays`); then `calloutPositions`.
 
 Use SVG view-box order for bounds, coordinate-pair notation for positions, CSS box shorthand clockwise from north for ports, SVG points syntax for waypoints, and an arrow for a Flow's endpoints:
 

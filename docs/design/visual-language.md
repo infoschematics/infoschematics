@@ -171,7 +171,7 @@ Controls should read as compact instrument controls rather than promotional call
 - Keep filtering separate from signalling, so inspecting an Infoschematic never causes accidental animation.
 - Keep independent grouping dimensions visually distinct.
 - Summarise the current view in quiet, concise text.
-- Keep reset actions separate from Scene and Story navigation.
+- Keep reset actions separate from Scene and Sequence navigation.
 - Preserve access to essential Present controls when surrounding panels are collapsed.
 
 ## Accessibility and presentation resilience

@@ -1,6 +1,6 @@
 # Present an Infoschematic
 
-[Present](/docs/reference/vocabulary/#present) is the audience-facing view around an Infoschematic. It lets a presenter control what remains visible, focus the [audience](/docs/reference/vocabulary/#audience) on a [Scene](/docs/reference/vocabulary/#scene), and move through a [Story](/docs/reference/vocabulary/#story) — explaining the model without changing it.
+[Present](/docs/reference/vocabulary/#present) is the Audience-facing view around an Infoschematic. It lets a presenter control what remains visible, focus the [Audience](/docs/reference/vocabulary/#audience) on a [Scene](/docs/reference/vocabulary/#scene), and move through a [Sequence](/docs/reference/vocabulary/#sequence) without changing the model.
 
 ```tsx
 import { Present } from '@infoschematics/view-present'
@@ -12,32 +12,36 @@ export function App() {
 }
 ```
 
-## Three audience questions
+## Three Audience questions
 
 Present answers three questions in order:
 
-1. **What is this Infoschematic?** The diagram shows the Cards, Fabrics, and Flows and how they relate.
-2. **What is showing now?** The controls and Info panel explain which Scopes and Flow families remain visible.
-3. **What should I follow?** A Scene focuses part of the same diagram, and a Story moves through a sequence of those focused explanations.
+1. **What is this Infoschematic?** The Diagram shows Cards, Fabrics, Flows, and how they relate.
+2. **What is showing now?** The controls and Info panel explain which Scopes and Flow Families remain visible.
+3. **What should I follow?** A Scene focuses part of the same Diagram, and a Sequence orders focused explanations with explicit selection and timing behaviour.
 
-The diagram answers first; the controls help the audience read it without becoming a competing application surface.
+The Diagram answers the first question; the controls help the Audience read it without becoming a competing application surface.
 
 ## Filtering and focus
 
-Scope and Flow-family controls are **subtractive** — they decide what remains present. A Scene is **emphatic** — it brings named content forward and pushes the rest back without moving anything. Filters apply first, then the Scene focuses only what remains visible. Story focus takes precedence over Thematic Scene focus, which takes precedence over Standalone Scene focus; at most one is active, and clearing every Scene leaves all visible content at full strength.
+Scope and Flow-family controls are **subtractive** — they decide what remains present. Scene focus is **emphatic** — it brings named content forward and pushes the rest back without moving anything. Filters apply first, then a Scene focuses only what remains visible. At most one Standalone or Sequence Scene is active, and clearing it leaves all visible content at full strength.
 
-Geometry never changes during presentation. Placement, routes, ports, and labels stay fixed while filters and Scenes change, so the audience keeps its spatial memory of the diagram. A [Callout](/docs/reference/vocabulary/#callout) is the one thing that floats over the composition — and even it never moves the content beneath it.
+Geometry never changes during presentation. Placement, routes, ports, and labels stay fixed while filters and Scenes change, so the Audience keeps its spatial memory of the Diagram.
 
-## Story playback
+## Sequence selection and playback
 
-A running Story steps through its Scenes with optional automatic advance. The primary actions are ordinary labelled buttons mirrored by contextual keyboard shortcuts: while a Story runs, **left** and **right** step through it, **space** holds or resumes automatic advance, and **Escape** stops it. Thematic Scenes use the same stepping keys without implying playback. Keyboard help is available in the view, and Callouts announce changes politely with explicit previous, next, and exit controls.
+An expanded Sequence exposes every Scene as a selector. A collapsed Sequence exposes one selector that starts at its first Scene. Either display can advance manually; when `timed` is enabled, automatic advance is also available.
 
-The Details panel's Info view is a derived register of the same runtime model the diagram uses — useful for orientation, and unable to disagree with the diagram. For presenting, the Details panel and expanded controls can collapse so the diagram takes the available canvas, while a compact rail keeps the filters and Story controls in reach.
+The primary actions are ordinary labelled buttons and are mirrored by contextual keyboard shortcuts: **left** and **right** step through an active Sequence, **space** holds or resumes timed advance, and **Escape** stops it. Callouts expose explicit previous, next, and exit controls. A Sequence with `callouts: false` retains the same focus and navigation without drawing its authored Callouts.
+
+The Details panel's Info view is derived from the same runtime model as the Diagram. The Details panel and expanded controls can collapse so the Diagram takes the available canvas, while a compact rail keeps filters and Sequence controls in reach.
 
 ## Flow signals
 
-Entering a Scene produces one transient signal per focused Flow by default — the `focused-flows` policy. The occurrence stays stable across React re-renders, so completed motion does not replay; stepping to another Scene creates new occurrences and cancels obsolete ones. Set `signalPolicy="none"` when Scene entry should not read as Flow activity; a host can still supply explicit occurrences for real application events. Under `prefers-reduced-motion` the travelling pulse becomes finite in-place emphasis, and every signal is announced in a live region — motion is never the only evidence.
+Entering a Scene produces one transient signal per focused Flow under the default `focused-flows` policy. The occurrence stays stable across React renders, so completed motion does not replay; stepping to another Scene creates new occurrences and cancels obsolete ones. Set `signalPolicy="none"` when Scene entry should not signal Flow activity.
+
+Under `prefers-reduced-motion`, a travelling pulse becomes finite in-place emphasis, and every signal is announced in a live region. Motion is never the only evidence.
 
 ## Where next
 
-Present is one of three mount choices — the [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present and Studio and supplying host renderers. To understand Scenes and Stories before authoring them, see [Components](/docs/components/) and then continue to [authoring](/docs/authoring/).
+Present is one of three mount choices. The [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present, and Studio and supplying host renderers. To understand Scenes and Sequences before authoring them, see [Components](/docs/components/) and then continue to [authoring](/docs/authoring/).

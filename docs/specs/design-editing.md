@@ -148,7 +148,7 @@ _Evidence:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/vie
 
 Design MUST start from complete authored content rather than Audience filters and MUST materialise typed operations into a derived runtime for Canvas. Creates, movement, resize, property replacement, within-kind reorder and safe removal MUST be visible without mutating the host configuration. Existing component-offset, route, waypoint and attachment drafts MUST remain effective later overlays.
 
-Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Story Overlay independently of Design's complete-content Overlay preview.
+Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Sequence Overlay independently of Design's complete-content Overlay preview.
 
 Draft projection MUST follow dependency order: effective component geometry, effective port geometry, endpoint attachment, interior route geometry, then route-label placement. A later draft layer MUST NOT restore an endpoint coordinate made stale by an earlier component move, resize or port-count change. Combining typed artefact operations with established draft fields MUST produce one coherent preview and one coherent change set rather than whichever representation happened to render last.
 
@@ -160,9 +160,9 @@ _Evidence:_ composition in `packages/view-studio/src/app/App.tsx` and preview de
 
 ### EDIT-015 — Removal plans make consequences explicit
 
-Removing a Card or Fabric MUST include endpoint Flow removals before the owner. Applied Card removal MUST also account for Adapter Cards that wrap it. Removing a Region MUST NOT cascade to any other artefact. Studio MUST block Overlay removal while a Story Scene directly references the Overlay and expose the reason to the Producer.
+Removing a Card or Fabric MUST include endpoint Flow removals before the owner. Applied Card removal MUST also account for Adapter Cards that wrap it. Removing a Region MUST NOT cascade to any other artefact. Studio MUST block Overlay removal while a Sequence Scene directly references the Overlay and expose the reason to the Producer.
 
-The underlying materialiser MUST remain total when it receives a direct Overlay removal by clearing Story references and Scene focus entries atomically. This cleanup is a safety boundary, not permission for Studio to bypass the review block.
+The underlying materialiser MUST remain total when it receives a direct Overlay removal by clearing Sequence references and Scene focus entries atomically. This cleanup is a safety boundary, not permission for Studio to bypass the review block.
 
 _Conformance:_ conforming
 

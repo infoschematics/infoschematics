@@ -6,7 +6,7 @@ This reference defines the public language used by packages, authored configurat
 
 ### Product
 
-The **product** is an Infoschematic together with its Standalone Scenes, Themes, and Stories.
+The **product** is an Infoschematic together with its Standalone Scenes and Sequences.
 
 | Id | Infoschematics term | Also known as |
 | --- | --- | --- |
@@ -24,10 +24,8 @@ The **product** is an Infoschematic together with its Standalone Scenes, Themes,
 | `port` | <span id="port"></span>Port | connection point, attachment point |
 | `scene` | <span id="scene"></span>Scene | focus composition, highlight group |
 | `standalone-scene` | <span id="standalone-scene"></span>Standalone Scene | reusable Scene |
-| `thematic-scene` | <span id="thematic-scene"></span>Thematic Scene | Theme-owned Scene |
-| `story-scene` | <span id="story-scene"></span>Story Scene | step |
-| `theme` | <span id="theme"></span>Theme | series, collection, deck |
-| `story` | <span id="story"></span>Story | walkthrough, narrative |
+| `sequence-scene` | <span id="sequence-scene"></span>Sequence Scene | step, thematic scene |
+| `sequence` | <span id="sequence"></span>Sequence | theme, story, walkthrough, deck |
 | `callout` | <span id="callout"></span>Callout | narration card, caption card |
 
 The alternatives help readers recognise a concept; they do not introduce additional public terms.
@@ -85,19 +83,16 @@ Every independently identifiable artefact has a stable machine identifier. Human
 A **Scene** is a deterministic presentation composition over an Infoschematic. It declares which Fabrics, Cards, and Flows are in focus, which Graphics are visible, and whether explanatory Callout material is present.
 
 - A **Standalone Scene** is independently authored and reusable.
-- A **Thematic Scene** is owned by a Theme.
-- A **Story Scene** is owned by a Story.
+- A **Sequence Scene** is owned by one Sequence.
 - A **Callout** is optional explanatory material attached to one Scene. It is not an Infoschematic artefact.
 
-Entering a Scene produces the same focus and Graphic visibility regardless of the previously presented Scene. Copying a Standalone Scene into a Theme or Story creates independently owned material rather than a hidden runtime link.
+Entering a Scene produces the same focus and Overlay visibility regardless of the previously presented Scene. Copying a Standalone Scene into a Sequence creates independently owned material rather than a hidden runtime link.
 
-## Themes and Stories
+## Sequences
 
-A **Theme** groups independently owned Thematic Scenes around a shared subject. Its order supports navigation without implying timed narrative progression.
+A **Sequence** owns an ordered collection of Scenes. Its required presentation settings independently choose whether every Scene is expanded as a selector or the Sequence is collapsed behind one selector, whether progression is timed or manual, and whether Scene Callouts render.
 
-A **Story** arranges independently owned Story Scenes into a narrative. Timing and automatic progression are Story capabilities.
-
-Themes and Stories may be empty while being authored. Neither may contain another Theme or Story.
+Sequences may be empty while being authored and may not contain another Sequence. Reusing a Scene is a Studio copy operation rather than inheritance or a domain reference.
 
 ## Roles and modes
 
@@ -107,7 +102,7 @@ The application has three modes:
 
 - **Present** — Audience-facing experience and navigation.
 - **Design** — edits the Infoschematic and its six artefact kinds.
-- **Direct** — edits Standalone Scenes, Themes, Stories, Callouts, and Storyboards.
+- **Direct** — edits Standalone Scenes, Sequences, Callouts, and Storyboards.
 
 Its persistent regions are the **Infoschematic panel**, **Producer controls**, and **Details panel**. A region keeps its identity as the selected mode changes what it exposes.
 

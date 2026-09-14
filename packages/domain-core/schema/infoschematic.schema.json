@@ -1158,7 +1158,7 @@
         "additionalProperties": false
       }
     },
-    "stories": {
+    "sequences": {
       "readOnly": true,
       "type": "array",
       "items": {
@@ -1173,8 +1173,29 @@
           "description": {
             "type": "string"
           },
-          "question": {
-            "type": "string"
+          "presentation": {
+            "type": "object",
+            "properties": {
+              "display": {
+                "type": "string",
+                "enum": [
+                  "expanded",
+                  "collapsed"
+                ]
+              },
+              "timed": {
+                "type": "boolean"
+              },
+              "callouts": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "display",
+              "timed",
+              "callouts"
+            ],
+            "additionalProperties": false
           },
           "scenes": {
             "readOnly": true,
@@ -1379,226 +1400,7 @@
         "required": [
           "id",
           "label",
-          "scenes"
-        ],
-        "additionalProperties": false
-      }
-    },
-    "themes": {
-      "readOnly": true,
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "scenes": {
-            "readOnly": true,
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "label": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "visibility": {
-                  "type": "object",
-                  "properties": {
-                    "show": {
-                      "type": "object",
-                      "properties": {
-                        "elements": {
-                          "readOnly": true,
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "scopes": {
-                          "readOnly": true,
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "additionalProperties": false
-                    },
-                    "hide": {
-                      "type": "object",
-                      "properties": {
-                        "elements": {
-                          "readOnly": true,
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "scopes": {
-                          "readOnly": true,
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        }
-                      },
-                      "additionalProperties": false
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "focus": {
-                  "type": "object",
-                  "properties": {
-                    "elements": {
-                      "readOnly": true,
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "scopes": {
-                      "readOnly": true,
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                "callout": {
-                  "type": "object",
-                  "properties": {
-                    "title": {
-                      "type": "string"
-                    },
-                    "body": {
-                      "type": "string"
-                    },
-                    "takeaways": {
-                      "readOnly": true,
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "placement": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "at": {
-                              "anyOf": [
-                                {
-                                  "type": "object",
-                                  "properties": {
-                                    "x": {
-                                      "type": "number"
-                                    },
-                                    "y": {
-                                      "type": "number"
-                                    }
-                                  },
-                                  "required": [
-                                    "x",
-                                    "y"
-                                  ],
-                                  "additionalProperties": false
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "at"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "object",
-                          "properties": {
-                            "element": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "element"
-                          ],
-                          "additionalProperties": false
-                        }
-                      ]
-                    },
-                    "kind": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "key": {
-                              "type": "string",
-                              "minLength": 1
-                            },
-                            "version": {
-                              "type": "integer",
-                              "exclusiveMinimum": 0,
-                              "maximum": 9007199254740991
-                            }
-                          },
-                          "required": [
-                            "key",
-                            "version"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "string",
-                          "minLength": 1
-                        }
-                      ]
-                    },
-                    "properties": {
-                      "readOnly": true,
-                      "type": "object",
-                      "propertyNames": {
-                        "type": "string"
-                      },
-                      "additionalProperties": {
-                        "$ref": "#/$defs/__schema0"
-                      }
-                    }
-                  },
-                  "required": [
-                    "body"
-                  ],
-                  "additionalProperties": false
-                }
-              },
-              "required": [
-                "id",
-                "label"
-              ],
-              "additionalProperties": false
-            }
-          }
-        },
-        "required": [
-          "id",
-          "label",
+          "presentation",
           "scenes"
         ],
         "additionalProperties": false

@@ -115,6 +115,8 @@ export function usePresentation() {
 
   return {
     annotated: production.presentation.annotated,
+    activeSequence: derived.activeSequence,
+    activeSequenceScene: derived.activeSequenceScene,
     autoAdvance: production.presentation.autoAdvance,
     directTarget: production.directTarget,
     designing: production.mode === 'design',
@@ -132,6 +134,10 @@ export function usePresentation() {
     setMode,
     setPlaying,
     standaloneScene: derived.standaloneScene,
+    activateSequence: (sequence: (typeof runtime.sequences)[number], step?: number) =>
+      dispatchPresentation(
+        step === undefined ? { sequence, type: 'start-sequence' } : { sequence, step, type: 'toggle-sequence-scene' }
+      ),
     startStory: (story: RuntimeStory) => dispatchPresentation({ story, type: 'start-story' }),
     stepStory: (delta: number) =>
       dispatchPresentation({
@@ -139,6 +145,8 @@ export function usePresentation() {
         stories: runtime.stories,
         type: 'step-story'
       }),
+    stepSequence: (delta: number) =>
+      dispatchPresentation({ delta, sequences: runtime.sequences, type: 'step-sequence' }),
     stepThematicScene: (delta: number) =>
       dispatchPresentation({
         delta,
@@ -146,6 +154,7 @@ export function usePresentation() {
         type: 'step-theme'
       }),
     stopStory: () => dispatchPresentation({ type: 'stop-story' }),
+    stopSequence: () => dispatchPresentation({ type: 'stop-sequence' }),
     thematicScene: derived.thematicScene,
     toggleAnnotated: () =>
       dispatchPresentation({

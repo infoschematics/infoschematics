@@ -130,21 +130,20 @@ export type Scene = {
   callout?: Callout
 }
 
-export type Theme = {
-  id: string
-  label: string
-  description?: string
-  scenes: readonly Scene[]
+export type SequencePresentation = {
+  display: 'expanded' | 'collapsed'
+  timed: boolean
+  callouts: boolean
 }
 
-export type StoryScene = Scene & { duration?: number }
+export type SequenceScene = Scene & { duration?: number }
 
-export type Story = {
+export type Sequence = {
   id: string
   label: string
   description?: string
-  question?: string
-  scenes: readonly StoryScene[]
+  presentation: SequencePresentation
+  scenes: readonly SequenceScene[]
 }
 
 type Realising = { realisedBy?: readonly string[] }
@@ -205,8 +204,7 @@ export type Infoschematic = {
   description?: string
   diagram: Diagram
   scopes?: readonly ArchitecturalScope[]
-  themes?: readonly Theme[]
-  stories?: readonly Story[]
+  sequences?: readonly Sequence[]
   specifications?: readonly SpecificationGroup[]
 }
 
@@ -225,13 +223,9 @@ export type DefinedDiagram = Omit<
   regions: readonly Region[]
 }
 
-export type DefinedInfoschematic = Omit<
-  Infoschematic,
-  'diagram' | 'scopes' | 'specifications' | 'stories' | 'themes'
-> & {
+export type DefinedInfoschematic = Omit<Infoschematic, 'diagram' | 'scopes' | 'sequences' | 'specifications'> & {
   diagram: DefinedDiagram
   scopes: readonly ArchitecturalScope[]
   specifications: readonly SpecificationGroup[]
-  stories: readonly Story[]
-  themes: readonly Theme[]
+  sequences: readonly Sequence[]
 }

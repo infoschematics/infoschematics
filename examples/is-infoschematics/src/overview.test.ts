@@ -27,7 +27,7 @@ describe('homepageInfoschematic', () => {
 
   it('names every product input and distinguishes static from live output', () => {
     expect(diagram.cards.find((card) => card.id === 'STR-01')?.description).toBe('Diagram, scopes, specifications')
-    expect(diagram.cards.find((card) => card.id === 'PRS-02')?.description).toBe('Scenes, themes, stories')
+    expect(diagram.cards.find((card) => card.id === 'PRS-02')?.description).toBe('Scenes and sequences')
     expect(diagram.cards.find((card) => card.id === 'OUT-04')?.stereotype).toBe('Static output')
     expect(diagram.cards.find((card) => card.id === 'OUT-05')?.stereotype).toBe('Live output')
   })

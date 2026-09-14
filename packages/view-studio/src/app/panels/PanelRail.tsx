@@ -1,19 +1,21 @@
 import { type RuntimeStory, useInfoschematic, useInfoschematicRenderers } from '@infoschematics/view-canvas'
-import { storyCanActivate, storyForEditing } from '../editor/scenes.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
-import { ThemeStrip } from './ThemeStrip.tsx'
 
 /* Present controls folded into 48px for a maximised diagram. */
 export function PanelRail({
-  onPlay,
+  onPlay: _onPlay,
   presentation
 }: {
-  onPlay: (story: RuntimeStory) => void
+  onPlay?: (story: RuntimeStory) => void
   presentation: Presentation
 }) {
-  const { config, infoschematicFamilies, infoschematicScopes, stories } = useInfoschematic()
+  const { infoschematicFamilies, infoschematicFlows, infoschematicRegister, infoschematicScopes, sequences } =
+    useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
-  const standaloneSceneIds = new Set(config.standaloneScenes.map((scene) => scene.id))
+  const validElements = new Set(infoschematicRegister.all.map(({ id }) => id))
+  const validFlows = new Set(infoschematicFlows.map(({ id }) => id))
+  const sceneCanActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
+    scene.components.some((id) => validElements.has(id)) || scene.flows.some((id) => validFlows.has(id))
 
   if (presentation.mode !== 'present') return null
 
@@ -53,50 +55,50 @@ export function PanelRail({
         ))}
       </section>
 
-      <section className="rail-group" aria-label="Stories">
-        {stories.map((story) => {
-          const authored = config.stories.find((candidate) => candidate.id === story.id)
-          const enabled = authored
-            ? storyCanActivate(storyForEditing(authored, config.standaloneScenes), standaloneSceneIds)
-            : false
-          return (
-            <button
-              aria-label={story.label}
-              aria-pressed={presentation.playing?.id === story.id}
-              className="rail-pathway"
-              disabled={!enabled}
-              key={story.id}
-              onClick={() => onPlay(story)}
-              title={`${story.label} — ${story.question}`}
-              type="button"
-            >
-              {story.short ?? story.code}
-            </button>
-          )
-        })}
-        <button
-          className="rail-toggle"
-          disabled={!presentation.playing}
-          onClick={presentation.stopStory}
-          title="Stop the Story"
-          type="button"
-        >
-          Clear
-        </button>
-      </section>
-
-      <section className="rail-group" aria-label="Themes">
-        <ThemeStrip compact presentation={presentation} />
-        <button
-          className="rail-toggle"
-          disabled={!presentation.thematicScene}
-          onClick={presentation.lightNothing}
-          title="Clear Theme"
-          type="button"
-        >
-          Clear
-        </button>
-      </section>
+      {sequences.length ? (
+        <section className="rail-group" aria-label="Sequences">
+          {sequences.flatMap((sequence) =>
+            sequence.presentation.display === 'expanded'
+              ? sequence.scenes.map((scene, step) => (
+                  <button
+                    aria-label={scene.label}
+                    aria-pressed={presentation.playing?.id === sequence.id && presentation.playing.step === step}
+                    className="rail-pathway"
+                    disabled={!sceneCanActivate(scene)}
+                    key={`${sequence.id}/${scene.id}`}
+                    onClick={() => presentation.activateSequence(sequence, step)}
+                    title={`${sequence.label} — ${scene.description}`}
+                    type="button"
+                  >
+                    {scene.code}
+                  </button>
+                ))
+              : [
+                  <button
+                    aria-label={sequence.label}
+                    aria-pressed={presentation.playing?.id === sequence.id}
+                    className="rail-pathway"
+                    disabled={!sequence.scenes.some(sceneCanActivate)}
+                    key={sequence.id}
+                    onClick={() => presentation.activateSequence(sequence)}
+                    title={`${sequence.label} — ${sequence.description}`}
+                    type="button"
+                  >
+                    {sequence.code}
+                  </button>
+                ]
+          )}
+          <button
+            className="rail-toggle"
+            disabled={!presentation.playing}
+            onClick={presentation.stopSequence}
+            title="Stop the Sequence"
+            type="button"
+          >
+            Clear
+          </button>
+        </section>
+      ) : null}
     </div>
   )
 }

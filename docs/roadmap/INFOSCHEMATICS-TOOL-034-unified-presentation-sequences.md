@@ -4,12 +4,12 @@ area: TOOL
 title: Unified presentation sequences
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-035]
 blocked_by: []
-baseline_ref: null
+baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-10T12:11:22Z
+updated_at: 2026-09-14T02:50:33Z
 ---
 
 ## Goal
@@ -34,14 +34,14 @@ The ownership decision is settled: every Sequence owns its Scenes directly. No u
 
 ## Steps
 
-- [ ] Replace canonical `Theme` and `Story` types with `Sequence`, `SequencePresentation`, and one owned Scene shape; require `display: expanded | collapsed`, `timed: boolean`, and `callouts: boolean`, and remove `question`.
-- [ ] Mirror the Sequence contract in Domain Core validation, reference checks, generated schema, definition defaults, and compact stable serialisation.
-- [ ] Translate established Themes to explicit expanded, untimed, callout-enabled Sequences and established Stories to explicit collapsed, timed, callout-enabled Sequences without changing the established input contract.
-- [ ] Replace the split runtime representation and presentation state with Sequence selection and playback that supports all four display/timing combinations; timed Scenes use authored duration with the current hold fallback.
-- [ ] Rebuild Present and Studio controls so expanded Sequences expose Scene entries, timed expanded Sequences also expose playback, collapsed Sequences expose one entry, and collapsed untimed Sequences advance manually.
-- [ ] Gate Scene callouts solely through `presentation.callouts`, use Sequence or Scene descriptions wherever Story questions were displayed, and preserve partner-callout rendering.
-- [ ] Migrate repository examples and fixtures, add parity coverage for all four presentation combinations, and visually inspect the controls and callouts at desktop and narrow widths.
-- [ ] Record the unified presentation decision and update the canonical model, core, vocabulary, and consumer guidance.
+- [x] Replace canonical `Theme` and `Story` types with `Sequence`, `SequencePresentation`, and one owned Scene shape; require `display: expanded | collapsed`, `timed: boolean`, and `callouts: boolean`, and remove `question`.
+- [x] Mirror the Sequence contract in Domain Core validation, reference checks, generated schema, definition defaults, and compact stable serialisation.
+- [x] Translate established Themes to explicit expanded, untimed, callout-enabled Sequences and established Stories to explicit collapsed, timed, callout-enabled Sequences without changing the established input contract.
+- [x] Replace the split runtime representation and presentation state with Sequence selection and playback that supports all four display/timing combinations; timed Scenes use authored duration with the current hold fallback.
+- [x] Rebuild Present and Studio controls so expanded Sequences expose Scene entries, timed expanded Sequences also expose playback, collapsed Sequences expose one entry, and collapsed untimed Sequences advance manually.
+- [x] Gate Scene callouts solely through `presentation.callouts`, use Sequence or Scene descriptions wherever Story questions were displayed, and preserve partner-callout rendering.
+- [x] Migrate repository examples and fixtures, add parity coverage for all four presentation combinations, and visually inspect the controls and callouts at desktop and narrow widths.
+- [x] Record the unified presentation decision and update the canonical model, core, vocabulary, and consumer guidance.
 
 ## Files touched
 
@@ -79,6 +79,41 @@ Update the overview, visual guide, and presentation guidance so the four support
 ### Roadmap
 
 Once the implementation lands, clear the build-order dependency from `INFOSCHEMATICS-TOOL-035`; do not close that follow-on automatically.
+
+## Review
+
+### Delivered
+
+From immutable baseline `e47f2ae54bd64431190ab9154576374c88b531a8`, canonical presentation material now uses owned `Sequence` Scenes with explicit `display`, `timed`, and `callouts` switches. Present, Studio, static rendering, examples, fixtures, schema, and documentation consume or explain the new contract while the established Theme and Story input boundary remains compatible.
+
+### Summary of changes
+
+- Replaced canonical Theme and Story types and schema fields with one Sequence model and removed canonical `question`.
+- Normalised established standalone Scenes, Themes, and Stories into explicit Sequences at the compatibility boundary.
+- Added Sequence runtime state, controls, timing, callout gating, signals, details, and static-renderer selection.
+- Migrated repository examples and format-parity fixtures, recorded ADR-INFOSCHEMATICS-019, and updated specifications and consumer guidance.
+- Cleared the build-order block on INFOSCHEMATICS-TOOL-035.
+
+### Verification
+
+- `bun run self:packages:build`
+- `bunx vitest run packages/domain-core packages/view-model packages/view-present packages/view-studio packages/render-svg examples/is-infoschematics examples/is-blank examples/is-system` — 49 files and 353 tests passed.
+- `bun run self:verify:typecheck`
+- `bun run self:check`
+- `ki repo audit --skill ki-specs --repo .`
+- Desktop and narrow playground screenshots on throwaway port 4187 confirmed the migrated format-parity model remains legible and responsive.
+
+### Outstanding concerns
+
+Direct's internal Theme and Story editor vocabulary remains temporarily compatibility-shaped and is explicitly owned by INFOSCHEMATICS-TOOL-035. The decision-record audit is otherwise blocked by the pre-existing non-canonical filename for ADR-INFOSCHEMATICS-018.
+
+### Post-change review
+
+The public canonical contract has one presentation concept and all four display/timing combinations are represented in tests. Compatibility is confined to established inputs and named transitional view/editor paths; no Scene inheritance or shared Scene vocabulary was introduced.
+
+### Mini recap
+
+Sequences now describe what an audience can select, whether progression is automatic, and whether callouts appear. Legacy inputs retain their former behaviour, and canonical view-internal cleanup can proceed independently.
 
 ## Discussion
 

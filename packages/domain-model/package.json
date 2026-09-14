@@ -86,6 +86,10 @@
       "types": "./dist/scene.d.ts",
       "import": "./dist/scene.js"
     },
+    "./sequence": {
+      "types": "./dist/sequence.d.ts",
+      "import": "./dist/sequence.js"
+    },
     "./scope": {
       "types": "./dist/scope.d.ts",
       "import": "./dist/scope.js"

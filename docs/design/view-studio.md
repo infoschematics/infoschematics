@@ -9,7 +9,7 @@ The destination is stated here so isolated editing affordances grow into one coh
 Studio supports two closely related loops:
 
 - **Design** shapes the Infoschematic: its artefacts, geography, identity, layout, ports and Flows.
-- **Direct** shapes its presentation material: Standalone Scenes, Themes, Stories, Callouts and Graphics.
+- **Direct** shapes its presentation material: Standalone Scenes, Sequences, Callouts and Overlays.
 
 Both loops should provide immediate visual feedback while keeping the authored `InfoschematicConfig` serialisable and reviewable. Studio derives runtime state from that configuration; it does not make browser state or React components part of the product.
 
@@ -17,7 +17,7 @@ Both loops should provide immediate visual feedback while keeping the authored `
 
 The application exposes one transient `ProductionMode`: `present`, `design` or `direct`. Present belongs to the Audience; Design and Direct belong to the Producer. A new session and every reload begin in Present, even when an editing draft has been retained.
 
-Mode does not collapse all interaction into one state object. Audience preferences and filters, active presentation focus and playback, and Producer editing state remain separate. Entering Design or Direct stops playback and clears the active Standalone Scene, Thematic Scene or Story without discarding the Audience's Scope and Flow-family filters. Returning to Present reuses those filters but never resumes a Story or restores presentation focus automatically.
+Mode does not collapse all interaction into one state object. Audience preferences and filters, active presentation focus and playback, and Producer editing state remain separate. Entering Design or Direct stops playback and clears the active Standalone or Sequence Scene without discarding the Audience's Scope and Flow-family filters. Returning to Present reuses those filters but never resumes a Sequence or restores presentation focus automatically.
 
 Design and Direct use the complete authored Infoschematic rather than the filtered Audience projection. Design therefore keeps every editable artefact reachable. Direct derives a separate draft preview from its active authoring target, so navigating or editing production material cannot accidentally change what Present had focused.
 
@@ -65,7 +65,7 @@ Studio has one primary selection unless a concrete operation requires more. The 
 - Selecting a Fabric or Card exposes identity, text, placement, renderer properties and ports.
 - Selecting a Flow exposes identity, endpoints, family, label and route.
 - Selecting a waypoint exposes its position and route operations.
-- Selecting a Scene, Theme or Story exposes its owned presentation material in Direct.
+- Selecting a Standalone Scene or Sequence exposes its owned presentation material in Direct.
 
 Clicking an artefact selects it; a short movement threshold separates that action from dragging. Clicking the empty Canvas or pressing Escape clears the selection. When labels overlap larger targets, the smaller explicit target takes precedence.
 
@@ -134,14 +134,13 @@ A label moves along its own route, not freely across the Canvas. Its authored po
 Direct uses the same Canvas to edit the product's presentation composition.
 
 - A Scene declares deterministic focus, visible Graphics and optional Callout material.
-- A Theme owns an ordered collection of Thematic Scenes without adding timing or narrative claims.
-- A Story owns ordered Story Scenes and can add narrative timing.
+- A Sequence owns an ordered collection of Scenes and explicitly selects expanded or collapsed display, manual or timed progression, and Callout visibility.
 
 Direct should distinguish editing the current Scene from merely navigating Present. Changing one Scene must not inherit accidental visibility or focus from whichever Scene was previously active.
 
-The active Direct target is an explicit discriminated choice rather than a generic selected tab. It identifies one Standalone Scene, Theme, Story, Callout or Storyboard and carries the stable identity needed for that kind. A Callout target also identifies its owning Theme or Story Scene. Switching targets changes the authoring context only; it does not activate the target in Present.
+The active Direct target is an explicit discriminated choice rather than a generic selected tab. It identifies one Standalone Scene, Sequence, Callout or Storyboard and carries the stable identity needed for that kind. A Callout target also identifies its owning Sequence Scene. Switching targets changes the authoring context only; it does not activate the target in Present.
 
-Theme and Story authoring begins with an empty ordered collection when that is the clearest valid draft. Empty Themes and Stories remain editable, undoable and reviewable in Direct, but Present cannot activate them until they contain a valid Scene. A Callout storyboard belongs to its selected presentation owner and previews Callout content and placement without becoming a second presentation-focus source.
+Sequence authoring begins with an empty ordered collection when that is the clearest valid draft. Empty Sequences remain editable, undoable and reviewable in Direct, but Present cannot activate them until they contain a valid Scene. A Callout storyboard belongs to its selected presentation owner and previews Callout content and placement without becoming a second presentation-focus source.
 
 Graphics and Callouts remain serialisable authored material selected by renderer keys and properties. Studio previews them through the host registry owned by Canvas and Present, including the same validation, diagnostics and accessible fallbacks. It does not embed implementations in configuration or create a Studio-only registration seam.
 
@@ -161,13 +160,13 @@ One serialisable draft contains typed artefact operations alongside the establis
 
 Change rows use deterministic phase and dependency order: creates precede updates, updates precede removals; containers precede dependants during creation and dependants precede owners during removal. Updates retain fixed kind depth and stable owner, authored index, field and identity ordering. Arrival timing does not become source order.
 
-Removal planning and materialisation keep relationships safe. Applied Card removal also removes wrapping Adapter Cards and every Flow ending on any removed Card; applied Fabric removal removes its endpoint Flows; applied Region removal cascades to nothing. Studio blocks an explicit Graphic removal while a Story Scene directly references it so the Producer can resolve the narrative choice. The framework-neutral materialiser also clears Graphic references and focus entries if it receives such an operation directly, keeping preview and handoff total rather than emitting a dangling reference.
+Removal planning and materialisation keep relationships safe. Applied Card removal also removes wrapping Adapter Cards and every Flow ending on any removed Card; applied Fabric removal removes its endpoint Flows; applied Region removal cascades to nothing. Studio blocks an explicit Overlay removal while a Sequence Scene directly references it so the Producer can resolve the narrative choice. The framework-neutral materialiser also clears Overlay references and focus entries if it receives such an operation directly, keeping preview and handoff total rather than emitting a dangling reference.
 
-Design renders complete authored content with the materialised draft layered into a derived runtime. Creates, movement, resize, property replacement, authored reordering and safe removal are visible before handoff without mutating the host configuration. Existing component-offset, route and waypoint drafts remain the final transient overlay. Present continues to resolve its active Story Graphic independently.
+Design renders complete authored content with the materialised draft layered into a derived runtime. Creates, movement, resize, property replacement, authored reordering and safe removal are visible before handoff without mutating the host configuration. Existing component-offset, route and waypoint drafts remain the final transient overlay. Present continues to resolve its active Sequence Overlay independently.
 
 ## Session boundary
 
-Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. The `ProductionMode`, active Direct target, selection, presentation focus and playback are transient; reload always returns to Present with no active focus or running Story. Undo history can remain session-local even where drafts persist.
+Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. The `ProductionMode`, active Direct target, selection, presentation focus and playback are transient; reload always returns to Present with no active focus or running Sequence. Undo history can remain session-local even where drafts persist.
 
 Persistence keys belong to the host or an explicitly identified Infoschematic. A configuration without an identity must not accidentally share production state with another blank or embedded instance.
 
