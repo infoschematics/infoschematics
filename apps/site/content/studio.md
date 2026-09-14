@@ -32,6 +32,8 @@ Applying the change set is a deliberate handoff, readable in review as model fra
 
 A draft can survive an accidental reload, but the session boundary holds: reload always returns to Present with no active focus or running Story.
 
+An artefact marked for removal remains visible, selectable and visibly pending until you lift the mark or apply the set.
+
 ## Where next
 
 Studio mounts like any other view — see the [React integration guide](/docs/react-integration/). The [authoring guide](/docs/authoring/) covers the same definition written directly, which remains the right choice for a definition that lives in a package.

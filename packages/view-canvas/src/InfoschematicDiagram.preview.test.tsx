@@ -368,8 +368,8 @@ describe('InfoschematicDiagram draft preview', () => {
 
     expect(markup).toContain('Fabric Replaced:90,60,190,90:drafted')
     expect(markup).toContain('Graphic Replaced:350,80,80,30:drafted')
-    expect(markup).not.toContain('data-artefact-id="card-a"')
-    expect(markup).not.toContain('data-artefact-id="flow-a"')
+    expect(markup).toContain('data-artefact-id="flow-a"')
+    expect(markup).toMatch(/<g(?=[^>]*data-artefact-id="card-a")(?=[^>]*class="[^"]*going)/)
     expect(markup.indexOf('data-artefact-id="graphic-b"')).toBeLessThan(markup.indexOf('data-artefact-id="graphic-a"'))
     expect(markup).toContain('aria-label="Region Region A"')
     expect(initial.infoschematic.fabrics[0]?.label).toBe('Fabric A')

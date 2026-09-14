@@ -144,6 +144,8 @@ The Library provides Card, Fabric and Flow starting points. Each insertion deep-
 
 Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
 
+An artefact marked for removal stays visible, selectable and visibly pending so you can review or lift the mark before applying it.
+
 ## Author as a document: YAML, JSON, or TypeScript
 
 The same definition can be a document instead of a compiled TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically. A `.ts` document is read in a strict TypeScript subset — comments, `import type` lines, and one exported object literal of strings, numbers, booleans, arrays, and nested objects — matched as data and never executed, so a definition module written in that subset loads without compiling. Try all three forms live in the [playground](/playground/) on the website.

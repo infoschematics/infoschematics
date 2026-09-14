@@ -158,11 +158,11 @@ Studio MUST have rendered interaction tests covering both read-only and editing-
 
 At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal and whole-draft discard. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-_Verify:_ rendered tests under `packages/view-canvas/src/` and `packages/view-studio/src/app/` drive interaction events and inspect resulting SVG geometry and change-set state.
+_Verify:_ run the Chromium suites in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`.
 
-_Evidence:_ rendered tests under `packages/view-canvas/src/` and `packages/view-studio/src/app/` drive interaction events and inspect resulting SVG geometry and change-set state.
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` exercises native coordinate conversion, pointer lifecycle, viewport movement, selection, hover, resize, reorder, pending removal, Flow attachment, Waypoint and segment gestures, route-label placement and dependent route projection; `packages/view-studio/src/app/App.browser.test.tsx` exercises keyboard and numeric movement, port counts, creation, property replacement and clearing, undo, redo, individual change removal and whole-draft discard against rendered SVG and the change list.
 
 ### DESIGN-016 — Register rows align without wrapping identity
 

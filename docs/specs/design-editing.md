@@ -126,11 +126,11 @@ Moving or resizing a Card or Fabric MUST carry every Flow route end attached to 
 
 When an Adapter or Wrapper Card derives its placement from another Card, moving either interactive representation MUST preserve the composition relationship rather than creating a second independent placement. A Flow attached to either constituent Card MUST follow the constituent Card whose port it names.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-_Verify:_ inspect derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ run the dependent-geometry cases in `packages/view-model/src/artefact-draft.test.ts` and the rendered Canvas and Studio interaction suites.
 
-_Evidence:_ derived changes in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`.
+_Evidence:_ `packages/view-model/src/artefact-draft.test.ts` covers authored, Adapter-attached, created, Waypoint-bearing and earlier-drafted routes; `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx` cover pointer, keyboard and numeric movement through rendered geometry and the reviewable change set.
 
 ### EDIT-013 — Library creation produces independent authored values
 

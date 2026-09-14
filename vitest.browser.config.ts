@@ -7,7 +7,14 @@ export default defineConfig({
   define: {
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
   },
+  optimizeDeps: {
+    noDiscovery: true,
+    include: ['vitest-browser-react', '@infoschematics/domain-core > yaml', '@infoschematics/domain-core > zod']
+  },
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom']
+  },
   test: {
     browser: {
       enabled: true,

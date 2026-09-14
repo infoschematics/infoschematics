@@ -980,8 +980,7 @@
    faded and struck through, until the reader applies the set or lifts the mark
    with the same key. Showing it as already absent would claim an edit the
    editor has not made. */
-.infoschematic-service.going,
-.infoschematic-flows .going {
+.infoschematic-svg .going {
   opacity: 0.32;
 }
 

@@ -361,6 +361,16 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
     },
     [editor.createdCards, editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes]
   )
+  const typedRemovals = useMemo(
+    () =>
+      Object.fromEntries(
+        editor.artefactOperations
+          .filter((operation) => operation.operation === 'remove')
+          .map((operation) => [operation.target.code ?? operation.target.id, {}])
+      ),
+    [editor.artefactOperations]
+  )
+  const pendingRemovals = useMemo(() => ({ ...editor.removals, ...typedRemovals }), [editor.removals, typedRemovals])
 
   /*
    * Two ports a drag has joined, waiting on a family.
@@ -506,9 +516,13 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
+      // Canvas handles keys on its focused SVG controls first. Respect that
+      // result so Delete and reorder do not reach this window shortcut a
+      // second time and immediately undo the edit they just requested.
+      if (event.defaultPrevented) return
+      const target = event.target
       // Leave these keys alone where they already mean something.
-      if (target?.closest('input, textarea, select, [role="tablist"]')) return
+      if (target instanceof Element && target.closest('input, textarea, select, [role="tablist"]')) return
 
       if (event.key === '?') {
         event.preventDefault()
@@ -772,7 +786,7 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
               <InfoschematicDiagram
                 artefactOperations={editor.artefactOperations}
                 componentOffsets={movedComponents}
-                removals={editor.removals}
+                removals={pendingRemovals}
                 highlight={diagramHighlight}
                 guides={editor.guides}
                 labelAlong={editor.labelPositions}

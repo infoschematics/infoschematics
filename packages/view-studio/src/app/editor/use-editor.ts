@@ -17,7 +17,7 @@ import {
   reorderArtefactOperation,
   resizeArtefactOperation
 } from '@infoschematics/view-model/editable'
-import type { Offset, Point } from '@infoschematics/view-model/geometry'
+import type { Box, Offset, Point } from '@infoschematics/view-model/geometry'
 import { type Guide, snapBoxToGuides, snapToGuides } from '@infoschematics/view-model/guides'
 import type { Side } from '@infoschematics/view-model/ports'
 import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing'
@@ -742,6 +742,15 @@ export function useEditor(
     setArtefactOperations((current) => recordArtefactOperation(current, operation))
   }
 
+  const effectiveBoxFor = (target: ArtefactSelection): Box | undefined => {
+    const value = effectiveArtefactValue(config, artefactOperations, target) as
+      | { box?: Box; placement?: Box | { box: Box } }
+      | undefined
+    if (value?.box) return value.box
+    if (!value?.placement) return undefined
+    return 'box' in value.placement ? value.placement.box : value.placement
+  }
+
   // Snapping works on the box, not the pointer: the pointer sits somewhere
   // inside the box, so pulling it onto the grid or a guide would leave the
   // box's own edges off both. `exact` is for keyboard steps, where a unit is a
@@ -753,8 +762,11 @@ export function useEditor(
       target.kind === selectedArtefactDetails.selection.kind && target.id === selectedArtefactDetails.selection.id
         ? selectedArtefactDetails
         : diagram.selectionFor(selectionKey(target))
-    if (!details || !details.capabilities.move) return
-    const geometry = details.geometry
+    if (!details?.capabilities.move) return
+    const geometry =
+      details.geometry.role === 'box'
+        ? { ...details.geometry, box: effectiveBoxFor(target) ?? details.geometry.box }
+        : details.geometry
     const offset = (() => {
       switch (geometry.role) {
         case 'box': {
@@ -824,7 +836,16 @@ export function useEditor(
 
   const removeSelectedArtefact = (): string | undefined => {
     if (!selectedArtefactDetails?.capabilities.remove) return undefined
-    const plan = planArtefactRemoval(config, selectedArtefactDetails.selection, artefactOperations)
+    const target = selectedArtefactDetails.selection
+    const existingRemoval = artefactOperations.some(
+      (operation) =>
+        operation.operation === 'remove' && operation.target.kind === target.kind && operation.target.id === target.id
+    )
+    const plan = planArtefactRemoval(
+      config,
+      target,
+      existingRemoval ? artefactOperations.filter((operation) => operation.operation !== 'remove') : artefactOperations
+    )
     if (plan.blockedReason) {
       setArtefactIssue(plan.blockedReason)
       return plan.blockedReason
@@ -832,8 +853,12 @@ export function useEditor(
     if (plan.operations.length === 0) return undefined
     checkpoint()
     closeGesture()
-    setArtefactOperations((current) => recordArtefactOperations(current, plan.operations))
-    selectArtefact(null)
+    if (existingRemoval) {
+      const lifted = new Set(plan.operations.map(artefactOperationKey))
+      setArtefactOperations((current) => current.filter((operation) => !lifted.has(artefactOperationKey(operation))))
+    } else {
+      setArtefactOperations((current) => recordArtefactOperations(current, plan.operations))
+    }
     return undefined
   }
 
@@ -874,7 +899,14 @@ export function useEditor(
 
   return {
     artefactCapabilities: selectedArtefactCapabilities,
-    artefactGeometry: selectedArtefactDetails?.geometry,
+    artefactGeometry:
+      selectedArtefactDetails?.geometry.role === 'box' &&
+      selectedArtefactDetails.movementTarget.id === selectedArtefactDetails.selection.id
+        ? {
+            ...selectedArtefactDetails.geometry,
+            box: effectiveBoxFor(selectedArtefactDetails.selection) ?? selectedArtefactDetails.geometry.box
+          }
+        : selectedArtefactDetails?.geometry,
     artefactIssue,
     artefactOperation,
     artefactOperations,
@@ -1048,6 +1080,18 @@ export function useEditor(
     placeAt: (key: string, axis: 'x' | 'y', value: number) => {
       const at = diagram.placementFor(key)
       if (at?.kind !== 'box' || !Number.isFinite(value)) return
+      if (selectedArtefactDetails && selectionKey(selectedArtefactDetails.selection) === key) {
+        const target = selectedArtefactDetails.movementTarget
+        const box = effectiveBoxFor(target) ?? at.box
+        moveSelectedArtefact(
+          {
+            x: (axis === 'x' ? value : box.x) + box.width / 2,
+            y: (axis === 'y' ? value : box.y) + box.height / 2
+          },
+          true
+        )
+        return
+      }
       const delta = value - at.box[axis]
       if (delta === 0) return
       checkpoint()

@@ -268,13 +268,31 @@ export function InfoschematicDiagram({
   viewportControls?: 'external' | 'overlay'
 }) {
   const hostRuntime = useInfoschematic()
-  const previewing = artefactOperations.length > 0
+  // Removal is a review state, not a materialised preview state. Keeping
+  // authored artefacts in the runtime lets Canvas draw and select them with
+  // the `going` treatment until the host applies the change set.
+  const previewOperations = useMemo(
+    () => artefactOperations.filter((operation) => operation.operation !== 'remove'),
+    [artefactOperations]
+  )
+  const pendingRemovals = useMemo(
+    () => ({
+      ...removals,
+      ...Object.fromEntries(
+        artefactOperations
+          .filter((operation) => operation.operation === 'remove')
+          .map((operation) => [operation.target.code ?? operation.target.id, {}])
+      )
+    }),
+    [artefactOperations, removals]
+  )
+  const previewing = previewOperations.length > 0
   const runtime = useMemo(
     () =>
       previewing
-        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.config, artefactOperations).config)
+        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.config, previewOperations).config)
         : hostRuntime,
-    [artefactOperations, hostRuntime, previewing]
+    [hostRuntime, previewing, previewOperations]
   )
   const {
     adapterFloor,
@@ -1229,7 +1247,7 @@ export function InfoschematicDiagram({
         aria-label={`Flow ${flow.code}`}
         data-artefact-id={selection.id}
         data-artefact-kind={selection.kind}
-        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${removals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}`}
+        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${pendingRemovals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}`}
         key={flow.id}
         onKeyDown={editing ? artefactKeyDown(selection, flow.code) : undefined}
         role={editing ? 'button' : undefined}
@@ -1427,7 +1445,7 @@ export function InfoschematicDiagram({
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
       <g
         aria-label={entry.label ?? entry.id}
-        className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${
+        className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${pendingRemovals[entry.id] ? ' going' : ''}${
           artefactSelected(selection, legacyKey) ? ' selected' : ''
         }`}
         data-artefact-id={selection.id}
@@ -1624,7 +1642,7 @@ export function InfoschematicDiagram({
             // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={`Region ${region.label}`}
-              className={`infoschematic-region artefact-selectable${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+              className={`infoschematic-region artefact-selectable${pendingRemovals[region.id] ? ' going' : ''}${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
               data-artefact-id={selection.id}
               data-artefact-kind={selection.kind}
               data-frame-treatment={treatment.frame}
@@ -1750,7 +1768,7 @@ export function InfoschematicDiagram({
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
               <g
                 aria-label={fabric.label}
-                className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+                className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${pendingRemovals[fabric.code] ? ' going' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 key={fabric.id}
@@ -1886,7 +1904,7 @@ export function InfoschematicDiagram({
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
               <g
                 aria-label={`${adapter.label}, holding ${adapter.wraps}`}
-                className={`infoschematic-adapter${editing ? ' selectable' : ''}${
+                className={`infoschematic-adapter${editing ? ' selectable' : ''}${pendingRemovals[adapter.code] ? ' going' : ''}${
                   highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
                 }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
                 data-artefact-id={selection.id}
@@ -2013,7 +2031,7 @@ export function InfoschematicDiagram({
                 className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
                   editing || focusing ? ' selectable' : ''
                 }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
-                  removals[card.code] ? ' going' : ''
+                  pendingRemovals[card.code] ? ' going' : ''
                 }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
