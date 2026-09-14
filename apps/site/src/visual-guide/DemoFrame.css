@@ -9,7 +9,9 @@
 .demo-frame__modes button[aria-pressed='true'] { border-color: #79c9ff55; color: #071624; background: #79c9ff; }
 .demo-frame__preview { min-height: 180px; overflow: hidden; background: #071624; }
 .demo-frame__preview figure { min-width: 0; margin: 0; }
-.demo-frame__preview img, .demo-frame__preview figure > section { display: block; width: 100%; height: auto; }
+.demo-frame__preview img, .demo-frame__preview figure > section { display: block; width: 100%; height: clamp(180px, 32vw, 360px); }
+.demo-frame__preview img { object-fit: contain; }
+.demo-frame__preview figure > .infoschematic { aspect-ratio: auto; }
 .demo-frame__preview figcaption { padding: 8px 12px; border-top: 1px solid #ffffff16; color: #9db4c9; font: 600 11px/1.4 'DM Mono', monospace; }
 .demo-frame__preview--variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
 .demo-frame__preview--variants figure + figure { border-left: 1px solid #ffffff16; }
