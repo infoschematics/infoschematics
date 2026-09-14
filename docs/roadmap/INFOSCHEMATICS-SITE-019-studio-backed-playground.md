@@ -6,10 +6,10 @@ theme: site-experience
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-043]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-13T18:09:40Z
+updated_at: 2026-09-14T19:30:34Z
 ---
 
 # Studio-backed playground
