@@ -825,6 +825,9 @@ a:focus-visible {
 }
 
 .overview-anatomy {
+  width: 100%;
+  max-width: 960px;
+  min-width: 0;
   margin-top: clamp(32px, 4vw, 48px);
 }
 
