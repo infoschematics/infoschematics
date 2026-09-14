@@ -9,7 +9,7 @@ blocks: [INFOSCHEMATICS-TOOL-035]
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T02:50:33Z
+updated_at: 2026-09-14T02:54:18Z
 ---
 
 ## Goal
@@ -102,10 +102,11 @@ From immutable baseline `e47f2ae54bd64431190ab9154576374c88b531a8`, canonical pr
 - `bun run self:check`
 - `ki repo audit --skill ki-specs --repo .`
 - Desktop and narrow playground screenshots on throwaway port 4187 confirmed the migrated format-parity model remains legible and responsive.
+- A throwaway Present harness on port 4188 rendered all four Sequence combinations at desktop and narrow widths; browser interaction confirmed a callout-enabled Sequence renders its callout and a callout-disabled Sequence does not.
 
 ### Outstanding concerns
 
-Direct's internal Theme and Story editor vocabulary remains temporarily compatibility-shaped and is explicitly owned by INFOSCHEMATICS-TOOL-035. The decision-record audit is otherwise blocked by the pre-existing non-canonical filename for ADR-INFOSCHEMATICS-018.
+Direct's internal Theme and Story editor vocabulary remains temporarily compatibility-shaped and is explicitly owned by INFOSCHEMATICS-TOOL-035. The narrow Present harness also exposes a pre-existing title/header collision addressed by the responsive-density work in INFOSCHEMATICS-TOOL-039; the new Sequence control bank itself wraps cleanly. The decision-record audit is otherwise blocked by the pre-existing non-canonical filename for ADR-INFOSCHEMATICS-018.
 
 ### Post-change review
 
