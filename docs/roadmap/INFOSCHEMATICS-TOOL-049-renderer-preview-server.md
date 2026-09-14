@@ -5,12 +5,11 @@ title: Renderer preview server
 theme: tool
 horizon: future
 status: draft
-candidate: true
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-13T20:08:57Z
+updated_at: 2026-09-14T07:02:11Z
 ---
 
 # Renderer preview server
