@@ -4,12 +4,12 @@ area: TOOL
 title: Canonical view internals
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 76fda523b613c91afed0343c9a3ad7db80cc3cc3
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T08:25:26Z
+updated_at: 2026-09-14T19:27:09Z
 ---
 
 # Canonical view internals
@@ -115,6 +115,10 @@ Review canonical-versus-established runtime parity, code-like editing identity, 
 ### Mini recap
 
 Canonical model concepts now remain canonical throughout runtime rendering and presentation. The remaining legacy edit projection is isolated and named for the next dependent roadmap item.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on the review packet above.
 
 ## Discussion
 

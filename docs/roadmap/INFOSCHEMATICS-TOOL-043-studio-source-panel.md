@@ -4,12 +4,12 @@ area: TOOL
 title: Studio source panel
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: []
 baseline_ref: a67000c108999b38b294d3e0c05141277851e619
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-14T14:34:52Z
+updated_at: 2026-09-14T19:27:09Z
 ---
 
 ## Goal
@@ -103,6 +103,10 @@ Review host acknowledgement timing, history branching after undo, invalid-source
 ### Mini recap
 
 Studio now owns the reusable YAML editing surface while the host still owns which validated document becomes current and whether it is saved.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on the review packet above.
 
 ## Discussion
 

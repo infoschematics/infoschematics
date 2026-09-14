@@ -4,12 +4,12 @@ area: TOOL
 title: Preserve YAML edits
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f2bdeee4ccaf57d6414309e4f4c09c34c8fcd148
 created_at: 2026-09-09T10:13:09Z
-updated_at: 2026-09-14T13:36:49Z
+updated_at: 2026-09-14T19:27:09Z
 ---
 
 ## Goal
@@ -108,6 +108,10 @@ Review comment retention around edited Sequence fields, add and reorder behaviou
 ### Mini recap
 
 Studio can now edit canonical YAML presentation content through the same lossless, stable-ID protocol already used for diagram elements, completing the source-preservation contract without giving the browser filesystem authority.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on the review packet above.
 
 ## Discussion
 
