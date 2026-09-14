@@ -1,4 +1,9 @@
 import {
+  applyInfoschematicDocumentEdit,
+  type InfoschematicDocument,
+  infoschematicDocumentModel
+} from '@infoschematics/domain-core'
+import {
   type DiagramViewportController,
   defineInfoschematicRenderers,
   InfoschematicContext,
@@ -22,9 +27,14 @@ import {
 } from '@infoschematics/view-model/runtime'
 import type { PresentProps } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  isStudioDocumentAcknowledgement,
+  projectStudioDocumentOperations,
+  type StudioDocumentChangeHandler
+} from './editor/document-operations.ts'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { infoschematicEditable } from './editor/infoschematic-editable.ts'
-import { type Attachment, gridSize, useEditor } from './editor/use-editor.ts'
+import { type Attachment, gridSize, type PendingOrigin, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
 import { useThemeComposition } from './editor/use-theme-composition.ts'
@@ -153,13 +163,44 @@ const roomForCard = (viewBox: Box, made: number): Box => ({
   y: viewBox.y + viewBox.height / 2 - 40 + made * 20
 })
 
-export function Studio({ config, renderers, responsiveCardDetails = false }: PresentProps) {
-  const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
+type StudioSourceProps =
+  | Readonly<{
+      /** Established serialisable input retained for v1 hosts. */
+      config: PresentProps['config']
+      document?: undefined
+    }>
+  | Readonly<{
+      /** Authored source document. When present, this is the rendering source. */
+      document: InfoschematicDocument
+      config?: never
+    }>
+
+export type StudioProps = Omit<PresentProps, 'config'> &
+  StudioSourceProps &
+  Readonly<{
+    /** Receives validated edits and source; the host decides whether to persist. */
+    onDocumentChange?: StudioDocumentChangeHandler
+  }>
+
+export function Studio({
+  config,
+  document: authoredDocument,
+  onDocumentChange,
+  renderers,
+  responsiveCardDetails = false
+}: StudioProps) {
+  const input = authoredDocument ? infoschematicDocumentModel(authoredDocument) : config
+  if (!input) throw new TypeError('Studio requires either config or an authored document.')
+  const runtime = useMemo(() => createInfoschematicRuntime(input), [input])
   const rendererRegistry = useMemo(() => defineInfoschematicRenderers(renderers ?? {}), [renderers])
   return (
     <InfoschematicRenderersContext value={rendererRegistry}>
       <InfoschematicContext value={runtime}>
-        <AppContent responsiveCardDetails={responsiveCardDetails} />
+        <AppContent
+          authoredDocument={authoredDocument}
+          onDocumentChange={onDocumentChange}
+          responsiveCardDetails={responsiveCardDetails}
+        />
       </InfoschematicContext>
     </InfoschematicRenderersContext>
   )
@@ -168,7 +209,15 @@ export function Studio({ config, renderers, responsiveCardDetails = false }: Pre
 /** Compatibility name retained for existing hosts while the additive View names settle. */
 export const App = Studio
 
-function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean }) {
+function AppContent({
+  authoredDocument,
+  onDocumentChange,
+  responsiveCardDetails
+}: {
+  authoredDocument?: InfoschematicDocument
+  onDocumentChange?: StudioDocumentChangeHandler
+  responsiveCardDetails: boolean
+}) {
   const runtime = useInfoschematic()
   const {
     flowsAfterCreations,
@@ -228,6 +277,27 @@ function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean 
   const editor = useEditor(buildEditable)
   const editorRef = useRef(editor)
   editorRef.current = editor
+  const emittedDocument = useRef<Readonly<{ origins: readonly PendingOrigin[]; source: string }> | null>(null)
+
+  useEffect(() => {
+    if (!authoredDocument) return
+    const emitted = emittedDocument.current
+    if (emitted && isStudioDocumentAcknowledgement(authoredDocument, emitted.source)) {
+      for (const origin of emitted.origins) editor.discardOne(origin)
+      emittedDocument.current = null
+      return
+    }
+    if (!onDocumentChange || editor.artefactOperations.length === 0) return
+    const projection = projectStudioDocumentOperations(authoredDocument, runtime.config, editor.artefactOperations)
+    if (!projection.ok) return
+    const applied = applyInfoschematicDocumentEdit(authoredDocument, projection.edit)
+    if (!applied.ok || emitted?.source === applied.source) return
+    emittedDocument.current = {
+      origins: editor.pending.flatMap((change) => (change.origin?.map === 'artefactOperations' ? [change.origin] : [])),
+      source: applied.source
+    }
+    onDocumentChange({ ...applied, edit: projection.edit })
+  }, [authoredDocument, editor.artefactOperations, editor.discardOne, editor.pending, onDocumentChange, runtime.config])
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
   const sceneList = useSceneList()

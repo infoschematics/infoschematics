@@ -27,5 +27,14 @@ export type {
 export { defineInfoschematicRenderers, resolveInfoschematicRenderer } from '@infoschematics/view-canvas'
 export type { PresentProps } from '@infoschematics/view-present'
 export { Present } from '@infoschematics/view-present'
+export type { StudioProps } from './app/App.tsx'
 export { App, Studio } from './app/App.tsx'
+export {
+  applyStudioDocumentOperations,
+  isStudioDocumentAcknowledgement,
+  projectStudioDocumentOperations,
+  type StudioDocumentChange,
+  type StudioDocumentChangeHandler,
+  type StudioDocumentProjectionResult
+} from './app/editor/document-operations.ts'
 export { readSpec } from './app/panels/contracts.ts'

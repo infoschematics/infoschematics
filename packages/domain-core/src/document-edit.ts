@@ -410,6 +410,18 @@ const changedElementsOf = (operations: readonly InfoschematicDocumentOperation[]
 const sameModel = (left: DefinedInfoschematic, right: DefinedInfoschematic): boolean =>
   JSON.stringify(left) === JSON.stringify(right)
 
+/** Read plain inert source data at a structured path without exposing YAML nodes. */
+export const infoschematicDocumentValue = (
+  document: InfoschematicDocument,
+  path: InfoschematicDocumentPath
+): JsonValue | undefined => {
+  const state = infoschematicDocumentState(document)
+  const invalid = validatePath(path)
+  if (invalid) return undefined
+  const location = locate(state.yaml, path)
+  return location ? nodeValueOf(location.node, state.yaml) : undefined
+}
+
 /** Apply a complete edit batch to a clone, validating before publishing it. */
 export const applyInfoschematicDocumentEdit = (
   document: InfoschematicDocument,

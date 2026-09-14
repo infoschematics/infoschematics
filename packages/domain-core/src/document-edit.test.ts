@@ -177,6 +177,49 @@ describe('applyInfoschematicDocumentEdit', () => {
     expect(withSequence.source.match(/elements:\n\s+- A\n\s+- B/g)).toHaveLength(2)
   })
 
+  it('addresses Sequence presentation and Scenes through the generic protocol', () => {
+    const added = applyInfoschematicDocumentEdit(parsedDocument(), {
+      operations: [
+        {
+          op: 'add',
+          path: [field('sequences'), id('SEQ')],
+          value: {
+            id: 'SEQ',
+            label: 'Sequence',
+            presentation: { callouts: true, display: 'expanded', timed: false },
+            scenes: [
+              { id: 'FIRST', label: 'First' },
+              { id: 'SECOND', label: 'Second' }
+            ]
+          }
+        }
+      ],
+      version: 1
+    })
+    expect(added.ok).toBe(true)
+    if (!added.ok) return
+
+    const edited = applyInfoschematicDocumentEdit(added.document, {
+      operations: [
+        {
+          op: 'replace',
+          path: [field('sequences'), id('SEQ'), field('presentation'), field('timed')],
+          value: true
+        },
+        {
+          before: 'FIRST',
+          op: 'move',
+          path: [field('sequences'), id('SEQ'), field('scenes'), id('SECOND')]
+        }
+      ],
+      version: 1
+    })
+    expect(edited.ok).toBe(true)
+    if (!edited.ok) return
+    expect(edited.model.sequences[0]?.presentation.timed).toBe(true)
+    expect(edited.model.sequences[0]?.scenes.map((scene) => scene.id)).toEqual(['SECOND', 'FIRST'])
+  })
+
   it('inserts new fields at house-order positions without disturbing existing fields', () => {
     const result = applyInfoschematicDocumentEdit(parsedDocument(), {
       operations: [

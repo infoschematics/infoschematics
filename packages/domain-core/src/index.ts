@@ -31,7 +31,8 @@ export {
   type InfoschematicDocumentPath,
   type InfoschematicDocumentPathSegment,
   type InfoschematicDocumentRemove,
-  type InfoschematicDocumentReplace
+  type InfoschematicDocumentReplace,
+  infoschematicDocumentValue
 } from './document-edit.ts'
 export { defaultCalloutPositions, defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {

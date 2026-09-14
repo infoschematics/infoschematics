@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, parseInfoschematicDocument } from '@infoschematics/domain-core'
 import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import {
   defineInfoschematicRenderers,
@@ -87,6 +87,8 @@ describe('App', () => {
     expect(source).toContain('onSpecificationHover={setHoveredSpecification}')
     expect(source).toContain('presentation.overlays && runningStoryScene')
     expect(source).toContain('takeaways={runningStoryScene.takeaways}')
+    expect(source).toContain('isStudioDocumentAcknowledgement(authoredDocument, emitted.source)')
+    expect(source).toContain('editor.discardOne(origin)')
     expect(source).not.toContain('presentation.takeaways ?')
   })
 
@@ -104,6 +106,20 @@ describe('App', () => {
     expect(markup).not.toContain('infoschematic-service')
     expect(localStorage.getItem).not.toHaveBeenCalled()
     expect(sessionStorage.getItem).not.toHaveBeenCalled()
+  })
+
+  it('renders from a host-owned authored document without requiring config', () => {
+    const parsed = parseInfoschematicDocument(`id: HOSTED
+title: Hosted document
+diagram:
+  bounds: 0 0 320 200
+`)
+    if (!parsed.ok) throw new Error('fixture should parse')
+
+    const markup = renderToStaticMarkup(<App document={parsed.document} onDocumentChange={vi.fn()} />)
+
+    expect(markup).toContain('<h1>Hosted document</h1>')
+    expect(markup).toContain('viewBox="0 0 320 200"')
   })
 
   it('starts each Studio session in explicit Present mode with Producer controls available', () => {
