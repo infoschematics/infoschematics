@@ -4,12 +4,12 @@ area: SITE
 title: Representation patterns guide
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b9f001f3c6b9f9a2828d946293fec7af41b8ad7a
 created_at: 2026-09-14T01:59:19Z
-updated_at: 2026-09-14T02:13:09Z
+updated_at: 2026-09-14T07:47:47Z
 ---
 
 # Representation patterns guide
@@ -101,6 +101,10 @@ The page follows the existing documentation shell on desktop and mobile. The das
 ### Mini recap
 
 Baseline `b9f001f3c6b9f9a2828d946293fec7af41b8ad7a`; result `e47f2ae54bd64431190ab9154576374c88b531a8`. The Site now explains the broader representation space and provides a concrete editable example without expanding the domain contract.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown under the current instruction to finish all Site-based roadmap items, on the review packet above.
 
 ## Discussion
 
