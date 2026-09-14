@@ -34,6 +34,7 @@ import {
 } from './editor/document-operations.ts'
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { infoschematicEditable } from './editor/infoschematic-editable.ts'
+import { sequencesWithEditorDrafts } from './editor/sequence-editing.ts'
 import { type Attachment, gridSize, type PendingOrigin, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
@@ -287,39 +288,87 @@ function AppContent({
   const editor = useEditor(buildEditable)
   const editorRef = useRef(editor)
   editorRef.current = editor
-  const emittedDocument = useRef<Readonly<{ origins: readonly PendingOrigin[]; source: string }> | null>(null)
+  const sceneList = useSceneList()
+  const sceneLibrary = useSceneLibrary()
+  const themeComposition = useThemeComposition()
+  const presentationEdited = sceneList.hasEdits || sceneLibrary.edited || themeComposition.edited
+  const editedSequences = useMemo(
+    () =>
+      sequencesWithEditorDrafts(runtime.config.sequences, {
+        collapsed: sceneList.hasEdits ? sceneList.stories : undefined,
+        expanded: themeComposition.edited ? themeComposition.themes : undefined,
+        overview: sceneLibrary.edited ? sceneLibrary.library : undefined
+      }),
+    [
+      runtime.config.sequences,
+      sceneLibrary.edited,
+      sceneLibrary.library,
+      sceneList.hasEdits,
+      sceneList.stories,
+      themeComposition.edited,
+      themeComposition.themes
+    ]
+  )
+  const emittedDocument = useRef<Readonly<{
+    origins: readonly PendingOrigin[]
+    presentation?: Readonly<{ library: boolean; source: string; stories: boolean; themes: boolean }>
+    source: string
+  }> | null>(null)
 
   useEffect(() => {
     if (!authoredDocument) return
     const emitted = emittedDocument.current
     if (emitted && isStudioDocumentAcknowledgement(authoredDocument, emitted.source)) {
       for (const origin of emitted.origins) editor.discardOne(origin)
+      if (emitted.presentation?.source === JSON.stringify(editedSequences)) {
+        if (emitted.presentation.library) sceneLibrary.revert()
+        if (emitted.presentation.stories) sceneList.revertAll()
+        if (emitted.presentation.themes) themeComposition.revert()
+      }
       emittedDocument.current = null
       return
     }
-    if (!onDocumentChange || editor.artefactOperations.length === 0) return
-    const projection = projectStudioDocumentOperations(authoredDocument, compatibilityConfig, editor.artefactOperations)
+    if (!onDocumentChange || (editor.artefactOperations.length === 0 && !presentationEdited)) return
+    const projection = projectStudioDocumentOperations(
+      authoredDocument,
+      compatibilityConfig,
+      editor.artefactOperations,
+      presentationEdited ? editedSequences : undefined
+    )
     if (!projection.ok) return
     const applied = applyInfoschematicDocumentEdit(authoredDocument, projection.edit)
     if (!applied.ok || emitted?.source === applied.source) return
     emittedDocument.current = {
       origins: editor.pending.flatMap((change) => (change.origin?.map === 'artefactOperations' ? [change.origin] : [])),
+      presentation: presentationEdited
+        ? {
+            library: sceneLibrary.edited,
+            source: JSON.stringify(editedSequences),
+            stories: sceneList.hasEdits,
+            themes: themeComposition.edited
+          }
+        : undefined,
       source: applied.source
     }
     onDocumentChange({ ...applied, edit: projection.edit })
   }, [
     authoredDocument,
     compatibilityConfig,
+    editedSequences,
     editor.artefactOperations,
     editor.discardOne,
     editor.pending,
-    onDocumentChange
+    onDocumentChange,
+    presentationEdited,
+    sceneLibrary.edited,
+    sceneLibrary.revert,
+    sceneList.hasEdits,
+    sceneList.revertAll,
+    themeComposition.edited,
+    themeComposition.revert
   ])
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
-  const sceneList = useSceneList()
-  const sceneLibrary = useSceneLibrary()
-  const themeComposition = useThemeComposition()
   const directTarget = presentation.directTarget
   const directUsesStandalone = directTarget?.kind === 'standalone-scene'
   const directUsesTheme =

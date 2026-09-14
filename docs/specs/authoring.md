@@ -151,3 +151,15 @@ _Conformance:_ conforming
 _Verify:_ `packages/domain-core/src/document-edit.test.ts` covers field and ID segments, add and move anchors, missing targets, and numeric-path rejection.
 
 _Evidence:_ `InfoschematicDocumentPathSegment` and `InfoschematicDocumentAnchor` in `packages/domain-core/src/document-edit.ts` are the only public path and collection-order vocabulary.
+
+### AUTHOR-015 — Studio presentation edits preserve authored source
+
+In document mode, Studio MUST project expanded and collapsed Sequence and Scene edits through stable-ID document operations without replacing the complete presentation tree.
+
+The projection may add, remove, or reorder Sequence and Scene members. Unchanged presentation fields and concrete syntax remain owned by the retained document.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers granular Sequence and Scene projection, comment retention, stable insertion, and idempotent reapplication; `App.browser.test.tsx` covers a canonical YAML Scene edit through Direct mode.
+
+_Evidence:_ `sequencesWithEditorDrafts` in `packages/view-studio/src/app/editor/sequence-editing.ts` retains unexposed canonical fields, while `sequenceOperations` in `document-operations.ts` emits field and stable-ID member operations.

@@ -2,6 +2,7 @@ import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
 import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLit } from './scene-library.ts'
+import { standaloneScenesForEditing } from './sequence-editing.ts'
 
 /**
  * A place to keep an edited scene library, and no more.
@@ -13,10 +14,17 @@ import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLi
  */
 export function useSceneLibrary() {
   const { compatibilityConfig: config, standaloneScenes, stories } = useInfoschematic()
-  const [draft, setDraft] = usePersistentState<readonly Scene[] | null>(config.id && `${config.id}.scenes`, null)
-  const [chosen, setChosen] = useState<string>(standaloneScenes[0]?.id ?? '')
+  const authored = useMemo(
+    () => (config.sequences?.length ? standaloneScenesForEditing(config.sequences) : standaloneScenes),
+    [config.sequences, standaloneScenes]
+  )
+  const [draft, setDraft] = usePersistentState<readonly Scene[] | null>(
+    config.id && `${config.id}.sequences.overview`,
+    null
+  )
+  const [chosen, setChosen] = useState<string>(authored[0]?.id ?? '')
 
-  const library = draft ?? standaloneScenes
+  const library = draft ?? authored
   const scene = library.find((entry) => entry.id === chosen) ?? library[0]
 
   /*
@@ -54,7 +62,10 @@ export function useSceneLibrary() {
       setDraft(next)
       setChosen(next[0]?.id ?? '')
     },
-    revert: () => setDraft(null),
+    revert: () => {
+      setDraft(null)
+      setChosen(authored[0]?.id ?? '')
+    },
     scene,
     source: libraryAsSource(library),
     toggle: (id: string, isFlow: boolean) => scene && setDraft(toggleLit(library, scene.id, id, isFlow))

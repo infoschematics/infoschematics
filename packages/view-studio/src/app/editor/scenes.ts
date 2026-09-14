@@ -112,9 +112,17 @@ export const clearScenes = (story: Story): Story => (story.steps.length === 0 ? 
  * the reader has to notice before they can fix it.
  */
 export const insertScene = (story: Story, after: number): Story => {
+  const used = new Set(story.steps.flatMap((scene) => (scene.authored.id ? [scene.authored.id] : [])))
+  let serial = story.steps.length + 1
+  let id = `${story.code}-SCN-${String(serial).padStart(2, '0')}`
+  while (used.has(id)) {
+    serial += 1
+    id = `${story.code}-SCN-${String(serial).padStart(2, '0')}`
+  }
   const authored: StorySceneConfig = {
     callout: { body: '' },
     duration: holdFor(''),
+    id,
     title: 'New scene'
   }
   const blank: Scene = {

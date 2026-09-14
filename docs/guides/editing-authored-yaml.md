@@ -69,6 +69,8 @@ Pass either established `config` input or an authored `document`, never both. In
 />
 ```
 
-Studio derives its structural selections from the canonical runtime, then projects typed Card, Fabric, Flow, Region and Overlay draft operations through an explicitly named compatibility edit boundary. This preserves compact Flow fields such as `link`, `waypoints` and `labelAt` instead of replacing the whole Flow. When the host supplies the emitted document as the new input, Studio discards only the draft operations represented by the accepted edit.
+Studio derives structural and presentation selections from the canonical runtime. It projects typed Card, Fabric, Flow, Region and Overlay draft operations through the explicitly named established-input edit boundary, preserving compact Flow fields such as `link`, `waypoints` and `labelAt` instead of replacing the whole Flow.
 
-Domain Core paths address Sequences, Scenes and presentation fields by stable IDs in the same way. YAML syntax trees remain inside Domain Core; View packages receive only the validated canonical model and document-edit results.
+Direct mode adapts canonical expanded and collapsed Sequences to its focused editor panels. Sequence and Scene changes return through field and stable-ID document paths, so changing one Scene label or focus does not replace the containing Sequence or the top-level presentation collection. Unexposed fields such as presentation switches, Scene visibility and Callout properties survive the edit.
+
+When the host supplies the emitted document as the new input, Studio discards only drafts represented by that accepted edit. YAML syntax trees remain inside Domain Core; View packages receive only the validated canonical model and document-edit results.

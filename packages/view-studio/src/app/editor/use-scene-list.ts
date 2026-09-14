@@ -15,6 +15,7 @@ import {
   storyForEditing,
   toggleLit
 } from './scenes.ts'
+import { storiesForEditing } from './sequence-editing.ts'
 
 /**
  * A place to keep an edited story, and no more.
@@ -31,10 +32,16 @@ import {
 export function useSceneList(_running?: { id: string; step: number } | null) {
   const { compatibilityConfig: config } = useInfoschematic()
   const authoredStories = useMemo(
-    () => config.stories.map((story) => storyForEditing(story, config.standaloneScenes)),
-    [config.standaloneScenes, config.stories]
+    () =>
+      config.sequences?.length
+        ? storiesForEditing(config.sequences)
+        : config.stories.map((story) => storyForEditing(story, config.standaloneScenes)),
+    [config.sequences, config.standaloneScenes, config.stories]
   )
-  const [drafts, setDrafts] = usePersistentState<Record<string, Story>>(config.id && `${config.id}.stories`, {})
+  const [drafts, setDrafts] = usePersistentState<Record<string, Story>>(
+    config.id && `${config.id}.sequences.collapsed`,
+    {}
+  )
   const [chosen, setChosen] = useState<string>(authoredStories[0]?.id ?? '')
   const [scene, setScene] = useState(0)
 
@@ -90,6 +97,7 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
     edit: (change: Partial<Scene>) => apply((current) => editScene(current, at, change)),
     /** Whether this story differs from what is authored, which is what the change set describes. */
     edited: Boolean(story && drafts[story.id]?.authored),
+    hasEdits: Object.keys(drafts).length > 0,
     insert: () => {
       apply((current) => insertScene(current, at))
       setScene(at + 1)
@@ -113,6 +121,7 @@ export function useSceneList(_running?: { id: string; step: number } | null) {
       if (!story) return
       setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== story.id)))
     },
+    revertAll: () => setDrafts({}),
     runTime: story ? runTime(story) : 0,
     toggle: (id: string, isFlow: boolean) => apply((current) => toggleLit(current, at, id, isFlow)),
     /*

@@ -26,7 +26,7 @@ Every successful edit returns an inverse. The inverse carries a semantically ver
 
 ## Consequences
 
-Untouched authored choices survive structured edits, undo can restore exact source, and change addresses remain stable across collection reordering. Runtimes and renderers continue to receive only canonical data.
+Untouched authored choices survive structured edits, undo can restore exact source, and change addresses remain stable across collection reordering. Runtimes and renderers continue to receive only canonical data. Studio adapts canonical Sequence categories into focused Direct editors and projects their changes as field or stable-ID member operations; it does not replace the complete presentation tree merely because an editor holds an ordered collection draft.
 
 Inverse envelopes may be larger than forward envelopes because exact restoration can require a source snapshot. Collaboration transport and merge policy remain separate concerns; this protocol defines deterministic local edits, not concurrent authority.
 

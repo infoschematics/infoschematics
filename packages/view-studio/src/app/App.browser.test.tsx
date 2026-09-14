@@ -1,5 +1,5 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
-import { expect, test } from 'vitest'
+import { defineInfoschematic, parseInfoschematicDocument } from '@infoschematics/domain-core'
+import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
 
@@ -154,4 +154,51 @@ test('Studio creation and property clearing stay rendered and reviewable until d
   discard.click()
   await expect.poll(() => container.querySelector('[data-artefact-kind="region"]')).toBeNull()
   expect(container.querySelector('.change-list')).toBeNull()
+})
+
+test('canonical YAML Sequences open in Direct mode and emit stable-id document edits', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: HOSTED
+title: Hosted sequences
+diagram:
+  bounds: 0 0 640 320
+sequences:
+  - id: OVERVIEW
+    label: Overview
+    presentation:
+      display: expanded
+      timed: false
+      callouts: false
+    scenes:
+      - id: SCN-01
+        label: Opening
+        description: Opening scene
+`)
+  if (!parsed.ok) throw new Error('hosted Sequence fixture should parse')
+  const changed = vi.fn()
+  const { container } = await render(<Studio document={parsed.document} onDocumentChange={changed} />)
+  const direct = container.querySelector<HTMLButtonElement>('button[aria-label^="Direct"]')
+  if (!direct) throw new Error('Studio has no Direct mode control')
+  direct.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
+
+  const label = [...container.querySelectorAll<HTMLInputElement>('.scene-fields input')].find(
+    (input) => input.value === 'Opening'
+  )
+  if (!label) throw new Error('canonical Overview Scene did not open in Direct mode')
+  const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  if (!setInputValue) throw new Error('browser has no native input value setter')
+  setInputValue.call(label, 'Edited opening')
+  label.dispatchEvent(new Event('input', { bubbles: true }))
+
+  await expect.poll(() => changed.mock.calls.length).toBeGreaterThan(0)
+  const change = changed.mock.calls.at(-1)?.[0]
+  expect(change?.model.sequences[0]?.scenes[0]?.label).toBe('Edited opening')
+  expect(change?.edit.operations[0]?.path).toEqual([
+    { field: 'sequences' },
+    { id: 'OVERVIEW' },
+    { field: 'scenes' },
+    { id: 'SCN-01' },
+    { field: 'label' }
+  ])
 })

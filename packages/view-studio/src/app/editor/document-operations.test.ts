@@ -4,7 +4,7 @@ import {
   parseInfoschematicDocument,
   serialiseInfoschematicYaml
 } from '@infoschematics/domain-core'
-import type { InfoschematicConfig } from '@infoschematics/domain-model'
+import type { InfoschematicConfig, Sequence } from '@infoschematics/domain-model'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
   type ArtefactSelection,
@@ -262,6 +262,66 @@ describe('Studio document operations', () => {
 
     expect(isStudioDocumentAcknowledgement(original, changed.source)).toBe(false)
     expect(isStudioDocumentAcknowledgement(accepted.document, changed.source)).toBe(true)
+  })
+
+  it('projects canonical Sequence edits by stable ids without replacing the presentation tree', () => {
+    const originalModel = infoschematicModelOf(config)
+    const originalSequence: Sequence = {
+      description: 'Presentation description',
+      id: 'SEQUENCE',
+      label: 'Sequence',
+      presentation: { callouts: true, display: 'expanded', timed: false },
+      scenes: [
+        {
+          callout: { body: 'Retained narration' },
+          focus: { elements: ['CARD-01'] },
+          id: 'SCENE-01',
+          label: 'First scene'
+        }
+      ]
+    }
+    const source = serialiseInfoschematicYaml({ ...originalModel, sequences: [originalSequence] })
+      .replace(
+        'description: Presentation description',
+        'description: Presentation description # retained sequence comment'
+      )
+      .replace('body: Retained narration', 'body: Retained narration # retained callout comment')
+    const parsed = parseInfoschematicDocument(source)
+    if (!parsed.ok) throw new Error('Sequence fixture should parse')
+    const changedSequence: Sequence = {
+      ...originalSequence,
+      label: 'Edited Sequence',
+      scenes: [
+        { id: 'SCENE-02', label: 'Inserted scene' },
+        ...originalSequence.scenes.map((scene) => ({
+          ...scene,
+          focus: { elements: ['CARD-01', 'FLOW-01'] },
+          label: 'Edited scene'
+        }))
+      ]
+    }
+
+    const projection = projectStudioDocumentOperations(parsed.document, config, [], [changedSequence])
+    expect(projection.ok).toBe(true)
+    if (!projection.ok) return
+    const result = applyStudioDocumentOperations(parsed.document, config, [], [changedSequence])
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.model.sequences[0]?.label).toBe('Edited Sequence')
+    expect(result.model.sequences[0]?.scenes.map(({ id }) => id)).toEqual(['SCENE-02', 'SCENE-01'])
+    expect(result.model.sequences[0]?.scenes[1]?.focus?.elements).toEqual(['CARD-01', 'FLOW-01'])
+    expect(result.source).toContain('description: Presentation description # retained sequence comment')
+    expect(result.source).toContain('body: Retained narration # retained callout comment')
+    expect(
+      projection.edit.operations.every((operation) => {
+        const first = operation.path[0]
+        return first && 'field' in first && first.field === 'sequences'
+      })
+    ).toBe(true)
+
+    const stable = applyStudioDocumentOperations(result.document, config, [], [changedSequence])
+    expect(stable.ok).toBe(true)
+    if (stable.ok) expect(stable.source).toBe(result.source)
   })
 
   it('rejects stale Studio operations instead of emitting an invalid edit', () => {

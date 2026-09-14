@@ -2,6 +2,7 @@ import type { ThematicSceneConfig, ThemeConfig } from '@infoschematics/domain-mo
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import { useMemo, useState } from 'react'
 import { usePersistentState } from '../hooks/use-persistent-state.ts'
+import { themesForEditing } from './sequence-editing.ts'
 import {
   addTheme,
   addThemeScene,
@@ -20,10 +21,17 @@ import {
 /** Persistent Theme drafts and transient Direct selection. */
 export function useThemeComposition() {
   const { compatibilityConfig: config } = useInfoschematic()
-  const [draft, setDraft] = usePersistentState<ThemeCollection | null>(config.id && `${config.id}.themes`, null)
-  const [chosenTheme, setChosenTheme] = useState(config.themes[0]?.id ?? '')
+  const authoredThemes = useMemo(
+    () => (config.sequences?.length ? themesForEditing(config.sequences) : config.themes),
+    [config.sequences, config.themes]
+  )
+  const [draft, setDraft] = usePersistentState<ThemeCollection | null>(
+    config.id && `${config.id}.sequences.expanded`,
+    null
+  )
+  const [chosenTheme, setChosenTheme] = useState(authoredThemes[0]?.id ?? '')
   const [chosenScene, setChosenScene] = useState(0)
-  const themes = draft ?? config.themes
+  const themes = draft ?? authoredThemes
   const theme = themes.find((candidate) => candidate.id === chosenTheme) ?? themes[0]
   const at = Math.min(chosenScene, Math.max(0, (theme?.scenes.length ?? 1) - 1))
   const scene = theme?.scenes[at]
@@ -101,7 +109,7 @@ export function useThemeComposition() {
     },
     revert: () => {
       setDraft(null)
-      setChosenTheme(config.themes[0]?.id ?? '')
+      setChosenTheme(authoredThemes[0]?.id ?? '')
       setChosenScene(0)
     },
     scene,

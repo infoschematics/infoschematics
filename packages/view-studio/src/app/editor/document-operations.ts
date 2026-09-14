@@ -5,12 +5,14 @@ import {
   type InfoschematicDocumentEdit,
   type InfoschematicDocumentEditResult,
   type InfoschematicDocumentOperation,
+  type InfoschematicDocumentPath,
+  infoschematicDocumentModel,
   infoschematicDocumentSource,
   infoschematicDocumentValue,
   infoschematicModelOf
 } from '@infoschematics/domain-core'
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
-import type { DefinedInfoschematic, JsonValue } from '@infoschematics/domain-model/model'
+import type { DefinedInfoschematic, JsonValue, Sequence } from '@infoschematics/domain-model/model'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import type { ArtefactKind, ArtefactSelection } from '@infoschematics/view-model/editable'
 
@@ -222,11 +224,104 @@ const projectOperation = (
   }
 }
 
+const objectDiff = (
+  path: InfoschematicDocumentPath,
+  before: Readonly<Record<string, JsonValue>>,
+  after: Readonly<Record<string, JsonValue>>,
+  ignored: ReadonlySet<string> = new Set()
+): readonly InfoschematicDocumentOperation[] =>
+  [...new Set([...Object.keys(before), ...Object.keys(after)])].flatMap((key) => {
+    if (ignored.has(key) || same(before[key], after[key])) return []
+    const member = [...path, field(key)]
+    if (after[key] === undefined) return [{ op: 'remove' as const, path: member }]
+    if (before[key] === undefined) return [{ op: 'add' as const, path: member, value: after[key] }]
+    const beforeRecord = record(before[key])
+    const afterRecord = record(after[key])
+    return beforeRecord && afterRecord
+      ? objectDiff(member, beforeRecord, afterRecord)
+      : [{ op: 'replace' as const, path: member, value: after[key] }]
+  })
+
+const collectionOrderChanged = (
+  before: readonly Readonly<{ id: string }>[],
+  after: readonly Readonly<{ id: string }>[]
+): boolean =>
+  !same(
+    before.map(({ id: value }) => value),
+    after.map(({ id: value }) => value)
+  )
+
+const keyedCollectionDiff = (
+  path: InfoschematicDocumentPath,
+  before: readonly Readonly<{ id: string }>[],
+  after: readonly Readonly<{ id: string }>[],
+  nested?: (
+    path: InfoschematicDocumentPath,
+    before: Readonly<Record<string, JsonValue>>,
+    after: Readonly<Record<string, JsonValue>>
+  ) => readonly InfoschematicDocumentOperation[]
+): readonly InfoschematicDocumentOperation[] => {
+  const beforeById = new Map(before.map((entry) => [entry.id, entry]))
+  const afterById = new Map(after.map((entry) => [entry.id, entry]))
+  const removals = before.flatMap((entry) =>
+    afterById.has(entry.id) ? [] : [{ op: 'remove' as const, path: [...path, id(entry.id)] }]
+  )
+  const available = new Set(before.filter((entry) => afterById.has(entry.id)).map((entry) => entry.id))
+  const additions: InfoschematicDocumentOperation[] = []
+  for (const entry of [...after].reverse()) {
+    if (beforeById.has(entry.id)) continue
+    const index = after.findIndex((candidate) => candidate.id === entry.id)
+    const next = after[index + 1]
+    additions.push({
+      ...(next && available.has(next.id) ? { before: next.id } : {}),
+      op: 'add',
+      path: [...path, id(entry.id)],
+      value: jsonValue(entry)
+    })
+    available.add(entry.id)
+  }
+  const moves = collectionOrderChanged(before, after)
+    ? [...after]
+        .reverse()
+        .map((entry) => ({ ...anchorFor(after, entry.id), op: 'move' as const, path: [...path, id(entry.id)] }))
+    : []
+  const changes = after.flatMap((entry) => {
+    const previous = beforeById.get(entry.id)
+    if (!previous) return []
+    const member = [...path, id(entry.id)]
+    const previousRecord = record(jsonValue(previous)) ?? {}
+    const nextRecord = record(jsonValue(entry)) ?? {}
+    return nested
+      ? nested(member, previousRecord, nextRecord)
+      : objectDiff(member, previousRecord, nextRecord, new Set(['id']))
+  })
+  return [...removals, ...additions, ...moves, ...changes]
+}
+
+const sequenceDiff = (
+  path: InfoschematicDocumentPath,
+  before: Readonly<Record<string, JsonValue>>,
+  after: Readonly<Record<string, JsonValue>>
+): readonly InfoschematicDocumentOperation[] => {
+  const beforeScenes = Array.isArray(before.scenes) ? (before.scenes as readonly Readonly<{ id: string }>[]) : []
+  const afterScenes = Array.isArray(after.scenes) ? (after.scenes as readonly Readonly<{ id: string }>[]) : []
+  return [
+    ...objectDiff(path, before, after, new Set(['id', 'scenes'])),
+    ...keyedCollectionDiff([...path, field('scenes')], beforeScenes, afterScenes)
+  ]
+}
+
+const sequenceOperations = (
+  before: readonly Sequence[],
+  after: readonly Sequence[]
+): readonly InfoschematicDocumentOperation[] => keyedCollectionDiff([field('sequences')], before, after, sequenceDiff)
+
 /** Project current Studio draft operations into the stable document protocol. */
 export const projectStudioDocumentOperations = (
   document: InfoschematicDocument,
   config: InfoschematicConfig,
-  operations: readonly ArtefactDraftOperation[]
+  operations: readonly ArtefactDraftOperation[],
+  sequences?: readonly Sequence[]
 ): StudioDocumentProjectionResult => {
   let current = config
   let currentDocument = document
@@ -251,6 +346,20 @@ export const projectStudioDocumentOperations = (
     currentDocument = interim.document
   }
 
+  if (sequences) {
+    const before = infoschematicDocumentModel(currentDocument)
+    let after: DefinedInfoschematic
+    try {
+      after = defineInfoschematicModel({ ...before, sequences })
+    } catch (error) {
+      return { ok: false, reason: error instanceof Error ? error.message : String(error) }
+    }
+    const projected = sequenceOperations(before.sequences, after.sequences)
+    const interim = applyInfoschematicDocumentEdit(currentDocument, { operations: projected, version: 1 })
+    if (!interim.ok) return { ok: false, reason: interim.issues.map((entry) => entry.message).join('; ') }
+    edits.push(...projected)
+  }
+
   return { edit: Object.freeze({ operations: Object.freeze(edits), version: 1 }), ok: true }
 }
 
@@ -258,9 +367,10 @@ export const projectStudioDocumentOperations = (
 export const applyStudioDocumentOperations = (
   document: InfoschematicDocument,
   config: InfoschematicConfig,
-  operations: readonly ArtefactDraftOperation[]
+  operations: readonly ArtefactDraftOperation[],
+  sequences?: readonly Sequence[]
 ): InfoschematicDocumentEditResult => {
-  const projection = projectStudioDocumentOperations(document, config, operations)
+  const projection = projectStudioDocumentOperations(document, config, operations, sequences)
   return projection.ok
     ? applyInfoschematicDocumentEdit(document, projection.edit)
     : { issues: [{ message: `Studio operation rejected: ${projection.reason}`, path: 'edit' }], ok: false }
