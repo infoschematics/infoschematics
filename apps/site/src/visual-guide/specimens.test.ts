@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { guideProperties, guidePropertyKeys } from './curriculum.ts'
+import { choiceLabel } from './PropertyControl.tsx'
 import { anatomySpecimen, guidePropertyValue, specimenFor, specimenSnippet, withGuideProperty } from './specimens.ts'
 
 describe('components guide specimens', () => {
+  it('uses clear labels for Canvas grid choices', () => {
+    expect(choiceLabel('canvas.grid', 'none')).toBe('No grid')
+    expect(choiceLabel('canvas.grid', 'major')).toBe('Major lines')
+    expect(choiceLabel('canvas.grid', 'major-plus-minor')).toBe('Major + minor lines')
+    expect(choiceLabel('canvas.grid', 'dots')).toBe('Major dots')
+  })
+
   it('contains every primary artefact kind and connects the Point in the labelled example', () => {
     const definition = anatomySpecimen.infoschematic
 
@@ -43,6 +51,27 @@ describe('components guide specimens', () => {
     expect(updated.infoschematic.cards).toHaveLength(2)
     expect(updated.infoschematic.cards[1]?.wraps).toBe(updated.infoschematic.cards[0]?.id)
     expect(guidePropertyValue(updated, 'card.variant')).toBe('adapter')
+  })
+
+  it('updates both Canvas viewBox dimensions without changing appearance', () => {
+    const original = specimenFor('canvas')
+    const updated = withGuideProperty(
+      withGuideProperty(original, 'canvas.viewBox.width', 900),
+      'canvas.viewBox.height',
+      600
+    )
+    expect(updated.infoschematic.viewBox).toMatchObject({ width: 900, height: 600 })
+    expect(updated.infoschematic.appearance).toEqual(original.infoschematic.appearance)
+    expect(guidePropertyValue(updated, 'canvas.viewBox.width')).toBe(900)
+    expect(guidePropertyValue(updated, 'canvas.viewBox.height')).toBe(600)
+  })
+
+  it('updates Point ports independently from its position', () => {
+    const original = specimenFor('point')
+    const updated = withGuideProperty(original, 'point.ports.east', 2)
+    expect(updated.infoschematic.points[0]?.ports?.east).toBe(2)
+    expect(updated.infoschematic.points[0]?.point).toEqual(original.infoschematic.points[0]?.point)
+    expect(guidePropertyValue(updated, 'point.ports.east')).toBe(2)
   })
 
   it('serialises the live specimen as YAML and a typed definition', () => {

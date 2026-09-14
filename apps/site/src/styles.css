@@ -22,8 +22,7 @@ body {
   overflow-x: hidden;
   background:
     radial-gradient(circle at 8% 0%, #12334d 0, transparent 30rem),
-    radial-gradient(circle at 88% 46%, #17144e 0, transparent 34rem),
-    #07111e;
+    radial-gradient(circle at 88% 46%, #17144e 0, transparent 34rem), #07111e;
 }
 
 button,
@@ -76,7 +75,9 @@ a:focus-visible {
 
 .site-nav nav a {
   color: #8fcff8;
-  font: 500 11px/1.5 'DM Mono', monospace;
+  font:
+    500 11px/1.5 "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   text-decoration: none;
 }
@@ -86,7 +87,7 @@ a:focus-visible {
   color: #f5f8ff;
 }
 
-.site-nav nav a[aria-current='page'] {
+.site-nav nav a[aria-current="page"] {
   color: #79c9ff;
 }
 
@@ -170,7 +171,9 @@ a:focus-visible {
 .eyebrow {
   margin: 0;
   color: #79c9ff;
-  font: 600 11px/1.4 'DM Mono', monospace;
+  font:
+    600 11px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -214,7 +217,9 @@ a:focus-visible {
   border-radius: 5px;
   background: #10283d;
   color: #d8eeff;
-  font: 650 12px/1.4 'DM Mono', monospace;
+  font:
+    650 12px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   text-decoration: none;
   text-transform: uppercase;
@@ -295,7 +300,9 @@ a:focus-visible {
   background: #0d2031;
   color: #9db4c9;
   cursor: pointer;
-  font: 500 10px/1.4 'DM Mono', monospace;
+  font:
+    500 10px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.02em;
 }
 
@@ -308,7 +315,9 @@ a:focus-visible {
 .inline-svg-reference__status {
   margin: 0;
   color: #4d687f;
-  font: 500 9px/1.4 'DM Mono', monospace;
+  font:
+    500 9px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -321,7 +330,9 @@ a:focus-visible {
   padding-top: 15px;
   border-top: 1px solid #ffffff12;
   color: #4d687f;
-  font: 500 9px/1.4 'DM Mono', monospace;
+  font:
+    500 9px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -450,7 +461,9 @@ a:focus-visible {
   border-radius: 4px;
   background: #0d2031;
   color: #d8eeff;
-  font: 0.88em/1.6 'DM Mono', monospace;
+  font:
+    0.88em/1.6 "DM Mono",
+    monospace;
 }
 
 .document-content pre {
@@ -498,7 +511,9 @@ a:focus-visible {
 .guide-journey > p {
   margin: 0 0 14px;
   color: #8fcff8;
-  font: 600 11px/1.45 'DM Mono', monospace;
+  font:
+    600 11px/1.45 "DM Mono",
+    monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -547,7 +562,9 @@ a:focus-visible {
 .guide-journey__link small {
   margin-bottom: 4px;
   color: #8fcff8;
-  font: 600 10px/1.4 'DM Mono', monospace;
+  font:
+    600 10px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -602,7 +619,9 @@ a:focus-visible {
 .specimen-card p {
   margin: 10px 0 0;
   color: #9db4c9;
-  font: 600 9px/1.4 'DM Mono', monospace;
+  font:
+    600 9px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-align: center;
   text-transform: uppercase;
@@ -611,7 +630,9 @@ a:focus-visible {
 .visual-guide__layer {
   margin-bottom: 10px;
   color: #79c9ff;
-  font: 650 10px/1.4 'DM Mono', monospace;
+  font:
+    650 10px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -678,7 +699,9 @@ a:focus-visible {
 
 .visual-guide__anatomy-key li > span {
   color: #79c9ff;
-  font: 650 10px/1.5 'DM Mono', monospace;
+  font:
+    650 10px/1.5 "DM Mono",
+    monospace;
   letter-spacing: 0.08em;
 }
 
@@ -721,7 +744,9 @@ a:focus-visible {
 .interactive-specimen__controls legend {
   padding: 0 6px;
   color: #f5f8ff;
-  font: 650 11px/1.4 'DM Mono', monospace;
+  font:
+    650 11px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -749,7 +774,7 @@ a:focus-visible {
 }
 
 .visual-guide-control select,
-.visual-guide-control input[type='text'],
+.visual-guide-control input[type="text"],
 .interactive-specimen__controls button {
   width: 100%;
   padding: 9px 10px;
@@ -759,7 +784,7 @@ a:focus-visible {
   background: #071624;
 }
 
-.visual-guide-control input[type='range'] {
+.visual-guide-control input[type="range"] {
   min-width: 0;
   flex: 1;
 }
@@ -767,7 +792,9 @@ a:focus-visible {
 .visual-guide-colour-value code,
 .visual-guide-number-value output {
   color: #9db4c9;
-  font: 600 11px/1.4 'DM Mono', monospace;
+  font:
+    600 11px/1.4 "DM Mono",
+    monospace;
 }
 
 .visual-guide-number-value output {
@@ -829,7 +856,9 @@ a:focus-visible {
   padding: 10px 14px;
   border-bottom: 1px solid #ffffff16;
   color: #b8cad9;
-  font: 650 11px/1.4 'DM Mono', monospace;
+  font:
+    650 11px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -843,7 +872,9 @@ a:focus-visible {
   color: #dcebf5;
   background: #071624;
   cursor: pointer;
-  font: 600 11px/1.4 'DM Mono', monospace;
+  font:
+    600 11px/1.4 "DM Mono",
+    monospace;
 }
 
 .interactive-specimen__header button:hover,
@@ -893,7 +924,7 @@ a:focus-visible {
   background: transparent;
 }
 
-.specimen-snippet__tabs button[aria-selected='true'] {
+.specimen-snippet__tabs button[aria-selected="true"] {
   border-color: #79c9ff55;
   color: #071624;
   background: #79c9ff;
@@ -909,7 +940,9 @@ a:focus-visible {
   padding: 16px;
   overflow: auto;
   color: #c7e3f4;
-  font: 12px/1.65 'DM Mono', monospace;
+  font:
+    12px/1.65 "DM Mono",
+    monospace;
   tab-size: 2;
 }
 
@@ -945,7 +978,9 @@ a:focus-visible {
 
 .visual-guide__property-reference summary span {
   color: #8fa8bc;
-  font: 500 11px/1.4 'DM Mono', monospace;
+  font:
+    500 11px/1.4 "DM Mono",
+    monospace;
 }
 
 .visual-guide__property-table {
@@ -968,7 +1003,9 @@ a:focus-visible {
 
 .visual-guide__property-table thead th {
   color: #8fa8bc;
-  font: 650 10px/1.4 'DM Mono', monospace;
+  font:
+    650 10px/1.4 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -976,7 +1013,9 @@ a:focus-visible {
 .visual-guide__property-table tbody th {
   width: 34%;
   color: #8fcff8;
-  font: 500 12px/1.5 'DM Mono', monospace;
+  font:
+    500 12px/1.5 "DM Mono",
+    monospace;
 }
 
 .visual-guide__property-table tbody td {
@@ -1045,7 +1084,9 @@ a:focus-visible {
 .docs-navigation h2 {
   margin: 0 0 6px;
   color: #5c7a92;
-  font: 600 10px/1.5 'DM Mono', monospace;
+  font:
+    600 10px/1.5 "DM Mono",
+    monospace;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -1060,7 +1101,9 @@ a:focus-visible {
 
 .docs-navigation a {
   color: #8fcff8;
-  font: 500 12px/1.5 'DM Mono', monospace;
+  font:
+    500 12px/1.5 "DM Mono",
+    monospace;
   letter-spacing: 0.02em;
   text-decoration: none;
 }
@@ -1070,7 +1113,7 @@ a:focus-visible {
   color: #f5f8ff;
 }
 
-.docs-navigation a[aria-current='page'] {
+.docs-navigation a[aria-current="page"] {
   color: #f5f8ff;
 }
 
@@ -1119,7 +1162,9 @@ a:focus-visible {
     gap: 16px;
     padding: 13px 15px;
     color: #8fcff8;
-    font: 600 11px/1.45 'DM Mono', monospace;
+    font:
+      600 11px/1.45 "DM Mono",
+      monospace;
     letter-spacing: 0.05em;
     cursor: pointer;
   }
@@ -1170,7 +1215,9 @@ a:focus-visible {
   gap: 8px;
   align-items: center;
   color: #9db4c9;
-  font: 600 11px/1 'DM Mono', monospace;
+  font:
+    600 11px/1 "DM Mono",
+    monospace;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -1181,7 +1228,9 @@ a:focus-visible {
   border-radius: 7px;
   background: #0d2031;
   color: #e8f1f8;
-  font: 600 11px/1 'DM Mono', monospace;
+  font:
+    600 11px/1 "DM Mono",
+    monospace;
 }
 
 .playground-document-state {
@@ -1190,12 +1239,14 @@ a:focus-visible {
   border: 1px solid #48c6a833;
   border-radius: 999px;
   color: #7de2c8;
-  font: 600 9px/1 'DM Mono', monospace;
+  font:
+    600 9px/1 "DM Mono",
+    monospace;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.playground-document-state[data-state='edited'] {
+.playground-document-state[data-state="edited"] {
   border-color: #f5c97644;
   color: #f5c976;
 }
@@ -1211,7 +1262,9 @@ a:focus-visible {
   border-radius: 7px;
   background: #0d2031;
   color: #e8f1f8;
-  font: 600 10px/1 'DM Mono', monospace;
+  font:
+    600 10px/1 "DM Mono",
+    monospace;
   letter-spacing: 0.03em;
   cursor: pointer;
 }
@@ -1250,7 +1303,9 @@ a:focus-visible {
   border-radius: 9px;
   background: #0b1a28;
   color: #e8f1f8;
-  font: 400 12px/1.6 'DM Mono', monospace;
+  font:
+    400 12px/1.6 "DM Mono",
+    monospace;
   resize: vertical;
 }
 
@@ -1277,14 +1332,18 @@ a:focus-visible {
   margin: 12px 0 0;
   padding: 0 0 0 18px;
   color: #ffb4a3;
-  font: 400 12px/1.6 'DM Mono', monospace;
+  font:
+    400 12px/1.6 "DM Mono",
+    monospace;
 }
 
 .playground-action-feedback {
   min-height: 18px;
   margin: -4px 0 0;
   color: #9db4c9;
-  font: 500 10px/1.5 'DM Mono', monospace;
+  font:
+    500 10px/1.5 "DM Mono",
+    monospace;
 }
 
 @media (max-width: 900px) {
@@ -1414,5 +1473,45 @@ a:focus-visible {
   *::before,
   *::after {
     scroll-behavior: auto !important;
+  }
+}
+.component-catalogue {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 1.5rem 0;
+}
+
+.component-catalogue__item {
+  border: 1px solid #ffffff1c;
+  border-radius: 0.75rem;
+  background: #0d2031;
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+  text-decoration: none;
+}
+
+.component-catalogue__item:hover,
+.component-catalogue__item:focus-visible {
+  border-color: #79c9ff;
+}
+
+.component-catalogue__item strong {
+  color: #f5f8ff;
+}
+
+.component-catalogue__item span {
+  color: #9db4c9;
+}
+
+.component-page__section {
+  margin-top: clamp(2rem, 5vw, 3.5rem);
+  scroll-margin-top: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .component-catalogue {
+    grid-template-columns: 1fr;
   }
 }

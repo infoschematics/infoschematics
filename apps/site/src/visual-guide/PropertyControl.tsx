@@ -7,8 +7,18 @@ type PropertyControlProps = {
   onChange: (value: GuidePropertyValue) => void
 }
 
-const choiceLabel = (propertyKey: GuidePropertyKey, choice: string) => {
+export const choiceLabel = (propertyKey: GuidePropertyKey, choice: string) => {
   if (propertyKey === 'canvas.surface' && choice === 'neutral') return 'default (neutral)'
+  if (propertyKey === 'canvas.grid') {
+    return (
+      {
+        none: 'No grid',
+        major: 'Major lines',
+        'major-plus-minor': 'Major + minor lines',
+        dots: 'Major dots'
+      }[choice] ?? choice
+    )
+  }
   if (propertyKey === 'card.variant') return `${choice} card`
   return choice.replaceAll('-', ' ')
 }

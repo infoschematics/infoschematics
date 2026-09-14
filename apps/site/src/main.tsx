@@ -26,7 +26,7 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
   if (componentRoute) {
     const { VisualGuide } = await import('./VisualGuide.tsx')
     document.title = `${componentRoute.title} · Infoschematics`
-    return <VisualGuide />
+    return <VisualGuide route={componentRoute} />
   }
 
   if (isPlaygroundPath(pathname)) {

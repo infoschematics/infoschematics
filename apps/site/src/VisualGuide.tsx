@@ -1,17 +1,33 @@
+import type { ReactNode } from 'react'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
-import { componentsPath } from './routes.ts'
+import { type ComponentRoute, componentPaths, componentRoutes, componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import './styles.css'
 
-export const componentsGuideContents = [
-  ...componentSections.map(({ id, title }) => ({ depth: 2 as const, slug: id, label: title })),
-  { depth: 2, slug: 'future-notation', label: 'Future notation' }
-] as const
+export const componentsGuideContents = componentSections.map(({ id, title }) => ({
+  depth: 2 as const,
+  slug: id,
+  label: title
+}))
+const futureRoute = {
+  path: componentPaths.future,
+  title: 'Future',
+  summary: 'Notation under consideration.',
+  section: 'components' as const
+}
 
-export function VisualGuide() {
+function Shell({
+  children,
+  currentPath,
+  outline = []
+}: {
+  children: ReactNode
+  currentPath: string
+  outline?: readonly { depth: 2 | 3; slug: string; label: string }[]
+}) {
   return (
     <div className="document-shell document-shell--wide docs-shell">
       <a className="skip-link" href="#document-content">
@@ -19,117 +35,157 @@ export function VisualGuide() {
       </a>
       <SiteNav section="docs" />
       <div className="docs-columns">
-        <DocsSidebar currentPageOutline={componentsGuideContents} currentPath={componentsPath} />
+        <DocsSidebar currentPageOutline={outline} currentPath={currentPath} />
         <main id="document-content">
-          <article aria-label="Components" className="document-content">
-            <h1>Components</h1>
-            <p>
-              Inspect each visible part on its own. Every focused example is generated from the same serialisable
-              properties used by Canvas and static SVG. The <a href="/docs/#labelled-example">Overview</a> introduces
-              the complete composition first.
-            </p>
-
-            {componentSections.map((component) => (
-              <section
-                aria-labelledby={component.id}
-                className="visual-guide__section visual-guide__component"
-                key={component.id}
-              >
-                <p className="visual-guide__layer">{component.layer}</p>
-                <h2 id={component.id}>{component.title}</h2>
-                <p>{component.summary}</p>
-                {component.id === 'fabric' ? (
-                  <>
-                    <p>
-                      A <strong>Port</strong> is a numbered attachment position on the north, east, south, or west side
-                      of a Card, Fabric, or Point. Port counts describe the available positions; a Flow names the
-                      particular source and target Ports it uses.
-                    </p>
-                    <p>
-                      The portable static renderer keeps Fabrics visually neutral. Named renderers—such as an Internet
-                      Fabric with a dotted field—need a portable fallback before this guide can offer them as presets.
-                    </p>
-                  </>
-                ) : null}
-                {component.id === 'canvas' ? (
-                  <p>
-                    Surface selects the neutral default or the blueprint preset. A custom colour and opacity override is
-                    not yet part of the portable definition, so the controls do not invent one locally.
-                  </p>
-                ) : null}
-                {component.id === 'card' ? (
-                  <p>
-                    Standard and Adapter Cards are supported today. An Adapter Card names the Standard Card it{' '}
-                    <code>wraps</code>, so its derived position stays attached. Decision and stacked Cards are future
-                    notation, not hidden Card types.
-                  </p>
-                ) : null}
-                {component.id === 'graphic' ? (
-                  <p>
-                    The dashed box is the deterministic static-SVG fallback. Authored data does not contain free-form
-                    SVG: it names a renderer and passes serialisable properties, while the host supplies the actual
-                    React or SVG implementation for Canvas.
-                  </p>
-                ) : null}
-                <InteractiveSpecimen
-                  kind={component.id}
-                  propertyKeys={component.propertyKeys}
-                  title={`${component.title} properties`}
-                />
-                <details className="visual-guide__property-reference">
-                  <summary>
-                    Property reference <span>{component.properties.length} groups</span>
-                  </summary>
-                  <div className="visual-guide__property-table">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th scope="col">Property</th>
-                          <th scope="col">What it controls</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {component.properties.map((property) => (
-                          <tr key={property.name}>
-                            <th scope="row">
-                              <code>{property.name}</code>
-                            </th>
-                            <td>{property.summary}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </details>
-              </section>
-            ))}
-
-            <section aria-labelledby="future-notation" className="visual-guide__section">
-              <h2 id="future-notation">Future notation</h2>
-              <p>
-                This page only offers controls the portable definition and current renderers support. The following
-                ideas are useful directions, but need model semantics and renderer parity before they can become public
-                API:
-              </p>
-              <ul>
-                <li>
-                  an arbitrary Canvas colour and opacity override beyond the current neutral and blueprint surfaces;
-                </li>
-                <li>named Fabric renderers such as Internet with portable static fallbacks;</li>
-                <li>Decision and stacked Card variants in addition to Standard and Adapter Cards;</li>
-                <li>semantic start, finish, junction, and off-page Point roles;</li>
-                <li>Flow endpoint markers, cardinality, and a coherent data-flow-diagram vocabulary.</li>
-              </ul>
-              <p>
-                A <strong>Sequence</strong> groups related Scenes and selects their display, timing, and Callout
-                behaviour. Any visual theme or inherited surface contract needs a distinct name and an explicit model
-                boundary.
-              </p>
-            </section>
-          </article>
-          <GuideJourneyNav currentPath={componentsPath} />
+          {children}
+          <GuideJourneyNav currentPath={currentPath} />
         </main>
       </div>
     </div>
   )
 }
+
+export function ComponentsHub() {
+  return (
+    <Shell currentPath={componentsPath}>
+      <article aria-label="Components" className="document-content">
+        <h1>Components</h1>
+        <p>
+          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, and host-supplied
+          Graphics. Explore each component on its own.
+        </p>
+        <div className="component-catalogue">
+          {componentRoutes.slice(1).map((route) => {
+            const component = componentSections.find(({ id }) => id === route.componentId)
+            return (
+              <a className="component-catalogue__item" href={route.path} key={route.path}>
+                <strong>{route.title}</strong>
+                <span>{component?.summary ?? route.summary}</span>
+              </a>
+            )
+          })}
+        </div>
+      </article>
+    </Shell>
+  )
+}
+
+function FuturePage() {
+  return (
+    <Shell currentPath={futureRoute.path}>
+      <article aria-label="Future notation" className="document-content">
+        <h1>Future notation</h1>
+        <p>These ideas need a portable model and renderer parity before becoming public controls.</p>
+        <ul>
+          <li>Orthogonal Canvas grid patterns: Squares or Dots, each with Major or Major + minor intervals.</li>
+          <li>Semantic Point roles such as start, end, junction, anchor, and off-page.</li>
+          <li>Decision and stacked Card variants, plus richer endpoint markers and cardinality.</li>
+          <li>Named Fabric presets with portable static fallbacks.</li>
+          <li>Authored visual themes distinct from Scene and Callout themes.</li>
+        </ul>
+      </article>
+    </Shell>
+  )
+}
+
+export function VisualGuide({ route }: { route?: ComponentRoute }) {
+  if (!route || route.path === componentsPath) return <ComponentsHub />
+  if (route.path === futureRoute.path) return <FuturePage />
+  const component = componentSections.find(({ id }) => id === route.componentId)
+  if (!component) return <ComponentsHub />
+  return (
+    <Shell
+      currentPath={route.path}
+      outline={[
+        { depth: 2, slug: `${component.id}-example`, label: 'Example' },
+        { depth: 2, slug: `${component.id}-properties`, label: 'Properties' }
+      ]}
+    >
+      <article aria-label={component.title} className="document-content">
+        <p className="visual-guide__layer">{component.layer}</p>
+        <h1>{component.title}</h1>
+        <p>{component.summary}</p>
+        {component.id === 'canvas' && (
+          <p>
+            Today the Grid offers four values: none, major lines, major plus minor lines, or major dots. A future
+            Pattern × Intervals model will make squares and dots consistent without changing grid geometry.
+          </p>
+        )}
+        {component.id === 'region' && (
+          <p>
+            Fill opacity and frame opacity are independent. Border colour and width are renderer tokens today, not
+            authored Region properties.
+          </p>
+        )}
+        {component.id === 'fabric' && (
+          <p>
+            Ports are numbered attachment positions. Named Fabric renderers remain host-provided and need static
+            fallback parity before they can be presets.
+          </p>
+        )}
+        {component.id === 'card' && (
+          <p>Standard and Adapter Cards are supported today. Decision and stacked Cards remain future notation.</p>
+        )}
+        {component.id === 'point' && (
+          <p>
+            A Point can currently be labelled, positioned, and connected through ports. Start, end, junction, anchor,
+            and hidden roles are future semantics.
+          </p>
+        )}
+        {component.id === 'graphic' && (
+          <p>
+            Authored data names a renderer and passes serialisable properties; the host supplies the visual
+            implementation.
+          </p>
+        )}
+        <section aria-labelledby={`${component.id}-example`} className="component-page__section">
+          <h2 id={`${component.id}-example`}>Example</h2>
+          <InteractiveSpecimen
+            comparisons={
+              component.id === 'card'
+                ? [
+                    { id: 'standard', label: 'Standard', propertyKey: 'card.variant', value: 'standard' },
+                    { id: 'adapter', label: 'Adapter', propertyKey: 'card.variant', value: 'adapter' }
+                  ]
+                : undefined
+            }
+            kind={component.id}
+            propertyKeys={component.propertyKeys}
+            title={`${component.title} properties`}
+          />
+        </section>
+        <section aria-labelledby={`${component.id}-properties`} className="component-page__section">
+          <h2 id={`${component.id}-properties`}>Properties</h2>
+          <p>Open the reference for the portable fields represented by this component.</p>
+          <details className="visual-guide__property-reference">
+            <summary>
+              Property reference <span>{component.properties.length} groups</span>
+            </summary>
+            <div className="visual-guide__property-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Property</th>
+                    <th scope="col">What it controls</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {component.properties.map((property) => (
+                    <tr key={property.name}>
+                      <th scope="row">
+                        <code>{property.name}</code>
+                      </th>
+                      <td>{property.summary}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        </section>
+      </article>
+    </Shell>
+  )
+}
+
+export { futureRoute }

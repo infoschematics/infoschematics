@@ -11,7 +11,8 @@ export const componentPaths = {
   card: '/docs/components/cards/',
   flow: '/docs/components/flows/',
   point: '/docs/components/points/',
-  graphic: '/docs/components/graphics/'
+  graphic: '/docs/components/graphics/',
+  future: '/docs/components/future/'
 } as const
 export const installationPath = '/docs/installation/'
 export const playgroundPath = '/playground/'
@@ -206,6 +207,13 @@ export const componentRoutes: readonly ComponentRoute[] = [
     summary: 'Named visual renderers supplied by a host.',
     section: 'components',
     componentId: 'graphic'
+  },
+  {
+    path: componentPaths.future,
+    title: 'Future',
+    summary: 'Notation under consideration.',
+    section: 'components',
+    componentId: 'future'
   }
 ]
 

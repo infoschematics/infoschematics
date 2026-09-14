@@ -15,7 +15,12 @@ const completeSpecimen = () =>
       appearance: {
         surface: 'blueprint',
         grid: 'major-plus-minor',
-        card: { compact: false, description: true, identity: true, stereotype: true }
+        card: {
+          compact: false,
+          description: true,
+          identity: true,
+          stereotype: true
+        }
       },
       scopes: [
         {
@@ -37,7 +42,13 @@ const completeSpecimen = () =>
       ],
       domains: [{ id: 'example', label: 'Example', color: '#82b366', fill: '#0d1b2a' }],
       flowFamilies: [
-        { id: 'connection', label: 'Flow', prefix: 'FLOW', description: 'A meaningful connection', color: '#79c9ff' }
+        {
+          id: 'connection',
+          label: 'Flow',
+          prefix: 'FLOW',
+          description: 'A meaningful connection',
+          color: '#79c9ff'
+        }
       ],
       regions: [
         {
@@ -59,7 +70,10 @@ const completeSpecimen = () =>
           detail: 'Connectable plane',
           scopes: ['primary'],
           scope: 'primary',
-          placement: { box: { x: 70, y: 110, width: 220, height: 120 }, ports: { east: 1 } },
+          placement: {
+            box: { x: 70, y: 110, width: 220, height: 120 },
+            ports: { east: 1 }
+          },
           appearance: { renderer: 'default', caption: 'Fabric' }
         }
       ],
@@ -161,7 +175,10 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
       return withDiagramParts(config, {})
     case 'region':
       return withDiagramParts(config, {
-        regions: regions.map((region) => ({ ...region, box: { x: 100, y: 70, width: 520, height: 260, radius: 10 } }))
+        regions: regions.map((region) => ({
+          ...region,
+          box: { x: 100, y: 70, width: 520, height: 260, radius: 10 }
+        }))
       })
     case 'fabric':
       return withDiagramParts(config, {
@@ -187,11 +204,17 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
       return withDiagramParts(config, {
         fabrics: fabrics.map((fabric) => ({
           ...fabric,
-          placement: { box: { x: 70, y: 140, width: 220, height: 120 }, ports: { east: 1 } }
+          placement: {
+            box: { x: 70, y: 140, width: 220, height: 120 },
+            ports: { east: 1 }
+          }
         })),
         cards: cards.map((card) => ({
           ...card,
-          placement: { box: { x: 430, y: 140, width: 220, height: 120 }, ports: { west: 1 } }
+          placement: {
+            box: { x: 430, y: 140, width: 220, height: 120 },
+            ports: { west: 1 }
+          }
         })),
         flows: flows.slice(0, 1).map((flow) => ({
           ...flow,
@@ -205,7 +228,10 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
       return withDiagramParts(config, {
         cards: cards.map((card) => ({
           ...card,
-          placement: { box: { x: 250, y: 70, width: 220, height: 120 }, ports: { south: 1 } }
+          placement: {
+            box: { x: 250, y: 70, width: 220, height: 120 },
+            ports: { south: 1 }
+          }
         })),
         flows: flows.slice(1).map((flow) => ({
           ...flow,
@@ -214,7 +240,11 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
             { x: 360, y: 280 }
           ]
         })),
-        points: points.map((point) => ({ ...point, point: { x: 360, y: 280 }, ports: { north: 1 } }))
+        points: points.map((point) => ({
+          ...point,
+          point: { x: 360, y: 280 },
+          ports: { north: 1 }
+        }))
       })
     case 'graphic':
       return withDiagramParts(config, {
@@ -222,7 +252,10 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
           ...graphic,
           label: 'Host-rendered Graphic',
           placement: { x: 180, y: 120, width: 360, height: 160 },
-          properties: { caption: 'Any serialisable renderer properties', emphasis: true }
+          properties: {
+            caption: 'Any serialisable renderer properties',
+            emphasis: true
+          }
         }))
       })
   }
@@ -253,12 +286,18 @@ export const guidePropertyValue = (config: InfoschematicConfig, key: GuideProper
   const graphic = diagram.graphics[0]
 
   switch (key) {
+    case 'canvas.viewBox.width':
+      return diagram.viewBox.width
+    case 'canvas.viewBox.height':
+      return diagram.viewBox.height
     case 'canvas.surface':
       return diagram.appearance?.surface ?? 'neutral'
     case 'canvas.grid':
       return diagram.appearance?.grid ?? 'none'
     case 'region.width':
       return region?.box.width ?? 0
+    case 'region.label':
+      return region?.label ?? ''
     case 'region.height':
       return region?.box.height ?? 0
     case 'region.radius':
@@ -323,6 +362,14 @@ export const guidePropertyValue = (config: InfoschematicConfig, key: GuideProper
       return point?.point.x ?? 0
     case 'point.y':
       return point?.point.y ?? 0
+    case 'point.ports.north':
+      return point?.ports?.north ?? 0
+    case 'point.ports.east':
+      return point?.ports?.east ?? 0
+    case 'point.ports.south':
+      return point?.ports?.south ?? 0
+    case 'point.ports.west':
+      return point?.ports?.west ?? 0
     case 'graphic.width':
       return graphic?.placement?.width ?? 0
     case 'graphic.height':
@@ -345,8 +392,22 @@ export const withGuideProperty = (
     const field = key.slice('canvas.'.length)
     return {
       ...config,
-      infoschematic: { ...diagram, appearance: { ...appearance, [field]: value } }
+      infoschematic: {
+        ...diagram,
+        appearance: { ...appearance, [field]: value }
+      }
     } as InfoschematicConfig
+  }
+
+  if (key === 'canvas.viewBox.width' || key === 'canvas.viewBox.height') {
+    const axis = key.endsWith('width') ? 'width' : 'height'
+    return {
+      ...config,
+      infoschematic: {
+        ...diagram,
+        viewBox: { ...diagram.viewBox, [axis]: Number(value) }
+      }
+    }
   }
 
   if (key.startsWith('region.')) {
@@ -355,14 +416,27 @@ export const withGuideProperty = (
         const field = key.slice('region.'.length)
         return { ...region, box: { ...region.box, [field]: Number(value) } }
       }
+      if (key === 'region.label') return { ...region, label: String(value) }
       if (key === 'region.fill') {
-        return { ...region, fill: colourWithOpacity(String(value), opacityFromColour(regionFill(config))) }
+        return {
+          ...region,
+          fill: colourWithOpacity(String(value), opacityFromColour(regionFill(config)))
+        }
       }
       if (key === 'region.fillOpacity') {
-        return { ...region, fill: colourWithOpacity(colourWithoutAlpha(regionFill(config)), Number(value)) }
+        return {
+          ...region,
+          fill: colourWithOpacity(colourWithoutAlpha(regionFill(config)), Number(value))
+        }
       }
       if (key === 'region.frame.opacity') {
-        return { ...region, frame: { style: region.frame?.style ?? 'solid', opacity: Number(value) } }
+        return {
+          ...region,
+          frame: {
+            style: region.frame?.style ?? 'solid',
+            opacity: Number(value)
+          }
+        }
       }
       if (key === 'region.frame.style') {
         const style = String(value) as NonNullable<typeof region.frame>['style']
@@ -370,7 +444,10 @@ export const withGuideProperty = (
       }
       return { ...region, [key.slice('region.'.length)]: value }
     })
-    return { ...config, infoschematic: { ...diagram, regions } } as InfoschematicConfig
+    return {
+      ...config,
+      infoschematic: { ...diagram, regions }
+    } as InfoschematicConfig
   }
 
   if (key.startsWith('fabric.')) {
@@ -398,10 +475,16 @@ export const withGuideProperty = (
       }
       return {
         ...fabric,
-        placement: { ...fabric.placement, box: { ...fabric.placement.box, [field]: Number(value) } }
+        placement: {
+          ...fabric.placement,
+          box: { ...fabric.placement.box, [field]: Number(value) }
+        }
       }
     })
-    return { ...config, infoschematic: { ...diagram, fabrics } } as InfoschematicConfig
+    return {
+      ...config,
+      infoschematic: { ...diagram, fabrics }
+    } as InfoschematicConfig
   }
 
   if (key.startsWith('card.')) {
@@ -424,28 +507,46 @@ export const withGuideProperty = (
               }
             ]
           : [standard]
-      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+      return {
+        ...config,
+        infoschematic: { ...diagram, cards }
+      } as InfoschematicConfig
     }
     if (field.startsWith('ports.')) {
       const side = field.slice('ports.'.length) as 'east' | 'north' | 'south' | 'west'
       const cards = updateFirst(diagram.cards, (card) => ({
         ...card,
-        placement: { ...card.placement, ports: { ...card.placement.ports, [side]: Number(value) } }
+        placement: {
+          ...card.placement,
+          ports: { ...card.placement.ports, [side]: Number(value) }
+        }
       }))
-      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+      return {
+        ...config,
+        infoschematic: { ...diagram, cards }
+      } as InfoschematicConfig
     }
     if (field === 'width' || field === 'height') {
       const cards = updateFirst(diagram.cards, (card) => ({
         ...card,
-        placement: { ...card.placement, box: { ...card.placement.box, [field]: Number(value) } }
+        placement: {
+          ...card.placement,
+          box: { ...card.placement.box, [field]: Number(value) }
+        }
       }))
-      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+      return {
+        ...config,
+        infoschematic: { ...diagram, cards }
+      } as InfoschematicConfig
     }
     return {
       ...config,
       infoschematic: {
         ...diagram,
-        appearance: { ...appearance, card: { ...appearance.card, [field]: Boolean(value) } }
+        appearance: {
+          ...appearance,
+          card: { ...appearance.card, [field]: Boolean(value) }
+        }
       }
     } as InfoschematicConfig
   }
@@ -455,7 +556,19 @@ export const withGuideProperty = (
     const flows = updateFirst(diagram.flows, (flow) =>
       field === 'labelAlong' ? { ...flow, label: { along: Number(value) } } : { ...flow, [field]: Boolean(value) }
     )
-    return { ...config, infoschematic: { ...diagram, flows } } as InfoschematicConfig
+    return {
+      ...config,
+      infoschematic: { ...diagram, flows }
+    } as InfoschematicConfig
+  }
+
+  if (key.startsWith('point.ports.')) {
+    const side = key.slice('point.ports.'.length) as 'east' | 'north' | 'south' | 'west'
+    const points = updateFirst(diagram.points, (point) => ({
+      ...point,
+      ports: { ...point.ports, [side]: Number(value) }
+    }))
+    return { ...config, infoschematic: { ...diagram, points } } as InfoschematicConfig
   }
 
   if (key.startsWith('point.')) {
@@ -471,7 +584,10 @@ export const withGuideProperty = (
           points: flow.points.map((routePoint, index) => (index === flow.points.length - 1 ? movedPoint : routePoint))
         }))
       : diagram.flows
-    return { ...config, infoschematic: { ...diagram, flows, points } } as InfoschematicConfig
+    return {
+      ...config,
+      infoschematic: { ...diagram, flows, points }
+    } as InfoschematicConfig
   }
 
   const field = key.slice('graphic.'.length)
@@ -485,7 +601,10 @@ export const withGuideProperty = (
       [field]: Number(value)
     }
   }))
-  return { ...config, infoschematic: { ...diagram, graphics } } as InfoschematicConfig
+  return {
+    ...config,
+    infoschematic: { ...diagram, graphics }
+  } as InfoschematicConfig
 }
 
 export type SpecimenSnippetFormat = 'typescript' | 'yaml'
@@ -504,7 +623,13 @@ const specimenSnippetInput = (config: InfoschematicConfig, kind: SpecimenKind) =
     case 'region':
       return { infoschematic: { ...base, regions: diagram.regions } }
     case 'fabric':
-      return { infoschematic: { ...base, scopes: diagram.scopes, fabrics: diagram.fabrics } }
+      return {
+        infoschematic: {
+          ...base,
+          scopes: diagram.scopes,
+          fabrics: diagram.fabrics
+        }
+      }
     case 'card':
       return {
         infoschematic: {
@@ -540,7 +665,13 @@ const specimenSnippetInput = (config: InfoschematicConfig, kind: SpecimenKind) =
         }
       }
     case 'graphic':
-      return { infoschematic: { ...base, scopes: diagram.scopes, graphics: diagram.graphics } }
+      return {
+        infoschematic: {
+          ...base,
+          scopes: diagram.scopes,
+          graphics: diagram.graphics
+        }
+      }
   }
 }
 
