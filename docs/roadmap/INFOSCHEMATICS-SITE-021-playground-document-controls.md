@@ -4,12 +4,12 @@ area: SITE
 title: Playground document controls
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8d13f6c1baa642dba6461b9274e5bf11eee76615
 created_at: 2026-09-14T01:15:29Z
-updated_at: 2026-09-14T01:20:31Z
+updated_at: 2026-09-14T01:21:46Z
 ---
 
 # Playground document controls
@@ -94,6 +94,10 @@ The new actions operate only on the inert document string and remain suitable as
 ### Mini recap
 
 The no-install Playground now supports a complete choose, edit, reset, and copy loop with clear state and accessible feedback.
+
+## Done
+
+Accepted 2026-09-14 under the project owner's explicit outcome authority to finish the website batch, on the review packet above.
 
 ## Discussion
 
