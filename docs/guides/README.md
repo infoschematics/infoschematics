@@ -7,6 +7,7 @@ The public consumer journey is Site-owned under `apps/site/content/` by [ADR-INF
 ## Operating guides
 
 - [Cloudflare hosting](cloudflare.md) — configure public hosting, custom domains, redirects, and Workers Builds.
+- [Edit authored YAML](editing-authored-yaml.md) — apply stable-ID edits without losing comments, scalar styles, ordering, or host source authority.
 - [Integrate a host renderer](integrating-renderers.md) — register versioned Fabric, Overlay, and Callout implementations with validated properties and accessible fallbacks.
 - [Maintaining programmatic examples](maintaining-programmatic-examples.md) — share repeated TypeScript geometry while emitting complete canonical Regions.
 - [Render from the command line](rendering-from-the-command-line.md) — turn canonical YAML or JSON into deterministic SVG in files and pipelines.

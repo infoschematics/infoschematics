@@ -56,11 +56,13 @@ _Evidence:_ `packages/domain-core/src/parse.ts`.
 
 ### AUTHOR-006 — Structured edits preserve authored YAML
 
-A structured authoring edit MUST preserve comments, scalar style, and unmodified concrete YAML outside the ID-addressed values it changes.
+A structured authoring edit MUST preserve comments, scalar style, aliases, mapping order, and unmodified concrete YAML outside the ID-addressed values it changes.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ round-trip a commented YAML fixture through one structured edit and compare every unmodified concrete-syntax node.
+_Verify:_ `packages/domain-core/src/document-edit.test.ts` covers comments, quoted and block scalars, aliases, mapping order, stable collection anchors, and exact inverse restoration.
+
+_Evidence:_ `InfoschematicDocument` in `packages/domain-core/src/document.ts` retains source-token YAML privately; `applyInfoschematicDocumentEdit` in `packages/domain-core/src/document-edit.ts` edits a cloned document and emits its retained concrete syntax.
 
 ## Quality properties
 
@@ -129,3 +131,23 @@ _Conformance:_ conforming
 _Verify:_ `bun run self:verify:schema`, which fails when the committed file is stale.
 
 _Evidence:_ `infoschematicJsonSchema` in `packages/domain-core/src/schema.ts` and `scripts/generate-schema.ts`.
+
+### AUTHOR-013 — Document edits are transactional and reversible
+
+Domain Core MUST validate a complete versioned edit batch before publishing its document, source, or model, return the original document unchanged on failure, and return an inverse capable of restoring the prior semantic value and exact affected source on success.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/domain-core/src/document-edit.test.ts` covers invalid paths, invalid references, whole-batch rollback, undo, redo, and dishonest syntax-snapshot rejection.
+
+_Evidence:_ `applyInfoschematicDocumentEdit` in `packages/domain-core/src/document-edit.ts` clones before mutation, reparses through the canonical loader, and verifies inverse concrete syntax against the computed semantic result.
+
+### AUTHOR-014 — Document edits use stable addresses
+
+A durable document edit MUST address collection members by stable IDs and order them with stable before-or-after ID anchors rather than numeric indices.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/domain-core/src/document-edit.test.ts` covers field and ID segments, add and move anchors, missing targets, and numeric-path rejection.
+
+_Evidence:_ `InfoschematicDocumentPathSegment` and `InfoschematicDocumentAnchor` in `packages/domain-core/src/document-edit.ts` are the only public path and collection-order vocabulary.

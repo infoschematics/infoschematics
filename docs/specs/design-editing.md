@@ -213,3 +213,23 @@ _Conformance:_ conforming
 _Verify:_ creation tests cover the full lifecycle after creation, including moving a created endpoint artefact and observing a connected created Flow.
 
 _Evidence:_ creation tests cover the full lifecycle after creation, including moving a created endpoint artefact and observing a connected created Flow.
+
+### EDIT-020 — Authored source remains host-owned
+
+In document mode, Studio MUST accept one opaque validated authored document, emit only fully validated edit, source, model, and inverse results, and leave acceptance, persistence, and conflict handling to the host.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/App.test.tsx` covers mutually exclusive source props and host acknowledgement; `packages/view-studio/src/app/editor/document-operations.test.ts` covers validated projection and rejection.
+
+_Evidence:_ `StudioProps` in `packages/view-studio/src/app/App.tsx` separates established `config` input from authored `document` input, while `StudioDocumentChangeHandler` in `packages/view-studio/src/app/editor/document-operations.ts` exposes validated results without a persistence API.
+
+### EDIT-021 — Studio edits retain authored representation
+
+Studio MUST project supported typed artefact operations through stable document paths without replacing unrelated source, including preserving compact versus structured Flow fields and comments inside an edited Flow.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers five artefact kinds, create, remove, reorder, geometry and property edits, collateral Scope membership, compact and structured Flows, comments, and accepted-document acknowledgement.
+
+_Evidence:_ `projectStudioDocumentOperations` in `packages/view-studio/src/app/editor/document-operations.ts` reads the retained source shape and emits granular `link`, `waypoints`, `labelAt`, or structured route operations as appropriate.
