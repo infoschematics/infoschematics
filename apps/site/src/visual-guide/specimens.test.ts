@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { guideProperties, guidePropertyKeys } from './curriculum.ts'
-import { anatomySpecimen, guidePropertyValue, specimenFor, withGuideProperty } from './specimens.ts'
+import { anatomySpecimen, guidePropertyValue, specimenFor, specimenSnippet, withGuideProperty } from './specimens.ts'
 
 describe('components guide specimens', () => {
   it('contains every primary artefact kind and connects the Point in the labelled example', () => {
@@ -25,6 +25,33 @@ describe('components guide specimens', () => {
     expect(card.cards).toHaveLength(1)
     expect(card.regions).toHaveLength(0)
     expect(card.flows).toHaveLength(0)
+  })
+
+  it('uses independently centred, grid-aligned specimen geometry', () => {
+    const fabric = specimenFor('fabric').infoschematic.fabrics[0]
+    const card = specimenFor('card').infoschematic.cards[0]
+
+    expect(fabric?.placement.box).toEqual({ x: 210, y: 130, width: 300, height: 140 })
+    expect(card?.placement.box).toEqual({ x: 250, y: 140, width: 220, height: 120 })
+    expect(fabric?.placement.ports).toEqual({ east: 1, north: 1, south: 1, west: 1 })
+    expect(card?.placement.ports).toEqual({ east: 1, north: 1, south: 1, west: 1 })
+  })
+
+  it('shows Adapter Cards as a supported composition around a Standard Card', () => {
+    const updated = withGuideProperty(specimenFor('card'), 'card.variant', 'adapter')
+
+    expect(updated.infoschematic.cards).toHaveLength(2)
+    expect(updated.infoschematic.cards[1]?.wraps).toBe(updated.infoschematic.cards[0]?.id)
+    expect(guidePropertyValue(updated, 'card.variant')).toBe('adapter')
+  })
+
+  it('serialises the live specimen as YAML and a typed definition', () => {
+    const updated = withGuideProperty(specimenFor('fabric'), 'fabric.ports.east', 3)
+
+    expect(specimenSnippet(updated, 'fabric', 'yaml')).toContain('east: 3')
+    expect(specimenSnippet(updated, 'fabric', 'yaml')).not.toContain('cards:')
+    expect(specimenSnippet(updated, 'fabric', 'typescript')).toContain('defineInfoschematic')
+    expect(specimenSnippet(updated, 'fabric', 'typescript')).toContain('"east": 3')
   })
 
   it.each(guidePropertyKeys)('round-trips the %s guide control', (key) => {

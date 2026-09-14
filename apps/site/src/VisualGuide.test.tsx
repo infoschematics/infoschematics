@@ -20,6 +20,7 @@ describe('components guide', () => {
       'flow',
       'point',
       'graphic',
+      'future-notation',
       'where-next'
     ]) {
       expect(page).toContain(`href="#${slug}"`)
@@ -32,9 +33,17 @@ describe('components guide', () => {
     expect(page).toContain('A labelled Infoschematic')
     expect(page).toContain('Labels for the complete example')
     expect(page).toContain('acts as a real endpoint')
-    expect(page.match(/<legend>Change properties<\/legend>/g)).toHaveLength(7)
+    expect(page.match(/<legend>Properties<\/legend>/g)).toHaveLength(7)
+    expect(page.match(/>Reset<\/button>/g)).toHaveLength(7)
     expect(page).toContain('Fill opacity')
     expect(page).toContain('Property reference')
+    expect(page).toContain('Copy snippet')
+    expect(page).toContain('TypeScript')
+    expect(page).toContain('Standard and Adapter Cards')
+    expect(page).toContain('A <strong>Port</strong> is a numbered attachment position')
+    expect(page).toContain('Future notation')
+    expect(page).not.toContain('aria-hidden="true">01')
+    expect(page).not.toContain('Canvas colour currently comes from a surface preset')
     expect(page).not.toContain('Explanation and presentation')
     expect(page).not.toContain('Presentation states')
     expect(page).not.toContain('Treatments')

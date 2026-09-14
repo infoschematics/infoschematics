@@ -540,14 +540,6 @@ a:focus-visible {
   margin-top: 0;
 }
 
-.visual-guide__anatomy-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(230px, 0.8fr);
-  gap: 20px;
-  align-items: start;
-  margin-top: 30px;
-}
-
 .visual-guide__anatomy,
 .interactive-specimen__output {
   margin: 0;
@@ -693,58 +685,6 @@ a:focus-visible {
   text-align: right;
 }
 
-.visual-guide__property-note {
-  margin: 18px 0 0;
-  padding: 14px 16px;
-  border-left: 2px solid #79c9ff;
-  background: #0d2031;
-  color: #a9bdcc;
-  font-size: 14px;
-}
-
-.visual-guide__property-reference {
-  margin-top: 26px;
-}
-
-.visual-guide__property-reference h3 {
-  margin-bottom: 12px;
-  font-size: 18px;
-}
-
-.visual-guide__property-reference dl {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
-  margin: 0;
-  border: 1px solid #ffffff16;
-  border-radius: 10px;
-  background: #ffffff16;
-}
-
-.visual-guide__property-reference dl > div {
-  min-width: 0;
-  padding: 14px 16px;
-  background: #0d2031;
-}
-
-.visual-guide__property-reference dt,
-.visual-guide__property-reference dd {
-  margin: 0;
-}
-
-.visual-guide__property-reference dt code {
-  color: #8fcff8;
-  font-size: 12px;
-}
-
-.visual-guide__property-reference dd {
-  margin-top: 7px;
-  color: #9db4c9;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
 .interactive-specimen__controls button {
   margin-top: 2px;
   cursor: pointer;
@@ -755,14 +695,222 @@ a:focus-visible {
   border-color: #79c9ff;
 }
 
+.visual-guide__anatomy {
+  margin: 30px 0 16px;
+}
+
+.visual-guide__anatomy-key {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  padding: 0;
+  background: #ffffff16;
+}
+
+.visual-guide__anatomy-key li,
+.visual-guide__anatomy-key li:first-child {
+  display: block;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 0;
+  background: #0d2031;
+}
+
+.interactive-specimen-layout {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.interactive-specimen {
+  display: block;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid #ffffff1c;
+  border-radius: 12px;
+  background: #0d2031;
+}
+
+.interactive-specimen__header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #ffffff16;
+  color: #b8cad9;
+  font: 650 11px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.interactive-specimen__header button,
+.specimen-snippet button {
+  width: auto;
+  padding: 6px 9px;
+  border: 1px solid #ffffff26;
+  border-radius: 6px;
+  color: #dcebf5;
+  background: #071624;
+  cursor: pointer;
+  font: 600 11px/1.4 'DM Mono', monospace;
+}
+
+.interactive-specimen__header button:hover,
+.interactive-specimen__header button:focus-visible,
+.specimen-snippet button:hover,
+.specimen-snippet button:focus-visible {
+  border-color: #79c9ff;
+}
+
+.interactive-specimen__output {
+  border: 0;
+  border-radius: 0;
+}
+
+.interactive-specimen__controls {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px 18px;
+  padding: 18px;
+  border: 0;
+  border-top: 1px solid #ffffff16;
+  border-radius: 0;
+}
+
+.specimen-snippet {
+  overflow: hidden;
+  border: 1px solid #ffffff1c;
+  border-radius: 10px;
+  background: #071624;
+}
+
+.specimen-snippet__toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 10px;
+  border-bottom: 1px solid #ffffff16;
+  background: #0d2031;
+}
+
+.specimen-snippet__tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.specimen-snippet__tabs button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.specimen-snippet__tabs button[aria-selected='true'] {
+  border-color: #79c9ff55;
+  color: #071624;
+  background: #79c9ff;
+}
+
+.specimen-snippet__copy {
+  margin-left: auto;
+}
+
+.specimen-snippet pre {
+  max-height: 340px;
+  margin: 0;
+  padding: 16px;
+  overflow: auto;
+  color: #c7e3f4;
+  font: 12px/1.65 'DM Mono', monospace;
+  tab-size: 2;
+}
+
+.specimen-snippet__feedback {
+  min-height: 20px;
+  margin: 0;
+  padding: 0 12px 7px;
+  color: #8fa8bc;
+  font-size: 11px;
+  text-align: right;
+}
+
+.visual-guide__property-reference {
+  overflow: hidden;
+  margin-top: 24px;
+  border: 1px solid #ffffff16;
+  border-radius: 10px;
+  background: #0d2031;
+}
+
+.visual-guide__property-reference summary {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 13px 16px;
+  color: #f5f8ff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+  list-style-position: inside;
+}
+
+.visual-guide__property-reference summary span {
+  color: #8fa8bc;
+  font: 500 11px/1.4 'DM Mono', monospace;
+}
+
+.visual-guide__property-table {
+  overflow-x: auto;
+  border-top: 1px solid #ffffff16;
+}
+
+.visual-guide__property-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.visual-guide__property-table th,
+.visual-guide__property-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid #ffffff12;
+  text-align: left;
+  vertical-align: top;
+}
+
+.visual-guide__property-table thead th {
+  color: #8fa8bc;
+  font: 650 10px/1.4 'DM Mono', monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.visual-guide__property-table tbody th {
+  width: 34%;
+  color: #8fcff8;
+  font: 500 12px/1.5 'DM Mono', monospace;
+}
+
+.visual-guide__property-table tbody td {
+  color: #9db4c9;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.visual-guide__property-table tbody tr:last-child th,
+.visual-guide__property-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
 @media (max-width: 760px) {
-  .visual-guide__anatomy-layout,
-  .interactive-specimen {
+  .visual-guide__anatomy-key {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .visual-guide__property-reference dl {
+  .interactive-specimen__controls {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .specimen-snippet__toolbar {
+    flex-wrap: wrap;
   }
 }
 

@@ -7,6 +7,12 @@ type PropertyControlProps = {
   onChange: (value: GuidePropertyValue) => void
 }
 
+const choiceLabel = (propertyKey: GuidePropertyKey, choice: string) => {
+  if (propertyKey === 'canvas.surface' && choice === 'neutral') return 'default (neutral)'
+  if (propertyKey === 'card.variant') return `${choice} card`
+  return choice.replaceAll('-', ' ')
+}
+
 export function PropertyControl({ propertyKey, value, onChange }: PropertyControlProps) {
   const descriptor = guideProperties[propertyKey]
   const inputId = `components-${propertyKey.replaceAll('.', '-')}`
@@ -32,7 +38,7 @@ export function PropertyControl({ propertyKey, value, onChange }: PropertyContro
         <select id={inputId} onChange={(event) => onChange(event.currentTarget.value)} value={String(value)}>
           {descriptor.values?.map((choice) => (
             <option key={choice} value={choice}>
-              {choice.replaceAll('-', ' ')}
+              {choiceLabel(propertyKey, choice)}
             </option>
           ))}
         </select>

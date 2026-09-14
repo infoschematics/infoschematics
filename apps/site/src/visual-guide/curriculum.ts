@@ -28,10 +28,19 @@ export type GuidePropertyKey =
   | 'card.description'
   | 'card.height'
   | 'card.identity'
+  | 'card.ports.east'
+  | 'card.ports.north'
+  | 'card.ports.south'
+  | 'card.ports.west'
   | 'card.stereotype'
+  | 'card.variant'
   | 'card.width'
   | 'fabric.caption'
   | 'fabric.height'
+  | 'fabric.ports.east'
+  | 'fabric.ports.north'
+  | 'fabric.ports.south'
+  | 'fabric.ports.west'
   | 'fabric.width'
   | 'flow.bidirectional'
   | 'flow.dashed'
@@ -76,8 +85,17 @@ export const guideProperties: Readonly<Record<GuidePropertyKey, GuidePropertyDes
   'fabric.width': { control: 'number', range: { min: 160, max: 480, step: 10 } },
   'fabric.height': { control: 'number', range: { min: 80, max: 240, step: 10 } },
   'fabric.caption': { control: 'text' },
-  'card.width': { control: 'number', range: { min: 150, max: 420, step: 10 } },
-  'card.height': { control: 'number', range: { min: 70, max: 220, step: 10 } },
+  'fabric.ports.north': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'fabric.ports.east': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'fabric.ports.south': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'fabric.ports.west': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'card.width': { control: 'number', range: { min: 160, max: 420, step: 10 } },
+  'card.height': { control: 'number', range: { min: 80, max: 220, step: 10 } },
+  'card.variant': { control: 'choice', values: ['standard', 'adapter'] },
+  'card.ports.north': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'card.ports.east': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'card.ports.south': { control: 'number', range: { min: 0, max: 4, step: 1 } },
+  'card.ports.west': { control: 'number', range: { min: 0, max: 4, step: 1 } },
   'card.compact': { control: 'flag' },
   'card.identity': { control: 'flag' },
   'card.stereotype': { control: 'flag' },
@@ -92,7 +110,7 @@ export const guideProperties: Readonly<Record<GuidePropertyKey, GuidePropertyDes
 }
 
 export const propertyLabels: Readonly<Record<GuidePropertyKey, string>> = {
-  'canvas.surface': 'Surface preset',
+  'canvas.surface': 'Surface',
   'canvas.grid': 'Grid',
   'region.width': 'Width',
   'region.height': 'Height',
@@ -107,8 +125,17 @@ export const propertyLabels: Readonly<Record<GuidePropertyKey, string>> = {
   'fabric.width': 'Width',
   'fabric.height': 'Height',
   'fabric.caption': 'Caption',
+  'fabric.ports.north': 'North ports',
+  'fabric.ports.east': 'East ports',
+  'fabric.ports.south': 'South ports',
+  'fabric.ports.west': 'West ports',
   'card.width': 'Width',
   'card.height': 'Height',
+  'card.variant': 'Card type',
+  'card.ports.north': 'North ports',
+  'card.ports.east': 'East ports',
+  'card.ports.south': 'South ports',
+  'card.ports.west': 'West ports',
   'card.compact': 'Compact layout',
   'card.identity': 'Identity code',
   'card.stereotype': 'Stereotype',
@@ -146,7 +173,10 @@ export const componentSections: readonly ComponentSection[] = [
     propertyKeys: ['canvas.surface', 'canvas.grid'],
     properties: [
       { name: 'viewBox', summary: 'The x, y, width, and height of the shared diagram coordinate space.' },
-      { name: 'appearance.surface', summary: 'The neutral or blueprint surface preset.' },
+      {
+        name: 'appearance.surface',
+        summary: 'The neutral or blueprint surface; omitting it uses the neutral default.'
+      },
       { name: 'appearance.grid', summary: 'No grid, major lines, major plus minor lines, or dots.' }
     ]
   },
@@ -186,7 +216,15 @@ export const componentSections: readonly ComponentSection[] = [
     layer: 'midground',
     summary:
       'A Fabric is a connectable plane or shared substrate. Unlike a Region, it can be the source or target of a Flow.',
-    propertyKeys: ['fabric.width', 'fabric.height', 'fabric.caption'],
+    propertyKeys: [
+      'fabric.width',
+      'fabric.height',
+      'fabric.caption',
+      'fabric.ports.north',
+      'fabric.ports.east',
+      'fabric.ports.south',
+      'fabric.ports.west'
+    ],
     properties: [
       { name: 'id, code, label, detail', summary: 'Stable identity and reader-facing text.' },
       { name: 'scope, scopes, scopeRule', summary: 'Default scope and the applicability rule.' },
@@ -202,7 +240,19 @@ export const componentSections: readonly ComponentSection[] = [
     layer: 'foreground',
     summary:
       'A Card is a placed component. It carries identity and meaning, and its ports make it connectable to Flows.',
-    propertyKeys: ['card.width', 'card.height', 'card.compact', 'card.identity', 'card.stereotype', 'card.description'],
+    propertyKeys: [
+      'card.variant',
+      'card.width',
+      'card.height',
+      'card.ports.north',
+      'card.ports.east',
+      'card.ports.south',
+      'card.ports.west',
+      'card.compact',
+      'card.identity',
+      'card.stereotype',
+      'card.description'
+    ],
     properties: [
       { name: 'id, code, label, detail', summary: 'Stable identity and reader-facing text.' },
       { name: 'scope, scopes, scopeRule', summary: 'Default scope and the applicability rule.' },

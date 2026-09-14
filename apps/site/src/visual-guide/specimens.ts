@@ -1,4 +1,5 @@
 import { defineInfoschematic, type InfoschematicConfig } from '@infoschematics/domain-core'
+import { stringify } from 'yaml'
 import type { GuidePropertyKey, SpecimenKind } from './curriculum.ts'
 
 export type GuidePropertyValue = boolean | number | string
@@ -42,7 +43,7 @@ const completeSpecimen = () =>
         {
           id: 'region',
           label: 'Region',
-          box: { x: 34, y: 32, width: 652, height: 330, radius: 12 },
+          box: { x: 30, y: 30, width: 660, height: 330, radius: 10 },
           fill: '#12273b24',
           frame: { style: 'solid', opacity: 1 },
           labelMount: 'boundary',
@@ -58,7 +59,7 @@ const completeSpecimen = () =>
           detail: 'Connectable plane',
           scopes: ['primary'],
           scope: 'primary',
-          placement: { box: { x: 76, y: 112, width: 214, height: 118 }, ports: { east: 1 } },
+          placement: { box: { x: 70, y: 110, width: 220, height: 120 }, ports: { east: 1 } },
           appearance: { renderer: 'default', caption: 'Fabric' }
         }
       ],
@@ -73,7 +74,7 @@ const completeSpecimen = () =>
           domain: 'example',
           stereotype: 'Component',
           placement: {
-            box: { x: 430, y: 112, width: 214, height: 118 },
+            box: { x: 430, y: 110, width: 220, height: 120 },
             ports: { west: 1, south: 1 }
           }
         }
@@ -84,7 +85,7 @@ const completeSpecimen = () =>
           code: 'POINT-01',
           label: 'Point',
           scopes: ['secondary'],
-          point: { x: 536, y: 314 },
+          point: { x: 540, y: 310 },
           ports: { north: 1 }
         }
       ],
@@ -99,8 +100,8 @@ const completeSpecimen = () =>
           targetPort: 'W1',
           label: { along: 0.5 },
           points: [
-            { x: 290, y: 171 },
-            { x: 430, y: 171 }
+            { x: 290, y: 170 },
+            { x: 430, y: 170 }
           ]
         },
         {
@@ -113,8 +114,8 @@ const completeSpecimen = () =>
           targetPort: 'N1',
           label: { along: 0.55 },
           points: [
-            { x: 537, y: 230 },
-            { x: 537, y: 314 }
+            { x: 540, y: 230 },
+            { x: 540, y: 310 }
           ]
         }
       ],
@@ -123,7 +124,7 @@ const completeSpecimen = () =>
           id: 'graphic',
           label: 'Graphic',
           renderer: 'guide-graphic',
-          placement: { x: 76, y: 276, width: 214, height: 64 },
+          placement: { x: 70, y: 270, width: 220, height: 70 },
           scopes: ['primary']
         }
       ]
@@ -159,17 +160,71 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
     case 'canvas':
       return withDiagramParts(config, {})
     case 'region':
-      return withDiagramParts(config, { regions })
+      return withDiagramParts(config, {
+        regions: regions.map((region) => ({ ...region, box: { x: 100, y: 70, width: 520, height: 260, radius: 10 } }))
+      })
     case 'fabric':
-      return withDiagramParts(config, { fabrics })
+      return withDiagramParts(config, {
+        fabrics: fabrics.map((fabric) => ({
+          ...fabric,
+          placement: {
+            box: { x: 210, y: 130, width: 300, height: 140 },
+            ports: { east: 1, north: 1, south: 1, west: 1 }
+          }
+        }))
+      })
     case 'card':
-      return withDiagramParts(config, { cards })
+      return withDiagramParts(config, {
+        cards: cards.map((card) => ({
+          ...card,
+          placement: {
+            box: { x: 250, y: 140, width: 220, height: 120 },
+            ports: { east: 1, north: 1, south: 1, west: 1 }
+          }
+        }))
+      })
     case 'flow':
-      return withDiagramParts(config, { fabrics, cards, flows: flows.slice(0, 1) })
+      return withDiagramParts(config, {
+        fabrics: fabrics.map((fabric) => ({
+          ...fabric,
+          placement: { box: { x: 70, y: 140, width: 220, height: 120 }, ports: { east: 1 } }
+        })),
+        cards: cards.map((card) => ({
+          ...card,
+          placement: { box: { x: 430, y: 140, width: 220, height: 120 }, ports: { west: 1 } }
+        })),
+        flows: flows.slice(0, 1).map((flow) => ({
+          ...flow,
+          points: [
+            { x: 290, y: 200 },
+            { x: 430, y: 200 }
+          ]
+        }))
+      })
     case 'point':
-      return withDiagramParts(config, { cards, flows: flows.slice(1), points })
+      return withDiagramParts(config, {
+        cards: cards.map((card) => ({
+          ...card,
+          placement: { box: { x: 250, y: 70, width: 220, height: 120 }, ports: { south: 1 } }
+        })),
+        flows: flows.slice(1).map((flow) => ({
+          ...flow,
+          points: [
+            { x: 360, y: 190 },
+            { x: 360, y: 280 }
+          ]
+        })),
+        points: points.map((point) => ({ ...point, point: { x: 360, y: 280 }, ports: { north: 1 } }))
+      })
     case 'graphic':
-      return withDiagramParts(config, { graphics })
+      return withDiagramParts(config, {
+        graphics: graphics.map((graphic) => ({
+          ...graphic,
+          label: 'Host-rendered Graphic',
+          placement: { x: 180, y: 120, width: 360, height: 160 },
+          properties: { caption: 'Any serialisable renderer properties', emphasis: true }
+        }))
+      })
   }
 }
 
@@ -228,10 +283,28 @@ export const guidePropertyValue = (config: InfoschematicConfig, key: GuideProper
       return fabric?.placement.box.height ?? 0
     case 'fabric.caption':
       return fabric?.appearance?.caption ?? ''
+    case 'fabric.ports.north':
+      return fabric?.placement.ports?.north ?? 0
+    case 'fabric.ports.east':
+      return fabric?.placement.ports?.east ?? 0
+    case 'fabric.ports.south':
+      return fabric?.placement.ports?.south ?? 0
+    case 'fabric.ports.west':
+      return fabric?.placement.ports?.west ?? 0
     case 'card.width':
       return card?.placement.box.width ?? 0
     case 'card.height':
       return card?.placement.box.height ?? 0
+    case 'card.variant':
+      return diagram.cards.some(({ wraps }) => Boolean(wraps)) ? 'adapter' : 'standard'
+    case 'card.ports.north':
+      return card?.placement.ports?.north ?? 0
+    case 'card.ports.east':
+      return card?.placement.ports?.east ?? 0
+    case 'card.ports.south':
+      return card?.placement.ports?.south ?? 0
+    case 'card.ports.west':
+      return card?.placement.ports?.west ?? 0
     case 'card.compact':
       return diagram.appearance?.card?.compact ?? false
     case 'card.identity':
@@ -313,6 +386,16 @@ export const withGuideProperty = (
           }
         }
       }
+      if (field.startsWith('ports.')) {
+        const side = field.slice('ports.'.length) as 'east' | 'north' | 'south' | 'west'
+        return {
+          ...fabric,
+          placement: {
+            ...fabric.placement,
+            ports: { ...fabric.placement.ports, [side]: Number(value) }
+          }
+        }
+      }
       return {
         ...fabric,
         placement: { ...fabric.placement, box: { ...fabric.placement.box, [field]: Number(value) } }
@@ -323,6 +406,34 @@ export const withGuideProperty = (
 
   if (key.startsWith('card.')) {
     const field = key.slice('card.'.length)
+    if (field === 'variant') {
+      const standard = diagram.cards.find(({ wraps }) => !wraps)
+      if (!standard) return config
+      const cards =
+        value === 'adapter'
+          ? [
+              standard,
+              {
+                ...standard,
+                id: 'adapter-card',
+                code: 'ADAPTER-01',
+                label: 'Adapter Card',
+                detail: 'Wraps the Standard Card',
+                stereotype: 'Adapter',
+                wraps: standard.id
+              }
+            ]
+          : [standard]
+      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+    }
+    if (field.startsWith('ports.')) {
+      const side = field.slice('ports.'.length) as 'east' | 'north' | 'south' | 'west'
+      const cards = updateFirst(diagram.cards, (card) => ({
+        ...card,
+        placement: { ...card.placement, ports: { ...card.placement.ports, [side]: Number(value) } }
+      }))
+      return { ...config, infoschematic: { ...diagram, cards } } as InfoschematicConfig
+    }
     if (field === 'width' || field === 'height') {
       const cards = updateFirst(diagram.cards, (card) => ({
         ...card,
@@ -375,4 +486,70 @@ export const withGuideProperty = (
     }
   }))
   return { ...config, infoschematic: { ...diagram, graphics } } as InfoschematicConfig
+}
+
+export type SpecimenSnippetFormat = 'typescript' | 'yaml'
+
+const specimenSnippetInput = (config: InfoschematicConfig, kind: SpecimenKind) => {
+  const diagram = config.infoschematic
+  const backdrop = {
+    surface: diagram.appearance?.surface,
+    grid: diagram.appearance?.grid
+  }
+  const base = { viewBox: diagram.viewBox, appearance: backdrop }
+
+  switch (kind) {
+    case 'canvas':
+      return { infoschematic: base }
+    case 'region':
+      return { infoschematic: { ...base, regions: diagram.regions } }
+    case 'fabric':
+      return { infoschematic: { ...base, scopes: diagram.scopes, fabrics: diagram.fabrics } }
+    case 'card':
+      return {
+        infoschematic: {
+          ...base,
+          appearance: { ...backdrop, card: diagram.appearance?.card },
+          scopes: diagram.scopes,
+          domains: diagram.domains,
+          cards: diagram.cards
+        }
+      }
+    case 'flow':
+      return {
+        infoschematic: {
+          ...base,
+          scopes: diagram.scopes,
+          domains: diagram.domains,
+          flowFamilies: diagram.flowFamilies,
+          fabrics: diagram.fabrics,
+          cards: diagram.cards,
+          flows: diagram.flows
+        }
+      }
+    case 'point':
+      return {
+        infoschematic: {
+          ...base,
+          scopes: diagram.scopes,
+          domains: diagram.domains,
+          flowFamilies: diagram.flowFamilies,
+          cards: diagram.cards,
+          points: diagram.points,
+          flows: diagram.flows
+        }
+      }
+    case 'graphic':
+      return { infoschematic: { ...base, scopes: diagram.scopes, graphics: diagram.graphics } }
+  }
+}
+
+export function specimenSnippet(config: InfoschematicConfig, kind: SpecimenKind, format: SpecimenSnippetFormat) {
+  const input = specimenSnippetInput(config, kind)
+  if (format === 'yaml') return stringify(input, { lineWidth: 0 })
+
+  return `import { defineInfoschematic } from '@infoschematics/domain-core'
+
+export const ${kind}Example = defineInfoschematic(${JSON.stringify(input, null, 2)})
+`
 }
