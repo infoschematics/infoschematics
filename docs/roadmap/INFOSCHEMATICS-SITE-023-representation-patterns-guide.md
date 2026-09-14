@@ -4,12 +4,12 @@ area: SITE
 title: Representation patterns guide
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: b9f001f3c6b9f9a2828d946293fec7af41b8ad7a
 created_at: 2026-09-14T01:59:19Z
-updated_at: 2026-09-14T01:59:55Z
+updated_at: 2026-09-14T02:09:54Z
 ---
 
 # Representation patterns guide
@@ -32,12 +32,12 @@ The Overview describes outputs and editing modes but not the range of representa
 
 ## Steps
 
-- [ ] Publish a Representation patterns guide that puts architectural explanation first and describes supporting workflow, process, entity, and pipeline views honestly.
-- [ ] Explain that imports from BPMN, n8n, or Node-RED would translate source models into a readable Infoschematic rather than make Infoschematics their execution engine.
-- [ ] Add a valid editable media-pipeline Playground preset whose Flow Families identify what passes between components.
-- [ ] Link the new guide from Overview and place it coherently in documentation navigation.
-- [ ] Expand the related-tools reference with focused lessons from React Flow, Rete.js, bpmn-js, ELK, Node-RED, and n8n, including n8n's licensing boundary.
-- [ ] Verify routing, source rendering, preset selection, canonical parsing, responsive output, and external-link wording.
+- [x] Publish a Representation patterns guide that puts architectural explanation first and describes supporting workflow, process, entity, and pipeline views honestly.
+- [x] Explain that imports from BPMN, n8n, or Node-RED would translate source models into a readable Infoschematic rather than make Infoschematics their execution engine.
+- [x] Add a valid editable media-pipeline Playground preset whose Flow Families identify what passes between components.
+- [x] Link the new guide from Overview and place it coherently in documentation navigation.
+- [x] Expand the related-tools reference with focused lessons from React Flow, Svelte Flow, Comgy, Rete.js, bpmn-js, ELK, Node-RED, and n8n, including n8n's licensing boundary.
+- [x] Verify routing, source rendering, preset selection, canonical parsing, responsive output, and external-link wording.
 
 ## Files touched
 
@@ -76,6 +76,32 @@ Add a Site-owned Representation patterns page and connect it from Overview.
 
 Keep importer, layout, notation, and runtime-control implementation outside this Site item for the non-website workstream to shape independently.
 
+## Review
+
+### Delivered
+
+Implementation commit `b312adf372d7e9db78aef6ca90468cb6de83393c` delivers the Representation patterns guide, its navigation and Overview pathway, the editable live-media pipeline preset, and the expanded related-tools inspiration reference.
+
+### Summary of changes
+
+The guide keeps architecture at the centre while describing dashboard topology, supporting workflow and entity views, media pipelines, source-model translation, and operational-console embedding. The Playground preset demonstrates typed media Flows between five components. React Flow, Svelte Flow, Comgy, Rete.js, bpmn-js, ELK, Node-RED, and n8n are recorded with their relevant lessons and boundaries.
+
+### Verification
+
+Focused App, DocumentPage, and Playground tests passed. Site TypeScript checking and `bun run self:check` passed. The guide was inspected at desktop and 390-pixel widths, and the media preset was inspected in the running Playground with no parse issues, console errors, stale output, or horizontal overflow. The roadmap audit reached unrelated `INFOSCHEMATICS-TOOL-*` candidate-field and harness-catalogue failures owned by the concurrent non-website workstream; this Site item introduced no roadmap-audit finding.
+
+### Outstanding concerns
+
+Import adapters, automatic layout, richer process or entity notation, live-data bindings, and runtime control remain deliberately outside this Site-owned item and need separately shaped package work.
+
+### Post-change review
+
+The page follows the existing documentation shell on desktop and mobile. The dashboard example is represented as a stable architectural topology with host-supplied operational overlays, avoiding any implication that an Infoschematic becomes the source system or workflow engine.
+
+### Mini recap
+
+Baseline `b9f001f3c6b9f9a2828d946293fec7af41b8ad7a`; result `b312adf372d7e9db78aef6ca90468cb6de83393c`. The Site now explains the broader representation space and provides a concrete editable example without expanding the domain contract.
+
 ## Discussion
 
 ### Architecture remains primary
@@ -88,8 +114,12 @@ BPMN XML and workflow JSON can be useful source formats for future adapters. An 
 
 ### Editor and layout references
 
-React Flow and Rete.js are useful references for node, Port, connection, and editorial interaction. bpmn-js is the specialist choice for native BPMN modelling. ELK addresses graph layout rather than rendering. Node-RED and n8n demonstrate executable workflows and data mapping, but n8n's editor code is source-available under commercial-use restrictions, so it is inspiration or an integration source rather than a default library dependency.
+React Flow, Svelte Flow, and Rete.js are useful references for node, Port, connection, and editorial interaction. Comgy's Svelte Flow implementation is a particularly relevant example because it places live energy measures over a stable topology. React Flow's workflow template and showcase provide comparable workflow, pipeline, entity, media, and automation examples. bpmn-js is the specialist choice for native BPMN modelling. ELK addresses graph layout rather than rendering. Node-RED and n8n demonstrate executable workflows and data mapping, but n8n's editor code is source-available under commercial-use restrictions, so it is inspiration or an integration source rather than a default library dependency.
+
+### Dashboard topology
+
+The supplied deployed-architecture dashboard is a strong pattern for an Infoschematic view: nested deployment boundaries, compact resource Cards, external dependencies, and cross-boundary Flows form the stable topology, while measures such as traffic, capacity, cost, health, or risk can be supplied by the host as a selected Scene or live overlay.
 
 ### Embedded operational explanation
 
-An operational console, including the HNR console, can host an interactive Infoschematic to explain a live system or authored setup. The host owns runtime data, actions, permissions, and persistence; the Infoschematic owns the serialisable explanatory model.
+An operational console, including an HR or service-management console, can host an interactive Infoschematic to explain a live system or authored setup. The host owns runtime data, actions, permissions, and persistence; the Infoschematic owns the serialisable explanatory model.
