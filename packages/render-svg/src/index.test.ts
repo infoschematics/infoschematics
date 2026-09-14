@@ -116,7 +116,7 @@ const representative: InfoschematicConfig = {
         id: 'note',
         label: 'Note <safe>',
         placement: { height: 34, width: 90, x: 155, y: 170 },
-        renderer: 'note"renderer'
+        renderer: { key: 'note"renderer', version: 2 }
       }
     ],
     interfaces: [],
@@ -158,6 +158,7 @@ describe('renderInfoschematicSvg', () => {
     expect(first).toContain('Source &amp; gateway')
     expect(first).toContain('Source &lt;entry&gt;')
     expect(first).toContain('data-renderer="note&quot;renderer"')
+    expect(first).toContain('data-renderer-version="2"')
     expect(first).toContain('d="M160 110 H240"')
     expect(first).not.toContain('Source <entry>')
   })

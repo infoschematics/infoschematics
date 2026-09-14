@@ -1,3 +1,4 @@
+import { rendererReferenceOf } from '@infoschematics/domain-model/renderer'
 import { ChevronDown, ChevronUp, ListX, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { LineList } from './LineList.tsx'
@@ -227,7 +228,7 @@ export function ThemeCompositionPanel({
                 })
               }
               type="text"
-              value={scene.callout?.renderer ?? ''}
+              value={scene.callout?.renderer ? rendererReferenceOf(scene.callout.renderer).key : ''}
             />
           </label>
           <LineList

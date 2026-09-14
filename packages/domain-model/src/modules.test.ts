@@ -33,6 +33,7 @@ import type {
   RegionFrameStyle,
   RegionLabelMount
 } from '@infoschematics/domain-model/region'
+import type { RendererReference, RendererReferenceInput } from '@infoschematics/domain-model/renderer'
 import type { CalloutConfig, FocusConfig, StandaloneSceneConfig } from '@infoschematics/domain-model/scene'
 import type { ScopeConfig } from '@infoschematics/domain-model/scope'
 import type { SpecificationGroupConfig } from '@infoschematics/domain-model/specification-group'
@@ -75,6 +76,8 @@ type PublicContracts = [
   ThemeConfig,
   StorySceneConfig,
   StoryConfig,
+  RendererReference,
+  RendererReferenceInput,
   InfoschematicDefinition,
   InfoschematicConfig,
   InfoschematicConfigInput,
@@ -87,7 +90,7 @@ type PublicContracts = [
 
 describe('public model modules', () => {
   it('resolves every explicit contract subpath', () => {
-    const contractCount: PublicContracts['length'] = 42
-    expect(contractCount).toBe(42)
+    const contractCount: PublicContracts['length'] = 44
+    expect(contractCount).toBe(44)
   })
 })

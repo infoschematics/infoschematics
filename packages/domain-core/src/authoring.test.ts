@@ -194,4 +194,63 @@ themes:
     expect(modelOf(bidirectional).diagram.flows[0]?.direction).toBe('bidirectional')
     expect(serialiseInfoschematicYaml(modelOf(bidirectional))).toContain('link: SRC E2 <-> SNK W2')
   })
+
+  it('normalises scalar renderer keys to explicit version-one references', () => {
+    const rendererDocument = (reference: string) => `
+id: RENDERERS
+title: Renderers
+diagram:
+  bounds: 0 0 100 100
+  fabrics:
+    - id: FABRIC
+      label: Fabric
+      kind: ${reference}
+      bounds: 0 0 50 50
+  overlays:
+    - id: OVERLAY
+      label: Overlay
+      kind: ${reference}
+themes:
+  - id: THEME
+    label: Theme
+    scenes:
+      - id: SCENE
+        label: Scene
+        callout:
+          body: Body
+          kind: ${reference}
+`
+    const scalar = modelOf(rendererDocument('custom'))
+    const structuredReference = '{ key: custom, version: 1 }'
+    const structured = modelOf(rendererDocument(structuredReference))
+
+    expect(scalar).toEqual(structured)
+    expect(scalar.diagram.fabrics[0]?.kind).toEqual({ key: 'custom', version: 1 })
+    expect(scalar.diagram.overlays[0]?.kind).toEqual({ key: 'custom', version: 1 })
+    expect(scalar.themes[0]?.scenes[0]?.callout?.kind).toEqual({ key: 'custom', version: 1 })
+
+    const yaml = serialiseInfoschematicYaml(scalar)
+    expect(yaml).toContain('kind:\n        key: custom\n        version: 1')
+    expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
+  })
+
+  it('rejects non-positive and fractional renderer schema versions at the authored path', () => {
+    const invalid = (version: number) =>
+      parseInfoschematic(`
+id: INVALID
+title: Invalid renderer
+diagram:
+  bounds: 0 0 100 100
+  overlays:
+    - id: OVERLAY
+      label: Overlay
+      kind: { key: custom, version: ${version} }
+`)
+
+    for (const version of [0, -1, 1.5]) {
+      const parsed = invalid(version)
+      expect(parsed.ok).toBe(false)
+      if (!parsed.ok) expect(parsed.issues[0]?.path).toBe('diagram.overlays.0.kind.version')
+    }
+  })
 })

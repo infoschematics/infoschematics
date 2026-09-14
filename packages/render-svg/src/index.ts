@@ -1,4 +1,4 @@
-import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/domain-model'
+import { type InfoschematicConfig, type InfoschematicInput, rendererReferenceOf } from '@infoschematics/domain-model'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import {
   type CardDetailOverrides,
@@ -811,6 +811,7 @@ export const renderInfoschematicSvg = (
   for (const graphic of graphics) {
     if (!graphic.placement) continue
     const box = graphic.placement
+    const renderer = rendererReferenceOf(graphic.renderer)
     const dimmed = focusClass(graphic.id, focus?.graphics, unfocused)
     body.push(
       group(
@@ -820,7 +821,8 @@ export const renderInfoschematicSvg = (
           ['data-artefact-id', graphic.id],
           ['data-artefact-kind', 'overlay'],
           ['data-id', graphic.id],
-          ['data-renderer', graphic.renderer],
+          ['data-renderer', renderer.key],
+          ['data-renderer-version', renderer.version],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
         [
@@ -845,7 +847,7 @@ export const renderInfoschematicSvg = (
               ['x', box.x + box.width / 2],
               ['y', box.y + box.height / 2]
             ],
-            xmlText(graphic.label ?? graphic.renderer)
+            xmlText(graphic.label ?? renderer.key)
           )
         ]
       ).join('\n')

@@ -11,6 +11,7 @@ import type {
   VisualIdentity
 } from '@infoschematics/domain-model/model'
 import type { PortCounts, PortId } from '@infoschematics/domain-model/ports'
+import type { RendererReference } from '@infoschematics/domain-model/renderer'
 import { z } from 'zod'
 
 /**
@@ -58,6 +59,18 @@ const jsonValue: z.ZodType<JsonValue> = z.lazy(() =>
 )
 
 const properties = z.record(z.string(), jsonValue).readonly()
+
+const rendererReferenceObject = z.strictObject({
+  key: z.string().min(1),
+  version: z.number().int().positive()
+})
+const rendererReference = z.union([
+  rendererReferenceObject,
+  z
+    .string()
+    .min(1)
+    .transform((key): RendererReference => ({ key, version: 1 }))
+])
 
 const visualIdentity = z.strictObject({
   color: z.string().optional(),
@@ -304,7 +317,7 @@ const fabric = z
     id: z.string(),
     label: z.string(),
     description: z.string().optional(),
-    kind: z.string().optional(),
+    kind: rendererReference.optional(),
     bounds: box,
     ports: portCounts.optional(),
     properties: properties.optional(),
@@ -404,7 +417,7 @@ const overlay = z.strictObject({
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
-  kind: z.string(),
+  kind: rendererReference,
   bounds: box.optional(),
   properties: properties.optional()
 })
@@ -419,7 +432,7 @@ const callout = z.strictObject({
   body: z.string(),
   takeaways: identifiers.optional(),
   placement: z.union([z.strictObject({ at: coordinate }), z.strictObject({ element: z.string() })]).optional(),
-  kind: z.string().optional(),
+  kind: rendererReference.optional(),
   properties: properties.optional()
 })
 

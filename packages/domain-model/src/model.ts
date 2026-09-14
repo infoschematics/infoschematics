@@ -2,6 +2,7 @@ import type { InfoschematicAppearanceConfig, RegionLabelPlacement } from './appe
 import type { Box, Point as Coordinate } from './geometry.ts'
 import type { PortCounts, PortId } from './ports.ts'
 import type { RegionFrameStyle, RegionLabelMount } from './region.ts'
+import type { RendererReference } from './renderer.ts'
 
 export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [key: string]: JsonValue }
 
@@ -70,7 +71,7 @@ export type Fabric = {
   description?: string
   bounds: Box
   ports?: PortCounts
-  kind?: string
+  kind?: RendererReference
   properties?: Readonly<Record<string, JsonValue>>
   appearance?: VisualIdentity
 }
@@ -101,7 +102,7 @@ export type Overlay = {
   id: string
   label: string
   description?: string
-  kind: string
+  kind: RendererReference
   bounds?: Box
   properties?: Readonly<Record<string, JsonValue>>
 }
@@ -116,7 +117,7 @@ export type Callout = {
   body: string
   takeaways?: readonly string[]
   placement?: { at: Coordinate } | { element: string }
-  kind?: string
+  kind?: RendererReference
   properties?: Readonly<Record<string, JsonValue>>
 }
 

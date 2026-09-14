@@ -43,7 +43,7 @@ describe('renderer registry', () => {
     expect(Object.isFrozen(registry.fabrics[0])).toBe(true)
   })
 
-  it('snapshots inputs, reports duplicate keys and resolves the first definition', () => {
+  it('snapshots inputs, reports duplicate key-version pairs and resolves the first definition', () => {
     const onDiagnostic = vi.fn()
     const definitions = [
       {
@@ -67,6 +67,30 @@ describe('renderer registry', () => {
       expect.objectContaining({ code: 'duplicate-key', key: 'same', kind: 'fabric' })
     )
     expect(resolveInfoschematicRenderer(registry, 'fabric', 'same', { label: 'kept' })?.Component).toBe(FirstFabric)
+  })
+
+  it('selects the exact authored schema version while scalar references request version one', () => {
+    const registry = defineInfoschematicRenderers({
+      fabrics: [
+        {
+          key: 'versioned',
+          schemaVersion: 1,
+          validateProperties: acceptsProperties,
+          component: FirstFabric
+        },
+        {
+          key: 'versioned',
+          schemaVersion: 2,
+          validateProperties: acceptsProperties,
+          component: SecondFabric
+        }
+      ]
+    })
+
+    expect(resolveInfoschematicRenderer(registry, 'fabric', 'versioned', undefined)?.Component).toBe(FirstFabric)
+    expect(
+      resolveInfoschematicRenderer(registry, 'fabric', { key: 'versioned', version: 2 }, undefined)?.Component
+    ).toBe(SecondFabric)
   })
 
   it('reports unknown keys, unsupported versions and invalid or throwing validators', () => {

@@ -1,3 +1,4 @@
+import type { RendererReferenceInput } from '@infoschematics/domain-model/renderer'
 import type { StandaloneSceneConfig } from '@infoschematics/domain-model/scene'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
 
@@ -28,7 +29,7 @@ export type Scene = {
   flows: readonly string[]
   hold: number
   overlay?: string
-  renderer?: string
+  renderer?: RendererReferenceInput
   scene?: string
   takeaways?: readonly string[]
   title?: string

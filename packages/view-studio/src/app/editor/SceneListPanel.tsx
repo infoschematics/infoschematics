@@ -1,3 +1,4 @@
+import { rendererReferenceOf } from '@infoschematics/domain-model/renderer'
 import { ChevronDown, ChevronUp, ListX, Plus, RotateCcw, Timer, Trash2 } from 'lucide-react'
 import { LineList } from './LineList.tsx'
 import { holdFor } from './scenes.ts'
@@ -173,7 +174,7 @@ export function SceneListPanel({
             <input
               onChange={(event) => editor.edit({ renderer: event.target.value || undefined })}
               type="text"
-              value={scene.renderer ?? ''}
+              value={scene.renderer ? rendererReferenceOf(scene.renderer).key : ''}
             />
           </label>
           <label className="text-row">

@@ -86,15 +86,17 @@ _Evidence:_ the repository `check:deps` script enforces the Domain Model depende
 
 ### AUTHOR-009 — Renderer references remain serialisable
 
-An authored Fabric, Overlay, or Callout MAY select a host visual implementation by stable renderer key. Its properties MUST remain serialisable scalar data. Authored configuration MUST NOT contain React components, JSX, callbacks, validators, runtime stores, or derived registries.
+An authored Fabric, Overlay, or Callout MAY select a host visual implementation with a stable renderer key and positive integer schema version. Its properties MUST remain serialisable scalar data. Authored configuration MUST NOT contain React components, JSX, callbacks, validators, runtime stores, or derived registries.
+
+A scalar renderer key MAY be accepted as compatibility input and MUST normalise to schema version `1`; canonical serialisation MUST emit the structured key-and-version reference.
 
 Renderer availability MUST NOT determine an artefact's identity, relationships, placement, or Audience content. A host or output that does not implement a compatible renderer MUST retain the product fallback.
 
 _Conformance:_ conforming
 
-_Verify:_ inspect renderer references in `packages/domain-model/src/fabric.ts`, `packages/domain-model/src/graphic.ts`, and `packages/domain-model/src/scene.ts`. against this requirement.
+_Verify:_ `packages/domain-core/src/authoring.test.ts` compares scalar and structured input, invalid versions, canonical serialisation, and stable re-emission.
 
-_Evidence:_ renderer references in `packages/domain-model/src/fabric.ts`, `packages/domain-model/src/graphic.ts`, and `packages/domain-model/src/scene.ts`.
+_Evidence:_ `RendererReference` in `packages/domain-model/src/renderer.ts`, the canonical schema in `packages/domain-core/src/schema.ts`, and the renderer-reference cases in `packages/domain-core/src/authoring.test.ts`.
 
 ### AUTHOR-010 — Normalisation is total over well-typed input
 

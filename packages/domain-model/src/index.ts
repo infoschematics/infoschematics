@@ -7,6 +7,8 @@ import type { StoryConfig } from './story.ts'
 import type { ThemeConfig } from './theme.ts'
 
 export type * from './model.ts'
+export type * from './renderer.ts'
+export { rendererReferenceOf } from './renderer.ts'
 
 export type InfoschematicConfig = InfoschematicMetadata & {
   infoschematic: InfoschematicDefinition

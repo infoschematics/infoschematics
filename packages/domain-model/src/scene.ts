@@ -1,4 +1,5 @@
 import type { Point } from './geometry.ts'
+import type { RendererReferenceInput } from './renderer.ts'
 
 export type FocusConfig = {
   artefacts?: readonly string[]
@@ -20,6 +21,6 @@ export type CalloutConfig = {
   body: string
   takeaways?: readonly string[]
   at?: Point
-  renderer?: string
+  renderer?: RendererReferenceInput
   properties?: Readonly<Record<string, boolean | number | string>>
 }

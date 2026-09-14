@@ -117,7 +117,7 @@ Its persistent regions are the **Infoschematic panel**, **Producer controls**, a
 - Types ending in `Config` describe authored serialisable data.
 - Runtime types derived from configuration do not leak into authored definitions.
 - Identifiers and renderer keys are stable strings.
-- A renderer key selects registered behaviour without embedding a component in configuration.
+- A renderer reference selects a registered key and property-schema version without embedding a component in configuration; a scalar compatibility key requests version `1`.
 - The host owns mounting, page metadata, routing, static assets, and deployment.
 
 Package ownership and dependency direction are defined by [the architecture guide](../design/architecture.md) and its linked decision records, rather than repeated here.

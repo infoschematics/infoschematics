@@ -1,7 +1,7 @@
 ---
 id: ADR-INFOSCHEMATICS-009
 title: Host-provided versioned renderers
-date: 2026-09-03
+date: 2026-09-14
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
@@ -16,10 +16,10 @@ Fabrics, Overlays, and Callouts may need domain-specific visual treatments, whil
 
 ## Decision
 
-Authored data names a stable renderer key and plain serialisable properties. Each host supplies an immutable renderer registry to the View instance. A registry definition binds its key to a supported property schema, version, and implementation; the owning View validates properties before rendering.
+Authored data selects a renderer property contract with a stable key and positive schema version, alongside plain serialisable properties. A scalar key remains compatibility input with the deterministic meaning of version `1`; canonical data and serialisation use the structured key-and-version reference. Each host supplies an immutable renderer registry to the View instance. A registry definition binds one key and version to a property validator and implementation; the owning View resolves the exact requested pair and validates properties before rendering.
 
-Unknown keys, unsupported versions, invalid properties, and duplicate definitions produce structured diagnostics and deterministic accessible fallbacks. Failures never remove View-owned geometry, selection, navigation, or labels. Incompatible property changes require a new renderer key unless the Domain Model later adds explicit version selection.
+Unknown keys, unregistered requested versions, invalid properties, and duplicate key-and-version definitions produce structured diagnostics and deterministic accessible fallbacks. A registry may deliberately provide several versions under one key, but resolution never guesses or silently falls forward. Failures never remove View-owned geometry, selection, navigation, or labels.
 
 ## Consequences
 
-Hosts can provide specialised rendering without executable authored data or cross-host state. The same Infoschematic remains usable by other hosts and renderers, and unsupported extensions stay legible.
+Hosts can evolve incompatible property contracts without multiplying otherwise stable renderer keys, while authored data remains executable-code-free and independent of cross-host state. Scalar compatibility input remains predictable, and canonical serialisation makes version selection visible. Hosts must retain every version still requested by supported documents or accept an explicit fallback diagnostic; they cannot rely on implicit negotiation.

@@ -16,7 +16,7 @@ _Evidence:_ `PortId` in `packages/domain-model/src/ports.ts` and flow endpoints 
 
 ### DIAGRAM-002 — A fabric is a first-class artefact
 
-A fabric MUST have authored identity and placement and MUST be available as a flow endpoint. Its appearance MAY use a renderer key, but its participation in relationships MUST NOT depend on that rendering.
+A fabric MUST have authored identity and placement and MUST be available as a flow endpoint. Its appearance MAY use a versioned renderer reference, but its participation in relationships MUST NOT depend on that rendering.
 
 _Conformance:_ conforming
 

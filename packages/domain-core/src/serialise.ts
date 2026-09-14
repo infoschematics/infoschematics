@@ -41,6 +41,7 @@ const fieldOrder = [
   'collection',
   'family',
   'kind',
+  'key',
   'stereotype',
   'owner',
   'documents',

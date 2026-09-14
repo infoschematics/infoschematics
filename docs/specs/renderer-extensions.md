@@ -16,13 +16,17 @@ _Evidence:_ `packages/view-canvas/src/renderers.test.tsx` covers inferred defini
 
 ### EXTEND-002 — Renderer compatibility is explicit
 
-Renderer keys MUST be treated as durable authored identifiers. The current definition contract MUST use schema version `1`; a definition with another version MUST be diagnosed as unsupported. A backwards-compatible validator change MAY retain its key and version. Because authored renderer references do not yet select a schema version, an incompatible property change MUST use a new stable renderer key until Domain Model introduces an explicit version selector.
+Renderer keys MUST be treated as durable authored identifiers, and an authored reference MUST select a positive integer property-schema version. A scalar compatibility reference MUST request version `1`. A backwards-compatible validator change MAY retain its key and version; an incompatible property change MAY use a new version under the same stable key.
+
+The registry MAY expose several versions for one key. Resolution MUST select the exact requested key-and-version pair and MUST NOT silently negotiate, fall forward, or choose another available version.
 
 Shared SVG definitions and Scope icons MAY remain unversioned host-level support because authored renderer properties do not select their implementation contract directly.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ `packages/domain-core/src/authoring.test.ts` covers reference normalisation and `packages/view-canvas/src/renderers.test.tsx` covers exact version selection and mismatch diagnostics.
+
+_Evidence:_ canonical authoring emits explicit references, and the shared Canvas resolver selects version `1` and `2` definitions registered under one key.
 
 ### EXTEND-003 — Fabrics retain a generic fallback
 
@@ -58,15 +62,15 @@ _Evidence:_ the renderer contract and context in `packages/view-canvas/src/rende
 
 ### EXTEND-006 — Renderer definitions are versioned and validated
 
-Each Fabric or Overlay renderer definition MUST bind one stable authored key and positive schema version to a runtime property validator and React implementation. Canvas MUST validate authored properties before invoking that implementation. An unknown key or invalid property value MUST select the relevant fallback and MUST emit a structured diagnostic when the host supplies a diagnostic callback. An unsupported definition version or duplicate key MUST be rejected deterministically and reported through the same callback.
+Each Fabric, Overlay, or Callout renderer definition MUST bind one stable authored key and positive schema version to a runtime property validator and React implementation. Canvas MUST validate authored properties before invoking that implementation. An unknown key, unregistered requested version, or invalid property value MUST select the relevant fallback and MUST emit a structured diagnostic when the host supplies a diagnostic callback. A duplicate key-and-version definition MUST be rejected deterministically and reported through the same callback.
 
-The diagnostic MUST identify the problem kind and affected renderer reference without requiring the Audience to inspect console output. Diagnostic reporting MUST NOT make rendering throw. The first definition for a duplicate key MUST win.
+The diagnostic MUST identify the problem kind, key, and requested schema version without requiring the Audience to inspect console output. Diagnostic reporting MUST NOT make rendering throw. The first definition for a duplicate key-and-version pair MUST win.
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `defineInfoschematicRenderers`, definition resolution, validation, and diagnostics in `packages/view-canvas/src/renderers.tsx`. against this requirement.
+_Verify:_ `packages/view-canvas/src/renderers.test.tsx` covers immutable definitions, duplicate pairs, scalar version-one compatibility, exact version selection, mismatch diagnostics, property validation, and server rendering.
 
-_Evidence:_ `defineInfoschematicRenderers`, definition resolution, validation, and diagnostics in `packages/view-canvas/src/renderers.tsx`.
+_Evidence:_ `defineInfoschematicRenderers` and `resolveInfoschematicRenderer` in `packages/view-canvas/src/renderers.tsx`, exercised by `packages/view-canvas/src/renderers.test.tsx`.
 
 ### EXTEND-007 — Hosts supply visual implementations
 

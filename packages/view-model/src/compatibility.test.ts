@@ -204,7 +204,7 @@ describe('establishedInfoschematicOf', () => {
             target: { element: 'SNK', port: 'W1' }
           }
         ],
-        overlays: [{ id: 'NOTE', label: 'Note', kind: 'note' }]
+        overlays: [{ id: 'NOTE', label: 'Note', kind: { key: 'note', version: 1 } }]
       },
       scopes: [
         {
@@ -247,6 +247,7 @@ describe('establishedInfoschematicOf', () => {
       fill: '#abcdef'
     })
     expect(adapted.infoschematic.graphics[0]?.scopes).toEqual([])
+    expect(adapted.infoschematic.graphics[0]?.renderer).toEqual({ key: 'note', version: 1 })
     expect(adapted.themes[0]?.scenes[0]?.focus).toEqual({
       artefacts: ['SRC', 'SNK'],
       flows: ['DATA-01'],

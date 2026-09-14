@@ -1,5 +1,6 @@
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import { type RendererReferenceInput, rendererReferenceOf } from '@infoschematics/domain-model/renderer'
 import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import type { Box } from '@infoschematics/view-model/geometry'
 import type { ComponentType, ReactNode } from 'react'
@@ -105,7 +106,7 @@ export type ResolvedRenderer<Props, Properties extends RendererProperties = Rend
   properties: Properties
 }>
 
-const supportedSchemaVersion = 1
+const componentSchemaVersion = 1
 const emptyProperties: RendererProperties = Object.freeze({})
 
 const diagnosticMessage = (diagnostic: Omit<RendererDiagnostic, 'message'>, detail: string): RendererDiagnostic => ({
@@ -122,9 +123,10 @@ const freezeCollection = <Props,>(
 
   if (!isDefinitionCollection(collection)) return Object.freeze({ ...collection })
 
-  const keys = new Set<string>()
+  const definitionsByReference = new Set<string>()
   const definitions = collection.map((definition) => {
-    if (keys.has(definition.key)) {
+    const reference = `${definition.key}\u0000${definition.schemaVersion}`
+    if (definitionsByReference.has(reference)) {
       onDiagnostic?.(
         diagnosticMessage(
           { code: 'duplicate-key', kind, key: definition.key, schemaVersion: definition.schemaVersion },
@@ -132,7 +134,7 @@ const freezeCollection = <Props,>(
         )
       )
     } else {
-      keys.add(definition.key)
+      definitionsByReference.add(reference)
     }
     return Object.freeze({ ...definition })
   })
@@ -170,37 +172,41 @@ const collectionFor = (
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'fabric',
-  key: string | undefined,
+  reference: RendererReferenceInput | undefined,
   properties: RendererProperties | undefined,
   artefactId?: string
 ): ResolvedRenderer<FabricRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'graphic',
-  key: string | undefined,
+  reference: RendererReferenceInput | undefined,
   properties: RendererProperties | undefined,
   artefactId?: string
 ): ResolvedRenderer<GraphicRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'callout',
-  key: string | undefined,
+  reference: RendererReferenceInput | undefined,
   properties: RendererProperties | undefined,
   artefactId?: string
 ): ResolvedRenderer<CalloutRendererProps> | undefined
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: RendererKind,
-  key: string | undefined,
+  authoredReference: RendererReferenceInput | undefined,
   properties: RendererProperties | undefined,
   artefactId?: string
 ): unknown {
-  if (!key) return undefined
+  if (!authoredReference) return undefined
+  const { key, version: requestedVersion } = rendererReferenceOf(authoredReference)
 
   const collection = collectionFor(renderers, kind)
   if (!collection) {
     renderers.onDiagnostic?.(
-      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
+      diagnosticMessage(
+        { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
+        'no matching definition is registered'
+      )
     )
     return undefined
   }
@@ -209,7 +215,19 @@ export function resolveInfoschematicRenderer(
     const Component = collection[key]
     if (!Component) {
       renderers.onDiagnostic?.(
-        diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
+        diagnosticMessage(
+          { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
+          'no matching definition is registered'
+        )
+      )
+      return undefined
+    }
+    if (requestedVersion !== componentSchemaVersion) {
+      renderers.onDiagnostic?.(
+        diagnosticMessage(
+          { artefactId, code: 'unsupported-version', kind, key, schemaVersion: requestedVersion },
+          `requested schema version ${requestedVersion} is not registered; component-only renderers support version ${componentSchemaVersion}`
+        )
       )
       return undefined
     }
@@ -217,23 +235,28 @@ export function resolveInfoschematicRenderer(
       Component: Component as ComponentType<unknown & { properties: RendererProperties }>,
       key,
       properties: properties ?? emptyProperties,
-      schemaVersion: supportedSchemaVersion
+      schemaVersion: componentSchemaVersion
     }
   }
 
-  const definition = collection.find((candidate) => candidate.key === key)
-  if (!definition) {
+  const matchingKey = collection.filter((candidate) => candidate.key === key)
+  if (matchingKey.length === 0) {
     renderers.onDiagnostic?.(
-      diagnosticMessage({ artefactId, code: 'unknown-key', kind, key }, 'no matching definition is registered')
+      diagnosticMessage(
+        { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
+        'no matching definition is registered'
+      )
     )
     return undefined
   }
 
-  if (definition.schemaVersion !== supportedSchemaVersion) {
+  const definition = matchingKey.find((candidate) => candidate.schemaVersion === requestedVersion)
+  if (!definition) {
+    const registeredVersions = [...new Set(matchingKey.map(({ schemaVersion }) => schemaVersion))].sort((a, b) => a - b)
     renderers.onDiagnostic?.(
       diagnosticMessage(
-        { artefactId, code: 'unsupported-version', kind, key, schemaVersion: definition.schemaVersion },
-        `schema version ${definition.schemaVersion} is unsupported; expected ${supportedSchemaVersion}`
+        { artefactId, code: 'unsupported-version', kind, key, schemaVersion: requestedVersion },
+        `requested schema version ${requestedVersion} is not registered; available versions: ${registeredVersions.join(', ')}`
       )
     )
     return undefined

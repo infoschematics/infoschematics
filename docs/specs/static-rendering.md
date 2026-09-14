@@ -22,11 +22,13 @@ _Verify:_ add a focused implementation or rendered-output check for this accepte
 
 ### STATIC-003 — Overlays remain serialisable
 
-Placed Overlays MUST resolve from authored configuration. The framework-neutral renderer MUST provide labelled fallback output without importing host React renderers or executing authored callbacks.
+Placed Overlays MUST resolve from authored configuration. The framework-neutral renderer MUST provide labelled fallback output without importing host React renderers or executing authored callbacks, and MUST expose the requested renderer key and schema version as deterministic data attributes.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ `packages/render-svg/src/index.test.ts` covers the labelled fallback and requested renderer metadata.
+
+_Evidence:_ `renderInfoschematicSvg` emits `data-renderer` and `data-renderer-version` on a placed Overlay fallback.
 
 ### STATIC-004 — Static output honours resolved visual treatments
 

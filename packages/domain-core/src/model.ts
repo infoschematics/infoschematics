@@ -1,11 +1,12 @@
-import type {
-  Callout,
-  DefinedInfoschematic,
-  ElementSelection,
-  Infoschematic,
-  InfoschematicConfig,
-  JsonValue,
-  Scene
+import {
+  type Callout,
+  type DefinedInfoschematic,
+  type ElementSelection,
+  type Infoschematic,
+  type InfoschematicConfig,
+  type JsonValue,
+  rendererReferenceOf,
+  type Scene
 } from '@infoschematics/domain-model'
 
 const legacyPorts = Object.freeze({ east: 7, north: 7, south: 7, west: 7 })
@@ -41,7 +42,7 @@ const calloutOf = (
   callout
     ? {
         body: callout.body,
-        kind: callout.renderer,
+        kind: callout.renderer ? rendererReferenceOf(callout.renderer) : undefined,
         placement: callout.at ? { at: callout.at } : placement,
         properties: propertiesOf(callout.properties),
         takeaways: callout.takeaways,
@@ -145,7 +146,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           bounds: fabric.placement.box,
           description: fabric.detail,
           id: fabric.code,
-          kind: fabric.appearance?.renderer,
+          kind: fabric.appearance?.renderer ? rendererReferenceOf(fabric.appearance.renderer) : undefined,
           label: fabric.label,
           ports: fabric.placement.ports ?? legacyPorts,
           properties: {
@@ -176,7 +177,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
       overlays: definition.graphics.map((graphic) => ({
         bounds: graphic.placement,
         id: graphic.id,
-        kind: graphic.renderer,
+        kind: rendererReferenceOf(graphic.renderer),
         label: graphic.label ?? graphic.id,
         properties: propertiesOf(graphic.properties)
       })),

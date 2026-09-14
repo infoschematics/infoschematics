@@ -40,7 +40,7 @@ _Evidence:_ `packages/view-model/src/placement.test.ts` covers candidate order, 
 
 ### SCENE-004 — Custom Callouts retain the Audience contract
 
-Present MUST resolve a Callout renderer through the immutable host registry and MUST validate its serialisable properties before invoking it. An unknown key or invalid property value MUST emit the corresponding structured host diagnostic and use the standard Callout presentation. An unsupported renderer-definition version MUST be diagnosed and rejected before use.
+Present MUST resolve the exact key-and-version Callout renderer requested through the immutable host registry and MUST validate its serialisable properties before invoking it. An unknown key, unregistered requested version, or invalid property value MUST emit the corresponding structured host diagnostic and use the standard Callout presentation.
 
 A custom implementation MAY replace the Callout's visual content, but Present MUST retain deterministic placement, the accessible live-status frame, Story navigation, automatic-advance controls, and exit action. The fallback MUST retain the authored title, body, and takeaways rather than hide explanatory content.
 
