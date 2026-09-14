@@ -5,7 +5,7 @@ title: Canonical view internals
 theme: tool
 horizon: next
 status: awaiting-review
-blocks: [INFOSCHEMATICS-TOOL-033]
+blocks: []
 blocked_by: []
 baseline_ref: 76fda523b613c91afed0343c9a3ad7db80cc3cc3
 created_at: 2026-09-10T00:14:39Z
