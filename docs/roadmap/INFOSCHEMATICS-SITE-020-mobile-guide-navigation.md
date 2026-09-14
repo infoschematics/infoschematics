@@ -4,12 +4,12 @@ area: SITE
 title: Mobile guide navigation
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8d13f6c1baa642dba6461b9274e5bf11eee76615
 created_at: 2026-09-14T01:15:29Z
-updated_at: 2026-09-14T01:15:29Z
+updated_at: 2026-09-14T01:16:34Z
 ---
 
 # Mobile guide navigation
