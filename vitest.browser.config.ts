@@ -23,6 +23,9 @@ export default defineConfig({
       provider: playwright(),
       screenshotFailures: false
     },
-    include: [fileURLToPath(new URL('./packages/*/src/**/*.browser.test.tsx', import.meta.url))]
+    include: [
+      fileURLToPath(new URL('./packages/*/src/**/*.browser.test.tsx', import.meta.url)),
+      fileURLToPath(new URL('./apps/site/src/**/*.browser.test.tsx', import.meta.url))
+    ]
   }
 })
