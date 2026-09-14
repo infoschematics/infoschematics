@@ -149,6 +149,7 @@ export function DocumentPage({
   supplementalOutline?: readonly DocsPageOutlineEntry[]
 }) {
   const { html, contents } = renderDocument(route)
+  const contentClassName = `document-content${anatomy ? ' document-content--before-anatomy' : ''}`
 
   return (
     <div className="document-shell document-shell--wide docs-shell">
@@ -160,7 +161,7 @@ export function DocumentPage({
         <DocsSidebar currentPageOutline={[...contents, ...supplementalOutline]} currentPath={route.path} />
         <main id="document-content">
           {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown, not user input */}
-          <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
+          <article aria-label={route.title} className={contentClassName} dangerouslySetInnerHTML={{ __html: html }} />
           {anatomy}
           <GuideJourneyNav currentPath={route.path} />
         </main>

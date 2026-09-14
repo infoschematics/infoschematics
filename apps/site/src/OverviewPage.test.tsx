@@ -11,6 +11,7 @@ describe('overview page', () => {
 
     const page = renderToStaticMarkup(<OverviewPage route={route} />)
 
+    expect(page).toContain('class="document-content document-content--before-anatomy"')
     expect(page).toContain('<h2 id="labelled-example">A labelled Infoschematic</h2>')
     expect(page).toContain('aria-label="Labels for the complete example"')
     expect(page).toContain('href="/docs/installation/" rel="next"')

@@ -410,6 +410,10 @@ a:focus-visible {
   line-height: 1.75;
 }
 
+.document-content--before-anatomy {
+  padding-bottom: 0;
+}
+
 .document-content > :first-child {
   margin-top: 0;
 }
@@ -820,24 +824,39 @@ a:focus-visible {
   margin: 30px 0 16px;
 }
 
+.overview-anatomy {
+  margin-top: clamp(32px, 4vw, 48px);
+}
+
 .visual-guide__anatomy-key {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  overflow: visible;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+  overflow: hidden;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
+  border: 1px solid #ffffff16;
+  border-radius: 10px;
+  background: #0d2031;
 }
 
 .visual-guide__anatomy-key li,
 .visual-guide__anatomy-key li:first-child {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(120px, 0.25fr) minmax(0, 1fr);
+  gap: 24px;
   min-width: 0;
   padding: 14px 16px;
-  border: 1px solid #ffffff16;
-  border-radius: 10px;
-  background: #0d2031;
+  border: 0;
+  border-top: 1px solid #ffffff12;
+  border-radius: 0;
+  background: transparent;
+}
+
+.visual-guide__anatomy-key li:first-child {
+  border-top: 0;
+}
+
+.visual-guide__anatomy-key p {
+  margin-top: 0;
 }
 
 .interactive-specimen-layout {
@@ -1039,6 +1058,15 @@ a:focus-visible {
 @media (max-width: 760px) {
   .visual-guide__anatomy-key {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .visual-guide__anatomy-key li,
+  .visual-guide__anatomy-key li:first-child {
+    display: block;
+  }
+
+  .visual-guide__anatomy-key p {
+    margin-top: 3px;
   }
 
   .interactive-specimen__controls {
