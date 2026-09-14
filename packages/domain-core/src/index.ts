@@ -20,6 +20,19 @@ export {
   infoschematicDocumentSource,
   parseInfoschematicDocument
 } from './document.ts'
+export {
+  applyInfoschematicDocumentEdit,
+  type InfoschematicDocumentAdd,
+  type InfoschematicDocumentAnchor,
+  type InfoschematicDocumentEdit,
+  type InfoschematicDocumentEditResult,
+  type InfoschematicDocumentMove,
+  type InfoschematicDocumentOperation,
+  type InfoschematicDocumentPath,
+  type InfoschematicDocumentPathSegment,
+  type InfoschematicDocumentRemove,
+  type InfoschematicDocumentReplace
+} from './document-edit.ts'
 export { defaultCalloutPositions, defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
