@@ -11,6 +11,9 @@ describe('components guide', () => {
     expect(page).toContain('aria-label="Components sections"')
     expect(page).toContain('<span>Guide navigation</span><strong>Components</strong>')
     expect(page).toContain('aria-label="Mobile documentation"')
+    expect(page).toContain('aria-label="Guide journey"')
+    expect(page).toContain('href="/docs/installation/" rel="prev"')
+    expect(page).toContain('href="/docs/authoring/" rel="next"')
     for (const slug of [
       'labelled-example',
       'canvas',
@@ -20,8 +23,7 @@ describe('components guide', () => {
       'flow',
       'point',
       'graphic',
-      'future-notation',
-      'where-next'
+      'future-notation'
     ]) {
       expect(page).toContain(`href="#${slug}"`)
     }
@@ -52,10 +54,10 @@ describe('components guide', () => {
     expect(page).not.toContain('Customer API')
   })
 
-  it('routes explanation elsewhere and keeps precise terminology available once', () => {
+  it('uses the shared journey instead of an ad hoc handoff section', () => {
     const page = renderToStaticMarkup(<VisualGuide />)
 
-    expect(page).toContain('href="/docs/explanation/"')
-    expect(page.match(/href="\/docs\/reference\/vocabulary\//g)).toHaveLength(1)
+    expect(page).toContain('aria-label="Guide journey"')
+    expect(page).not.toContain('id="where-next"')
   })
 })

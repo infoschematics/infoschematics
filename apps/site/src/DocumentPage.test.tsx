@@ -54,6 +54,17 @@ describe('documentation pages', () => {
     expect(positions).toEqual([...positions].sort((left, right) => left - right))
   })
 
+  it('continues each practical article through the guide journey', () => {
+    const route = documentationRoutes.find(({ path }) => path === '/docs/authoring/')
+    if (!route) throw new Error('The authoring route is missing.')
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+
+    expect(page).toContain('aria-label="Guide journey"')
+    expect(page).toContain('href="/docs/components/" rel="prev"')
+    expect(page).toContain('href="/docs/representations/" rel="next"')
+  })
+
   it('explains architectural and supporting representation patterns', () => {
     const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/representations.md')
     if (!route) throw new Error('The representation-patterns documentation route is missing.')

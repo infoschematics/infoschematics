@@ -1,5 +1,6 @@
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { DocsSidebar } from './DocsSidebar.tsx'
+import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
@@ -10,8 +11,7 @@ import './styles.css'
 export const componentsGuideContents = [
   { depth: 2, slug: 'labelled-example', label: 'A labelled Infoschematic' },
   ...componentSections.map(({ id, title }) => ({ depth: 2 as const, slug: id, label: title })),
-  { depth: 2, slug: 'future-notation', label: 'Future notation' },
-  { depth: 2, slug: 'where-next', label: 'Where next' }
+  { depth: 2, slug: 'future-notation', label: 'Future notation' }
 ] as const
 
 export function VisualGuide() {
@@ -156,17 +156,8 @@ export function VisualGuide() {
                 boundary.
               </p>
             </section>
-
-            <section aria-labelledby="where-next" className="visual-guide__section">
-              <h2 id="where-next">Where next</h2>
-              <p>
-                Continue to <a href="/docs/explanation/">Explanation</a> for Scopes, Scenes, Sequences, Callouts, and
-                presentation state. Use <a href="/docs/authoring/">Authoring</a> for complete TypeScript, YAML, and JSON
-                examples, or the <a href="/docs/reference/vocabulary/">canonical terminology</a> when you need the exact
-                contract language.
-              </p>
-            </section>
           </article>
+          <GuideJourneyNav currentPath={componentsPath} />
         </main>
       </div>
     </div>

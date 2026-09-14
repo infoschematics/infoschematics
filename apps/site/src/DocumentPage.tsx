@@ -14,6 +14,7 @@ import representationsMarkdown from '../content/representations.md?raw'
 import staticRenderingMarkdown from '../content/static-rendering.md?raw'
 import studioMarkdown from '../content/studio.md?raw'
 import { type DocsPageOutlineEntry, DocsSidebar } from './DocsSidebar.tsx'
+import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import type { DocumentationRoute } from './routes.ts'
 import { documentationRoutes } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
@@ -151,6 +152,7 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
         <main id="document-content">
           {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown, not user input */}
           <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
+          <GuideJourneyNav currentPath={route.path} />
         </main>
       </div>
     </div>

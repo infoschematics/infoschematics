@@ -132,6 +132,24 @@ export const documentationRoutes: readonly PublishedDocument[] = publishedDocume
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
 
+export interface GuideJourneyEntry {
+  path: string
+  title: string
+  summary: string
+}
+
+const componentsJourneyEntry: GuideJourneyEntry = {
+  path: componentsPath,
+  title: 'Components',
+  summary: 'See how the Canvas, Regions, Fabrics, Cards, Flows, Points, and Graphics fit together.'
+}
+
+export const guideJourney: readonly GuideJourneyEntry[] = [
+  ...publishedDocuments.filter((route) => route.section === 'guide'),
+  componentsJourneyEntry,
+  ...publishedDocuments.filter((route) => route.section === 'usage')
+]
+
 interface SiteLocation {
   pathname: string
   search: string
@@ -164,6 +182,23 @@ export function canonicalSiteLocation(pathname: string, search = ''): SiteLocati
 /** Return only the canonical path when query selection is not needed by the caller. */
 export function canonicalSitePath(pathname: string) {
   return canonicalSiteLocation(pathname).pathname
+}
+
+export function getGuideJourneyNeighbours(pathname: string): {
+  previous?: GuideJourneyEntry
+  next?: GuideJourneyEntry
+} {
+  const canonicalPath = canonicalSitePath(pathname)
+  const currentIndex = guideJourney.findIndex(
+    (entry) => canonicalPath === entry.path || canonicalPath === entry.path.slice(0, -1)
+  )
+
+  if (currentIndex === -1) return {}
+
+  return {
+    previous: guideJourney[currentIndex - 1],
+    next: guideJourney[currentIndex + 1]
+  }
 }
 
 export function isDocsIndexPath(pathname: string) {
