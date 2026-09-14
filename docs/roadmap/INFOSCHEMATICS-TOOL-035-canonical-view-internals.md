@@ -4,12 +4,12 @@ area: TOOL
 title: Canonical view internals
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-TOOL-033]
 blocked_by: []
-baseline_ref: null
+baseline_ref: 76fda523b613c91afed0343c9a3ad7db80cc3cc3
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T07:03:21Z
+updated_at: 2026-09-14T07:06:43Z
 ---
 
 # Canonical view internals
