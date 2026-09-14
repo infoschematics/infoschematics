@@ -4,23 +4,23 @@ area: SITE
 title: Studio-backed playground
 theme: site-experience
 horizon: next
-status: draft
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-14T19:30:34Z
+updated_at: 2026-09-14T22:03:54Z
 ---
 
 # Studio-backed playground
 
 ## Goal
 
-Turn the Playground into a focused host for the real Studio experience so visitors can explore presets, edit visually or in source, and copy their work without learning a separate editor. The hosted, no-install editor is a first-class outcome: creating, editing, and copying must work in the browser without local packages.
+Turn Playground into a focused host for the real Studio experience so visitors can explore presets, edit visually or in source, and copy their work without learning a separate editor. The hosted, no-install editor is a first-class outcome: creating, editing, and copying must work in the browser without local packages.
 
 ## Context
 
-The current Playground owns a bespoke two-pane preview and YAML textarea. That is useful as an early editor, but it duplicates responsibilities that belong in Studio and makes the public experience diverge from the reusable authoring product.
+The current Playground owns a bespoke two-pane preview and YAML textarea. It is a useful early editor, but it duplicates responsibilities that belong in Studio and makes the public experience diverge from the reusable authoring experience.
 
 ## Boundary
 
@@ -28,16 +28,16 @@ This item does not add server persistence, accounts, collaboration, filesystem a
 
 ## Current state
 
-Playground already provides a hosted, no-install source-editing path: it parses YAML locally, renders static SVG into an image, and owns preset replacement and validation feedback. Studio is demonstrated elsewhere, while its future source panel and the curated preset set have not yet landed. The remaining work is to make that editor experience Studio-backed and provide an explicit way to copy the authored source.
+Playground already provides a hosted, no-install source-editing path: it parses YAML locally, renders a static SVG into an image, and owns preset replacement and validation feedback. Studio now exposes supported document-change and source-replacement contracts, including validation, history, and source copying. The remaining work is to make Playground a focused Site-owned host for that landed capability.
 
 ## Steps
 
-- [ ] Replace the bespoke Playground editor with a Site host around the supported Studio and source-panel APIs, preserving a first-class no-install browser path for create, edit, and copy.
-- [ ] Load the three curated presets from `INFOSCHEMATICS-SITE-018` as complete authored documents.
+- [ ] Replace the bespoke Playground editor with a Site host around supported Studio source-panel APIs, preserving a first-class no-install browser path to create, edit, and copy.
+- [ ] Load the curated presets from `INFOSCHEMATICS-SITE-018` as complete authored documents.
 - [ ] Preserve copy, source replacement, validation feedback, and reset-to-preset behaviour through Studio-owned contracts.
 - [ ] Keep routing, page metadata, responsive layout, and any browser persistence Site-owned.
 - [ ] Remove superseded Playground-only parsing and editor state.
-- [ ] Add integration and visual coverage for preset switching, structured editing, source editing, and narrow layouts.
+- [ ] Add focused integration and browser coverage for the hosted authoring journey.
 
 ## Files touched
 
@@ -53,7 +53,7 @@ Run focused Playground and Studio integration tests, `bun run --cwd apps/site bu
 
 ## Dependencies / blocks
 
-`INFOSCHEMATICS-SITE-018` has established the curated preset contract and compatibility routes. `INFOSCHEMATICS-TOOL-043` remains the sole build-order dependency and must provide the reusable Studio source panel. The Site should consume that capability rather than reimplement it.
+`INFOSCHEMATICS-SITE-018` established the curated preset contract and compatibility routes. `INFOSCHEMATICS-TOOL-043` has delivered and been accepted, so there is no remaining build-order dependency. Site must consume the reusable Studio capability rather than reimplement it.
 
 ## Documentation impact
 
@@ -77,8 +77,8 @@ Retire the bespoke Playground-editor direction after delivery and capture any ad
 
 ### Product fidelity
 
-The Playground should demonstrate the authoring product that consumers can integrate, not a second implementation with similar controls.
+Playground should demonstrate the authoring experience consumers can integrate, not a second implementation with similar controls.
 
 ### Preset ownership
 
-Presets remain authored serialisable documents. The Site chooses which ones to present and owns URL selection; Studio owns the editing experience.
+Presets remain authored serialisable documents. Site chooses which ones to present and owns URL selection; Studio owns the editing experience.
