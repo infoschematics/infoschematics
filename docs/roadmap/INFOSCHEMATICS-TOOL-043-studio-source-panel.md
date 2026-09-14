@@ -4,70 +4,69 @@ area: TOOL
 title: Studio source panel
 theme: tool
 horizon: next
-status: draft
+status: ready
 blocks: [INFOSCHEMATICS-SITE-019]
-blocked_by: [INFOSCHEMATICS-TOOL-033]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-13T16:31:38Z
+updated_at: 2026-09-14T13:47:14Z
 ---
-
-# Studio source panel
 
 ## Goal
 
-Let a Studio host expose the authored YAML source as an editor panel that can be inspected, copied, replaced, validated, and kept in step with structured editing.
+Let a Studio host expose an authored YAML source panel that Producers can inspect, copy, replace, validate, undo and redo while structured editing stays synchronized with the same document history.
 
 ## Context
 
-The Playground currently owns a bespoke YAML textarea beside a rendered preview. YAML is part of the authoring experience rather than a separate product surface, but moving it into Studio requires the lossless document-edit boundary planned by `INFOSCHEMATICS-TOOL-033`.
+Playground currently owns a bespoke YAML textarea beside its rendered preview. YAML is part of the authoring experience rather than a separate product surface. `INFOSCHEMATICS-TOOL-033` now supplies the lossless, stable-ID document-edit boundary needed to place that source experience inside Studio.
 
 ## Boundary
 
-This item does not grant Studio filesystem authority, embed callbacks in authored data, choose a code-editor dependency without review, implement collaboration or conflict resolution, or redesign every Studio panel.
+This item does not grant Studio filesystem authority, embed callbacks in authored data, add a code-editor dependency, implement collaboration or conflict resolution, or redesign unrelated Studio panels. The host retains source loading, persistence and conflict authority.
 
 ## Current state
 
-Studio edits structured drafts derived from canonical data and has no source panel. Playground parses and serialises YAML itself, so source editing, validation feedback, and replacement behaviour are outlet-specific and cannot preserve document syntax through structured edits.
+Studio accepts a retained authored document and emits validated structured edits, but it has no source panel. A host cannot yet offer one coherent Studio history across direct YAML replacement and structured changes.
 
 ## Steps
 
-- [ ] Define the Studio source-panel host contract around the lossless document and edit protocol delivered by `INFOSCHEMATICS-TOOL-033`.
-- [ ] Add a panel that displays and copies current YAML, accepts replacement text, and reports parse and validation failures without discarding the last valid document.
-- [ ] Keep structured edits and source replacements synchronized through one undoable document history.
-- [ ] Expose host-controlled persistence hooks without reading or writing files inside Studio.
-- [ ] Cover comments, scalar styles, ordering, invalid replacements, undo and redo, focus, keyboard access, and panel lifecycle.
-- [ ] Document how hosts integrate the panel and retain persistence authority.
+- [ ] Define a Studio source-panel host contract around the lossless document protocol delivered by `INFOSCHEMATICS-TOOL-033`.
+- [ ] Add a Source tab that displays and copies current YAML, accepts replacement text, and reports accessible parse or validation failures without discarding the last valid document.
+- [ ] Keep valid source replacements and structured document edits in one undoable and redoable document history.
+- [ ] Emit validated source replacements to a host persistence callback without granting Studio filesystem access.
+- [ ] Cover comments and scalar-style retention, source ordering, invalid replacement, undo and redo, structured-edit synchronization, focus, keyboard use, copy and panel lifecycle.
+- [ ] Update the authoring and Design-editing specifications, Studio design documentation and authored-YAML guide.
 
 ## Files touched
 
-- `packages/view-studio/src/`
-- focused Studio source-panel fixtures and tests
+- `packages/view-studio/src/app/`
+- focused Studio source-panel and browser tests
 - `docs/design/view-studio.md`
-- `docs/specs/view-studio.md`
-- consumer Studio guidance rendered by Site
+- `docs/specs/authoring.md`
+- `docs/specs/design-editing.md`
+- `docs/guides/editing-authored-yaml.md`
 
 ## Verify
 
-Run focused Studio source-panel and YAML document-edit suites, package builds, and `bun run self:check`. In an integration fixture, confirm copy returns current source, valid replacement updates the rendered model, invalid replacement preserves the last valid model with accessible errors, and structured edits preserve unaffected YAML syntax.
+Run focused Studio source-panel and YAML document-edit suites, package builds and `bun run self:check`. In an integration fixture, confirm copy returns current source, valid replacement updates the rendered model after host acknowledgement, invalid replacement preserves the last valid model with accessible errors, undo and redo traverse source and structured edits, and structured edits preserve unaffected YAML syntax.
 
 ## Dependencies / blocks
 
-`INFOSCHEMATICS-TOOL-033` must first supply lossless, transactional YAML document edits. This work then supplies the reusable panel required by `INFOSCHEMATICS-SITE-019`.
+The lossless document protocol and canonical Sequence projection are delivered. This work supplies the reusable Studio panel required by `INFOSCHEMATICS-SITE-019`.
 
 ## Documentation impact
 
 ### Decision Records
 
-Extend or link the lossless-editing decision from `INFOSCHEMATICS-TOOL-033`; add a separate decision only if panel ownership introduces a new reusable boundary.
+Extend the existing lossless-editing decision. Add a separate decision only if implementation introduces a new ownership boundary.
 
 ### Specifications
 
-Specify source replacement, validation failure, synchronization, history, and host-persistence behaviour.
+Specify source replacement, validation failure, synchronization, history and host-persistence behaviour as user-observable contracts.
 
 ### Guides
 
-Add Studio source-panel integration and authoring guidance after the contract lands.
+Add source-panel host integration and Producer usage guidance to the authored-YAML guide.
 
 ### Roadmap
 
@@ -75,10 +74,10 @@ Unblock the Studio-backed Playground. Keep code-editor enhancements and collabor
 
 ## Discussion
 
-### Source as a panel
+### One document, two editing surfaces
 
-YAML is one representation of the authored Infoschematic, not a second model. A Studio panel lets hosts compose it alongside structured editing while one document history remains authoritative.
+The source panel is another view of the authored Infoschematic, not a second model. Valid source replacements and structured changes advance the same retained document timeline.
 
 ### Host authority
 
-The panel can emit validated changes and persistence requests, but only the host knows which document is current and whether or where it should be saved.
+Studio may validate, preview and emit replacement documents. Only the host knows which document is current, whether it should be persisted and how external conflicts are resolved.
