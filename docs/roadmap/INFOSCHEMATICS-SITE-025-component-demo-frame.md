@@ -4,12 +4,12 @@ area: SITE
 title: Component demo frame
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-SITE-026]
 blocked_by: []
 baseline_ref: 4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T07:32:30Z
+updated_at: 2026-09-14T07:46:10Z
 ---
 
 # Component demo frame
@@ -32,12 +32,12 @@ This item does not add MUI as a dependency, implement a second editor, claim per
 
 ## Steps
 
-- [ ] Build a reusable demo frame with compact preview, optional side-by-side variants, property controls, and a coherent preview-toolbar-source stack.
-- [ ] Add Rendered and Design display modes using genuine Canvas behavior while avoiding unsupported editing claims.
-- [ ] Replace text reset and copy actions with accessible icon controls, add expand or collapse source, and retain visible feedback and keyboard access.
-- [ ] Produce focused YAML and TypeScript snippets for the demonstrated component, limited to roughly five or six visible lines until expanded.
-- [ ] Keep property changes, source, mode changes, and reset synchronized within the demo frame.
-- [ ] Add focused interaction tests and inspect representative Canvas, Region, and Card demonstrations at desktop and narrow widths.
+- [x] Build a reusable demo frame with compact preview, optional side-by-side variants, property controls, and a coherent preview-toolbar-source stack.
+- [x] Add Rendered and Design display modes using genuine Canvas behavior while avoiding unsupported editing claims.
+- [x] Replace text reset and copy actions with accessible icon controls, add expand or collapse source, and retain visible feedback and keyboard access.
+- [x] Produce focused YAML and TypeScript snippets for the demonstrated component, limited to roughly five or six visible lines until expanded.
+- [x] Keep property changes, source, mode changes, and reset synchronized within the demo frame.
+- [x] Add focused interaction tests and inspect representative Canvas, Region, and Card demonstrations at desktop and narrow widths.
 
 ## Files touched
 
@@ -76,6 +76,32 @@ Component pages will present concise editable examples and focused source more c
 ### Roadmap
 
 Unblock the dedicated component-page work in `INFOSCHEMATICS-SITE-026`; retain new grid, Point, and visual-theme semantics as separate package work.
+
+## Review
+
+### Delivered
+
+Component examples now use one compact preview, toolbar, properties, and source frame. It supports rendered output, the real Canvas Design treatment, side-by-side variants, synchronized reset, YAML and TypeScript source, and accessible icon actions.
+
+### Summary of changes
+
+Added the reusable `DemoFrame`, bounded previews, Canvas styling and dependency metadata, collapsed or expanded source, icon-only reset and copy controls with labels and feedback, and focused unit and browser interaction coverage.
+
+### Verification
+
+At result `957ccda727d79d62654455638b9034aa6c17687f`, 39 focused Site tests, Site TypeScript checking, the production Site build, and all 13 browser tests passed in clean detached worktrees. Canvas, Region, and Card frames were inspected at desktop and 390-pixel widths in both Rendered and Design treatments with no overflow.
+
+### Outstanding concerns
+
+Design treatment exposes the real Canvas affordances but deliberately does not claim that drag operations persist. Individual component pages and their supported variant selections remain `INFOSCHEMATICS-SITE-026` work.
+
+### Post-change review
+
+Preview height is capped on wide screens and remains proportional on narrow screens, so simple examples no longer dominate the page. Property controls remain usable below the preview and source begins at about six visible lines.
+
+### Mini recap
+
+Baseline `4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe`; result `957ccda727d79d62654455638b9034aa6c17687f`. The frame consumes existing public Canvas behavior and introduces no model or renderer contract.
 
 ## Discussion
 

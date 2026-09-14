@@ -71,3 +71,4 @@ Each admitted item must reach `awaiting-review`, pass a fresh review-packet and 
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
 | `INFOSCHEMATICS-SITE-024` | ready | awaiting-review | `067bcb41` baseline; `4de2cbe3` result; 37 focused tests, Site type check and build passed; desktop/390px inspection passed | Consolidate acceptance under the approved batch closure |
+| `INFOSCHEMATICS-SITE-025` | ready | awaiting-review | `4de2cbe3` baseline; `957ccda7` result; 39 focused tests, Site type check and build, 13 browser tests and desktop/390px inspection passed | Consolidate acceptance under the approved batch closure |
