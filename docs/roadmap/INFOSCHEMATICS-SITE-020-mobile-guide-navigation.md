@@ -2,7 +2,7 @@
 id: INFOSCHEMATICS-SITE-020
 area: SITE
 title: Mobile guide navigation
-theme: site
+theme: site-experience
 horizon: now
 status: ready
 blocks: []
@@ -25,6 +25,10 @@ The desktop documentation sidebar expands the active page into its second- and t
 ## Boundary
 
 This item adds a compact Site-owned navigation disclosure using the same route and outline data as the desktop sidebar. It does not add search, duplicate the route catalogue, alter canonical document URLs, or introduce a client-side navigation framework.
+
+## Current state
+
+The shared sidebar is visible above 960 pixels and hidden below that breakpoint. Document pages do not provide an alternative narrow-screen guide map or active-page outline.
 
 ## Steps
 
@@ -50,4 +54,24 @@ None. The existing route catalogue and page-outline projection are stable inputs
 
 ## Documentation impact
 
-No content or canonical repository documentation changes are required.
+### Decision Records
+
+No decision change is required.
+
+### Specifications
+
+No product behaviour changes.
+
+### Guides
+
+No public content changes are required; this item changes how existing guide structure is reached on a narrow screen.
+
+### Roadmap
+
+This record supplies the bounded Site delivery and review evidence.
+
+## Discussion
+
+### One source of navigation truth
+
+Desktop and mobile presentations must consume the same entry and outline projection so route order, current-page state, and headings cannot drift.

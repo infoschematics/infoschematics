@@ -2,7 +2,7 @@
 id: INFOSCHEMATICS-SITE-021
 area: SITE
 title: Playground document controls
-theme: site
+theme: site-experience
 horizon: now
 status: ready
 blocks: []
@@ -25,6 +25,10 @@ The current page loads curated presets into a live YAML textarea, but the preset
 ## Boundary
 
 This item owns only Site host controls around the existing inert document string. It does not introduce lossless structured edits, write files, replace the editor with Studio, persist drafts, or duplicate the reusable source-panel work in `INFOSCHEMATICS-TOOL-043`.
+
+## Current state
+
+The query-selected preset provides the initial YAML, while a selector with no selected value can replace it. The page offers no dirty state, reset action, clipboard action, or action feedback.
 
 ## Steps
 
@@ -49,4 +53,24 @@ None for this bounded host improvement. `INFOSCHEMATICS-TOOL-033` and `INFOSCHEM
 
 ## Documentation impact
 
+### Decision Records
+
+No decision change is required.
+
+### Specifications
+
+No reusable product behaviour changes.
+
+### Guides
+
 The existing Installation and Overview guides already describe the hosted editor; no new public page is required.
+
+### Roadmap
+
+Keep the Studio-backed replacement in `INFOSCHEMATICS-SITE-019`; this record owns only the current Site host controls.
+
+## Discussion
+
+### Preserve the Studio destination
+
+These controls surround the existing document string and should remain valid host actions when the textarea is replaced. They must not grow into a second structured-editing implementation.
