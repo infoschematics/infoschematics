@@ -4,12 +4,12 @@ area: SITE
 title: Component demo frame
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-SITE-026]
 blocked_by: []
 baseline_ref: 4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T07:46:10Z
+updated_at: 2026-09-14T07:47:02Z
 ---
 
 # Component demo frame
@@ -102,6 +102,10 @@ Preview height is capped on wide screens and remains proportional on narrow scre
 ### Mini recap
 
 Baseline `4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe`; result `957ccda727d79d62654455638b9034aa6c17687f`. The frame consumes existing public Canvas behavior and introduces no model or renderer contract.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown under `INFOSCHEMATICS-BATCH-011` closure authority on the review packet above.
 
 ## Discussion
 
