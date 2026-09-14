@@ -24,7 +24,7 @@ Canonical YAML, JSON-compatible input, typed TypeScript authoring, and public Vi
 
 ## Boundary
 
-This item does not remove established public input support, change authored shorthand syntax, redesign visual treatments or geometry, reopen the Sequence presentation semantics owned by [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md), or make YAML document trees part of View state.
+This item does not remove established public input support, change authored shorthand syntax, redesign visual treatments or geometry, reopen the Sequence presentation semantics owned by `INFOSCHEMATICS-TOOL-034`, or make YAML document trees part of View state.
 
 ## Current state
 
@@ -56,11 +56,11 @@ Domain Core parses canonical documents, but View entry points accept a union and
 
 ## Verify
 
-After [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) lands, run focused bunx vitest run suites for compatibility projection, canonical runtime, Canvas, Present, Studio, static SVG, editable capabilities, and visual parity; run bun run self:packages:build and bun run self:check. Add a dependency assertion that View packages do not import the legacy configuration module outside the named boundary, and compare established and canonical inputs for equivalent output.
+After `INFOSCHEMATICS-TOOL-034` lands, run focused bunx vitest run suites for compatibility projection, canonical runtime, Canvas, Present, Studio, static SVG, editable capabilities, and visual parity; run bun run self:packages:build and bun run self:check. Add a dependency assertion that View packages do not import the legacy configuration module outside the named boundary, and compare established and canonical inputs for equivalent output.
 
 ## Dependencies / blocks
 
-[Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) must first establish canonical Sequence and presentation semantics. Migrating internals earlier would encode the Theme and Story split that this work is meant to remove. The established public input remains a supported adapter after the dependency lands.
+`INFOSCHEMATICS-TOOL-034` must first establish canonical Sequence and presentation semantics. Migrating internals earlier would encode the Theme and Story split that this work is meant to remove. The established public input remains a supported adapter after the dependency lands.
 
 ## Documentation impact
 
@@ -78,7 +78,7 @@ Update integration guidance so canonical input is primary and established input 
 
 ### Roadmap
 
-Remove the dependency and transition this item to Ready only after [Unified presentation sequences](INFOSCHEMATICS-TOOL-034-unified-presentation-sequences.md) has landed. Capture removal of established public input separately if a later compatibility policy authorises it.
+Remove the dependency and transition this item to Ready only after `INFOSCHEMATICS-TOOL-034` has landed. Capture removal of established public input separately if a later compatibility policy authorises it.
 
 ## Discussion
 

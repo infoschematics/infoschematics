@@ -67,7 +67,7 @@ Run focused Domain Core, View Model, Canvas, Studio, and static-renderer tests p
 
 ## Dependencies / blocks
 
-No hard dependency is known. Coordinate its browser cases with [Design editing regression contract](INFOSCHEMATICS-TOOL-037-design-editing-regression-contract.md) and its toolbar placement with [Design interaction layers](INFOSCHEMATICS-TOOL-045-design-interaction-layers.md), without making either feature a build-order dependency.
+No hard dependency is known. Coordinate its browser cases with the `INFOSCHEMATICS-TOOL-037` design-editing regression contract and its toolbar placement with [Design interaction layers](INFOSCHEMATICS-TOOL-045-design-interaction-layers.md), without making either feature a build-order dependency.
 
 ## Documentation impact
 

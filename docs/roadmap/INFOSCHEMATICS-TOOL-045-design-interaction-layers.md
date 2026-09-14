@@ -57,7 +57,7 @@ Run focused View Model, Canvas, and Studio tests plus `bun run self:check`. In a
 
 ## Dependencies / blocks
 
-No hard dependency is known. Coordinate the browser matrix with [Design editing regression contract](INFOSCHEMATICS-TOOL-037-design-editing-regression-contract.md) so layer controls reuse its gesture, selection, viewport, and undo assertions rather than creating a parallel interaction harness.
+No hard dependency is known. Coordinate the browser matrix with the `INFOSCHEMATICS-TOOL-037` design-editing regression contract so layer controls reuse its gesture, selection, viewport, and undo assertions rather than creating a parallel interaction harness.
 
 ## Documentation impact
 
