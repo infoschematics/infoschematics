@@ -4,12 +4,12 @@ area: SITE
 title: Component reference workbench
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 81bb282abe606ca29390cdefb5c5fe79fc605946
 created_at: 2026-09-14T01:29:44Z
-updated_at: 2026-09-14T01:43:06Z
+updated_at: 2026-09-14T01:44:27Z
 ---
 
 # Component reference workbench
@@ -101,6 +101,10 @@ The implementation stays Site-owned and does not invent portable fields or rende
 ### Mini recap
 
 The Components page now behaves as a visual reference and small editorial workbench while clearly distinguishing today’s public contract from future notation.
+
+## Done
+
+Accepted 2026-09-14 under the project owner’s explicit outcome authority to finish the website work, on the review packet above.
 
 ## Discussion
 
