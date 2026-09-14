@@ -503,7 +503,7 @@ a:focus-visible {
 
 .guide-journey {
   max-width: 960px;
-  margin-top: clamp(-24px, -2vw, -12px);
+  margin-top: clamp(36px, 6vw, 64px);
   padding: 24px 0 clamp(48px, 8vw, 84px);
   border-top: 1px solid #ffffff1c;
 }
@@ -551,6 +551,10 @@ a:focus-visible {
   grid-column: 2;
   grid-template-columns: minmax(0, 1fr) auto;
   text-align: right;
+}
+
+.guide-journey__link:only-child {
+  grid-column: 1 / -1;
 }
 
 .guide-journey__link small,
@@ -818,10 +822,12 @@ a:focus-visible {
 
 .visual-guide__anatomy-key {
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1px;
-  overflow: hidden;
+  gap: 12px;
+  overflow: visible;
   padding: 0;
-  background: #ffffff16;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .visual-guide__anatomy-key li,
@@ -829,7 +835,8 @@ a:focus-visible {
   display: block;
   min-width: 0;
   padding: 14px 16px;
-  border: 0;
+  border: 1px solid #ffffff16;
+  border-radius: 10px;
   background: #0d2031;
 }
 
