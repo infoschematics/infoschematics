@@ -4,12 +4,12 @@ area: SITE
 title: Component reference pages
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: d92553d3b5d84052b54e87453b0a0a29d9dff065
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T08:07:57Z
+updated_at: 2026-09-14T08:11:59Z
 ---
 
 # Component reference pages
@@ -83,7 +83,7 @@ Capture square and dot grid density, semantic Point roles, richer Card or Flow n
 
 Components now has a concise catalogue and stable pages for Canvas, Regions, Fabrics, Cards, Flows, Points, Graphics, and Future notation. Each current component page combines focused guidance, a bounded live example, honest model-backed controls, compact source, and a collapsible property reference.
 
-### Summary of changes
+### Summary changes
 
 Added component routing and nested navigation; Canvas view-box width and height controls; Region label and opacity controls; Card, Fabric, and Point port controls; a synchronized Standard and Adapter Card comparison; clear current grid labels; and an explicit Future page for unsupported notation.
 
@@ -104,6 +104,10 @@ The labelled whole-diagram example remains in Overview, while Components now get
 ### Mini recap
 
 Baseline `d92553d3b5d84052b54e87453b0a0a29d9dff065`; result `fab582b6e656e976babcd373e2fa10af42e08798`. The implementation stayed inside Site-owned routes, content, examples, controls, tests, and styling.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown under `INFOSCHEMATICS-BATCH-012` closure authority on the review packet above.
 
 ## Discussion
 
