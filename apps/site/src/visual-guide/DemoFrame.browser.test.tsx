@@ -29,17 +29,17 @@ test('mode, source expansion, format, and reset stay synchronized', async () => 
   await expect.poll(() => container.querySelector('svg.infoschematic-svg.editing')).not.toBeNull()
 
   buttonWithLabel(container, 'Expand source').click()
-  expect(container.querySelector('.specimen-snippet__source--expanded')).not.toBeNull()
+  await expect.poll(() => container.querySelector('.specimen-snippet__source--expanded')).not.toBeNull()
 
   const typescript = [...container.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find(
     (button) => button.textContent === 'TypeScript'
   )
   if (!typescript) throw new Error('Missing TypeScript tab')
   typescript.click()
-  expect(typescript.getAttribute('aria-selected')).toBe('true')
+  await expect.poll(() => typescript.getAttribute('aria-selected')).toBe('true')
 
   buttonWithLabel(container, 'Reset example').click()
   await expect.poll(() => container.querySelector('svg.infoschematic-svg.editing')).toBeNull()
-  expect(container.querySelector('.specimen-snippet__source--expanded')).toBeNull()
-  expect(container.querySelector('button[aria-pressed="true"]')?.textContent).toBe('Rendered')
+  await expect.poll(() => container.querySelector('.specimen-snippet__source--expanded')).toBeNull()
+  await expect.poll(() => container.querySelector('button[aria-pressed="true"]')?.textContent).toBe('Rendered')
 })
