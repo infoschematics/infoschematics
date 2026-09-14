@@ -57,3 +57,11 @@ The item may reach `awaiting-review` only with every planned step complete and t
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-010-RUN-001 889fdab6e888fc01e4d7fd260f38f2f70eb4ecb90bbe7d2393ad7a8f9cd12e8d -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-TOOL-035` | `in-progress` | `awaiting-review` | Baseline `76fda523`; implementation `1842009f`; `self:check` passed with 644 unit/integration and 13 browser tests | Review canonical runtime parity and the isolated Studio source-edit bridge |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Canonical and established public inputs now converge on one canonical runtime used by Canvas, Present, Studio presentation, and static SVG rendering. Code-like canonical editing identities retain compatibility with established records and attached Flow movement. The final source-edit projection remains explicitly bounded to `INFOSCHEMATICS-TOOL-033`; acceptance, pruning, push, deployment, publication, and release remain outside this run.
