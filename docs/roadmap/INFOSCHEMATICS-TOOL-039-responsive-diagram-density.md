@@ -4,12 +4,12 @@ area: TOOL
 title: Responsive diagram density
 theme: tool
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-13T15:39:09Z
-updated_at: 2026-09-14T02:16:32Z
+updated_at: 2026-09-14T02:27:28Z
 ---
 
 # Responsive diagram density
@@ -32,14 +32,14 @@ View Model resolves Card layout from authored box size and requested detail. Can
 
 ## Steps
 
-- [ ] Add representative dense-diagram fixtures and record the rendered scale at which optional Card detail ceases to be legible on desktop and narrow layouts.
-- [ ] Add a framework-neutral View Model resolver that takes authored view-box dimensions, target rendered dimensions, and requested Card detail and returns a deterministic visible-detail profile.
-- [ ] Define an explicit opt-in responsive-detail option for Canvas and static rendering; omission must preserve current authored and cardDetails behaviour.
-- [ ] Make Canvas observe its container without changing server-rendered markup before measurement, then recompute Card layout when the resolved profile changes.
-- [ ] Let static callers provide a target output size for the same resolver while keeping output deterministic for identical inputs.
-- [ ] Preserve Card label, semantic SVG title or accessible name, hidden authored metadata, focus, and selection even when optional visual rows are withheld.
-- [ ] Add parity tests at full, threshold, and narrow sizes and inspect dense examples in Canvas, Present, Studio, and static SVG.
-- [ ] Update the output-detail decision, specifications, and host guidance with the opt-in and fallback behaviour.
+- [x] Add representative dense-diagram fixtures and record the rendered scale at which optional Card detail ceases to be legible on desktop and narrow layouts.
+- [x] Add a framework-neutral View Model resolver that takes authored view-box dimensions, target rendered dimensions, and requested Card detail and returns a deterministic visible-detail profile.
+- [x] Define an explicit opt-in responsive-detail option for Canvas and static rendering; omission must preserve current authored and cardDetails behaviour.
+- [x] Make Canvas observe its container without changing server-rendered markup before measurement, then recompute Card layout when the resolved profile changes.
+- [x] Let static callers provide a target output size for the same resolver while keeping output deterministic for identical inputs.
+- [x] Preserve Card label, semantic SVG title or accessible name, hidden authored metadata, focus, and selection even when optional visual rows are withheld.
+- [x] Add parity tests at full, threshold, and narrow sizes and inspect dense examples in Canvas, Present, Studio, and static SVG.
+- [x] Update the output-detail decision, specifications, and host guidance with the opt-in and fallback behaviour.
 
 ## Files touched
 
@@ -76,6 +76,32 @@ Document when hosts should enable responsive detail and how explicit cardDetails
 ### Roadmap
 
 Keep true layout reflow or alternate mobile diagram composition outside this item as a separately selected capability.
+
+## Review
+
+### Delivered
+
+Delivered the approved opt-in responsive Card-detail boundary from immutable baseline `e47f2ae54bd64431190ab9154576374c88b531a8`; implementation commit `9cdc7ca9e6c6251104318c3f4b5a9823c7742201` provides the resulting code, tests, decision, specification, and guide evidence. Authored geometry, essential labels, accessible metadata, default rendering, true layout reflow, and device-class inference remain outside or unchanged as required.
+
+### Summary of changes
+
+Added `resolveResponsiveCardTreatment` as the shared dimension-driven policy; added opt-in measured Canvas support, Present and Studio pass-throughs, and explicit-size static SVG support. Added full, threshold, narrow, compatibility, and accessibility fixtures. Updated ADR-INFOSCHEMATICS-011, APPEAR-016/017, STATIC-016, and static-rendering host guidance. The selected thresholds preserve all optional rows at scale `0.8`, remove description below `0.8`, identity below `0.6`, and stereotype below `0.4`.
+
+### Verification
+
+`bunx vitest run packages/view-model/src/appearance.test.ts packages/render-svg/src/index.test.ts packages/view-present/src/Present.test.tsx packages/view-studio/src/app/App.test.tsx` passed with 50 tests. The dedicated Chromium run for `InfoschematicDiagram.responsive.browser.test.tsx` passed with two tests. `bun run self:check` passed with 79 unit suites and 593 tests, four browser suites and 21 tests, all package builds, schema and visual-token checks, TypeScript checks, dependency boundaries, and Site production build. The Specifications and Guides audits passed.
+
+### Outstanding concerns
+
+The Decision Records audit still reports the pre-existing non-canonical filename for ADR-INFOSCHEMATICS-018. The roadmap audit currently reports six pre-existing Future records whose `candidate` field is rejected by the concurrently changing KI tool. Neither finding was introduced by or blocks this delivery.
+
+### Post-change review
+
+The implementation meets the approved goal without mutating the canonical model or changing default output. Both renderers consume the same pure resolver, static output is deterministic for identical dimensions, and real-browser coverage proves Canvas responds only after measurement. Public surface growth is limited to the explicitly planned opt-in properties, with source-level pass-through coverage for Present and Studio. The item is ready for acceptance review.
+
+### Mini recap
+
+Responsive detail is now a host choice grounded in explicit dimensions rather than an ambient device heuristic. Optional rows disappear predictably while the diagram structure and accessible meaning remain intact. No follow-up work is required within this item; genuine mobile reflow remains a separate future capability.
 
 ## Discussion
 
