@@ -1168,6 +1168,11 @@ a:focus-visible {
   line-height: 1.4;
 }
 
+.docs-navigation .docs-sidebar__outline a[aria-current="location"] {
+  color: #f5f8ff;
+  font-weight: 650;
+}
+
 .docs-navigation .docs-sidebar__outline-subsection {
   padding-left: 10px;
 }

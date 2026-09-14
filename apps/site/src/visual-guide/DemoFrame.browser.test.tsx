@@ -19,6 +19,11 @@ test('mode, source expansion, format, and reset stay synchronized', async () => 
       title="Card properties"
     />
   )
+  const feedback = container.querySelector<HTMLElement>('.specimen-snippet__feedback')
+
+  if (!feedback) throw new Error('Missing snippet feedback')
+
+  expect(getComputedStyle(feedback).display).toBe('none')
 
   const design = [...container.querySelectorAll<HTMLButtonElement>('button')].find(
     (button) => button.textContent === 'Design'
@@ -37,6 +42,10 @@ test('mode, source expansion, format, and reset stay synchronized', async () => 
   if (!typescript) throw new Error('Missing TypeScript tab')
   typescript.click()
   await expect.poll(() => typescript.getAttribute('aria-selected')).toBe('true')
+
+  buttonWithLabel(container, 'Copy snippet').click()
+  await expect.poll(() => feedback.textContent).not.toBe('')
+  await expect.poll(() => getComputedStyle(feedback).display).not.toBe('none')
 
   buttonWithLabel(container, 'Reset example').click()
   await expect.poll(() => container.querySelector('svg.infoschematic-svg.editing')).toBeNull()
