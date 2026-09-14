@@ -4,12 +4,12 @@ area: TOOL
 title: Canonical view internals
 theme: tool
 horizon: next
-status: draft
+status: ready
 blocks: [INFOSCHEMATICS-TOOL-033]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T03:43:59Z
+updated_at: 2026-09-14T07:03:21Z
 ---
 
 # Canonical view internals
@@ -60,7 +60,7 @@ After `INFOSCHEMATICS-TOOL-034` lands, run focused bunx vitest run suites for co
 
 ## Dependencies / blocks
 
-`INFOSCHEMATICS-TOOL-034` must first establish canonical Sequence and presentation semantics. Migrating internals earlier would encode the Theme and Story split that this work is meant to remove. The established public input remains a supported adapter after the dependency lands.
+`INFOSCHEMATICS-TOOL-034` established canonical Sequence and presentation semantics and has landed, so this item has no remaining build-order dependency. The established public input remains a supported adapter during the migration.
 
 ## Documentation impact
 
