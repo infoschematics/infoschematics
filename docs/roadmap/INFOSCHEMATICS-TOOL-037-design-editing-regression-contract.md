@@ -8,6 +8,8 @@ status: in-progress
 blocks: []
 blocked_by: []
 baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
+created_at: 2026-09-13T15:00:21Z
+updated_at: 2026-09-13T17:37:48Z
 ---
 
 # Harden Design interactions

@@ -8,6 +8,8 @@ status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
+created_at: 2026-09-03T06:02:55Z
+updated_at: 2026-09-13T15:39:09Z
 ---
 
 # Renderer schema version

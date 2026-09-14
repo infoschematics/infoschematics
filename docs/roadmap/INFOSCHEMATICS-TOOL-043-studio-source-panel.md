@@ -8,6 +8,8 @@ status: draft
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: [INFOSCHEMATICS-TOOL-033]
 baseline_ref: null
+created_at: 2026-09-13T15:55:21Z
+updated_at: 2026-09-13T16:31:38Z
 ---
 
 # Studio source panel

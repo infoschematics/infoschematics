@@ -8,6 +8,8 @@ status: ready
 blocks: [INFOSCHEMATICS-TOOL-023]
 blocked_by: []
 baseline_ref: null
+created_at: 2026-09-08T17:36:14Z
+updated_at: 2026-09-10T12:11:22Z
 ---
 
 ## Goal

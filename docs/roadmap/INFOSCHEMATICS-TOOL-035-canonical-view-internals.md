@@ -8,6 +8,8 @@ status: draft
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-034]
 baseline_ref: null
+created_at: 2026-09-10T00:14:39Z
+updated_at: 2026-09-13T15:39:09Z
 ---
 
 # Canonical view internals

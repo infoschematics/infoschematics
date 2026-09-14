@@ -8,6 +8,8 @@ status: draft
 blocks: []
 blocked_by: []
 baseline_ref: null
+created_at: 2026-09-13T20:03:15Z
+updated_at: 2026-09-13T20:03:15Z
 ---
 
 # Design interaction layers

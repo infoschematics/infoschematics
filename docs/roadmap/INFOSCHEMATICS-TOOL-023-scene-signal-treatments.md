@@ -8,6 +8,8 @@ status: draft
 blocks: []
 blocked_by: [INFOSCHEMATICS-SITE-006]
 baseline_ref: null
+created_at: 2026-09-08T02:09:11Z
+updated_at: 2026-09-13T15:39:09Z
 ---
 
 # Scene signal treatments
