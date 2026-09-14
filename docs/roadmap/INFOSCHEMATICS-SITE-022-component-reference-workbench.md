@@ -4,12 +4,12 @@ area: SITE
 title: Component reference workbench
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 81bb282abe606ca29390cdefb5c5fe79fc605946
 created_at: 2026-09-14T01:29:44Z
-updated_at: 2026-09-14T01:29:44Z
+updated_at: 2026-09-14T01:30:16Z
 ---
 
 # Component reference workbench
