@@ -13,6 +13,12 @@ The definition has two complementary parts:
 
 The [Components guide](/docs/components/) shows these parts together before you need to learn their exact schema names.
 
+## What it can represent
+
+Infoschematics is centred on architectural explanation: components, interfaces, specifications, and the interactions between them. The same visual grammar can also support simplified workflows, processes, entity context, and data or media pipelines when those views help explain the architecture.
+
+The [Representation patterns guide](/docs/representations/) explains those adjacent uses, shows where specialist workflow or modelling tools remain a better fit, and includes an editable live-media example.
+
 ## One definition, several outcomes
 
 Start with only the parts you need. You can use the same definition to:
@@ -35,6 +41,7 @@ Changing the way you use an Infoschematic does not require you to rewrite its un
 
 - **I want to try it first** — open the [Playground](/playground/).
 - **I want to understand the visual parts** — continue to [Components](/docs/components/).
+- **I want to understand what it can represent** — explore [Representation patterns](/docs/representations/).
 - **I want to add it to a project** — choose a route in [Installation](/docs/installation/).
 - **I want to write a definition** — follow the [Authoring guide](/docs/authoring/).
 - **I need a still image** — use [Static rendering](/docs/static-rendering/).

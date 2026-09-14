@@ -9,10 +9,11 @@ import { homepageInfoschematic } from '@infoschematics/is-infoschematics'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { useEffect, useMemo, useState } from 'react'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
+import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
-export type PlaygroundPreset = 'blank' | 'explained' | 'source-to-sink'
+export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'source-to-sink'
 
 /** A preset replaces the YAML document while its own page remains a curated view. */
 export const presets: readonly {
@@ -24,6 +25,11 @@ export const presets: readonly {
     key: 'source-to-sink',
     label: 'Source to sink',
     document: yamlSeed
+  },
+  {
+    key: 'media-pipeline',
+    label: 'Live media pipeline',
+    document: mediaPipelineSeed
   },
   {
     key: 'explained',

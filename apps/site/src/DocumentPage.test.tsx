@@ -41,6 +41,7 @@ describe('documentation pages', () => {
       'Installation',
       'Components',
       'Authoring',
+      'Representation patterns',
       'Explanation',
       'Present view',
       'Studio view',
@@ -51,6 +52,19 @@ describe('documentation pages', () => {
 
     expect(positions.every((position) => position >= 0)).toBe(true)
     expect(positions).toEqual([...positions].sort((left, right) => left - right))
+  })
+
+  it('explains architectural and supporting representation patterns', () => {
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/representations.md')
+    if (!route) throw new Error('The representation-patterns documentation route is missing.')
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+
+    expect(page).toContain('Architecture is the centre')
+    expect(page).toContain('Architecture dashboard views')
+    expect(page).toContain('Data and media pipelines')
+    expect(page).toContain('href="/playground/?preset=media-pipeline"')
+    expect(page).toContain('Embedding in an operational console')
   })
 
   it('explains hosted and local ways to use Infoschematics before package setup', () => {

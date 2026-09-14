@@ -23,6 +23,20 @@ This is a curated set of adjacent projects worth revisiting when designing Infos
 
 - **[Excalidraw Libraries](https://libraries.excalidraw.com/)** — collects reusable community-made symbols for subjects including data visualisation, infrastructure, interfaces, and electrical schematics. Its discoverable library model and approachable hand-drawn treatment are useful references for reusable Graphics and less formal explanatory views.
 
+## Node editors and graph layout
+
+- **[React Flow](https://reactflow.dev/)** — is an MIT-licensed React library for node-based editors and interactive diagrams. Its custom nodes, Handles, Edges, connection events, selection, keyboard interaction, and save-and-restore examples are useful references for Studio interaction, but it supplies an editor surface rather than Infoschematic semantics. Its [Workflow Editor template](https://reactflow.dev/ui/templates/workflow-editor) is the closest first-party example of a complete workflow-authoring shell.
+- **[Svelte Flow](https://svelteflow.dev/)** — is the Svelte member of the same xyflow family, with equivalent node, Handle, Edge, grouping, layout, and interaction ideas expressed through Svelte. Its [examples](https://svelteflow.dev/examples) are especially useful for focused interaction studies.
+- **[Comgy](https://svelteflow.dev/showcase)** — uses Svelte Flow to model and visualise energy flows across real estate. It is a particularly relevant showcase for operational architecture, because the same topology can carry live measures without becoming the execution model. Comparable React Flow references include its broad [project showcase](https://reactflow.dev/showcase), especially Carto’s data pipelines, ChartDB and Liam ERD for entity relationships, and media or automation tools such as Bleu AI, GenAIntel, and Dafthunk.
+- **[Rete.js](https://retejs.org/)** — is a TypeScript-first framework for visual interfaces and workflows with sockets, connections, custom controls, framework renderers, and dataflow or control-flow processing. Its separation between graph processing and interchangeable visualisation is a useful comparison for Ports and host-supplied renderers.
+- **[Eclipse Layout Kernel](https://eclipse.dev/elk/)** — computes automatic layouts for graph viewers and editors, including Ports and hierarchical nodes, but deliberately does not render the final drawing. Its model-to-layout boundary and layered routing options are useful references if Infoschematics later offers automatic placement.
+
+## Workflow and process systems
+
+- **[bpmn-js](https://bpmn.io/toolkit/bpmn-js/)** — embeds a BPMN 2.0 viewer or modeler in a browser and reads and writes standards-compliant BPMN XML. It is the specialist reference for native process semantics, modelling rules, extension points, and future BPMN-to-Infoschematic translation.
+- **[Node-RED](https://nodered.org/docs/user-guide/editor/)** — provides a low-code editor where people place nodes, wire them together, and run event-driven Flows. Its palette, workspace, deploy boundary, subflows, and import/export experience are useful references for authoring and source adapters, not a replacement for the Infoschematic model.
+- **[n8n](https://docs.n8n.io/)** — combines a visual node editor with executable workflow automation and explicit data mapping between nodes. Exported workflows could be an import source or operational integration, but n8n is a product rather than a general diagramming library. Its editor code is covered by the [Sustainable Use License](https://docs.n8n.io/privacy-and-security/sustainable-use-license/), which restricts some commercial and customer-facing uses, so embedding or deriving from it requires separate licensing review.
+
 ## What to capture
 
 When adding a project, note the specific idea worth revisiting rather than recording a bare link. Useful areas include authoring models, reusable visual vocabulary, interactive editing, static rendering, presentation, accessibility, and documentation structure.

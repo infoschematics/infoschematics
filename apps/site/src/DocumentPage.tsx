@@ -10,6 +10,7 @@ import gettingStartedMarkdown from '../content/getting-started.md?raw'
 import installationMarkdown from '../content/installation.md?raw'
 import presentMarkdown from '../content/present.md?raw'
 import reactIntegrationMarkdown from '../content/react-integration.md?raw'
+import representationsMarkdown from '../content/representations.md?raw'
 import staticRenderingMarkdown from '../content/static-rendering.md?raw'
 import studioMarkdown from '../content/studio.md?raw'
 import { type DocsPageOutlineEntry, DocsSidebar } from './DocsSidebar.tsx'
@@ -29,6 +30,7 @@ const markdownBySourcePath: Record<string, string> = {
   'apps/site/content/studio.md': studioMarkdown,
   'apps/site/content/static-rendering.md': staticRenderingMarkdown,
   'apps/site/content/react-integration.md': reactIntegrationMarkdown,
+  'apps/site/content/representations.md': representationsMarkdown,
   'docs/reference/vocabulary.md': vocabularyMarkdown,
   'docs/design/architecture.md': architectureMarkdown,
   'docs/design/visual-language.md': visualLanguageMarkdown,

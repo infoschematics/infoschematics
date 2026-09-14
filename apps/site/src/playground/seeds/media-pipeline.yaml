@@ -1,0 +1,89 @@
+# yaml-language-server: $schema=../../../../../packages/domain-core/schema/infoschematic.schema.json
+id: MEDIA-PIPELINE
+title: Live media pipeline
+subtitle: What passes between capture, processing, delivery, and playback
+diagram:
+  bounds: 0 0 1260 520
+  appearance:
+    surface: blueprint
+    grid: major
+    card: { compact: true, identity: true, stereotype: true }
+  collections:
+    - id: PRODUCTION
+      label: Production
+      description: Capture and prepare live media.
+      appearance: { color: '#5eead4', fill: '#102f35' }
+    - id: DELIVERY
+      label: Delivery
+      description: Distribute and play the prepared stream.
+      appearance: { color: '#a78bfa', fill: '#241b3d' }
+  families:
+    - id: AV
+      label: Audio and video
+      description: Contribution media before packaging.
+      color: '#5eead4'
+    - id: PACKAGE
+      label: Segments and manifest
+      description: Packaged media and playback metadata.
+      color: '#fbbf24'
+    - id: PLAYBACK
+      label: Playback
+      description: Viewer requests and delivered media.
+      color: '#a78bfa'
+  regions:
+    - id: LIVE-PATH
+      label: Live path
+      bounds: 30 70 1200 370
+      appearance:
+        cornerRadius: 12
+        frame: { style: dashed, opacity: 0.65 }
+        label: { placement: north-west, mount: boundary }
+  cards:
+    - id: CAMERA
+      label: Camera
+      description: Captures picture and sound.
+      collection: PRODUCTION
+      stereotype: source
+      bounds: 60 180 180 120
+      ports: 0 1 0 0
+    - id: ENCODER
+      label: Encoder
+      description: Produces compressed media.
+      collection: PRODUCTION
+      stereotype: processor
+      bounds: 300 180 180 120
+      ports: 0 1 0 1
+    - id: PACKAGER
+      label: Packager
+      description: Creates segments and manifests.
+      collection: PRODUCTION
+      stereotype: processor
+      bounds: 540 180 180 120
+      ports: 0 1 0 1
+    - id: CDN
+      label: Distribution
+      description: Places media near its audience.
+      collection: DELIVERY
+      stereotype: service
+      bounds: 780 180 180 120
+      ports: 0 1 0 1
+    - id: PLAYER
+      label: Player
+      description: Requests and presents the stream.
+      collection: DELIVERY
+      stereotype: client
+      bounds: 1020 180 180 120
+      ports: 0 0 0 1
+  flows:
+    - id: CAPTURE
+      family: AV
+      link: CAMERA E1 -> ENCODER W1
+    - id: ENCODED
+      family: AV
+      link: ENCODER E1 -> PACKAGER W1
+    - id: PUBLISHED
+      family: PACKAGE
+      link: PACKAGER E1 -> CDN W1
+    - id: VIEWED
+      family: PLAYBACK
+      link: CDN E1 -> PLAYER W1

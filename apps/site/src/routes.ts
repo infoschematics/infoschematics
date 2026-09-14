@@ -50,6 +50,13 @@ const publishedDocuments = [
     section: 'usage'
   },
   {
+    sourcePath: 'apps/site/content/representations.md',
+    path: '/docs/representations/',
+    title: 'Representation patterns',
+    summary: 'Apply the architectural visual grammar to systems, workflows, entities and data or media pipelines.',
+    section: 'usage'
+  },
+  {
     sourcePath: 'apps/site/content/explanation.md',
     path: '/docs/explanation/',
     title: 'Explanation',

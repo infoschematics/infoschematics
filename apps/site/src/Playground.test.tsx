@@ -12,6 +12,7 @@ import {
   presets
 } from './Playground.tsx'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
+import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 
 describe('Playground', () => {
   it('presents one document editor to the right of its live preview', () => {
@@ -53,6 +54,22 @@ describe('Playground', () => {
       })
     ])
     expect(renderInfoschematicSvg(parsed.model)).toContain('d="M300 220 H500"')
+  })
+
+  it('offers an architectural media pipeline whose Flow Families say what moves', () => {
+    const parsed = parseInfoschematic(mediaPipelineSeed)
+
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+
+    expect(parsed.model.diagram.cards).toHaveLength(5)
+    expect(parsed.model.diagram.flows).toHaveLength(4)
+    expect(parsed.model.diagram.families.map(({ label }) => label)).toEqual([
+      'Audio and video',
+      'Segments and manifest',
+      'Playback'
+    ])
+    expect(renderInfoschematicSvg(parsed.model)).toContain('Player')
   })
 
   it('serialises every canonical preset as valid YAML', () => {
