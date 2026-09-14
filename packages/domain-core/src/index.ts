@@ -12,6 +12,14 @@ export {
   defaultInfoschematicAppearance,
   defineInfoschematic
 } from './define.ts'
+export {
+  type InfoschematicDocument,
+  type InfoschematicDocumentParseResult,
+  infoschematicDocumentModel,
+  infoschematicDocumentPathname,
+  infoschematicDocumentSource,
+  parseInfoschematicDocument
+} from './document.ts'
 export { defaultCalloutPositions, defineInfoschematicModel, infoschematicModelOf } from './model.ts'
 export {
   formatInfoschematicIssue,
