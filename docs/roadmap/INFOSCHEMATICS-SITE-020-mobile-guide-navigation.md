@@ -4,12 +4,12 @@ area: SITE
 title: Mobile guide navigation
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 8d13f6c1baa642dba6461b9274e5bf11eee76615
 created_at: 2026-09-14T01:15:29Z
-updated_at: 2026-09-14T01:16:34Z
+updated_at: 2026-09-14T01:20:31Z
 ---
 
 # Mobile guide navigation
@@ -32,10 +32,10 @@ The shared sidebar is visible above 960 pixels and hidden below that breakpoint.
 
 ## Steps
 
-- [ ] Render one accessible mobile documentation disclosure on every guide and Components page.
-- [ ] Reuse the desktop navigation entries and active-page outline rather than maintaining a second route list.
-- [ ] Make the current page and its headings understandable inside the disclosure.
-- [ ] Verify keyboard structure, narrow-screen containment, and desktop sidebar preservation.
+- [x] Render one accessible mobile documentation disclosure on every guide and Components page.
+- [x] Reuse the desktop navigation entries and active-page outline rather than maintaining a second route list.
+- [x] Make the current page and its headings understandable inside the disclosure.
+- [x] Verify keyboard structure, narrow-screen containment, and desktop sidebar preservation.
 
 ## Files touched
 
@@ -69,6 +69,32 @@ No public content changes are required; this item changes how existing guide str
 ### Roadmap
 
 This record supplies the bounded Site delivery and review evidence.
+
+## Review
+
+### Delivered
+
+Commit `8d2768d1` adds a narrow-screen guide disclosure to every documentation and Components page while retaining the existing desktop sidebar.
+
+### Summary of changes
+
+`DocsSidebar` now renders desktop and mobile presentations from one `DocumentationLinks` projection. The mobile disclosure names the active page and expands to the same guide sections and active-page outline. Site styling switches presentations at the existing 960-pixel breakpoint.
+
+### Verification
+
+Focused DocumentPage, Components, and Playground tests passed as part of 46 focused Site tests. `bun run self:check` passed 570 tests, browser tests, all workspace typechecks, dependency boundaries, schema and token checks, and the production Site build. Chromium inspection at 1440 and 390 pixels confirmed the correct navigation presentation, a visible Components outline after disclosure, zero horizontal overflow, and no console errors.
+
+### Outstanding concerns
+
+None. The mobile navigation is deliberately a disclosure rather than a permanently open sidebar so it does not push every article below the complete guide map.
+
+### Post-change review
+
+Desktop and mobile navigation share route order, current-page state, and outline entries, avoiding a second navigation source. Distinct accessible navigation labels and heading IDs prevent duplicate associations while both responsive presentations remain in the document.
+
+### Mini recap
+
+Narrow-screen readers can now reach the guide map and the current page's headings; desktop behaviour is unchanged.
 
 ## Discussion
 
