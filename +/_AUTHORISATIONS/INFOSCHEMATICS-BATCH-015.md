@@ -46,4 +46,4 @@ Implementation-level completion of the single selected item at `awaiting-review`
 
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
-| `INFOSCHEMATICS-TOOL-053` | `ready` | running | Baseline pending | Review grid-size contract, controls and parity |
+| `INFOSCHEMATICS-TOOL-053` | `ready` | running | Baseline `e7d790a2` | Review grid-size contract, controls and parity |

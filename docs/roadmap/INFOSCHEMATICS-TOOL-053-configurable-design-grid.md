@@ -4,12 +4,12 @@ area: TOOL
 title: Configurable Design grid
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: e7d790a2174873ec57990d54519394c5ed8f0f5c
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-14T14:36:30Z
+updated_at: 2026-09-14T14:38:30Z
 ---
 
 # Configurable Design grid
