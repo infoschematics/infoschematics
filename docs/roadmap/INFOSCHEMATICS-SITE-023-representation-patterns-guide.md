@@ -4,12 +4,12 @@ area: SITE
 title: Representation patterns guide
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: b9f001f3c6b9f9a2828d946293fec7af41b8ad7a
 created_at: 2026-09-14T01:59:19Z
-updated_at: 2026-09-14T01:59:19Z
+updated_at: 2026-09-14T01:59:55Z
 ---
 
 # Representation patterns guide
