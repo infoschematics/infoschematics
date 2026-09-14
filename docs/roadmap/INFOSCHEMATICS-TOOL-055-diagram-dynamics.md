@@ -1,15 +1,15 @@
 ---
-id: INFOSCHEMATICS-SITE-006
-area: SITE
+id: INFOSCHEMATICS-TOOL-055
+area: TOOL
 title: Diagram dynamics
-theme: site-experience
+theme: tool
 horizon: next
 status: ready
 blocks: [INFOSCHEMATICS-TOOL-023]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-08T17:36:14Z
-updated_at: 2026-09-10T12:11:22Z
+updated_at: 2026-09-14T08:38:20Z
 ---
 
 ## Goal

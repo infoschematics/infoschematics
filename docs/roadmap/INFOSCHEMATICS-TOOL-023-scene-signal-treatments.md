@@ -6,10 +6,10 @@ theme: tool
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-SITE-006]
+blocked_by: [INFOSCHEMATICS-TOOL-055]
 baseline_ref: null
 created_at: 2026-09-08T02:09:11Z
-updated_at: 2026-09-13T15:39:09Z
+updated_at: 2026-09-14T08:38:20Z
 ---
 
 # Scene signal treatments
@@ -24,7 +24,7 @@ The current Scene signal path emits one transient occurrence for every focused F
 
 ## Boundary
 
-This item composes the named Dynamics delivered by [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md). It does not create a parallel animation vocabulary, expose arbitrary timelines or offsets, change Flow routing, make motion the only carrier of meaning, infer activity from focus, or add callbacks and timers to authored data.
+This item composes the named Dynamics delivered by [Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md). It does not create a parallel animation vocabulary, expose arbitrary timelines or offsets, change Flow routing, make motion the only carrier of meaning, infer activity from focus, or add callbacks and timers to authored data.
 
 ## Current state
 
@@ -55,11 +55,11 @@ View Model can resolve one FlowSignal occurrence from focused Flow IDs. Canvas h
 
 ## Verify
 
-After [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) lands, run bun run self:verify:schema, focused bunx vitest run suites for Scene parsing, cue scheduling, Present replay and cancellation, Canvas treatments, Studio pass-through, reduced motion, accessibility, and static SVG explicit occurrences, then bun run self:packages:build and bun run self:check. Inspect all five visual-guide treatments in full and reduced motion and confirm a Scene change cancels the prior schedule.
+After [Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md) lands, run bun run self:verify:schema, focused bunx vitest run suites for Scene parsing, cue scheduling, Present replay and cancellation, Canvas treatments, Studio pass-through, reduced motion, accessibility, and static SVG explicit occurrences, then bun run self:packages:build and bun run self:check. Inspect all five visual-guide treatments in full and reduced motion and confirm a Scene change cancels the prior schedule.
 
 ## Dependencies / blocks
 
-[Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) must first deliver named Diagram Dynamics, DynamicOccurrence resolution, and renderer interpretations. Until that contract exists this plan is complete but cannot truthfully enter Ready.
+[Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md) must first deliver named Diagram Dynamics, DynamicOccurrence resolution, and renderer interpretations. Until that contract exists this plan is complete but cannot truthfully enter Ready.
 
 ## Documentation impact
 
@@ -77,7 +77,7 @@ Add authored examples for playback policies and explain that focus and Dynamics 
 
 ### Roadmap
 
-Remove the dependency and transition this item to Ready only after [Diagram dynamics](INFOSCHEMATICS-SITE-006-diagram-dynamics.md) has landed.
+Remove the dependency and transition this item to Ready only after [Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md) has landed.
 
 ## Discussion
 
