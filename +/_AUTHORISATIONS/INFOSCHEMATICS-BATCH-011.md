@@ -67,3 +67,7 @@ Each admitted item must reach `awaiting-review`, pass a fresh review-packet and 
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-011-RUN-001 b18140c78a07d7462aa4cdeacbd5cbbe8554cac9f102c3a98db2694707037ba5 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-SITE-024` | ready | awaiting-review | `067bcb41` baseline; `4de2cbe3` result; 37 focused tests, Site type check and build passed; desktop/390px inspection passed | Consolidate acceptance under the approved batch closure |

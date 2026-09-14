@@ -4,12 +4,12 @@ area: SITE
 title: Documentation architecture
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-SITE-026]
 blocked_by: []
 baseline_ref: 067bcb41ed3e574ef0d891f40dab408fe5555b1b
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T07:09:57Z
+updated_at: 2026-09-14T07:35:36Z
 ---
 
 # Documentation architecture
@@ -32,12 +32,12 @@ Overview is mostly prose. The whole labelled example, anatomy legend, every comp
 
 ## Steps
 
-- [ ] Extract the whole labelled Infoschematic and legend into a reusable Site component and place it in Overview with concise reader-facing copy.
-- [ ] Remove the duplicate anatomy section and internal-facing Point explanation from the Components page.
-- [ ] Introduce a first-class Components documentation section and a concise catalogue hub that can own nested component routes.
-- [ ] Preserve the practical journey through Overview, Installation, the Components hub, Authoring, representation, explanation, presentation, Studio, static rendering, and React integration.
-- [ ] Update Site-owned links, active navigation, mobile navigation, outlines, and route tests for the new information architecture.
-- [ ] Inspect Overview and Components at desktop and narrow widths for readable hierarchy and overflow.
+- [x] Extract the whole labelled Infoschematic and legend into a reusable Site component and place it in Overview with concise reader-facing copy.
+- [x] Remove the duplicate anatomy section and internal-facing Point explanation from the Components page.
+- [x] Introduce a first-class Components documentation section and a concise catalogue hub that can own nested component routes.
+- [x] Preserve the practical journey through Overview, Installation, the Components hub, Authoring, representation, explanation, presentation, Studio, static rendering, and React integration.
+- [x] Update Site-owned links, active navigation, mobile navigation, outlines, and route tests for the new information architecture.
+- [x] Inspect Overview and Components at desktop and narrow widths for readable hierarchy and overflow.
 
 ## Files touched
 
@@ -78,6 +78,32 @@ Move the labelled introduction into Overview and reorganize Components as a dist
 ### Roadmap
 
 Unblock the dedicated component-page work in `INFOSCHEMATICS-SITE-026`.
+
+## Review
+
+### Delivered
+
+Overview now contains the labelled whole Infoschematic and legend. Components is a first-class documentation section with stable hub and child routes, and the practical user-guide journey continues through the hub without placing every component page in that journey.
+
+### Summary of changes
+
+Added reusable Overview composition, moved the homepage structure pathway to it, removed the duplicate anatomy and internal Point wording from Components, introduced component route metadata, and taught desktop and mobile navigation about the catalogue hierarchy.
+
+### Verification
+
+At result `4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe`, 37 focused Site tests, Site TypeScript checking, and the production Site build passed in a clean detached worktree. Overview and Components were inspected at desktop and 390-pixel widths with no horizontal overflow or broken navigation layout.
+
+### Outstanding concerns
+
+The child routes intentionally use the existing Components implementation until `INFOSCHEMATICS-SITE-026` gives each destination its focused page. The reusable demo frame is delivered separately by `INFOSCHEMATICS-SITE-025`.
+
+### Post-change review
+
+The labelled example is now a visual introduction rather than the first specimen in a long reference page. Its legend uses the full available content width and no longer carries numbered side labels.
+
+### Mini recap
+
+Baseline `067bcb41ed3e574ef0d891f40dab408fe5555b1b`; result `4de2cbe3fb9f4f54db5ce82f57052cfdf15493fe`. The change remained inside Site-owned routing, composition, content, and tests.
 
 ## Discussion
 
