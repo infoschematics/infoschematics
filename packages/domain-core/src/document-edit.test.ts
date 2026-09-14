@@ -7,6 +7,7 @@ id: EDITS
 title: "Original title" # title comment
 diagram:
   bounds: &diagram-bounds 0 0 200 100
+  gridSize: 10
   cards:
     # Alpha member comment
     - id: A

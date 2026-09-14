@@ -1,4 +1,4 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { GridTreatment } from '@infoschematics/domain-model/appearance'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -66,6 +66,28 @@ const treatmentConfig = defineInfoschematic({
 })
 
 describe('Canvas visual treatments', () => {
+  it('uses the authored grid size and suppresses a zero-sized lattice', () => {
+    const canonical = (gridSize: number) =>
+      defineInfoschematicModel({
+        id: `GRID-${gridSize}`,
+        title: 'Grid sizing',
+        diagram: {
+          appearance: { grid: 'major-plus-minor' },
+          bounds: { x: 0, y: 0, width: 120, height: 80 },
+          gridSize
+        }
+      })
+
+    const custom = renderToStaticMarkup(<Canvas config={canonical(4)} />)
+    expect(custom).toContain('data-grid-treatment="major-plus-minor"')
+    expect(custom).toContain('<pattern height="4" id="infoschematic-grid-minor"')
+    expect(custom).toContain('<pattern height="20" id="infoschematic-grid-major"')
+
+    const disabled = renderToStaticMarkup(<Canvas config={canonical(0)} />)
+    expect(disabled).toContain('data-grid-treatment="none"')
+    expect(disabled).not.toContain('class="infoschematic-authored-grid"')
+  })
+
   it('renders authored blueprint, shared region geometry, compact Card metadata and Domain semantics', () => {
     const markup = renderToStaticMarkup(<Canvas config={treatmentConfig} />)
 

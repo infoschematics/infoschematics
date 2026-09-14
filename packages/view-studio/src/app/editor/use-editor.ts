@@ -57,7 +57,7 @@ export type { Attachment, CardCreation, Creation, TextDraft, TextField } from '.
 
 // Editing state is held apart from the Infoschematic and its host. Drafts
 // persist because they represent unsaved work; the active editor does not.
-export type EditorView = { grid: boolean; snapping: boolean }
+export type EditorView = { snapping: boolean }
 
 /**
  * Which editor is open.
@@ -72,13 +72,10 @@ export type EditorView = { grid: boolean; snapping: boolean }
  */
 export type EditorMode = 'scenes' | 'design' | 'stories' | null
 
-const openView: EditorView = { grid: true, snapping: true }
-const closedView: EditorView = { grid: false, snapping: false }
+const openView: EditorView = { snapping: true }
+const closedView: EditorView = { snapping: false }
 
-/** The diagram is laid out on tens, so a drop that lands on one stays tidy. */
-export const gridSize = 10
-
-const toGrid = (point: Point): Point => ({
+const toGrid = (point: Point, gridSize: number): Point => ({
   x: Math.round(point.x / gridSize) * gridSize,
   y: Math.round(point.y / gridSize) * gridSize
 })
@@ -243,7 +240,8 @@ export function useEditor(
     // which is a line the reader can see and cannot touch.
     created: readonly CreatedFlow[],
     createdCards: readonly CreatedComponent[]
-  ) => EditableDiagram
+  ) => EditableDiagram,
+  gridSize: number
 ) {
   const { compatibilityConfig: config } = useInfoschematic()
   const storage = config.id
@@ -440,7 +438,6 @@ export function useEditor(
    * already says is enough to know they have been applied.
    */
   const swept = useRef(false)
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   useEffect(() => {
     if (swept.current) return
     swept.current = true
@@ -777,9 +774,12 @@ export function useEditor(
               return snapBoxToGuides(
                 wanted,
                 diagram.guidesFor(selectionKey(target)),
-                view.grid ? { grid: gridSize } : {}
+                gridSize > 0 ? { grid: gridSize } : {}
               )
-            return { box: view.grid ? { ...wanted, ...toGrid(wanted) } : wanted, guides: [] as readonly Guide[] }
+            return {
+              box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted,
+              guides: [] as readonly Guide[]
+            }
           })()
           setGuides(placed.guides)
           return { dx: placed.box.x - geometry.box.x, dy: placed.box.y - geometry.box.y }
@@ -799,7 +799,7 @@ export function useEditor(
     if (!selectedArtefactDetails?.capabilities.resize) return
     const toGridLength = (length: number | undefined) =>
       length === undefined ? undefined : Math.max(gridSize, Math.round(length / gridSize) * gridSize)
-    const wanted = view.grid ? { height: toGridLength(size.height), width: toGridLength(size.width) } : size
+    const wanted = gridSize > 0 ? { height: toGridLength(size.height), width: toGridLength(size.width) } : size
     const operation = resizeArtefactOperation(
       selectedArtefactDetails.selection,
       selectedArtefactDetails.geometry,
@@ -956,7 +956,7 @@ export function useEditor(
       const onLine = diagram.onRoute(key, point)
       if (onLine) {
         const axis = onLine.vertical ? 'y' : 'x'
-        let at = view.grid ? { ...onLine.at, [axis]: toGrid(onLine.at)[axis] } : onLine.at
+        let at = gridSize > 0 ? { ...onLine.at, [axis]: toGrid(onLine.at, gridSize)[axis] } : onLine.at
         if (view.snapping) {
           const pulled = snapToGuides(at, diagram.guidesFor(key))
           setGuides(pulled.guides)
@@ -981,15 +981,15 @@ export function useEditor(
       const box = placement?.kind === 'box' ? placement.box : undefined
       const centre = (() => {
         if (!box) {
-          const wanted = view.grid ? toGrid(point) : point
+          const wanted = gridSize > 0 ? toGrid(point, gridSize) : point
           const snapped = view.snapping ? snapToGuides(wanted, diagram.guidesFor(key)) : { guides: [], point: wanted }
           setGuides(snapped.guides)
           return snapped.point
         }
         const wanted = { ...box, x: point.x - box.width / 2, y: point.y - box.height / 2 }
         const snapped = view.snapping
-          ? snapBoxToGuides(wanted, diagram.guidesFor(key), view.grid ? { grid: gridSize } : {})
-          : { box: view.grid ? { ...wanted, ...toGrid(wanted) } : wanted, guides: [] }
+          ? snapBoxToGuides(wanted, diagram.guidesFor(key), gridSize > 0 ? { grid: gridSize } : {})
+          : { box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted, guides: [] }
         setGuides(snapped.guides)
         return { x: snapped.box.x + box.width / 2, y: snapped.box.y + box.height / 2 }
       })()
@@ -1112,7 +1112,7 @@ export function useEditor(
     // which the caller already has - the hook holds no Infoschematic of its own, so
     // it cannot look a flow's current points up for itself.
     addWaypoint: (code: string, points: readonly Point[], at: Point) => {
-      const wanted = view.grid ? toGrid(at) : at
+      const wanted = gridSize > 0 ? toGrid(at, gridSize) : at
       const next = waypoints.insertWaypoint(points, wanted)
       if (sameValue(next, points)) return
       checkpoint()
@@ -1137,7 +1137,7 @@ export function useEditor(
     // A drag, like moveTo: checkpointed on every move, closed by releaseGuides
     // once the pointer lifts rather than here.
     moveWaypoint: (code: string, points: readonly Point[], index: number, to: Point) => {
-      const wanted = view.grid ? toGrid(to) : to
+      const wanted = gridSize > 0 ? toGrid(to, gridSize) : to
       const next = waypoints.moveWaypoint(points, index, wanted)
       if (sameValue(next, points)) return
       checkpoint()
@@ -1154,7 +1154,7 @@ export function useEditor(
     // An end anchored to no component has no ports to choose between, so it is
     // placed rather than chosen - the only end in the diagram that is.
     moveFreeEnd: (code: string, points: readonly Point[], end: 'end' | 'start', to: Point) => {
-      const wanted = view.grid ? toGrid(to) : to
+      const wanted = gridSize > 0 ? toGrid(to, gridSize) : to
       const from = end === 'start' ? points[0] : points.at(-1)
       if (!from) return
       const next = normaliseRoute(moveRouteEnd(points, end, { dx: wanted.x - from.x, dy: wanted.y - from.y }))
@@ -1163,7 +1163,7 @@ export function useEditor(
       setRoutes((current) => ({ ...current, [code]: next }))
     },
     moveSegment: (code: string, points: readonly Point[], index: number, to: Point) => {
-      const wanted = view.grid ? toGrid(to) : to
+      const wanted = gridSize > 0 ? toGrid(to, gridSize) : to
       const next = waypoints.moveSegment(points, index, wanted)
       if (sameValue(next, points)) return
       checkpoint()

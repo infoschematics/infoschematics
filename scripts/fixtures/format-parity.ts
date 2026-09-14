@@ -6,6 +6,7 @@ export const formatParityDefinition: Infoschematic = {
   title: 'Format parity',
   subtitle: 'One model, portable data',
   diagram: {
+    gridSize: 10,
     bounds: { x: 0, y: 0, width: 800, height: 500 },
     appearance: { surface: 'blueprint', grid: 'major', card: { compact: true, identity: true } },
     collections: [

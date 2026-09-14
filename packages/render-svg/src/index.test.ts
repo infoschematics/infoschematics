@@ -1,3 +1,4 @@
+import { defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
@@ -137,6 +138,28 @@ const representative: InfoschematicConfig = {
 }
 
 describe('renderInfoschematicSvg', () => {
+  it('renders the authored grid interval and disables appearance at zero', () => {
+    const canonical = (gridSize: number) =>
+      defineInfoschematicModel({
+        id: `GRID-${gridSize}`,
+        title: 'Grid sizing',
+        diagram: {
+          appearance: { grid: 'major-plus-minor' },
+          bounds: { x: 0, y: 0, width: 120, height: 80 },
+          gridSize
+        }
+      })
+
+    const custom = renderInfoschematicSvg(canonical(4))
+    expect(custom).toContain('data-grid-treatment="major-plus-minor"')
+    expect(custom).toContain('height="4" id="infoschematic-grid-minor"')
+    expect(custom).toContain('height="20" id="infoschematic-grid-major-plus-minor"')
+
+    const disabled = renderInfoschematicSvg(canonical(0))
+    expect(disabled).toContain('data-grid-treatment="none"')
+    expect(disabled).not.toContain('grid-major-plus-minor')
+  })
+
   it('renders a title-only Infoschematic as stable standalone SVG', () => {
     expect(renderInfoschematicSvg(blank('A & <B> "quoted"'))).toBe(
       [
@@ -250,6 +273,7 @@ describe('renderInfoschematicSvg', () => {
       title: 'Canonical boundary',
       diagram: {
         bounds: established.infoschematic.viewBox,
+        gridSize: 10,
         calloutPositions: [],
         cards: [],
         collections: [],

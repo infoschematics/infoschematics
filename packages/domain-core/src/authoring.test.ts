@@ -9,6 +9,7 @@ title: Compact authoring
 description: The structured equivalent.
 diagram:
   bounds: { x: 0, y: 0, width: 800, height: 500 }
+  gridSize: 10
   calloutPositions:
 ${defaultCalloutPositions.map(({ x, y }) => `    - { x: ${x}, y: ${y} }`).join('\n')}
   collections:
@@ -61,6 +62,7 @@ title: Compact authoring
 description: The structured equivalent.
 diagram:
   bounds: 0 0 800 500
+  gridSize: 10
   collections:
     - id: CORE
       label: Core
@@ -202,6 +204,7 @@ id: RENDERERS
 title: Renderers
 diagram:
   bounds: 0 0 100 100
+  gridSize: 10
   fabrics:
     - id: FABRIC
       label: Fabric
@@ -246,6 +249,7 @@ id: INVALID
 title: Invalid renderer
 diagram:
   bounds: 0 0 100 100
+  gridSize: 10
   overlays:
     - id: OVERLAY
       label: Overlay

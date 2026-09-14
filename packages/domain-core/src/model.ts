@@ -119,6 +119,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
     diagram: {
       appearance: definition.appearance,
       bounds: definition.viewBox,
+      gridSize: 10,
       calloutPositions: config.calloutPositions,
       cards: definition.cards.map((card) => ({
         adapts: card.wraps ? visibleId(card.wraps) : undefined,

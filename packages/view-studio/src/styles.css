@@ -2597,8 +2597,45 @@ button:focus-visible,
   color: #dff3ff;
 }
 
+.grid-size-control {
+  align-items: center;
+  background: #ffffff08;
+  border: 1px solid #ffffff18;
+  border-radius: 6px;
+  color: #9fb4cc;
+  display: flex;
+  gap: 5px;
+  height: 30px;
+  padding: 0 6px;
+}
+
+.grid-size-control:focus-within {
+  border-color: #79c9ff;
+  color: #dff3ff;
+}
+
+.grid-size-control input {
+  appearance: textfield;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font: 600 10px "DM Mono", monospace;
+  outline: 0;
+  padding: 0;
+  width: 34px;
+}
+
+.grid-size-control input::-webkit-inner-spin-button,
+.grid-size-control input::-webkit-outer-spin-button {
+  appearance: none;
+}
+
+.grid-default-button {
+  font: 600 9px "DM Mono", monospace;
+}
+
 /* The canvas's own edge, drawn whenever the editor is open regardless of
-   whether the grid is switched on, and distinct from the region panels inside
+   whether the authored lattice is active, and distinct from the region panels inside
    it - a dragged card runs out of room here, not at a region's rounded corner. */
 .canvas-edge {
   fill: none;

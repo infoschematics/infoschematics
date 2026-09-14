@@ -146,7 +146,7 @@ describe('presentation state', () => {
       defineInfoschematicModel({
         id: 'SEQUENCES',
         title: 'Sequence combinations',
-        diagram: { bounds: { x: 0, y: 0, width: 100, height: 100 } },
+        diagram: { bounds: { x: 0, y: 0, width: 100, height: 100 }, gridSize: 10 },
         sequences: (
           [
             ['expanded-manual', 'expanded', false],

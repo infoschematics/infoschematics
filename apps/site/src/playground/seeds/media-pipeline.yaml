@@ -4,6 +4,7 @@ title: Live media pipeline
 subtitle: What passes between capture, processing, delivery, and playback
 diagram:
   bounds: 0 0 1260 520
+  gridSize: 10
   appearance:
     surface: blueprint
     grid: major

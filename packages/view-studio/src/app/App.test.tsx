@@ -113,6 +113,7 @@ describe('App', () => {
 title: Hosted document
 diagram:
   bounds: 0 0 320 200
+  gridSize: 10
 `)
     if (!parsed.ok) throw new Error('fixture should parse')
 

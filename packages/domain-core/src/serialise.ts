@@ -46,6 +46,7 @@ const fieldOrder = [
   'adapts',
   'wraps',
   'bounds',
+  'gridSize',
   'at',
   'ports',
   'link',

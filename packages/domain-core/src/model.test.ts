@@ -257,6 +257,7 @@ describe('infoschematicModelOf', () => {
       title: 'Model',
       diagram: {
         bounds: { x: 0, y: 0, width: 400, height: 300 },
+        gridSize: 10,
         cards: [
           {
             id: 'SRC',
@@ -284,6 +285,7 @@ describe('infoschematicModelOf', () => {
         title: 'Broken',
         diagram: {
           bounds: { x: 0, y: 0, width: 400, height: 300 },
+          gridSize: 10,
           cards: [
             {
               id: 'SRC',

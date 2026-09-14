@@ -6,6 +6,7 @@ export const infoschematicsInfoschematic = defineInfoschematicModel({
   description:
     'The repository separates its authored contract, framework-neutral behaviour, interactive Views, renderers, examples, and hosts with dependencies pointing toward lower-level packages.',
   diagram: {
+    gridSize: 10,
     appearance: {
       surface: 'blueprint',
       grid: 'major-plus-minor',

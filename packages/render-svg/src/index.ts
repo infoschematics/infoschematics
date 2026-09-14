@@ -177,8 +177,12 @@ export const renderInfoschematicSvg = (
   const definition = config.diagram
   const viewBox = definition.bounds
   const requestedVisualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
+  const authoredGridSize = definition.gridSize
+  const gridSize = authoredGridSize || 1
+  const gridMajorSize = gridSize * (canvasTokens.geometry.gridMajorSize / canvasTokens.geometry.gridSize)
   const visualTreatment = {
     ...requestedVisualTreatment,
+    grid: authoredGridSize === 0 ? ('none' as const) : requestedVisualTreatment.grid,
     card: options.responsiveCardDetails
       ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
       : requestedVisualTreatment.card
@@ -295,16 +299,16 @@ export const renderInfoschematicSvg = (
           // the tile's corner would be clipped to a quarter by the tile edge.
           [
             `    <pattern${attributes([
-              ['height', canvasTokens.geometry.gridMajorSize],
+              ['height', gridMajorSize],
               ['id', patternId],
               ['patternUnits', 'userSpaceOnUse'],
-              ['width', canvasTokens.geometry.gridMajorSize],
-              ['x', -canvasTokens.geometry.gridMajorSize / 2],
-              ['y', -canvasTokens.geometry.gridMajorSize / 2]
+              ['width', gridMajorSize],
+              ['x', -gridMajorSize / 2],
+              ['y', -gridMajorSize / 2]
             ])}>`,
             line(3, 'circle', [
-              ['cx', canvasTokens.geometry.gridMajorSize / 2],
-              ['cy', canvasTokens.geometry.gridMajorSize / 2],
+              ['cx', gridMajorSize / 2],
+              ['cy', gridMajorSize / 2],
               ['fill', gridStroke],
               ['r', canvasTokens.geometry.gridMinorStrokeWidth * 3]
             ]),
@@ -314,15 +318,15 @@ export const renderInfoschematicSvg = (
             ...(visualTreatment.grid === 'major-plus-minor'
               ? [
                   `    <pattern${attributes([
-                    ['height', canvasTokens.geometry.gridSize],
+                    ['height', gridSize],
                     ['id', `${resourceIdPrefix}-grid-minor`],
                     ['patternUnits', 'userSpaceOnUse'],
-                    ['width', canvasTokens.geometry.gridSize]
+                    ['width', gridSize]
                   ])}>`,
                   line(3, 'path', [
                     [
                       'd',
-                      `M ${number(canvasTokens.geometry.gridSize)} 0 V ${number(canvasTokens.geometry.gridSize)} M 0 ${number(canvasTokens.geometry.gridSize)} H ${number(canvasTokens.geometry.gridSize)}`
+                      `M ${number(gridSize)} 0 V ${number(gridSize)} M 0 ${number(gridSize)} H ${number(gridSize)}`
                     ],
                     ['fill', 'none'],
                     ['stroke', gridStroke],
@@ -332,24 +336,24 @@ export const renderInfoschematicSvg = (
                 ]
               : []),
             `    <pattern${attributes([
-              ['height', canvasTokens.geometry.gridMajorSize],
+              ['height', gridMajorSize],
               ['id', patternId],
               ['patternUnits', 'userSpaceOnUse'],
-              ['width', canvasTokens.geometry.gridMajorSize]
+              ['width', gridMajorSize]
             ])}>`,
             ...(visualTreatment.grid === 'major-plus-minor'
               ? [
                   line(3, 'rect', [
                     ['fill', `url(#${resourceIdPrefix}-grid-minor)`],
-                    ['height', canvasTokens.geometry.gridMajorSize],
-                    ['width', canvasTokens.geometry.gridMajorSize]
+                    ['height', gridMajorSize],
+                    ['width', gridMajorSize]
                   ])
                 ]
               : []),
             line(3, 'path', [
               [
                 'd',
-                `M ${number(canvasTokens.geometry.gridMajorSize)} 0 V ${number(canvasTokens.geometry.gridMajorSize)} M 0 ${number(canvasTokens.geometry.gridMajorSize)} H ${number(canvasTokens.geometry.gridMajorSize)}`
+                `M ${number(gridMajorSize)} 0 V ${number(gridMajorSize)} M 0 ${number(gridMajorSize)} H ${number(gridMajorSize)}`
               ],
               ['fill', 'none'],
               ['stroke', gridStroke],

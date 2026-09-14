@@ -4,6 +4,7 @@ export const homepageInfoschematic = defineInfoschematicModel({
   description:
     'Structure and presentation material combine in one Infoschematic, which can be rendered as static output or presented as a live, interactive view.',
   diagram: {
+    gridSize: 10,
     appearance: {
       surface: 'blueprint',
       grid: 'major-plus-minor',

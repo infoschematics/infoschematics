@@ -124,6 +124,7 @@ describe('establishedInfoschematicOf', () => {
       title: 'Line treatments',
       diagram: {
         bounds: { x: 0, y: 0, width: 240, height: 100 },
+        gridSize: 10,
         cards: [
           {
             id: 'SRC',
@@ -178,6 +179,7 @@ describe('establishedInfoschematicOf', () => {
       title: 'Architectural scopes',
       diagram: {
         bounds: { x: 0, y: 0, width: 240, height: 100 },
+        gridSize: 10,
         collections: [
           {
             id: 'delivery',

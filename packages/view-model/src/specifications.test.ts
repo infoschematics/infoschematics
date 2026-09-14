@@ -8,6 +8,7 @@ const canonical = defineInfoschematicModel({
   title: 'Specifications',
   diagram: {
     bounds: { x: 0, y: 0, width: 400, height: 200 },
+    gridSize: 10,
     cards: [
       { id: 'SRC', label: 'Source', bounds: { x: 20, y: 60, width: 100, height: 60 } },
       { id: 'SNK', label: 'Sink', bounds: { x: 280, y: 60, width: 100, height: 60 } }

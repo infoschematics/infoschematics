@@ -4,6 +4,7 @@ export const systemExample = defineInfoschematicModel({
   description:
     'Observation gathers signals, arrangement gives them structure, illumination draws out meaning, and the result is a view a whole team can share.',
   diagram: {
+    gridSize: 10,
     appearance: {
       surface: 'blueprint',
       grid: 'major-plus-minor',

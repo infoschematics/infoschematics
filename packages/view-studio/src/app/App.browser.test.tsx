@@ -163,6 +163,7 @@ test('canonical YAML Sequences open in Direct mode and emit stable-id document e
 title: Hosted sequences
 diagram:
   bounds: 0 0 640 320
+  gridSize: 10
 sequences:
   - id: OVERVIEW
     label: Overview
@@ -223,6 +224,7 @@ id: SOURCE
 title: Initial source
 diagram:
   bounds: 0 0 640 320
+  gridSize: 10
 `)
   if (!parsed.ok) throw new Error('source panel fixture should parse')
   const initialDocument = parsed.document
@@ -268,6 +270,7 @@ diagram:
 title: Invalid source
 diagram:
   bounds: no
+  gridSize: 10
 `
   )
   source.dispatchEvent(new Event('input', { bubbles: true }))
@@ -287,6 +290,7 @@ id: SOURCE
 title: Replaced source
 diagram:
   bounds: 0 0 640 320
+  gridSize: 10
 `
   )
   source.dispatchEvent(new Event('input', { bubbles: true }))
@@ -313,4 +317,109 @@ diagram:
   await expect.poll(() => container.querySelector('h1')?.textContent ?? '').toContain('Initial source')
   redo.click()
   await expect.poll(() => container.querySelector('h1')?.textContent ?? '').toContain('Replaced source')
+})
+
+test('Studio persists the authored Design grid and uses it for keyboard movement', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: GRID
+title: Authored grid
+diagram:
+  bounds: 0 0 320 200
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+`)
+  if (!parsed.ok) throw new Error('authored grid fixture should parse')
+  const initialDocument = parsed.document
+  const changed = vi.fn()
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return (
+      <Studio
+        document={document}
+        onDocumentChange={(change) => {
+          changed(change)
+          setDocument(change.document)
+        }}
+      />
+    )
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  await expect.poll(() => container.querySelector('input[aria-label="Design grid size"]')).not.toBeNull()
+  const gridSize = container.querySelector<HTMLInputElement>('input[aria-label="Design grid size"]')
+  if (!gridSize) throw new Error('Studio did not render the Design grid control')
+  const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  if (!setInputValue) throw new Error('browser has no native input value setter')
+  gridSize.focus()
+  setInputValue.call(gridSize, '7')
+  gridSize.dispatchEvent(new Event('input', { bubbles: true }))
+  gridSize.blur()
+
+  await expect.poll(() => changed.mock.calls.length).toBe(1)
+  expect(changed.mock.calls[0]?.[0].edit.operations).toEqual([
+    { op: 'replace', path: [{ field: 'diagram' }, { field: 'gridSize' }], value: 7 }
+  ])
+  expect(changed.mock.calls[0]?.[0].model.diagram.gridSize).toBe(7)
+  await expect.poll(() => gridSize.value).toBe('7')
+  await expect
+    .poll(() =>
+      [...container.querySelectorAll('pattern#infoschematic-grid-minor')].map((pattern) =>
+        pattern.getAttribute('height')
+      )
+    )
+    .toEqual(['7'])
+  expect(
+    [...container.querySelectorAll('pattern#infoschematic-grid-major-plus-minor')].map((pattern) =>
+      pattern.getAttribute('height')
+    )
+  ).toEqual(['35'])
+
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  if (!card) throw new Error('Studio did not render the authored Card')
+  card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 31 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 31 }))
+  await expect.poll(() => card.classList.contains('selected')).toBe(true)
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
+  await expect.poll(() => card.getAttribute('transform')).toBe('translate(27 40)')
+
+  const beforeZero = changed.mock.calls.length
+  gridSize.focus()
+  setInputValue.call(gridSize, '0')
+  gridSize.dispatchEvent(new Event('input', { bubbles: true }))
+  gridSize.blur()
+  await expect.poll(() => changed.mock.calls.length).toBe(beforeZero + 1)
+  expect(changed.mock.calls.at(-1)?.[0].edit.operations).toEqual([
+    { op: 'replace', path: [{ field: 'diagram' }, { field: 'gridSize' }], value: 0 }
+  ])
+  await expect
+    .poll(() => container.querySelector('svg.infoschematic-svg')?.getAttribute('data-grid-treatment'))
+    .toBe('none')
+  expect(container.querySelector('rect.infoschematic-authored-grid')).toBeNull()
+
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
+  await expect.poll(() => card.getAttribute('transform')).toBe('translate(28 40)')
+
+  const restore = container.querySelector<HTMLButtonElement>('button[aria-label="Restore ten-unit Design grid"]')
+  if (!restore) throw new Error('Studio did not render the grid reset action')
+  restore.click()
+  await expect.poll(() => changed.mock.calls.at(-1)?.[0].model.diagram.gridSize).toBe(10)
+  await expect.poll(() => gridSize.value).toBe('10')
 })

@@ -185,6 +185,8 @@ export type SpecificationGroup = {
 
 export type Diagram = {
   bounds: Box
+  /** Diagram-unit lattice used by authoring and rendering; zero disables it. */
+  gridSize: number
   appearance?: InfoschematicAppearanceConfig
   calloutPositions?: readonly Coordinate[]
   collections?: readonly CardCollection[]

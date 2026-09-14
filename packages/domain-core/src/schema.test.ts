@@ -6,13 +6,21 @@ const parity: SchemaMirrorsContract = true
 const minimal = {
   id: 'MINIMAL',
   title: 'Minimal',
-  diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 } }
+  diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 }, gridSize: 10 }
 }
 
 describe('infoschematicSchema', () => {
   it('holds the schema to the canonical TypeScript contract', () => {
     expect(parity).toBe(true)
     expect(infoschematicSchema.safeParse(minimal).success).toBe(true)
+  })
+
+  it('requires a non-negative integer diagram grid size', () => {
+    const { gridSize: _gridSize, ...diagram } = minimal.diagram
+    expect(infoschematicSchema.safeParse({ ...minimal, diagram }).success).toBe(false)
+    expect(infoschematicSchema.safeParse({ ...minimal, diagram: { ...diagram, gridSize: -1 } }).success).toBe(false)
+    expect(infoschematicSchema.safeParse({ ...minimal, diagram: { ...diagram, gridSize: 0 } }).success).toBe(true)
+    expect(infoschematicSchema.safeParse({ ...minimal, diagram: { ...diagram, gridSize: 1 } }).success).toBe(true)
   })
 
   it('rejects a misspelt key rather than dropping it', () => {

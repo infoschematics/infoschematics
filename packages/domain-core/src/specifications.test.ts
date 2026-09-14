@@ -8,6 +8,7 @@ const definition = () => ({
   title: 'Specifications',
   diagram: {
     bounds: { x: 0, y: 0, width: 400, height: 200 },
+    gridSize: 10,
     cards: [
       { id: 'SRC', label: 'Source', bounds: { x: 20, y: 60, width: 100, height: 60 } },
       { id: 'SNK', label: 'Sink', bounds: { x: 280, y: 60, width: 100, height: 60 } }
@@ -85,7 +86,7 @@ describe('canonical specifications', () => {
       defineInfoschematicModel({
         id: 'DUPLICATE',
         title: 'Duplicate',
-        diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 } },
+        diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 }, gridSize: 10 },
         specifications: [
           {
             id: 'federation',
@@ -106,6 +107,7 @@ id: OLD
 title: Old
 diagram:
   bounds: 0 0 10 10
+  gridSize: 10
   cards:
     - id: CARD
       label: Card

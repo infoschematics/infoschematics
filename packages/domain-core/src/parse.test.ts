@@ -3,8 +3,8 @@ import { formatInfoschematicIssue, infoschematicFormatOf, parseInfoschematic } f
 import { serialiseInfoschematicJson, serialiseInfoschematicYaml } from './serialise.ts'
 
 const json =
-  '{ "id": "TWO", "title": "Two syntaxes", "diagram": { "bounds": { "x": 0, "y": 0, "width": 10, "height": 20 } } }'
-const yaml = 'id: TWO\ntitle: Two syntaxes\ndiagram:\n  bounds: { x: 0, y: 0, width: 10, height: 20 }\n'
+  '{ "id": "TWO", "title": "Two syntaxes", "diagram": { "bounds": { "x": 0, "y": 0, "width": 10, "height": 20 }, "gridSize": 10 } }'
+const yaml = 'id: TWO\ntitle: Two syntaxes\ndiagram:\n  bounds: { x: 0, y: 0, width: 10, height: 20 }\n  gridSize: 10\n'
 
 const issuesOf = (text: string, pathname = 'infoschematic.yaml') => {
   const parsed = parseInfoschematic(text, { pathname })
@@ -42,7 +42,9 @@ describe('parseInfoschematic', () => {
     expect(syntax[0]?.path).toBe('')
     expect(syntax[0]?.message).toMatch(/^Malformed YAML: /)
 
-    const wrongType = issuesOf('id: WRONG\ntitle: Wrong\ndiagram:\n  bounds: { x: 0, y: 0, width: wide, height: 20 }\n')
+    const wrongType = issuesOf(
+      'id: WRONG\ntitle: Wrong\ndiagram:\n  bounds: { x: 0, y: 0, width: wide, height: 20 }\n  gridSize: 10\n'
+    )
     expect(wrongType.map((issue) => issue.path)).toEqual(['diagram.bounds.width'])
   })
 
@@ -56,6 +58,7 @@ describe('parseInfoschematic', () => {
       'title: Dangling',
       'diagram:',
       '  bounds: { x: 0, y: 0, width: 10, height: 10 }',
+      '  gridSize: 10',
       '  cards:',
       '    - id: A',
       '      label: A',
@@ -74,14 +77,14 @@ describe('parseInfoschematic', () => {
     expect(issuesOf(yaml.replace('id: TWO', 'id: !runtime TWO'))[0]?.message).toMatch(/Malformed YAML/)
     expect(
       issuesOf(
-        '&root\nid: TWO\ntitle: Cyclic\ndiagram: { bounds: { x: 0, y: 0, width: 1, height: 1 } }\ncycle: *root\n'
+        '&root\nid: TWO\ntitle: Cyclic\ndiagram: { bounds: { x: 0, y: 0, width: 1, height: 1 }, gridSize: 10 }\ncycle: *root\n'
       )[0]?.message
     ).toMatch(/Cyclic YAML aliases/)
   })
 
   it('lets a document point an editor at its schema', () => {
     const document =
-      '{ "$schema": "./x.json", "id": "EDITOR", "title": "Editor", "diagram": { "bounds": { "x": 0, "y": 0, "width": 1, "height": 1 } } }'
+      '{ "$schema": "./x.json", "id": "EDITOR", "title": "Editor", "diagram": { "bounds": { "x": 0, "y": 0, "width": 1, "height": 1 }, "gridSize": 10 } }'
     expect(parseInfoschematic(document).ok).toBe(true)
   })
 

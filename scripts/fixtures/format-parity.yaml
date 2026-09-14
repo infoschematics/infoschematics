@@ -4,6 +4,7 @@ title: Format parity
 subtitle: One model, portable data
 diagram:
   bounds: 0 0 800 500
+  gridSize: 10
   appearance:
     surface: blueprint
     grid: major

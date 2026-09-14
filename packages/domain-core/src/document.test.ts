@@ -12,6 +12,7 @@ id: RETAINED
 title: "Quoted title" # retained side comment
 diagram:
   bounds: 0 0 100 60
+  gridSize: 10
   cards:
     # retained member comment
     - id: CARD-01

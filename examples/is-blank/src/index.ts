@@ -4,6 +4,7 @@ export const blankInfoschematic = defineInfoschematicModel({
   id: 'INFOSCHEMATIC',
   title: 'Infoschematics',
   diagram: {
+    gridSize: 10,
     bounds: {
       x: 0,
       y: 0,

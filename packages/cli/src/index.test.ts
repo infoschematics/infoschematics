@@ -5,8 +5,9 @@ const yaml = `id: CLI
 title: CLI smoke
 diagram:
   bounds: 0 0 100 100
+  gridSize: 10
 `
-const json = JSON.stringify({ id: 'CLI', title: 'CLI smoke', diagram: { bounds: '0 0 100 100' } })
+const json = JSON.stringify({ id: 'CLI', title: 'CLI smoke', diagram: { bounds: '0 0 100 100', gridSize: 10 } })
 
 const harness = (files: Readonly<Record<string, string>> = {}) => {
   let stdout = ''

@@ -296,6 +296,7 @@ export function DetailsPanel({
   themes,
   onAddWaypoint,
   onCreateCard,
+  onGridSizeChange,
   onResetRoute,
   onSpecificationHover,
   presentation,
@@ -303,6 +304,7 @@ export function DetailsPanel({
 }: {
   /** Supplied by the app, which is the only place that can issue a code and find room for a card. */
   onCreateCard: (kind: 'adapter' | 'card') => void
+  onGridSizeChange?: (gridSize: number) => void
   /** Lifted to the app, because the Infoschematic marks what the selected scene lights. */
   /** The scene library, lifted for the same reason the stories are. */
   scenes: SceneLibraryEditor
@@ -348,7 +350,11 @@ export function DetailsPanel({
   }
   presentation: Presentation
 }) {
-  const { compatibilityConfig: config, infoschematicSpecificationSections } = useInfoschematic()
+  const {
+    config: canonicalConfig,
+    compatibilityConfig: config,
+    infoschematicSpecificationSections
+  } = useInfoschematic()
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const artefactContexts = useMemo(
     () => detailsArtefactContexts(config, editor),
@@ -743,8 +749,10 @@ export function DetailsPanel({
               mode={mode}
               canRoute={editor.canRoute}
               canWrap={editor.canWrap}
+              gridSize={canonicalConfig.diagram.gridSize}
               onAddWaypoint={onAddWaypoint}
               onCreateCard={onCreateCard}
+              onGridSizeChange={onGridSizeChange}
               onResetRoute={onResetRoute}
               onToggle={editor.toggleView}
               view={editor.view}

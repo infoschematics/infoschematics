@@ -1,10 +1,42 @@
 import { Eraser, Grid3x3, Magnet, Spline, SquarePlus, SquareStack } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import type { EditorMode, EditorView } from './use-editor.ts'
 
 const toggles: [keyof EditorView, string, string, typeof Magnet][] = [
-  ['grid', 'Show grid', 'Draw the ten-unit grid and round a drop onto it', Grid3x3],
   ['snapping', 'Snap to guides', 'Pull a drop onto the nearest edge, centre, or label', Magnet]
 ]
+
+function GridSizeControl({ onChange, value }: Readonly<{ onChange?: (gridSize: number) => void; value: number }>) {
+  const [draft, setDraft] = useState(String(value))
+  useEffect(() => setDraft(String(value)), [value])
+
+  const commit = () => {
+    const number = Number(draft)
+    const next = Number.isFinite(number) ? Math.max(0, Math.round(number)) : value
+    setDraft(String(next))
+    if (next !== value) onChange?.(next)
+  }
+
+  return (
+    <label className="grid-size-control" title="Design grid size — zero disables grid rounding">
+      <Grid3x3 aria-hidden="true" size={15} />
+      <input
+        aria-label="Design grid size"
+        disabled={!onChange}
+        min="0"
+        onBlur={commit}
+        onChange={(event) => setDraft(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') commit()
+          if (event.key === 'Escape') setDraft(String(value))
+        }}
+        step="1"
+        type="number"
+        value={draft}
+      />
+    </label>
+  )
+}
 
 /*
  * What the editor turns on, what it can add, and what it can do to the thing in
@@ -25,8 +57,10 @@ const toggles: [keyof EditorView, string, string, typeof Magnet][] = [
 export function EditorTools({
   canRoute,
   canWrap,
+  gridSize,
   onAddWaypoint,
   onCreateCard,
+  onGridSizeChange,
   onResetRoute,
   mode,
   onToggle,
@@ -36,8 +70,10 @@ export function EditorTools({
   canRoute?: boolean
   /** A card is selected that could take an adapter, and has not got one. */
   canWrap?: boolean
+  gridSize: number
   onAddWaypoint?: () => void
   onCreateCard?: (kind: 'adapter' | 'card') => void
+  onGridSizeChange?: (gridSize: number) => void
   onResetRoute?: () => void
   onToggle: (key: keyof EditorView) => void
   view: EditorView
@@ -64,6 +100,22 @@ export function EditorTools({
   return (
     <fieldset className="editor-tools">
       <legend className="sr-only">Editor tools</legend>
+      {mode === 'design' ? (
+        <>
+          <GridSizeControl onChange={onGridSizeChange} value={gridSize} />
+          <button
+            aria-label="Restore ten-unit Design grid"
+            className="tool-button grid-default-button"
+            disabled={!onGridSizeChange || gridSize === 10}
+            onClick={() => onGridSizeChange?.(10)}
+            title="Restore the ordinary ten-unit grid"
+            type="button"
+          >
+            10
+          </button>
+          <span className="tool-divider" />
+        </>
+      ) : null}
 
       {toggles.map(([key, label, hint, Icon]) => (
         <button

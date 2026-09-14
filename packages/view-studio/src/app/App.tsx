@@ -36,7 +36,7 @@ import {
 import { FamilyChoice } from './editor/FamilyChoice.tsx'
 import { infoschematicEditable } from './editor/infoschematic-editable.ts'
 import { sequencesWithEditorDrafts } from './editor/sequence-editing.ts'
-import { type Attachment, gridSize, type PendingOrigin, useEditor } from './editor/use-editor.ts'
+import { type Attachment, type PendingOrigin, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
 import { useThemeComposition } from './editor/use-theme-composition.ts'
@@ -100,6 +100,18 @@ export function specificationDiagramHighlight(
     flows: new Set(conforming.map((flow) => flow.id))
   }
 }
+
+const gridSizeDocumentEdit = (gridSize: number) =>
+  ({
+    operations: [
+      {
+        op: 'replace',
+        path: [{ field: 'diagram' }, { field: 'gridSize' }],
+        value: gridSize
+      }
+    ],
+    version: 1
+  }) as const
 
 /**
  * Where a port sits in the model, before any edit in hand.
@@ -228,6 +240,17 @@ function AppContent({
 }) {
   const runtime = useInfoschematic()
   const documentTimeline = useDocumentTimeline(authoredDocument, onDocumentReplace)
+  const changeGridSize = useCallback(
+    (gridSize: number) => {
+      if (!authoredDocument || !onDocumentChange || gridSize === runtime.config.diagram.gridSize) return
+      const edit = gridSizeDocumentEdit(gridSize)
+      const applied = applyInfoschematicDocumentEdit(authoredDocument, edit)
+      if (!applied.ok) return
+      documentTimeline.record(applied.document)
+      onDocumentChange({ ...applied, edit })
+    },
+    [authoredDocument, documentTimeline.record, onDocumentChange, runtime.config.diagram.gridSize]
+  )
   const {
     compatibilityConfig,
     flowsAfterCreations,
@@ -293,7 +316,7 @@ function AppContent({
       runtime
     ]
   )
-  const editor = useEditor(buildEditable)
+  const editor = useEditor(buildEditable, runtime.config.diagram.gridSize)
   const editorRef = useRef(editor)
   editorRef.current = editor
   const sceneList = useSceneList()
@@ -739,7 +762,7 @@ function AppContent({
         event.preventDefault()
         // With the grid on an arrow steps a whole cell, so a keyboard move
         // lands on grid lines exactly as a drag does.
-        const step = editor.view.grid ? gridSize : event.shiftKey ? 10 : 1
+        const step = runtime.config.diagram.gridSize || (event.shiftKey ? 10 : 1)
         const point = designArrowPoint(geometry, event.key, step)
         if (point) editor.moveArtefact(point, true)
         return
@@ -749,7 +772,7 @@ function AppContent({
       // whatever Story is running.
       if (arrow && editor.editing && editor.selected) {
         event.preventDefault()
-        const step = editor.view.grid ? gridSize : event.shiftKey ? 10 : 1
+        const step = runtime.config.diagram.gridSize || (event.shiftKey ? 10 : 1)
         editor.nudge(arrow[0] * step, arrow[1] * step)
         return
       }
@@ -801,7 +824,7 @@ function AppContent({
     editor.selected,
     editor.selectedArtefact,
     editor.artefactGeometry,
-    editor.view.grid,
+    runtime.config.diagram.gridSize,
     playing,
     activeSequence,
     presentation.stepSequence,
@@ -995,7 +1018,7 @@ function AppContent({
                 selected={editor.selected}
                 selectedArtefact={editor.selectedArtefact}
                 annotated={presentation.annotated}
-                grid={editor.view.grid}
+                grid={editor.editing}
                 graphic={activeSequenceScene?.graphic ?? runningStoryScene?.graphic}
                 responsiveCardDetails={responsiveCardDetails}
                 visibleScopes={visibleScopes}
@@ -1105,6 +1128,7 @@ function AppContent({
             }}
             onAddWaypoint={addWaypoint}
             onCreateCard={createCard}
+            onGridSizeChange={authoredDocument && onDocumentChange ? changeGridSize : undefined}
             onSpecificationHover={setHoveredSpecification}
             onResetRoute={resetRoute}
             presentation={presentation}

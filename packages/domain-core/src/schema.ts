@@ -504,6 +504,7 @@ const specificationGroup = z.strictObject({
 
 const diagram = z.strictObject({
   bounds: box,
+  gridSize: z.number().int().nonnegative(),
   appearance: appearance.optional(),
   collections: z.array(collection).readonly().optional(),
   families: z.array(family).readonly().optional(),

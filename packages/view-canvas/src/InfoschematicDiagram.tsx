@@ -144,8 +144,7 @@ function DefaultGraphic({ graphic, bounds }: { graphic: Overlay; bounds: Box }) 
   )
 }
 
-const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMajorSize, gridMinorStrokeWidth, gridSize } =
-  visualTokens.canvas.geometry
+const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeWidth } = visualTokens.canvas.geometry
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
 
@@ -295,13 +294,22 @@ export function InfoschematicDiagram({
     [artefactOperations, removals]
   )
   const previewing = previewOperations.length > 0
-  const runtime = useMemo(
-    () =>
-      previewing
-        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.compatibilityConfig, previewOperations).config)
-        : hostRuntime,
-    [hostRuntime, previewing, previewOperations]
-  )
+  const runtime = useMemo(() => {
+    if (!previewing) return hostRuntime
+    const preview = createInfoschematicRuntime(
+      applyArtefactOperations(hostRuntime.compatibilityConfig, previewOperations).config
+    )
+    // Artefact operations still project through the established compatibility
+    // shape. Preserve canonical-only Diagram settings while that boundary is
+    // in force so opening a Design draft cannot silently restore its defaults.
+    return {
+      ...preview,
+      config: {
+        ...preview.config,
+        diagram: { ...preview.config.diagram, gridSize: hostRuntime.config.diagram.gridSize }
+      }
+    }
+  }, [hostRuntime, previewing, previewOperations])
   const {
     adapterFloor,
     config,
@@ -372,6 +380,11 @@ export function InfoschematicDiagram({
   ])
   const renderers = useInfoschematicRenderers()
   const requestedVisualTreatment = resolveVisualTreatment(config.diagram.appearance, cardDetails)
+  const authoredGridSize = config.diagram.gridSize
+  // Pattern dimensions cannot be zero even though zero intentionally disables
+  // the authored lattice. Keep dormant definitions valid and suppress their use.
+  const gridSize = authoredGridSize || 1
+  const gridMajorSize = gridSize * (visualTokens.canvas.geometry.gridMajorSize / visualTokens.canvas.geometry.gridSize)
   const domains = infoschematicCollections
   const Definitions = renderers.definitions
   const activeGraphicRenderer =
@@ -542,6 +555,7 @@ export function InfoschematicDiagram({
       }
   const visualTreatment = {
     ...requestedVisualTreatment,
+    grid: authoredGridSize === 0 ? ('none' as const) : requestedVisualTreatment.grid,
     card:
       responsiveCardDetails && frameSize
         ? resolveResponsiveCardTreatment(infoschematicViewBox, frameSize, requestedVisualTreatment.card)
@@ -813,7 +827,7 @@ export function InfoschematicDiagram({
         onKeyDown={(event) => {
           // With the grid on a resize steps a whole cell, so the far edge
           // stays on a grid line; the editor rounds the result to the grid too.
-          const step = grid ? gridSize : event.shiftKey ? 10 : 1
+          const step = grid && authoredGridSize > 0 ? authoredGridSize : event.shiftKey ? 10 : 1
           const size: ResizeMinimum =
             axes.width && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
               ? { width: bounds.width + (event.key === 'ArrowRight' ? step : -step) }
@@ -943,7 +957,13 @@ export function InfoschematicDiagram({
 
       const from = chosen.points[index]
       const to = chosen.points[index + 1]
-      const snapped = { x: Math.round(at.x / gridSize) * gridSize, y: Math.round(at.y / gridSize) * gridSize }
+      const snapped =
+        authoredGridSize > 0
+          ? {
+              x: Math.round(at.x / authoredGridSize) * authoredGridSize,
+              y: Math.round(at.y / authoredGridSize) * authoredGridSize
+            }
+          : at
       setAddAt(from.x === to.x ? { x: from.x, y: snapped.y } : { x: snapped.x, y: from.y })
     }
 
@@ -978,7 +998,7 @@ export function InfoschematicDiagram({
       window.removeEventListener('pointermove', holding)
       window.removeEventListener('blur', clear)
     }
-  }, [flows, editing, selected])
+  }, [authoredGridSize, flows, editing, selected])
 
   const dragHandle =
     (key: string, onMove?: (key: string, point: Point) => void, onRelease?: () => void) =>
@@ -1754,7 +1774,7 @@ export function InfoschematicDiagram({
           />
         ) : null}
 
-        {editing && grid ? (
+        {editing && grid && authoredGridSize > 0 ? (
           <g className="edit-grid">
             <rect
               fill="url(#infoschematic-grid-major-plus-minor)"

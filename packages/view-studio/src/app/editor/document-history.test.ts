@@ -12,12 +12,14 @@ const initial = documentOf(`id: TIMELINE
 title: Initial
 diagram:
   bounds: 0 0 320 200
+  gridSize: 10
 `)
 
 const changed = documentOf(`id: TIMELINE
 title: Changed
 diagram:
   bounds: 0 0 320 200
+  gridSize: 10
 `)
 
 describe('Studio document timeline', () => {
@@ -29,13 +31,14 @@ describe('Studio document timeline', () => {
 title: Replacement
 diagram:
   bounds: 0 0 320 200
+  gridSize: 10
 `)
 
     const branched = appendDocumentTimeline(undone, replacement)
 
     expect(branched.entries.map(({ source }) => source)).toEqual([
       started.entries[0]?.source,
-      `id: TIMELINE\ntitle: Replacement\ndiagram:\n  bounds: 0 0 320 200\n`
+      `id: TIMELINE\ntitle: Replacement\ndiagram:\n  bounds: 0 0 320 200\n  gridSize: 10\n`
     ])
     expect(branched.at).toBe(1)
     expect(branched.dirty).toBe(false)
