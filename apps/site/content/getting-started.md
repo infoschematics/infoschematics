@@ -11,7 +11,7 @@ The definition has two complementary parts:
 - **The diagram** describes the visible structure using Regions, Fabrics, Cards, Flows, Points, and Graphics.
 - **The explanation** uses Scopes, Scenes, Sequences, and Callouts to tailor what an Audience sees and how a guided narrative unfolds.
 
-The [Components guide](/docs/components/) shows these parts together before you need to learn their exact schema names.
+The [labelled example](/docs/#labelled-example) below makes this visual vocabulary self-describing. The [Components guide](/docs/components/) then gives each part its own focused example before you need to learn the exact schema names.
 
 ## What it can represent
 

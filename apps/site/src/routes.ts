@@ -4,19 +4,34 @@ const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
 export const examplesIndexPath = '/examples/'
 export const componentsPath = '/docs/components/'
+export const componentPaths = {
+  canvas: '/docs/components/canvas/',
+  region: '/docs/components/regions/',
+  fabric: '/docs/components/fabrics/',
+  card: '/docs/components/cards/',
+  flow: '/docs/components/flows/',
+  point: '/docs/components/points/',
+  graphic: '/docs/components/graphics/'
+} as const
 export const installationPath = '/docs/installation/'
 export const playgroundPath = '/playground/'
 
-export type DocumentSection = 'guide' | 'usage' | 'reference' | 'approach'
+export type DocumentSection = 'guide' | 'components' | 'usage' | 'reference' | 'approach'
 
 export const sectionTitles: Record<DocumentSection, string> = {
   guide: 'User guide',
+  components: 'Components',
   usage: 'Use Infoschematics',
   reference: 'Reference',
   approach: 'Approach'
 }
 
-export const documentSections = ['guide', 'usage', 'approach'] as const satisfies readonly DocumentSection[]
+export const documentSections = [
+  'guide',
+  'components',
+  'usage',
+  'approach'
+] as const satisfies readonly DocumentSection[]
 
 interface PublishedDocument {
   sourcePath: string
@@ -128,6 +143,72 @@ const publishedDocuments = [
   }
 ] as const satisfies readonly PublishedDocument[]
 
+export type ComponentRoute = {
+  path: string
+  title: string
+  summary: string
+  section: 'components'
+  componentId?: string
+}
+
+export const componentRoutes: readonly ComponentRoute[] = [
+  {
+    path: componentsPath,
+    title: 'Components',
+    summary: 'Explore the visible parts of an Infoschematic.',
+    section: 'components'
+  },
+  {
+    path: componentPaths.canvas,
+    title: 'Canvas',
+    summary: 'The drawing area and its backdrop.',
+    section: 'components',
+    componentId: 'canvas'
+  },
+  {
+    path: componentPaths.region,
+    title: 'Regions',
+    summary: 'Named boundaries that establish geography.',
+    section: 'components',
+    componentId: 'region'
+  },
+  {
+    path: componentPaths.fabric,
+    title: 'Fabrics',
+    summary: 'Connectable planes and shared substrates.',
+    section: 'components',
+    componentId: 'fabric'
+  },
+  {
+    path: componentPaths.card,
+    title: 'Cards',
+    summary: 'Placed components and capabilities.',
+    section: 'components',
+    componentId: 'card'
+  },
+  {
+    path: componentPaths.flow,
+    title: 'Flows',
+    summary: 'Connections between diagram elements.',
+    section: 'components',
+    componentId: 'flow'
+  },
+  {
+    path: componentPaths.point,
+    title: 'Points',
+    summary: 'Junctions and explicit waypoints.',
+    section: 'components',
+    componentId: 'point'
+  },
+  {
+    path: componentPaths.graphic,
+    title: 'Graphics',
+    summary: 'Named visual renderers supplied by a host.',
+    section: 'components',
+    componentId: 'graphic'
+  }
+]
+
 export const documentationRoutes: readonly PublishedDocument[] = publishedDocuments
 
 export type DocumentationRoute = (typeof documentationRoutes)[number]
@@ -158,14 +239,35 @@ interface SiteLocation {
 const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
   '/docs/capabilities/': { pathname: componentsPath, search: '' },
   '/docs/visual-guide/': { pathname: componentsPath, search: '' },
-  '/docs/design/architecture/': { pathname: '/docs/approach/architecture/', search: '' },
-  '/docs/design/visual-language/': { pathname: '/docs/approach/visual-language/', search: '' },
-  '/docs/design/view-present/': { pathname: '/docs/approach/view-present/', search: '' },
-  '/docs/design/view-studio/': { pathname: '/docs/approach/view-studio/', search: '' },
-  [examplesIndexPath]: { pathname: playgroundPath, search: '?preset=source-to-sink' },
+  '/docs/design/architecture/': {
+    pathname: '/docs/approach/architecture/',
+    search: ''
+  },
+  '/docs/design/visual-language/': {
+    pathname: '/docs/approach/visual-language/',
+    search: ''
+  },
+  '/docs/design/view-present/': {
+    pathname: '/docs/approach/view-present/',
+    search: ''
+  },
+  '/docs/design/view-studio/': {
+    pathname: '/docs/approach/view-studio/',
+    search: ''
+  },
+  [examplesIndexPath]: {
+    pathname: playgroundPath,
+    search: '?preset=source-to-sink'
+  },
   [blankExamplePath]: { pathname: playgroundPath, search: '?preset=blank' },
-  [infoschematicsExamplePath]: { pathname: playgroundPath, search: '?preset=explained' },
-  [systemExamplePath]: { pathname: playgroundPath, search: '?preset=explained' }
+  [infoschematicsExamplePath]: {
+    pathname: playgroundPath,
+    search: '?preset=explained'
+  },
+  [systemExamplePath]: {
+    pathname: playgroundPath,
+    search: '?preset=explained'
+  }
 }
 
 /** Return the canonical browser location for a retired public route. */
@@ -207,6 +309,11 @@ export function isDocsIndexPath(pathname: string) {
 
 export function isComponentsPath(pathname: string) {
   return pathname === componentsPath || pathname === componentsPath.slice(0, -1)
+}
+
+export function getComponentRoute(pathname: string): ComponentRoute | undefined {
+  const canonicalPath = canonicalSitePath(pathname)
+  return componentRoutes.find((route) => canonicalPath === route.path || canonicalPath === route.path.slice(0, -1))
 }
 
 export function isPlaygroundPath(pathname: string) {

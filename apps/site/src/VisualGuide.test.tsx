@@ -14,27 +14,17 @@ describe('components guide', () => {
     expect(page).toContain('aria-label="Guide journey"')
     expect(page).toContain('href="/docs/installation/" rel="prev"')
     expect(page).toContain('href="/docs/authoring/" rel="next"')
-    for (const slug of [
-      'labelled-example',
-      'canvas',
-      'region',
-      'fabric',
-      'card',
-      'flow',
-      'point',
-      'graphic',
-      'future-notation'
-    ]) {
+    for (const slug of ['canvas', 'region', 'fabric', 'card', 'flow', 'point', 'graphic', 'future-notation']) {
       expect(page).toContain(`href="#${slug}"`)
     }
   })
 
-  it('uses a labelled whole example followed by isolated property specimens', () => {
+  it('links back to the labelled overview and presents isolated property specimens', () => {
     const page = renderToStaticMarkup(<VisualGuide />)
 
-    expect(page).toContain('A labelled Infoschematic')
-    expect(page).toContain('Labels for the complete example')
-    expect(page).toContain('acts as a real endpoint')
+    expect(page).toContain('href="/docs/#labelled-example"')
+    expect(page).not.toContain('Labels for the complete example')
+    expect(page).not.toContain('unexplained dot')
     expect(page.match(/<legend>Properties<\/legend>/g)).toHaveLength(7)
     expect(page.match(/>Reset<\/button>/g)).toHaveLength(7)
     expect(page).toContain('Fill opacity')

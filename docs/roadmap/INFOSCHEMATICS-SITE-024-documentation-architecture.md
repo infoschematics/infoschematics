@@ -4,12 +4,12 @@ area: SITE
 title: Documentation architecture
 theme: site-experience
 horizon: now
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-SITE-026]
 blocked_by: []
-baseline_ref: null
+baseline_ref: 067bcb41ed3e574ef0d891f40dab408fe5555b1b
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T07:05:25Z
+updated_at: 2026-09-14T07:09:57Z
 ---
 
 # Documentation architecture

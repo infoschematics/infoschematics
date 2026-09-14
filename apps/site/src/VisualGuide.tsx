@@ -1,24 +1,17 @@
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
-import { anatomySpecimen } from './visual-guide/specimens.ts'
 import './styles.css'
 
 export const componentsGuideContents = [
-  { depth: 2, slug: 'labelled-example', label: 'A labelled Infoschematic' },
   ...componentSections.map(({ id, title }) => ({ depth: 2 as const, slug: id, label: title })),
   { depth: 2, slug: 'future-notation', label: 'Future notation' }
 ] as const
 
 export function VisualGuide() {
-  const anatomySource = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    renderInfoschematicSvg(anatomySpecimen, { annotations: true, visibility: { graphics: 'all' } })
-  )}`
-
   return (
     <div className="document-shell document-shell--wide docs-shell">
       <a className="skip-link" href="#document-content">
@@ -31,33 +24,10 @@ export function VisualGuide() {
           <article aria-label="Components" className="document-content">
             <h1>Components</h1>
             <p>
-              Start with one complete Infoschematic, then inspect each part on its own. Every focused example is
-              generated from the same serialisable properties used by Canvas and static SVG.
+              Inspect each visible part on its own. Every focused example is generated from the same serialisable
+              properties used by Canvas and static SVG. The <a href="/docs/#labelled-example">Overview</a> introduces
+              the complete composition first.
             </p>
-
-            <section aria-labelledby="labelled-example" className="visual-guide__section">
-              <h2 id="labelled-example">A labelled Infoschematic</h2>
-              <p>
-                The Canvas is the background. Regions establish geography, Fabrics sit in the midground, and Cards,
-                Flows, Points, and Graphics make up the foreground. In this example the Point is connected, so it acts
-                as a real endpoint rather than an unexplained dot.
-              </p>
-              <figure className="visual-guide__anatomy">
-                <img
-                  alt="A labelled Infoschematic showing its Canvas, Region, Fabric, Card, Flows, connected Point, and Graphic"
-                  src={anatomySource}
-                />
-                <figcaption>All seven visible parts shown together in one deterministic SVG.</figcaption>
-              </figure>
-              <ul aria-label="Labels for the complete example" className="visual-guide__anatomy-key">
-                {componentSections.map((component) => (
-                  <li key={component.id}>
-                    <strong>{component.title}</strong>
-                    <p>{component.summary}</p>
-                  </li>
-                ))}
-              </ul>
-            </section>
 
             {componentSections.map((component) => (
               <section

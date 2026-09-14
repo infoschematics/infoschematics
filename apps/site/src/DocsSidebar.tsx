@@ -1,5 +1,5 @@
 import {
-  componentsPath,
+  componentRoutes,
   type DocumentSection,
   docsIndexPath,
   documentationRoutes,
@@ -30,20 +30,18 @@ function documentEntry(path: string): SidebarEntry {
   return { path: route.path, title: route.title }
 }
 
-// Components is a rendered specimen page rather than a Markdown document, so it is declared beside the two
-// introductory guide pages.
-const guideEntries: readonly SidebarEntry[] = [
-  documentEntry(docsIndexPath),
-  documentEntry(installationPath),
-  { path: componentsPath, title: 'Components' }
-]
+const guideEntries: readonly SidebarEntry[] = [documentEntry(docsIndexPath), documentEntry(installationPath)]
+
+const componentEntries: readonly SidebarEntry[] = componentRoutes.map(({ path, title }) => ({ path, title }))
 
 const entriesFor = (section: DocumentSection): readonly SidebarEntry[] =>
   section === 'guide'
     ? guideEntries
-    : documentationRoutes
-        .filter((route) => route.section === section)
-        .map((route) => ({ path: route.path, title: route.title }))
+    : section === 'components'
+      ? componentEntries
+      : documentationRoutes
+          .filter((route) => route.section === section)
+          .map((route) => ({ path: route.path, title: route.title }))
 
 interface DocsSidebarProps {
   currentPath?: string

@@ -1,4 +1,5 @@
 import { Marked, type Tokens } from 'marked'
+import type { ReactNode } from 'react'
 import architectureMarkdown from '../../../docs/design/architecture.md?raw'
 import viewPresentDesignMarkdown from '../../../docs/design/view-present.md?raw'
 import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
@@ -138,7 +139,15 @@ function renderDocument(route: DocumentationRoute): {
   return { html: marked.parse(markdown, { async: false }), contents }
 }
 
-export function DocumentPage({ route }: { route: DocumentationRoute }) {
+export function DocumentPage({
+  route,
+  anatomy,
+  supplementalOutline = []
+}: {
+  route: DocumentationRoute
+  anatomy?: ReactNode
+  supplementalOutline?: readonly DocsPageOutlineEntry[]
+}) {
   const { html, contents } = renderDocument(route)
 
   return (
@@ -148,10 +157,11 @@ export function DocumentPage({ route }: { route: DocumentationRoute }) {
       </a>
       <SiteNav section="docs" />
       <div className="docs-columns">
-        <DocsSidebar currentPageOutline={contents} currentPath={route.path} />
+        <DocsSidebar currentPageOutline={[...contents, ...supplementalOutline]} currentPath={route.path} />
         <main id="document-content">
           {/* biome-ignore lint/security/noDangerouslySetInnerHtml: html is rendered from repository-authored Markdown, not user input */}
           <article aria-label={route.title} className="document-content" dangerouslySetInnerHTML={{ __html: html }} />
+          {anatomy}
           <GuideJourneyNav currentPath={route.path} />
         </main>
       </div>

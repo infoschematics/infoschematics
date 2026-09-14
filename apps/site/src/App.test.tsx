@@ -6,8 +6,10 @@ import { homepageGuideActions } from './HomepageGuideDiagram.tsx'
 import {
   canonicalSiteLocation,
   canonicalSitePath,
+  componentRoutes,
   docsIndexPath,
   documentationRoutes,
+  getComponentRoute,
   getDocumentationRoute,
   isDocsIndexPath
 } from './routes.ts'
@@ -51,7 +53,7 @@ describe('website routes', () => {
 
   it('keeps homepage artefact pathways on the approved guide destinations', () => {
     expect(homepageGuideActions.map(({ id, href }) => ({ href, id }))).toEqual([
-      { href: '/docs/components/#anatomy', id: 'STR-01' },
+      { href: '/docs/#labelled-example', id: 'STR-01' },
       { href: '/docs/authoring/#add-presentation-material', id: 'PRS-02' },
       { href: '/docs/', id: 'INFO-03' },
       { href: '/docs/static-rendering/', id: 'OUT-04' },
@@ -62,6 +64,11 @@ describe('website routes', () => {
   it.each(documentationRoutes)('resolves $path with or without a trailing slash', (route) => {
     expect(getDocumentationRoute(route.path)).toEqual(route)
     expect(getDocumentationRoute(route.path.slice(0, -1))).toEqual(route)
+  })
+
+  it.each(componentRoutes)('resolves component route $path with or without a trailing slash', (route) => {
+    expect(getComponentRoute(route.path)).toEqual(route)
+    expect(getComponentRoute(route.path.slice(0, -1))).toEqual(route)
   })
 
   it('keeps Site-owned guide content separate from repository-owned approach documents', () => {
