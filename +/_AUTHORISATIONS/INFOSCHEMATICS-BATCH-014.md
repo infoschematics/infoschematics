@@ -46,4 +46,8 @@ Implementation-level completion of the single selected item at `awaiting-review`
 
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
-| `INFOSCHEMATICS-TOOL-043` | `ready` | running | Baseline `a67000c1` | Review source-panel contract and browser behaviour |
+| `INFOSCHEMATICS-TOOL-043` | `ready` | `awaiting-review` | Baseline `a67000c1`; implementation `70779ae9`, accessibility `dcc9bb02`; `self:check` passed 649 unit/integration and 15 browser tests | Review source-panel contract and browser behaviour |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Studio now offers a reusable Source tab backed by the retained canonical YAML document, validates replacements before host notification, preserves the last valid model on errors, and keeps structured edits and source replacements in one undoable history. Acceptance, pruning, push, deployment, publication and release remain outside this run.
