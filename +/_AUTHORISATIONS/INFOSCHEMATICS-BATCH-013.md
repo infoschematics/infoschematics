@@ -57,3 +57,11 @@ The item may reach `awaiting-review` only with its final step complete and the c
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-013-RUN-001 701fa83827031c4f684742d4958145009685c08943ec8b01ba30aabd721fab41 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-TOOL-033` | `ready` | `awaiting-review` | Baseline `f2bdeee4`; implementation `9fbcf712`; `self:check` passed with 647 unit/integration and 14 browser tests | Review Direct Sequence editing, stable-ID YAML operations, and host acknowledgement |
+
+## Batch recap
+
+The selected record reached the authorised `awaiting-review` target. Canonical YAML Sequences now populate Studio's Direct editors and return granular, stable-ID document edits without replacing the presentation tree. Expanded and collapsed Sequences preserve independent timing and Callout switches, unexposed Scene fields survive, inserted collapsed Scenes receive deterministic IDs, and an acknowledged host document clears only represented drafts. Acceptance, pruning, push, deployment, publication, and release remain outside this run.
