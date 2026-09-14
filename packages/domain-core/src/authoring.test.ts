@@ -211,9 +211,13 @@ diagram:
     - id: OVERLAY
       label: Overlay
       kind: ${reference}
-themes:
-  - id: THEME
-    label: Theme
+sequences:
+  - id: SEQUENCE
+    label: Sequence
+    presentation:
+      display: expanded
+      timed: false
+      callouts: true
     scenes:
       - id: SCENE
         label: Scene
@@ -228,7 +232,7 @@ themes:
     expect(scalar).toEqual(structured)
     expect(scalar.diagram.fabrics[0]?.kind).toEqual({ key: 'custom', version: 1 })
     expect(scalar.diagram.overlays[0]?.kind).toEqual({ key: 'custom', version: 1 })
-    expect(scalar.themes[0]?.scenes[0]?.callout?.kind).toEqual({ key: 'custom', version: 1 })
+    expect(scalar.sequences[0]?.scenes[0]?.callout?.kind).toEqual({ key: 'custom', version: 1 })
 
     const yaml = serialiseInfoschematicYaml(scalar)
     expect(yaml).toContain('kind:\n        key: custom\n        version: 1')
