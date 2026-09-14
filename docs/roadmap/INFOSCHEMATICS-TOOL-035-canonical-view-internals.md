@@ -5,11 +5,11 @@ title: Canonical view internals
 theme: tool
 horizon: next
 status: draft
-blocks: []
+blocks: [INFOSCHEMATICS-TOOL-033]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T02:50:33Z
+updated_at: 2026-09-14T03:43:59Z
 ---
 
 # Canonical view internals

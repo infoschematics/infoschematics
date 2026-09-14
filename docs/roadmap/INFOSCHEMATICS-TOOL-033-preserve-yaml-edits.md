@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-033
 area: TOOL
 title: Preserve YAML edits
 theme: tool
-horizon: next
-status: in-progress
+horizon: waiting-for
+status: draft
 blocks: [INFOSCHEMATICS-TOOL-043]
-blocked_by: []
-baseline_ref: cc467afa5ff8dc6dfd72d7b475441d120b82971c
+blocked_by: [INFOSCHEMATICS-TOOL-035]
+baseline_ref: null
 created_at: 2026-09-09T10:13:09Z
-updated_at: 2026-09-14T02:56:20Z
+updated_at: 2026-09-14T03:43:59Z
 ---
 
 ## Goal
@@ -26,18 +26,18 @@ This item does not reopen the canonical model, introduce executable document val
 
 ## Current state
 
-Domain Core uses the `yaml` package's `parseDocument` only long enough to convert a document to JavaScript and validate it; comments and concrete syntax are then discarded. Studio's `EditorDraft` and artefact operations are serialisable, but source changes are rendered as TypeScript-like snippets rather than applied to an authored document. The current operations already provide stable artefact identity and dependency-safe ordering that the YAML edit protocol can reuse.
+Domain Core now retains source-token YAML behind an opaque validated document and applies versioned transactional edits through stable IDs. Studio accepts that document as an alternative host input and projects its current five-kind artefact operations into validated source changes. Its Scene and presentation editors remain Theme and Story compatibility internals, so they cannot yet project canonical Sequence paths without `INFOSCHEMATICS-TOOL-035`.
 
 ## Steps
 
-- [ ] Add a Domain Core document API that retains the YAML concrete syntax tree alongside the validated canonical model, diagnostics, original pathname, and deterministic source emission.
-- [ ] Define a versioned inert edit envelope with `add`, `remove`, `replace`, and `move` operations; address collection members through structured field and stable-ID segments, and use stable before/after ID anchors for ordering rather than numeric indices.
-- [ ] Apply edit batches transactionally to a cloned document tree, preserve untouched comments, scalar styles, aliases already accepted by the loader, and mapping order, then validate the complete result before returning source or model.
-- [ ] Produce inverse operations from the pre-edit document so undo and redo restore both semantic values and affected concrete syntax.
+- [x] Add a Domain Core document API that retains the YAML concrete syntax tree alongside the validated canonical model, diagnostics, original pathname, and deterministic source emission.
+- [x] Define a versioned inert edit envelope with `add`, `remove`, `replace`, and `move` operations; address collection members through structured field and stable-ID segments, and use stable before/after ID anchors for ordering rather than numeric indices.
+- [x] Apply edit batches transactionally to a cloned document tree, preserve untouched comments, scalar styles, aliases already accepted by the loader, and mapping order, then validate the complete result before returning source or model.
+- [x] Produce inverse operations from the pre-edit document so undo and redo restore both semantic values and affected concrete syntax.
 - [ ] Project existing Studio artefact, geometry, property, Scene, and presentation edits into the versioned protocol while retaining the current editor-draft compatibility reader.
-- [ ] Add a host-owned Studio source boundary that accepts an authored document and emits validated edit batches or updated source; keep filesystem writes and conflict resolution outside Studio.
-- [ ] Cover comments before, beside, and within edited nodes; quoted and block scalars; stable collection ordering; sorted-set `elements`; add/remove/move anchors; invalid references; rollback; undo/redo; and parse-emit idempotence.
-- [ ] Record the lossless editing and persistence boundary and document the operation format for hosts, Studio, collaboration adapters, and agent-authored changes.
+- [x] Add a host-owned Studio source boundary that accepts an authored document and emits validated edit batches or updated source; keep filesystem writes and conflict resolution outside Studio.
+- [x] Cover comments before, beside, and within edited nodes; quoted and block scalars; stable collection ordering; sorted-set `elements`; add/remove/move anchors; invalid references; rollback; undo/redo; and parse-emit idempotence.
+- [x] Record the lossless editing and persistence boundary and document the operation format for hosts, Studio, collaboration adapters, and agent-authored changes.
 
 ## Files touched
 
@@ -53,7 +53,7 @@ Run focused `bunx vitest run` suites for Domain Core parsing and document edits,
 
 ## Dependencies / blocks
 
-The canonical YAML loader, stable canonical IDs, and serialisable Studio editor operations are delivered. The structured selector format is independent of collection names, so unified Sequences may land before or after this work without changing the protocol. Implementing this after `INFOSCHEMATICS-TOOL-034` is the preferred sequence to avoid touching the presentation editor twice, but it is not a build-order blocker.
+The canonical YAML loader, stable canonical IDs, serialisable Studio editor operations, and unified Sequences are delivered. The generic document protocol already edits Sequence and Scene paths. Completing Studio's Scene and presentation projection requires `INFOSCHEMATICS-TOOL-035` to replace the remaining Theme and Story compatibility editors with canonical Sequence internals; building a second temporary editor here would duplicate that migration.
 
 ## Documentation impact
 
@@ -86,3 +86,9 @@ Edits operate on the YAML concrete syntax tree rather than serialising a plain J
 ### Authority boundary
 
 Studio may preview and emit a validated edit batch or updated source, but the host decides which document is current, whether to persist it, and how to handle concurrent changes. That keeps browser state and filesystem authority out of the authored model and reusable View packages.
+
+### Remaining Sequence projection
+
+The document protocol and public Studio source boundary are complete. The unchecked projection step is limited to existing Scene and presentation editor actions: their current internal identities do not map one-to-one to canonical Sequence ownership. `INFOSCHEMATICS-TOOL-035` owns that canonicalisation and blocks only this final projection, not the delivered document API or artefact editing path.
+
+The completed foundation began from `cc467afa5ff8dc6dfd72d7b475441d120b82971c`. Returning the remaining work to Waiting for clears the execution baseline; a later implementation cycle records a new immutable baseline after `INFOSCHEMATICS-TOOL-035` lands.

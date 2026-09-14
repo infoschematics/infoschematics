@@ -5,11 +5,11 @@ title: Unified presentation sequences
 theme: tool
 horizon: next
 status: awaiting-review
-blocks: [INFOSCHEMATICS-TOOL-035]
+blocks: []
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T02:54:18Z
+updated_at: 2026-09-14T03:43:59Z
 ---
 
 ## Goal
