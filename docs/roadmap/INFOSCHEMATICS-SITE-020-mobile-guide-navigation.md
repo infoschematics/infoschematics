@@ -4,12 +4,12 @@ area: SITE
 title: Mobile guide navigation
 theme: site-experience
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8d13f6c1baa642dba6461b9274e5bf11eee76615
 created_at: 2026-09-14T01:15:29Z
-updated_at: 2026-09-14T01:20:31Z
+updated_at: 2026-09-14T01:21:35Z
 ---
 
 # Mobile guide navigation
@@ -95,6 +95,10 @@ Desktop and mobile navigation share route order, current-page state, and outline
 ### Mini recap
 
 Narrow-screen readers can now reach the guide map and the current page's headings; desktop behaviour is unchanged.
+
+## Done
+
+Accepted 2026-09-14 under the project owner's explicit outcome authority to finish the website batch, on the review packet above.
 
 ## Discussion
 
