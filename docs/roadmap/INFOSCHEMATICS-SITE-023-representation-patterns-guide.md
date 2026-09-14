@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: b9f001f3c6b9f9a2828d946293fec7af41b8ad7a
 created_at: 2026-09-14T01:59:19Z
-updated_at: 2026-09-14T02:09:54Z
+updated_at: 2026-09-14T02:13:09Z
 ---
 
 # Representation patterns guide
@@ -80,7 +80,7 @@ Keep importer, layout, notation, and runtime-control implementation outside this
 
 ### Delivered
 
-Implementation commit `b312adf372d7e9db78aef6ca90468cb6de83393c` delivers the Representation patterns guide, its navigation and Overview pathway, the editable live-media pipeline preset, and the expanded related-tools inspiration reference.
+Implementation commits `b312adf372d7e9db78aef6ca90468cb6de83393c` and `e47f2ae54bd64431190ab9154576374c88b531a8` deliver the Representation patterns guide, its navigation and Overview pathway, the editable live-media pipeline preset, and the expanded related-tools inspiration reference, including visual lessons from the supplied n8n example.
 
 ### Summary of changes
 
@@ -88,7 +88,7 @@ The guide keeps architecture at the centre while describing dashboard topology, 
 
 ### Verification
 
-Focused App, DocumentPage, and Playground tests passed. Site TypeScript checking and `bun run self:check` passed. The guide was inspected at desktop and 390-pixel widths, and the media preset was inspected in the running Playground with no parse issues, console errors, stale output, or horizontal overflow. The roadmap audit reached unrelated `INFOSCHEMATICS-TOOL-*` candidate-field and harness-catalogue failures owned by the concurrent non-website workstream; this Site item introduced no roadmap-audit finding.
+Focused App, DocumentPage, and Playground tests passed. Site TypeScript checking and `bun run self:check` passed with 587 unit tests and three browser tests. The guide was inspected at desktop and 390-pixel widths, and the media preset was inspected in the running Playground with no parse issues, console errors, stale output, or horizontal overflow. The roadmap audit reached unrelated `INFOSCHEMATICS-TOOL-*` candidate-field and harness-catalogue failures owned by the concurrent non-website workstream; this Site item introduced no roadmap-audit finding.
 
 ### Outstanding concerns
 
@@ -100,7 +100,7 @@ The page follows the existing documentation shell on desktop and mobile. The das
 
 ### Mini recap
 
-Baseline `b9f001f3c6b9f9a2828d946293fec7af41b8ad7a`; result `b312adf372d7e9db78aef6ca90468cb6de83393c`. The Site now explains the broader representation space and provides a concrete editable example without expanding the domain contract.
+Baseline `b9f001f3c6b9f9a2828d946293fec7af41b8ad7a`; result `e47f2ae54bd64431190ab9154576374c88b531a8`. The Site now explains the broader representation space and provides a concrete editable example without expanding the domain contract.
 
 ## Discussion
 
