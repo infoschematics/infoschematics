@@ -4,12 +4,12 @@ area: SITE
 title: Component reference workbench
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 81bb282abe606ca29390cdefb5c5fe79fc605946
 created_at: 2026-09-14T01:29:44Z
-updated_at: 2026-09-14T01:30:16Z
+updated_at: 2026-09-14T01:43:06Z
 ---
 
 # Component reference workbench
@@ -32,16 +32,16 @@ The complete example uses a narrow side key. Each component places controls to t
 
 ## Steps
 
-- [ ] Place the complete-example key beneath a full-width diagram and remove numbered side labels.
-- [ ] Centre every focused specimen independently on a grid-aligned coordinate and size baseline.
-- [ ] Combine each rendering and its compact property controls in one workbench with a small reset action.
-- [ ] Rename the Canvas control to Surface and describe inherited neutral output versus the authored blueprint value without conflating presentation Themes with colour styling.
-- [ ] Add Card and Fabric port-count controls and introduce Port before the Flow section relies on it.
-- [ ] Let the Card specimen switch between supported Standard and Adapter Cards and explain the authored `wraps` relationship.
-- [ ] Replace permanently expanded reference cards with a collapsible property table.
-- [ ] Add copyable YAML and TypeScript snippets reflecting the current specimen and expose the Graphic host-renderer boundary clearly.
-- [ ] Record unsupported Canvas, Fabric, Card, Point, Flow, and data-flow notation as future contract work rather than live controls.
-- [ ] Verify responsive layout, control-to-render updates, snippet copying, and current-contract terminology.
+- [x] Place the complete-example key beneath a full-width diagram and remove numbered side labels.
+- [x] Centre every focused specimen independently on a grid-aligned coordinate and size baseline.
+- [x] Combine each rendering and its compact property controls in one workbench with a small reset action.
+- [x] Rename the Canvas control to Surface and describe inherited neutral output versus the authored blueprint value without conflating presentation Themes with colour styling.
+- [x] Add Card and Fabric port-count controls and introduce Port before the Flow section relies on it.
+- [x] Let the Card specimen switch between supported Standard and Adapter Cards and explain the authored `wraps` relationship.
+- [x] Replace permanently expanded reference cards with a collapsible property table.
+- [x] Add copyable YAML and TypeScript snippets reflecting the current specimen and expose the Graphic host-renderer boundary clearly.
+- [x] Record unsupported Canvas, Fabric, Card, Point, Flow, and data-flow notation as future contract work rather than live controls.
+- [x] Verify responsive layout, control-to-render updates, snippet copying, and current-contract terminology.
 
 ## Files touched
 
@@ -75,6 +75,32 @@ Restructure the Components guide around visual workbenches, snippets, and collap
 ### Roadmap
 
 Keep future product capabilities outside this Site item and hand them to the non-website workstream for independent shaping.
+
+## Review
+
+### Delivered
+
+Commit `8e479f73bbebf9afc21749458d843c3d91ac602f` delivers the component reference workbench within the Site ownership root.
+
+### Summary of changes
+
+The complete example now uses the full article width with an unnumbered key below it. Each component has an independently centred specimen, compact reset action, controls below the rendering, component-specific YAML and TypeScript snippets with copy feedback, and a collapsible property table. Fabric and Card examples expose current per-side Port counts, while Card can switch between the supported Standard and Adapter forms.
+
+### Verification
+
+`bun run self:check` passed with 582 unit tests, three browser tests, all workspace typechecks, dependency-boundary checks, and the production Site build. Playwright inspection at 1440 and 390 pixels found no console errors or horizontal overflow; it also exercised the Adapter selector, Port updates, snippet tabs and copying, and property-table expansion.
+
+### Outstanding concerns
+
+Arbitrary Canvas colour and opacity, named Fabric renderers with static fallbacks, Decision and stacked Cards, semantic Point roles, and richer Flow endpoint notation remain intentionally unsupported. They require model and renderer work outside Site ownership before this guide can expose controls for them.
+
+### Post-change review
+
+The implementation stays Site-owned and does not invent portable fields or renderer behaviour. Component snippets project only the records relevant to the current example, and their YAML representation targets the existing `InfoschematicConfig` authoring shape used by these renderers.
+
+### Mini recap
+
+The Components page now behaves as a visual reference and small editorial workbench while clearly distinguishing today’s public contract from future notation.
 
 ## Discussion
 
