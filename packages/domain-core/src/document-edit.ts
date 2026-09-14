@@ -8,6 +8,7 @@ import {
   parseInfoschematicDocument
 } from './document.ts'
 import type { InfoschematicIssue } from './parse.ts'
+import { infoschematicFieldOrder } from './serialise.ts'
 
 export type InfoschematicDocumentPathSegment = Readonly<{ field: string }> | Readonly<{ id: string }>
 export type InfoschematicDocumentPath = readonly InfoschematicDocumentPathSegment[]
@@ -145,6 +146,69 @@ const cloneJson = <T extends JsonValue>(value: T): T => {
 const isJsonObject = (value: JsonValue): value is Readonly<Record<string, JsonValue>> =>
   value !== null && typeof value === 'object' && !Array.isArray(value)
 
+const fieldsOf = (path: InfoschematicDocumentPath): readonly string[] =>
+  path.flatMap((segment) => ('field' in segment ? [segment.field] : []))
+
+const endsWith = (values: readonly string[], suffix: readonly string[]): boolean =>
+  values.length >= suffix.length &&
+  suffix.every((value, index) => values[values.length - suffix.length + index] === value)
+
+const isElementSetPath = (path: InfoschematicDocumentPath): boolean => {
+  const fields = fieldsOf(path)
+  return (
+    endsWith(fields, ['scopes', 'elements']) ||
+    endsWith(fields, ['scenes', 'focus', 'elements']) ||
+    endsWith(fields, ['scenes', 'visibility', 'show', 'elements']) ||
+    endsWith(fields, ['scenes', 'visibility', 'hide', 'elements'])
+  )
+}
+
+const normaliseEditedElementSets = (value: JsonValue, path: InfoschematicDocumentPath): JsonValue => {
+  if (isElementSetPath(path) && Array.isArray(value) && value.every((entry) => typeof entry === 'string')) {
+    return [...new Set(value)].sort((left, right) => left.localeCompare(right))
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) =>
+      normaliseEditedElementSets(entry, [
+        ...path,
+        ...(isJsonObject(entry) && typeof entry.id === 'string' ? [{ id: entry.id } as const] : [])
+      ])
+    )
+  }
+  if (isJsonObject(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([field, entry]) => [field, normaliseEditedElementSets(entry, [...path, { field }])])
+    )
+  }
+  return value
+}
+
+const mappingContext = (path: InfoschematicDocumentPath): string => {
+  const fields = fieldsOf(path)
+  return fields.length === 0 ? '<root>' : (fields.at(-1) ?? '<root>')
+}
+
+const addFieldInAuthoringOrder = (
+  yaml: YamlDocument,
+  map: YAMLMap<unknown, unknown>,
+  field: string,
+  value: unknown,
+  parentPath: InfoschematicDocumentPath
+): void => {
+  const order = infoschematicFieldOrder(mappingContext(parentPath))
+  const wanted = order.indexOf(field)
+  const wantedRank = wanted < 0 ? order.length : wanted
+  const pair = yaml.createPair(field, value)
+  const index = map.items.findIndex((entry) => {
+    const key = keyOf(entry)
+    if (typeof key !== 'string') return false
+    const candidate = order.indexOf(key)
+    const candidateRank = candidate < 0 ? order.length : candidate
+    return candidateRank > wantedRank || (candidateRank === wantedRank && candidateRank === order.length && key > field)
+  })
+  map.items.splice(index < 0 ? map.items.length : index, 0, pair)
+}
+
 const nodeValueOf = (node: Node, yaml: YamlDocument): JsonValue =>
   cloneJson(node.toJS(yaml, { mapAsMap: false, maxAliasCount: 100 }) as JsonValue)
 
@@ -237,9 +301,9 @@ const addOperation = (yaml: YamlDocument, operation: InfoschematicDocumentAdd): 
     const collection = parentPath.at(-1)
     const owner = locate(yaml, parentPath.slice(0, -1))
     if (collection && 'field' in collection && owner && isMap(owner.node) && !pairFor(owner.node, collection.field)) {
-      const sequence = yaml.createNode([]) as YAMLSeq<unknown>
-      owner.node.add(yaml.createPair(collection.field, sequence))
-      parent = { key: collection.field, node: sequence, parent: owner.node }
+      addFieldInAuthoringOrder(yaml, owner.node, collection.field, [], parentPath.slice(0, -1))
+      const sequence = pairFor(owner.node, collection.field)?.value
+      if (sequence && isSeq(sequence)) parent = { key: collection.field, node: sequence, parent: owner.node }
     }
   }
 
@@ -251,7 +315,13 @@ const addOperation = (yaml: YamlDocument, operation: InfoschematicDocumentAdd): 
     if (operation.before !== undefined || operation.after !== undefined) {
       throw new Error('Ordering anchors apply only to ID-addressed collection members.')
     }
-    parent.node.add(yaml.createPair(last.field, cloneJson(operation.value)))
+    addFieldInAuthoringOrder(
+      yaml,
+      parent.node,
+      last.field,
+      cloneJson(normaliseEditedElementSets(operation.value, operation.path)),
+      parentPath
+    )
     return { op: 'remove', path: operation.path }
   }
 
@@ -263,7 +333,11 @@ const addOperation = (yaml: YamlDocument, operation: InfoschematicDocumentAdd): 
   if (operation.value.id !== last.id) throw new Error(`Added value must carry id ${last.id}.`)
 
   const index = insertionIndex(parent.node, operation)
-  parent.node.items.splice(index, 0, yaml.createNode(cloneJson(operation.value)) as Node)
+  parent.node.items.splice(
+    index,
+    0,
+    yaml.createNode(cloneJson(normaliseEditedElementSets(operation.value, operation.path))) as Node
+  )
   return { op: 'remove', path: operation.path }
 }
 
@@ -294,7 +368,10 @@ const replaceOperation = (
     if (operation.value.id !== last.id) throw new Error(`Replacement must retain id ${last.id}.`)
   }
   const value = nodeValueOf(location.node, yaml)
-  replaceAt(location, replacementNode(yaml, location.node, cloneJson(operation.value)))
+  replaceAt(
+    location,
+    replacementNode(yaml, location.node, cloneJson(normaliseEditedElementSets(operation.value, operation.path)))
+  )
   return { op: 'replace', path: operation.path, value }
 }
 

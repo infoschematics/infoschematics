@@ -98,13 +98,17 @@ const fieldOrder = [
   'line'
 ]
 
+/** Shared authored mapping order for deterministic insertion without reordering existing fields. */
+export const infoschematicFieldOrder = (context: string): readonly string[] =>
+  context === '<root>' ? topLevelOrder : context === 'diagram' ? diagramOrder : fieldOrder
+
 const rank = (order: readonly string[], key: string): number => {
   const index = order.indexOf(key)
   return index === -1 ? order.length : index
 }
 
 const ordered = (entries: readonly [string, unknown][], context: string): Mapping => {
-  const order = context === '<root>' ? topLevelOrder : context === 'diagram' ? diagramOrder : fieldOrder
+  const order = infoschematicFieldOrder(context)
   return Object.fromEntries(
     [...entries].sort(([left], [right]) => {
       const difference = rank(order, left) - rank(order, right)

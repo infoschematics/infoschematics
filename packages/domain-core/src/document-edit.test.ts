@@ -141,8 +141,68 @@ describe('applyInfoschematicDocumentEdit', () => {
     expect(result.ok).toBe(true)
     if (!result.ok) return
     expect(result.model.scopes[0]?.elements).toEqual(['A'])
+    expect(result.source).toContain('elements:\n      - A')
     expect(result.model.diagram.cards.map((card) => card.id)).toEqual(['A'])
     expect(result.changedElements).toEqual(['B', 'SCOPE'])
+  })
+
+  it('normalises element sets nested in added Sequences without touching unrelated sets', () => {
+    const withSequence = applyInfoschematicDocumentEdit(parsedDocument(), {
+      operations: [
+        {
+          op: 'add',
+          path: [field('sequences'), id('SEQ')],
+          value: {
+            id: 'SEQ',
+            label: 'Sequence',
+            presentation: { callouts: true, display: 'expanded', timed: false },
+            scenes: [
+              {
+                focus: { elements: ['B', 'A', 'B'] },
+                id: 'SCENE',
+                label: 'Scene',
+                visibility: { hide: { elements: ['B', 'A', 'B'] } }
+              }
+            ]
+          }
+        }
+      ],
+      version: 1
+    })
+    expect(withSequence.ok).toBe(true)
+    if (!withSequence.ok) return
+    expect(withSequence.model.sequences[0]?.scenes[0]?.focus?.elements).toEqual(['A', 'B'])
+    expect(withSequence.model.sequences[0]?.scenes[0]?.visibility?.hide?.elements).toEqual(['A', 'B'])
+    expect(withSequence.source).toContain('elements: [ B, A, A ]')
+    expect(withSequence.source.match(/elements:\n\s+- A\n\s+- B/g)).toHaveLength(2)
+  })
+
+  it('inserts new fields at house-order positions without disturbing existing fields', () => {
+    const result = applyInfoschematicDocumentEdit(parsedDocument(), {
+      operations: [
+        { op: 'add', path: [field('subtitle')], value: 'Inserted subtitle' },
+        {
+          op: 'add',
+          path: [field('diagram'), field('collections'), id('COLLECTION')],
+          value: { id: 'COLLECTION', label: 'Inserted collection' }
+        },
+        {
+          op: 'add',
+          path: [field('diagram'), field('cards'), id('B'), field('description')],
+          value: 'Inserted description'
+        }
+      ],
+      version: 1
+    })
+    expect(result.ok).toBe(true)
+    if (!result.ok) return
+    expect(result.source.indexOf('title:')).toBeLessThan(result.source.indexOf('subtitle:'))
+    expect(result.source.indexOf('subtitle:')).toBeLessThan(result.source.indexOf('diagram:'))
+    expect(result.source.indexOf('bounds: &diagram-bounds')).toBeLessThan(result.source.indexOf('collections:'))
+    expect(result.source.indexOf('collections:')).toBeLessThan(result.source.indexOf('cards:'))
+    const beta = result.source.slice(result.source.indexOf('- id: B'))
+    expect(beta.indexOf('label: Beta')).toBeLessThan(beta.indexOf('description: Inserted description'))
+    expect(beta.indexOf('description: Inserted description')).toBeLessThan(beta.indexOf('bounds: 80'))
   })
 
   it('rejects numeric-style paths, invalid anchors, and dishonest syntax snapshots', () => {
