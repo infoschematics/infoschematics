@@ -4,12 +4,12 @@ area: TOOL
 title: Preserve YAML edits
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-TOOL-043]
 blocked_by: []
-baseline_ref: null
+baseline_ref: f2bdeee4ccaf57d6414309e4f4c09c34c8fcd148
 created_at: 2026-09-09T10:13:09Z
-updated_at: 2026-09-14T08:31:35Z
+updated_at: 2026-09-14T08:35:12Z
 ---
 
 ## Goal
