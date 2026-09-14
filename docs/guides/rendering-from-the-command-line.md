@@ -48,3 +48,17 @@ fi
 ```
 
 Use [`@infoschematics/domain-core`](../specs/authoring.md) and [`@infoschematics/render-svg`](../specs/static-rendering.md) directly when an application needs parsed-model access or renderer options beyond the document command.
+
+## Fit Card detail to a static output
+
+The library renderer preserves authored Card detail unless the caller opts into a target size. Supply `responsiveCardDetails` when the SVG will be displayed at a known size:
+
+```ts
+const svg = renderInfoschematicSvg(model, {
+  responsiveCardDetails: { width: 960, height: 640 }
+})
+```
+
+The target becomes the SVG's width and height while its authored view box and geometry remain unchanged. At progressively smaller scales the shared output policy withholds description, identity, and stereotype rows in that order. Card labels and accessible authored metadata remain available.
+
+Use `cardDetails` to set the maximum detail the output may show. Responsive resolution can hide a requested optional row when it would be too small, but it never enables a row disabled by `cardDetails`. Omit `responsiveCardDetails` when exact compatibility with authored output treatment is required.

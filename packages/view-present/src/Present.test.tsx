@@ -1,9 +1,16 @@
+import { readFile } from 'node:fs/promises'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Present } from './Present.tsx'
 
 describe('Present', () => {
+  it('passes opt-in responsive Card detail to Canvas', async () => {
+    const source = await readFile(new URL('./Present.tsx', import.meta.url), 'utf8')
+
+    expect(source).toContain('responsiveCardDetails={responsiveCardDetails}')
+  })
+
   it('renders a title-only Infoschematic without Producer editing controls', () => {
     const markup = renderToStaticMarkup(<Present config={defineInfoschematic({ title: 'Audience view' })} />)
 

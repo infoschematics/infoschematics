@@ -377,6 +377,23 @@ describe('renderInfoschematicSvg', () => {
     expect(overridden).not.toContain('class="infoschematic-card-stereotype"')
     expect(overridden).not.toContain('class="infoschematic-card-description"')
     expect(overridden).toContain('data-compact="true"')
+
+    const responsive = renderInfoschematicSvg(config, {
+      responsiveCardDetails: { height: 144, width: 240 }
+    })
+    expect(responsive).toContain('height="144"')
+    expect(responsive).toContain('width="240"')
+    expect(responsive).toContain('class="infoschematic-card-identity"')
+    expect(responsive).toContain('class="infoschematic-card-stereotype"')
+    expect(responsive).not.toContain('class="infoschematic-card-description"')
+    expect(responsive).toContain('aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"')
+
+    const labelOnly = renderInfoschematicSvg(config, {
+      responsiveCardDetails: { height: 72, width: 120 }
+    })
+    expect(labelOnly).not.toContain('data-card-detail=')
+    expect(labelOnly).toContain('>Source &amp; gate…<')
+    expect(labelOnly).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
   })
 
   it('paints the midground from the blueprint palette rather than the neutral output set', () => {

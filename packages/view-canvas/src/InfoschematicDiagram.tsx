@@ -5,6 +5,7 @@ import {
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
+  resolveResponsiveCardTreatment,
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
@@ -179,6 +180,7 @@ export function InfoschematicDiagram({
   flows: suppliedFlows,
   annotated,
   cardDetails,
+  responsiveCardDetails = false,
   grid,
   graphic,
   visibleScopes,
@@ -251,6 +253,8 @@ export function InfoschematicDiagram({
   annotated?: boolean
   /** Output-only Card metadata visibility; authored data remains unchanged. */
   cardDetails?: CardDetailOverrides
+  /** Reduce optional Card rows from the measured rendered size. Defaults off. */
+  responsiveCardDetails?: boolean
   /** Legacy Design grid overlay, independent of the authored grid treatment. */
   grid?: boolean
   /** A resolved Graphic drawn by the active Story Scene. */
@@ -340,7 +344,7 @@ export function InfoschematicDiagram({
     visibleScopes
   ])
   const renderers = useInfoschematicRenderers()
-  const visualTreatment = resolveVisualTreatment(config.infoschematic.appearance, cardDetails)
+  const requestedVisualTreatment = resolveVisualTreatment(config.infoschematic.appearance, cardDetails)
   const domains = config.infoschematic.domains ?? []
   const Definitions = renderers.definitions
   const activeGraphicRenderer =
@@ -503,6 +507,13 @@ export function InfoschematicDiagram({
         height: '100%',
         width: '100%'
       }
+  const visualTreatment = {
+    ...requestedVisualTreatment,
+    card:
+      responsiveCardDetails && frameSize
+        ? resolveResponsiveCardTreatment(infoschematicViewBox, frameSize, requestedVisualTreatment.card)
+        : requestedVisualTreatment.card
+  }
 
   useLayoutEffect(() => {
     const surface = diagramFrame.current?.parentElement

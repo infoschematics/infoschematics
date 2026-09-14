@@ -153,13 +153,13 @@ const roomForCard = (viewBox: Box, made: number): Box => ({
   y: viewBox.y + viewBox.height / 2 - 40 + made * 20
 })
 
-export function Studio({ config, renderers }: PresentProps) {
+export function Studio({ config, renderers, responsiveCardDetails = false }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
   const rendererRegistry = useMemo(() => defineInfoschematicRenderers(renderers ?? {}), [renderers])
   return (
     <InfoschematicRenderersContext value={rendererRegistry}>
       <InfoschematicContext value={runtime}>
-        <AppContent />
+        <AppContent responsiveCardDetails={responsiveCardDetails} />
       </InfoschematicContext>
     </InfoschematicRenderersContext>
   )
@@ -168,7 +168,7 @@ export function Studio({ config, renderers }: PresentProps) {
 /** Compatibility name retained for existing hosts while the additive View names settle. */
 export const App = Studio
 
-function AppContent() {
+function AppContent({ responsiveCardDetails }: { responsiveCardDetails: boolean }) {
   const runtime = useInfoschematic()
   const {
     flowsAfterCreations,
@@ -810,6 +810,7 @@ function AppContent() {
                 annotated={presentation.annotated}
                 grid={editor.view.grid}
                 graphic={runningStoryScene?.graphic}
+                responsiveCardDetails={responsiveCardDetails}
                 visibleScopes={visibleScopes}
                 viewportControllerRef={diagramViewport}
                 viewportControls="external"

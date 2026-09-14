@@ -2,9 +2,11 @@ import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/do
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import {
   type CardDetailOverrides,
+  type RenderedSize,
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
+  resolveResponsiveCardTreatment,
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
@@ -33,6 +35,8 @@ export type RenderInfoschematicSvgOptions = {
   annotations?: boolean
   /** Override authored Card metadata visibility without removing authored data. */
   cardDetails?: CardDetailOverrides
+  /** Opt into responsive Card detail for this explicit rendered output size. */
+  responsiveCardDetails?: RenderedSize
   /** An authored Scene to render without introducing playback or other motion. */
   scene?: SvgSceneSelection
   /** Flow ids to emphasise deterministically without serialising animation. */
@@ -175,7 +179,13 @@ export const renderInfoschematicSvg = (
   const config = runtime.config
   const definition = config.infoschematic
   const viewBox = definition.viewBox
-  const visualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
+  const requestedVisualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
+  const visualTreatment = {
+    ...requestedVisualTreatment,
+    card: options.responsiveCardDetails
+      ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
+      : requestedVisualTreatment.card
+  }
   const signalledFlows = new Set(options.signals ?? [])
   /* The interactive Canvas draws the blueprint palette natively and overrides
      only what neutral changes, so this renderer has to pick the same side for
@@ -848,11 +858,11 @@ export const renderInfoschematicSvg = (
       ['aria-label', `${config.title} structural Infoschematic`],
       ['data-grid-treatment', visualTreatment.grid],
       ['data-surface-treatment', visualTreatment.surface],
-      ['height', viewBox.height],
+      ['height', options.responsiveCardDetails?.height ?? viewBox.height],
       ['preserveAspectRatio', 'xMidYMid meet'],
       ['role', 'img'],
       ['viewBox', `${number(viewBox.x)} ${number(viewBox.y)} ${number(viewBox.width)} ${number(viewBox.height)}`],
-      ['width', viewBox.width]
+      ['width', options.responsiveCardDetails?.width ?? viewBox.width]
     ])}>`,
     ...body,
     '</svg>'

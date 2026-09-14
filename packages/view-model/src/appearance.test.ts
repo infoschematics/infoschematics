@@ -1,6 +1,12 @@
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import { describe, expect, it } from 'vitest'
-import { resolveCardDomain, resolveReadableInk, resolveRegionTreatment, resolveVisualTreatment } from './appearance.ts'
+import {
+  resolveCardDomain,
+  resolveReadableInk,
+  resolveRegionTreatment,
+  resolveResponsiveCardTreatment,
+  resolveVisualTreatment
+} from './appearance.ts'
 
 describe('visual treatment resolution', () => {
   it('preserves the label-only legacy treatment when appearance is absent', () => {
@@ -26,6 +32,52 @@ describe('visual treatment resolution', () => {
       grid: 'major-plus-minor',
       surface: 'blueprint'
     })
+  })
+
+  it.each([
+    [
+      { height: 800, width: 1200 },
+      { compact: true, description: true, identity: true, stereotype: true }
+    ],
+    [
+      { height: 600, width: 900 },
+      { compact: true, description: false, identity: true, stereotype: true }
+    ],
+    [
+      { height: 400, width: 600 },
+      { compact: true, description: false, identity: false, stereotype: true }
+    ],
+    [
+      { height: 300, width: 450 },
+      { compact: true, description: false, identity: false, stereotype: false }
+    ]
+  ] as const)('reduces optional Card rows deterministically at rendered size %o', (target, expected) => {
+    expect(
+      resolveResponsiveCardTreatment({ height: 800, width: 1200 }, target, {
+        compact: true,
+        description: true,
+        identity: true,
+        stereotype: true
+      })
+    ).toEqual(expected)
+  })
+
+  it('treats explicit detail settings as an upper bound and rejects unusable dimensions', () => {
+    expect(
+      resolveResponsiveCardTreatment(
+        { height: 800, width: 1200 },
+        { height: 800, width: 1200 },
+        { compact: false, description: false, identity: true, stereotype: false }
+      )
+    ).toEqual({ compact: false, description: false, identity: true, stereotype: false })
+
+    expect(() =>
+      resolveResponsiveCardTreatment(
+        { height: 800, width: 1200 },
+        { height: 0, width: 1200 },
+        { compact: false, description: true, identity: true, stereotype: true }
+      )
+    ).toThrow('finite positive numbers')
   })
 })
 

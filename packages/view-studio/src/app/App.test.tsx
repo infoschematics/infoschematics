@@ -82,6 +82,7 @@ describe('App', () => {
     expect(source).toContain('presentation.visibleScopes')
     expect(source).toContain('viewportControllerRef={diagramViewport}')
     expect(source).toContain('viewportControls="external"')
+    expect(source).toContain('responsiveCardDetails={responsiveCardDetails}')
     expect(source).toContain('highlight={diagramHighlight}')
     expect(source).toContain('onSpecificationHover={setHoveredSpecification}')
     expect(source).toContain('presentation.overlays && runningStoryScene')

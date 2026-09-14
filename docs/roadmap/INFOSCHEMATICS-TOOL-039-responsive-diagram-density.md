@@ -4,12 +4,12 @@ area: TOOL
 title: Responsive diagram density
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-13T15:39:09Z
-updated_at: 2026-09-13T15:39:09Z
+updated_at: 2026-09-14T02:16:32Z
 ---
 
 # Responsive diagram density

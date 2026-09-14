@@ -157,3 +157,13 @@ _Conformance:_ conforming
 _Verify:_ `packages/render-svg/src/index.test.ts` renders the same definition with two prefixes and checks isolated marker identifiers and references; `apps/site/src/InlineSvgReference.test.tsx` scopes repeated authored identifiers to separate host SVGs.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` and `apps/site/src/InlineSvgReference.test.tsx` cover distinct renderer-resource namespaces and host-scoped authored identity resolution.
+
+### STATIC-016 — Responsive output uses an explicit target size
+
+The static renderer MAY accept an explicit responsive Card-detail target size and MUST use it for both deterministic output dimensions and the shared View Model density decision; omission MUST preserve authored output dimensions and Card-detail treatment.
+
+_Conformance:_ conforming
+
+_Verify:_ render the representative treatment fixture repeatedly with full, reduced, and label-only target sizes and inspect its root dimensions, optional rows, label, and accessible summary.
+
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers explicit target dimensions, deterministic optional-row reduction, and retained accessible authored metadata.

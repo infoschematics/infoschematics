@@ -8,6 +8,7 @@ import type {
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
+import type { Box } from '@infoschematics/domain-model/geometry'
 import type { RegionConfig, RegionFrameStyle } from '@infoschematics/domain-model/region'
 
 export type CardDetailOverrides = Readonly<Partial<Pick<CardDetailDefaults, 'description' | 'identity' | 'stereotype'>>>
@@ -18,6 +19,8 @@ export type ResolvedCardTreatment = Readonly<{
   identity: boolean
   stereotype: boolean
 }>
+
+export type RenderedSize = Readonly<{ height: number; width: number }>
 
 export type ResolvedVisualTreatment = Readonly<{
   card: ResolvedCardTreatment
@@ -55,6 +58,30 @@ export const resolveVisualTreatment = (
   grid: appearance?.grid ?? 'none',
   surface: appearance?.surface ?? 'neutral'
 })
+
+/**
+ * Reduce optional Card rows when an authored view box is rendered too small
+ * for those rows to remain legible. The caller must opt in and supply the
+ * rendered size; authored geometry and the requested upper bound stay intact.
+ */
+export const resolveResponsiveCardTreatment = (
+  viewBox: Pick<Box, 'height' | 'width'>,
+  target: RenderedSize,
+  requested: ResolvedCardTreatment
+): ResolvedCardTreatment => {
+  const values = [viewBox.height, viewBox.width, target.height, target.width]
+  if (values.some((value) => !Number.isFinite(value) || value <= 0)) {
+    throw new TypeError('Responsive Card detail dimensions must be finite positive numbers')
+  }
+
+  const scale = Math.min(target.width / viewBox.width, target.height / viewBox.height)
+  return {
+    compact: requested.compact,
+    description: requested.description && scale >= 0.8,
+    identity: requested.identity && scale >= 0.6,
+    stereotype: requested.stereotype && scale >= 0.4
+  }
+}
 
 /**
  * Resolve one Region's treatment from its authored record. A boundary-mounted

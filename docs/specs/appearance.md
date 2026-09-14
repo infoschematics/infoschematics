@@ -168,6 +168,22 @@ _Verify:_ render overlapping filled and framed Regions over neutral and blueprin
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx`, `packages/render-svg/src/index.test.ts`, and `scripts/visual-treatment-parity.test.ts` cover the current surface, grid, Region fill, and frame vocabulary across renderers.
 
-## Gaps
+### APPEAR-016 — Responsive Card detail is explicit
 
-- Responsive output density remains a candidate appearance contract.
+Canvas and static SVG hosts MAY opt into responsive Card detail, but omission MUST preserve the authored and explicitly requested Card treatment exactly; when enabled, output MUST retain every Card label and accessible identity while withholding optional description, identity, then stereotype rows as rendered scale crosses the shared deterministic thresholds defined by [ADR-INFOSCHEMATICS-011](../decisions/ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md).
+
+_Conformance:_ conforming
+
+_Verify:_ exercise the framework-neutral resolver, measured Canvas output, and explicit-size static SVG above, at, and below every threshold.
+
+_Evidence:_ `packages/view-model/src/appearance.test.ts`, `packages/view-canvas/src/InfoschematicDiagram.responsive.browser.test.tsx`, and `packages/render-svg/src/index.test.ts` cover compatibility defaults, threshold resolution, and accessible metadata retention.
+
+### APPEAR-017 — Responsive density is renderer-neutral
+
+Responsive Card detail MUST resolve only from the authored view-box dimensions, explicit or measured rendered dimensions, and the caller's requested detail upper bound; it MUST NOT inspect user agent, device class, ambient viewport state in View Model, or mutate authored geometry.
+
+_Conformance:_ conforming
+
+_Verify:_ inspect `resolveResponsiveCardTreatment` and compare Canvas and static SVG fixtures at equivalent dimensions.
+
+_Evidence:_ `packages/view-model/src/appearance.ts` is a pure dimension-driven resolver consumed by both `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/render-svg/src/index.ts`.

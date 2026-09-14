@@ -12,11 +12,19 @@ export type PresentProps = Readonly<{
   className?: string
   config: InfoschematicInput
   renderers?: CanvasProps['renderers']
+  /** Opt into rendered-size Card detail reduction in the Canvas. */
+  responsiveCardDetails?: boolean
   /** Signal focused Flows on Scene entry, or suppress automatic signalling. */
   signalPolicy?: SceneSignalPolicy
 }>
 
-export function Present({ className, config, renderers, signalPolicy = 'focused-flows' }: PresentProps) {
+export function Present({
+  className,
+  config,
+  renderers,
+  responsiveCardDetails = false,
+  signalPolicy = 'focused-flows'
+}: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
   const established = runtime.config
   const presentation = usePresentation(runtime, signalPolicy)
@@ -151,6 +159,7 @@ export function Present({ className, config, renderers, signalPolicy = 'focused-
             graphic={derived.runningStoryScene?.graphic}
             highlight={derived.highlight}
             renderers={renderers}
+            responsiveCardDetails={responsiveCardDetails}
             signals={derived.signals}
             visibleScopes={state.visibleScopes}
           >
