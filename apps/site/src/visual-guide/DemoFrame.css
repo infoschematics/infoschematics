@@ -1,0 +1,23 @@
+.demo-frame { overflow: hidden; border: 1px solid #ffffff1c; border-radius: 12px; background: #0d2031; }
+.demo-frame__heading { display: flex; gap: 16px; align-items: start; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #ffffff16; }
+.demo-frame__heading h3 { margin: 0; color: #f5f8ff; font-size: 16px; }
+.demo-frame__heading p { margin: 4px 0 0; color: #9db4c9; font-size: 12px; }
+.demo-frame__modes, .demo-frame__actions { display: flex; gap: 4px; }
+.demo-frame__modes { margin: 0; padding: 0; border: 0; }
+.demo-frame button { border: 1px solid #ffffff26; border-radius: 6px; color: #dcebf5; background: #071624; cursor: pointer; font: 600 11px/1.4 'DM Mono', monospace; }
+.demo-frame__modes button { padding: 6px 9px; }
+.demo-frame__modes button[aria-pressed='true'] { border-color: #79c9ff55; color: #071624; background: #79c9ff; }
+.demo-frame__preview { min-height: 180px; overflow: hidden; background: #071624; }
+.demo-frame__preview figure { min-width: 0; margin: 0; }
+.demo-frame__preview img, .demo-frame__preview figure > section { display: block; width: 100%; height: auto; }
+.demo-frame__preview figcaption { padding: 8px 12px; border-top: 1px solid #ffffff16; color: #9db4c9; font: 600 11px/1.4 'DM Mono', monospace; }
+.demo-frame__preview--variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
+.demo-frame__preview--variants figure + figure { border-left: 1px solid #ffffff16; }
+.demo-frame__controls { display: flex; gap: 12px; align-items: end; justify-content: space-between; padding: 14px 16px; border-top: 1px solid #ffffff16; }
+.demo-frame__actions button { display: grid; width: 30px; height: 30px; padding: 6px; place-items: center; }
+.demo-frame__icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
+.demo-frame__controls .interactive-specimen__controls { flex: 1; margin: 0; padding: 0; border: 0; }
+.specimen-snippet__source { max-height: 8.2em !important; overflow: auto; }
+.specimen-snippet__source--expanded { max-height: 340px !important; }
+.demo-frame button:hover, .demo-frame button:focus-visible { border-color: #79c9ff; }
+@media (max-width: 640px) { .demo-frame__heading { display: block; } .demo-frame__modes { margin-top: 12px; } .demo-frame__controls { align-items: start; } }

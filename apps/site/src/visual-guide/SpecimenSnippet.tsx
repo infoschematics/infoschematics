@@ -3,7 +3,15 @@ import { useState } from 'react'
 import type { SpecimenKind } from './curriculum.ts'
 import { type SpecimenSnippetFormat, specimenSnippet } from './specimens.ts'
 
-export function SpecimenSnippet({ config, kind }: { config: InfoschematicConfig; kind: SpecimenKind }) {
+export function SpecimenSnippet({
+  config,
+  kind,
+  expanded = false
+}: {
+  config: InfoschematicConfig
+  kind: SpecimenKind
+  expanded?: boolean
+}) {
   const [format, setFormat] = useState<SpecimenSnippetFormat>('yaml')
   const [feedback, setFeedback] = useState('')
   const source = specimenSnippet(config, kind, format)
@@ -41,11 +49,27 @@ export function SpecimenSnippet({ config, kind }: { config: InfoschematicConfig;
             </button>
           ))}
         </div>
-        <button className="specimen-snippet__copy" onClick={copySnippet} type="button">
-          Copy snippet
+        <button
+          aria-label="Copy snippet"
+          className="specimen-snippet__copy"
+          onClick={copySnippet}
+          title="Copy snippet"
+          type="button"
+        >
+          <svg aria-hidden="true" className="demo-frame__icon" viewBox="0 0 16 16">
+            <rect height="10" rx="1" width="9" x="6" y="6" />
+            <path d="M4 4h9v2M4 4v9h2" />
+          </svg>
         </button>
       </header>
-      <pre aria-label={`${format} source`} id={panelId} role="tabpanel">
+      <pre
+        aria-label={`${format} source`}
+        className={
+          expanded ? 'specimen-snippet__source specimen-snippet__source--expanded' : 'specimen-snippet__source'
+        }
+        id={panelId}
+        role="tabpanel"
+      >
         <code>{source}</code>
       </pre>
       <p aria-live="polite" className="specimen-snippet__feedback">
