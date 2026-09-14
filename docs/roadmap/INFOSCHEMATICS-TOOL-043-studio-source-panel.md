@@ -4,12 +4,12 @@ area: TOOL
 title: Studio source panel
 theme: tool
 horizon: next
-status: ready
+status: in-progress
 blocks: [INFOSCHEMATICS-SITE-019]
 blocked_by: []
-baseline_ref: null
+baseline_ref: a67000c108999b38b294d3e0c05141277851e619
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-14T13:47:14Z
+updated_at: 2026-09-14T13:50:10Z
 ---
 
 ## Goal

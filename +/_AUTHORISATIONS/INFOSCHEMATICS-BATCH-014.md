@@ -46,4 +46,4 @@ Implementation-level completion of the single selected item at `awaiting-review`
 
 | Item | Start | Result | Evidence | Next human action |
 | --- | --- | --- | --- | --- |
-| `INFOSCHEMATICS-TOOL-043` | `ready` | running | Baseline pending | Review source-panel contract and browser behaviour |
+| `INFOSCHEMATICS-TOOL-043` | `ready` | running | Baseline `a67000c1` | Review source-panel contract and browser behaviour |
