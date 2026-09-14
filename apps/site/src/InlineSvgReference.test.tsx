@@ -126,7 +126,7 @@ describe('InlineSvgReference', () => {
 
     expect(markup).toContain('<svg xmlns="http://www.w3.org/2000/svg"')
     expect(markup).not.toContain('data:image/svg+xml')
-    expect(markup).toContain('data-artefact-id="shared" data-artefact-kind="card"')
+    expect(markup).toContain('data-artefact-id="CARD-001" data-artefact-kind="card"')
     expect(markup).toContain('<button type="button">Inspect Source</button>')
     expect(markup).toContain('role="status"')
   })

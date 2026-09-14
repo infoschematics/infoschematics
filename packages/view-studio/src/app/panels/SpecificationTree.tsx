@@ -1,5 +1,4 @@
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import type { InfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import type { InfoschematicRuntime, RuntimeInterface } from '@infoschematics/view-model/runtime'
 import { type CSSProperties, useState } from 'react'
 
 type SpecificationSection = InfoschematicRuntime['infoschematicSpecificationSections'][number]
@@ -7,10 +6,10 @@ type SpecificationSection = InfoschematicRuntime['infoschematicSpecificationSect
 const uniqueSorted = (values: readonly string[]) =>
   [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
 
-const descendantNodes = (entry: InterfaceConfig, within: readonly InterfaceConfig[]) =>
+const descendantNodes = (entry: RuntimeInterface, within: readonly RuntimeInterface[]) =>
   within.filter((candidate) => candidate.id === entry.id || candidate.id.startsWith(`${entry.id}/`))
 
-const selectionFor = (entry: InterfaceConfig, within: readonly InterfaceConfig[]): InterfaceConfig => {
+const selectionFor = (entry: RuntimeInterface, within: readonly RuntimeInterface[]): RuntimeInterface => {
   const descendants = descendantNodes(entry, within)
   const operations =
     entry.kind === 'operation'
@@ -31,7 +30,7 @@ const selectionFor = (entry: InterfaceConfig, within: readonly InterfaceConfig[]
   }
 }
 
-const groupSelection = ({ group, within }: SpecificationSection): InterfaceConfig => {
+const groupSelection = ({ group, within }: SpecificationSection): RuntimeInterface => {
   const operations = within
     .filter((entry) => entry.kind === 'operation')
     .map((entry) => ({
@@ -44,9 +43,11 @@ const groupSelection = ({ group, within }: SpecificationSection): InterfaceConfi
     description: group.note,
     hasDocument: group.hasDocument,
     id: group.id,
+    kind: 'specification',
     label: group.label,
     operations: operations.length > 0 ? operations : undefined,
     owner: group.owner,
+    parent: '',
     prefix: group.id,
     realisedBy: uniqueSorted(within.flatMap((entry) => entry.realisedBy ?? []))
   }
@@ -59,9 +60,9 @@ export function SpecificationTree({
   selected
 }: {
   onHover: (elements: readonly string[] | null) => void
-  onSelect: (entry: InterfaceConfig) => void
+  onSelect: (entry: RuntimeInterface) => void
   sections: readonly SpecificationSection[]
-  selected: InterfaceConfig | null
+  selected: RuntimeInterface | null
 }) {
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set(sections.map(({ group }) => group.id)))
   const toggle = (id: string) =>
@@ -72,7 +73,7 @@ export function SpecificationTree({
       return next
     })
 
-  const branch = (entry: InterfaceConfig, within: readonly InterfaceConfig[], depth: number) => {
+  const branch = (entry: RuntimeInterface, within: readonly RuntimeInterface[], depth: number) => {
     const children = within.filter((candidate) => candidate.parent === entry.id)
     const chosen = selectionFor(entry, within)
     const open = expanded.has(entry.id)

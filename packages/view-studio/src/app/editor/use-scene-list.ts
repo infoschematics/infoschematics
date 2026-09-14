@@ -29,7 +29,7 @@ import {
  * not, because it is a place in a list rather than an edit.
  */
 export function useSceneList(_running?: { id: string; step: number } | null) {
-  const { config } = useInfoschematic()
+  const { compatibilityConfig: config } = useInfoschematic()
   const authoredStories = useMemo(
     () => config.stories.map((story) => storyForEditing(story, config.standaloneScenes)),
     [config.standaloneScenes, config.stories]

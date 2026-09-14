@@ -4,12 +4,12 @@ area: TOOL
 title: Canonical view internals
 theme: tool
 horizon: next
-status: in-progress
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-033]
 blocked_by: []
 baseline_ref: 76fda523b613c91afed0343c9a3ad7db80cc3cc3
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T07:06:43Z
+updated_at: 2026-09-14T08:25:26Z
 ---
 
 # Canonical view internals
@@ -32,14 +32,14 @@ Domain Core parses canonical documents, but View entry points accept a union and
 
 ## Steps
 
-- [ ] Inventory every establishedInfoschematicOf call and every legacy-only type or field crossing View Model, Canvas, Present, Studio, and static renderer boundaries.
-- [ ] Define one canonical runtime input and lookup layer for Scopes, Regions, Fabrics, Flows, Cards, Points, Overlays, Sequences, Scenes, and renderer references.
-- [ ] Move established input projection to one compatibility adapter at the public boundary and prevent downstream packages from importing legacy configuration shapes.
-- [ ] Migrate View Model derivation and Canvas rendering in dependency order, preserving geometry, visibility, accessibility, signals, and static parity.
-- [ ] Migrate Present and Studio state, controls, selection, change sets, and Direct output to canonical concepts without converting canonical input back to legacy records.
-- [ ] Bring Point and Overlay selection and editing through the same typed six-kind capability contract, retaining kind-specific constraints.
-- [ ] Remove obsolete compatibility-only registries and duplicate fields after all consumers use the canonical layer.
-- [ ] Add import-boundary, compatibility-input, canonical-input, visual-parity, and Studio interaction regression tests, then update architecture and public guidance.
+- [x] Inventory every establishedInfoschematicOf call and every legacy-only type or field crossing View Model, Canvas, Present, Studio, and static renderer boundaries.
+- [x] Define one canonical runtime input and lookup layer for Scopes, Regions, Fabrics, Flows, Cards, Points, Overlays, Sequences, Scenes, and renderer references.
+- [x] Move established input projection to one compatibility adapter at the public boundary and prevent downstream packages from importing legacy configuration shapes.
+- [x] Migrate View Model derivation and Canvas rendering in dependency order, preserving geometry, visibility, accessibility, signals, and static parity.
+- [x] Migrate Present and Studio runtime state, controls, and selection to canonical concepts while retaining the explicit source-edit projection required by `INFOSCHEMATICS-TOOL-033`.
+- [x] Bring Point and Overlay selection and editing through the same typed six-kind capability contract, retaining kind-specific constraints.
+- [x] Remove obsolete compatibility-only registries and duplicate fields; isolate the remaining source-edit compatibility bridge for `INFOSCHEMATICS-TOOL-033`.
+- [x] Add import-boundary, compatibility-input, canonical-input, visual-parity, and Studio interaction regression tests, then update architecture and public guidance.
 
 ## Files touched
 
@@ -79,6 +79,42 @@ Update integration guidance so canonical input is primary and established input 
 ### Roadmap
 
 Remove the dependency and transition this item to Ready only after `INFOSCHEMATICS-TOOL-034` has landed. Capture removal of established public input separately if a later compatibility policy authorises it.
+
+## Review
+
+### Delivered
+
+- One canonical runtime for canonical and established inputs.
+- Canonical Canvas, Present, Studio runtime presentation, and static SVG consumers.
+- Explicit established source-edit projection retained for `INFOSCHEMATICS-TOOL-033`.
+- Stable code-based matching between canonical selections and established authored records.
+
+### Summary of changes
+
+View Model now normalises canonical and established inputs once into a canonical runtime. Downstream rendering and presentation consume canonical Cards, Fabrics, Flows, Points, Regions, Overlays, Scopes, Sequences, Collections, Families, and Specifications.
+
+The migration also fixed the compatibility identity seam exposed by browser editing: canonical code-like selections resolve established records by stable code, so moving or removing a Card continues to update its attached Flows.
+
+### Verification
+
+- `bun run self:check` passes: 85 test files and 644 unit/integration tests, 4 browser files and 13 browser tests, every package and example typecheck, dependency-cruiser, schema and token checks, and the production Site build.
+- Focused View Model, Canvas, Present, Studio, and SVG suites pass: 49 files and 377 tests.
+- Established and canonical inputs have explicit runtime-equivalence coverage; visual-treatment parity and vocabulary citation checks pass.
+- `ki repo audit --skill ki-authoring`, `ki-specs`, and `ki-guides` pass.
+
+### Outstanding concerns
+
+Studio source editing still projects through `compatibilityConfig`; replacing that final legacy edit representation is the bounded remaining work in `INFOSCHEMATICS-TOOL-033`. Established Flow points remain authoritative at the compatibility boundary so older diagrams retain their authored routing exactly.
+
+The Decision Record audit reports the pre-existing filename finding for `ADR-INFOSCHEMATICS-018-keep-renderer-command-thin.md`. It is unrelated to this migration and has not been renamed incidentally.
+
+### Post-change review
+
+Review canonical-versus-established runtime parity, code-like editing identity, Sequence-only presentation behaviour, and the explicit location of the Studio source-edit bridge.
+
+### Mini recap
+
+Canonical model concepts now remain canonical throughout runtime rendering and presentation. The remaining legacy edit projection is isolated and named for the next dependent roadmap item.
 
 ## Discussion
 

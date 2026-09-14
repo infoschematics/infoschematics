@@ -1,5 +1,4 @@
-import type { FabricConfig } from '@infoschematics/domain-model/fabric'
-import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { Overlay } from '@infoschematics/domain-model'
 import {
   type CardDetailOverrides,
   resolveCardDomain,
@@ -38,9 +37,18 @@ export type DiagramViewportController = Readonly<{
   zoomOut: () => void
 }>
 
-import { createInfoschematicRuntime, type RuntimeFlow as InfoschematicFlow } from '@infoschematics/view-model/runtime'
+import {
+  createInfoschematicRuntime,
+  type RuntimeFlow as InfoschematicFlow,
+  type RuntimeFabric
+} from '@infoschematics/view-model/runtime'
 import { flowSignalDuration, flowSignalKey } from './flow-signals.ts'
-import { type FabricRendererProps, resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
+import {
+  type FabricRendererProps,
+  type RendererProperties,
+  resolveInfoschematicRenderer,
+  useInfoschematicRenderers
+} from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
 import {
   centerViewportAt,
@@ -78,14 +86,14 @@ const pointInDiagram = (svg: SVGSVGElement, clientX: number, clientY: number): P
   return { x: mapped.x, y: mapped.y }
 }
 
-const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
-  const width = graphic.placement?.width ?? Math.min(320, viewBox.width / 3)
-  const height = graphic.placement?.height ?? 80
+const graphicBounds = (graphic: Overlay, viewBox: Box): Box => {
+  const width = graphic.bounds?.width ?? Math.min(320, viewBox.width / 3)
+  const height = graphic.bounds?.height ?? 80
   return {
     height,
     width,
-    x: graphic.placement?.x ?? viewBox.x + (viewBox.width - width) / 2,
-    y: graphic.placement?.y ?? viewBox.y + (viewBox.height - height) / 2
+    x: graphic.bounds?.x ?? viewBox.x + (viewBox.width - width) / 2,
+    y: graphic.bounds?.y ?? viewBox.y + (viewBox.height - height) / 2
   }
 }
 
@@ -95,8 +103,8 @@ const graphicBounds = (graphic: GraphicConfig, viewBox: Box): Box => {
  * retain their Scope colours as a compatibility fallback.
  */
 function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
-  const caption = fabric.appearance?.caption ?? fabric.label
-  const detail = fabric.appearance?.detail ?? fabric.detail
+  const caption = typeof fabric.properties?.caption === 'string' ? fabric.properties.caption : fabric.label
+  const detail = typeof fabric.properties?.detail === 'string' ? fabric.properties.detail : fabric.description
   const centre = bounds.x + bounds.width / 2
   const captionY = bounds.y + bounds.height / 2 - (detail ? 4 : 0)
 
@@ -122,7 +130,7 @@ function DefaultFabric({ fabric, bounds }: FabricRendererProps) {
   )
 }
 
-function DefaultGraphic({ graphic, bounds }: { graphic: GraphicConfig; bounds: Box }) {
+function DefaultGraphic({ graphic, bounds }: { graphic: Overlay; bounds: Box }) {
   const { height, width, x, y } = bounds
   const label = graphic.label ?? graphic.id
 
@@ -258,7 +266,7 @@ export function InfoschematicDiagram({
   /** Legacy Design grid overlay, independent of the authored grid treatment. */
   grid?: boolean
   /** A resolved Graphic drawn by the active Story Scene. */
-  graphic?: GraphicConfig
+  graphic?: Overlay
   visibleScopes: ReadonlySet<string>
   /** Overview map shown while zoomed; false disables it, otherwise selects its corner. */
   minimap?: false | DiagramMinimapPosition
@@ -290,7 +298,7 @@ export function InfoschematicDiagram({
   const runtime = useMemo(
     () =>
       previewing
-        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.config, previewOperations).config)
+        ? createInfoschematicRuntime(applyArtefactOperations(hostRuntime.compatibilityConfig, previewOperations).config)
         : hostRuntime,
     [hostRuntime, previewing, previewOperations]
   )
@@ -300,6 +308,7 @@ export function InfoschematicDiagram({
     infoschematicAnnotationLabelPositions,
     infoschematicCardIsVisible,
     infoschematicCards,
+    infoschematicCollections,
     infoschematicEndpointCodes,
     infoschematicEndpointLabels,
     infoschematicFabricIsVisible,
@@ -307,12 +316,12 @@ export function InfoschematicDiagram({
     infoschematicFamilies,
     infoschematicFlowIsVisible,
     infoschematicFlows,
-    infoschematicInterfaceById,
     infoschematicLayout,
     infoschematicPlaceables,
     infoschematicRegions,
     infoschematicRegisterWith,
     infoschematicScopes,
+    infoschematicSpecificationsFor,
     infoschematicViewBox
   } = runtime
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
@@ -348,11 +357,11 @@ export function InfoschematicDiagram({
           : flow
       })
     const effectiveIds = new Set(effective.map((flow) => flow.id))
-    const authoredIds = new Set(hostRuntime.config.infoschematic.flows.map((flow) => flow.id))
+    const authoredIds = new Set(hostRuntime.config.diagram.flows.map((flow) => flow.id))
     const legacyDrafts = suppliedFlows.filter((flow) => !authoredIds.has(flow.id) && !effectiveIds.has(flow.id))
     return [...effective, ...legacyDrafts]
   }, [
-    hostRuntime.config.infoschematic.flows,
+    hostRuntime.config.diagram.flows,
     infoschematicFamilies,
     infoschematicFlowIsVisible,
     infoschematicFlows,
@@ -362,12 +371,18 @@ export function InfoschematicDiagram({
     visibleScopes
   ])
   const renderers = useInfoschematicRenderers()
-  const requestedVisualTreatment = resolveVisualTreatment(config.infoschematic.appearance, cardDetails)
-  const domains = config.infoschematic.domains ?? []
+  const requestedVisualTreatment = resolveVisualTreatment(config.diagram.appearance, cardDetails)
+  const domains = infoschematicCollections
   const Definitions = renderers.definitions
   const activeGraphicRenderer =
     mode !== 'design' && graphic
-      ? resolveInfoschematicRenderer(renderers, 'graphic', graphic.renderer, graphic.properties, graphic.id)
+      ? resolveInfoschematicRenderer(
+          renderers,
+          'graphic',
+          graphic.kind,
+          graphic.properties as RendererProperties | undefined,
+          graphic.id
+        )
       : undefined
   const familyById = new Map(infoschematicFamilies.map((family) => [family.id, family]))
   const familyLayer = new Map(infoschematicFamilies.map((family, index) => [family.id, index]))
@@ -453,7 +468,7 @@ export function InfoschematicDiagram({
    * and waypoint controls simply are not rendered.
    */
   const editing = mode === 'design'
-  const graphics = editing ? config.infoschematic.graphics : graphic ? [graphic] : []
+  const graphics = editing ? config.diagram.overlays : graphic ? [graphic] : []
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
   const focusing = mode === 'scenes' || mode === 'stories'
@@ -1219,7 +1234,7 @@ export function InfoschematicDiagram({
    */
   const endpointLabel = (id: string) => infoschematicEndpointLabels.get(id) ?? id
 
-  const fabricTitle = (fabric: FabricConfig) => `${fabric.code}: ${fabric.label} · ${fabric.detail}`
+  const fabricTitle = (fabric: RuntimeFabric) => `${fabric.code}: ${fabric.label} · ${fabric.detail}`
 
   const fabricClass = (id: string) => {
     return highlight?.endpoints.has(id) ? 'infoschematic-fabric highlighted' : 'infoschematic-fabric'
@@ -1238,8 +1253,10 @@ export function InfoschematicDiagram({
     const family = familyById.get(flow.family) ?? infoschematicFamilies[0]
     const sourceCode = infoschematicEndpointCodes.get(flow.source) ?? flow.source
     const targetCode = infoschematicEndpointCodes.get(flow.target) ?? flow.target
-    const conforms = (flow.conformsTo ?? []).map((id) => infoschematicInterfaceById.get(id)?.label ?? id).join(' or ')
-    const call = flow.operation ? ` · ${flow.operation}` : ''
+    const realisedSpecifications = infoschematicSpecificationsFor?.(flow.id) ?? []
+    const conforms = realisedSpecifications.map(({ label }) => label).join(' or ')
+    const operation = realisedSpecifications.find(({ kind }) => kind === 'operation')
+    const call = operation ? ` · ${operation.label}` : ''
     const flowSelected = artefactSelected(selection, flow.code)
     return (
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
@@ -1439,7 +1456,13 @@ export function InfoschematicDiagram({
     const renderer =
       !editing && graphic === entry
         ? activeGraphicRenderer
-        : resolveInfoschematicRenderer(renderers, 'graphic', entry.renderer, entry.properties, entry.id)
+        : resolveInfoschematicRenderer(
+            renderers,
+            'graphic',
+            entry.kind,
+            entry.properties as RendererProperties | undefined,
+            entry.id
+          )
     const Renderer = renderer?.Component
     return (
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
@@ -1755,12 +1778,12 @@ export function InfoschematicDiagram({
               id: fabric.id,
               kind: 'fabric'
             } as const satisfies ArtefactSelection
-            const rendererKey = fabric.appearance?.renderer
+            const rendererKey = fabric.renderer
             const renderer = resolveInfoschematicRenderer(
               renderers,
               'fabric',
               rendererKey,
-              fabric.appearance?.properties,
+              fabric.properties as RendererProperties | undefined,
               fabric.id
             )
             const Renderer = renderer?.Component
@@ -2036,7 +2059,7 @@ export function InfoschematicDiagram({
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 data-card-compact={visualTreatment.card.compact || undefined}
-                data-domain={domain?.id}
+                data-collection={domain?.id}
                 data-ink={resolveReadableInk(appearance.fill)}
                 key={card.id}
                 onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}

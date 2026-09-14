@@ -76,7 +76,7 @@ describe('Canvas', () => {
     const markup = renderToStaticMarkup(<Canvas config={config} renderers={{ fabrics: { custom: CustomFabric } }} />)
 
     expect(markup).toContain('Configured source')
-    expect(markup).toContain('data-fabric="custom"')
+    expect(markup).toContain('data-fabric="SYS-02"')
     expect(markup).toContain('cx="250"')
     expect(markup).toContain('Fallback Fabric')
     expect(markup).toContain('x="500"')
@@ -123,9 +123,9 @@ describe('Canvas', () => {
     })
     const Badge = ({ fabric, properties }: FabricRendererProps & { properties: RendererProperties }) => (
       <text
-        data-authored-label={fabric.appearance?.properties?.label}
+        data-authored-label={fabric.properties?.label}
         data-badge={properties.label}
-        data-renderer={fabric.appearance?.renderer}
+        data-renderer={fabric.renderer?.key}
       >
         validated
       </text>
@@ -133,7 +133,7 @@ describe('Canvas', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={config}
-        graphic={{ id: 'missing-graphic', label: 'Graphic fallback', renderer: 'missing' }}
+        graphic={{ id: 'missing-graphic', kind: { key: 'missing', version: 1 }, label: 'Graphic fallback' }}
         renderers={{
           fabrics: [
             {
@@ -166,7 +166,7 @@ describe('Canvas', () => {
         data-authored-caption={graphic.properties?.caption}
         data-bounds={`${bounds.x},${bounds.y},${bounds.width},${bounds.height}`}
         data-graphic={graphic.id}
-        data-renderer={graphic.renderer}
+        data-renderer={graphic.kind.key}
       >
         {properties.caption}
       </text>
@@ -174,7 +174,12 @@ describe('Canvas', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={defineInfoschematic({ title: 'Graphic' })}
-        graphic={{ id: 'custom-graphic', renderer: 'caption', properties: { caption: 'Host graphic' } }}
+        graphic={{
+          id: 'custom-graphic',
+          kind: { key: 'caption', version: 1 },
+          label: 'Host graphic',
+          properties: { caption: 'Host graphic' }
+        }}
         renderers={{
           graphics: [
             {

@@ -1,4 +1,4 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
 import { describe, expect, it } from 'vitest'
 import { createInfoschematicRuntime } from './runtime.ts'
 
@@ -81,19 +81,19 @@ describe('createInfoschematicRuntime', () => {
     const runtime = createInfoschematicRuntime(config)
     const everyScope = new Set(['inside', 'outside'])
 
-    expect(runtime.infoschematicRegister.byCode('IN-01')).toMatchObject({ id: 'source', kind: 'card' })
+    expect(runtime.infoschematicRegister.byCode('IN-01')).toMatchObject({ id: 'IN-01', kind: 'card' })
     expect(runtime.infoschematicFlows[0]?.d).toBe('M260 140 H500')
     expect(runtime.infoschematicPlaceables(everyScope)).toEqual([
       {
         box: { x: 100, y: 100, width: 160, height: 80 },
         code: 'IN-01',
-        id: 'source',
+        id: 'IN-01',
         ports: { east: 1 }
       },
       {
         box: { x: 500, y: 100, width: 160, height: 80 },
         code: 'OUT-01',
-        id: 'target',
+        id: 'OUT-01',
         ports: { west: 1 }
       }
     ])
@@ -103,6 +103,32 @@ describe('createInfoschematicRuntime', () => {
     expect(
       runtime.infoschematicFlowIsVisible(runtime.infoschematicFlows[0]!, new Set(['request']), new Set(['inside']))
     ).toBe(false)
+  })
+
+  it('derives equivalent canonical and established runtime values at the public boundary', () => {
+    const established = createInfoschematicRuntime(config)
+    const canonical = createInfoschematicRuntime(defineInfoschematicModel(infoschematicModelOf(config)))
+
+    expect({
+      cards: established.infoschematicCards,
+      families: established.infoschematicFamilies,
+      flows: established.infoschematicFlows,
+      overlays: established.infoschematicOverlays,
+      points: established.infoschematicPoints,
+      regions: established.infoschematicRegions,
+      scopes: established.infoschematicScopes,
+      sequences: established.sequences
+    }).toEqual({
+      cards: canonical.infoschematicCards,
+      families: canonical.infoschematicFamilies,
+      flows: canonical.infoschematicFlows,
+      overlays: canonical.infoschematicOverlays,
+      points: canonical.infoschematicPoints,
+      regions: canonical.infoschematicRegions,
+      scopes: canonical.infoschematicScopes,
+      sequences: canonical.sequences
+    })
+    expect(canonical.config).toEqual(defineInfoschematicModel(infoschematicModelOf(config)))
   })
 
   it('resolves Story Graphics only through authored Graphic records', () => {
@@ -123,7 +149,10 @@ describe('createInfoschematicRuntime', () => {
       })
     )
 
-    expect(runtime.stories[0]?.steps[0]?.graphic).toMatchObject({ id: 'annotation', renderer: 'custom' })
+    expect(runtime.stories[0]?.steps[0]?.graphic).toMatchObject({
+      id: 'annotation',
+      kind: { key: 'custom', version: 1 }
+    })
     expect(runtime.stories[0]?.steps[1]?.graphic).toBeUndefined()
   })
 })

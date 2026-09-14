@@ -189,8 +189,8 @@ describe('presentation state', () => {
 
     expect(initial.visibleScopes).toEqual(new Set(['one', 'two']))
     expect(initial.visibleFamilies).toEqual(new Set(['delivery']))
-    expect(initiallyShown.visibleFlows.map((flow) => flow.id)).toEqual(['delivery-flow', 'return-flow'])
-    expect(shown.visibleCards.map((card) => card.id)).toEqual(['source'])
+    expect(initiallyShown.visibleFlows.map((flow) => flow.id)).toEqual(['DEL-001', 'DEL-002'])
+    expect(shown.visibleCards.map((card) => card.id)).toEqual(['ONE-001'])
     expect(shown.visibleFlows).toEqual([])
   })
 
@@ -212,10 +212,10 @@ describe('presentation state', () => {
     expect(themed).toMatchObject({
       playing: null,
       standaloneSceneId: null,
-      thematicSceneId: 'theme-scene'
+      thematicSceneId: 'THEME-001'
     })
     expect(playing).toMatchObject({
-      playing: { id: 'story', step: 0 },
+      playing: { id: 'STORY-001', step: 0 },
       standaloneSceneId: null,
       thematicSceneId: null
     })
@@ -255,8 +255,8 @@ describe('presentation state', () => {
     })
 
     expect(first.signals).toEqual([
-      { flowId: 'delivery-flow', occurrenceKey: 'present-scene-1' },
-      { flowId: 'return-flow', occurrenceKey: 'present-scene-1' }
+      { flowId: 'DEL-001', occurrenceKey: 'present-scene-1' },
+      { flowId: 'DEL-002', occurrenceKey: 'present-scene-1' }
     ])
     expect(derivePresentation(source, unrelated).signals).toEqual(first.signals)
   })
@@ -300,11 +300,11 @@ describe('presentation state', () => {
 
     expect(derivePresentation(source, cleared).signals).toEqual([])
     expect(derivePresentation(source, replayed).signals).toEqual([
-      { flowId: 'delivery-flow', occurrenceKey: 'present-scene-2' },
-      { flowId: 'return-flow', occurrenceKey: 'present-scene-2' }
+      { flowId: 'DEL-001', occurrenceKey: 'present-scene-2' },
+      { flowId: 'DEL-002', occurrenceKey: 'present-scene-2' }
     ])
     expect(derivePresentation(source, changed).signals).toEqual([
-      { flowId: 'delivery-flow', occurrenceKey: 'present-scene-3' }
+      { flowId: 'DEL-001', occurrenceKey: 'present-scene-3' }
     ])
   })
 
@@ -336,13 +336,13 @@ describe('presentation state', () => {
     })
 
     expect(derivePresentation(source, started).signals).toEqual([
-      { flowId: 'delivery-flow', occurrenceKey: 'present-scene-1' },
-      { flowId: 'return-flow', occurrenceKey: 'present-scene-1' }
+      { flowId: 'DEL-001', occurrenceKey: 'present-scene-1' },
+      { flowId: 'DEL-002', occurrenceKey: 'present-scene-1' }
     ])
     expect(derivePresentation(source, advanced).signals).toEqual([])
     expect(derivePresentation(source, returned).signals).toEqual([
-      { flowId: 'delivery-flow', occurrenceKey: 'present-scene-3' },
-      { flowId: 'return-flow', occurrenceKey: 'present-scene-3' }
+      { flowId: 'DEL-001', occurrenceKey: 'present-scene-3' },
+      { flowId: 'DEL-002', occurrenceKey: 'present-scene-3' }
     ])
   })
 })

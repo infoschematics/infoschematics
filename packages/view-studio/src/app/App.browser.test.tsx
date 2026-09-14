@@ -55,9 +55,9 @@ test('Studio keyboard edits render one reviewable change with undo, redo and rev
   design.click()
   await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
 
-  const card = container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!card) throw new Error('Studio did not render Card A')
-  const currentCard = () => container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const currentCard = () => container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 21 }))
   window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 21 }))
   await expect.poll(() => card.classList.contains('selected')).toBe(true)

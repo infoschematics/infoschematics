@@ -245,7 +245,7 @@ export function useEditor(
     createdCards: readonly CreatedComponent[]
   ) => EditableDiagram
 ) {
-  const { config } = useInfoschematic()
+  const { compatibilityConfig: config } = useInfoschematic()
   const storage = config.id
   /*
    * Which editor is open, if either.

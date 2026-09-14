@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematic, parseInfoschematicDocument } from '@infoschematics/domain-core'
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import type { Callout } from '@infoschematics/domain-model'
 import {
   defineInfoschematicRenderers,
   type FabricRendererProps,
@@ -64,8 +64,8 @@ describe('App', () => {
   it('wires all-six typed Design preview without replacing legacy handle callbacks', async () => {
     const source = await readFile(new URL('./App.tsx', import.meta.url), 'utf8')
 
-    expect(source).toContain('fabrics: runtime.config.infoschematic.fabrics')
-    expect(source).toContain('graphics: runtime.config.infoschematic.graphics')
+    expect(source).toContain('fabrics: infoschematicFabrics')
+    expect(source).toContain('overlays: infoschematicOverlays')
     expect(source).toContain('artefactOperations={editor.artefactOperations}')
     expect(source).toContain('selectedArtefact={editor.selectedArtefact}')
     expect(source).toContain('editorRef.current.selectArtefact(selection)')
@@ -234,7 +234,7 @@ diagram:
     )
 
     expect(markup).toContain('id="host-gradient"')
-    expect(markup).toContain('data-fabric="custom"')
+    expect(markup).toContain('data-fabric="SYS-01"')
     expect(markup).toContain('cx="250"')
     expect(markup).toContain('data-scope-icon="13"')
     expect(markup).toContain('Fallback Fabric')
@@ -258,7 +258,10 @@ diagram:
       })
     )
 
-    expect(resolved.stories[0]?.steps[0]?.graphic).toMatchObject({ id: 'annotation', renderer: 'custom' })
+    expect(resolved.stories[0]?.steps[0]?.graphic).toMatchObject({
+      id: 'annotation',
+      kind: { key: 'custom', version: 1 }
+    })
     expect(resolved.stories[0]?.steps[1]?.graphic).toBeUndefined()
   })
 
@@ -271,7 +274,7 @@ diagram:
 
 const calloutRuntime = createInfoschematicRuntime(defineInfoschematic({ title: 'Studio Callout renderers' }))
 
-const renderSceneCallout = (calloutConfig: CalloutConfig, renderers = defineInfoschematicRenderers({})) =>
+const renderSceneCallout = (calloutConfig: Callout, renderers = defineInfoschematicRenderers({})) =>
   renderToStaticMarkup(
     <InfoschematicRenderersContext value={renderers}>
       <InfoschematicContext value={calloutRuntime}>
@@ -310,7 +313,11 @@ describe('Studio SceneCallout renderers', () => {
     })
 
     const markup = renderSceneCallout(
-      { body: 'Studio audience content', properties: { tone: 'urgent' }, renderer: 'emphasis' },
+      {
+        body: 'Studio audience content',
+        kind: { key: 'emphasis', version: 1 },
+        properties: { tone: 'urgent' }
+      },
       renderers
     )
 
@@ -323,7 +330,7 @@ describe('Studio SceneCallout renderers', () => {
   it('reports an unknown Callout and retains the standard Studio content', () => {
     const onDiagnostic = vi.fn()
     const markup = renderSceneCallout(
-      { body: 'Studio audience content', renderer: 'missing' },
+      { body: 'Studio audience content', kind: { key: 'missing', version: 1 } },
       defineInfoschematicRenderers({ callouts: [], onDiagnostic })
     )
 
@@ -337,7 +344,11 @@ describe('Studio SceneCallout renderers', () => {
   it('reports invalid Callout properties and retains the standard Studio content', () => {
     const onDiagnostic = vi.fn()
     const markup = renderSceneCallout(
-      { body: 'Studio audience content', properties: { tone: 3 }, renderer: 'emphasis' },
+      {
+        body: 'Studio audience content',
+        kind: { key: 'emphasis', version: 1 },
+        properties: { tone: 3 }
+      },
       defineInfoschematicRenderers({
         callouts: [
           {

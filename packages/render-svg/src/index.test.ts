@@ -194,10 +194,10 @@ describe('renderInfoschematicSvg', () => {
     const svg = renderInfoschematicSvg(identified, { visibility: { graphics: 'all' } })
     const expected = [
       ['region', 'runtime'],
-      ['fabric', 'fabric/shared'],
-      ['flow', 'call'],
-      ['card', 'source'],
-      ['point', 'point/shared'],
+      ['fabric', 'FAB-001'],
+      ['flow', 'CALL-001'],
+      ['card', 'ONE-001'],
+      ['point', 'PNT-001'],
       ['overlay', 'note']
     ] as const
 
@@ -357,7 +357,7 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.surfaces.regionDot}"`)
     expect(svg).toContain('stroke-linecap="round"')
     expect(svg).toContain('data-label-placement="south-east"')
-    expect(svg).toContain('data-domain="platform"')
+    expect(svg).toContain('data-collection="platform"')
     expect(svg).toContain('data-stereotype="service"')
     expect(svg).toContain('aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"')
     expect(svg).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
@@ -493,7 +493,7 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(representative, { signals: ['call', 'missing'] })).toBe(signalled)
     expect(baseline).not.toContain('data-signalled=')
     expect(baseline).not.toContain('infoschematic-flow-signal')
-    expect(signalled).toContain('data-id="call" data-signalled="true"')
+    expect(signalled).toContain('data-id="CALL-001" data-signalled="true"')
     expect(signalled).toContain('class="infoschematic-flow-signal"')
     expect(signalled.match(/class="infoschematic-flow-signal"/g)).toHaveLength(1)
     expect(signalled).toContain(`stroke-width="${visualTokens.canvas.flows.signalStillWidth}"`)
@@ -588,17 +588,17 @@ describe('renderInfoschematicSvg', () => {
       visibility: { scopes: ['one', 'two'], unfocused: 'hide' }
     })
 
-    expect(focused).toContain('data-id="source"')
+    expect(focused).toContain('data-id="ONE-001"')
     expect(focused).toContain('data-id="note"')
-    expect(focused).not.toContain('data-id="target"')
-    expect(focused).not.toContain('data-id="call"')
+    expect(focused).not.toContain('data-id="TWO-001"')
+    expect(focused).not.toContain('data-id="CALL-001"')
 
     const oneScope = renderInfoschematicSvg(representative, {
       visibility: { scopes: ['one'] }
     })
-    expect(oneScope).toContain('data-id="source"')
-    expect(oneScope).not.toContain('data-id="target"')
-    expect(oneScope).not.toContain('data-id="call"')
+    expect(oneScope).toContain('data-id="ONE-001"')
+    expect(oneScope).not.toContain('data-id="TWO-001"')
+    expect(oneScope).not.toContain('data-id="CALL-001"')
   })
 
   it('fails explicitly when a selected Scene does not exist', () => {

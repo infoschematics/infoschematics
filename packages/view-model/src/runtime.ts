@@ -1,36 +1,71 @@
-import type { InfoschematicConfig, InfoschematicInput } from '@infoschematics/domain-model'
-import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
-import type { ScopeConfig } from '@infoschematics/domain-model/scope'
-import type { SequenceConfig, SequencePresentationConfig } from '@infoschematics/domain-model/sequence'
-import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
-import type { ThematicSceneConfig } from '@infoschematics/domain-model/theme'
+import { defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
+import type {
+  ArchitecturalScope,
+  Callout,
+  Card,
+  DefinedInfoschematic,
+  Fabric,
+  InfoschematicInput,
+  Operation,
+  Overlay,
+  SequencePresentation,
+  SpecificationDocument
+} from '@infoschematics/domain-model'
+import type { PortId } from '@infoschematics/domain-model/ports'
 import { adapterBoundsFor, adapterFloor } from './assembly.ts'
 import { establishedInfoschematicOf } from './compatibility.ts'
 import type { AttachedEnd, CreatedComponent, CreatedFlow } from './editable.ts'
 import type { Box, Offset, Point } from './geometry.ts'
 import { routeEndpoints, routePath } from './geometry.ts'
 import { placeLabels } from './placement.ts'
-import { auditPorts, minimumPortGap, type PortCounts } from './ports.ts'
+import { auditPorts, minimumPortGap, type PortCounts, portsForBox } from './ports.ts'
 import { moveRouteEnd, normaliseRoute, routeBetweenPorts } from './routing.ts'
 import { annotationLabelWidth, visualTokens } from './tokens.ts'
 
-export type RuntimeCard = InfoschematicConfig['infoschematic']['cards'][number] & {
+export type RuntimeCard = Card & {
   bounds: Box
+  code: string
+  detail: string
+  domain?: string
   group: string
   kind: 'card'
+  placement: { box: Box; ports?: PortCounts }
   ports?: PortCounts
+  scope: string
+  scopes: readonly string[]
+  wraps?: string
 }
 
-export type RuntimeFabric = InfoschematicConfig['infoschematic']['fabrics'][number] & {
+export type RuntimeFabric = Omit<Fabric, 'kind'> & {
   bounds: Box
+  code: string
+  detail: string
   group: string
   kind: 'fabric'
+  placement: { box: Box; ports?: PortCounts }
   ports?: PortCounts
+  renderer?: Fabric['kind']
+  scope: string
+  scopes: readonly string[]
 }
 
-export type RuntimeFlow = InfoschematicConfig['infoschematic']['flows'][number] & { d: string }
+export type RuntimeFlow = {
+  id: string
+  code: string
+  family: string
+  source: string
+  target: string
+  sourcePort: PortId
+  targetPort: PortId
+  bidirectional?: boolean
+  conformsTo?: readonly string[]
+  dashed?: boolean
+  label?: { along: number }
+  operation?: string
+  over?: string
+  points: readonly Point[]
+  d: string
+}
 
 export type RuntimeIdentity = {
   code: string
@@ -46,48 +81,6 @@ export type RuntimeIdentity = {
   wraps?: string
 }
 
-export type RuntimeStandaloneScene = {
-  id: string
-  code: string
-  label: string
-  short?: string
-  description: string
-  components: readonly string[]
-  flows: readonly string[]
-}
-
-export type RuntimeStoryScene = Omit<StorySceneConfig, 'callout' | 'graphic'> & {
-  caption: string
-  hold: number
-  components: readonly string[]
-  flows: readonly string[]
-  graphic?: GraphicConfig
-  callout?: Point
-  takeaways?: readonly string[]
-  scene?: string
-}
-
-export type RuntimeStory = {
-  id: string
-  code: string
-  label: string
-  short?: string
-  question: string
-  steps: readonly RuntimeStoryScene[]
-}
-
-export type RuntimeThemeScene = Omit<ThematicSceneConfig, 'callout' | 'description'> & {
-  description: string
-  headline: string
-  components: readonly string[]
-  flows: readonly string[]
-  profile?: readonly string[]
-  takeaways?: readonly string[]
-  cover?: true
-  logo?: string
-  callout?: Point
-}
-
 export type RuntimeSequenceScene = {
   id: string
   code: string
@@ -98,13 +91,16 @@ export type RuntimeSequenceScene = {
   hold: number
   components: readonly string[]
   flows: readonly string[]
-  graphic?: GraphicConfig
+  graphic?: Overlay
   callout?: Point
-  calloutConfig?: CalloutConfig
+  calloutConfig?: Callout
   takeaways?: readonly string[]
   profile?: readonly string[]
   cover?: true
   logo?: string
+  scene?: string
+  short?: string
+  title?: string
 }
 
 export type RuntimeSequence = {
@@ -112,9 +108,24 @@ export type RuntimeSequence = {
   code: string
   label: string
   description: string
-  presentation: SequencePresentationConfig
+  presentation: SequencePresentation
   scenes: readonly RuntimeSequenceScene[]
 }
+
+/** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
+export type RuntimeStandaloneScene = RuntimeSequenceScene & { scene?: string; short?: string }
+/** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
+export type RuntimeThemeScene = RuntimeSequenceScene & { scene?: string; short?: string }
+/** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
+export type RuntimeStory = {
+  id: string
+  code: string
+  label: string
+  question: string
+  steps: readonly RuntimeSequenceScene[]
+}
+/** @deprecated Use RuntimeSequenceScene. */
+export type RuntimeStoryScene = RuntimeSequenceScene & { scene?: string; short?: string; title?: string }
 
 /** Safe readable fallback for timed Scenes without an authored duration. */
 export const defaultSceneDuration = 3100
@@ -151,172 +162,235 @@ const membershipVisible = (
     ? entry.scopes.every((scope) => visibleScopes.has(scope))
     : entry.scopes.some((scope) => visibleScopes.has(scope))
 
+export type RuntimeScope = ArchitecturalScope & {
+  color: string
+  fill: string
+  icon?: string
+  prefix: string
+}
+
+export type RuntimeInterface = {
+  id: string
+  prefix: string
+  label: string
+  description: string
+  kind: 'specification' | 'interface' | 'operation'
+  parent: string
+  owner: string
+  hasDocument: boolean
+  documents?: readonly SpecificationDocument[]
+  contract?: string
+  href?: string
+  version?: string
+  realisedBy?: readonly string[]
+  operations?: readonly Operation[]
+}
+
+const specificationNodesOf = (model: DefinedInfoschematic): readonly RuntimeInterface[] =>
+  model.specifications.flatMap((group) =>
+    group.specifications.flatMap((specification) => {
+      const specificationPath = `${group.id}/${specification.id}`
+      const primaryDocument = specification.documents?.[0]
+      const shared = {
+        owner: specification.owner ?? '',
+        hasDocument: specification.documents?.some(({ href }) => Boolean(href)) ?? false,
+        documents: specification.documents,
+        contract: primaryDocument?.code,
+        href: primaryDocument?.href,
+        version: primaryDocument?.version
+      }
+      return [
+        {
+          ...shared,
+          description: specification.description ?? '',
+          id: specificationPath,
+          kind: 'specification' as const,
+          label: specification.label,
+          parent: group.id,
+          prefix: specification.id,
+          realisedBy: specification.realisedBy
+        },
+        ...(specification.interfaces ?? []).flatMap((interfaceEntry) => {
+          const interfacePath = `${specificationPath}/${interfaceEntry.id}`
+          return [
+            {
+              ...shared,
+              description: interfaceEntry.description ?? '',
+              id: interfacePath,
+              kind: 'interface' as const,
+              label: interfaceEntry.label,
+              operations: interfaceEntry.operations,
+              parent: specificationPath,
+              prefix: interfaceEntry.id,
+              realisedBy: interfaceEntry.realisedBy
+            },
+            ...(interfaceEntry.operations ?? []).map((operation) => ({
+              ...shared,
+              description: operation.description ?? '',
+              id: `${interfacePath}/${operation.id}`,
+              kind: 'operation' as const,
+              label: operation.label,
+              parent: interfacePath,
+              prefix: operation.id,
+              realisedBy: operation.realisedBy
+            }))
+          ]
+        })
+      ]
+    })
+  )
+
 export const createInfoschematicRuntime = (input: InfoschematicInput) => {
-  const config = establishedInfoschematicOf(input)
-  const definition = config.infoschematic
+  const config = defineInfoschematicModel('infoschematic' in input ? infoschematicModelOf(input) : input)
+  const compatibilityConfig = 'infoschematic' in input ? input : establishedInfoschematicOf(config)
+  const definition = config.diagram
+  const establishedFlowPoints =
+    'infoschematic' in input ? new Map(input.infoschematic.flows.map((flow) => [flow.code, flow.points])) : undefined
+  const specificationNodes = specificationNodesOf(config)
+  const scopesOf = (id: string) => config.scopes.filter((scope) => scope.elements.includes(id)).map((scope) => scope.id)
   const cards: RuntimeCard[] = definition.cards.map((card) => ({
     ...card,
-    bounds: card.placement.box,
-    group: card.scope,
+    bounds: card.bounds,
+    code: card.id,
+    detail: card.description ?? '',
+    domain: card.collection,
+    group: card.collection ?? '',
     kind: 'card',
-    ports: card.placement.ports
+    placement: { box: card.bounds, ports: card.ports },
+    scope: scopesOf(card.id)[0] ?? '',
+    scopes: scopesOf(card.id),
+    wraps: card.adapts ?? card.wraps
   }))
   const fabrics: RuntimeFabric[] = definition.fabrics.map((fabric) => ({
     ...fabric,
-    bounds: fabric.placement.box,
-    group: fabric.scope,
+    bounds: fabric.bounds,
+    code: fabric.id,
+    detail: fabric.description ?? '',
+    group: fabric.id,
     kind: 'fabric',
-    ports: fabric.placement.ports
+    placement: { box: fabric.bounds, ports: fabric.ports },
+    renderer: fabric.kind,
+    scope: scopesOf(fabric.id)[0] ?? '',
+    scopes: scopesOf(fabric.id)
   }))
-  const flows: RuntimeFlow[] = definition.flows.map((flow) => ({
-    ...flow,
-    d: routePath(flow.points)
-  }))
+  const endpointById = new Map<string, { box?: Box; at?: Point; ports?: PortCounts }>([
+    ...cards.map((entry) => [entry.id, { box: entry.bounds, ports: entry.ports }] as const),
+    ...fabrics.map((entry) => [entry.id, { box: entry.bounds, ports: entry.ports }] as const),
+    ...definition.points.map((entry) => [entry.id, { at: entry.at, ports: entry.ports }] as const)
+  ])
+  const portAt = (element: string, port: string): Point => {
+    const endpoint = endpointById.get(element)
+    if (!endpoint) throw new Error(`Unknown Flow endpoint: ${element}`)
+    if (endpoint.at) return endpoint.at
+    const found = endpoint.box ? portsForBox(endpoint.box, endpoint.ports).find(({ id }) => id === port) : undefined
+    if (!found) throw new Error(`Unknown Port ${port} on ${element}`)
+    return found.at
+  }
+  const flows: RuntimeFlow[] = definition.flows.map((flow) => {
+    const points = establishedFlowPoints?.get(flow.id) ?? [
+      portAt(flow.source.element, flow.source.port),
+      ...(flow.route?.waypoints ?? []),
+      portAt(flow.target.element, flow.target.port)
+    ]
+    const realisedSpecifications = specificationNodes.filter((entry) => entry.realisedBy?.includes(flow.id))
+    return {
+      id: flow.id,
+      code: flow.id,
+      family: flow.family ?? '',
+      source: flow.source.element,
+      target: flow.target.element,
+      sourcePort: flow.source.port,
+      targetPort: flow.target.port,
+      bidirectional: flow.direction === 'bidirectional' || undefined,
+      conformsTo: realisedSpecifications.map((entry) => entry.id),
+      dashed: flow.appearance?.line === 'dashed' || undefined,
+      label: flow.route?.labelAt === undefined ? undefined : { along: flow.route.labelAt },
+      operation: realisedSpecifications.find((entry) => entry.kind === 'operation')?.prefix,
+      points,
+      d: routePath(points)
+    }
+  })
   const identities: RuntimeIdentity[] = [
     ...cards.map(({ placement: _placement, bounds: _bounds, ports: _ports, ...card }) => card),
     ...fabrics.map(
       ({ placement: _placement, bounds: _bounds, ports: _ports, appearance: _appearance, ...fabric }) => fabric
     ),
     ...definition.points.map((point) => ({
-      ...point,
+      code: point.id,
       detail: undefined,
-      kind: 'point' as const
+      group: point.id,
+      id: point.id,
+      kind: 'point' as const,
+      label: point.label,
+      scopes: scopesOf(point.id)
     }))
   ]
   const register = registerOf(identities)
   const endpointCodes = new Map(identities.map(({ code, id }) => [id, code]))
   const endpointLabels = new Map(identities.map(({ id, label }) => [id, label]))
   const layout = Object.fromEntries(cards.map((card) => [card.id, card.bounds])) as Readonly<Record<string, Box>>
-  const interfaceById = new Map(definition.interfaces.map((entry) => [entry.id, entry]))
+  const interfaceById = new Map(specificationNodes.map((entry) => [entry.id, entry]))
 
-  const standaloneScenes: RuntimeStandaloneScene[] = config.standaloneScenes.map((scene) => ({
-    ...scene,
-    components: scene.focus.artefacts ?? [],
-    flows: scene.focus.flows ?? []
-  }))
-  const standaloneById = new Map(standaloneScenes.map((scene) => [scene.id, scene]))
-  const graphicById = new Map(definition.graphics.map((graphic) => [graphic.id, graphic]))
-  const sequenceConfigs: readonly SequenceConfig[] = [
-    ...(config.sequences ?? []),
-    ...config.themes.map((theme) => ({
-      code: theme.id,
-      description: theme.description,
-      id: theme.id,
-      label: theme.title,
-      presentation: { callouts: true, display: 'expanded' as const, timed: false },
-      scenes: theme.scenes.map((scene) => ({
-        ...scene,
-        description: scene.description,
-        label: scene.label
-      }))
-    })),
-    ...config.stories.map((story) => ({
-      code: story.code,
-      description: story.question,
-      id: story.id,
-      label: story.title,
-      presentation: { callouts: true, display: 'collapsed' as const, timed: true },
-      scenes: story.scenes.map((scene, index) => {
-        const source = scene.sourceScene ? standaloneById.get(scene.sourceScene) : undefined
-        return {
-          ...scene,
-          code: scene.id ?? `${story.code}-${index + 1}`,
-          description: source?.description,
-          focus: {
-            artefacts: scene.focus?.artefacts ?? source?.components,
-            flows: scene.focus?.flows ?? source?.flows,
-            graphics: scene.focus?.graphics
-          },
-          id: scene.id ?? `${story.id}-${index + 1}`,
-          label: scene.title ?? source?.label ?? `Scene ${index + 1}`
-        }
-      })
-    }))
-  ]
-  const sequences: RuntimeSequence[] = sequenceConfigs.map((sequence) => ({
-    code: sequence.code,
+  const flowIds = new Set(flows.map(({ id }) => id))
+  const overlayById = new Map(definition.overlays.map((overlay) => [overlay.id, overlay]))
+  const overlayIds = new Set(overlayById.keys())
+  const scopeElements = new Map(config.scopes.map((scope) => [scope.id, scope.elements]))
+  const flowEndpoints = new Map(
+    definition.flows.map((flow) => [flow.id, { source: flow.source.element, target: flow.target.element }])
+  )
+  const focusedElements = (scene: DefinedInfoschematic['sequences'][number]['scenes'][number]) => {
+    const selection = scene.focus ?? scene.visibility?.show
+    const scoped = new Set((selection?.scopes ?? []).flatMap((scope) => scopeElements.get(scope) ?? []))
+    const derivedFlows = [...flowEndpoints]
+      .filter(([, endpoints]) => scoped.has(endpoints.source) && scoped.has(endpoints.target))
+      .map(([id]) => id)
+    return [...new Set([...(selection?.elements ?? []), ...scoped, ...derivedFlows])]
+  }
+  const profileOf = (properties: Callout['properties']): readonly string[] | undefined => {
+    const profile = properties?.profile
+    if (Array.isArray(profile) && profile.every((entry) => typeof entry === 'string')) {
+      return profile as readonly string[]
+    }
+    if (typeof profile !== 'string') return undefined
+    try {
+      const parsed: unknown = JSON.parse(profile)
+      return Array.isArray(parsed) && parsed.every((entry) => typeof entry === 'string')
+        ? (parsed as readonly string[])
+        : undefined
+    } catch {
+      return undefined
+    }
+  }
+  const sequences: RuntimeSequence[] = config.sequences.map((sequence) => ({
+    code: sequence.id,
     description: sequence.description ?? '',
     id: sequence.id,
     label: sequence.label,
     presentation: sequence.presentation,
     scenes: sequence.scenes.map((scene) => {
+      const elements = focusedElements(scene)
+      const overlay = elements.find((id) => overlayIds.has(id))
       const properties = scene.callout?.properties
-      let profile: readonly string[] | undefined
-      if (typeof properties?.profile === 'string') {
-        try {
-          const parsed: unknown = JSON.parse(properties.profile)
-          if (Array.isArray(parsed) && parsed.every((entry) => typeof entry === 'string')) profile = parsed
-        } catch {
-          profile = undefined
-        }
-      }
       return {
         id: scene.id,
-        code: scene.code,
+        code: scene.id,
         label: scene.label,
         description: scene.description ?? scene.callout?.body ?? '',
         caption: scene.callout?.body ?? '',
         headline: scene.callout?.title ?? scene.label,
         hold: scene.duration ?? defaultSceneDuration,
-        components: scene.focus.artefacts ?? [],
-        flows: scene.focus.flows ?? [],
-        graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
-        callout: scene.callout?.at,
+        components: elements.filter((id) => !flowIds.has(id) && !overlayIds.has(id)),
+        flows: elements.filter((id) => flowIds.has(id)),
+        graphic: overlay ? overlayById.get(overlay) : undefined,
+        callout: scene.callout?.placement && 'at' in scene.callout.placement ? scene.callout.placement.at : undefined,
         calloutConfig: scene.callout,
         takeaways: scene.callout?.takeaways,
-        profile,
+        profile: profileOf(properties),
         cover: properties?.wide === true ? true : undefined,
         logo: typeof properties?.logo === 'string' ? properties.logo : undefined
       }
     })
   }))
-  const stories: RuntimeStory[] = config.stories.map((story: StoryConfig) => ({
-    id: story.id,
-    code: story.code,
-    label: story.title,
-    short: story.short,
-    question: story.question ?? '',
-    steps: story.scenes.map((scene) => {
-      const source = scene.sourceScene ? standaloneById.get(scene.sourceScene) : undefined
-      return {
-        ...scene,
-        caption: scene.callout?.body ?? '',
-        hold: scene.duration ?? defaultSceneDuration,
-        components: scene.focus?.artefacts ?? source?.components ?? [],
-        flows: scene.focus?.flows ?? source?.flows ?? [],
-        graphic: scene.graphic ? graphicById.get(scene.graphic) : undefined,
-        callout: scene.callout?.at,
-        takeaways: scene.callout?.takeaways,
-        scene: scene.sourceScene
-      }
-    })
-  }))
-  const thematicScenes: RuntimeThemeScene[] = config.themes.flatMap((theme) =>
-    theme.scenes.map((scene) => {
-      const properties = scene.callout?.properties
-      let profile: readonly string[] | undefined
-      if (typeof properties?.profile === 'string') {
-        try {
-          const parsed: unknown = JSON.parse(properties.profile)
-          if (Array.isArray(parsed) && parsed.every((entry) => typeof entry === 'string')) profile = parsed
-        } catch {
-          profile = undefined
-        }
-      }
-      return {
-        ...scene,
-        headline: scene.callout?.title ?? scene.label,
-        description: scene.description ?? scene.callout?.body ?? '',
-        components: scene.focus.artefacts ?? [],
-        flows: scene.focus.flows ?? [],
-        profile,
-        takeaways: scene.callout?.takeaways,
-        cover: properties?.wide === true ? true : undefined,
-        logo: typeof properties?.logo === 'string' ? properties.logo : undefined,
-        callout: scene.callout?.at
-      }
-    })
-  )
 
   const registerWith = (created: readonly CreatedComponent[] = []) =>
     created.length === 0
@@ -515,22 +589,31 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       }))
     })
 
-  const specificationSections = definition.specificationGroups
-    .map((group) => ({
-      group,
-      within: definition.interfaces.filter((entry) =>
-        group.specifications
-          ? group.specifications.some(
-              (specificationPath) => entry.id === specificationPath || entry.id.startsWith(`${specificationPath}/`)
-            )
-          : entry.owner === group.owner && entry.hasDocument === group.hasDocument
-      )
-    }))
+  const specificationSections = config.specifications
+    .map((group) => {
+      const specificationPaths = group.specifications.map((specification) => `${group.id}/${specification.id}`)
+      return {
+        group: {
+          id: group.id,
+          label: group.label,
+          note: group.description ?? '',
+          owner: '',
+          hasDocument: group.specifications.some((specification) =>
+            specification.documents?.some(({ href }) => Boolean(href))
+          ),
+          specifications: specificationPaths
+        },
+        within: specificationNodes.filter((entry) =>
+          specificationPaths.some((path) => entry.id === path || entry.id.startsWith(`${path}/`))
+        )
+      }
+    })
     .filter((section) => section.within.length > 0)
 
   const realisedBySpecification = new Map(
-    definition.interfaces.map((entry) => [entry.id, entry.realisedBy ?? []] as const)
+    specificationNodes.map((entry) => [entry.id, entry.realisedBy ?? []] as const)
   )
+
   const flowsById = new Map(flows.map((flow) => [flow.id, flow]))
   const identitiesById = new Map(register.all.map((entry) => [entry.id, entry]))
   const flowsCarrying = (id: string) =>
@@ -543,23 +626,74 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       const identity = identitiesById.get(element)
       return identity?.kind === 'card' ? [identity] : []
     })
-  const specificationsByElement = new Map<string, InterfaceConfig[]>()
-  for (const entry of definition.interfaces) {
+  const specificationsByElement = new Map<string, RuntimeInterface[]>()
+  for (const entry of specificationNodes) {
     for (const element of entry.realisedBy ?? []) {
       specificationsByElement.set(element, [...(specificationsByElement.get(element) ?? []), entry])
     }
   }
-  const unroutedInterfaces = definition.interfaces.filter((entry) => (entry.realisedBy?.length ?? 0) === 0)
+  const unroutedInterfaces = specificationNodes.filter((entry) => (entry.realisedBy?.length ?? 0) === 0)
+  const runtimeScopes: readonly RuntimeScope[] = config.scopes.map((scope) => ({
+    ...scope,
+    color: '#94a3b8',
+    fill: '#0f172a',
+    icon: scope.appearance?.icon,
+    prefix: scope.id
+  }))
+  const runtimeCollections = definition.collections.map((collection) => ({
+    color: collection.appearance?.color ?? '#94a3b8',
+    description: collection.description,
+    fill: collection.appearance?.fill ?? '#0f172a',
+    id: collection.id,
+    label: collection.label
+  }))
+  const runtimeFamilies = definition.families.map((family) => ({
+    color: family.appearance?.color ?? '#94a3b8',
+    description: family.description ?? '',
+    id: family.id,
+    label: family.label,
+    prefix: family.id
+  }))
+  const runtimeRegions = definition.regions.map((region) => ({
+    box: { ...region.bounds, radius: region.appearance?.cornerRadius },
+    fill: region.appearance?.fill,
+    frame: region.appearance?.frame,
+    id: region.id,
+    label: region.label,
+    labelMount: region.appearance?.label?.mount,
+    labelOffset: region.appearance?.label?.offset,
+    labelPlacement: region.appearance?.label?.placement
+  }))
+  const themeLogos = Object.fromEntries(
+    sequences.flatMap((sequence) => sequence.scenes.flatMap((scene) => (scene.logo ? [[scene.id, scene.logo]] : [])))
+  )
+  const standaloneScenes = sequences.find((sequence) => sequence.id === 'OVERVIEW')?.scenes ?? []
+  const thematicScenes = sequences
+    .filter((sequence) => sequence.presentation.display === 'expanded' && sequence.id !== 'OVERVIEW')
+    .flatMap((sequence) => sequence.scenes)
+  const stories: readonly RuntimeStory[] = sequences
+    .filter((sequence) => sequence.presentation.display === 'collapsed')
+    .map((sequence) => ({
+      code: sequence.code,
+      id: sequence.id,
+      label: sequence.label,
+      question: sequence.description,
+      steps: sequence.scenes.map((scene) => ({ ...scene, title: scene.headline }))
+    }))
 
   return {
+    compatibilityConfig,
     config,
-    infoschematicViewBox: definition.viewBox,
-    infoschematicScopes: definition.scopes,
-    infoschematicFamilies: definition.flowFamilies,
-    infoschematicRegions: definition.regions,
+    infoschematicViewBox: definition.bounds,
+    infoschematicScopes: runtimeScopes,
+    infoschematicCollections: runtimeCollections,
+    infoschematicFamilies: runtimeFamilies,
+    infoschematicRegions: runtimeRegions,
     infoschematicCards: cards,
     infoschematicFabrics: fabrics,
+    infoschematicPoints: definition.points,
     infoschematicFlows: flows,
+    infoschematicOverlays: definition.overlays,
     infoschematicRegister: register,
     infoschematicRegisterWith: registerWith,
     infoschematicEndpointCodes: endpointCodes,
@@ -571,12 +705,10 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     flowsAfterCreations,
     flowsAfterEdits,
     editableModel: {
-      componentLayout: Object.fromEntries(
-        [...definition.cards, ...definition.fabrics].map((entry) => [entry.code, entry.placement])
-      ),
+      componentLayout: Object.fromEntries([...cards, ...fabrics].map((entry) => [entry.code, entry.placement])),
       endpointCodes,
       flowCodes: new Set(flows.map((flow) => flow.code)),
-      regions: definition.regions,
+      regions: runtimeRegions,
       layout,
       register,
       registerWith,
@@ -616,12 +748,12 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     infoschematicCardsOffering: cardsOffering,
     infoschematicSpecificationsFor: (element: string) => specificationsByElement.get(element) ?? [],
     infoschematicUnroutedInterfaces: unroutedInterfaces,
-    stories,
     sequences,
     standaloneScenes,
+    stories,
     thematicScenes,
-    calloutPorts: config.calloutPositions,
-    themeLogos: Object.fromEntries(thematicScenes.flatMap((scene) => (scene.logo ? [[scene.id, scene.logo]] : []))),
+    calloutPorts: definition.calloutPositions,
+    themeLogos,
     adapterFloor
   }
 }
@@ -629,6 +761,3 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
 type CompleteInfoschematicRuntime = ReturnType<typeof createInfoschematicRuntime>
 export type InfoschematicRuntime = Omit<CompleteInfoschematicRuntime, 'infoschematicSpecificationsFor'> &
   Partial<Pick<CompleteInfoschematicRuntime, 'infoschematicSpecificationsFor'>>
-
-export type RuntimeScope = ScopeConfig
-export type RuntimeInterface = InterfaceConfig

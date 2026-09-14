@@ -28,7 +28,7 @@ export function PresentationControls({
               scope.label,
               state.visibleScopes.has(scope.id),
               () => dispatch({ type: 'toggle-scope', id: scope.id }),
-              `Architectural scope: ${scope.description}`
+              `Architectural scope: ${scope.description ?? ''}`
             )}
           </span>
         ))}
@@ -89,44 +89,6 @@ export function PresentationControls({
               : sceneControls
           })}
           <button disabled={!state.playing} onClick={() => dispatch({ type: 'stop-sequence' })} type="button">
-            Clear
-          </button>
-        </section>
-      ) : null}
-
-      {runtime.standaloneScenes.length && runtime.sequences.length === 0 ? (
-        <section className="isp-control-bank" aria-label="Scenes">
-          <span>Scenes</span>
-          {runtime.standaloneScenes.map((scene) => (
-            <span key={scene.id}>
-              {control(
-                scene.label,
-                state.standaloneSceneId === scene.id,
-                () => dispatch({ type: 'toggle-standalone-scene', scene }),
-                scene.description
-              )}
-            </span>
-          ))}
-          <button disabled={!state.standaloneSceneId} onClick={() => dispatch({ type: 'clear-focus' })} type="button">
-            Clear
-          </button>
-        </section>
-      ) : null}
-
-      {runtime.thematicScenes.length && runtime.sequences.length === 0 ? (
-        <section className="isp-control-bank" aria-label="Themes">
-          <span>Themes</span>
-          {runtime.thematicScenes.map((scene) => (
-            <span key={scene.id}>
-              {control(
-                scene.label,
-                state.thematicSceneId === scene.id,
-                () => dispatch({ type: 'toggle-theme-scene', scene }),
-                scene.headline
-              )}
-            </span>
-          ))}
-          <button disabled={!state.thematicSceneId} onClick={() => dispatch({ type: 'clear-focus' })} type="button">
             Clear
           </button>
         </section>

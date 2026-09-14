@@ -39,6 +39,9 @@ export const artefactOperationKey = (operation: ArtefactDraftOperation): string 
 const sameTarget = (left: ArtefactSelection, right: ArtefactSelection) =>
   left.kind === right.kind && left.id === right.id
 
+const matchesTarget = (value: { readonly code?: string; readonly id: string }, target: ArtefactSelection): boolean =>
+  value.id === target.id || (target.code !== null && value.code === target.code)
+
 const kindOrder: Readonly<Record<ArtefactSelection['kind'], number>> = {
   region: 0,
   fabric: 1,
@@ -136,15 +139,15 @@ const valueForTarget = (
 ): ArtefactValueByKind[ArtefactSelection['kind']] | undefined => {
   switch (target.kind) {
     case 'region':
-      return config.infoschematic.regions.find((value) => value.id === target.id)
+      return config.infoschematic.regions.find((value) => matchesTarget(value, target))
     case 'fabric':
-      return config.infoschematic.fabrics.find((value) => value.id === target.id)
+      return config.infoschematic.fabrics.find((value) => matchesTarget(value, target))
     case 'card':
-      return config.infoschematic.cards.find((value) => value.id === target.id)
+      return config.infoschematic.cards.find((value) => matchesTarget(value, target))
     case 'flow':
-      return config.infoschematic.flows.find((value) => value.id === target.id)
+      return config.infoschematic.flows.find((value) => matchesTarget(value, target))
     case 'graphic':
-      return config.infoschematic.graphics.find((value) => value.id === target.id)
+      return config.infoschematic.graphics.find((value) => matchesTarget(value, target))
   }
 }
 
@@ -279,9 +282,11 @@ export const planArtefactRemoval = (
   current: readonly ArtefactDraftOperation[] = []
 ): ArtefactRemovalPlan => {
   const effectiveConfig = applyArtefactOperations(config, current).config
+  const targetValue = valueForTarget(effectiveConfig, target)
+  const sourceId = targetValue?.id ?? target.id
   if (
     target.kind === 'graphic' &&
-    effectiveConfig.stories.some((story) => story.scenes.some((scene) => scene.graphic === target.id))
+    effectiveConfig.stories.some((story) => story.scenes.some((scene) => scene.graphic === sourceId))
   ) {
     return {
       blockedReason: `Graphic ${target.id} is referenced by a Story`,
@@ -293,7 +298,7 @@ export const planArtefactRemoval = (
   const cascades: ArtefactOperation[] = []
   if (target.kind === 'card' || target.kind === 'fabric') {
     for (const flow of flows) {
-      if (flow.source === target.id || flow.target === target.id) {
+      if (flow.source === sourceId || flow.target === sourceId) {
         cascades.push(removeArtefactOperation(flowSelection(flow)))
       }
     }
@@ -307,15 +312,15 @@ export const artefactIndex = (config: InfoschematicConfig, target: ArtefactSelec
   const index = (() => {
     switch (target.kind) {
       case 'region':
-        return config.infoschematic.regions.findIndex((entry) => entry.id === target.id)
+        return config.infoschematic.regions.findIndex((entry) => matchesTarget(entry, target))
       case 'fabric':
-        return config.infoschematic.fabrics.findIndex((entry) => entry.id === target.id)
+        return config.infoschematic.fabrics.findIndex((entry) => matchesTarget(entry, target))
       case 'card':
-        return config.infoschematic.cards.findIndex((entry) => entry.id === target.id)
+        return config.infoschematic.cards.findIndex((entry) => matchesTarget(entry, target))
       case 'flow':
-        return config.infoschematic.flows.findIndex((entry) => entry.id === target.id)
+        return config.infoschematic.flows.findIndex((entry) => matchesTarget(entry, target))
       case 'graphic':
-        return config.infoschematic.graphics.findIndex((entry) => entry.id === target.id)
+        return config.infoschematic.graphics.findIndex((entry) => matchesTarget(entry, target))
     }
   })()
   return index === undefined || index < 0 ? undefined : index

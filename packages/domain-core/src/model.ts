@@ -12,6 +12,9 @@ import {
 const legacyPorts = Object.freeze({ east: 7, north: 7, south: 7, west: 7 })
 const standardPorts = Object.freeze({ east: 1, north: 1, south: 1, west: 1 })
 
+const legacyPortsOf = (ports: Readonly<Record<string, number>> | undefined) =>
+  ports && Object.keys(ports).length > 0 ? ports : legacyPorts
+
 /** Generic callout candidates: three columns by five rows, ordered from the centre out. */
 export const defaultCalloutPositions = Object.freeze([
   Object.freeze({ x: 0.5, y: 0.5 }),
@@ -64,6 +67,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
   const elementId = new Map(endpoints.map(({ code, id }) => [id, code]))
   const flowId = new Map(definition.flows.map(({ code, id }) => [id, code]))
   const visibleId = (id: string) => elementId.get(id) ?? flowId.get(id) ?? id
+  const visibleIds = new Set([...elementId.values(), ...flowId.values(), ...definition.graphics.map(({ id }) => id)])
   const scopeById = new Map(definition.scopes.map((scope) => [scope.id, scope]))
   const selectionOf = (
     focus:
@@ -82,7 +86,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         ...(focus?.flows ?? []).map(visibleId),
         ...(focus?.graphics ?? []).map(visibleId),
         ...graphics.map(visibleId)
-      ]
+      ].filter((id) => visibleIds.has(id))
     }
   }
 
@@ -97,7 +101,14 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
       callout: calloutOf(scene.callout, scene.anchor ? { element: visibleId(scene.anchor) } : undefined),
       description: source?.description,
       duration: scene.duration,
-      focus: selectionOf(scene.focus ?? source?.focus, scene.graphic ? [scene.graphic] : []),
+      focus: selectionOf(
+        {
+          artefacts: scene.focus?.artefacts ?? source?.focus.artefacts,
+          flows: scene.focus?.flows ?? source?.focus.flows,
+          graphics: scene.focus?.graphics ?? source?.focus.graphics
+        },
+        scene.graphic ? [scene.graphic] : []
+      ),
       id: scene.id ?? `${storyId}-${index + 1}`,
       label: scene.title ?? source?.label ?? `Scene ${index + 1}`
     }
@@ -116,7 +127,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         description: card.detail,
         id: card.code,
         label: card.label,
-        ports: card.placement.ports ?? legacyPorts,
+        ports: legacyPortsOf(card.placement.ports),
         stereotype: card.stereotype
       })),
       collections: [
@@ -148,7 +159,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           id: fabric.code,
           kind: fabric.appearance?.renderer ? rendererReferenceOf(fabric.appearance.renderer) : undefined,
           label: fabric.label,
-          ports: fabric.placement.ports ?? legacyPorts,
+          ports: legacyPortsOf(fabric.placement.ports),
           properties: {
             ...fabric.appearance?.properties,
             ...(fabric.appearance?.caption ? { caption: fabric.appearance.caption } : {}),
@@ -188,7 +199,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           at: point.point,
           id: point.code,
           label: point.label,
-          ports: point.ports ?? legacyPorts
+          ports: legacyPortsOf(point.ports)
         }
       }),
       regions: definition.regions.map((region) => ({
@@ -214,6 +225,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
     },
     id: config.id ?? 'INFOSCHEMATIC',
     scopes: definition.scopes.map((scope) => ({
+      appearance: scope.icon ? { icon: scope.icon } : undefined,
       description: scope.description,
       elements: [
         ...endpoints.filter((entry) => entry.scopes.includes(scope.id)).map((entry) => entry.code),

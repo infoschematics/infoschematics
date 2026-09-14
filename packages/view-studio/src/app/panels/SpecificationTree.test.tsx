@@ -1,10 +1,11 @@
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
-import type { SpecificationGroupConfig } from '@infoschematics/domain-model/specification-group'
+import type { InfoschematicRuntime, RuntimeInterface } from '@infoschematics/view-model/runtime'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
 import { SpecificationTree } from './SpecificationTree.tsx'
 
-const group: SpecificationGroupConfig = {
+type SpecificationSection = InfoschematicRuntime['infoschematicSpecificationSections'][number]
+
+const group: SpecificationSection['group'] = {
   hasDocument: true,
   id: 'federation',
   label: 'Federation',
@@ -13,7 +14,7 @@ const group: SpecificationGroupConfig = {
   specifications: ['federation/registry']
 }
 
-const within: InterfaceConfig[] = [
+const within: RuntimeInterface[] = [
   {
     contract: 'API-REGISTRY-001',
     description: 'Registry API.',

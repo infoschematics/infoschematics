@@ -77,7 +77,7 @@ const moveAt = <T>(values: readonly T[], from: number, to: number): readonly T[]
 }
 
 const matchesTarget = (value: { id: string; code?: string }, target: ArtefactSelection): boolean =>
-  value.id === target.id && (target.code === null || ('code' in value && value.code === target.code))
+  value.id === target.id || (target.code !== null && value.code === target.code)
 
 const matchesReplacement = (operation: AnyReplaceOperation): boolean => matchesTarget(operation.value, operation.target)
 
@@ -338,7 +338,8 @@ const removeArtefact = (
     case 'fabric': {
       const index = definition.fabrics.findIndex((fabric) => matchesTarget(fabric, operation.target))
       if (index < 0) return undefined
-      const removedId = operation.target.id
+      const removedId = definition.fabrics[index]?.id
+      if (!removedId) return undefined
       return withDefinition(config, {
         ...definition,
         fabrics: definition.fabrics.filter((_, candidate) => candidate !== index),
@@ -348,7 +349,9 @@ const removeArtefact = (
     case 'card': {
       const index = definition.cards.findIndex((card) => matchesTarget(card, operation.target))
       if (index < 0) return undefined
-      const removedIds = new Set([operation.target.id])
+      const removedId = definition.cards[index]?.id
+      if (!removedId) return undefined
+      const removedIds = new Set([removedId])
       let added = true
       while (added) {
         added = false
@@ -376,7 +379,8 @@ const removeArtefact = (
     case 'graphic': {
       const index = definition.graphics.findIndex((graphic) => matchesTarget(graphic, operation.target))
       if (index < 0) return undefined
-      const graphicId = operation.target.id
+      const graphicId = definition.graphics[index]?.id
+      if (!graphicId) return undefined
       return {
         ...withDefinition(config, {
           ...definition,

@@ -220,10 +220,13 @@ function AppContent({
 }) {
   const runtime = useInfoschematic()
   const {
+    compatibilityConfig,
     flowsAfterCreations,
     flowsAfterEdits,
     infoschematicFamilies,
+    infoschematicFabrics,
     infoschematicFlows,
+    infoschematicOverlays,
     infoschematicPlaceables,
     infoschematicRegister,
     infoschematicRegisterWith,
@@ -231,7 +234,7 @@ function AppContent({
     thematicScenes,
     themeLogos
   } = runtime
-  const storage = runtime.config.id
+  const storage = compatibilityConfig.id
   const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
   const [shortcuts, setShortcuts] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
@@ -268,11 +271,18 @@ function AppContent({
         attached,
         createdCards,
         {
-          fabrics: runtime.config.infoschematic.fabrics,
-          graphics: runtime.config.infoschematic.graphics
+          fabrics: infoschematicFabrics,
+          overlays: infoschematicOverlays
         }
       ),
-    [flowsAfterCreations, presentation.visibleFlows, presentation.visibleScopes, runtime]
+    [
+      flowsAfterCreations,
+      infoschematicFabrics,
+      infoschematicOverlays,
+      presentation.visibleFlows,
+      presentation.visibleScopes,
+      runtime
+    ]
   )
   const editor = useEditor(buildEditable)
   const editorRef = useRef(editor)
@@ -288,7 +298,7 @@ function AppContent({
       return
     }
     if (!onDocumentChange || editor.artefactOperations.length === 0) return
-    const projection = projectStudioDocumentOperations(authoredDocument, runtime.config, editor.artefactOperations)
+    const projection = projectStudioDocumentOperations(authoredDocument, compatibilityConfig, editor.artefactOperations)
     if (!projection.ok) return
     const applied = applyInfoschematicDocumentEdit(authoredDocument, projection.edit)
     if (!applied.ok || emitted?.source === applied.source) return
@@ -297,7 +307,14 @@ function AppContent({
       source: applied.source
     }
     onDocumentChange({ ...applied, edit: projection.edit })
-  }, [authoredDocument, editor.artefactOperations, editor.discardOne, editor.pending, onDocumentChange, runtime.config])
+  }, [
+    authoredDocument,
+    compatibilityConfig,
+    editor.artefactOperations,
+    editor.discardOne,
+    editor.pending,
+    onDocumentChange
+  ])
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
   const sceneList = useSceneList()
@@ -392,10 +409,10 @@ function AppContent({
     [highlight, hoveredSpecification, visibleFlows]
   )
   const storyCallout = playing
-    ? runtime.config.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
+    ? compatibilityConfig.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
     : undefined
   const thematicCallout = presentation.thematicScene
-    ? runtime.config.themes
+    ? compatibilityConfig.themes
         .flatMap((theme) => theme.scenes)
         .find((scene) => scene.id === presentation.thematicScene?.id)?.callout
     : undefined

@@ -12,7 +12,7 @@ import { addScene, editScene, libraryAsSource, removeScene, type Scene, toggleLi
  * checkable without rendering anything.
  */
 export function useSceneLibrary() {
-  const { config, standaloneScenes, stories } = useInfoschematic()
+  const { compatibilityConfig: config, standaloneScenes, stories } = useInfoschematic()
   const [draft, setDraft] = usePersistentState<readonly Scene[] | null>(config.id && `${config.id}.scenes`, null)
   const [chosen, setChosen] = useState<string>(standaloneScenes[0]?.id ?? '')
 

@@ -46,6 +46,7 @@
         "marked": "^18.0.11",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
+        "yaml": "^2.9.0",
       },
       "devDependencies": {
         "@types/node": "^24.10.0",
@@ -130,6 +131,7 @@
       "name": "@infoschematics/view-model",
       "version": "0.1.0",
       "dependencies": {
+        "@infoschematics/domain-core": "0.1.0",
         "@infoschematics/domain-model": "0.1.0",
       },
     },

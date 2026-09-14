@@ -69,6 +69,6 @@ Pass either established `config` input or an authored `document`, never both. In
 />
 ```
 
-Studio currently projects its typed Card, Fabric, Flow, Region, and Overlay compatibility operations into document edits. It preserves compact Flow fields such as `link`, `waypoints`, and `labelAt` instead of replacing the whole Flow. When the host supplies the emitted document as the new input, Studio discards only the draft operations represented by that accepted edit.
+Studio derives its structural selections from the canonical runtime, then projects typed Card, Fabric, Flow, Region and Overlay draft operations through an explicitly named compatibility edit boundary. This preserves compact Flow fields such as `link`, `waypoints` and `labelAt` instead of replacing the whole Flow. When the host supplies the emitted document as the new input, Studio discards only the draft operations represented by the accepted edit.
 
-The Domain Core protocol already addresses Sequence, Scene, and presentation fields by stable IDs. Studio will project its presentation editors through that path after canonical view internals replace the remaining Theme and Story compatibility state.
+Domain Core paths address Sequences, Scenes and presentation fields by stable IDs in the same way. YAML syntax trees remain inside Domain Core; View packages receive only the validated canonical model and document-edit results.

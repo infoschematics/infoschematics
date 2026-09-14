@@ -1,5 +1,4 @@
-import type { FabricConfig } from '@infoschematics/domain-model/fabric'
-import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { Overlay } from '@infoschematics/domain-model'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type {
   ArtefactCapabilities,
@@ -19,12 +18,13 @@ import type { Box } from '@infoschematics/view-model/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/view-model/geometry'
 import { guidesFrom } from '@infoschematics/view-model/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/view-model/ports'
+import type { RuntimeFabric } from '@infoschematics/view-model/runtime'
 
 type InfoschematicScopeId = string
 
 type AuthoredEditableArtefacts = Readonly<{
-  fabrics?: readonly FabricConfig[]
-  graphics?: readonly GraphicConfig[]
+  fabrics?: readonly RuntimeFabric[]
+  overlays?: readonly Overlay[]
 }>
 
 const adapterCapabilities = (canMove: boolean): ArtefactCapabilities =>
@@ -190,7 +190,7 @@ export const infoschematicEditable = (
     const authored = authoredArtefacts.fabrics?.find((fabric) => fabric.code === code)
     const placeable = placeables(visibleScopes).find((candidate) => candidate.code === code)
     if (!authored && !placeable) return undefined
-    const box = authored?.placement.box ?? placeable?.box
+    const box = authored?.bounds ?? placeable?.box
     if (!box) return undefined
     const selection = defineArtefactSelection({
       code: authored?.code ?? code,
@@ -245,7 +245,7 @@ export const infoschematicEditable = (
       }
     }
     if (key.startsWith('graphic:')) {
-      const graphic = authoredArtefacts.graphics?.find((candidate) => candidate.id === key.slice('graphic:'.length))
+      const graphic = authoredArtefacts.overlays?.find((candidate) => candidate.id === key.slice('graphic:'.length))
       if (!graphic) return undefined
       const selection = defineArtefactSelection({
         code: null,
@@ -253,7 +253,7 @@ export const infoschematicEditable = (
         id: graphic.id,
         kind: 'graphic' as const
       })
-      const box = graphic.placement ?? {
+      const box = graphic.bounds ?? {
         height: artefactResizeMinimums.graphic.height ?? 1,
         width: artefactResizeMinimums.graphic.width ?? 1,
         x: 0,

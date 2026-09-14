@@ -2,7 +2,12 @@ import { useInfoschematic } from '@infoschematics/view-canvas'
 
 /** Diagram elements claimed by the selected specification node or branch. */
 export function InterfaceLines({ realisedBy }: { realisedBy: readonly string[] }) {
-  const { config, infoschematicEndpointLabels, infoschematicFlows, infoschematicRegister } = useInfoschematic()
+  const {
+    compatibilityConfig: config,
+    infoschematicEndpointLabels,
+    infoschematicFlows,
+    infoschematicRegister
+  } = useInfoschematic()
   const flows = new Map(infoschematicFlows.map((flow) => [flow.id, flow]))
   const identities = new Map(infoschematicRegister.all.map((entry) => [entry.id, entry]))
   const regions = new Map(config.infoschematic.regions.map((entry) => [entry.id, entry]))

@@ -109,8 +109,8 @@ const diagram = infoschematicEditable(
   new Map(),
   [],
   {
-    fabrics: config.infoschematic.fabrics,
-    graphics: config.infoschematic.graphics
+    fabrics: runtime.infoschematicFabrics,
+    overlays: runtime.infoschematicOverlays
   }
 )
 
@@ -125,17 +125,17 @@ describe('Infoschematic editable selection adapter', () => {
       selection: {
         code: 'FABRIC-01',
         geometry: 'box',
-        id: 'fabric-one',
+        id: 'FABRIC-01',
         kind: 'fabric'
       }
     })
     expect(diagram.selectionFor('CARD-01')).toMatchObject({
       geometry: { box: { height: 80, width: 120, x: 80, y: 100 }, role: 'box' },
-      selection: { code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' }
+      selection: { code: 'CARD-01', geometry: 'box', id: 'CARD-01', kind: 'card' }
     })
     expect(diagram.selectionFor('FLOW-01')).toMatchObject({
       geometry: { role: 'route' },
-      selection: { code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' }
+      selection: { code: 'FLOW-01', geometry: 'route', id: 'FLOW-01', kind: 'flow' }
     })
     expect(diagram.selectionFor('graphic:graphic-one')).toMatchObject({
       geometry: { box: { height: 60, width: 90, x: 500, y: 80 }, role: 'box' },
@@ -158,18 +158,18 @@ describe('Infoschematic editable selection adapter', () => {
 
     expect(adapter).toMatchObject({
       capabilities: { move: true, resize: false },
-      movementTarget: { id: 'card-one', kind: 'card' },
-      selection: { id: 'adapter-one', kind: 'card' }
+      movementTarget: { id: 'CARD-01', kind: 'card' },
+      selection: { id: 'ADAPTER-01', kind: 'card' }
     })
   })
 
   it('resolves port and waypoint handles to their owning artefacts', () => {
     expect(diagram.selectionFor('port:CARD-01:E1')?.selection).toMatchObject({
-      id: 'card-one',
+      id: 'CARD-01',
       kind: 'card'
     })
     expect(diagram.selectionFor('waypoint:FLOW-01:1')?.selection).toMatchObject({
-      id: 'flow-one',
+      id: 'FLOW-01',
       kind: 'flow'
     })
     expect(diagram.selectionFor('missing')).toBeUndefined()

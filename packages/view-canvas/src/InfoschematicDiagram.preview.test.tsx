@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { Canvas } from './Canvas.tsx'
+import type { FabricRendererProps, GraphicRendererProps } from './renderers.tsx'
 
 const config = (): InfoschematicConfig =>
   defineInfoschematic({
@@ -164,24 +165,12 @@ const selection = {
 
 const renderers = {
   fabrics: {
-    'fabric-preview': ({
-      fabric,
-      bounds
-    }: {
-      fabric: ReturnType<typeof config>['infoschematic']['fabrics'][number]
-      bounds: { height: number; width: number; x: number; y: number }
-    }) => (
-      <text>{`${fabric.label}:${bounds.x},${bounds.y},${bounds.width},${bounds.height}:${fabric.appearance?.properties?.tone}`}</text>
+    'fabric-preview': ({ fabric, bounds }: FabricRendererProps) => (
+      <text>{`${fabric.label}:${bounds.x},${bounds.y},${bounds.width},${bounds.height}:${fabric.properties?.tone}`}</text>
     )
   },
   graphics: {
-    'graphic-preview': ({
-      graphic,
-      bounds
-    }: {
-      graphic: ReturnType<typeof config>['infoschematic']['graphics'][number]
-      bounds: { height: number; width: number; x: number; y: number }
-    }) => (
+    'graphic-preview': ({ graphic, bounds }: GraphicRendererProps) => (
       <text>{`${graphic.label}:${bounds.x},${bounds.y},${bounds.width},${bounds.height}:${graphic.properties?.caption}`}</text>
     )
   }
@@ -293,7 +282,7 @@ describe('InfoschematicDiagram draft preview', () => {
 
     const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
 
-    for (const id of ['region-created', 'fabric-created', 'card-created', 'flow-created', 'graphic-created']) {
+    for (const id of ['region-created', 'FABRIC-C', 'CARD-C', 'FLOW-C', 'graphic-created']) {
       expect(markup).toContain(`data-artefact-id="${id}"`)
     }
     expect(initial.infoschematic.regions).toHaveLength(1)
@@ -368,8 +357,8 @@ describe('InfoschematicDiagram draft preview', () => {
 
     expect(markup).toContain('Fabric Replaced:90,60,190,90:drafted')
     expect(markup).toContain('Graphic Replaced:350,80,80,30:drafted')
-    expect(markup).toContain('data-artefact-id="flow-a"')
-    expect(markup).toMatch(/<g(?=[^>]*data-artefact-id="card-a")(?=[^>]*class="[^"]*going)/)
+    expect(markup).toContain('data-artefact-id="FLOW-A"')
+    expect(markup).toMatch(/<g(?=[^>]*data-artefact-id="CARD-A")(?=[^>]*class="[^"]*going)/)
     expect(markup.indexOf('data-artefact-id="graphic-b"')).toBeLessThan(markup.indexOf('data-artefact-id="graphic-a"'))
     expect(markup).toContain('aria-label="Region Region A"')
     expect(initial.infoschematic.fabrics[0]?.label).toBe('Fabric A')
@@ -464,7 +453,7 @@ describe('InfoschematicDiagram draft preview', () => {
       id: 'present-graphic',
       label: 'Present Graphic',
       properties: { caption: 'present' },
-      renderer: 'graphic-preview'
+      kind: { key: 'graphic-preview', version: 1 }
     }
     const baseMarkup = renderToStaticMarkup(<Canvas config={initial} mode="design" />)
     const rejectedMarkup = renderToStaticMarkup(

@@ -102,7 +102,7 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
   dataInks: values(output, 'data-ink'),
   description: output.includes('class="infoschematic-card-description"'),
   domainColour: output.includes('fill="#063b35"') && output.includes('stroke="#22c3a6"'),
-  domains: values(output, 'data-domain'),
+  domains: values(output, 'data-collection'),
   frames: values(output, 'data-frame-treatment'),
   grid: values(output, 'data-grid-treatment'),
   identity: output.includes('class="infoschematic-card-identity"'),

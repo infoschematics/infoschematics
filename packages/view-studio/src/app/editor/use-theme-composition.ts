@@ -19,7 +19,7 @@ import {
 
 /** Persistent Theme drafts and transient Direct selection. */
 export function useThemeComposition() {
-  const { config } = useInfoschematic()
+  const { compatibilityConfig: config } = useInfoschematic()
   const [draft, setDraft] = usePersistentState<ThemeCollection | null>(config.id && `${config.id}.themes`, null)
   const [chosenTheme, setChosenTheme] = useState(config.themes[0]?.id ?? '')
   const [chosenScene, setChosenScene] = useState(0)

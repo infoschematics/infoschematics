@@ -81,7 +81,7 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('class="infoschematic-region-frame"')
 
     expect(markup).toContain('data-card-compact="true"')
-    expect(markup).toContain('data-domain="platform"')
+    expect(markup).toContain('data-collection="platform"')
     expect(markup).toContain('fill="#053c35"')
     expect(markup).toContain('stroke="#00aa88"')
     expect(markup).not.toContain('stroke="#ff0055"')
@@ -216,9 +216,9 @@ describe('Canvas visual treatments', () => {
     const visible = renderToStaticMarkup(<Canvas config={treatmentConfig} visibleScopes={new Set(['delivery'])} />)
     const hidden = renderToStaticMarkup(<Canvas config={treatmentConfig} visibleScopes={new Set()} />)
 
-    expect(visible).toContain('data-domain="platform"')
+    expect(visible).toContain('data-collection="platform"')
     expect(visible).toContain('fill="#053c35"')
-    expect(hidden).not.toContain('data-domain="platform"')
+    expect(hidden).not.toContain('data-collection="platform"')
     expect(hidden).not.toContain('Gateway')
   })
 })

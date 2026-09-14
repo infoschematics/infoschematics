@@ -64,7 +64,7 @@ const config = defineInfoschematic({
 
 describe('Canvas Flow signals', () => {
   it('renders a finite decorative pulse while preserving route geometry', () => {
-    const signals = [{ flowId: 'request-flow', occurrenceKey: 'scene:1' }]
+    const signals = [{ flowId: 'REQ-001', occurrenceKey: 'scene:1' }]
     const markup = renderToStaticMarkup(<Canvas config={config} signals={signals} />)
 
     expect(renderToStaticMarkup(<Canvas config={config} signals={signals} />)).toBe(markup)
@@ -199,10 +199,10 @@ describe('Canvas Flow signals', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={config}
-        highlight={{ endpoints: new Set(), flows: new Set(['request-flow']) }}
+        highlight={{ endpoints: new Set(), flows: new Set(['REQ-001']) }}
         hovered="REQ-001"
         selected="REQ-001"
-        signals={[{ flowId: 'request-flow', occurrenceKey: 'scene:1' }]}
+        signals={[{ flowId: 'REQ-001', occurrenceKey: 'scene:1' }]}
       />
     )
 

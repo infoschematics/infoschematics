@@ -26,31 +26,17 @@ export function Present({
   signalPolicy = 'focused-flows'
 }: PresentProps) {
   const runtime = useMemo(() => createInfoschematicRuntime(config), [config])
-  const established = runtime.config
   const presentation = usePresentation(runtime, signalPolicy)
   const { derived, dispatch, state } = presentation
   const sequenceCallout = derived.activeSequenceScene?.calloutConfig
-  const thematicCallout = derived.thematicScene
-    ? established.themes.flatMap((theme) => theme.scenes).find((scene) => scene.id === derived.thematicScene?.id)
-        ?.callout
-    : undefined
   const [detailsVisible, setDetailsVisible] = useState(true)
   const [fullscreen, setFullscreen] = useState(false)
   const root = useRef<HTMLElement>(null)
 
-  const stepStory = useCallback(
-    (delta: number) => dispatch({ type: 'step-story', stories: runtime.stories, delta }),
-    [dispatch, runtime.stories]
-  )
   const stepSequence = useCallback(
     (delta: number) => dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta }),
     [dispatch, runtime.sequences]
   )
-  const stepTheme = useCallback(
-    (delta: number) => dispatch({ type: 'step-theme', scenes: runtime.thematicScenes, delta }),
-    [dispatch, runtime.thematicScenes]
-  )
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   useEffect(() => {
     const { playing } = state
@@ -160,7 +146,7 @@ export function Present({
             className="isp-canvas"
             config={config}
             flows={derived.visibleFlows}
-            graphic={derived.activeSequenceScene?.graphic ?? derived.runningStoryScene?.graphic}
+            graphic={derived.activeSequenceScene?.graphic}
             highlight={derived.highlight}
             renderers={renderers}
             responsiveCardDetails={responsiveCardDetails}
@@ -189,44 +175,6 @@ export function Present({
                 takeaways={state.takeaways ? derived.activeSequenceScene.takeaways : undefined}
                 title={derived.activeSequenceScene.headline}
                 wide={derived.activeSequenceScene.cover}
-              />
-            ) : derived.runningStoryScene && derived.runningStory ? (
-              <SceneCallout
-                autoAdvance={state.autoAdvance}
-                body={derived.runningStoryScene.caption}
-                calloutConfig={undefined}
-                eyebrow={derived.runningStory.label}
-                onExit={() => dispatch({ type: 'stop-story' })}
-                onStep={stepStory}
-                onToggleAuto={() =>
-                  dispatch({
-                    type: 'set-auto-advance',
-                    value: !state.autoAdvance
-                  })
-                }
-                runtime={runtime}
-                scene={derived.runningStoryScene}
-                stepNumber={(state.playing?.step ?? 0) + 1}
-                stepTotal={derived.runningStory.steps.length}
-                takeaways={state.takeaways ? derived.runningStoryScene.takeaways : undefined}
-                title={derived.runningStoryScene.title}
-              />
-            ) : derived.thematicScene ? (
-              <SceneCallout
-                body={derived.thematicScene.description}
-                calloutConfig={thematicCallout}
-                eyebrow={derived.thematicScene.label}
-                logo={runtime.themeLogos[derived.thematicScene.id]}
-                onExit={() => dispatch({ type: 'clear-focus' })}
-                onStep={stepTheme}
-                profile={derived.thematicScene.profile}
-                runtime={runtime}
-                scene={derived.thematicScene}
-                stepNumber={runtime.thematicScenes.findIndex((scene) => scene.id === derived.thematicScene?.id) + 1}
-                stepTotal={runtime.thematicScenes.length}
-                takeaways={state.takeaways ? derived.thematicScene.takeaways : undefined}
-                title={derived.thematicScene.headline}
-                wide={derived.thematicScene.cover}
               />
             ) : null}
           </Canvas>

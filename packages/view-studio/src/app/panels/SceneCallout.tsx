@@ -1,6 +1,7 @@
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import type { Callout } from '@infoschematics/domain-model'
 import {
   type InfoschematicRuntime,
+  type RendererProperties,
   resolveInfoschematicRenderer,
   useInfoschematic,
   useInfoschematicRenderers
@@ -103,7 +104,7 @@ export function SceneCallout({
   /** Absent for anything that does not run itself. */
   autoAdvance?: boolean
   body: string
-  calloutConfig?: CalloutConfig
+  calloutConfig?: Callout
   eyebrow: string
   logo?: string
   onExit: () => void
@@ -131,8 +132,8 @@ export function SceneCallout({
     ? resolveInfoschematicRenderer(
         renderers,
         'callout',
-        calloutConfig.renderer,
-        calloutConfig.properties,
+        calloutConfig.kind,
+        calloutConfig.properties as RendererProperties | undefined,
         'id' in step && typeof step.id === 'string' ? step.id : undefined
       )
     : undefined

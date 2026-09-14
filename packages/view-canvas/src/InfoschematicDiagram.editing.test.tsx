@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { annotationLabelWidth } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -100,9 +101,9 @@ const config = defineInfoschematic({
 
 const selections = [
   { code: null, geometry: 'box', id: 'delivery', kind: 'region' },
-  { code: 'SYS-001', geometry: 'box', id: 'fabric', kind: 'fabric' },
-  { code: 'SYS-002', geometry: 'box', id: 'card', kind: 'card' },
-  { code: 'REQ-001', geometry: 'route', id: 'request-flow', kind: 'flow' },
+  { code: 'SYS-001', geometry: 'box', id: 'SYS-001', kind: 'fabric' },
+  { code: 'SYS-002', geometry: 'box', id: 'SYS-002', kind: 'card' },
+  { code: 'REQ-001', geometry: 'route', id: 'REQ-001', kind: 'flow' },
   { code: null, geometry: 'box', id: 'annotation', kind: 'graphic' }
 ] as const satisfies readonly ArtefactSelection[]
 
@@ -210,7 +211,9 @@ describe('InfoschematicDiagram Design editing', () => {
     const design = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
     // Present mode draws a Graphic only while a Scene calls for one, so the
     // comparison hands it the same entry the editor renders unconditionally.
-    const present = renderToStaticMarkup(<Canvas config={config} graphic={config.infoschematic.graphics?.[0]} />)
+    const present = renderToStaticMarkup(
+      <Canvas config={config} graphic={createInfoschematicRuntime(config).infoschematicOverlays[0]} />
+    )
     const card = 'aria-label="SYS-002 · Card · Card detail"'
 
     // One layer rendered in one of two positions, so an overlay Graphic

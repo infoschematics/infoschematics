@@ -1,9 +1,7 @@
-import { type InfoschematicConfig, type InfoschematicInput, rendererReferenceOf } from '@infoschematics/domain-model'
-import type { FocusConfig } from '@infoschematics/domain-model/scene'
+import { type InfoschematicInput, rendererReferenceOf } from '@infoschematics/domain-model'
 import {
   type CardDetailOverrides,
   type RenderedSize,
-  resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
   resolveResponsiveCardTreatment,
@@ -100,66 +98,56 @@ const container = (depth: number, name: string, values: Attributes, children: re
 const group = (depth: number, values: Attributes, children: readonly string[]) =>
   container(depth, 'g', values, children)
 
-const focusOf = (focus: FocusConfig | undefined, graphic?: string): ResolvedFocus => ({
-  artefacts: new Set(focus?.artefacts ?? []),
-  flows: new Set(focus?.flows ?? []),
-  graphics: new Set([...(focus?.graphics ?? []), ...(graphic ? [graphic] : [])])
+const focusOf = (scene: {
+  components: readonly string[]
+  flows: readonly string[]
+  graphic?: { id: string }
+}): ResolvedFocus => ({
+  artefacts: new Set(scene.components),
+  flows: new Set(scene.flows),
+  graphics: new Set(scene.graphic ? [scene.graphic.id] : [])
 })
 
 const resolveFocus = (
-  config: InfoschematicConfig,
+  runtime: ReturnType<typeof createInfoschematicRuntime>,
   selection: SvgSceneSelection | undefined
 ): ResolvedFocus | undefined => {
   if (!selection) return undefined
 
   if (selection.kind === 'standalone') {
-    const scene = config.standaloneScenes.find((candidate) => candidate.id === selection.sceneId)
+    const legacyScene = runtime.compatibilityConfig.standaloneScenes.find(
+      (candidate) => candidate.id === selection.sceneId
+    )
+    const scene = runtime.standaloneScenes.find(
+      (candidate) => candidate.id === (legacyScene?.code ?? selection.sceneId)
+    )
     if (!scene) throw new Error(`Unknown Standalone Scene: ${selection.sceneId}`)
-    return focusOf(scene.focus)
+    return focusOf(scene)
   }
 
   if (selection.kind === 'theme') {
-    const theme = config.themes.find((candidate) => candidate.id === selection.themeId)
-    if (!theme) throw new Error(`Unknown Theme: ${selection.themeId}`)
-    const scene = theme.scenes.find((candidate) => candidate.id === selection.sceneId)
+    const legacyScene = runtime.compatibilityConfig.themes
+      .find((candidate) => candidate.id === selection.themeId)
+      ?.scenes.find((candidate) => candidate.id === selection.sceneId)
+    const scene = runtime.thematicScenes.find((candidate) => candidate.id === (legacyScene?.code ?? selection.sceneId))
     if (!scene) throw new Error(`Unknown Thematic Scene in ${selection.themeId}: ${selection.sceneId}`)
-    return focusOf(scene.focus)
+    return focusOf(scene)
   }
 
   if (selection.kind === 'sequence') {
-    const sequence = config.sequences?.find((candidate) => candidate.id === selection.sequenceId)
+    const sequence = runtime.sequences.find((candidate) => candidate.id === selection.sequenceId)
     if (!sequence) throw new Error(`Unknown Sequence: ${selection.sequenceId}`)
     const scene = sequence.scenes[selection.sceneIndex]
     if (!scene) throw new Error(`Unknown Sequence Scene in ${selection.sequenceId}: ${selection.sceneIndex}`)
-    return focusOf(scene.focus, scene.graphic)
+    return focusOf(scene)
   }
 
-  const story = config.stories.find((candidate) => candidate.id === selection.storyId)
+  const legacyStory = runtime.compatibilityConfig.stories.find((candidate) => candidate.id === selection.storyId)
+  const story = runtime.stories.find((candidate) => candidate.id === (legacyStory?.code ?? selection.storyId))
   if (!story) throw new Error(`Unknown Story: ${selection.storyId}`)
-  const scene = story.scenes[selection.sceneIndex]
+  const scene = story.steps[selection.sceneIndex]
   if (!scene) throw new Error(`Unknown Story Scene in ${selection.storyId}: ${selection.sceneIndex}`)
-  const source = scene.sourceScene
-    ? config.standaloneScenes.find((candidate) => candidate.id === scene.sourceScene)
-    : undefined
-  if (scene.sourceScene && !source) throw new Error(`Unknown source Scene: ${scene.sourceScene}`)
-  return focusOf(
-    {
-      artefacts: scene.focus?.artefacts ?? source?.focus.artefacts,
-      flows: scene.focus?.flows ?? source?.focus.flows,
-      graphics: scene.focus?.graphics ?? source?.focus.graphics
-    },
-    scene.graphic
-  )
-}
-
-const memberIsVisible = (
-  entry: { scopes?: readonly string[]; scopeRule?: 'all' | 'any' },
-  visibleScopes: ReadonlySet<string>
-) => {
-  if (!entry.scopes) return true
-  return entry.scopeRule === 'all'
-    ? entry.scopes.every((scope) => visibleScopes.has(scope))
-    : entry.scopes.some((scope) => visibleScopes.has(scope))
+  return focusOf(scene)
 }
 
 const focusClass = (
@@ -186,8 +174,8 @@ export const renderInfoschematicSvg = (
 ): string => {
   const runtime = createInfoschematicRuntime(input)
   const config = runtime.config
-  const definition = config.infoschematic
-  const viewBox = definition.viewBox
+  const definition = config.diagram
+  const viewBox = definition.bounds
   const requestedVisualTreatment = resolveVisualTreatment(definition.appearance, options.cardDetails)
   const visualTreatment = {
     ...requestedVisualTreatment,
@@ -195,7 +183,8 @@ export const renderInfoschematicSvg = (
       ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
       : requestedVisualTreatment.card
   }
-  const signalledFlows = new Set(options.signals ?? [])
+  const legacyFlowIds = new Map(runtime.compatibilityConfig.infoschematic.flows.map((flow) => [flow.id, flow.code]))
+  const signalledFlows = new Set((options.signals ?? []).map((id) => legacyFlowIds.get(id) ?? id))
   /* The interactive Canvas draws the blueprint palette natively and overrides
      only what neutral changes, so this renderer has to pick the same side for
      every surface-sensitive token. Anything left on the `output` set alone
@@ -209,14 +198,13 @@ export const renderInfoschematicSvg = (
   const graphicStroke = blueprint ? canvasTokens.surfaces.graphicFallbackStroke : canvasTokens.output.stroke
   const graphicText = blueprint ? canvasTokens.text.muted : canvasTokens.output.textMuted
   const regionStroke = blueprint ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
-  const visibleScopes = new Set(options.visibility?.scopes ?? definition.scopes.map((scope) => scope.id))
+  const visibleScopes = new Set(options.visibility?.scopes ?? config.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
   const graphicVisibility = options.visibility?.graphics ?? 'scene'
   const resourceIdPrefix = svgResourcePrefix(options.resourceIdPrefix)
-  const focus = resolveFocus(config, options.scene)
-  const scopes = new Map(definition.scopes.map((scope) => [scope.id, scope]))
-  const domains = definition.domains ?? []
-  const families = new Map(definition.flowFamilies.map((family, index) => [family.id, { family, index }]))
+  const focus = resolveFocus(runtime, options.scene)
+  const collections = new Map(runtime.infoschematicCollections.map((collection) => [collection.id, collection]))
+  const families = new Map(runtime.infoschematicFamilies.map((family, index) => [family.id, { family, index }]))
 
   const cards = runtime.infoschematicCards.filter(
     (card) =>
@@ -227,19 +215,16 @@ export const renderInfoschematicSvg = (
       runtime.infoschematicFabricIsVisible(fabric, visibleScopes) &&
       includedByFocus(fabric.id, focus?.artefacts, unfocused)
   )
-  const points = definition.points.filter(
-    (point) => memberIsVisible(point, visibleScopes) && includedByFocus(point.id, focus?.artefacts, unfocused)
-  )
-  const visibleFamilies = new Set(definition.flowFamilies.map((family) => family.id))
+  const points = runtime.infoschematicPoints.filter((point) => includedByFocus(point.id, focus?.artefacts, unfocused))
+  const visibleFamilies = new Set(runtime.infoschematicFamilies.map((family) => family.id))
   const flows = runtime.infoschematicFlows.filter(
     (flow) =>
       runtime.infoschematicFlowIsVisible(flow, visibleFamilies, visibleScopes) &&
       includedByFocus(flow.id, focus?.flows, unfocused)
   )
-  const graphics = definition.graphics.filter(
+  const graphics = runtime.infoschematicOverlays.filter(
     (graphic) =>
       graphicVisibility !== 'none' &&
-      memberIsVisible(graphic, visibleScopes) &&
       (graphicVisibility === 'all'
         ? includedByFocus(graphic.id, focus?.graphics, unfocused)
         : Boolean(focus?.graphics.has(graphic.id)))
@@ -247,7 +232,7 @@ export const renderInfoschematicSvg = (
 
   const accessibleSummary = [
     config.subtitle,
-    config.synopsis,
+    config.description,
     cards.length > 0
       ? `Cards: ${cards
           .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
@@ -499,7 +484,7 @@ export const renderInfoschematicSvg = (
           ['x', box.x + box.width / 2],
           ['y', box.y + box.height / 2 + 4]
         ],
-        xmlText(fabric.appearance?.caption ?? fabric.label)
+        xmlText(fabric.label)
       )
     ]
     body.push(
@@ -627,9 +612,7 @@ export const renderInfoschematicSvg = (
 
   for (const card of cards) {
     const box = card.bounds
-    const scope = scopes.get(card.scope)
-    const domain = resolveCardDomain(card, domains)
-    const appearance = domain ?? scope
+    const appearance = card.collection ? collections.get(card.collection) : undefined
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
     const fill = appearance?.fill ?? canvasTokens.output.surface
     const ink = resolveReadableInk(fill)
@@ -774,7 +757,7 @@ export const renderInfoschematicSvg = (
           ['class', `infoschematic-card${dimmed}`],
           ['data-compact', visualTreatment.card.compact || undefined],
           ['data-code', card.code],
-          ['data-domain', domain?.id],
+          ['data-collection', card.collection],
           ['data-artefact-id', card.id],
           ['data-artefact-kind', 'card'],
           ['data-id', card.id],
@@ -789,27 +772,26 @@ export const renderInfoschematicSvg = (
   }
 
   for (const point of points) {
-    const scope = point.scopes.map((scopeId) => scopes.get(scopeId)).find(Boolean)
     const dimmed = focusClass(point.id, focus?.artefacts, unfocused)
     body.push(
       group(
         1,
         [
           ['class', `infoschematic-point${dimmed}`],
-          ['data-code', point.code],
+          ['data-code', point.id],
           ['data-artefact-id', point.id],
           ['data-artefact-kind', 'point'],
           ['data-id', point.id],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
         [
-          line(2, 'title', [], xmlText(`${point.code}: ${point.label}`)),
+          line(2, 'title', [], xmlText(`${point.id}: ${point.label}`)),
           line(2, 'circle', [
-            ['cx', point.point.x],
-            ['cy', point.point.y],
-            ['fill', scope?.fill ?? canvasTokens.output.backdrop],
+            ['cx', point.at.x],
+            ['cy', point.at.y],
+            ['fill', point.appearance?.fill ?? canvasTokens.output.backdrop],
             ['r', canvasTokens.geometry.pointRadius],
-            ['stroke', scope?.color ?? canvasTokens.output.fallbackFamily],
+            ['stroke', point.appearance?.color ?? canvasTokens.output.fallbackFamily],
             ['stroke-width', 2]
           ])
         ]
@@ -818,9 +800,9 @@ export const renderInfoschematicSvg = (
   }
 
   for (const graphic of graphics) {
-    if (!graphic.placement) continue
-    const box = graphic.placement
-    const renderer = rendererReferenceOf(graphic.renderer)
+    if (!graphic.bounds) continue
+    const box = graphic.bounds
+    const renderer = rendererReferenceOf(graphic.kind)
     const dimmed = focusClass(graphic.id, focus?.graphics, unfocused)
     body.push(
       group(

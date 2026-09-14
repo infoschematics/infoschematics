@@ -1,9 +1,9 @@
 import type { InfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { useEffect, useMemo, useReducer } from 'react'
 import {
-  createPresentationState,
   derivePresentation,
-  reducePresentation,
+  initialPresentationState,
+  presentationReducer,
   type SceneSignalPolicy
 } from './presentation.ts'
 
@@ -19,8 +19,8 @@ const readPreference = (key: string | undefined, fallback: boolean) => {
 
 export const usePresentation = (runtime: InfoschematicRuntime, signalPolicy: SceneSignalPolicy) => {
   const storage = runtime.config.id
-  const [state, dispatch] = useReducer(reducePresentation, runtime, (source) => ({
-    ...createPresentationState(source),
+  const [state, dispatch] = useReducer(presentationReducer, runtime, (source) => ({
+    ...initialPresentationState(source),
     annotated: readPreference(storage && `${storage}.annotated`, false),
     autoAdvance: readPreference(storage && `${storage}.presentation.autoAdvance`, true),
     takeaways: readPreference(storage && `${storage}.takeaways`, true)

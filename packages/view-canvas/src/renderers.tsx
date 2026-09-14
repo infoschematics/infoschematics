@@ -1,8 +1,7 @@
-import type { FabricConfig } from '@infoschematics/domain-model/fabric'
-import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { Callout, Overlay } from '@infoschematics/domain-model'
 import { type RendererReferenceInput, rendererReferenceOf } from '@infoschematics/domain-model/renderer'
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
 import type { Box } from '@infoschematics/view-model/geometry'
+import type { RuntimeFabric } from '@infoschematics/view-model/runtime'
 import type { ComponentType, ReactNode } from 'react'
 import { createContext, useContext } from 'react'
 
@@ -22,19 +21,19 @@ export type RendererDefinition<Props, Properties extends RendererProperties = Re
 }>
 
 export type FabricRendererProps = {
-  fabric: FabricConfig
+  fabric: RuntimeFabric
   bounds: Box
 }
 
 export type GraphicRendererProps = {
-  graphic: GraphicConfig
+  graphic: Overlay
   /** Effective Design bounds, including an uncommitted move or resize. */
   bounds: Box
   viewBox: Box
 }
 
 export type CalloutRendererProps = {
-  callout: CalloutConfig
+  callout: Callout
   children: ReactNode
 }
 

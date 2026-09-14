@@ -91,11 +91,11 @@ const config: IConfiguration = {
       }
     },
     {
-      name: 'domain-core-is-a-test-only-dependency-for-views',
+      name: 'domain-core-is-a-test-only-dependency-for-interactive-views',
       comment:
-        'A View builds fixtures with defineInfoschematic in its tests, where Domain Core is a declared devDependency. Shipped View code consumes the serialisable contract and derives from View Model.',
+        'View Model may normalise supported inputs through Domain Core. Interactive Views consume that canonical runtime and use Domain Core only in tests.',
       severity: 'error',
-      from: { path: '^packages/view-(model|canvas|present)/', pathNot: testFile },
+      from: { path: '^packages/view-(canvas|present)/', pathNot: testFile },
       to: { path: owners('domain-core') }
     },
     {

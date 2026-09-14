@@ -1,5 +1,9 @@
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
-import { resolveInfoschematicRenderer, useInfoschematicRenderers } from '@infoschematics/view-canvas'
+import type { Callout } from '@infoschematics/domain-model'
+import {
+  type RendererProperties,
+  resolveInfoschematicRenderer,
+  useInfoschematicRenderers
+} from '@infoschematics/view-canvas'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
 import type { InfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -79,7 +83,7 @@ export function SceneCallout({
 }: {
   autoAdvance?: boolean
   body: string
-  calloutConfig?: CalloutConfig
+  calloutConfig?: Callout
   eyebrow: string
   logo?: string
   onExit: () => void
@@ -99,7 +103,12 @@ export function SceneCallout({
   const [position, setPosition] = useState(scene.callout ?? runtime.calloutPorts[0] ?? { x: 0.5, y: 0.5 })
   const aside = Boolean(logo || profile?.length)
   const resolved = calloutConfig
-    ? resolveInfoschematicRenderer(renderers, 'callout', calloutConfig.renderer, calloutConfig.properties)
+    ? resolveInfoschematicRenderer(
+        renderers,
+        'callout',
+        calloutConfig.kind,
+        calloutConfig.properties as RendererProperties | undefined
+      )
     : undefined
   const standardContent = (
     <>

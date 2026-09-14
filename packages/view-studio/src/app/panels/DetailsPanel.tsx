@@ -1,5 +1,4 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
-import type { InterfaceConfig } from '@infoschematics/domain-model/interface'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import type {
@@ -11,6 +10,7 @@ import type {
   Placement
 } from '@infoschematics/view-model/editable'
 import { type PortCounts, portsForBox, type Side } from '@infoschematics/view-model/ports'
+import type { RuntimeInterface } from '@infoschematics/view-model/runtime'
 import type { DirectTarget } from '@infoschematics/view-present'
 import { type SetStateAction, useEffect, useMemo, useState } from 'react'
 import { ArtefactControls, type ArtefactControlsEditor } from '../editor/ArtefactControls.tsx'
@@ -344,7 +344,7 @@ export function DetailsPanel({
   }
   presentation: Presentation
 }) {
-  const { config, infoschematicSpecificationSections } = useInfoschematic()
+  const { compatibilityConfig: config, infoschematicSpecificationSections } = useInfoschematic()
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const artefactContexts = useMemo(
     () => detailsArtefactContexts(config, editor),
@@ -418,9 +418,9 @@ export function DetailsPanel({
       : firstCalloutTarget?.kind === 'callout'
         ? firstCalloutTarget.owner
         : 'theme'
-  const [selectedContract, setSelectedContract] = useState<InterfaceConfig | null>(null)
+  const [selectedContract, setSelectedContract] = useState<RuntimeInterface | null>(null)
   /* Reading opens the document overlay; selecting a tree node keeps detail in the panel. */
-  const [reading, setReading] = useState<InterfaceConfig | null>(null)
+  const [reading, setReading] = useState<RuntimeInterface | null>(null)
   const { detail: contractDetail, failed: contractError } = useContractDetail(selectedContract)
   const selectedDocumentVersion = selectedContract?.version ?? contractDetail?.version
   const selectedDocuments =

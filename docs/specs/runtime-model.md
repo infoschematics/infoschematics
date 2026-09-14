@@ -6,13 +6,13 @@ Framework-neutral derivation and immutable materialisation of typed selection an
 
 ### RUNTIME-001 — Runtime derivation is framework-neutral
 
-Reusable registers, resolved Scenes and Stories, visibility predicates, routed Flows, placement lookup and interface lookup MUST derive from `InfoschematicConfig` without React or browser state. Equivalent consumers MUST receive deterministic results from the same configuration.
+Reusable registers, canonical Sequences and Scenes, visibility predicates, routed Flows, placement lookups and specification lookups MUST derive without React or browser state. Equivalent canonical inputs MUST receive deterministic results.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/runtime.test.ts` exercises representative register, visibility, routing and Scene derivation through `createInfoschematicRuntime`.
+_Verify:_ exercise representative register, visibility, routing and Sequence derivation through `createInfoschematicRuntime`.
 
-_Evidence:_ `packages/view-model/src/runtime.test.ts` exercises representative register, visibility, routing and Scene derivation through `createInfoschematicRuntime`.
+_Evidence:_ `packages/view-model/src/runtime.test.ts` and `packages/view-model/src/specifications.test.ts` cover framework-neutral runtime derivation.
 
 ### RUNTIME-002 — Selection and capabilities are discriminated by kind
 
@@ -69,3 +69,13 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx` covers six-kind creation, geometry, ordering, property replacement, safe removal, draft overlay precedence and Present Overlay independence.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx` covers six-kind creation, geometry, ordering, property replacement, safe removal, draft overlay precedence and Present Overlay independence.
+
+### RUNTIME-007 — Public inputs share one canonical runtime
+
+View Model MUST accept a canonical `Infoschematic` or established `InfoschematicConfig` through one public runtime factory. It MUST normalise either form once through Domain Core, expose the canonical `DefinedInfoschematic` as runtime configuration, and MUST NOT convert canonical inputs into established configuration before Canvas, Present or static rendering derives behaviour. Compatibility-only projections MUST be explicitly named and confined to established selection or Studio source-edit boundaries.
+
+_Conformance:_ conforming
+
+_Verify:_ compare canonical and established inputs through `createInfoschematicRuntime`, inspect package boundaries, and run Canvas, Present, Studio and static-renderer suites.
+
+_Evidence:_ `packages/view-model/src/runtime.ts` owns the single normalisation point; `packages/view-model/src/compatibility.test.ts`, `packages/view-model/src/runtime.test.ts`, and cross-View tests cover both input forms.

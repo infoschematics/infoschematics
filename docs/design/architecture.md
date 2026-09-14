@@ -14,7 +14,8 @@ The reasons for this direction are recorded in [the framework-neutral library de
 └── @infoschematics/domain-model
 
 @infoschematics/view-model
-└── @infoschematics/domain-model
+├── @infoschematics/domain-model
+└── @infoschematics/domain-core
 
 @infoschematics/view-canvas
 ├── @infoschematics/domain-model
@@ -57,7 +58,7 @@ The reasons for this direction are recorded in [the framework-neutral library de
 └── @infoschematics/is-system
 ```
 
-Dependencies point downward. Domain Model is the dependency root. Domain Core and View Model independently consume it; neither imports an interactive view, authored Infoschematic, or site. Authored Infoschematics do not import interactive views. Site consumes public package exports rather than package internals.
+Dependencies point downward. Domain Model is the dependency root. Domain Core validates and normalises its serialisable contract; View Model consumes that canonical behaviour before deriving renderer-neutral runtime state. Neither imports an interactive View, authored Infoschematic, or Site. Authored Infoschematics do not import interactive Views. Site consumes public package exports rather than package internals.
 
 This graph is mechanically enforced. `.dependency-cruiser.ts` states each ownership boundary as a rule, `bun run self:verify:depcruise` runs them over every source root including `scripts/`, and `bun run self:check` fails on a violation. Because a boundary checker fails silently when its imports stop resolving, `scripts/dependency-boundaries.test.ts` asserts that workspace imports still resolve into `packages/` and that an illegal import is still reported: a clean cruise means the rules ran, not that nothing was checked.
 
@@ -71,9 +72,9 @@ Bun treats every package, application, and example as part of one workspace grap
 
 ## Responsibilities
 
-- `packages/domain-model` owns the dependency-free `InfoschematicConfig` and focused authored product-type modules.
-- `packages/domain-core` owns `defineInfoschematic`, defaults, validation, and other framework-neutral domain behaviour.
-- `packages/view-model` owns runtime derivation, geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
+- `packages/domain-model` owns the dependency-free canonical `Infoschematic` data contract and the established `InfoschematicConfig` compatibility input.
+- `packages/domain-core` owns canonical parsing, definition, defaults, validation, serialisation, document editing, and established-input normalisation.
+- `packages/view-model` owns canonical runtime derivation, geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
 - `packages/view-canvas` owns the interactive React Infoschematic surface, renderer bindings, and Canvas interaction contract.
 - `packages/view-present` owns Audience filtering, Scene focus, Sequence playback, Callouts, and presentation details over Canvas.
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
@@ -88,23 +89,27 @@ Authored Infoschematic examples use the `is-` prefix. Reusable packages and host
 
 ## Host boundary
 
-A host imports one complete `InfoschematicConfig`, owns the document title, and passes the definition into a view:
+A host imports one complete canonical `Infoschematic`, owns the document title, and passes the definition into a View:
 
 ```tsx
-import { defineInfoschematic } from "@infoschematics/domain-core";
+import { defineInfoschematicModel } from "@infoschematics/domain-core";
 import { App } from "@infoschematics/view-studio";
 import "@infoschematics/view-studio/styles.css";
 
-const config = defineInfoschematic({ title: "My Infoschematic" });
+const config = defineInfoschematicModel({
+  id: "MY-DIAGRAM",
+  title: "My Infoschematic",
+  diagram: { bounds: { x: 0, y: 0, width: 1200, height: 800 } },
+});
 
 export function Page() {
   return <App config={config} />;
 }
 ```
 
-The view derives lookup tables, routed paths, visibility state, and editing state from that prop. Descendants consume derived runtime state through internal application context rather than importing an authored definition.
+View Model normalises either supported input once, then derives lookup tables, routed paths, visibility state, and editing state from the canonical value. Descendants consume the derived runtime through internal context rather than importing or re-projecting authored data. `InfoschematicConfig` remains accepted only at the public compatibility boundary; Canvas, Present, Studio presentation, and static rendering consume canonical runtime concepts internally. Compatibility-only Studio source-edit projections remain explicitly named until the document-edit protocol owns them.
 
-When `config.id` is absent, an application must not create a shared persistence key. A title-only definition is therefore a safe blank canvas.
+Canonical `id` values are persistence keys. Established configurations preserve the earlier optional-id behaviour: when their id is absent, Studio does not create a shared persistence key, so a title-only established definition remains a safe blank canvas.
 
 ## Additive views
 
@@ -128,13 +133,13 @@ A host may display static SVG as an inert image or insert the generated string i
 
 ## Renderer boundary
 
-[ADR-INFOSCHEMATICS-009](../decisions/ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Graphics, and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.
+[ADR-INFOSCHEMATICS-009](../decisions/ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Overlays and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.
 
-Canvas owns immutable, host-provided Fabric and Graphic renderer definitions, runtime property validation, structured diagnostics, and deterministic accessible fallbacks. Present extends the same contract for Callout definitions while retaining ownership of Callout placement, Audience content, and navigation controls. Studio passes the registry through the lower Views and retains compatibility re-exports rather than defining a second contract.
+Canvas owns immutable, host-provided Fabric and Overlay renderer definitions, runtime property validation, structured diagnostics, and deterministic accessible fallbacks. Present extends the same contract for Callout definitions while retaining ownership of Callout placement, Audience content, and navigation controls. Studio passes the registry through the lower Views and retains compatibility re-exports rather than defining a second contract.
 
 React context distributes one application's supplied registry internally; it is not a mutable public registration surface. Shared SVG definitions and Scope icons remain host-level supporting renderers. They do not change the versioned property contract.
 
-Unknown keys, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, a Graphic receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry.
+Unknown keys, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, a Overlay receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry.
 
 ## Visual token boundary
 

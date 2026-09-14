@@ -5,16 +5,17 @@ import type {
   RuntimeStory,
   RuntimeThemeScene
 } from '@infoschematics/view-model/runtime'
-import { resolveSceneFlowSignals, type SceneSignalSelection } from '@infoschematics/view-model/signals'
 
-export type PlayingStory = Readonly<{ id: string; step: number }>
+export type PlayingSequence = Readonly<{ id: string; step: number }>
+/** @deprecated Use PlayingSequence. */
+export type PlayingStory = PlayingSequence
 
 export type SceneSignalPolicy = 'focused-flows' | 'none'
 
 export type PresentationState = Readonly<{
   annotated: boolean
   autoAdvance: boolean
-  playing: PlayingStory | null
+  playing: PlayingSequence | null
   sceneOccurrence: number
   standaloneSceneId: string | null
   takeaways: boolean
@@ -28,34 +29,14 @@ export type PresentationAction =
   | Readonly<{ type: 'set-annotated'; value: boolean }>
   | Readonly<{ type: 'set-auto-advance'; value: boolean }>
   | Readonly<{ type: 'set-takeaways'; value: boolean }>
-  | Readonly<{
-      type: 'show-all-families'
-      ids: readonly string[]
-      value: boolean
-    }>
-  | Readonly<{
-      type: 'show-all-scopes'
-      ids: readonly string[]
-      value: boolean
-    }>
-  | Readonly<{ type: 'start-story'; story: RuntimeStory }>
+  | Readonly<{ type: 'show-all-families'; ids: readonly string[]; value: boolean }>
+  | Readonly<{ type: 'show-all-scopes'; ids: readonly string[]; value: boolean }>
   | Readonly<{ type: 'start-sequence'; sequence: RuntimeSequence; step?: number }>
+  | Readonly<{ type: 'start-story'; story: RuntimeStory }>
   | Readonly<{ type: 'toggle-sequence-scene'; sequence: RuntimeSequence; step: number }>
-  | Readonly<{
-      type: 'step-sequence'
-      sequences: readonly RuntimeSequence[]
-      delta: number
-    }>
-  | Readonly<{
-      type: 'step-story'
-      stories: readonly RuntimeStory[]
-      delta: number
-    }>
-  | Readonly<{
-      type: 'step-theme'
-      scenes: readonly RuntimeThemeScene[]
-      delta: number
-    }>
+  | Readonly<{ type: 'step-sequence'; sequences: readonly RuntimeSequence[]; delta: number }>
+  | Readonly<{ type: 'step-story'; stories: readonly RuntimeStory[]; delta: number }>
+  | Readonly<{ type: 'step-theme'; scenes: readonly RuntimeThemeScene[]; delta: number }>
   | Readonly<{ type: 'stop-story' }>
   | Readonly<{ type: 'stop-sequence' }>
   | Readonly<{ type: 'toggle-family'; id: string }>
@@ -63,34 +44,32 @@ export type PresentationAction =
   | Readonly<{ type: 'toggle-standalone-scene'; scene: RuntimeStandaloneScene }>
   | Readonly<{ type: 'toggle-theme-scene'; scene: RuntimeThemeScene }>
 
-export const createPresentationState = (runtime: InfoschematicRuntime): PresentationState => ({
+export const initialPresentationState = (runtime: InfoschematicRuntime): PresentationState => ({
   annotated: false,
   autoAdvance: true,
   playing: null,
   sceneOccurrence: 0,
   standaloneSceneId: null,
-  takeaways: true,
+  takeaways: false,
   thematicSceneId: null,
   visibleFamilies: new Set(runtime.infoschematicFamilies.map((family) => family.id)),
   visibleScopes: new Set(runtime.infoschematicScopes.map((scope) => scope.id))
 })
 
-const toggled = (current: ReadonlySet<string>, id: string) => {
+const toggled = (current: ReadonlySet<string>, id: string): ReadonlySet<string> => {
   const next = new Set(current)
   if (next.has(id)) next.delete(id)
   else next.add(id)
   return next
 }
 
-export const reducePresentation = (state: PresentationState, action: PresentationAction): PresentationState => {
+export const presentationReducer = (state: PresentationState, action: PresentationAction): PresentationState => {
   switch (action.type) {
     case 'clear-focus':
-      return {
-        ...state,
-        playing: null,
-        standaloneSceneId: null,
-        thematicSceneId: null
-      }
+      return { ...state, playing: null, standaloneSceneId: null, thematicSceneId: null }
+    case 'stop-story':
+    case 'stop-sequence':
+      return { ...state, playing: null }
     case 'set-annotated':
       return { ...state, annotated: action.value }
     case 'set-auto-advance':
@@ -98,29 +77,21 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
     case 'set-takeaways':
       return { ...state, takeaways: action.value }
     case 'show-all-families':
-      return {
-        ...state,
-        visibleFamilies: action.value ? new Set(action.ids) : new Set()
-      }
+      return { ...state, visibleFamilies: action.value ? new Set(action.ids) : new Set() }
     case 'show-all-scopes':
+      return { ...state, visibleScopes: action.value ? new Set(action.ids) : new Set() }
+    case 'start-sequence':
+      if (action.sequence.scenes.length === 0) return state
       return {
         ...state,
-        visibleScopes: action.value ? new Set(action.ids) : new Set()
+        playing: { id: action.sequence.id, step: action.step ?? 0 },
+        sceneOccurrence: state.sceneOccurrence + 1
       }
     case 'start-story':
       if (action.story.steps.length === 0) return state
       return {
         ...state,
         playing: { id: action.story.id, step: 0 },
-        sceneOccurrence: state.sceneOccurrence + 1,
-        standaloneSceneId: null,
-        thematicSceneId: null
-      }
-    case 'start-sequence':
-      if (action.sequence.scenes.length === 0) return state
-      return {
-        ...state,
-        playing: { id: action.sequence.id, step: action.step ?? 0 },
         sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
         thematicSceneId: null
@@ -133,9 +104,7 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
       return {
         ...state,
         playing: { id: action.sequence.id, step: action.step },
-        sceneOccurrence: state.sceneOccurrence + 1,
-        standaloneSceneId: null,
-        thematicSceneId: null
+        sceneOccurrence: state.sceneOccurrence + 1
       }
     case 'step-sequence': {
       if (!state.playing) return state
@@ -153,44 +122,23 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
       const story = action.stories.find((entry) => entry.id === state.playing?.id)
       if (!story || story.steps.length === 0) return { ...state, playing: null }
       const step = (state.playing.step + action.delta + story.steps.length) % story.steps.length
-      return {
-        ...state,
-        playing: { ...state.playing, step },
-        sceneOccurrence: state.sceneOccurrence + 1
-      }
+      return { ...state, playing: { ...state.playing, step }, sceneOccurrence: state.sceneOccurrence + 1 }
     }
     case 'step-theme': {
       if (!state.thematicSceneId || action.scenes.length === 0) return state
       const current = action.scenes.findIndex((entry) => entry.id === state.thematicSceneId)
-      if (current === -1) return { ...state, thematicSceneId: null }
       const scene = action.scenes[(current + action.delta + action.scenes.length) % action.scenes.length]
-      return scene
-        ? {
-            ...state,
-            sceneOccurrence: state.sceneOccurrence + 1,
-            thematicSceneId: scene.id
-          }
-        : state
+      return scene ? { ...state, sceneOccurrence: state.sceneOccurrence + 1, thematicSceneId: scene.id } : state
     }
-    case 'stop-story':
-    case 'stop-sequence':
-      return { ...state, playing: null }
     case 'toggle-family':
-      return {
-        ...state,
-        visibleFamilies: toggled(state.visibleFamilies, action.id)
-      }
+      return { ...state, visibleFamilies: toggled(state.visibleFamilies, action.id) }
     case 'toggle-scope':
-      return {
-        ...state,
-        visibleScopes: toggled(state.visibleScopes, action.id)
-      }
+      return { ...state, visibleScopes: toggled(state.visibleScopes, action.id) }
     case 'toggle-standalone-scene':
       return {
         ...state,
         playing: null,
-        sceneOccurrence:
-          state.standaloneSceneId === action.scene.id ? state.sceneOccurrence : state.sceneOccurrence + 1,
+        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: state.standaloneSceneId === action.scene.id ? null : action.scene.id,
         thematicSceneId: null
       }
@@ -198,7 +146,7 @@ export const reducePresentation = (state: PresentationState, action: Presentatio
       return {
         ...state,
         playing: null,
-        sceneOccurrence: state.thematicSceneId === action.scene.id ? state.sceneOccurrence : state.sceneOccurrence + 1,
+        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
         thematicSceneId: state.thematicSceneId === action.scene.id ? null : action.scene.id
       }
@@ -219,10 +167,10 @@ export const derivePresentation = (
   const visibleFlows = runtime.infoschematicFlows.filter((flow) =>
     runtime.infoschematicFlowIsVisible(flow, state.visibleFamilies, state.visibleScopes)
   )
-  const runningStory = state.playing ? runtime.stories.find((entry) => entry.id === state.playing?.id) : undefined
-  const runningStoryScene = state.playing ? runningStory?.steps[state.playing.step] : undefined
   const activeSequence = state.playing ? runtime.sequences.find((entry) => entry.id === state.playing?.id) : undefined
   const activeSequenceScene = state.playing ? activeSequence?.scenes[state.playing.step] : undefined
+  const runningStory = state.playing ? runtime.stories.find((entry) => entry.id === state.playing?.id) : undefined
+  const runningStoryScene = state.playing ? runningStory?.steps[state.playing.step] : undefined
   const thematicScene = state.thematicSceneId
     ? runtime.thematicScenes.find((entry) => entry.id === state.thematicSceneId)
     : undefined
@@ -230,47 +178,21 @@ export const derivePresentation = (
     ? runtime.standaloneScenes.find((entry) => entry.id === state.standaloneSceneId)
     : undefined
   const focusedScene = activeSequenceScene ?? runningStoryScene ?? thematicScene ?? standaloneScene
-  const thematicThemeId = thematicScene
-    ? runtime.config.themes.find((theme) => theme.scenes.some((scene) => scene.id === thematicScene.id))?.id
-    : undefined
-  let signalSelection: SceneSignalSelection | undefined
-  if (activeSequence && state.playing) {
-    signalSelection = {
-      kind: 'sequence',
-      sceneIndex: state.playing.step,
-      sequenceId: activeSequence.id
-    }
-  } else if (state.playing) {
-    signalSelection = {
-      kind: 'story',
-      sceneIndex: state.playing.step,
-      storyId: state.playing.id
-    }
-  } else if (thematicScene && thematicThemeId) {
-    signalSelection = {
-      kind: 'theme',
-      sceneId: thematicScene.id,
-      themeId: thematicThemeId
-    }
-  } else if (standaloneScene) {
-    signalSelection = { kind: 'standalone', sceneId: standaloneScene.id }
-  }
-  const signals =
-    signalPolicy === 'focused-flows' && activeSequenceScene
-      ? [...new Set(activeSequenceScene.flows)]
-          .filter((flowId) => runtime.infoschematicFlows.some(({ id }) => id === flowId))
-          .map((flowId) => ({ flowId, occurrenceKey: `present-scene-${state.sceneOccurrence}` }))
-      : signalPolicy === 'focused-flows' && signalSelection
-        ? resolveSceneFlowSignals(runtime.config, signalSelection, `present-scene-${state.sceneOccurrence}`)
-        : []
   const focusedFlows = focusedScene
-    ? visibleFlows.filter((flow) => focusedScene.flows.includes(flow.id)).map((flow) => flow.id)
+    ? [...new Set(focusedScene.flows)].filter((flowId) => runtime.infoschematicFlows.some(({ id }) => id === flowId))
     : []
+  const signals =
+    signalPolicy === 'focused-flows'
+      ? focusedFlows.map((flowId) => ({
+          flowId,
+          occurrenceKey: `present-scene-${state.sceneOccurrence}`
+        }))
+      : []
   const highlight =
-    focusedScene && (focusedFlows.length > 0 || focusedScene.components.length > 0)
+    focusedScene && (focusedScene.components.length > 0 || focusedScene.flows.length > 0)
       ? {
           endpoints: new Set(focusedScene.components),
-          flows: new Set(focusedFlows)
+          flows: new Set(focusedScene.flows)
         }
       : undefined
 
@@ -279,9 +201,9 @@ export const derivePresentation = (
     activeSequenceScene,
     focusedScene,
     highlight,
+    signals,
     runningStory,
     runningStoryScene,
-    signals,
     standaloneScene,
     thematicScene,
     visibleCards,
@@ -291,3 +213,8 @@ export const derivePresentation = (
 }
 
 export type DerivedPresentation = ReturnType<typeof derivePresentation>
+
+/** @deprecated Use initialPresentationState. */
+export const createPresentationState = initialPresentationState
+/** @deprecated Use presentationReducer. */
+export const reducePresentation = presentationReducer

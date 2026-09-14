@@ -1,5 +1,5 @@
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import type { CalloutConfig } from '@infoschematics/domain-model/scene'
+import type { Callout } from '@infoschematics/domain-model'
 import {
   defineInfoschematicRenderers,
   InfoschematicRenderersContext,
@@ -26,7 +26,7 @@ const standardProps = {
   title: 'A standard callout'
 } as const
 
-const renderCallout = (calloutConfig?: CalloutConfig, renderers = defineInfoschematicRenderers({})) =>
+const renderCallout = (calloutConfig?: Callout, renderers = defineInfoschematicRenderers({})) =>
   renderToStaticMarkup(
     <InfoschematicRenderersContext value={renderers}>
       <SceneCallout {...standardProps} calloutConfig={calloutConfig} />
@@ -65,7 +65,7 @@ describe('SceneCallout renderers', () => {
       {
         body: standardProps.body,
         properties: { tone: 'urgent' },
-        renderer: 'emphasis'
+        kind: { key: 'emphasis', version: 1 }
       },
       renderers
     )
@@ -77,7 +77,7 @@ describe('SceneCallout renderers', () => {
   it('reports an unknown Callout renderer and retains standard Audience content', () => {
     const onDiagnostic = vi.fn()
     const markup = renderCallout(
-      { body: standardProps.body, renderer: 'missing' },
+      { body: standardProps.body, kind: { key: 'missing', version: 1 } },
       defineInfoschematicRenderers({ callouts: [], onDiagnostic })
     )
 
@@ -113,7 +113,7 @@ describe('SceneCallout renderers', () => {
       {
         body: standardProps.body,
         properties: { tone: 3 },
-        renderer: 'emphasis'
+        kind: { key: 'emphasis', version: 1 }
       },
       renderers
     )

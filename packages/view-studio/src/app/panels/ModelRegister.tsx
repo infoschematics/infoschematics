@@ -83,7 +83,7 @@ export function ModelRegister({
 }) {
   const runtime = useInfoschematic()
   const {
-    config,
+    compatibilityConfig,
     infoschematicEndpointLabels,
     infoschematicFamilies,
     infoschematicFlows,
@@ -96,7 +96,10 @@ export function ModelRegister({
   const heldBy = new Map(cards.filter((card) => card.wraps).map((adapter) => [adapter.code, adapter.wraps as string]))
   const endpointName = (id: string) => infoschematicEndpointLabels.get(id) ?? id
   const specificationName = (id: string) => infoschematicInterfaceById.get(id)?.label ?? id
-  const [shut, setShut] = usePersistentState<Record<string, boolean>>(config.id && `${config.id}.register.shut`, {})
+  const [shut, setShut] = usePersistentState<Record<string, boolean>>(
+    compatibilityConfig.id && `${compatibilityConfig.id}.register.shut`,
+    {}
+  )
   const toggle = (part: string) => setShut((current) => ({ ...current, [part]: !current[part] }))
 
   const row = (code: string, name: string, detail: string) => (

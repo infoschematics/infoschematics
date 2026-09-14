@@ -128,7 +128,7 @@ describe('Present signal wiring', () => {
     const markup = renderToStaticMarkup(<Present config={config} />)
 
     expect(markup).toContain('data-testid="canvas-signals"')
-    expect(markup).toContain('data-flow-id="delivery-flow"')
+    expect(markup).toContain('data-flow-id="D-001"')
     expect(markup).toContain('data-occurrence-key="present-scene-1"')
   })
 })

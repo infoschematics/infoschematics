@@ -87,21 +87,21 @@ const config = defineInfoschematic({
 const cardA = {
   code: 'CARD-A',
   geometry: 'box',
-  id: 'card-a',
+  id: 'CARD-A',
   kind: 'card'
 } as const satisfies ArtefactSelection
 
 const flowA = {
   code: 'FLOW-A',
   geometry: 'route',
-  id: 'flow-a',
+  id: 'FLOW-A',
   kind: 'flow'
 } as const satisfies ArtefactSelection
 
 const adapterFlow = {
   code: 'FLOW-ADAPTER',
   geometry: 'route',
-  id: 'flow-adapter',
+  id: 'FLOW-ADAPTER',
   kind: 'flow'
 } as const satisfies ArtefactSelection
 
@@ -195,7 +195,7 @@ const screenPoint = (svg: SVGSVGElement, x: number, y: number) => {
 test('pointer movement carries a Flow end with its Card port', async () => {
   const { container } = await render(<EditingHarness />)
   const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
-  const card = container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!svg || !card) throw new Error('rendered fixture is incomplete')
 
   const matrix = svg.getScreenCTM()
@@ -218,7 +218,7 @@ test('pointer movement carries a Flow end with its Card port', async () => {
 test('dragging an Adapter moves its held Card and the Flow attached to the Adapter', async () => {
   const { container } = await render(<EditingHarness />)
   const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
-  const adapter = container.querySelector<SVGGElement>('[data-artefact-id="adapter-a"]')
+  const adapter = container.querySelector<SVGGElement>('[data-artefact-id="ADAPTER-A"]')
   if (!svg || !adapter) throw new Error('rendered Adapter fixture is incomplete')
 
   const matrix = svg.getScreenCTM()
@@ -236,10 +236,10 @@ test('dragging an Adapter moves its held Card and the Flow attached to the Adapt
   window.dispatchEvent(new PointerEvent('pointerup', { ...at(170, 205), bubbles: true, pointerId: 2 }))
 
   await expect
-    .poll(() => container.querySelector('[data-artefact-id="card-a"]')?.getAttribute('transform'))
+    .poll(() => container.querySelector('[data-artefact-id="CARD-A"]')?.getAttribute('transform'))
     .toBe('translate(120 180)')
   await expect
-    .poll(() => container.querySelector('[data-artefact-id="flow-adapter"] .infoschematic-route')?.getAttribute('d'))
+    .poll(() => container.querySelector('[data-artefact-id="FLOW-ADAPTER"] .infoschematic-route')?.getAttribute('d'))
     .toBe('M240 237.5 H280 V195 H360')
 })
 
@@ -248,7 +248,7 @@ test('pointer cancellation and unmount remove active drag listeners', async () =
   const released = vi.fn()
   const first = await render(<EditingHarness onMove={moved} onRelease={released} />)
   const svg = first.container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
-  const card = first.container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const card = first.container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!svg || !card) throw new Error('rendered cancellation fixture is incomplete')
   const matrix = svg.getScreenCTM()
   if (!matrix) throw new Error('rendered SVG has no screen transform')
@@ -271,7 +271,7 @@ test('pointer cancellation and unmount remove active drag listeners', async () =
   const movedAfterUnmount = vi.fn()
   const second = await render(<EditingHarness onMove={movedAfterUnmount} />)
   const secondSvg = second.container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
-  const secondCard = second.container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const secondCard = second.container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!secondSvg || !secondCard) throw new Error('rendered unmount fixture is incomplete')
   const secondMatrix = secondSvg.getScreenCTM()
   if (!secondMatrix) throw new Error('rendered SVG has no screen transform')
@@ -290,8 +290,8 @@ test('pointer cancellation and unmount remove active drag listeners', async () =
 test('keyboard, selection, hover, removal and resize controls share the rendered Design surface', async () => {
   const { container } = await render(<InteractionHarness />)
   const events = () => container.querySelector('[data-testid="events"]')?.textContent ?? ''
-  const card = container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
-  const flow = container.querySelector<SVGGElement>('[data-artefact-id="flow-a"]')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  const flow = container.querySelector<SVGGElement>('[data-artefact-id="FLOW-A"]')
   const backdrop = container.querySelector<SVGRectElement>('.infoschematic-backdrop')
   if (!card || !flow || !backdrop) throw new Error('rendered interaction fixture is incomplete')
 
@@ -304,17 +304,17 @@ test('keyboard, selection, hover, removal and resize controls share the rendered
   card.dispatchEvent(new KeyboardEvent('keydown', { altKey: true, bubbles: true, key: 'ArrowUp' }))
   card.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Delete' }))
   await expect.poll(events).toContain('hover:CARD-A|hover:none')
-  expect(events()).toContain('reorder:card-a:-1')
-  expect(events()).toContain('remove:card-a')
+  expect(events()).toContain('reorder:CARD-A:-1')
+  expect(events()).toContain('remove:CARD-A')
 
   const resize = container.querySelector<SVGGElement>('[aria-label="Resize Card A"]')
   if (!resize) throw new Error('selected Card has no rendered resize control')
   resize.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
-  await expect.poll(events).toContain('resize:card-a:101:')
+  await expect.poll(events).toContain('resize:CARD-A:101:')
 
   backdrop.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 10 }))
   await expect.poll(events).toContain('select:none')
-  expect(container.querySelector('[data-artefact-id="card-a"]')?.classList.contains('going')).toBe(true)
+  expect(container.querySelector('[data-artefact-id="CARD-A"]')?.classList.contains('going')).toBe(true)
 })
 
 test('a zoomed and panned pointer move keeps Card and connected Flow geometry together', async () => {
@@ -363,7 +363,7 @@ test('a zoomed and panned pointer move keeps Card and connected Flow geometry to
     })
   )
 
-  const card = container.querySelector<SVGGElement>('[data-artefact-id="card-a"]')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!card) throw new Error('rendered Card fixture is incomplete')
   card.dispatchEvent(new PointerEvent('pointerdown', { ...screenAt(130, 195), bubbles: true, pointerId: 13 }))
   window.dispatchEvent(new PointerEvent('pointermove', { ...screenAt(170, 205), bubbles: true, pointerId: 13 }))
@@ -400,7 +400,7 @@ test('materialised route drafts and newly created endpoints preserve dependent g
     />
   )
   await expect
-    .poll(() => drafted.container.querySelector('[data-artefact-id="flow-a"] .infoschematic-route')?.getAttribute('d'))
+    .poll(() => drafted.container.querySelector('[data-artefact-id="FLOW-A"] .infoschematic-route')?.getAttribute('d'))
     .toBe('M220 205 H280 V235 H360')
   await drafted.unmount()
 
@@ -429,13 +429,13 @@ test('materialised route drafts and newly created endpoints preserve dependent g
   const createdCardSelection = {
     code: createdCard.code,
     geometry: 'box',
-    id: createdCard.id,
+    id: createdCard.code,
     kind: 'card'
   } as const satisfies ArtefactSelection
   const createdFlowSelection = {
     code: createdFlow.code,
     geometry: 'route',
-    id: createdFlow.id,
+    id: createdFlow.code,
     kind: 'flow'
   } as const satisfies ArtefactSelection
   const created = await render(
@@ -454,10 +454,10 @@ test('materialised route drafts and newly created endpoints preserve dependent g
     />
   )
   await expect
-    .poll(() => created.container.querySelector('[data-artefact-id="card-c"]')?.getAttribute('transform'))
+    .poll(() => created.container.querySelector('[data-artefact-id="CARD-C"]')?.getAttribute('transform'))
     .toBe('translate(80 60)')
   await expect
-    .poll(() => created.container.querySelector('[data-artefact-id="flow-c"] .infoschematic-route')?.getAttribute('d'))
+    .poll(() => created.container.querySelector('[data-artefact-id="FLOW-C"] .infoschematic-route')?.getAttribute('d'))
     .toBe('M180 85 H360 V195')
 })
 
@@ -475,7 +475,7 @@ test('Flow attachment and route-label gestures reach the rendered editing callba
   source.dispatchEvent(new PointerEvent('pointerdown', { ...screenPoint(svg, 180, 195), bubbles: true, pointerId: 14 }))
   window.dispatchEvent(new PointerEvent('pointermove', { ...screenPoint(svg, 130, 170), bubbles: true, pointerId: 14 }))
   window.dispatchEvent(new PointerEvent('pointerup', { ...screenPoint(svg, 130, 170), bubbles: true, pointerId: 14 }))
-  await expect.poll(events).toContain('attach:FLOW-A:source:card-a:N1')
+  await expect.poll(events).toContain('attach:FLOW-A:source:CARD-A:N1')
 
   const label = container.querySelector<SVGGElement>('.audit-flow.selected')
   if (!label) throw new Error('selected Flow has no rendered route label')

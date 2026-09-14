@@ -30,7 +30,7 @@ export function usePresentation() {
   const runtime = useInfoschematic()
   const allFamilyIds = runtime.infoschematicFamilies.map((family) => family.id)
   const allScopeIds = runtime.infoschematicScopes.map((scope) => scope.id)
-  const storage = runtime.config.id
+  const storage = runtime.compatibilityConfig.id
 
   // Audience preferences persist. Production mode, focus and playback do not.
   const [storedAutoAdvance, setStoredAutoAdvance] = usePersistentState(

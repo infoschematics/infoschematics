@@ -11,12 +11,7 @@ export function PresentationDetails({
 }) {
   const [tab, setTab] = useState<'info' | 'specifications'>('info')
   const { derived } = presentation
-  const focus =
-    derived.activeSequence?.description ||
-    derived.activeSequenceScene?.description ||
-    derived.runningStory?.question ||
-    derived.thematicScene?.description ||
-    derived.standaloneScene?.description
+  const focus = derived.activeSequence?.description || derived.activeSequenceScene?.description
 
   return (
     <aside className="isp-details" aria-label="Presentation details">

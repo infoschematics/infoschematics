@@ -6,7 +6,7 @@ This reference defines the public language used by packages, authored configurat
 
 ### Product
 
-The **product** is an Infoschematic together with its Standalone Scenes and Sequences.
+The **product** is one Infoschematic: its structural Diagram plus optional Scopes, Specifications and Sequences.
 
 | Id | Infoschematics term | Also known as |
 | --- | --- | --- |
@@ -18,12 +18,12 @@ The **product** is an Infoschematic together with its Standalone Scenes and Sequ
 | `adapter-card` | <span id="adapter-card"></span>Adapter Card | sidecar, wrapper |
 | `flow` | <span id="flow"></span>Flow | connection, connector, link, edge |
 | `point` | <span id="point"></span>Point | junction, anchor, endpoint |
-| `graphic` | <span id="graphic"></span>Graphic | overlay figure, drawn annotation |
+| `overlay` | <span id="overlay"></span>Overlay | foreground figure, drawn annotation |
+| `graphic` | <span id="graphic"></span>Graphic | established compatibility name for Overlay |
 | `route` | <span id="route"></span>Route | geometry, line run |
 | `waypoint` | <span id="waypoint"></span>Waypoint | bend, corner, vertex |
 | `port` | <span id="port"></span>Port | connection point, attachment point |
 | `scene` | <span id="scene"></span>Scene | focus composition, highlight group |
-| `standalone-scene` | <span id="standalone-scene"></span>Standalone Scene | reusable Scene |
 | `sequence-scene` | <span id="sequence-scene"></span>Sequence Scene | step, thematic scene |
 | `sequence` | <span id="sequence"></span>Sequence | theme, story, walkthrough, deck |
 | `callout` | <span id="callout"></span>Callout | narration card, caption card |
@@ -51,42 +51,39 @@ Each term carries a stable `Id`. Code and documents cite a concept by that id ra
 
 ### Groupings
 
-Three independent groupings classify what appears in an Infoschematic. None is an artefact and none substitutes for another.
+Card Collections and Flow Families classify Diagram elements and supply their semantic visual identity. Architectural Scopes are presentation selections over element ids rather than Diagram classifications.
 
 | Id | Infoschematics term | Meaning |
 | --- | --- | --- |
-| `flow-family` | <span id="flow-family"></span>Flow Family | What a Flow carries and the visual identity associated with it |
-| `scope` | <span id="scope"></span>Scope | A selectable architectural grouping of artefacts |
-| `domain` | <span id="domain"></span>Domain | A sphere of concern that can classify or visually distinguish Cards |
+| `card-collection` | <span id="card-collection"></span>Card Collection | Kind and semantic visual identity shared by Cards |
+| `domain` | <span id="domain"></span>Domain | established compatibility name for Card Collection |
+| `flow-family` | <span id="flow-family"></span>Flow Family | Kind and semantic visual identity shared by Flows |
+| `scope` | <span id="scope"></span>Architectural Scope | Selectable presentation grouping over Diagram elements |
 
-`family` and `scope` are acceptable shorthand where the surrounding code or prose makes their full meaning unambiguous.
+`collection`, `family` and `scope` are acceptable shorthand where the surrounding code or prose makes the full meaning unambiguous.
 
 ## Infoschematic
 
 An **Infoschematic** is the complete structural diagram. It establishes what exists, where it is placed, and how it is connected.
 
-An Infoschematic contains exactly six primary artefact kinds:
+An Infoschematic contains exactly six visible element types:
 
-- **Region** — a background panel: an explicit box with an optional frame, an optional fill, and a label treatment.
-- **Fabric** — a midground artefact that can participate in Flows and be focused by a Scene.
-- **Card** — a box-like foreground artefact. An Adapter Card wraps a Standard Card without taking an independent position.
-- **Flow** — a foreground artefact showing movement between Cards and Fabrics.
-- **Point** — a foreground junction or labelled anchor that can participate in the same scoped diagram geography.
-- **Graphic** — a foreground artefact normally hidden until a Scene makes it visible.
+- **Region** — authored diagram geography such as a lane, tier or boundary.
+- **Fabric** — background component or plane that Flows may cross and connect to.
+- **Card** — box-like component that originates, transforms or consumes Flows.
+- **Point** — lightweight visible source, sink or junction.
+- **Flow** — connection between ports on Cards, Fabrics or Points.
+- **Overlay** — foreground figure or annotation normally shown by a Scene.
 
-Routes, Waypoints, and Ports describe Flow geometry; they are not additional artefact kinds. Regions establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
+Routes, Waypoints and Ports describe Flow geometry; they are not additional element types. Regions establish geography rather than connectable components. Behaviour determines an artefact kind, not merely how it looks.
 
-Every independently identifiable artefact has a stable machine identifier. Human-readable codes are authored discussion handles and do not change merely because an item moves within a list.
+Every independently identifiable element has one stable, code-like `id`, such as `SRC`. Its human-readable `label`, such as `Source`, may change without changing references.
 
 ## Scenes
 
-A **Scene** is a deterministic presentation composition over an Infoschematic. It declares which Fabrics, Cards, and Flows are in focus, which Graphics are visible, and whether explanatory Callout material is present.
+A **Scene** is a deterministic presentation composition owned by one Sequence. It declares Diagram elements or Architectural Scopes to show, hide or focus, and may carry an explanatory Callout. A Callout is presentation content, not a Diagram element.
 
-- A **Standalone Scene** is independently authored and reusable.
-- A **Sequence Scene** is owned by one Sequence.
-- A **Callout** is optional explanatory material attached to one Scene. It is not an Infoschematic artefact.
-
-Entering a Scene produces the same focus and Overlay visibility regardless of the previously presented Scene. Copying a Standalone Scene into a Sequence creates independently owned material rather than a hidden runtime link.
+Entering a Scene produces the same focus and Overlay visibility regardless of the previously presented Scene. Reusing a Scene is a Studio copy operation: the copied Scene becomes independently owned data rather than retaining a source relationship.
 
 ## Sequences
 
@@ -102,17 +99,18 @@ The application has three modes:
 
 - **Present** — Audience-facing experience and navigation.
 - **Design** — edits the Infoschematic and its six artefact kinds.
-- **Direct** — edits Standalone Scenes, Sequences, Callouts, and Storyboards.
+- **Direct** — edits Sequences, their Scenes, Callouts and Storyboards.
 
 Its persistent regions are the **Infoschematic panel**, **Producer controls**, and **Details panel**. A region keeps its identity as the selected mode changes what it exposes.
 
 ## Code conventions
 
-- `InfoschematicConfig` is one complete host-supplied product definition.
-- Types ending in `Config` describe authored serialisable data.
-- Runtime types derived from configuration do not leak into authored definitions.
+- `Infoschematic` is the canonical complete host-supplied product definition; `DefinedInfoschematic` is its normalised form.
+- `InfoschematicConfig` is the established compatibility input accepted at public boundaries.
+- Canonical authored data uses one stable code-like `id`; runtime compatibility aliases do not create a second domain identity.
+- Runtime types derive from canonical authored data and do not leak into authored definitions.
 - Identifiers and renderer keys are stable strings.
 - A renderer reference selects a registered key and property-schema version without embedding a component in configuration; a scalar compatibility key requests version `1`.
-- The host owns mounting, page metadata, routing, static assets, and deployment.
+- The host owns mounting, page metadata, routing, static assets and deployment.
 
 Package ownership and dependency direction are defined by [the architecture guide](../design/architecture.md) and its linked decision records, rather than repeated here.
