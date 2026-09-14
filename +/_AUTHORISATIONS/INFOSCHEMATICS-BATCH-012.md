@@ -47,3 +47,7 @@ The item may close only after every component route has focused reader-facing co
 ## Run ledger
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-012-RUN-001 b0e63a939686e62b44c145d58194fa4ed52640ff5ffb4d89ee20cab543af20e0 -->
+
+| Item | Start | Result | Evidence | Next human action |
+| --- | --- | --- | --- | --- |
+| `INFOSCHEMATICS-SITE-026` | ready | awaiting-review | `d92553d3` baseline; `fab582b6` result; 92 focused tests, Site type check and build, 13 browser tests, and desktop/390px inspection passed | Consolidate acceptance under the approved batch closure |

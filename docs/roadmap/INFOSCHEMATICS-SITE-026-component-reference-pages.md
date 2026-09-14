@@ -4,12 +4,12 @@ area: SITE
 title: Component reference pages
 theme: site-experience
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: d92553d3b5d84052b54e87453b0a0a29d9dff065
 created_at: 2026-09-14T07:05:25Z
-updated_at: 2026-09-14T07:49:00Z
+updated_at: 2026-09-14T08:07:57Z
 ---
 
 # Component reference pages
@@ -32,12 +32,12 @@ Every component specimen and property reference is rendered in one long page. Ro
 
 ## Steps
 
-- [ ] Add stable child routes for Canvas, Regions, Fabrics, Cards, Flows, Points, and Graphics beneath the Components hub.
-- [ ] Give each page concise explanatory content, supported variants, focused controls, short source, and detailed property reference using the shared demo frame.
-- [ ] Add supported Canvas view-box and Region label controls, and use Rendered versus Design display where ports or editing detail materially aid understanding.
-- [ ] Keep the Components hub concise and collect unsupported notation under a clearly marked Future destination.
-- [ ] Update nested desktop and mobile navigation, active outlines, Site links, and route tests for the new child pages.
-- [ ] Inspect every page at desktop and 390-pixel widths and run the full repository gate.
+- [x] Add stable child routes for Canvas, Regions, Fabrics, Cards, Flows, Points, and Graphics beneath the Components hub.
+- [x] Give each page concise explanatory content, supported variants, focused controls, short source, and detailed property reference using the shared demo frame.
+- [x] Add supported Canvas view-box and Region label controls, and use Rendered versus Design display where ports or editing detail materially aid understanding.
+- [x] Keep the Components hub concise and collect unsupported notation under a clearly marked Future destination.
+- [x] Update nested desktop and mobile navigation, active outlines, Site links, and route tests for the new child pages.
+- [x] Inspect every page at desktop and 390-pixel widths and run the full repository gate.
 
 ## Files touched
 
@@ -76,6 +76,34 @@ Replace the monolithic Components page with focused component reference pages an
 ### Roadmap
 
 Capture square and dot grid density, semantic Point roles, richer Card or Flow notation, and authored visual themes as package work outside this Site item when their contracts are selected.
+
+## Review
+
+### Delivered
+
+Components now has a concise catalogue and stable pages for Canvas, Regions, Fabrics, Cards, Flows, Points, Graphics, and Future notation. Each current component page combines focused guidance, a bounded live example, honest model-backed controls, compact source, and a collapsible property reference.
+
+### Summary of changes
+
+Added component routing and nested navigation; Canvas view-box width and height controls; Region label and opacity controls; Card, Fabric, and Point port controls; a synchronized Standard and Adapter Card comparison; clear current grid labels; and an explicit Future page for unsupported notation.
+
+### Verification
+
+Result `fab582b6e656e976babcd373e2fa10af42e08798`: 92 focused Site tests, Site TypeScript checking, production Site build, and all 13 browser tests passed. Components, Canvas, Regions, Cards, Points, and Future pages were inspected at desktop width; Components, Canvas, and Cards were also inspected at 390 pixels with no horizontal overflow.
+
+The repository-wide gate was run before the implementation commit. It is currently blocked by concurrent non-Site work in renderer parity, vocabulary citations, and an inline-SVG expectation; the scoped Site checks and clean detached-worktree build are green.
+
+### Outstanding concerns
+
+Future grid combinations, semantic Point roles, decision and stacked Cards, named Fabric presets, endpoint cardinality, and authored visual themes remain deliberately non-interactive until their portable package contracts exist. The Studio-backed Playground remains separately blocked by reusable Studio source-panel work.
+
+### Post-change review
+
+The labelled whole-diagram example remains in Overview, while Components now gets directly to the catalogue. The examples stay bounded on wide screens, stack cleanly on mobile, and expose only properties the current model and renderers support.
+
+### Mini recap
+
+Baseline `d92553d3b5d84052b54e87453b0a0a29d9dff065`; result `fab582b6e656e976babcd373e2fa10af42e08798`. The implementation stayed inside Site-owned routes, content, examples, controls, tests, and styling.
 
 ## Discussion
 
