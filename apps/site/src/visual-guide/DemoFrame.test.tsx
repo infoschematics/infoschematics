@@ -16,8 +16,8 @@ describe('component demo frame', () => {
     )
 
     expect(page).toContain('>Preview mode</legend>')
-    expect(page).toContain('aria-pressed="true">Rendered</button>')
-    expect(page).toContain('aria-pressed="false">Design</button>')
+    expect(page).toMatch(/aria-pressed="true"[^>]*>Rendered<\/button>/)
+    expect(page).toMatch(/aria-pressed="false"[^>]*>Design<\/button>/)
     expect(page).toContain('aria-label="Reset example"')
     expect(page).toContain('aria-label="Expand source"')
     expect(page).toContain('aria-label="Copy snippet"')
