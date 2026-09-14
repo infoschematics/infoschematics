@@ -4,12 +4,12 @@ area: TOOL
 title: Harden Design interactions
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6e2c957ac37f4349d3e70bc213d17ea777fde986
 created_at: 2026-09-13T15:00:21Z
-updated_at: 2026-09-14T02:59:22Z
+updated_at: 2026-09-14T06:49:55Z
 ---
 
 # Harden Design interactions
@@ -114,6 +114,10 @@ A fresh review against the Goal and Boundary found the interaction contract cove
 ### Mini recap
 
 Design interactions now preserve attached presentation across pointer, keyboard and property surfaces, pending removals remain reviewable, and the rendered regression matrix is part of the repository-wide gate. Producer guidance and specification conformance match the delivered behaviour; acceptance is the only remaining lifecycle step.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: Responsive diagram density
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-13T15:39:09Z
-updated_at: 2026-09-14T02:27:28Z
+updated_at: 2026-09-14T06:49:55Z
 ---
 
 # Responsive diagram density
@@ -102,6 +102,10 @@ The implementation meets the approved goal without mutating the canonical model 
 ### Mini recap
 
 Responsive detail is now a host choice grounded in explicit dimensions rather than an ambient device heuristic. Optional rows disappear predictably while the diagram structure and accessible meaning remain intact. No follow-up work is required within this item; genuine mobile reflow remains a separate future capability.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on review packet above.
 
 ## Discussion
 

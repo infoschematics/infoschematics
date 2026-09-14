@@ -4,12 +4,12 @@ area: TOOL
 title: Renderer schema version
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-03T06:02:55Z
-updated_at: 2026-09-14T02:29:04Z
+updated_at: 2026-09-14T06:49:55Z
 ---
 
 # Renderer schema version
@@ -101,6 +101,10 @@ The shared reference is serialisable and dependency-free, canonical parsing remo
 ### Mini recap
 
 Baseline `e47f2ae54bd64431190ab9154576374c88b531a8`; implementation `1b60599fea4771ac6f13f415dd80ab8b40763594`. TOOL-014 is integrated, fully verified, and ready for human acceptance at `awaiting-review`.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: Unified presentation sequences
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: e47f2ae54bd64431190ab9154576374c88b531a8
 created_at: 2026-09-10T00:14:39Z
-updated_at: 2026-09-14T03:43:59Z
+updated_at: 2026-09-14T06:49:55Z
 ---
 
 ## Goal
@@ -115,6 +115,10 @@ The public canonical contract has one presentation concept and all four display/
 ### Mini recap
 
 Sequences now describe what an audience can select, whether progression is automatic, and whether callouts appear. Legacy inputs retain their former behaviour, and canonical view-internal cleanup can proceed independently.
+
+## Done
+
+Accepted 2026-09-14 by Kris Brown on review packet above.
 
 ## Discussion
 
