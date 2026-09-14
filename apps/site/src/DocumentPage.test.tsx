@@ -90,6 +90,19 @@ describe('documentation pages', () => {
     }
   })
 
+  it('keeps the guide map and active outline available through mobile navigation', () => {
+    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
+
+    if (!route) throw new Error('The authoring documentation route is missing.')
+
+    const page = renderToStaticMarkup(<DocumentPage route={route} />)
+
+    expect(page).toContain('<details class="docs-mobile-navigation">')
+    expect(page).toContain('<span>Guide navigation</span><strong>Authoring</strong>')
+    expect(page).toContain('aria-label="Mobile documentation"')
+    expect(page.match(/aria-label="Authoring sections"/g)).toHaveLength(2)
+  })
+
   it('renders Markdown structure rather than exposing source text', () => {
     const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'apps/site/content/authoring.md')
 

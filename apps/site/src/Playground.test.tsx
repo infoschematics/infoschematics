@@ -2,7 +2,15 @@ import { parseInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { Issues, Playground, Preview, presetFromSearch, presets } from './Playground.tsx'
+import {
+  copyPlaygroundDocument,
+  documentForPreset,
+  Issues,
+  Playground,
+  Preview,
+  presetFromSearch,
+  presets
+} from './Playground.tsx'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 
 describe('Playground', () => {
@@ -27,6 +35,10 @@ describe('Playground', () => {
     expect(page).toContain('document-shell--wide')
     expect(page).toContain('playground-shell')
     for (const { label } of presets) expect(page).toContain(`>${label}</option>`)
+    expect(page).toContain('>Preset loaded</span>')
+    expect(page).toContain('>Reset preset</button>')
+    expect(page).toContain('>Copy YAML</button>')
+    expect(page).toContain('aria-live="polite"')
   })
 
   it('starts with a visible Flow from Source to Sink', () => {
@@ -53,6 +65,21 @@ describe('Playground', () => {
     expect(page).toContain('aria-label="Infoschematic document"')
     expect(page).toContain('data:image/svg+xml')
     expect(page).toContain('What makes an Infoschematic')
+    expect(page).toContain('<option value="explained" selected="">An Infoschematic explained</option>')
+    expect(documentForPreset('explained')).toContain('What makes an Infoschematic')
+  })
+
+  it('copies the current inert document through the supplied clipboard boundary', async () => {
+    let copied = ''
+
+    await copyPlaygroundDocument('title: Copy me', {
+      writeText: async (text) => {
+        copied = text
+      }
+    })
+
+    expect(copied).toBe('title: Copy me')
+    await expect(copyPlaygroundDocument('title: No clipboard', undefined)).rejects.toThrow('Clipboard access')
   })
 
   it('selects a preset from the query string and refuses one it does not know', () => {

@@ -794,17 +794,17 @@ a:focus-visible {
   padding-bottom: 24px;
 }
 
-.docs-sidebar section {
+.docs-navigation section {
   padding-top: 16px;
   border-top: 1px solid #ffffff12;
 }
 
-.docs-sidebar section:first-child {
+.docs-navigation section:first-child {
   padding-top: 0;
   border-top: 0;
 }
 
-.docs-sidebar h2 {
+.docs-navigation h2 {
   margin: 0 0 6px;
   color: #5c7a92;
   font: 600 10px/1.5 'DM Mono', monospace;
@@ -812,7 +812,7 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
-.docs-sidebar ul {
+.docs-navigation ul {
   display: grid;
   gap: 5px;
   margin: 0;
@@ -820,37 +820,41 @@ a:focus-visible {
   list-style: none;
 }
 
-.docs-sidebar a {
+.docs-navigation a {
   color: #8fcff8;
   font: 500 12px/1.5 'DM Mono', monospace;
   letter-spacing: 0.02em;
   text-decoration: none;
 }
 
-.docs-sidebar a:hover,
-.docs-sidebar a:focus-visible {
+.docs-navigation a:hover,
+.docs-navigation a:focus-visible {
   color: #f5f8ff;
 }
 
-.docs-sidebar a[aria-current='page'] {
+.docs-navigation a[aria-current='page'] {
   color: #f5f8ff;
 }
 
-.docs-sidebar .docs-sidebar__outline {
+.docs-navigation .docs-sidebar__outline {
   gap: 4px;
   margin: 7px 0 8px 10px;
   padding-left: 11px;
   border-left: 1px solid #ffffff1c;
 }
 
-.docs-sidebar .docs-sidebar__outline a {
+.docs-navigation .docs-sidebar__outline a {
   color: #668ba6;
   font-size: 11px;
   line-height: 1.4;
 }
 
-.docs-sidebar .docs-sidebar__outline-subsection {
+.docs-navigation .docs-sidebar__outline-subsection {
   padding-left: 10px;
+}
+
+.docs-mobile-navigation {
+  display: none;
 }
 
 @media (max-width: 960px) {
@@ -860,6 +864,42 @@ a:focus-visible {
 
   .docs-sidebar {
     display: none;
+  }
+
+  .docs-mobile-navigation {
+    display: block;
+    margin: 0 0 12px;
+    border: 1px solid #ffffff1c;
+    border-radius: 9px;
+    background: #0d2031;
+  }
+
+  .docs-mobile-navigation > summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 15px;
+    color: #8fcff8;
+    font: 600 11px/1.45 'DM Mono', monospace;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+  }
+
+  .docs-mobile-navigation > summary::marker {
+    color: #79c9ff;
+  }
+
+  .docs-mobile-navigation > summary strong {
+    color: #f5f8ff;
+    font-weight: 600;
+  }
+
+  .docs-mobile-navigation__body {
+    display: grid;
+    gap: 18px;
+    padding: 16px;
+    border-top: 1px solid #ffffff16;
   }
 }
 
@@ -882,9 +922,9 @@ a:focus-visible {
 .playground-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 10px 14px;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .playground-preset {
@@ -904,6 +944,49 @@ a:focus-visible {
   background: #0d2031;
   color: #e8f1f8;
   font: 600 11px/1 'DM Mono', monospace;
+}
+
+.playground-document-state {
+  margin-right: auto;
+  padding: 5px 8px;
+  border: 1px solid #48c6a833;
+  border-radius: 999px;
+  color: #7de2c8;
+  font: 600 9px/1 'DM Mono', monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.playground-document-state[data-state='edited'] {
+  border-color: #f5c97644;
+  color: #f5c976;
+}
+
+.playground-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.playground-actions button {
+  padding: 8px 10px;
+  border: 1px solid #ffffff26;
+  border-radius: 7px;
+  background: #0d2031;
+  color: #e8f1f8;
+  font: 600 10px/1 'DM Mono', monospace;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.playground-actions button:hover,
+.playground-actions button:focus-visible {
+  border-color: #79c9ff;
+}
+
+.playground-actions button:disabled {
+  border-color: #ffffff12;
+  color: #607689;
+  cursor: not-allowed;
 }
 
 .playground-panels {
@@ -959,6 +1042,13 @@ a:focus-visible {
   font: 400 12px/1.6 'DM Mono', monospace;
 }
 
+.playground-action-feedback {
+  min-height: 18px;
+  margin: -4px 0 0;
+  color: #9db4c9;
+  font: 500 10px/1.5 'DM Mono', monospace;
+}
+
 @media (max-width: 900px) {
   .playground-shell {
     height: auto;
@@ -974,6 +1064,38 @@ a:focus-visible {
 
   .playground-editor {
     min-height: 320px;
+  }
+
+  .playground-toolbar {
+    justify-content: flex-start;
+  }
+
+  .playground-document-state {
+    margin-right: 0;
+  }
+
+  .playground-actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .playground-preset {
+    width: 100%;
+  }
+
+  .playground-preset select {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .playground-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .playground-actions button {
+    flex: 1;
   }
 }
 

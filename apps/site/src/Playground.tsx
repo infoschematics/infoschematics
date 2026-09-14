@@ -45,6 +45,19 @@ export const presetFromSearch = (search: string): PlaygroundPreset | undefined =
   return presets.find(({ key }) => key === wanted)?.key ?? (wanted ? legacyPresetAliases[wanted] : undefined)
 }
 
+export const documentForPreset = (key: PlaygroundPreset) =>
+  presets.find((entry) => entry.key === key)?.document ?? yamlSeed
+
+export async function copyPlaygroundDocument(
+  text: string,
+  clipboard: Pick<Clipboard, 'writeText'> | undefined = typeof navigator === 'undefined'
+    ? undefined
+    : navigator.clipboard
+) {
+  if (!clipboard?.writeText) throw new Error('Clipboard access is unavailable.')
+  await clipboard.writeText(text)
+}
+
 const parseDelay = 250
 
 function usePlaygroundParse(text: string): InfoschematicParseResult {
@@ -100,13 +113,42 @@ const initialPreset = (): PlaygroundPreset =>
 
 /** One inert Infoschematic document, validated and rendered live through the same loader the CLI uses. */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {
-  const [text, setText] = useState(() => presets.find(({ key }) => key === preset)?.document ?? yamlSeed)
+  const [selectedPreset, setSelectedPreset] = useState(preset)
+  const [text, setText] = useState(() => documentForPreset(preset))
+  const [copyFeedback, setCopyFeedback] = useState('')
   const parsed = usePlaygroundParse(text)
+  const presetDocument = documentForPreset(selectedPreset)
+  const dirty = text !== presetDocument
 
   const loadPreset = (key: PlaygroundPreset) => {
-    const wanted = presets.find((entry) => entry.key === key)
-    if (!wanted) return
-    setText(wanted.document)
+    setSelectedPreset(key)
+    setText(documentForPreset(key))
+    setCopyFeedback('')
+
+    if (typeof window !== 'undefined') {
+      const location = new URL(window.location.href)
+      location.searchParams.set('preset', key)
+      window.history.replaceState(null, '', `${location.pathname}${location.search}${location.hash}`)
+    }
+  }
+
+  const editDocument = (value: string) => {
+    setText(value)
+    setCopyFeedback('')
+  }
+
+  const resetDocument = () => {
+    setText(presetDocument)
+    setCopyFeedback('Preset restored.')
+  }
+
+  const copyDocument = async () => {
+    try {
+      await copyPlaygroundDocument(text)
+      setCopyFeedback('YAML copied.')
+    } catch {
+      setCopyFeedback('Could not copy YAML. Select the document and copy it manually.')
+    }
   }
 
   return (
@@ -120,10 +162,7 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
             <div className="playground-toolbar">
               <label className="playground-preset">
                 Preset
-                <select onChange={(event) => loadPreset(event.target.value as PlaygroundPreset)} value="">
-                  <option disabled value="">
-                    Load a definition…
-                  </option>
+                <select onChange={(event) => loadPreset(event.target.value as PlaygroundPreset)} value={selectedPreset}>
                   {presets.map(({ key, label }) => (
                     <option key={key} value={key}>
                       {label}
@@ -131,14 +170,28 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
                   ))}
                 </select>
               </label>
+              <span className="playground-document-state" data-state={dirty ? 'edited' : 'preset'}>
+                {dirty ? 'Edited' : 'Preset loaded'}
+              </span>
+              <div className="playground-actions">
+                <button disabled={!dirty} onClick={resetDocument} type="button">
+                  Reset preset
+                </button>
+                <button onClick={copyDocument} type="button">
+                  Copy YAML
+                </button>
+              </div>
             </div>
             <textarea
               aria-label="Infoschematic document"
               className="playground-editor"
-              onChange={(event) => setText(event.target.value)}
+              onChange={(event) => editDocument(event.target.value)}
               spellCheck={false}
               value={text}
             />
+            <p aria-live="polite" className="playground-action-feedback">
+              {copyFeedback}
+            </p>
             <Issues parsed={parsed} />
           </div>
         </div>

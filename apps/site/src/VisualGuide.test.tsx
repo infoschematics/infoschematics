@@ -9,6 +9,8 @@ describe('components guide', () => {
     expect(page).toContain('<article aria-label="Components" class="document-content">')
     expect(page).toContain('<h1>Components</h1>')
     expect(page).toContain('aria-label="Components sections"')
+    expect(page).toContain('<span>Guide navigation</span><strong>Components</strong>')
+    expect(page).toContain('aria-label="Mobile documentation"')
     for (const slug of [
       'labelled-example',
       'canvas',
