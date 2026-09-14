@@ -245,6 +245,10 @@ diagram:
   }
 
   const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const sourceTab = [...container.querySelectorAll<HTMLButtonElement>('.panel-tabs button')].find(
     (button) => button.textContent?.trim() === 'Source'
   )
