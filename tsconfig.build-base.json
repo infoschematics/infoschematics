@@ -4,6 +4,7 @@
     "declaration": true,
     "noEmit": false,
     "noEmitOnError": true,
+    "paths": {},
     "rewriteRelativeImportExtensions": true,
     "sourceMap": true
   }

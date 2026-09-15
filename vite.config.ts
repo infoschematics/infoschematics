@@ -1,6 +1,7 @@
 import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
+import { workspaceSourceAliases } from './scripts/workspace-sources.ts'
 
 // The package ships TypeScript source behind its exports map - hosts compile
 // it in their own build. This config exists for the test suite alone.
@@ -10,6 +11,9 @@ export default defineConfig({
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
   },
   plugins: [react()],
+  resolve: {
+    alias: workspaceSourceAliases()
+  },
   test: {
     // Both extensions: a component test has to be .tsx, and leaving it out of
     // the pattern meant one could be written and silently never run.

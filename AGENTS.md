@@ -13,3 +13,5 @@ The consumer user guide is Site-owned content under `apps/site/content/`; reposi
 A passing suite is not evidence that output looks right. When changing visual treatment, render the result and look at it: a Flow arrowhead that was referenced but never defined, and a light slab painted onto the blueprint backdrop, both survived a fully green run.
 
 Run `bun run self:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.
+
+Suites and typechecks resolve each package to its own source, so a change to a shared package is visible immediately and no build is a prerequisite for running them. The build still runs in the gate, because it is what proves the published shape.

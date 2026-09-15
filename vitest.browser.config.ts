@@ -2,17 +2,20 @@ import { fileURLToPath, URL } from 'node:url'
 import react from '@vitejs/plugin-react'
 import { playwright } from '@vitest/browser-playwright'
 import { defineConfig } from 'vitest/config'
+import { workspaceSourceAliases } from './scripts/workspace-sources.ts'
 
 export default defineConfig({
   define: {
     __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10))
   },
   optimizeDeps: {
-    noDiscovery: true,
-    include: ['vitest-browser-react', '@infoschematics/domain-core > yaml', '@infoschematics/domain-core > zod']
+    // Domain Core resolves to its own source here, so its dependencies are discovered from that source rather
+    // than pre-bundled through the package.
+    include: ['vitest-browser-react']
   },
   plugins: [react()],
   resolve: {
+    alias: workspaceSourceAliases(),
     dedupe: ['react', 'react-dom']
   },
   test: {

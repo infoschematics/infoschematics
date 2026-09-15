@@ -1,20 +1,37 @@
 {
   "compilerOptions": {
     "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
     "jsx": "react-jsx",
     "lib": ["ES2024", "DOM", "DOM.Iterable"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "noEmit": true,
+    "noUnusedLocals": true,
+    "paths": {
+      "@infoschematics/cli": ["./packages/cli/src/index.ts"],
+      "@infoschematics/cli/*": ["./packages/cli/src/*.ts", "./packages/cli/src/*"],
+      "@infoschematics/domain-core": ["./packages/domain-core/src/index.ts"],
+      "@infoschematics/domain-core/*": ["./packages/domain-core/src/*.ts", "./packages/domain-core/src/*"],
+      "@infoschematics/domain-model": ["./packages/domain-model/src/index.ts"],
+      "@infoschematics/domain-model/*": ["./packages/domain-model/src/*.ts", "./packages/domain-model/src/*"],
+      "@infoschematics/render-svg": ["./packages/render-svg/src/index.ts"],
+      "@infoschematics/render-svg/*": ["./packages/render-svg/src/*.ts", "./packages/render-svg/src/*"],
+      "@infoschematics/view-canvas": ["./packages/view-canvas/src/index.ts"],
+      "@infoschematics/view-canvas/*": ["./packages/view-canvas/src/*.ts", "./packages/view-canvas/src/*"],
+      "@infoschematics/view-model/*": ["./packages/view-model/src/*.ts", "./packages/view-model/src/*"],
+      "@infoschematics/view-present": ["./packages/view-present/src/index.ts"],
+      "@infoschematics/view-present/*": ["./packages/view-present/src/*.ts", "./packages/view-present/src/*"],
+      "@infoschematics/view-studio": ["./packages/view-studio/src/index.ts"],
+      "@infoschematics/view-studio/*": ["./packages/view-studio/src/*.ts", "./packages/view-studio/src/*"]
+    },
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
     "target": "ES2024",
-    "verbatimModuleSyntax": true,
-    "noUnusedLocals": true
+    "verbatimModuleSyntax": true
   },
   "include": ["src", "vite.config.ts"]
 }

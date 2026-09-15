@@ -75,7 +75,7 @@
     "ki:site:preview": "bun run --cwd apps/site preview",
     "prepare": "husky",
     "self:cf:build": "bun run self:packages:build && bun run ki:site:build",
-    "self:check": "bun run self:packages:build && bun run self:verify:visual-tokens && bun run self:verify:schema && bun run self:verify:examples && bun run test && bun run test:browser && bun run self:verify:typecheck && bun run self:verify:depcruise && bun run --cwd apps/site build",
+    "self:check": "bun run self:verify:typecheck && bun run self:packages:build && bun run self:verify:visual-tokens && bun run self:verify:schema && bun run self:verify:examples && bun run test && bun run self:verify:depcruise && bun run test:browser && bun run --cwd apps/site build",
     "self:dev": "bun run self:packages:build && bun run --cwd apps/site ki:site:dev",
     "self:examples:generate": "bun scripts/examples.ts",
     "self:examples:render": "bun scripts/render-example.ts",
@@ -89,7 +89,7 @@
     "self:verify:depcruise": "depcruise --config .dependency-cruiser.ts packages/domain-model/src packages/domain-core/src packages/view-model/src packages/view-canvas/src packages/view-present/src packages/view-studio/src packages/render-svg/src packages/cli/src examples/is-blank/src examples/is-infoschematics/src examples/is-system/src apps/site/src scripts",
     "self:verify:examples": "bun scripts/examples.ts --check",
     "self:verify:schema": "bun scripts/generate-schema.ts --check",
-    "self:verify:typecheck": "tsc --noEmit -p packages/domain-model && tsc --noEmit -p packages/domain-core && tsc --noEmit -p packages/view-model && tsc --noEmit -p packages/render-svg && tsc --noEmit -p packages/cli && tsc --noEmit -p packages/view-canvas && tsc --noEmit -p packages/view-present && tsc --noEmit -p packages/view-studio && tsc --noEmit -p examples/is-blank && tsc --noEmit -p examples/is-infoschematics && tsc --noEmit -p examples/is-system && tsc --noEmit -p apps/site && tsc --noEmit -p tsconfig.scripts.json",
+    "self:verify:typecheck": "bun scripts/typecheck.ts",
     "self:verify:visual-tokens": "bun scripts/generate-visual-tokens.ts --check",
     "test": "vitest run --root .",
     "test:browser": "vitest run --config vitest.browser.config.ts"
