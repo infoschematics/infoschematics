@@ -1,4 +1,3 @@
-import { defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
@@ -139,16 +138,27 @@ const representative: InfoschematicConfig = {
 
 describe('renderInfoschematicSvg', () => {
   it('renders the authored grid interval and disables appearance at zero', () => {
-    const canonical = (gridSize: number) =>
-      defineInfoschematicModel({
-        id: `GRID-${gridSize}`,
-        title: 'Grid sizing',
-        diagram: {
-          appearance: { grid: 'major-plus-minor' },
-          bounds: { x: 0, y: 0, width: 120, height: 80 },
-          gridSize
-        }
-      })
+    const canonical = (gridSize: number): DefinedInfoschematic => ({
+      id: `GRID-${gridSize}`,
+      title: 'Grid sizing',
+      diagram: {
+        appearance: { grid: 'major-plus-minor' },
+        bounds: { x: 0, y: 0, width: 120, height: 80 },
+        calloutPositions: [],
+        cards: [],
+        collections: [],
+        fabrics: [],
+        families: [],
+        flows: [],
+        gridSize,
+        overlays: [],
+        points: [],
+        regions: []
+      },
+      scopes: [],
+      sequences: [],
+      specifications: []
+    })
 
     const custom = renderInfoschematicSvg(canonical(4))
     expect(custom).toContain('data-grid-treatment="major-plus-minor"')
