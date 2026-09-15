@@ -7,7 +7,7 @@
     "@infoschematics/view-model": "0.1.0"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "exports": {
     ".": {

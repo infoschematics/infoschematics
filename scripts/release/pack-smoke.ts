@@ -11,6 +11,7 @@ import { checkReleaseVersions } from './check-versions.ts'
 import {
   type PackageManifest,
   type ReleasePackage,
+  releaseNodeEngine,
   releasePackages,
   releaseRepositoryUrl,
   repositoryRoot
@@ -122,7 +123,8 @@ export function validatePackedPackage(
   if (typeof manifest.repository !== 'object' || manifest.repository.directory !== entry.directory) {
     errors.push(`packed package repository.directory must be ${entry.directory}`)
   }
-  if (manifest.engines?.node !== '>=22') errors.push('packed package engines.node must be >=22')
+  if (manifest.engines?.node !== releaseNodeEngine)
+    errors.push(`packed package engines.node must be ${releaseNodeEngine}`)
   if (manifest.publishConfig?.access !== 'public') errors.push('packed package publishConfig.access must be public')
   if (!files.includes('package.json')) errors.push('tarball must contain package.json')
   if (!files.includes('dist/LICENSE')) errors.push('tarball must contain dist/LICENSE')

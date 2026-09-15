@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-15T14:45:00Z
+updated_at: 2026-09-15T15:10:00Z
 ---
 
 # Major dependency upgrades
@@ -132,7 +132,7 @@ Attribution was established rather than assumed. The `TS2321` failure was reprod
 
 ### Outstanding concerns
 
-The `@types/node` hold was not removed, which deviates from the step that said to remove both. The reasoning is above and now lives in the hold text. Two things about it deserve a decision that is not this item's to take: the repository is _already_ one major loose, typing against 24 while promising `>=22`, and `engines.node >= 22` may simply be stale — Node 22 leaves maintenance before long, and moving it is a published-package contract change.
+The `@types/node` hold was not removed, which deviates from the step that said to remove both. The reasoning is above and now lives in the hold text. Two things about it deserve a decision that is not this item's to take: the repository is _already_ one major loose, typing against 24 while promising `>=22`, and `engines.node >= 22` may simply be stale — Node 22 leaves maintenance before long, and moving it is a published-package contract change. Both were then decided: the floor is the Active LTS line, recorded as [GDR-INFOSCHEMATICS-004](../decisions/GDR-INFOSCHEMATICS-004-promise-the-active-lts-node-line.md), which moves `engines.node` to `>=24` and discharges the hold rather than leaving it standing.
 
 One test failed once and never again. `packages/cli/src/index.test.ts`'s raster scaling case timed out at the default 5000 ms during the first full-gate run, then passed alone, passed under a forced gate on 5.9.3, and passed under three further forced gates on 7.0.2. It rasterises the same document twice at different scales, which is genuinely slow, and the gate now runs 43 tasks at once where it used to run stages in series. That is a real robustness gap in the test rather than in the product, and it is captured as `INFOSCHEMATICS-TOOL-068` rather than fixed here.
 

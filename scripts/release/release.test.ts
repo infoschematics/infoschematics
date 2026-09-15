@@ -3,6 +3,7 @@ import { type PackedPackage, publicEntrySpecifiers, validatePackedPackage } from
 import {
   type PackageManifest,
   type ReleasePackage,
+  releaseNodeEngine,
   releasePackages,
   releaseRepositoryUrl,
   validateReleaseManifests
@@ -32,7 +33,7 @@ const dependencies: Readonly<Record<string, readonly string[]>> = {
 const manifestFor = (entry: ReleasePackage, version = '1.2.3'): PackageManifest => ({
   dependencies: Object.fromEntries((dependencies[entry.name] ?? []).map((name) => [name, version])),
   description: `${entry.name} package`,
-  engines: { node: '>=22' },
+  engines: { node: releaseNodeEngine },
   exports: { '.': { import: './dist/index.js', types: './dist/index.d.ts' } },
   license: 'MIT',
   name: entry.name,
@@ -96,7 +97,7 @@ describe('packed public package inspection', () => {
   const entry = releasePackages.find(({ name }) => name === '@infoschematics/view-canvas') as ReleasePackage
   const manifest: PackageManifest = {
     description: 'Canvas',
-    engines: { node: '>=22' },
+    engines: { node: releaseNodeEngine },
     exports: {
       '.': { import: './dist/index.js', types: './dist/index.d.ts' },
       './styles.css': './dist/styles.css'

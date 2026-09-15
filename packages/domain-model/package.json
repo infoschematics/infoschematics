@@ -3,7 +3,7 @@
   "description": "The framework-neutral Infoschematic domain model and serialisable configuration contract.",
   "version": "0.1.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "exports": {
     ".": {

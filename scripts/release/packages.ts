@@ -23,6 +23,9 @@ export const releasePackages: readonly ReleasePackage[] = Object.freeze([
 export const releasePackageNames = new Set(releasePackages.map(({ name }) => name))
 export const releaseRepositoryUrl = 'git+https://github.com/infoschematics/infoschematics.git'
 
+/** The Node line every published package promises, per GDR-INFOSCHEMATICS-004: the Active LTS line, raised deliberately. */
+export const releaseNodeEngine = '>=24'
+
 export type PackageManifest = Readonly<{
   bin?: Readonly<Record<string, string>> | string
   dependencies?: Readonly<Record<string, string>>
@@ -91,7 +94,8 @@ export function validateReleaseManifests(
     if (typeof manifest.repository !== 'object' || manifest.repository.directory !== expected.directory) {
       errors.push(`${location}: repository.directory must be ${expected.directory}.`)
     }
-    if (manifest.engines?.node !== '>=22') errors.push(`${location}: engines.node must be >=22.`)
+    if (manifest.engines?.node !== releaseNodeEngine)
+      errors.push(`${location}: engines.node must be ${releaseNodeEngine}.`)
     if (manifest.publishConfig?.access !== 'public') errors.push(`${location}: publishConfig.access must be public.`)
   }
 

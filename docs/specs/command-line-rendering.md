@@ -108,7 +108,7 @@ _Evidence:_ `packages/cli/src/index.test.ts`.
 
 ### CLI-005 — Publishable package boundary
 
-The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core and the static SVG renderer. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.
+The CLI package MUST remain a Node 24 ESM adapter whose workspace dependencies are limited to Domain Core and the static SVG renderer. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.
 
 _Conformance:_ conforming
 

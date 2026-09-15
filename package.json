@@ -30,7 +30,7 @@
   },
   "engines": {
     "bun": ">=1.3.0",
-    "node": ">=22"
+    "node": ">=24"
   },
   "homepage": "https://infoschematics.info/",
   "keywords": [
