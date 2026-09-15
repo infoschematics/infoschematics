@@ -536,3 +536,129 @@ test('Studio layer controls close a kind to interaction and release whatever it 
   expect(control('Flows interactive')?.getAttribute('aria-pressed')).toBe('true')
   expect(container.querySelector('.audit-port')).not.toBeNull()
 })
+
+/*
+ * Three Cards, no two of them sharing an edge or a gap, so every group operation has something to change and an
+ * already-aligned fixture cannot pass by accident.
+ */
+const groupConfig = defineInfoschematic({
+  title: 'Group alignment',
+  infoschematic: {
+    cards: [
+      {
+        code: 'CARD-A',
+        detail: 'Anchor card',
+        id: 'card-a',
+        label: 'Card A',
+        placement: { box: { height: 50, width: 100, x: 40, y: 40 } },
+        scope: 'scope',
+        scopes: ['scope']
+      },
+      {
+        code: 'CARD-B',
+        detail: 'Middle card',
+        id: 'card-b',
+        label: 'Card B',
+        placement: { box: { height: 50, width: 100, x: 200, y: 120 } },
+        scope: 'scope',
+        scopes: ['scope']
+      },
+      {
+        code: 'CARD-C',
+        detail: 'Far card',
+        id: 'card-c',
+        label: 'Card C',
+        placement: { box: { height: 50, width: 100, x: 500, y: 200 } },
+        scope: 'scope',
+        scopes: ['scope']
+      }
+    ],
+    scopes: [{ color: '#2463eb', description: 'Cards', fill: '#dbeafe', id: 'scope', label: 'Scope', prefix: 'CARD' }],
+    viewBox: { height: 320, width: 640, x: 0, y: 0 }
+  }
+})
+
+test('a held group aligns and distributes onto its anchor, and one undo puts the whole group back', async () => {
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={groupConfig} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const at = (id: string) => container.querySelector<SVGGElement>(`[data-artefact-id="${id}"]`)
+  const placedAt = (id: string) => at(id)?.getAttribute('transform')
+  const control = (label: string) => container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
+
+  // Nothing is held but the one Card, so a group control has nothing to act on and says so by being disabled.
+  at('CARD-A')?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 60 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 60 }))
+  await expect.poll(() => at('CARD-A')?.classList.contains('selected')).toBe(true)
+  expect(control('Align top')?.disabled).toBe(true)
+
+  for (const [id, pointerId] of [
+    ['CARD-B', 61],
+    ['CARD-C', 62]
+  ] as const) {
+    at(id)?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId, shiftKey: true }))
+    await expect.poll(() => at(id)?.classList.contains('group-held')).toBe(true)
+  }
+  expect(control('Align top')?.disabled).toBe(false)
+  expect(control('Distribute across')?.disabled).toBe(false)
+
+  control('Align top')?.click()
+  // The anchor stays exactly where it was; the other two come onto its top edge and move on no other axis.
+  await expect.poll(() => placedAt('CARD-B')).toBe('translate(200 40)')
+  expect(placedAt('CARD-A')).toBe('translate(40 40)')
+  expect(placedAt('CARD-C')).toBe('translate(500 40)')
+  // One row per element moved, because a row names the authored source a review has to read.
+  expect(container.querySelectorAll('.change-drop').length).toBe(2)
+
+  const undo = container.querySelector<HTMLButtonElement>('button[aria-label="Undo"]')
+  if (!undo) throw new Error('Studio did not render history controls')
+  undo.click()
+  await expect.poll(() => placedAt('CARD-B')).toBe('translate(200 120)')
+  expect(placedAt('CARD-C')).toBe('translate(500 200)')
+  expect(container.querySelector('.change-list')).toBeNull()
+
+  // The outermost two are left where they are and the gaps between all three are equalised: 560 across, 300 of it
+  // occupied, so 130 of space on either side of the middle Card.
+  control('Distribute across')?.click()
+  await expect.poll(() => placedAt('CARD-B')).toBe('translate(270 120)')
+  expect(placedAt('CARD-A')).toBe('translate(40 40)')
+  expect(placedAt('CARD-C')).toBe('translate(500 200)')
+
+  undo.click()
+  await expect.poll(() => placedAt('CARD-B')).toBe('translate(200 120)')
+  expect(container.querySelector('.change-list')).toBeNull()
+})
+
+test('arrow keys carry the whole held group, one step for the group rather than one each', async () => {
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={groupConfig} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const at = (id: string) => container.querySelector<SVGGElement>(`[data-artefact-id="${id}"]`)
+  const placedAt = (id: string) => at(id)?.getAttribute('transform')
+
+  at('CARD-A')?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 63 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 63 }))
+  // The anchor has to be held before the next press can extend it; a Shift press with nothing held is a plain
+  // selection of whatever it landed on.
+  await expect.poll(() => at('CARD-A')?.classList.contains('selected')).toBe(true)
+  at('CARD-B')?.dispatchEvent(
+    new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 64, shiftKey: true })
+  )
+  await expect.poll(() => at('CARD-B')?.classList.contains('group-held')).toBe(true)
+
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
+  await expect.poll(() => placedAt('CARD-A')).toBe('translate(50 40)')
+  expect(placedAt('CARD-B')).toBe('translate(210 120)')
+  // Two steps rather than one twice as long: each press is measured from where the group now is.
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
+  await expect.poll(() => placedAt('CARD-A')).toBe('translate(60 40)')
+  expect(placedAt('CARD-B')).toBe('translate(220 120)')
+})

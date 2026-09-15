@@ -2,23 +2,34 @@ import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
+  type AlignEdge,
   type ArtefactKind,
   type ArtefactSelection,
+  type ArtefactSelectionSet,
   type ArtefactValueByKind,
+  alignOffsets,
   type Change,
   type CreatedComponent,
   type CreatedFlow,
   artefactCapabilities as capabilitiesByKind,
   createArtefactOperation,
+  type DistributeAxis,
+  distributeOffsets,
+  type EditableArtefact,
   type EditableDiagram,
   everyInteractionLayer,
+  groupMovableSelection,
   type InteractionLayers,
   moveArtefactOperation,
   orderChanges,
   type ResizeMinimum,
   reorderArtefactOperation,
   resizeArtefactOperation,
+  sameArtefact,
+  selectionAnchor,
+  selectionSetWithinLayers,
   selectionWithinLayers,
+  toggleArtefactSelection,
   toggleInteractionLayer
 } from '@infoschematics/view-model/editable'
 import type { Box, Offset, Point } from '@infoschematics/view-model/geometry'
@@ -197,6 +208,30 @@ const selectionKey = (selection: ArtefactSelection): string => {
   }
 }
 
+/**
+ * The geometry of an artefact the draft has made and the diagram has not seen yet.
+ *
+ * Its box exists only in the operation that created it, so a selection resolved against the diagram alone comes back
+ * empty and a newly created element could not be moved, aligned, or read in the properties.
+ */
+const createdArtefactDetailsFor = (
+  config: InfoschematicConfig,
+  operations: readonly ArtefactDraftOperation[],
+  selection: ArtefactSelection
+): EditableArtefact | undefined => {
+  const created = [...operations]
+    .reverse()
+    .find(
+      (operation) =>
+        operation.operation === 'create' &&
+        operation.target.kind === selection.kind &&
+        operation.target.id === selection.id
+    )
+  if (created?.operation !== 'create') return undefined
+  const value = effectiveArtefactValue(config, operations, selection)
+  return value ? createdArtefactDetails({ ...created, value } as typeof created) : undefined
+}
+
 const selectionForCreation = <K extends ArtefactKind>(
   kind: K,
   value: ArtefactValueByKind[K]
@@ -273,6 +308,14 @@ export function useEditor(
   // what a presenter means by "this one" - there is no separate selection to make.
   const [selected, setSelected] = useState<string | null>(null)
   const [selectedArtefact, setSelectedArtefact] = useState<ArtefactSelection | null>(null)
+  /*
+   * Everything the Producer is holding, in the order they chose it.
+   *
+   * The first element is the anchor and stays the single selection every other control already reads, so one element
+   * is the ordinary case rather than a second kind of state: the properties panel, a drag, a resize and a removal all
+   * go on acting on exactly one element, and only the group geometry operations look past it.
+   */
+  const [selectionSet, setSelectionSet] = useState<ArtefactSelectionSet>([])
   const [artefactIssue, setArtefactIssue] = useState<string | null>(null)
   // What the pointer is over, so a change and the thing on Infoschematic it describes
   // can light each other up. Not persisted and not checkpointed: hovering is
@@ -410,21 +453,12 @@ export function useEditor(
     () => build(offsets, labelPositions, attached, created, createdCards),
     [attached, build, created, createdCards, labelPositions, offsets]
   )
-  const selectedArtefactDetails = useMemo(() => {
-    const authored = selected ? diagram.selectionFor(selected) : undefined
-    if (authored || !selectedArtefact) return authored
-    const created = [...artefactOperations]
-      .reverse()
-      .find(
-        (operation) =>
-          operation.operation === 'create' &&
-          operation.target.kind === selectedArtefact.kind &&
-          operation.target.id === selectedArtefact.id
-      )
-    if (created?.operation !== 'create') return undefined
-    const value = effectiveArtefactValue(config, artefactOperations, selectedArtefact)
-    return value ? createdArtefactDetails({ ...created, value } as typeof created) : undefined
-  }, [artefactOperations, config, diagram, selected, selectedArtefact])
+  const selectedArtefactDetails = useMemo(
+    () =>
+      (selected ? diagram.selectionFor(selected) : undefined) ??
+      (selectedArtefact ? createdArtefactDetailsFor(config, artefactOperations, selectedArtefact) : undefined),
+    [artefactOperations, config, diagram, selected, selectedArtefact]
+  )
   const selectedArtefactCapabilities =
     selectedArtefactDetails?.capabilities ?? (selectedArtefact ? capabilitiesByKind[selectedArtefact.kind] : undefined)
   const artefactValue = useMemo(
@@ -456,10 +490,15 @@ export function useEditor(
    * layer that closed has just taken them away. Selection and layers are separate state, so the rule that binds them
    * is applied where they meet rather than inside whichever control happened to change one of them.
    */
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `selectKey` is rebuilt every render and only ever resets the same three pieces of state, so listing it would re-run this on every render without changing what it does.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `selectKey` and `holdSelection` are rebuilt every render and only ever reset the same four pieces of state, so listing them would re-run this on every render without changing what it does.
   useEffect(() => {
+    const held = selectionSetWithinLayers(selectionSet, layers)
+    if (held.length !== selectionSet.length) {
+      holdSelection(held)
+      return
+    }
     if (selectedArtefact && !selectionWithinLayers(selectedArtefact, layers)) selectKey(null)
-  }, [layers, selectedArtefact])
+  }, [layers, selectedArtefact, selectionSet])
 
   const swept = useRef(false)
   useEffect(() => {
@@ -745,15 +784,45 @@ export function useEditor(
     )
   }, [artefactOperations, attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
 
-  const selectArtefact = (target: ArtefactSelection | null) => {
-    setSelectedArtefact(target)
-    setSelected(target ? selectionKey(target) : null)
+  /*
+   * Hold exactly this group, with its first element as the anchor.
+   *
+   * The anchor is published as the single selection as well, so the two never disagree: there is one selection with
+   * an order, not a selection and a set that have to be kept in step.
+   */
+  const holdSelection = (selection: ArtefactSelectionSet) => {
+    const anchor = selectionAnchor(selection)
+    setSelectionSet(selection)
+    setSelectedArtefact(anchor)
+    setSelected(anchor ? selectionKey(anchor) : null)
     setArtefactIssue(null)
   }
 
+  const selectArtefact = (target: ArtefactSelection | null) => holdSelection(target ? [target] : [])
+
+  /** Add one element to the group, or take it back out. */
+  const extendSelection = (target: ArtefactSelection) => holdSelection(toggleArtefactSelection(selectionSet, target))
+
+  /**
+   * Add everything a range gesture swept over, keeping what was already held.
+   *
+   * A union rather than a toggle: sweeping across an element that is already in the group means the Producer wants it
+   * in the group, and dropping it would make the same gesture add or remove depending on what it happened to cross.
+   */
+  const addToSelection = (targets: readonly ArtefactSelection[]) =>
+    holdSelection(
+      targets.reduce<ArtefactSelectionSet>(
+        (selection, target) =>
+          selection.some((held) => sameArtefact(held, target)) ? selection : [...selection, target],
+        selectionSet
+      )
+    )
+
   const selectKey = (key: string | null) => {
+    const resolved = key ? (diagram.selectionFor(key)?.selection ?? null) : null
     setSelected(key)
-    setSelectedArtefact(key ? (diagram.selectionFor(key)?.selection ?? null) : null)
+    setSelectedArtefact(resolved)
+    setSelectionSet(resolved ? [resolved] : [])
     setArtefactIssue(null)
   }
 
@@ -772,22 +841,38 @@ export function useEditor(
     return 'box' in value.placement ? value.placement.box : value.placement
   }
 
+  const artefactDetailsFor = (selection: ArtefactSelection): EditableArtefact | undefined =>
+    diagram.selectionFor(selectionKey(selection)) ?? createdArtefactDetailsFor(config, artefactOperations, selection)
+
+  /*
+   * What a move actually acts on, and the box it starts from.
+   *
+   * An Adapter identifies itself but moves through the Card it holds, so the element selected and the element moved
+   * are not always the same one. The box comes from the draft rather than the diagram, so a second move carries on
+   * from where the first left off instead of from the authored coordinate.
+   */
+  const movementFor = (details: EditableArtefact) => {
+    const target = details.movementTarget
+    const moving = sameArtefact(target, details.selection) ? details : artefactDetailsFor(target)
+    if (!moving?.capabilities.move) return undefined
+    return {
+      geometry:
+        moving.geometry.role === 'box'
+          ? { ...moving.geometry, box: effectiveBoxFor(target) ?? moving.geometry.box }
+          : moving.geometry,
+      target
+    }
+  }
+
   // Snapping works on the box, not the pointer: the pointer sits somewhere
   // inside the box, so pulling it onto the grid or a guide would leave the
   // box's own edges off both. `exact` is for keyboard steps, where a unit is a
   // unit and neither the grid nor a guide may pull the move somewhere else.
   const moveSelectedArtefact = (point: Point, exact = false) => {
     if (!selectedArtefactDetails?.capabilities.move) return
-    const target = selectedArtefactDetails.movementTarget
-    const details =
-      target.kind === selectedArtefactDetails.selection.kind && target.id === selectedArtefactDetails.selection.id
-        ? selectedArtefactDetails
-        : diagram.selectionFor(selectionKey(target))
-    if (!details?.capabilities.move) return
-    const geometry =
-      details.geometry.role === 'box'
-        ? { ...details.geometry, box: effectiveBoxFor(target) ?? details.geometry.box }
-        : details.geometry
+    const movement = movementFor(selectedArtefactDetails)
+    if (!movement) return
+    const { geometry, target } = movement
     const offset = (() => {
       switch (geometry.role) {
         case 'box': {
@@ -815,6 +900,105 @@ export function useEditor(
     if (!offset) return
     const operation = moveArtefactOperation(target, geometry, offset)
     if (operation) recordOperation(operation, false)
+  }
+
+  /*
+   * The elements a group geometry operation will move, anchor first.
+   *
+   * Participation is read from the capability matrix through the held selection, so a Flow in the group is left out
+   * rather than refused: a Flow runs between the ports it is attached to, and aligning its route directly would
+   * fight them. A closed layer has already been taken out of the selection itself, so it cannot reappear here.
+   */
+  const groupMovements = () =>
+    groupMovableSelection(selectionSet).flatMap((selection) => {
+      const details = artefactDetailsFor(selection)
+      const movement = details ? movementFor(details) : undefined
+      return movement?.geometry.role === 'box' ? [{ box: movement.geometry.box, movement }] : []
+    })
+
+  /*
+   * One group operation, one undo.
+   *
+   * Every participant emits an ordinary move, so the result is ordinary authored coordinates that a later editor can
+   * change freely - reopening an aligned document needs no alignment engine to reproduce its geometry. All of them
+   * are recorded inside a single checkpoint, which is what lets a Producer try an alignment and take it back with one
+   * step instead of one per element.
+   *
+   * Neither the grid nor the snapping guides apply. The Producer has asked for one exact relationship between these
+   * elements, and rounding each result independently is how you get a group that is nearly aligned.
+   */
+  const recordGroupMove = (
+    movements: readonly ReturnType<typeof groupMovements>[number][],
+    offsets: readonly Offset[],
+    discrete = true
+  ) => {
+    const operations = movements.flatMap(({ movement }, index) => {
+      const offset = offsets[index]
+      if (!offset || (offset.dx === 0 && offset.dy === 0)) return []
+      const operation = moveArtefactOperation(movement.target, movement.geometry, offset)
+      return operation ? [operation] : []
+    })
+    if (operations.length === 0) return
+    checkpoint()
+    if (discrete) closeGesture()
+    setArtefactOperations((current) => recordArtefactOperations(current, operations))
+  }
+
+  /*
+   * Move everything held by the same amount.
+   *
+   * The starting boxes are taken once, when the gesture opens, because every move that follows is recorded against
+   * them: reading the draft again on each pointer event would add the travelled distance to a box that had already
+   * moved by most of it. A keyboard step is discrete, so it takes its own boxes and gives them back immediately.
+   *
+   * The grid rounds the anchor and the rest are carried by that same result, which is what keeps the group's own
+   * relative geometry exactly as the Producer arranged it. Snapping guides are left out for the reason alignment
+   * leaves them out: they pull one element's edges onto another element's, which is the group's shape changing.
+   */
+  const groupDrag = useRef<readonly ReturnType<typeof groupMovements>[number][] | null>(null)
+
+  const moveGroup = (offset: Offset, options: Readonly<{ discrete?: boolean; exact?: boolean }> = {}) => {
+    const movements = groupDrag.current ?? groupMovements()
+    groupDrag.current = movements
+    const anchor = movements[0]
+    if (!anchor) return
+    const wanted = { ...anchor.box, x: anchor.box.x + offset.dx, y: anchor.box.y + offset.dy }
+    const placed = !options.exact && gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted
+    const moved = { dx: placed.x - anchor.box.x, dy: placed.y - anchor.box.y }
+    recordGroupMove(
+      movements,
+      movements.map(() => moved),
+      options.discrete ?? false
+    )
+    if (options.discrete) groupDrag.current = null
+  }
+
+  /** Bring the group onto one edge or centre of its anchor. Two elements is the least that can be aligned. */
+  const alignSelectedArtefacts = (edge: AlignEdge) => {
+    const movements = groupMovements()
+    const anchor = movements[0]
+    if (!anchor || movements.length < 2) return
+    recordGroupMove(
+      movements,
+      alignOffsets(
+        anchor.box,
+        movements.map(({ box }) => box),
+        edge
+      )
+    )
+  }
+
+  /** Space the group evenly between its two outermost elements, which is why three is the least that can be spaced. */
+  const distributeSelectedArtefacts = (axis: DistributeAxis) => {
+    const movements = groupMovements()
+    if (movements.length < 3) return
+    recordGroupMove(
+      movements,
+      distributeOffsets(
+        movements.map(({ box }) => box),
+        axis
+      )
+    )
   }
 
   // The grid is strict about size as well as position: a box's width and
@@ -1206,6 +1390,14 @@ export function useEditor(
       selectKey(normalised)
     },
     selectArtefact,
+    extendSelection,
+    addToSelection,
+    selectionSet,
+    /** How many held elements a group operation would actually move, which is what enables its controls. */
+    groupCount: groupMovableSelection(selectionSet).length,
+    alignArtefacts: alignSelectedArtefacts,
+    distributeArtefacts: distributeSelectedArtefacts,
+    moveGroup,
     selectedArtefact,
     selectedComponent: selectedHandle?.kind === 'component' ? selected : null,
     selectedCounts,
@@ -1353,6 +1545,7 @@ export function useEditor(
     removals,
     releaseGuides: () => {
       closeGesture()
+      groupDrag.current = null
       setGuides([])
     },
     undo: () => {

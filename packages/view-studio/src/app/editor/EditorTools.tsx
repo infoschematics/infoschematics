@@ -1,10 +1,20 @@
 import {
+  type AlignEdge,
   type ArtefactKind,
   artefactKinds,
+  type DistributeAxis,
   type InteractionLayers,
   interactionLayerOpen
 } from '@infoschematics/view-model/editable'
 import {
+  AlignCenterHorizontal,
+  AlignCenterVertical,
+  AlignEndHorizontal,
+  AlignEndVertical,
+  AlignHorizontalDistributeCenter,
+  AlignStartHorizontal,
+  AlignStartVertical,
+  AlignVerticalDistributeCenter,
   Eraser,
   Frame,
   Grid3x3,
@@ -38,6 +48,33 @@ const layerControls: Readonly<Record<ArtefactKind, readonly [string, string, typ
   graphic: ['Graphics', 'Authored graphics over the diagram', Shapes],
   region: ['Regions', 'Region boxes and their labels', Frame]
 }
+
+/*
+ * Six edges and two axes, in the order a Producer reads them: the horizontal three, then the vertical three.
+ *
+ * Every one of them brings the group onto the anchor, which is the element selected first. The anchor never moves,
+ * so pressing the same control twice does nothing the second time - the arrangement is already the one asked for.
+ */
+const alignControls: readonly (readonly [AlignEdge, string, string, typeof Magnet])[] = [
+  ['left', 'Align left', "the anchor's left edge", AlignStartVertical],
+  ['centre-x', 'Align centres across', "the anchor's vertical centre line", AlignCenterVertical],
+  ['right', 'Align right', "the anchor's right edge", AlignEndVertical],
+  ['top', 'Align top', "the anchor's top edge", AlignStartHorizontal],
+  ['centre-y', 'Align centres down', "the anchor's horizontal centre line", AlignCenterHorizontal],
+  ['bottom', 'Align bottom', "the anchor's bottom edge", AlignEndHorizontal]
+]
+
+/* Distribution equalises the gaps and leaves the two outermost elements where they are, so three is the least it
+   can be asked of: two elements are already as evenly spaced as two elements can be. */
+const distributeControls: readonly (readonly [DistributeAxis, string, string, typeof Magnet])[] = [
+  [
+    'horizontal',
+    'Distribute across',
+    'even the horizontal gaps between the held elements',
+    AlignHorizontalDistributeCenter
+  ],
+  ['vertical', 'Distribute down', 'even the vertical gaps between the held elements', AlignVerticalDistributeCenter]
+]
 
 function GridSizeControl({ onChange, value }: Readonly<{ onChange?: (gridSize: number) => void; value: number }>) {
   const [draft, setDraft] = useState(String(value))
@@ -91,8 +128,11 @@ export function EditorTools({
   canRoute,
   canWrap,
   gridSize,
+  groupCount = 0,
   onAddWaypoint,
+  onAlign,
   onCreateCard,
+  onDistribute,
   onGridSizeChange,
   onResetRoute,
   mode,
@@ -106,8 +146,12 @@ export function EditorTools({
   /** A card is selected that could take an adapter, and has not got one. */
   canWrap?: boolean
   gridSize: number
+  /** How many held elements a group operation would move. Two can be aligned; three is the least that can be spaced. */
+  groupCount?: number
   onAddWaypoint?: () => void
+  onAlign?: (edge: AlignEdge) => void
   onCreateCard?: (kind: 'adapter' | 'card') => void
+  onDistribute?: (axis: DistributeAxis) => void
   onGridSizeChange?: (gridSize: number) => void
   onResetRoute?: () => void
   /** Which kinds answer interaction. Absent leaves every kind interactive, which is how a session opens. */
@@ -187,6 +231,46 @@ export function EditorTools({
           <Icon aria-hidden="true" size={15} />
         </button>
       ))}
+
+      {mode === 'design' ? (
+        <>
+          <span className="tool-divider" />
+          {alignControls.map(([edge, label, onto, Icon]) => (
+            <button
+              aria-label={label}
+              className="tool-button"
+              disabled={!onAlign || groupCount < 2}
+              key={edge}
+              onClick={() => onAlign?.(edge)}
+              title={
+                groupCount < 2
+                  ? `${label} — hold a second element with Shift to align a group`
+                  : `${label} — bring the other ${groupCount - 1} onto ${onto}`
+              }
+              type="button"
+            >
+              <Icon aria-hidden="true" size={15} />
+            </button>
+          ))}
+          {distributeControls.map(([axis, label, hint, Icon]) => (
+            <button
+              aria-label={label}
+              className="tool-button"
+              disabled={!onDistribute || groupCount < 3}
+              key={axis}
+              onClick={() => onDistribute?.(axis)}
+              title={
+                groupCount < 3
+                  ? `${label} — hold three elements with Shift to space a group evenly`
+                  : `${label} — ${hint}`
+              }
+              type="button"
+            >
+              <Icon aria-hidden="true" size={15} />
+            </button>
+          ))}
+        </>
+      ) : null}
 
       <span className="tool-divider" />
 

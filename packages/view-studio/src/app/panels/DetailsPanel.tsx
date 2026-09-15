@@ -2,11 +2,13 @@ import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import type {
+  AlignEdge,
   ArtefactCapabilities,
   ArtefactGeometry,
   ArtefactKind,
   ArtefactSelection,
   ArtefactValueByKind,
+  DistributeAxis,
   InteractionLayers,
   Placement
 } from '@infoschematics/view-model/editable'
@@ -89,6 +91,8 @@ type EditablePlaceable =
   | InfoschematicConfig['infoschematic']['fabrics'][number]
 
 export type DetailsPanelEditor = {
+  /** Bring every held element onto one edge or centre of the anchor. */
+  alignArtefacts: (edge: AlignEdge) => void
   artefactCapabilities?: ArtefactCapabilities
   artefactGeometry?: ArtefactGeometry
   artefactIssue: string | null
@@ -108,6 +112,10 @@ export type DetailsPanelEditor = {
   ) => ArtefactSelection | undefined
   discard: () => void
   discardOne: (origin: PendingOrigin) => void
+  /** Space the held elements evenly between the two outermost of them. */
+  distributeArtefacts: (axis: DistributeAxis) => void
+  /** How many held elements a group operation would actually move, which is what enables its controls. */
+  groupCount: number
   hover: (code: string | null) => void
   hovered: string | null
   identity: Readonly<Partial<Record<string, string>>> | undefined
@@ -756,6 +764,9 @@ export function DetailsPanel({
               canRoute={editor.canRoute}
               canWrap={editor.canWrap}
               gridSize={canonicalConfig.diagram.gridSize}
+              groupCount={editor.groupCount}
+              onAlign={editor.alignArtefacts}
+              onDistribute={editor.distributeArtefacts}
               onAddWaypoint={onAddWaypoint}
               onCreateCard={onCreateCard}
               onGridSizeChange={onGridSizeChange}

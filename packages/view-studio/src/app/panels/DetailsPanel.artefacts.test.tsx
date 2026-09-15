@@ -94,6 +94,7 @@ const graphic = defineArtefactSelection({
 })
 
 const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor => ({
+  alignArtefacts: vi.fn(),
   artefactCapabilities: undefined,
   artefactGeometry: undefined,
   artefactIssue: null,
@@ -107,6 +108,8 @@ const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor
   createArtefact: vi.fn() as unknown as DetailsPanelEditor['createArtefact'],
   discard: vi.fn(),
   discardOne: vi.fn(),
+  distributeArtefacts: vi.fn(),
+  groupCount: 0,
   hover: vi.fn(),
   hovered: null,
   identity: undefined,

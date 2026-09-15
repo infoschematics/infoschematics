@@ -776,6 +776,15 @@ function AppContent({
         return
       }
 
+      /* A group is nudged as one thing, which is the keyboard's half of dragging it. Exact rather than rounded:
+         a step is a step, and rounding each element's own result is how a group ends up nearly aligned. */
+      if (arrow && editor.editing && editor.groupCount > 1) {
+        event.preventDefault()
+        const step = runtime.config.diagram.gridSize || (event.shiftKey ? 10 : 1)
+        editor.moveGroup({ dx: (arrow[0] ?? 0) * step, dy: (arrow[1] ?? 0) * step }, { discrete: true, exact: true })
+        return
+      }
+
       if (arrow && editor.editing && editor.selectedArtefact && editor.artefactGeometry) {
         const geometry = editor.artefactGeometry
         if (geometry.role === 'route') return
@@ -840,6 +849,8 @@ function AppContent({
     editor.removeArtefact,
     editor.reorderArtefact,
     editor.moveArtefact,
+    editor.groupCount,
+    editor.moveGroup,
     editor.select,
     editor.selected,
     editor.selectedArtefact,
@@ -1006,8 +1017,15 @@ function AppContent({
                 onHover={editor.hover}
                 hovered={editor.hovered}
                 onSelect={editor.select}
+                onArtefactExtend={
+                  editor.editing ? (selection) => editorRef.current.extendSelection(selection) : undefined
+                }
+                onArtefactGroupMove={editor.editing ? (offset) => editorRef.current.moveGroup(offset) : undefined}
                 onArtefactMove={
                   editor.editing ? (_selection, point) => editorRef.current.moveArtefact(point) : undefined
+                }
+                onArtefactRange={
+                  editor.editing ? (selections) => editorRef.current.addToSelection(selections) : undefined
                 }
                 onArtefactRelease={() => editorRef.current.releaseGuides()}
                 onArtefactRemove={
@@ -1040,6 +1058,7 @@ function AppContent({
                 flows={drawnFlows}
                 selected={editor.selected}
                 selectedArtefact={editor.selectedArtefact}
+                selectionSet={editor.selectionSet}
                 annotated={presentation.annotated}
                 grid={editor.editing}
                 graphic={activeSequenceScene?.graphic ?? runningStoryScene?.graphic}
