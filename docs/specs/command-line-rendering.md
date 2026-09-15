@@ -36,7 +36,7 @@ _Evidence:_ `packages/cli/src/index.test.ts`; packed malformed, missing, and uns
 
 ### CLI-004 — Inert authoring boundary
 
-The command MUST reject executable TypeScript modules as input with guidance to use the programmatic libraries.
+The command MUST reject executable TypeScript modules as input with guidance to use the programmatic libraries. Rejection MUST NOT depend on an option that makes execution follow from the pathname, per [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md).
 
 _Conformance:_ conforming
 

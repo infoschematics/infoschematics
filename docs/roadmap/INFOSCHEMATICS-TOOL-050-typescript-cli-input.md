@@ -4,12 +4,12 @@ area: TOOL
 title: TypeScript CLI input
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-15T05:10:00Z
+updated_at: 2026-09-15T06:25:00Z
 ---
 
 # TypeScript CLI input
@@ -34,13 +34,13 @@ The examples confirm the workaround already works: `scripts/render-example.ts` i
 
 ## Steps
 
-- [ ] Gather the concrete workflows that motivate the request, and for each one record whether the programmatic library or a documented wrapper already serves it.
-- [ ] Evaluate at least three options: retain rejection and document the programmatic path; publish a thin supported wrapper that loads a module and renders it; and add an explicit trusted-input mode to the command.
-- [ ] Assess the trust boundary for each option, since loading a module executes code with the invoking user's authority, and state what an attacker gains from a malicious document path.
-- [ ] Require that no option permits format auto-detection into execution: any executing path must be selected by an explicit flag whose name states that it runs code.
-- [ ] Confirm that every option preserves the serialisable-data boundary in AGENTS.md, so no callback, store, or runtime state can enter an authored Infoschematic through a CLI route.
-- [ ] Write the decision record with the chosen option and its rejected alternatives, and treat retention of `CLI-004` as a first-class acceptable outcome.
-- [ ] Raise a separate implementation record only if the decision selects a change; this item completes when the decision is recorded.
+- [x] Gather the concrete workflows that motivate the request, and for each one record whether the programmatic library or a documented wrapper already serves it.
+- [x] Evaluate at least three options: retain rejection and document the programmatic path; publish a thin supported wrapper that loads a module and renders it; and add an explicit trusted-input mode to the command.
+- [x] Assess the trust boundary for each option, since loading a module executes code with the invoking user's authority, and state what an attacker gains from a malicious document path.
+- [x] Require that no option permits format auto-detection into execution: any executing path must be selected by an explicit flag whose name states that it runs code.
+- [x] Confirm that every option preserves the serialisable-data boundary in AGENTS.md, so no callback, store, or runtime state can enter an authored Infoschematic through a CLI route.
+- [x] Write the decision record with the chosen option and its rejected alternatives, and treat retention of `CLI-004` as a first-class acceptable outcome.
+- [x] Raise a separate implementation record only if the decision selects a change; this item completes when the decision is recorded.
 
 ## Files touched
 
@@ -83,3 +83,29 @@ Loading a TypeScript module executes code with the user's authority and is funda
 ### Alternatives
 
 A small programmatic wrapper around the renderer library may remain safer and clearer than adding module execution to the general command. Shaping should retain rejection if no compelling CLI-specific workflow exists.
+
+## Review
+
+### Delivered
+
+A decision on executable command-line input, recorded as [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md): retain `CLI-004` unchanged, leave TypeScript execution with the consumer, and reject extension-driven auto-detection permanently rather than deferring it. No product behaviour changed, because the decision selected retention.
+
+### Summary of changes
+
+`docs/decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md` is new and records the trust boundary, the two declined alternatives (a module-loading `--typescript` flag, and a separate executable-input command), and the condition any future revisit must meet. `docs/decisions/README.md` lists it at 27 and renumbers the two repository-operation entries. `CLI-004` in `docs/specs/command-line-rendering.md` keeps its conforming status and gains a requirement that rejection must not depend on an option making execution follow from the pathname, citing the record. `docs/guides/rendering-from-the-command-line.md` replaces its one-line deferral with a `## Render a TypeScript definition` section carrying a four-line worked snippet and the reasoning, so the rejection diagnostic now leads somewhere useful.
+
+### Verification
+
+`bun run self:check`. The deliverable is a decision, so the substantive check is review-based: the record states the chosen option, the evaluated alternatives, the trust-boundary reasoning, and the consequence for `CLI-004`; `CLI-004` cites the record; no source file under `packages/` changed.
+
+### Outstanding concerns
+
+The guide's snippet is prose, not an executed example, so it is not covered by a test. `scripts/render-example.ts` exercises the same call shape, which is why the section points at it. Nothing here blocks review.
+
+### Post-change review
+
+The trust argument is the load-bearing part and should be read as such: extension-driven execution is rejected because `render model.ts` and `render model.yaml` are indistinguishable at a call site, not because TypeScript authoring is discouraged. The record deliberately leaves an explicit-flag route open to a future decision rather than closing the subject.
+
+### Mini recap
+
+Decision-only item, no code. `CLI-004` stands, now with a recorded reason and a guide section that makes the supported programmatic path easy to find.

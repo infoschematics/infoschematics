@@ -32,7 +32,21 @@ YAML, JSON, and standard input all pass through the same canonical parser. Equiv
 generate-infoschematic | infoschematics render - > architecture.svg
 ```
 
-The accepted file extensions are `.yaml`, `.yml`, and `.json`. TypeScript remains a programmatic authoring option: execute or compile it in your own application, then call `@infoschematics/render-svg` with its defined model. The command will not load a `.ts` file.
+The accepted file extensions are `.yaml`, `.yml`, and `.json`. The command will not load a `.ts` file.
+
+## Render a TypeScript definition
+
+The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
+
+```ts
+import { writeFile } from 'node:fs/promises'
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { architecture } from './architecture.ts'
+
+await writeFile('architecture.svg', renderInfoschematicSvg(architecture))
+```
+
+This is the same renderer the command calls, over the same canonical model, so an equivalent YAML document produces the same SVG — the command adds only a trailing newline for shell use. This repository renders its own authored examples exactly this way in `scripts/render-example.ts`.
 
 ## Handle diagnostics
 

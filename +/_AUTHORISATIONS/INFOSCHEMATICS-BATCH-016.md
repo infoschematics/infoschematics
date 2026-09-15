@@ -88,7 +88,7 @@ Each named item at `awaiting-review` with a six-heading review packet. No item i
 
 | Item                      | Start   | Result  | Evidence | Next human action |
 | ------------------------- | ------- | ------- | -------- | ----------------- |
-| `INFOSCHEMATICS-TOOL-050` | `ready` | pending | —        | —                 |
+| `INFOSCHEMATICS-TOOL-050` | `ready` | `awaiting-review` | `ADR-INFOSCHEMATICS-021`; `CLI-004` retained unchanged | Review the decision |
 | `INFOSCHEMATICS-TOOL-051` | `ready` | pending | —        | —                 |
 | `INFOSCHEMATICS-TOOL-054` | `ready` | pending | —        | —                 |
 | `INFOSCHEMATICS-TOOL-047` | `ready` | pending | —        | —                 |
