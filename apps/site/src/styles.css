@@ -1234,23 +1234,28 @@ a:focus-visible {
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  padding-bottom: 20px;
+  padding-bottom: 14px;
 }
 
 .playground-main {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   min-height: 0;
 }
 
 .playground-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 14px;
+  gap: 8px 14px;
   align-items: center;
-  justify-content: space-between;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #ffffff1c;
+  border-radius: 9px;
+  background: #0b1a28cc;
 }
 
 .playground-preset {
@@ -1277,7 +1282,6 @@ a:focus-visible {
 }
 
 .playground-document-state {
-  margin-right: auto;
   padding: 5px 8px;
   border: 1px solid #48c6a833;
   border-radius: 999px;
@@ -1297,6 +1301,7 @@ a:focus-visible {
 .playground-actions {
   display: flex;
   gap: 8px;
+  margin-left: auto;
 }
 
 .playground-actions button {
@@ -1323,99 +1328,84 @@ a:focus-visible {
   cursor: not-allowed;
 }
 
-.playground-panels {
-  display: grid;
-  flex: 1;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 560px);
-  gap: 20px;
-  min-height: 0;
+.playground-guidance {
+  margin: 0;
+  color: #8fa9bf;
+  font-size: 11px;
+  line-height: 1.45;
 }
 
-.playground-editor-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-}
-
-.playground-editor {
+.playground-studio {
   flex: 1;
   min-height: 0;
-  padding: 14px;
   border: 1px solid #ffffff1c;
-  border-radius: 9px;
-  background: #0b1a28;
-  color: #e8f1f8;
-  font:
-    400 12px/1.6 "DM Mono",
-    monospace;
-  resize: vertical;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.playground-preview {
+.playground-studio > main {
+  height: 100%;
   min-height: 0;
-  padding: 14px;
-  border: 1px solid #ffffff1c;
-  border-radius: 9px;
-  background: #0d2031;
-  overflow: auto;
-}
-
-.playground-preview img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.playground-preview img.playground-preview--stale {
-  opacity: 0.35;
-}
-
-.playground-issues {
-  margin: 12px 0 0;
-  padding: 0 0 0 18px;
-  color: #ffb4a3;
-  font:
-    400 12px/1.6 "DM Mono",
-    monospace;
-}
-
-.playground-action-feedback {
-  min-height: 18px;
-  margin: -4px 0 0;
-  color: #9db4c9;
-  font:
-    500 10px/1.5 "DM Mono",
-    monospace;
+  padding: 12px;
 }
 
 @media (max-width: 900px) {
   .playground-shell {
     height: auto;
+    min-height: 100dvh;
   }
 
-  .playground-panels {
+  .playground-studio {
+    min-height: 0;
+  }
+
+  .playground-studio > main {
+    height: auto;
+    min-height: 0;
+    align-content: start;
+    overflow: hidden;
+  }
+
+  .playground-studio .title-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .playground-studio .title-bar-actions {
+    width: 100%;
+    max-width: 100%;
+    padding-bottom: 4px;
+    flex-wrap: wrap;
+  }
+
+  .playground-studio .title-bar-actions .tool-divider {
+    display: none;
+  }
+
+  .playground-studio .presentation-column {
+    min-height: 360px;
+  }
+
+  .playground-studio .control-room.sized,
+  .playground-studio .control-room:not(.sized):not(.collapsed) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .playground-editor-pane {
-    order: -1;
+  .playground-studio .panel-resizer {
+    display: none;
   }
 
-  .playground-editor {
-    min-height: 320px;
+  .playground-studio .producer-controls {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .playground-toolbar {
-    justify-content: flex-start;
+  .playground-studio .producer-bank.spanning {
+    grid-column: auto;
   }
 
-  .playground-document-state {
-    margin-right: 0;
-  }
-
-  .playground-actions {
-    margin-left: auto;
+  .playground-guidance {
+    order: 4;
+    width: 100%;
   }
 }
 
@@ -1430,12 +1420,11 @@ a:focus-visible {
   }
 
   .playground-actions {
-    width: 100%;
-    margin-left: 0;
+    margin-left: auto;
   }
 
   .playground-actions button {
-    flex: 1;
+    white-space: nowrap;
   }
 }
 

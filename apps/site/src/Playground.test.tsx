@@ -1,36 +1,25 @@
-import { parseInfoschematic } from '@infoschematics/domain-core'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { infoschematicDocumentSource, parseInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import {
-  copyPlaygroundDocument,
-  documentForPreset,
-  Issues,
-  Playground,
-  Preview,
-  presetFromSearch,
-  presets
-} from './Playground.tsx'
+import { authoredDocumentForPreset, documentForPreset, Playground, presetFromSearch, presets } from './Playground.tsx'
 import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 
 describe('Playground', () => {
-  it('presents one document editor to the right of its live preview', () => {
+  it('hosts the real Studio rather than a second Site-owned editor', () => {
     const page = renderToStaticMarkup(<Playground />)
-    const previewPosition = page.indexOf('playground-preview')
-    const editorPosition = page.indexOf('playground-editor-pane')
 
-    expect(previewPosition).toBeGreaterThan(-1)
-    expect(editorPosition).toBeGreaterThan(previewPosition)
-    expect(page).not.toContain('>YAML</p>')
-    expect(page).not.toContain('>TypeScript<')
-    expect(page).not.toContain('aria-label="JSON document"')
-    expect(page).toContain('aria-label="Infoschematic document"')
-    expect(page).not.toContain('Validated and rendered live as inert data')
-    expect(page).toContain('data:image/svg+xml')
+    expect(page).toContain('>Playground controls</legend>')
+    expect(page).toContain('class="playground-studio"')
+    expect(page).toContain('data-production-mode="present"')
+    expect(page).toContain('aria-label="Design mode')
+    expect(page).toContain('aria-label="Format parity Infoschematic"')
+    expect(page).not.toContain('playground-editor-pane')
+    expect(page).not.toContain('aria-label="Infoschematic document"')
+    expect(page).not.toContain('data:image/svg+xml')
   })
 
-  it('is a full-view page with every preset listed', () => {
+  it('keeps preset routing and reset controls in the Site host', () => {
     const page = renderToStaticMarkup(<Playground />)
 
     expect(page).toContain('document-shell--wide')
@@ -38,8 +27,7 @@ describe('Playground', () => {
     for (const { label } of presets) expect(page).toContain(`>${label}</option>`)
     expect(page).toContain('>Preset loaded</span>')
     expect(page).toContain('>Reset preset</button>')
-    expect(page).toContain('>Copy YAML</button>')
-    expect(page).toContain('aria-live="polite"')
+    expect(page).toContain('Use Design to shape it and Source to edit, validate, undo, or copy YAML.')
   })
 
   it('starts with a visible Flow from Source to Sink', () => {
@@ -53,7 +41,6 @@ describe('Playground', () => {
         target: { element: 'SNK', port: 'W1' }
       })
     ])
-    expect(renderInfoschematicSvg(parsed.model)).toContain('d="M300 220 H500"')
   })
 
   it('offers an architectural media pipeline whose Flow Families say what moves', () => {
@@ -69,66 +56,31 @@ describe('Playground', () => {
       'Segments and manifest',
       'Playback'
     ])
-    expect(renderInfoschematicSvg(parsed.model)).toContain('Player')
   })
 
-  it('serialises every canonical preset as valid YAML', () => {
-    for (const preset of presets) expect(parseInfoschematic(preset.document).ok, preset.key).toBe(true)
+  it('retains every canonical preset as a valid authored YAML document', () => {
+    for (const preset of presets) {
+      const document = authoredDocumentForPreset(preset.key)
+      expect(infoschematicDocumentSource(document), preset.key).toBe(preset.document)
+    }
   })
 
-  it('renders a selected preset from the same document editor', () => {
+  it('renders a selected preset through Studio', () => {
     const page = renderToStaticMarkup(<Playground preset="explained" />)
 
-    expect(page).toContain('aria-label="Infoschematic document"')
-    expect(page).toContain('data:image/svg+xml')
-    expect(page).toContain('What makes an Infoschematic')
+    expect(page).toContain('aria-label="What makes an Infoschematic Infoschematic"')
     expect(page).toContain('<option value="explained" selected="">An Infoschematic explained</option>')
     expect(documentForPreset('explained')).toContain('What makes an Infoschematic')
   })
 
-  it('copies the current inert document through the supplied clipboard boundary', async () => {
-    let copied = ''
-
-    await copyPlaygroundDocument('title: Copy me', {
-      writeText: async (text) => {
-        copied = text
-      }
-    })
-
-    expect(copied).toBe('title: Copy me')
-    await expect(copyPlaygroundDocument('title: No clipboard', undefined)).rejects.toThrow('Clipboard access')
-  })
-
   it('selects a preset from the query string and refuses one it does not know', () => {
     expect(presetFromSearch('?preset=source-to-sink')).toBe('source-to-sink')
+    expect(presetFromSearch('?preset=media-pipeline')).toBe('media-pipeline')
     expect(presetFromSearch('?preset=explained')).toBe('explained')
     expect(presetFromSearch('?preset=blank')).toBe('blank')
     expect(presetFromSearch('?preset=system')).toBe('explained')
     expect(presetFromSearch('?preset=format-parity')).toBe('source-to-sink')
     expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()
     expect(presetFromSearch('')).toBeUndefined()
-  })
-
-  it('renders a valid document as a preview image', () => {
-    const parsed = parseInfoschematic(yamlSeed)
-    const panel = renderToStaticMarkup(<Preview parsed={parsed} />)
-
-    expect(parsed.ok).toBe(true)
-    expect(panel).toContain('data:image/svg+xml')
-  })
-
-  it('shows canonical path-addressed issues for a broken document', () => {
-    const broken = yamlSeed.replace('bounds: 0 0 800 500', 'bounds: { x: 0, y: 0, width: wide, height: 500 }')
-    const parsed = parseInfoschematic(broken)
-    const panel = renderToStaticMarkup(<Issues parsed={parsed} />)
-
-    expect(parsed.ok).toBe(false)
-    expect(panel).toContain('playground-issues')
-    expect(panel).toContain('diagram.bounds.width')
-  })
-
-  it('treats executable-looking TypeScript as inert invalid YAML', () => {
-    const parsed = parseInfoschematic("export const d = defineInfoschematic({ title: 'Nope' })")
-    expect(parsed.ok).toBe(false)
   })
 })

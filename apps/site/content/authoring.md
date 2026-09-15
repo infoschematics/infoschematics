@@ -148,7 +148,7 @@ An artefact marked for removal stays visible, selectable and visibly pending so 
 
 ## Author as a document: YAML, JSON, or TypeScript
 
-The same definition can be a document instead of a compiled TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically. A `.ts` document is read in a strict TypeScript subset — comments, `import type` lines, and one exported object literal of strings, numbers, booleans, arrays, and nested objects — matched as data and never executed, so a definition module written in that subset loads without compiling. Try all three forms live in the [playground](/playground/) on the website.
+The same definition can be a document instead of a compiled TypeScript module. `parseInfoschematic` validates the document against the domain contract and normalises it exactly as `defineInfoschematic` normalises a literal, so all three formats render identically. A `.ts` document is read in a strict TypeScript subset — comments, `import type` lines, and one exported object literal of strings, numbers, booleans, arrays, and nested objects — matched as data and never executed, so a definition module written in that subset loads without compiling. Use the hosted [Playground](/playground/) to design and edit canonical YAML with Studio. JSON and restricted TypeScript remain supported inputs for loaders and local integrations; the browser editor keeps one clear source format.
 
 ```ts
 import { readFile } from 'node:fs/promises'

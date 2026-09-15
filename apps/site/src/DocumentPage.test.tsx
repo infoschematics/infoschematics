@@ -87,7 +87,8 @@ describe('documentation pages', () => {
     const packages = page.indexOf('Install a published package')
 
     expect(hosted).toBeGreaterThanOrEqual(0)
-    expect(page).toContain('create, edit, and copy an Infoschematic in your browser')
+    expect(page).toContain('use the real Studio experience in your browser')
+    expect(page).toContain('copy the current definition')
     expect(page).toContain('@infoschematics/render-svg')
     expect(page).toContain('@infoschematics/view-canvas')
     expect(page).toContain('@infoschematics/view-present')

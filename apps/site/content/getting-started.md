@@ -23,7 +23,7 @@ The [Representation patterns guide](/docs/representations/) explains those adjac
 
 Start with only the parts you need. You can use the same definition to:
 
-- experiment in the [Playground](/playground/) without installing anything;
+- open the hosted [Playground](/playground/) and use Studio to design visually, edit validated YAML, or copy a definition without installing anything;
 - produce deterministic SVG for documents, websites, and build pipelines;
 - let people explore the diagram interactively in Canvas;
 - guide an Audience through Scenes and Sequences in Present;

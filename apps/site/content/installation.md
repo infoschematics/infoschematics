@@ -6,7 +6,7 @@ Infoschematics supports a hosted, no-install workflow as well as local package i
 
 ### Hosted editor (no install)
 
-Open the [Playground](/playground/) to create, edit, and copy an Infoschematic in your browser. It is a quick way to try Infoschematics and does not require a local checkout or package installation.
+Open the [Playground](/playground/) to use the real Studio experience in your browser. Choose a preset, work visually in Design, or open Source to edit validated YAML, undo and redo changes, and copy the current definition. Nothing needs to be installed, and refreshing the page starts from the selected preset again.
 
 ### Create an authored definition
 
