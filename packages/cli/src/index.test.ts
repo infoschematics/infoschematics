@@ -148,7 +148,13 @@ const pngSize = (image: Uint8Array) => {
 
 const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
 
-describe('renderer CLI raster output', () => {
+/**
+ * Rasterising initialises sharp's native library once per worker, which measured between 150 ms and 1.5 s on the same
+ * quiet machine while the image work either side of it stayed near 400 ms. What puts these cases near a budget is the
+ * variance of that one-off, not the rasterisation, so they get a deliberate budget that says so. Every other suite
+ * keeps Vitest's 5000 ms default, which is what still catches a genuinely hung test.
+ */
+describe('renderer CLI raster output', { timeout: 20_000 }, () => {
   it('writes a binary-clean PNG to standard output', async () => {
     const run = harness({ 'model.yaml': yaml })
 
