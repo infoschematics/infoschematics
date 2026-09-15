@@ -8,6 +8,8 @@ const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 type PackageManifest = Readonly<{
   name: string
   exports?: Readonly<Record<string, string | Readonly<Record<string, string>>>>
+  dependencies?: Readonly<Record<string, string>>
+  peerDependencies?: Readonly<Record<string, string>>
 }>
 
 export type WorkspaceEntryPoint = Readonly<{
@@ -26,6 +28,8 @@ export type WorkspacePackage = Readonly<{
   source: string
   /** Every published specifier, resolved back to the source file it is built from. */
   entryPoints: readonly WorkspaceEntryPoint[]
+  /** Sibling packages this one depends on, by name, so a build or a fingerprint can follow the graph. */
+  dependencies: readonly string[]
 }>
 
 /** Resolve one published target back to the source file the build compiles into it. */
@@ -39,15 +43,30 @@ const entryPointsOf = (manifest: PackageManifest, packageSource: string): readon
   }))
 
 /** Every reusable package in this repository, discovered from the workspace rather than a list to maintain. */
-export const workspacePackages = (): readonly WorkspacePackage[] =>
-  readdirSync(join(repositoryRoot, 'packages'), { withFileTypes: true })
+export const workspacePackages = (): readonly WorkspacePackage[] => {
+  const declared = readdirSync(join(repositoryRoot, 'packages'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => {
-      const directory = join(repositoryRoot, 'packages', entry.name)
-      const manifest = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8')) as PackageManifest
-      const source = join(directory, 'src')
-      return { directory: entry.name, entryPoints: entryPointsOf(manifest, source), name: manifest.name, source }
+      const source = join(repositoryRoot, 'packages', entry.name, 'src')
+      const manifest = JSON.parse(
+        readFileSync(join(repositoryRoot, 'packages', entry.name, 'package.json'), 'utf8')
+      ) as PackageManifest
+      return { directory: entry.name, manifest, source }
     })
+
+  // A dependency only belongs to the graph when the workspace itself owns it; everything else is an installed package.
+  const owned = new Set(declared.map(({ manifest }) => manifest.name))
+
+  return declared.map(({ directory, manifest, source }) => ({
+    dependencies: Object.keys({ ...manifest.dependencies, ...manifest.peerDependencies })
+      .filter((name) => owned.has(name))
+      .sort(),
+    directory,
+    entryPoints: entryPointsOf(manifest, source),
+    name: manifest.name,
+    source
+  }))
+}
 
 /**
  * Resolve every published specifier to the source file it is built from, while testing.

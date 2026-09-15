@@ -15,3 +15,5 @@ A passing suite is not evidence that output looks right. When changing visual tr
 Run `bun run self:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.
 
 Suites and typechecks resolve each package to its own source, so a change to a shared package is visible immediately and no build is a prerequisite for running them. The build still runs in the gate, because it is what proves the published shape.
+
+The build and the typecheck both detect change: a package is rebuilt only when its own inputs or a dependency's fingerprint move, and each TypeScript project reuses its incremental build information. Neither cache is trusted over evidence — a missing `dist` rebuilds regardless — but if you ever need to prove a build from nothing, `bun run self:packages:build -- --force` does it.
