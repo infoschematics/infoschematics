@@ -4,12 +4,12 @@ area: SITE
 title: Studio-backed playground
 theme: site-experience
 horizon: next
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 5e3f2751de75f2d346adfed3369208eb2fb10e16
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-14T22:03:54Z
+updated_at: 2026-09-15T04:50:10Z
 ---
 
 # Studio-backed playground
