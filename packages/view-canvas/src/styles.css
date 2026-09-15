@@ -325,6 +325,54 @@
   stroke-width: 3px;
 }
 
+/*
+ * Held with the anchor, and not the anchor.
+ *
+ * A group member is selected - an align or a distribute is about to move it - so it is drawn in the selection's own
+ * colour. It is broken rather than solid, and left at the ordinary weight, because the anchor is the element the
+ * others are brought onto and a Producer has to be able to see which one that is before pressing a control.
+ */
+.infoschematic-svg.editing .infoschematic-service.group-held > rect,
+.infoschematic-svg.editing .infoschematic-region.group-held > rect,
+.infoschematic-svg.editing .infoschematic-graphic.group-held .fabric-shell,
+.infoschematic-svg.editing .infoschematic-fabric.group-held .fabric-shell,
+.infoschematic-svg.editing .infoschematic-adapter.group-held .adapter-socket,
+.infoschematic-svg.editing .audit-flow.group-held rect {
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-dasharray: 5 4;
+  stroke-width: 2px;
+}
+
+/* The selection's own glow at a little over half its strength, so the group reads as one thing with one element of
+   it to the front rather than as several separate selections. */
+.infoschematic-svg.editing .group-held {
+  --glow: color-mix(in srgb, var(--infoschematic-canvas-selection-selected) 60%, transparent);
+}
+
+.infoschematic-svg.editing .infoschematic-service.group-held > rect,
+.infoschematic-svg.editing .infoschematic-fabric.group-held .fabric-shell,
+.infoschematic-svg.editing .infoschematic-adapter.group-held .adapter-socket {
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
+}
+
+/* A Graphic is dimmed while the diagram is worked on; being held brings it back exactly as selecting it does. */
+.infoschematic-svg.editing .infoschematic-graphic.group-held {
+  opacity: 1;
+}
+
+/*
+ * The band a range sweep has covered so far.
+ *
+ * In the selection's colour, because that is what everything under it is about to become, and only a thin broken
+ * edge over a faint wash: the Producer is aiming at the elements beneath it, so it must not hide them.
+ */
+.infoschematic-range-band {
+  fill: color-mix(in srgb, var(--infoschematic-canvas-selection-selected) 12%, transparent);
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-dasharray: 4 3;
+  stroke-width: 1px;
+}
+
 .artefact-resize-handle,
 .artefact-action {
   cursor: pointer;
@@ -1088,7 +1136,9 @@
     var(--infoschematic-canvas-focus-transition-timing);
 }
 
-.infoschematic-svg.editing .audit-flow.editable:not(.selected):not(.pointed) {
+/* A Flow held in the group is no more dimmed than a selected one, even though an alignment leaves its route to the
+   ports it is attached to. */
+.infoschematic-svg.editing .audit-flow.editable:not(.selected):not(.pointed):not(.group-held) {
   opacity: 0.4;
 }
 

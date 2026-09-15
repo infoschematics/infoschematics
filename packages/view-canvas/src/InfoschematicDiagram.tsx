@@ -13,6 +13,7 @@ import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import {
   type ArtefactKind,
   type ArtefactSelection,
+  type ArtefactSelectionSet,
   type CreatedComponent,
   type InteractionLayers,
   interactionLayerOpen,
@@ -91,6 +92,27 @@ type PanGesture = Readonly<{
   viewport: Box
 }>
 type MinimapGesture = Readonly<{ pointerId: number }>
+/** Where a range sweep started and where it has reached, in diagram units, so the band is drawn from the same numbers the hit test uses. */
+type RangeGesture = Readonly<{ from: Point; to: Point }>
+
+/** One empty set, so a host that holds nothing does not hand a new array to every render. */
+const noSelectionSet: ArtefactSelectionSet = []
+
+/** The band a sweep has covered, whichever corner it started from. */
+const rangeBand = (gesture: RangeGesture): Box => ({
+  height: Math.abs(gesture.to.y - gesture.from.y),
+  width: Math.abs(gesture.to.x - gesture.from.x),
+  x: Math.min(gesture.from.x, gesture.to.x),
+  y: Math.min(gesture.from.y, gesture.to.y)
+})
+
+/* Touched, not enclosed: a sweep that crosses an element takes it, which is what lets a Producer gather a row of
+   Cards without also covering the Region they sit in. */
+const bandTouches = (band: Box, box: Box) =>
+  band.x < box.x + box.width &&
+  box.x < band.x + band.width &&
+  band.y < box.y + box.height &&
+  box.y < band.y + band.height
 
 const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
   left?.kind === right.kind && left.id === right.id
@@ -217,7 +239,10 @@ export function InfoschematicDiagram({
   onFreeEnd,
   onHover,
   onSelect,
+  onArtefactExtend,
+  onArtefactGroupMove,
   onArtefactMove,
+  onArtefactRange,
   onArtefactRelease,
   onArtefactRemove,
   onArtefactReorder,
@@ -226,6 +251,7 @@ export function InfoschematicDiagram({
   portCounts,
   selected,
   selectedArtefact,
+  selectionSet = noSelectionSet,
   signals = [],
   emphasis = [],
   flows: suppliedFlows,
@@ -294,8 +320,19 @@ export function InfoschematicDiagram({
   onSelect?: (code: string) => void
   /** Typed six-kind Design selection. String selection remains for auxiliary handles during migration. */
   onArtefactSelect?: (selection: ArtefactSelection | null) => void
+  /** Shift on a press or on Enter: add the element to the held group, or take it back out. */
+  onArtefactExtend?: (selection: ArtefactSelection) => void
+  /**
+   * How far a group drag has travelled, in diagram units, measured from where it started.
+   *
+   * One offset for the whole group rather than a point per element: the elements keep their positions relative to
+   * each other, so the only thing the gesture has to say is how far. Absent leaves a held element dragging alone.
+   */
+  onArtefactGroupMove?: (offset: { dx: number; dy: number }) => void
   /** Canvas emits pointer coordinates; View Model owns constraints and operation construction. */
   onArtefactMove?: (selection: MovableArtefactSelection, point: Point) => void
+  /** Everything a range sweep crossed, for the host to add to what it already holds. */
+  onArtefactRange?: (selections: readonly ArtefactSelection[]) => void
   onArtefactResize?: (selection: MovableArtefactSelection, size: ResizeMinimum) => void
   onArtefactReorder?: (selection: ArtefactSelection, direction: -1 | 1) => void
   onArtefactRemove?: (selection: ArtefactSelection) => void
@@ -305,6 +342,13 @@ export function InfoschematicDiagram({
   portCounts?: Readonly<Record<string, PortCounts>>
   selected?: string | null
   selectedArtefact?: ArtefactSelection | null
+  /**
+   * Every element the Design session holds, anchor first, with `selectedArtefact` as its first element.
+   *
+   * The anchor is what a group operation aligns to, and it is the element every single-selection control already
+   * reads, so a group is the single selection with more behind it rather than a second kind of selection.
+   */
+  selectionSet?: ArtefactSelectionSet
   /** Transient host-owned Flow occurrences; stable keys prevent accidental replay. */
   signals?: readonly FlowSignal[]
   /**
@@ -580,6 +624,7 @@ export function InfoschematicDiagram({
   const [viewport, setViewport] = useState<Box>(infoschematicViewBox)
   const [panGesture, setPanGesture] = useState<PanGesture | null>(null)
   const [minimapGesture, setMinimapGesture] = useState<MinimapGesture | null>(null)
+  const [rangeGesture, setRangeGesture] = useState<RangeGesture | null>(null)
 
   const listenForPointerGesture = useCallback(
     (move: (event: PointerEvent) => void, release: (event: PointerEvent) => void, cancel: () => void) => {
@@ -717,8 +762,85 @@ export function InfoschematicDiagram({
     if (onArtefactSelect) onArtefactSelect(null)
     else onSelect?.('')
   }
+  /*
+   * What a range sweep can gather, taken from the collections this render already resolved.
+   *
+   * Read from the geometry the diagram drew rather than by hit testing the document, so an element lying under a
+   * Graphic is still swept while a closed layer is still left out. Flows are absent because a route is not a box and
+   * follows the ports it is attached to. An adapter is absent because the Card it holds is swept in its own right,
+   * and holding both would ask one Card to move twice.
+   */
+  const rangeCandidates = (): readonly { box: Box; selection: ArtefactSelection }[] => [
+    ...(interactive('region')
+      ? infoschematicRegions.map((region) => ({
+          box: region.box,
+          selection: { code: null, geometry: 'box', id: region.id, kind: 'region' } as const
+        }))
+      : []),
+    ...(interactive('fabric')
+      ? infoschematicFabrics
+          .filter((fabric) => infoschematicFabricIsVisible(fabric, visibleScopes))
+          .map((fabric) => ({
+            box: movedBox(fabric.bounds, fabric.code),
+            selection: { code: fabric.code, geometry: 'box', id: fabric.id, kind: 'fabric' } as const
+          }))
+      : []),
+    ...(interactive('card')
+      ? placeables
+          .filter((placeable) => !register.cardAt(placeable.code)?.wraps)
+          .map((placeable) => ({
+            box: placeable.box,
+            selection: { code: placeable.code, geometry: 'box', id: placeable.id, kind: 'card' } as const
+          }))
+      : []),
+    ...(interactive('graphic')
+      ? graphics.map((entry) => ({
+          box: graphicBounds(entry, infoschematicViewBox),
+          selection: { code: null, geometry: 'box', id: entry.id, kind: 'graphic' } as const
+        }))
+      : [])
+  ]
+
+  /*
+   * Shift and drag across the surface: take everything the band covers, and keep what is already held.
+   *
+   * Both ends are mapped into diagram units as they happen, because the viewport can be zoomed and panned: a band
+   * measured in screen pixels would cover something other than what the Producer drew it around. The sweep is only
+   * read once, on release - a selection that changed under every pointer event would make the band a series of
+   * guesses rather than one question.
+   */
+  const startRange = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!onArtefactRange) return
+    const svg = event.currentTarget
+    const from = pointInDiagram(svg, event.clientX, event.clientY)
+    if (!from) return
+    event.preventDefault()
+    setRangeGesture({ from, to: from })
+    const candidates = rangeCandidates()
+    let band: Box | null = null
+    const move = (moved: PointerEvent) => {
+      const to = pointInDiagram(svg, moved.clientX, moved.clientY)
+      if (!to) return
+      band = rangeBand({ from, to })
+      setRangeGesture({ from, to })
+    }
+    const abandon = () => setRangeGesture(null)
+    const finish = () => {
+      setRangeGesture(null)
+      const swept = band
+      if (!swept) return
+      onArtefactRange(candidates.flatMap(({ box, selection }) => (bandTouches(swept, box) ? [selection] : [])))
+    }
+    listenForPointerGesture(move, finish, abandon)
+  }
+
   const startPan = (event: React.PointerEvent<SVGSVGElement>) => {
     if (editing && (event.target as Element).closest('[data-artefact-kind]')) return
+    // Shift on the surface gathers rather than pans, and must not clear the group it is about to add to.
+    if (editing && onArtefactRange && event.shiftKey && event.button === 0) {
+      startRange(event)
+      return
+    }
     clearSelection()
     if (fitted || event.button !== 0) return
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -801,6 +923,19 @@ export function InfoschematicDiagram({
   const artefactSelected = (selection: ArtefactSelection, legacyKey: string) =>
     selectedArtefact ? sameArtefact(selectedArtefact, selection) : selected === legacyKey
 
+  const artefactInGroup = (selection: ArtefactSelection) =>
+    selectionSet.length > 1 && selectionSet.some((element) => sameArtefact(element, selection))
+
+  /*
+   * The class for a held element that is not the anchor.
+   *
+   * The anchor keeps the ordinary selected treatment, because it is the element every single-selection control still
+   * acts on and the one an alignment brings the rest onto. Marking the others differently is how a Producer can see
+   * which of them that is before pressing an align control.
+   */
+  const inGroup = (selection: ArtefactSelection) =>
+    artefactInGroup(selection) && !sameArtefact(selectedArtefact, selection) ? ' group-held' : ''
+
   const selectArtefact = (selection: ArtefactSelection, legacyKey: string) => {
     if (onArtefactSelect) onArtefactSelect(selection)
     else onSelect?.(legacyKey)
@@ -809,7 +944,10 @@ export function InfoschematicDiagram({
   const artefactKeyDown = (selection: ArtefactSelection, legacyKey: string) => (event: React.KeyboardEvent) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault()
-      selectArtefact(selection, legacyKey)
+      // Shift is the keyboard's whole multi-selection gesture. There is no keyboard range, because adding one
+      // element at a time is already how a group is built without a pointer.
+      if (event.shiftKey && onArtefactExtend) onArtefactExtend(selection)
+      else selectArtefact(selection, legacyKey)
       return
     }
     if (event.key === 'Delete' || event.key === 'Backspace') {
@@ -836,6 +974,36 @@ export function InfoschematicDiagram({
     return { x: mapped.x, y: mapped.y }
   }
 
+  /*
+   * One press, every held element.
+   *
+   * The gesture reports how far it has travelled from where it started rather than where the pointer now is, so the
+   * group keeps its own shape however the host decides to place it, and a second drag carries on from the first.
+   */
+  const dragGroup = (event: React.PointerEvent<SVGElement>) => {
+    if (!onArtefactGroupMove) return
+    event.preventDefault()
+    event.stopPropagation()
+    const element = event.currentTarget
+    const origin = { x: event.clientX, y: event.clientY }
+    const start = eventPoint(element, event.clientX, event.clientY)
+    if (!start) return
+    let dragging = false
+    const move = (moved: PointerEvent) => {
+      if (!dragging) {
+        if (Math.hypot(moved.clientX - origin.x, moved.clientY - origin.y) < dragThreshold) return
+        dragging = true
+      }
+      const point = eventPoint(element, moved.clientX, moved.clientY)
+      if (!point) return
+      onArtefactGroupMove({ dx: point.x - start.x, dy: point.y - start.y })
+    }
+    const release = () => {
+      if (dragging) onArtefactRelease?.()
+    }
+    listenForPointerGesture(move, release, release)
+  }
+
   const dragArtefact =
     (
       selection: MovableArtefactSelection,
@@ -845,6 +1013,24 @@ export function InfoschematicDiagram({
       selectionToSelect: ArtefactSelection = selection
     ) =>
     (event: React.PointerEvent<SVGElement>) => {
+      // Shift takes the element into the group or out of it, and never starts a drag: the press that is building a
+      // selection is not the press that moves it.
+      if (event.shiftKey && onArtefactExtend) {
+        event.preventDefault()
+        event.stopPropagation()
+        onArtefactExtend(selectionToSelect)
+        return
+      }
+      /*
+       * A press on something already held moves the whole group, and does not reduce the selection to it.
+       *
+       * Taking hold of one of several elements is how a Producer expects to move all of them; re-selecting on the
+       * press would throw the group away before the drag it was collected for could happen.
+       */
+      if (onArtefactGroupMove && artefactInGroup(selectionToSelect)) {
+        dragGroup(event)
+        return
+      }
       selectArtefact(selectionToSelect, legacyKey)
       if (!onArtefactMove) return
       event.preventDefault()
@@ -1352,7 +1538,7 @@ export function InfoschematicDiagram({
         aria-label={`Flow ${flow.code}`}
         data-artefact-id={selection.id}
         data-artefact-kind={selection.kind}
-        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${pendingRemovals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}${inert('flow')}`}
+        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${pendingRemovals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}${inGroup(selection)}${inert('flow')}`}
         key={flow.id}
         onKeyDown={interactive('flow') ? artefactKeyDown(selection, flow.code) : undefined}
         role={interactive('flow') ? 'button' : undefined}
@@ -1560,7 +1746,7 @@ export function InfoschematicDiagram({
         aria-label={entry.label ?? entry.id}
         className={`infoschematic-graphic${interactive('graphic') ? ' artefact-selectable' : ''}${pendingRemovals[entry.id] ? ' going' : ''}${
           artefactSelected(selection, legacyKey) ? ' selected' : ''
-        }${inert('graphic')}`}
+        }${inGroup(selection)}${inert('graphic')}`}
         data-artefact-id={selection.id}
         data-artefact-kind="overlay"
         key={entry.id}
@@ -1806,7 +1992,7 @@ export function InfoschematicDiagram({
             // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={`Region ${region.label}`}
-              className={`infoschematic-region${interactive('region') || !editing ? ' artefact-selectable' : ''}${pendingRemovals[region.id] ? ' going' : ''}${artefactSelected(selection, legacyKey) ? ' selected' : ''}${inert('region')}`}
+              className={`infoschematic-region${interactive('region') || !editing ? ' artefact-selectable' : ''}${pendingRemovals[region.id] ? ' going' : ''}${artefactSelected(selection, legacyKey) ? ' selected' : ''}${inGroup(selection)}${inert('region')}`}
               data-artefact-id={selection.id}
               data-artefact-kind={selection.kind}
               data-frame-treatment={treatment.frame}
@@ -1917,7 +2103,7 @@ export function InfoschematicDiagram({
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
               <g
                 aria-label={fabric.label}
-                className={`${fabricClass(fabric.id)}${interactive('fabric') ? ' selectable artefact-selectable' : ''}${pendingRemovals[fabric.code] ? ' going' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}${inert('fabric')}`}
+                className={`${fabricClass(fabric.id)}${interactive('fabric') ? ' selectable artefact-selectable' : ''}${pendingRemovals[fabric.code] ? ' going' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}${inGroup(selection)}${inert('fabric')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 key={fabric.id}
@@ -2040,7 +2226,7 @@ export function InfoschematicDiagram({
                 aria-label={`${adapter.label}, holding ${adapter.wraps}`}
                 className={`infoschematic-adapter${interactive('card') ? ' selectable' : ''}${pendingRemovals[adapter.code] ? ' going' : ''}${
                   highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
-                }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}${inert('card')}`}
+                }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}${inGroup(selection)}${inert('card')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 key={placed.id}
@@ -2159,7 +2345,7 @@ export function InfoschematicDiagram({
                   interactive('card') || focusing ? ' selectable' : ''
                 }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
                   pendingRemovals[card.code] ? ' going' : ''
-                }${focusing && litByScene?.has(card.id) ? ' lit' : ''}${inert('card')}`}
+                }${focusing && litByScene?.has(card.id) ? ' lit' : ''}${inGroup(selection)}${inert('card')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 data-card-compact={visualTreatment.card.compact || undefined}
@@ -2279,6 +2465,12 @@ export function InfoschematicDiagram({
               selection={selectionControls.selection}
             />
           </g>
+        ) : null}
+
+        {/* The band a range sweep has covered so far, drawn above the diagram because it is about the gesture rather
+          than about anything on the surface, and gone the moment the pointer is let go. */}
+        {rangeGesture ? (
+          <rect className="infoschematic-range-band" {...rangeBand(rangeGesture)} pointerEvents="none" />
         ) : null}
 
         {annotated || editing ? (
@@ -2413,7 +2605,7 @@ export function InfoschematicDiagram({
                 <g
                   /* The chip is where a Flow's code is read as well as where its label is dragged from, so a closed
                     Flow layer leaves it drawn and takes only the dragging - unlike a port, which is affordance only. */
-                  className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${inert('flow')}`}
+                  className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${inGroup(selection)}${inert('flow')}`}
                   key={flow.code}
                   onPointerDown={
                     interactive('flow')

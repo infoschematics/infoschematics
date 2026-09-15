@@ -2,8 +2,10 @@ import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
   type ArtefactSelection,
+  type ArtefactSelectionSet,
   everyInteractionLayer,
   type InteractionLayers,
+  toggleArtefactSelection,
   toggleInteractionLayer
 } from '@infoschematics/view-model/editable'
 import { useState } from 'react'
@@ -595,4 +597,108 @@ test('a closed Card layer leaves the Card drawn, unreachable, and unselectable',
   const { clientX, clientY } = screenPoint(svg, 130, 195)
   card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX, clientY, pointerId: 40 }))
   await expect.poll(() => container.querySelector('[data-testid="layer-events"]')?.textContent).toBe('')
+})
+
+/*
+ * Several elements held at once, where the three things that could go wrong are all about a press.
+ *
+ * Shift has to add without dragging, an ordinary press on something already held has to move the group rather than
+ * reduce the selection to the one element pressed, and a sweep has to find what it covered from the geometry the
+ * diagram drew rather than from what happens to be on top.
+ */
+function GroupHarness({ initial }: { initial: ArtefactSelectionSet }) {
+  const [held, setHeld] = useState<ArtefactSelectionSet>(initial)
+  const [events, setEvents] = useState<string[]>([])
+  const record = (event: string) => setEvents((current) => [...current, event])
+  return (
+    <>
+      <Canvas
+        config={config}
+        mode="design"
+        onArtefactExtend={(selection) => {
+          setHeld((current) => toggleArtefactSelection(current, selection))
+          record(`extend:${selection.id}`)
+        }}
+        // Rounded here rather than asserted to the unit: the offset is a real screen-to-diagram conversion, and the
+        // subject is how far the group was asked to move.
+        onArtefactGroupMove={(offset) => record(`group:${Math.round(offset.dx)}:${Math.round(offset.dy)}`)}
+        onArtefactMove={(selection) => record(`move:${selection.id}`)}
+        onArtefactRange={(selections) => record(`range:${selections.map((selection) => selection.id).join('+')}`)}
+        onArtefactSelect={(selection) => {
+          setHeld(selection ? [selection] : [])
+          record(`select:${selection?.id ?? 'none'}`)
+        }}
+        selectedArtefact={held[0] ?? null}
+        selectionSet={held}
+      />
+      <output data-testid="group-events">{events.join('|')}</output>
+    </>
+  )
+}
+
+const cardB = {
+  code: 'CARD-B',
+  geometry: 'box',
+  id: 'CARD-B',
+  kind: 'card'
+} as const satisfies ArtefactSelection
+
+test('Shift adds an element to the held group by pointer and by keyboard, and takes it back out', async () => {
+  const { container } = await render(<GroupHarness initial={[cardA]} />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const second = container.querySelector<SVGGElement>('[data-artefact-id="CARD-B"]')
+  if (!svg || !second) throw new Error('rendered group fixture is incomplete')
+  const events = () => container.querySelector('[data-testid="group-events"]')?.textContent ?? ''
+  const classOf = (id: string) => container.querySelector(`[data-artefact-id="${id}"]`)?.getAttribute('class') ?? ''
+
+  second.dispatchEvent(
+    new PointerEvent('pointerdown', { ...screenPoint(svg, 410, 195), bubbles: true, pointerId: 50, shiftKey: true })
+  )
+  await expect.poll(events).toBe('extend:CARD-B')
+  // The anchor keeps the ordinary selected treatment, because it is what an alignment brings the others onto.
+  await expect.poll(() => classOf('CARD-B')).toContain('group-held')
+  expect(classOf('CARD-A')).toContain('selected')
+  expect(classOf('CARD-A')).not.toContain('group-held')
+
+  second.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Enter', shiftKey: true }))
+  await expect.poll(events).toBe('extend:CARD-B|extend:CARD-B')
+  await expect.poll(() => classOf('CARD-B')).not.toContain('group-held')
+})
+
+test('a press on a held element moves the whole group and does not reduce the selection to it', async () => {
+  const { container } = await render(<GroupHarness initial={[cardA, cardB]} />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const second = container.querySelector<SVGGElement>('[data-artefact-id="CARD-B"]')
+  if (!svg || !second) throw new Error('rendered group fixture is incomplete')
+  const events = () => container.querySelector('[data-testid="group-events"]')?.textContent ?? ''
+
+  second.dispatchEvent(new PointerEvent('pointerdown', { ...screenPoint(svg, 410, 195), bubbles: true, pointerId: 51 }))
+  window.dispatchEvent(new PointerEvent('pointermove', { ...screenPoint(svg, 460, 215), bubbles: true, pointerId: 51 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { ...screenPoint(svg, 460, 215), bubbles: true, pointerId: 51 }))
+
+  // One group offset, and neither a single move nor a selection change: the group survived the press it was made for.
+  await expect.poll(events).toBe('group:50:20')
+})
+
+test('a Shift sweep gathers what it crossed and leaves an Adapter to the Card it holds', async () => {
+  const { container } = await render(<GroupHarness initial={[]} />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const backdrop = container.querySelector<SVGRectElement>('.infoschematic-backdrop')
+  if (!svg || !backdrop) throw new Error('rendered group fixture is incomplete')
+  const events = () => container.querySelector('[data-testid="group-events"]')?.textContent ?? ''
+
+  backdrop.dispatchEvent(
+    new PointerEvent('pointerdown', { ...screenPoint(svg, 20, 150), bubbles: true, pointerId: 52, shiftKey: true })
+  )
+  window.dispatchEvent(
+    new PointerEvent('pointermove', { ...screenPoint(svg, 500, 240), bubbles: true, pointerId: 52, shiftKey: true })
+  )
+  await expect.poll(() => container.querySelector('.infoschematic-range-band')).not.toBeNull()
+
+  window.dispatchEvent(
+    new PointerEvent('pointerup', { ...screenPoint(svg, 500, 240), bubbles: true, pointerId: 52, shiftKey: true })
+  )
+  // ADAPTER-A covers the same ground and is absent: it moves through the Card it holds, which the sweep already took.
+  await expect.poll(events).toBe('range:CARD-A+CARD-B')
+  await expect.poll(() => container.querySelector('.infoschematic-range-band')).toBeNull()
 })

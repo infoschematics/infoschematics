@@ -169,6 +169,61 @@ export const selectionWithinLayers = (
 export const defineArtefactSelection = <T extends ArtefactSelection>(selection: T): T =>
   Object.freeze({ ...selection }) as T
 
+/**
+ * A Design selection in the order the Producer built it.
+ *
+ * The order is the contract: the first element is the anchor, and a group operation holds it still while the rest
+ * move to it. So a Producer chooses the result by choosing what to click first, rather than by learning a rule
+ * about which extent wins.
+ *
+ * One element is the ordinary case rather than a special one, which is why this is a list and not a second kind of
+ * state kept beside the single selection.
+ */
+export type ArtefactSelectionSet = readonly ArtefactSelection[]
+
+/** The same element, whatever geometry it is carrying. Identity is the kind and the id, because a code can be absent. */
+export const sameArtefact = (left: ArtefactSelection, right: ArtefactSelection): boolean =>
+  left.kind === right.kind && left.id === right.id
+
+/**
+ * Add an element to an additive selection, or take it back out.
+ *
+ * Adding always appends, so the anchor stays the element the Producer chose first. Removing keeps the order of what
+ * is left, so taking the anchor out of a group promotes whatever was chosen next rather than leaving the group
+ * without one.
+ */
+export const toggleArtefactSelection = (
+  selection: ArtefactSelectionSet,
+  artefact: ArtefactSelection
+): ArtefactSelectionSet =>
+  selection.some((held) => sameArtefact(held, artefact))
+    ? selection.filter((held) => !sameArtefact(held, artefact))
+    : [...selection, artefact]
+
+/** The element a group operation holds still. */
+export const selectionAnchor = (selection: ArtefactSelectionSet): ArtefactSelection | null => selection[0] ?? null
+
+/**
+ * Everything held whose layer is still open, in order.
+ *
+ * Interaction layers decide what a Producer can reach, so a group selection is filtered through the same set rather
+ * than carrying a second notion of selectability: closing a layer takes its elements out of the group exactly as it
+ * takes them out of a single selection.
+ */
+export const selectionSetWithinLayers = (
+  selection: ArtefactSelectionSet,
+  layers?: InteractionLayers
+): ArtefactSelectionSet => selection.filter((artefact) => interactionLayerOpen(artefact.kind, layers))
+
+/**
+ * Which held elements a group geometry operation may move.
+ *
+ * Read out of the capability matrix rather than listed here, so a kind that cannot be moved cannot be aligned
+ * either: a Flow runs between the ports it is attached to, and aligning its route directly would fight them.
+ */
+export const groupMovableSelection = (selection: ArtefactSelectionSet): ArtefactSelectionSet =>
+  selection.filter((artefact) => artefact.geometry === 'box' && artefactCan(artefact.kind, 'move'))
+
 export type BoxGeometry = Readonly<{ box: Box; role: 'box' }>
 export type RouteGeometry = Readonly<{
   points: readonly Point[]
@@ -392,6 +447,83 @@ export const reorderArtefactOperation = (
 
 export const removeArtefactOperation = (target: ArtefactSelection): RemoveArtefactOperation =>
   cloneFrozen({ operation: 'remove' as const, target })
+
+/** Which edge or centre of the anchor the rest of a group is brought to. */
+export type AlignEdge = 'bottom' | 'centre-x' | 'centre-y' | 'left' | 'right' | 'top'
+
+export type DistributeAxis = 'horizontal' | 'vertical'
+
+const noOffset: Offset = { dx: 0, dy: 0 }
+
+const alignedOffset = (anchor: Box, box: Box, edge: AlignEdge): Offset => {
+  switch (edge) {
+    case 'left':
+      return { dx: anchor.x - box.x, dy: 0 }
+    case 'centre-x':
+      return { dx: anchor.x + anchor.width / 2 - (box.x + box.width / 2), dy: 0 }
+    case 'right':
+      return { dx: anchor.x + anchor.width - (box.x + box.width), dy: 0 }
+    case 'top':
+      return { dx: 0, dy: anchor.y - box.y }
+    case 'centre-y':
+      return { dx: 0, dy: anchor.y + anchor.height / 2 - (box.y + box.height / 2) }
+    case 'bottom':
+      return { dx: 0, dy: anchor.y + anchor.height - (box.y + box.height) }
+  }
+}
+
+/**
+ * What it takes to bring every box onto one edge or centre of the anchor, in the order the boxes arrived.
+ *
+ * Each offset moves on one axis only, so aligning a column of Cards to the left never also moves them up or down:
+ * the Producer asked about one coordinate and only that one changes. The anchor's own offset is zero, which is what
+ * makes the operation safe to repeat - aligning an already-aligned group is a no-op rather than a drift.
+ */
+export const alignOffsets = (anchor: Box, boxes: readonly Box[], edge: AlignEdge): readonly Offset[] =>
+  boxes.map((box) => alignedOffset(anchor, box, edge))
+
+/**
+ * What it takes to space a run of boxes evenly, in the order the boxes arrived.
+ *
+ * The two outermost boxes stay where they are and everything between them is spread through the space they leave,
+ * so distributing never grows or shrinks the run: the Producer positions the ends and the operation fills in
+ * between. Gaps are equalised rather than centres, because a run of boxes of different widths reads as evenly
+ * spaced when the space between them is equal.
+ *
+ * Positions round to whole units. Even spacing rarely divides exactly, and a Producer would rather two gaps differed
+ * by one unit than have the authored model carry `x: 213.33333333333334`.
+ */
+export const distributeOffsets = (boxes: readonly Box[], axis: DistributeAxis): readonly Offset[] => {
+  const offsets: Offset[] = boxes.map(() => noOffset)
+  // Two boxes are already as evenly spaced as two boxes can be, and one has nothing to be spaced against.
+  if (boxes.length < 3) return offsets
+
+  const horizontal = axis === 'horizontal'
+  const ordered = boxes
+    .map((box, index) => ({
+      index,
+      size: horizontal ? box.width : box.height,
+      start: horizontal ? box.x : box.y
+    }))
+    .sort((left, right) => left.start - right.start || left.index - right.index)
+
+  const first = ordered[0]
+  const last = ordered[ordered.length - 1]
+  if (!first || !last) return offsets
+
+  const span = last.start + last.size - first.start
+  const occupied = ordered.reduce((total, entry) => total + entry.size, 0)
+  const gap = (span - occupied) / (ordered.length - 1)
+
+  let at = first.start
+  for (const entry of ordered) {
+    const delta = Math.round(at) - entry.start
+    offsets[entry.index] = horizontal ? { dx: delta, dy: 0 } : { dx: 0, dy: delta }
+    at = at + entry.size + gap
+  }
+
+  return offsets
+}
 
 export type HandleKind = 'component' | 'label' | 'port' | 'region' | 'waypoint'
 

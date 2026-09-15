@@ -3,22 +3,31 @@ import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import { describe, expect, it } from 'vitest'
 import {
+  type AlignEdge,
   type ArtefactKind,
   type ArtefactOperation,
   type ArtefactSelection,
+  type ArtefactSelectionSet,
+  alignOffsets,
   artefactCan,
   artefactCapabilities,
   artefactKinds,
   createArtefactOperation,
   defineArtefactSelection,
+  distributeOffsets,
   everyInteractionLayer,
+  groupMovableSelection,
   interactionLayerOpen,
   moveArtefactOperation,
   orderArtefactOperations,
   removeArtefactOperation,
   reorderArtefactOperation,
   resizeArtefactOperation,
+  sameArtefact,
+  selectionAnchor,
+  selectionSetWithinLayers,
   selectionWithinLayers,
+  toggleArtefactSelection,
   toggleInteractionLayer
 } from './editable.ts'
 
@@ -252,5 +261,149 @@ describe('Design-session interaction layers', () => {
     expect(selectionWithinLayers(cardSelection, everyInteractionLayer())).toBe(cardSelection)
     expect(selectionWithinLayers(cardSelection)).toBe(cardSelection)
     expect(selectionWithinLayers(null, withoutCards)).toBeNull()
+  })
+})
+
+describe('Ordered multi-selection', () => {
+  const graphicSelection = defineArtefactSelection({
+    code: null,
+    geometry: 'box',
+    id: 'graphic-one',
+    kind: 'graphic'
+  })
+
+  it('keeps the element chosen first as the anchor however the group grows', () => {
+    const built = [cardSelection, regionSelection, graphicSelection].reduce<ArtefactSelectionSet>(
+      (selection, artefact) => toggleArtefactSelection(selection, artefact),
+      []
+    )
+
+    expect(built.map((artefact) => artefact.id)).toEqual(['card-one', 'region-one', 'graphic-one'])
+    expect(selectionAnchor(built)).toBe(cardSelection)
+    expect(selectionAnchor([])).toBeNull()
+  })
+
+  it('promotes the next element when the anchor is taken back out', () => {
+    const built = toggleArtefactSelection(toggleArtefactSelection([cardSelection], regionSelection), graphicSelection)
+    const withoutAnchor = toggleArtefactSelection(built, cardSelection)
+
+    expect(withoutAnchor.map((artefact) => artefact.id)).toEqual(['region-one', 'graphic-one'])
+    expect(selectionAnchor(withoutAnchor)).toBe(regionSelection)
+    expect(toggleArtefactSelection(withoutAnchor, cardSelection).map((artefact) => artefact.id)).toEqual([
+      'region-one',
+      'graphic-one',
+      'card-one'
+    ])
+  })
+
+  it('identifies an element by kind and id, whatever geometry it carries', () => {
+    expect(sameArtefact(cardSelection, { ...cardSelection, code: 'RENAMED' })).toBe(true)
+    expect(sameArtefact(cardSelection, regionSelection)).toBe(false)
+    expect(sameArtefact(cardSelection, { ...cardSelection, kind: 'graphic' })).toBe(false)
+  })
+
+  it('takes a closed layer out of a group exactly as it does out of a single selection', () => {
+    const withoutCards = toggleInteractionLayer(everyInteractionLayer(), 'card')
+    const group: ArtefactSelectionSet = [cardSelection, regionSelection, flowSelection]
+
+    expect(selectionSetWithinLayers(group, withoutCards).map((artefact) => artefact.id)).toEqual([
+      'region-one',
+      'flow-one'
+    ])
+    expect(selectionSetWithinLayers(group, everyInteractionLayer())).toEqual(group)
+    expect(selectionSetWithinLayers(group)).toEqual(group)
+    expect(selectionSetWithinLayers([cardSelection], withoutCards)).toEqual([])
+  })
+
+  it('reads participation out of the capability matrix, so a Flow never joins a group move', () => {
+    const group: ArtefactSelectionSet = [cardSelection, flowSelection, regionSelection]
+
+    expect(groupMovableSelection(group).map((artefact) => artefact.kind)).toEqual(['card', 'region'])
+    expect(artefactCan('flow', 'move')).toBe(false)
+    for (const artefact of groupMovableSelection(group)) expect(artefact.geometry).toBe('box')
+  })
+})
+
+describe('Group alignment geometry', () => {
+  const anchor = { height: 40, width: 100, x: 100, y: 100 }
+  const wide = { height: 20, width: 200, x: 150, y: 220 }
+  const small = { height: 60, width: 40, x: 400, y: 300 }
+
+  const edges: readonly [AlignEdge, number, number][] = [
+    ['left', 100, 100],
+    ['centre-x', 50, 130],
+    ['right', 0, 160],
+    ['top', 100, 100],
+    ['centre-y', 110, 90],
+    ['bottom', 120, 80]
+  ]
+
+  it.each(edges)('brings every box onto the anchor %s and moves on that axis alone', (edge, ...expected) => {
+    const offsets = alignOffsets(anchor, [anchor, wide, small], edge)
+    const horizontal = edge === 'left' || edge === 'centre-x' || edge === 'right'
+
+    expect(offsets[0]).toEqual({ dx: 0, dy: 0 })
+    for (const offset of offsets) expect(horizontal ? offset.dy : offset.dx).toBe(0)
+
+    const moved = [wide, small].map((box, index) => {
+      const offset = offsets[index + 1] ?? { dx: 0, dy: 0 }
+      return { ...box, x: box.x + offset.dx, y: box.y + offset.dy }
+    })
+    expect(moved.map((box) => (horizontal ? box.x : box.y))).toEqual(expected)
+  })
+
+  it('leaves an already-aligned group alone, so the operation can be repeated', () => {
+    const aligned = [anchor, { ...wide, x: anchor.x }, { ...small, x: anchor.x }]
+
+    expect(alignOffsets(anchor, aligned, 'left')).toEqual([
+      { dx: 0, dy: 0 },
+      { dx: 0, dy: 0 },
+      { dx: 0, dy: 0 }
+    ])
+  })
+
+  it('spaces a run evenly between the two boxes it does not move', () => {
+    const boxes = [
+      { height: 20, width: 100, x: 0, y: 0 },
+      { height: 20, width: 20, x: 110, y: 0 },
+      { height: 20, width: 40, x: 150, y: 0 },
+      { height: 20, width: 100, x: 400, y: 0 }
+    ]
+    const offsets = distributeOffsets(boxes, 'horizontal')
+    const placed = boxes.map((box, index) => ({ ...box, x: box.x + (offsets[index]?.dx ?? 0) }))
+
+    expect(offsets[0]).toEqual({ dx: 0, dy: 0 })
+    expect(offsets[3]).toEqual({ dx: 0, dy: 0 })
+    for (const offset of offsets) expect(offset.dy).toBe(0)
+
+    const gaps = placed.slice(1).map((box, index) => box.x - ((placed[index]?.x ?? 0) + (placed[index]?.width ?? 0)))
+    expect(gaps).toEqual([80, 80, 80])
+  })
+
+  it('reads the run in its own order, not the order the boxes were selected in', () => {
+    const boxes = [
+      { height: 100, width: 20, x: 0, y: 300 },
+      { height: 20, width: 20, x: 0, y: 0 },
+      { height: 20, width: 20, x: 0, y: 100 }
+    ]
+    const offsets = distributeOffsets(boxes, 'vertical')
+    const placed = boxes.map((box, index) => ({ ...box, y: box.y + (offsets[index]?.dy ?? 0) }))
+
+    expect(offsets[1]).toEqual({ dx: 0, dy: 0 })
+    expect(offsets[0]).toEqual({ dx: 0, dy: 0 })
+    expect(placed.map((box) => box.y)).toEqual([300, 0, 150])
+  })
+
+  it('has nothing to space when fewer than three boxes are held', () => {
+    const pair = [
+      { height: 20, width: 20, x: 0, y: 0 },
+      { height: 20, width: 20, x: 500, y: 0 }
+    ]
+
+    expect(distributeOffsets(pair, 'horizontal')).toEqual([
+      { dx: 0, dy: 0 },
+      { dx: 0, dy: 0 }
+    ])
+    expect(distributeOffsets([], 'vertical')).toEqual([])
   })
 })
