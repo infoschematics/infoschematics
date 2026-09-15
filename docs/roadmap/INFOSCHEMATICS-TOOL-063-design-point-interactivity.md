@@ -20,7 +20,7 @@ Give a Point the Design interaction `DESIGN-014` already promises it, so a Produ
 
 ## Context
 
-Found while delivering [Design interaction layers](INFOSCHEMATICS-TOOL-045-design-interaction-layers.md). That item put one interaction layer behind every artefact kind Design can reach, and found there were five, not six: `ArtefactKind` in `packages/view-model/src/editable.ts` has `region`, `fabric`, `card`, `flow` and `graphic`, and Canvas hit-tests exactly those. A Point is rendered — `packages/render-svg/` draws one — but no Canvas surface offers it a selection, a handle, or a keyboard target, so there was nothing for a sixth layer to filter and none was built.
+Found while delivering Design interaction layers (`INFOSCHEMATICS-TOOL-045`, delivered). That item put one interaction layer behind every artefact kind Design can reach, and found there were five, not six: `ArtefactKind` in `packages/view-model/src/editable.ts` has `region`, `fabric`, `card`, `flow` and `graphic`, and Canvas hit-tests exactly those. A Point is rendered — `packages/render-svg/` draws one — but no Canvas surface offers it a selection, a handle, or a keyboard target, so there was nothing for a sixth layer to filter and none was built.
 
 `DESIGN-014` states the six-kind contract including Point, and `docs/reference/vocabulary.md` carries `point` as a canonical term with authored geometry. The gap is therefore a stated behaviour that is not delivered rather than a term without a plan, and `DESIGN-018` records it as a known exception pointing here.
 

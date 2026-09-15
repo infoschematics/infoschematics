@@ -58,7 +58,7 @@ Run focused View Model, Canvas, and Studio suites, `bun run test:browser`, and `
 
 ## Dependencies / blocks
 
-No hard dependency. Coordinate with [Design interaction layers](INFOSCHEMATICS-TOOL-045-design-interaction-layers.md), which changes which kinds are selectable: layer filtering must constrain what a multi-selection can contain rather than the two features maintaining separate notions of selectability. Extend the `DESIGN-015` matrix in [the Design session specification](../specs/design-session.md) rather than adding a parallel harness.
+No hard dependency. Coordinate with Design interaction layers (`INFOSCHEMATICS-TOOL-045`, delivered), which changes which kinds are selectable: layer filtering must constrain what a multi-selection can contain rather than the two features maintaining separate notions of selectability. Extend the `DESIGN-015` matrix in [the Design session specification](../specs/design-session.md) rather than adding a parallel harness.
 
 ## Documentation impact
 
@@ -76,7 +76,7 @@ Explain multi-selection gestures, anchor choice, and that alignment produces ord
 
 ### Roadmap
 
-Selectability filtering stays with [Design interaction layers](INFOSCHEMATICS-TOOL-045-design-interaction-layers.md); this item owns the selection set and the group geometry operations.
+Selectability filtering stays with Design interaction layers (`INFOSCHEMATICS-TOOL-045`, delivered); this item owns the selection set and the group geometry operations.
 
 ## Discussion
 

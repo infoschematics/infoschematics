@@ -20,7 +20,7 @@ Make each rendered Infoschematic resolve its own SVG definitions, so two Infosch
 
 ## Context
 
-Found while completing [Inline browser verification](INFOSCHEMATICS-TOOL-051-inline-browser-verification.md). Two inline Canvases mounted in one host document emit `defs` children with fixed, document-global identifiers: one `marker` per Flow family as `infoschematic-arrow-<family>`, and four grid patterns as `infoschematic-grid-minor`, `-major`, `-major-plus-minor`, and `-dots`. Every instance emits the same identifiers, and every Flow references its arrowhead as `url(#infoschematic-arrow-<family>)`.
+Found while completing Inline browser verification (`INFOSCHEMATICS-TOOL-051`, delivered). Two inline Canvases mounted in one host document emit `defs` children with fixed, document-global identifiers: one `marker` per Flow family as `infoschematic-arrow-<family>`, and four grid patterns as `infoschematic-grid-minor`, `-major`, `-major-plus-minor`, and `-dots`. Every instance emits the same identifiers, and every Flow references its arrowhead as `url(#infoschematic-arrow-<family>)`.
 
 SVG resolves such a reference to the first matching element in document order. A browser fixture mounting a purple `request` family above a red one confirmed the consequence directly: both documents emit their own correct `marker`, and both render with the first one. Authored appearance is correct, definitions are correct, and output is still wrong.
 

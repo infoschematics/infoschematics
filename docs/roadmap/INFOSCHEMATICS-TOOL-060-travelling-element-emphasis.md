@@ -20,7 +20,7 @@ Let an emphasis travel around the element it names — a mark running the perime
 
 ## Context
 
-Raised while reviewing [Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md) against the IBC 2026 5G-EMERGE walkthrough. The ask there was described as "a big circular arrow runs around it": movement along the element's own geometry, not a change of state in place.
+Raised while reviewing Diagram dynamics (`INFOSCHEMATICS-TOOL-055`, delivered) against the IBC 2026 5G-EMERGE walkthrough. The ask there was described as "a big circular arrow runs around it": movement along the element's own geometry, not a change of state in place.
 
 `emphasise-elements` as delivered outlines the whole element and animates the outline as one object. That reads as "this element matters now", which is the right statement for most uses and the wrong one when the point is direction — a loop, a cycle, a path being walked.
 

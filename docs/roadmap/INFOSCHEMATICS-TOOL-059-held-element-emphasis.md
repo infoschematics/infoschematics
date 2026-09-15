@@ -20,7 +20,7 @@ Let a Dynamic emphasise an element for as long as a state lasts, so a presenter 
 
 ## Context
 
-Raised while reviewing [Diagram dynamics](INFOSCHEMATICS-TOOL-055-diagram-dynamics.md) against a real presentation. The IBC 2026 5G-EMERGE walkthrough wants the final step's element to keep pulsating while that step is on screen, which is a different statement from "something just happened here".
+Raised while reviewing Diagram dynamics (`INFOSCHEMATICS-TOOL-055`, delivered) against a real presentation. The IBC 2026 5G-EMERGE walkthrough wants the final step's element to keep pulsating while that step is on screen, which is a different statement from "something just happened here".
 
 Every Dynamic occurrence delivered by TOOL-055 is finite: `emphasise-elements` outlines its targets for one token-owned duration and retires itself, and the only way to prolong it is to keep supplying new occurrence keys. That produces a stutter rather than a hold, makes the announcement repeat, and puts a timing loop in the host for something the document could state once.
 
