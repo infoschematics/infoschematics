@@ -6,6 +6,12 @@
  * reads cannot fall behind the options the command accepts because both are derived from the same declaration.
  */
 
+/** Loopback only: a preview is for the person at the keyboard, and anything wider has to be asked for. */
+export const loopbackHost = '127.0.0.1'
+
+/** High, memorable, and clear of the ports the usual development servers take. */
+export const defaultPort = 4680
+
 export type OptionSpec = Readonly<{
   alias?: string
   describe: string
@@ -22,7 +28,18 @@ export const renderOptionSpecs = {
   },
   format: { describe: 'Output format: svg or png. Defaults to svg.', kind: 'value', placeholder: '<format>' },
   help: { alias: 'h', describe: 'Show this message.', kind: 'flag' },
+  host: {
+    describe: 'Bind the preview to another interface. Defaults to loopback, which is not reachable from the network.',
+    kind: 'value',
+    placeholder: '<address>'
+  },
   output: { alias: 'o', describe: 'Write to a file instead of standard output.', kind: 'value', placeholder: '<path>' },
+  port: {
+    describe: `Preview port. Defaults to ${defaultPort}; 0 lets the system choose.`,
+    kind: 'value',
+    placeholder: '<number>'
+  },
+  serve: { alias: 's', describe: 'Preview the render in a browser and refresh it on every change.', kind: 'flag' },
   scale: { describe: 'Multiply the raster pixel size. Defaults to 1.', kind: 'value', placeholder: '<number>' },
   watch: { alias: 'w', describe: 'Re-render whenever the input document changes. Requires --output.', kind: 'flag' }
 } as const satisfies Readonly<Record<string, OptionSpec>>
@@ -35,8 +52,13 @@ export type RenderArguments = Readonly<{
   /** Font files pinned for text, in declaration order. Empty means the host font stack. */
   fonts: readonly string[]
   format: RenderFormat
+  /** The interface the preview binds to; loopback unless deliberately widened. */
+  host: string
   input: string
   output?: string
+  port: number
+  /** Serve the render to a browser instead of, or as well as, writing it. */
+  serve: boolean
   scale: number
   /** Keep rendering until the process is interrupted, rather than converting once and exiting. */
   watch: boolean
@@ -113,6 +135,15 @@ const scaleOf = (value: string | undefined) => {
   return scale
 }
 
+const portOf = (value: string | undefined) => {
+  if (value === undefined) return defaultPort
+  const port = Number(value)
+  if (!Number.isInteger(port) || port < 0 || port > 65535) {
+    throw new Error(`The port option requires a number from 0 to 65535, received ${value}.`)
+  }
+  return port
+}
+
 /** Read one `render` invocation, or report that the caller asked for help. */
 export function parseArguments(argv: readonly string[]): ParsedArguments {
   if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') return { help: true }
@@ -137,11 +168,22 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
     }
   }
 
+  const serve = parsed.flags.has('serve')
+  const host = parsed.single('host') ?? loopbackHost
+  const port = portOf(parsed.single('port'))
+  if (!serve) {
+    for (const option of ['host', 'port'] as const) {
+      if (parsed.values.has(option))
+        throw new Error(`The ${option} option applies to the preview server. Pass --serve.`)
+    }
+  }
+  if (serve && input === '-') throw new Error('The serve option requires a file to watch, not standard input.')
+
   const watch = parsed.flags.has('watch')
   // Rewriting a stream nobody re-reads is not a useful loop, and standard input is consumed once and never changes.
   if (watch && !output)
     throw new Error('The watch option requires --output, because standard output cannot be rewritten.')
   if (watch && input === '-') throw new Error('The watch option requires a file to watch, not standard input.')
 
-  return { fonts, format, input, ...(output ? { output } : {}), scale, watch }
+  return { fonts, format, host, input, ...(output ? { output } : {}), port, scale, serve, watch }
 }

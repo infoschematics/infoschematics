@@ -84,6 +84,26 @@ _Verify:_ invalidate a watched document, assert the retained output and the diag
 
 _Evidence:_ `packages/cli/src/index.test.ts`.
 
+### CLI-010 — Local preview surface
+
+`--serve` MUST bind loopback only unless another interface is named by `--host`, which MUST report that the preview is reachable from the network. It MUST serve exactly the preview page, the current render, and a refresh stream, returning 404 for every other pathname without consulting the filesystem, per [ADR-INFOSCHEMATICS-025](../decisions/ADR-INFOSCHEMATICS-025-keep-the-preview-server-local-and-in-memory.md). Responses MUST forbid caching. An occupied port MUST fail with status `6` rather than binding a different one.
+
+_Conformance:_ conforming
+
+_Verify:_ fetch the render and compare it with the equivalent file render, request paths outside the served surface, inspect cache headers, and start a session against a port already bound.
+
+_Evidence:_ `packages/cli/src/index.test.ts` and `packages/cli/src/serve.ts`.
+
+### CLI-011 — Preview refresh and retained render
+
+A served session MUST re-render on change and push a refresh to open pages. A render that fails MUST leave the previous render served and show its diagnostic on the page as text. Interruption MUST release the socket and the watcher.
+
+_Conformance:_ conforming
+
+_Verify:_ subscribe to the refresh stream and change the document; invalidate the document and assert the retained render and the escaped diagnostic; cancel the session and assert the socket is refused.
+
+_Evidence:_ `packages/cli/src/index.test.ts`.
+
 ## Quality properties
 
 ### CLI-005 — Publishable package boundary

@@ -1,8 +1,8 @@
 import { mkdtemp, rename, rm, writeFile } from 'node:fs/promises'
-import { tmpdir } from 'node:os'
+import { networkInterfaces, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { hostRendererCliIo, type RendererCliIo, rendererCliExit, runRendererCli } from './index.ts'
+import { hostRendererCliIo, type RendererCliIo, rendererCliExit, runRendererCli, startPreviewServer } from './index.ts'
 
 const yaml = `id: CLI
 title: CLI smoke
@@ -40,6 +40,7 @@ const harness = (files: Readonly<Record<string, string>> = {}) => {
       return new TextEncoder().encode(value)
     },
     readStdin: async () => documents.get('-') ?? '',
+    serve: startPreviewServer,
     signal: interrupt.signal,
     // Settling is a real delay in the command and an immediate resolution here: a burst still coalesces, because the
     // events arrive before the pending render resumes, and the suite never waits on a timer.
@@ -342,5 +343,146 @@ describe('renderer CLI host watcher', () => {
       watcher.close()
       await rm(directory, { force: true, recursive: true })
     }
+  })
+})
+
+describe('renderer CLI preview server', () => {
+  const served = ['render', 'model.yaml', '--serve', '--port', '0']
+
+  /** Start a preview session and wait for the address it reports, which is how an ephemeral port becomes knowable. */
+  const preview = async (files: Readonly<Record<string, string>> = { 'model.yaml': yaml }) => {
+    const run = harness(files)
+    const finished = runRendererCli(served, run.io)
+    expect(await arrives(() => /http:\/\/[^\s]+/.test(run.output().stderr))).toBe(true)
+    const origin = /http:\/\/[^\s/]+/.exec(run.output().stderr)?.[0] ?? ''
+    return {
+      ...run,
+      origin,
+      stop: async () => {
+        run.interrupt.abort()
+        return finished
+      }
+    }
+  }
+
+  it('serves the render a file invocation would have written, and nothing else', async () => {
+    const session = await preview()
+    const written = harness({ 'model.yaml': yaml })
+    await runRendererCli(['render', 'model.yaml', '--output', 'model.svg'], written.io)
+
+    const rendered = await fetch(`${session.origin}/render`)
+    expect(rendered.status).toBe(200)
+    expect(rendered.headers.get('content-type')).toBe('image/svg+xml')
+    expect(await rendered.text()).toBe(written.output().written.get('model.svg'))
+
+    const document = await fetch(`${session.origin}/`)
+    expect(document.status).toBe(200)
+    expect(await document.text()).toContain('/render?revision=')
+
+    // The preview holds one render in memory and never consults the filesystem, so a pathname reaches nothing.
+    for (const pathname of ['/model.yaml', '/index.html', '/../package.json', '/src/index.ts']) {
+      expect((await fetch(`${session.origin}${pathname}`)).status).toBe(404)
+    }
+
+    expect(await session.stop()).toBe(rendererCliExit.interrupted)
+  })
+
+  it('never caches, so a reload cannot show a stale render', async () => {
+    const session = await preview()
+
+    for (const pathname of ['/', '/render']) {
+      expect((await fetch(`${session.origin}${pathname}`)).headers.get('cache-control')).toBe('no-store')
+    }
+
+    await session.stop()
+  })
+
+  it('keeps serving the last good render and shows why the document stopped', async () => {
+    const session = await preview()
+    const good = await (await fetch(`${session.origin}/render`)).text()
+
+    session.watch.change('id: [\n')
+    await settle()
+
+    expect(await (await fetch(`${session.origin}/render`)).text()).toBe(good)
+    const page = await (await fetch(`${session.origin}/`)).text()
+    expect(page).toContain('Malformed YAML')
+    // The diagnostic is text, not markup: what it says about the document cannot become part of the page.
+    expect(page).toContain('&lt;document&gt;')
+
+    session.watch.change(yaml.replace('CLI smoke', 'Recovered'))
+    await settle()
+    expect(await (await fetch(`${session.origin}/render`)).text()).toContain('Recovered')
+
+    await session.stop()
+  })
+
+  it('pushes a refresh to an open page when the document changes', async () => {
+    const session = await preview()
+    const events = await fetch(`${session.origin}/events`)
+    const reader = events.body?.getReader()
+    expect(reader).toBeDefined()
+
+    const message = (async () => {
+      const decoder = new TextDecoder()
+      let received = ''
+      while (!received.includes('data:')) {
+        const chunk = await reader?.read()
+        if (!chunk || chunk.done) break
+        received += decoder.decode(chunk.value)
+      }
+      return received
+    })()
+
+    session.watch.change(yaml.replace('CLI smoke', 'Pushed'))
+    await settle()
+    expect(await message).toContain('data:')
+
+    await reader?.cancel()
+    await session.stop()
+  })
+
+  it('refuses an occupied port instead of quietly choosing another', async () => {
+    const taken = await startPreviewServer({ contentType: 'image/svg+xml', host: '127.0.0.1', port: 0, state: {} })
+    const run = harness({ 'model.yaml': yaml })
+
+    const code = await runRendererCli(['render', 'model.yaml', '--serve', '--port', String(taken.port)], run.io)
+
+    expect(code).toBe(rendererCliExit.network)
+    expect(run.output().stderr).toContain(String(taken.port))
+    expect(run.output().stdout).toBe('')
+    await taken.close()
+  })
+
+  it('binds loopback only unless another interface is named', async () => {
+    const session = await preview()
+    const external = Object.values(networkInterfaces())
+      .flatMap((entries) => entries ?? [])
+      .find((entry) => entry.family === 'IPv4' && !entry.internal)
+
+    if (external) {
+      const port = Number(new URL(session.origin).port)
+      await expect(fetch(`http://${external.address}:${port}/render`)).rejects.toThrow()
+    }
+
+    await session.stop()
+  })
+
+  it('releases the socket on shutdown', async () => {
+    const session = await preview()
+    expect((await fetch(`${session.origin}/render`)).status).toBe(200)
+
+    expect(await session.stop()).toBe(rendererCliExit.interrupted)
+    await expect(fetch(`${session.origin}/render`)).rejects.toThrow()
+  })
+
+  it('rejects preview options that have no preview, and a stream it cannot watch', async () => {
+    const run = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(['render', 'model.yaml', '--port', '8080'], run.io)).toBe(rendererCliExit.usage)
+    expect(run.output().stderr).toContain('--serve')
+
+    const piped = harness({ '-': yaml })
+    expect(await runRendererCli(['render', '-', '--serve'], piped.io)).toBe(rendererCliExit.usage)
+    expect(piped.output().stderr).toContain('standard input')
   })
 })

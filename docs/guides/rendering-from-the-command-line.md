@@ -77,6 +77,28 @@ Press `Ctrl-C` to stop. The watcher is released and the command exits with statu
 
 Raster output works the same way, so `--watch --format png --output architecture.png` keeps a PNG current while you edit.
 
+## Preview in a browser
+
+`--serve` renders the document and serves it to a browser, refreshing the page every time you save:
+
+```bash
+infoschematics render architecture.yaml --serve
+```
+
+The address is printed on standard error: `http://127.0.0.1:4680/`. Pass `--port` for a different one, or `--port 0` to let the operating system choose. An occupied port fails with status `6` rather than quietly moving, so the address you were given is the address you keep.
+
+The preview is a development server, not hosting. It binds loopback, so nothing on your network can reach it, and it serves exactly three things from memory: the page, the current render, and the refresh stream. No pathname reaches a file — not the document, not its directory, not anything beside it. When a document stops validating, the diagnostic appears on the page above the last render that worked, so the preview never blanks while you type.
+
+To show the preview on another device, name an interface deliberately:
+
+```bash
+infoschematics render architecture.yaml --serve --host 0.0.0.0
+```
+
+The command says plainly that the preview is now reachable from the network. The reasoning behind these defaults is in [ADR-INFOSCHEMATICS-025](../decisions/ADR-INFOSCHEMATICS-025-keep-the-preview-server-local-and-in-memory.md).
+
+Add `--output architecture.svg` to keep a file current at the same time, and `--format png` to preview the raster instead. `Ctrl-C` releases the socket and the watcher and exits with status `130`.
+
 ## Render a TypeScript definition
 
 The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
@@ -93,7 +115,7 @@ This is the same renderer the command calls, over the same canonical model, so a
 
 ## Handle diagnostics
 
-Rendered output — SVG text or PNG bytes — is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write and raster-conversion failures use `5`; and an interrupted watch session uses `130`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into a rendered stream.
+Rendered output — SVG text or PNG bytes — is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write and raster-conversion failures use `5`; a preview port that cannot be bound uses `6`; and an interrupted watch or preview session uses `130`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into a rendered stream.
 
 For example:
 

@@ -3,8 +3,9 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 import { formatInfoschematicIssue, infoschematicFormatOf, parseInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { type ParsedArguments, parseArguments, type RenderArguments, usage } from './options.ts'
+import { loopbackHost, type ParsedArguments, parseArguments, type RenderArguments, usage } from './options.ts'
 import { rasteriseInfoschematicSvg } from './raster.ts'
+import { type PreviewServer, type PreviewServerOptions, type PreviewState, startPreviewServer } from './serve.ts'
 
 export const rendererCliExit = {
   success: 0,
@@ -12,6 +13,8 @@ export const rendererCliExit = {
   input: 3,
   validation: 4,
   output: 5,
+  /** A listening socket could not be opened, which is neither the document's fault nor the output path's. */
+  network: 6,
   /** A watch session ended because the process was interrupted, which is not a rendering failure. */
   interrupted: 130
 } as const
@@ -27,6 +30,8 @@ export type RendererCliIo = Readonly<{
   signal?: AbortSignal
   /** Settle a burst of writes before re-rendering. Injectable so watch tests do not wait on real time. */
   wait: (milliseconds: number) => Promise<void>
+  /** Open a preview server for the current render, rejecting when the socket cannot be bound. */
+  serve: (options: PreviewServerOptions) => Promise<PreviewServer>
   /** Observe one document, calling back on every change until the returned watcher is closed. */
   watch: (pathname: string, onChange: () => void) => RendererCliWatcher
   writeFile: (pathname: string, contents: string | Uint8Array) => Promise<void>
@@ -36,6 +41,7 @@ export type RendererCliIo = Readonly<{
 
 export { usage } from './options.ts'
 export { rasteriseInfoschematicSvg } from './raster.ts'
+export { type PreviewServer, type PreviewServerOptions, type PreviewState, startPreviewServer } from './serve.ts'
 
 /**
  * Editors commonly save by writing a temporary file and renaming it over the original, which replaces the inode a file
@@ -59,6 +65,7 @@ export const hostRendererCliIo = (signal?: AbortSignal): RendererCliIo => ({
     for await (const chunk of process.stdin) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
     return Buffer.concat(chunks).toString('utf8')
   },
+  serve: startPreviewServer,
   wait: (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
   watch: watchDocument,
   writeFile: (pathname, contents) => writeFile(pathname, contents),
@@ -74,54 +81,66 @@ const line = (contents: string) => (contents.endsWith('\n') ? contents : `${cont
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-/** Convert one document once, reporting every failure class through its own diagnostic and status. */
-const renderOnce = async (parsed: RenderArguments, io: RendererCliIo): Promise<number> => {
+/** One conversion attempt: the bytes it produced, or the diagnostic and status explaining why it produced none. */
+type RenderOutcome = Readonly<{ diagnostic?: string; rendered?: string | Uint8Array; status: number }>
+
+/** Convert one document once, without deciding where the result or the diagnostic goes. */
+const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promise<RenderOutcome> => {
   let authored: string
   try {
     authored = parsed.input === '-' ? await io.readStdin() : await io.readFile(parsed.input)
   } catch (error) {
-    io.writeStderr(`Cannot read ${parsed.input}: ${message(error)}\n`)
-    return rendererCliExit.input
+    return { diagnostic: `Cannot read ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.input }
   }
 
   const result = parseInfoschematic(authored, parsed.input === '-' ? {} : { pathname: parsed.input })
   if (!result.ok) {
-    io.writeStderr(line(result.issues.map(formatInfoschematicIssue).join('\n')))
-    return rendererCliExit.validation
+    return {
+      diagnostic: line(result.issues.map(formatInfoschematicIssue).join('\n')),
+      status: rendererCliExit.validation
+    }
   }
 
   const svg = renderInfoschematicSvg(result.model)
 
   // A raster image is bytes, so it never gains the trailing newline that keeps SVG pleasant in a shell.
-  let rendered: string | Uint8Array
-  if (parsed.format === 'svg') rendered = line(svg)
-  else {
-    // resvg ignores a font file it cannot open, so an unreadable --font would silently fall back to the host stack and
-    // produce output that looks right here and different elsewhere. Read each one first and fail loudly instead.
-    for (const font of parsed.fonts) {
-      try {
-        await io.readBytes(font)
-      } catch (error) {
-        io.writeStderr(`Cannot read font ${font}: ${message(error)}\n`)
-        return rendererCliExit.input
-      }
-    }
+  if (parsed.format === 'svg') return { rendered: line(svg), status: rendererCliExit.success }
 
+  // resvg ignores a font file it cannot open, so an unreadable --font would silently fall back to the host stack and
+  // produce output that looks right here and different elsewhere. Read each one first and fail loudly instead.
+  for (const font of parsed.fonts) {
     try {
-      rendered = rasteriseInfoschematicSvg(svg, { fonts: parsed.fonts, scale: parsed.scale })
+      await io.readBytes(font)
     } catch (error) {
-      io.writeStderr(`Cannot rasterise ${parsed.input}: ${message(error)}\n`)
-      return rendererCliExit.output
+      return { diagnostic: `Cannot read font ${font}: ${message(error)}\n`, status: rendererCliExit.input }
     }
   }
 
+  try {
+    return {
+      rendered: rasteriseInfoschematicSvg(svg, { fonts: parsed.fonts, scale: parsed.scale }),
+      status: rendererCliExit.success
+    }
+  } catch (error) {
+    return { diagnostic: `Cannot rasterise ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.output }
+  }
+}
+
+/** Convert one document once and deliver it to standard output or the named file. */
+const renderOnce = async (parsed: RenderArguments, io: RendererCliIo): Promise<number> => {
+  const outcome = await renderDocument(parsed, io)
+  if (outcome.rendered === undefined) {
+    io.writeStderr(outcome.diagnostic ?? '')
+    return outcome.status
+  }
+
   if (!parsed.output) {
-    io.writeStdout(rendered)
+    io.writeStdout(outcome.rendered)
     return rendererCliExit.success
   }
 
   try {
-    await io.writeFile(parsed.output, rendered)
+    await io.writeFile(parsed.output, outcome.rendered)
     return rendererCliExit.success
   } catch (error) {
     io.writeStderr(`Cannot write ${parsed.output}: ${message(error)}\n`)
@@ -132,12 +151,15 @@ const renderOnce = async (parsed: RenderArguments, io: RendererCliIo): Promise<n
 /**
  * Render on start and after every change until the session is cancelled.
  *
- * A failed render is reported and then forgotten: the last good output stays on disk, so a document caught mid-edit
- * never destroys the file a preview or a build is reading, and the next document that validates simply replaces it.
  * Renders are serialised and coalesced, so a burst of writes produces one render and a slow render cannot overlap the
- * next one.
+ * next one. What a render does with its result is the caller's business: writing a file and refreshing a page share
+ * this loop rather than each growing one.
  */
-const runWatch = async (parsed: RenderArguments, io: RendererCliIo): Promise<number> => {
+const watchUntilCancelled = async (
+  parsed: RenderArguments,
+  io: RendererCliIo,
+  render: () => Promise<void>
+): Promise<number> => {
   let changed = false
   let running = false
   let settled: (() => void) | undefined
@@ -148,7 +170,7 @@ const runWatch = async (parsed: RenderArguments, io: RendererCliIo): Promise<num
       await io.wait(settleMilliseconds)
       // Cleared after settling, so every write during the settle window belongs to the render about to start.
       changed = false
-      await renderOnce(parsed, io)
+      await render()
     }
     running = false
     settled?.()
@@ -159,7 +181,7 @@ const runWatch = async (parsed: RenderArguments, io: RendererCliIo): Promise<num
     if (!running) void drain()
   }
 
-  await renderOnce(parsed, io)
+  await render()
 
   const watcher = io.watch(parsed.input, onChange)
   await new Promise<void>((resolve) => {
@@ -176,6 +198,73 @@ const runWatch = async (parsed: RenderArguments, io: RendererCliIo): Promise<num
     })
   }
   return rendererCliExit.interrupted
+}
+
+/**
+ * Watch a document and keep its output current.
+ *
+ * A failed render is reported and then forgotten: the last good output stays on disk, so a document caught mid-edit
+ * never destroys the file a preview or a build is reading, and the next document that validates simply replaces it.
+ */
+const runWatch = (parsed: RenderArguments, io: RendererCliIo): Promise<number> =>
+  watchUntilCancelled(parsed, io, async () => {
+    await renderOnce(parsed, io)
+  })
+
+/**
+ * Serve the current render to a browser, re-rendering and refreshing on every change.
+ *
+ * The retained-render contract is the same as watch mode's, and visible here: a document that stops validating puts its
+ * diagnostic on the page above the last render that worked, rather than replacing a preview with an error.
+ */
+const runServe = async (parsed: RenderArguments, io: RendererCliIo): Promise<number> => {
+  const contentType = parsed.format === 'png' ? 'image/png' : 'image/svg+xml'
+  let state: PreviewState = {}
+
+  const attempt = async (): Promise<PreviewState> => {
+    const outcome = await renderDocument(parsed, io)
+    if (outcome.diagnostic) io.writeStderr(outcome.diagnostic)
+    if (outcome.rendered === undefined) {
+      return {
+        ...(outcome.diagnostic ? { diagnostic: outcome.diagnostic } : {}),
+        ...(state.rendered === undefined ? {} : { rendered: state.rendered })
+      }
+    }
+    if (parsed.output) {
+      try {
+        await io.writeFile(parsed.output, outcome.rendered)
+      } catch (error) {
+        io.writeStderr(`Cannot write ${parsed.output}: ${message(error)}\n`)
+      }
+    }
+    return { rendered: outcome.rendered }
+  }
+
+  state = await attempt()
+
+  let server: PreviewServer
+  try {
+    server = await io.serve({ contentType, host: parsed.host, port: parsed.port, state })
+  } catch (error) {
+    io.writeStderr(`Cannot serve on ${parsed.host}:${parsed.port}: ${message(error)}\n`)
+    return rendererCliExit.network
+  }
+
+  // Informational, but still standard error: standard output carries rendered documents and nothing else.
+  io.writeStderr(`Previewing ${parsed.input} at http://${parsed.host}:${server.port}/\n`)
+  if (parsed.host !== loopbackHost) {
+    io.writeStderr(
+      `This preview is reachable from the network on ${parsed.host}. It is a development server, not a host.\n`
+    )
+  }
+
+  const status = await watchUntilCancelled(parsed, io, async () => {
+    state = await attempt()
+    server.update(state)
+  })
+
+  await server.close()
+  return status
 }
 
 /** Execute the renderer command against injectable streams and filesystem operations. */
@@ -201,5 +290,6 @@ export async function runRendererCli(
     return rendererCliExit.usage
   }
 
+  if (parsed.serve) return runServe(parsed, io)
   return parsed.watch ? runWatch(parsed, io) : renderOnce(parsed, io)
 }
