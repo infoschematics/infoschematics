@@ -31,8 +31,9 @@ Copy the closest existing package, then:
    ```
 
 3. Run `bun run self:examples:generate` to write `src/infoschematic.ts`, and re-export it from `src/index.ts`.
-4. Add the package to the workspace lists that enumerate example directories: `self:verify:typecheck` and `self:verify:depcruise` in the root `package.json`.
-5. Run `bun run self:check`.
+4. Give the package what every workspace has: a `tsconfig.json` extending the root one, a `vitest.config.ts` that re-exports `workspaceTests(import.meta.url)`, and `test` and `typecheck` scripts in its manifest. Turborepo's cache unit is a task in a package, so a workspace without those scripts is one `turbo run` skips silently and greenly; `scripts/workspace-sources.test.ts` fails and names it. The `vitest.config.ts` is what points the suite at its siblings' source rather than their last build, so a package without one passes against stale output.
+5. Add the package's `src` to `self:verify:depcruise` in the root `package.json`, which still enumerates the directories it cruises.
+6. Run `bun run self:check`.
 
 Nothing else needs to learn about the new example. `scripts/render-example.ts` builds its catalogue from the declared metadata, so `bun run self:examples:render --all` picks the document up on its own.
 

@@ -56,7 +56,7 @@ Interactive views are additive. `@infoschematics/view-canvas` owns the reusable 
 
 ## Develop
 
-[Bun](https://bun.sh) manages packages, applications, and examples as one workspace graph.
+[Bun](https://bun.sh) manages packages, applications, and examples as one workspace graph, and [Turborepo](https://turborepo.com) runs the tasks over it.
 
 ```bash
 bun install
@@ -64,7 +64,16 @@ bun run self:dev
 bun run self:check
 ```
 
-`bun run self:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website.
+`bun run self:check` runs tests and TypeScript checks across every workspace, verifies dependency boundaries, and builds the production website. Each stage is a task Turborepo replays when nothing it reads has changed, so a repeat run on an unchanged tree costs a fraction of a second and a run after one edit pays for that package and what is downstream of it. `bun run self:check --force` reruns everything regardless.
+
+Every workspace owns its own suite and typecheck, so narrow the run instead of repeating the whole one:
+
+```bash
+bun run --cwd packages/view-model test -- runtime             # one file, or a name substring, in one package
+bunx vitest --root packages/view-model                        # watch that package
+bunx turbo run test --filter=...@infoschematics/domain-core   # a package and everything that depends on it
+bun run self:verify:repo                                      # only the checks under scripts/ that span workspaces
+```
 
 Each script under `scripts/` is a self-describing command as well as a `bun run` target: run it directly (`./scripts/render-example.ts`), ask it for `--help`, and read its exit code — 0 for success, 1 for failure, 2 for misuse. Unknown options are rejected rather than ignored.
 
