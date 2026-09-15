@@ -2,11 +2,11 @@ import { createHash } from 'node:crypto'
 import { access, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
-import type { Infoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
-import type { RenderInfoschematicSvgOptions, SvgSceneSelection } from '@infoschematics/render-svg'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { establishedInfoschematicOf } from '@infoschematics/view-model/compatibility'
+import { defineInfoschematicModel, infoschematicModelOf } from '../packages/domain-core/src/index.ts'
+import type { Infoschematic, InfoschematicConfig } from '../packages/domain-model/src/index.ts'
+import type { RenderInfoschematicSvgOptions, SvgSceneSelection } from '../packages/render-svg/src/index.ts'
+import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
+import { establishedInfoschematicOf } from '../packages/view-model/src/compatibility.ts'
 
 type SharpInstance = {
   ensureAlpha(): SharpInstance

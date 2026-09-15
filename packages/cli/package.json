@@ -33,7 +33,9 @@
   },
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs ../../LICENSE dist/LICENSE",
-    "clean": "node build.mjs --clean"
+    "clean": "node build.mjs --clean",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "sideEffects": false,
   "type": "module",

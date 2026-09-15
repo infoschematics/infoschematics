@@ -2,7 +2,6 @@ import { existsSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { typecheckProjects } from './typecheck.ts'
 import { workspacePackages, workspaceSourceAliases } from './workspace-sources.ts'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
@@ -43,26 +42,41 @@ describe('workspace source resolution', () => {
     expect(build.compilerOptions.paths).toEqual({})
   })
 
-  it('typechecks every project that has a TypeScript configuration', async () => {
-    const owners = ['packages', 'apps', 'examples']
-    const directories = await Promise.all(
-      owners.map(async (owner) =>
-        (await readdir(`${repositoryRoot}${owner}`, { withFileTypes: true }))
-          .filter((entry) => entry.isDirectory())
-          .map((entry) => `${owner}/${entry.name}`)
+  it('declares every workspace to the orchestrator, so none escapes the graph', async () => {
+    const turbo = await readJson('turbo.json')
+    const workspaces = (
+      await Promise.all(
+        ['packages', 'apps', 'examples'].map(async (owner) =>
+          (
+            await readdir(`${repositoryRoot}${owner}`, { withFileTypes: true })
+          )
+            .filter((entry) => entry.isDirectory())
+            .map((entry) => `${owner}/${entry.name}`)
+        )
       )
+    ).flat()
+
+    expect(workspaces.length).toBeGreaterThan(0)
+    for (const workspace of workspaces) {
+      const manifest = await readJson(`${workspace}/package.json`)
+      // A workspace missing one of these is simply skipped by `turbo run`, silently and with a green result.
+      for (const task of ['typecheck', 'test']) {
+        expect(Object.keys(manifest.scripts), `${workspace} declares no ${task}`).toContain(task)
+        expect(Object.keys(turbo.tasks), `turbo.json declares no ${task}`).toContain(task)
+      }
+      expect(existsSync(`${repositoryRoot}${workspace}/tsconfig.json`), `${workspace} has no tsconfig`).toBe(true)
+    }
+  })
+
+  it('keeps workspace packages out of the root manifest, where they would flatten the graph', async () => {
+    const root = await readJson('package.json')
+    const declared = Object.keys({ ...root.dependencies, ...root.devDependencies }).filter((name) =>
+      workspacePackages().some((workspace) => workspace.name === name)
     )
 
-    const configured: string[] = []
-    for (const project of directories.flat()) {
-      const present = await readFile(`${repositoryRoot}${project}/tsconfig.json`, 'utf8').then(
-        () => true,
-        () => false
-      )
-      if (present) configured.push(project)
-    }
-
-    expect(configured.length).toBeGreaterThan(0)
-    expect([...typecheckProjects].sort()).toEqual([...configured, 'tsconfig.scripts.json'].sort())
+    // Turborepo attributes the root package's dependencies to every workspace, so one entry here makes each package
+    // appear to depend on it: editing any package would then invalidate all of them, and the graph would say nothing.
+    // Repository scripts import the packages they use from source, exactly as the generators already do.
+    expect(declared, 'the root manifest depends on workspace packages').toEqual([])
   })
 })

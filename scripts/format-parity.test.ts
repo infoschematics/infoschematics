@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
-import { defineInfoschematicModel, parseInfoschematic } from '@infoschematics/domain-core'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { describe, expect, it } from 'vitest'
+import { defineInfoschematicModel, parseInfoschematic } from '../packages/domain-core/src/index.ts'
+import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { formatParityDefinition } from './fixtures/format-parity.ts'
 import { isDocumentSubject, loadRenderable } from './render-example.ts'
 

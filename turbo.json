@@ -1,0 +1,105 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "remoteCache": {
+    "enabled": false
+  },
+  "globalDependencies": [
+    "tsconfig.json",
+    "tsconfig.build-base.json",
+    "LICENSE",
+    "scripts/workspace-sources.ts",
+    "scripts/vitest-workspace.ts"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "!src/**/*.test.ts",
+        "!src/**/*.test.tsx",
+        "package.json",
+        "tsconfig.build.json",
+        "build.mjs"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "@infoschematics/site#build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test:browser": {
+      "dependsOn": ["^typecheck"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "ki:site:dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "deploy": {
+      "cache": false
+    },
+    "//#self:packages:check-versions": {
+      "inputs": ["scripts/cli.ts", "scripts/release/**", "packages/*/package.json", "package.json"]
+    },
+    "//#self:verify:typecheck:scripts": {
+      "inputs": ["scripts/**", ".dependency-cruiser.ts", "vite.config.ts", "tsconfig.scripts.json", "package.json"]
+    },
+    "//#self:verify:schema": {
+      "inputs": [
+        "scripts/generate-schema.ts",
+        "scripts/cli.ts",
+        "packages/domain-core/src/**",
+        "packages/domain-core/schema/**",
+        "packages/domain-model/src/**"
+      ]
+    },
+    "//#self:verify:visual-tokens": {
+      "inputs": ["scripts/generate-visual-tokens.ts", "scripts/cli.ts", "packages/view-model/src/**"]
+    },
+    "//#self:verify:examples": {
+      "inputs": ["scripts/examples.ts", "scripts/cli.ts", "examples/*/src/**", "examples/*/*.yaml"]
+    },
+    "//#self:verify:depcruise": {
+      "inputs": [
+        ".dependency-cruiser.ts",
+        "packages/*/src/**",
+        "packages/*/package.json",
+        "apps/site/src/**",
+        "apps/site/package.json",
+        "examples/*/src/**",
+        "examples/*/package.json",
+        "scripts/**"
+      ]
+    },
+    "//#self:verify:repo": {
+      "inputs": [
+        "scripts/**",
+        "vite.config.ts",
+        "docs/**",
+        "packages/*/src/**",
+        "packages/*/schema/**",
+        "packages/*/package.json",
+        "apps/site/src/**",
+        "apps/site/content/**",
+        "apps/site/package.json",
+        "examples/*/src/**",
+        "examples/*/package.json",
+        "package.json"
+      ]
+    }
+  }
+}

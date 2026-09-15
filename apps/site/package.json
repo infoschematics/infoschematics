@@ -31,8 +31,9 @@
     "deploy": "bun run build && wrangler deploy",
     "ki:site:dev": "vite",
     "preview": "bun run build && wrangler dev",
-    "test": "vitest run --root .",
-    "typecheck": "tsc --noEmit"
+    "test": "vitest run",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "type": "module"
 }

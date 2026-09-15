@@ -1,4 +1,4 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["scripts", ".dependency-cruiser.ts"]
+  "include": ["scripts", ".dependency-cruiser.ts", "vite.config.ts"]
 }

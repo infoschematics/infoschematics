@@ -2,14 +2,16 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     "packages/*": {
-      "entry": ["src/*.{ts,tsx}"],
+      "entry": ["src/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
       "project": ["src/**/*.{ts,tsx}"]
     },
     "apps/site": {
-      "project": ["src/**/*.{ts,tsx}"]
+      "project": ["src/**/*.{ts,tsx}"],
+      "entry": ["src/**/*.test.{ts,tsx}"]
     },
     "examples/*": {
-      "project": ["src/**/*.ts"]
+      "project": ["src/**/*.ts"],
+      "entry": ["src/*.ts", "src/**/*.test.ts"]
     },
     ".": {
       "entry": ["scripts/**/*.ts"],

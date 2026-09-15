@@ -37,7 +37,10 @@
   },
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/styles.css dist/styles.css ../../LICENSE dist/LICENSE",
-    "clean": "node build.mjs --clean"
+    "clean": "node build.mjs --clean",
+    "test": "vitest run",
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "sideEffects": [
     "./dist/styles.css"

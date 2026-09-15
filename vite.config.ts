@@ -3,8 +3,9 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 import { workspaceSourceAliases } from './scripts/workspace-sources.ts'
 
-// The package ships TypeScript source behind its exports map - hosts compile
-// it in their own build. This config exists for the test suite alone.
+// The repository-level suite. Every workspace runs its own tests from its own configuration; what is left here are
+// the checks that span workspaces and therefore belong to none of them — vocabulary, dependency boundaries, visual
+// treatment parity, the generators, and the command-line conventions the scripts share.
 export default defineConfig({
   // Mirrors the apps/site build stamp so its components render under the shared test run.
   define: {
@@ -18,14 +19,6 @@ export default defineConfig({
     // Both extensions: a component test has to be .tsx, and leaving it out of
     // the pattern meant one could be written and silently never run.
     exclude: [fileURLToPath(new URL('./**/*.browser.test.{ts,tsx}', import.meta.url))],
-    include: [
-      fileURLToPath(new URL('./packages/*/src/**/*.test.ts', import.meta.url)),
-      fileURLToPath(new URL('./packages/*/src/**/*.test.tsx', import.meta.url)),
-      fileURLToPath(new URL('./apps/*/src/**/*.test.ts', import.meta.url)),
-      fileURLToPath(new URL('./apps/*/src/**/*.test.tsx', import.meta.url)),
-      fileURLToPath(new URL('./examples/*/src/**/*.test.ts', import.meta.url)),
-      fileURLToPath(new URL('./examples/*/src/**/*.test.tsx', import.meta.url)),
-      fileURLToPath(new URL('./scripts/**/*.test.ts', import.meta.url))
-    ]
+    include: [fileURLToPath(new URL('./scripts/**/*.test.ts', import.meta.url))]
   }
 })

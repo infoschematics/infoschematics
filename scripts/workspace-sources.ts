@@ -1,16 +1,21 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { Alias } from 'vite'
 
 const repositoryRoot = fileURLToPath(new URL('..', import.meta.url))
 
 type PackageManifest = Readonly<{
   name: string
   exports?: Readonly<Record<string, string | Readonly<Record<string, string>>>>
-  dependencies?: Readonly<Record<string, string>>
-  peerDependencies?: Readonly<Record<string, string>>
 }>
+
+/**
+ * One resolution rule, in the shape Vite's `resolve.alias` accepts.
+ *
+ * Declared here rather than imported as Vite's own `Alias`: the repository has two copies of Vite installed while the
+ * major is held, and a type that named one of them would not be assignable to a config built against the other.
+ */
+export type WorkspaceSourceAlias = Readonly<{ find: RegExp; replacement: string }>
 
 export type WorkspaceEntryPoint = Readonly<{
   /** Specifier a consumer imports. */
@@ -28,8 +33,6 @@ export type WorkspacePackage = Readonly<{
   source: string
   /** Every published specifier, resolved back to the source file it is built from. */
   entryPoints: readonly WorkspaceEntryPoint[]
-  /** Sibling packages this one depends on, by name, so a build or a fingerprint can follow the graph. */
-  dependencies: readonly string[]
 }>
 
 /** Resolve one published target back to the source file the build compiles into it. */
@@ -43,30 +46,16 @@ const entryPointsOf = (manifest: PackageManifest, packageSource: string): readon
   }))
 
 /** Every reusable package in this repository, discovered from the workspace rather than a list to maintain. */
-export const workspacePackages = (): readonly WorkspacePackage[] => {
-  const declared = readdirSync(join(repositoryRoot, 'packages'), { withFileTypes: true })
+export const workspacePackages = (): readonly WorkspacePackage[] =>
+  readdirSync(join(repositoryRoot, 'packages'), { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => {
       const source = join(repositoryRoot, 'packages', entry.name, 'src')
       const manifest = JSON.parse(
         readFileSync(join(repositoryRoot, 'packages', entry.name, 'package.json'), 'utf8')
       ) as PackageManifest
-      return { directory: entry.name, manifest, source }
+      return { directory: entry.name, entryPoints: entryPointsOf(manifest, source), name: manifest.name, source }
     })
-
-  // A dependency only belongs to the graph when the workspace itself owns it; everything else is an installed package.
-  const owned = new Set(declared.map(({ manifest }) => manifest.name))
-
-  return declared.map(({ directory, manifest, source }) => ({
-    dependencies: Object.keys({ ...manifest.dependencies, ...manifest.peerDependencies })
-      .filter((name) => owned.has(name))
-      .sort(),
-    directory,
-    entryPoints: entryPointsOf(manifest, source),
-    name: manifest.name,
-    source
-  }))
-}
 
 /**
  * Resolve every published specifier to the source file it is built from, while testing.
@@ -82,7 +71,7 @@ export const workspacePackages = (): readonly WorkspacePackage[] => {
  * `tsconfig.json` carries the same intent as `paths` for typechecking, and `tsconfig.build-base.json` clears it so a
  * published declaration still resolves its siblings through their entry points.
  */
-export const workspaceSourceAliases = (): readonly Alias[] =>
+export const workspaceSourceAliases = (): readonly WorkspaceSourceAlias[] =>
   workspacePackages().flatMap(({ entryPoints }) =>
     entryPoints.map(({ specifier, source }) => ({
       // Exact specifiers: a bare string would prefix-match, sending every subpath to the package's own entry point.

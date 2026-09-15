@@ -1,6 +1,6 @@
-import { appearanceOptions } from '@infoschematics/domain-model/option-catalogue'
 import { describe, expect, it } from 'vitest'
 import { guideAppearanceOptions } from '../apps/site/src/visual-guide/curriculum.ts'
+import { appearanceOptions } from '../packages/domain-model/src/option-catalogue.ts'
 
 describe('visual guide appearance catalogue projection', () => {
   it('matches every canonical option, control shape, value, and range', () => {

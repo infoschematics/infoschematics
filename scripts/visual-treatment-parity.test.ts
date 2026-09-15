@@ -1,10 +1,10 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { Canvas } from '@infoschematics/view-canvas'
-import { visualTokens } from '@infoschematics/view-model/tokens'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
+import { defineInfoschematic } from '../packages/domain-core/src/index.ts'
+import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
+import { Canvas } from '../packages/view-canvas/src/index.ts'
+import { visualTokens } from '../packages/view-model/src/tokens.ts'
 
 const config = defineInfoschematic({
   title: 'Cross-renderer treatment reference',

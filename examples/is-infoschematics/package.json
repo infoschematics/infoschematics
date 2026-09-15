@@ -30,7 +30,9 @@
   "private": true,
   "scripts": {
     "check": "infoschematics render infoschematic.yaml --output /dev/null && infoschematics render overview.yaml --output /dev/null",
-    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg && infoschematics render overview.yaml --output overview.svg"
+    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg && infoschematics render overview.yaml --output overview.svg",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "type": "module",
   "version": "0.1.0"

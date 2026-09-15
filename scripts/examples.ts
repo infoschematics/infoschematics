@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { readdir, readFile, writeFile } from 'node:fs/promises'
 import { basename, extname, join, resolve } from 'node:path'
-import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
+import { formatInfoschematicIssue, parseInfoschematic } from '../packages/domain-core/src/index.ts'
 import { type CliSpec, isDirectInvocation, runCli } from './cli.ts'
 
 /**

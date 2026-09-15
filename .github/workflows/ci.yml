@@ -23,6 +23,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # Turborepo replays any task whose declared inputs are unchanged, so a run that touches
+      # one package pays for that package rather than for the whole gate.
+      - name: Restore task cache
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
       - name: Install browser-test runtime
         run: bunx playwright install --with-deps chromium
 

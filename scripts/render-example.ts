@@ -7,10 +7,10 @@ import {
   infoschematicFormatExtensions,
   infoschematicFormatOf,
   parseInfoschematic
-} from '@infoschematics/domain-core'
-import type { InfoschematicInput } from '@infoschematics/domain-model'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+} from '../packages/domain-core/src/index.ts'
+import type { InfoschematicInput } from '../packages/domain-model/src/index.ts'
+import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
+import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { type CliSpec, CliUsageError, isDirectInvocation, runCli } from './cli.ts'
 import { examplePackages, examplesRoot } from './examples.ts'
 

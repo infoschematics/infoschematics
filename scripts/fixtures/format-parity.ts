@@ -1,4 +1,4 @@
-import type { Infoschematic } from '@infoschematics/domain-model/model'
+import type { Infoschematic } from '../../packages/domain-model/src/model.ts'
 
 /** Canonical typed form of the source-to-sink document fixtures. */
 export const formatParityDefinition: Infoschematic = {
