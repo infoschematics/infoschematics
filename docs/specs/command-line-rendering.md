@@ -1,6 +1,6 @@
 # Command-line rendering — CLI
 
-Portable document-to-SVG behaviour exposed by the published renderer command. Part of the [Specifications corpus](index.md).
+Portable document-to-image behaviour exposed by the published renderer command. Part of the [Specifications corpus](index.md).
 
 ## User-observable behaviours
 
@@ -44,11 +44,31 @@ _Verify:_ pass a `.ts` pathname and inspect the usage diagnostic and status.
 
 _Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`.
 
+### CLI-006 — Opt-in raster output
+
+The command MUST write SVG when no format is named, and MUST write PNG bytes when `--format png` is given, leaving standard output binary-clean so the result can be piped or redirected. Raster-only options MUST be rejected as usage errors when the output stays SVG.
+
+_Conformance:_ conforming
+
+_Verify:_ render one document with and without `--format png`, assert the PNG signature on standard output and in a written file, and provoke a raster option against SVG output.
+
+_Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`.
+
+### CLI-007 — Raster determinism and the font boundary
+
+Rendering one document to PNG twice on one machine MUST produce identical bytes, and equivalent YAML and JSON documents MUST produce identical bytes. Text is the only host-dependent part: without `--font` the host font stack is used and identity is not promised across machines; with `--font` only the named files are consulted. An unreadable `--font` file MUST fail with the input status rather than falling back silently to the host stack.
+
+_Conformance:_ conforming
+
+_Verify:_ compare repeated renders byte for byte in the workspace and from a packed clean consumer, and name a missing font file.
+
+_Evidence:_ `packages/cli/src/index.test.ts`, `packages/cli/src/raster.ts`, and `scripts/release/pack-smoke.ts`.
+
 ## Quality properties
 
 ### CLI-005 — Publishable package boundary
 
-The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core and the static SVG renderer.
+The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core and the static SVG renderer. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.
 
 _Conformance:_ conforming
 

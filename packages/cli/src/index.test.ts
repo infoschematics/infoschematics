@@ -12,12 +12,18 @@ const json = JSON.stringify({ id: 'CLI', title: 'CLI smoke', diagram: { bounds: 
 const harness = (files: Readonly<Record<string, string>> = {}) => {
   let stdout = ''
   let stderr = ''
-  const written = new Map<string, string>()
+  const bytes: Uint8Array[] = []
+  const written = new Map<string, string | Uint8Array>()
   const io: RendererCliIo = {
     readFile: async (pathname) => {
       const value = files[pathname]
       if (value === undefined) throw new Error('missing')
       return value
+    },
+    readBytes: async (pathname) => {
+      const value = files[pathname]
+      if (value === undefined) throw new Error('missing')
+      return new TextEncoder().encode(value)
     },
     readStdin: async () => files['-'] ?? '',
     writeFile: async (pathname, contents) => {
@@ -27,10 +33,11 @@ const harness = (files: Readonly<Record<string, string>> = {}) => {
       stderr += contents
     },
     writeStdout: (contents) => {
-      stdout += contents
+      if (typeof contents === 'string') stdout += contents
+      else bytes.push(contents)
     }
   }
-  return { io, output: () => ({ stderr, stdout, written }) }
+  return { io, output: () => ({ bytes, stderr, stdout, written }) }
 }
 
 describe('renderer CLI', () => {
@@ -71,5 +78,95 @@ describe('renderer CLI', () => {
     expect(await runRendererCli(['render', 'model.yaml', '-o', 'model.svg'], io)).toBe(rendererCliExit.output)
     expect(run.output().stdout).toBe('')
     expect(run.output().stderr).toContain('read only')
+  })
+
+  it('rejects raster options when the output stays SVG', async () => {
+    const run = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(['render', 'model.yaml', '--scale', '2'], run.io)).toBe(rendererCliExit.usage)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).toContain('--format png')
+  })
+
+  it.each([
+    ['render', 'model.yaml', '--format', 'gif'],
+    ['render', 'model.yaml', '--format', 'png', '--scale', 'wide'],
+    ['render', 'model.yaml', '--format', 'png', '--scale', '0'],
+    ['render', 'model.yaml', '-o', 'one.svg', '-o', 'two.svg'],
+    ['render', 'model.yaml', '--format', 'png', '--background', '#ff0000']
+  ])('rejects malformed options before reading anything', async (...args) => {
+    const run = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(args, run.io)).toBe(rendererCliExit.usage)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).not.toBe('')
+  })
+})
+
+/** PNG dimensions live in the IHDR chunk, which starts at byte 16. */
+const pngSize = (image: Uint8Array) => {
+  const view = new DataView(image.buffer, image.byteOffset, image.byteLength)
+  return { height: view.getUint32(20), width: view.getUint32(16) }
+}
+
+const pngSignature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]
+
+describe('renderer CLI raster output', () => {
+  it('writes a binary-clean PNG to standard output', async () => {
+    const run = harness({ 'model.yaml': yaml })
+
+    expect(await runRendererCli(['render', 'model.yaml', '--format', 'png'], run.io)).toBe(rendererCliExit.success)
+
+    const [image] = run.output().bytes
+    expect(image).toBeDefined()
+    expect([...(image ?? []).slice(0, 8)]).toEqual(pngSignature)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).toBe('')
+  })
+
+  it('renders the same document to identical bytes on repeated runs', async () => {
+    const first = harness({ 'model.yaml': yaml })
+    const second = harness({ 'model.json': json })
+
+    await runRendererCli(['render', 'model.yaml', '--format', 'png'], first.io)
+    await runRendererCli(['render', 'model.json', '--format', 'png'], second.io)
+
+    expect(first.output().bytes[0]).toEqual(second.output().bytes[0])
+  })
+
+  it('scales pixel size without changing the document', async () => {
+    const plain = harness({ 'model.yaml': yaml })
+    const scaled = harness({ 'model.yaml': yaml })
+
+    await runRendererCli(['render', 'model.yaml', '--format', 'png'], plain.io)
+    await runRendererCli(['render', 'model.yaml', '--format', 'png', '--scale', '2'], scaled.io)
+
+    const before = pngSize(plain.output().bytes[0] ?? new Uint8Array())
+    const after = pngSize(scaled.output().bytes[0] ?? new Uint8Array())
+    expect(after.width).toBe(before.width * 2)
+    expect(after.height).toBe(before.height * 2)
+  })
+
+  it('writes raster bytes to a file without touching standard output', async () => {
+    const run = harness({ 'model.yaml': yaml })
+
+    expect(await runRendererCli(['render', 'model.yaml', '--format', 'png', '-o', 'model.png'], run.io)).toBe(
+      rendererCliExit.success
+    )
+
+    const written = run.output().written.get('model.png')
+    expect(written).toBeInstanceOf(Uint8Array)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().bytes).toEqual([])
+    expect(run.output().stderr).toBe('')
+  })
+
+  it('reports an unreadable font before rasterising rather than silently dropping it', async () => {
+    const run = harness({ 'model.yaml': yaml })
+
+    const code = await runRendererCli(['render', 'model.yaml', '--format', 'png', '--font', 'missing.ttf'], run.io)
+
+    expect(code).toBe(rendererCliExit.input)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().bytes).toEqual([])
+    expect(run.output().stderr).toContain('missing.ttf')
   })
 })

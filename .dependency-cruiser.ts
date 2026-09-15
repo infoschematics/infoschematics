@@ -119,6 +119,17 @@ const config: IConfiguration = {
       }
     },
     {
+      name: 'renderer-command-names-its-third-party-dependencies',
+      comment:
+        'The command is the only publishable package that installs a third-party runtime, so each one is named here and in CLI-005 rather than accumulating quietly.',
+      severity: 'error',
+      from: { path: '^packages/cli/', pathNot: testFile },
+      to: {
+        dependencyTypes: ['npm'],
+        pathNot: '(^|/)node_modules/@resvg/resvg-js(/|$)'
+      }
+    },
+    {
       name: 'view-model-stays-generic',
       comment: 'The view model may consume domain data, but never application, authored-example or deployment code.',
       severity: 'error',

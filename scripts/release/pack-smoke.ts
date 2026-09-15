@@ -291,6 +291,32 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
     throw new Error('Packed renderer command file output differs from standard output.')
   }
 
+  // A raster render exercises the packed third-party engine, which the workspace suite never installs from a tarball.
+  await run([cli, 'render', 'model.yaml', '--format', 'png', '--output', 'packed.png'], directory)
+  await run([cli, 'render', 'model.json', '--format', 'png', '--output', 'repeated.png'], directory)
+  await run(
+    [
+      process.execPath,
+      join(repositoryRoot, 'packages', 'cli', 'dist', 'bin.js'),
+      'render',
+      'model.yaml',
+      '--format',
+      'png',
+      '--output',
+      'workspace.png'
+    ],
+    directory
+  )
+  const [raster, repeated, workspace] = await Promise.all(
+    ['packed.png', 'repeated.png', 'workspace.png'].map((name) => readFile(join(directory, name)))
+  )
+  if (!raster?.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    throw new Error('Packed renderer command did not write a PNG for --format png.')
+  }
+  if (!raster.equals(repeated ?? Buffer.alloc(0)) || !raster.equals(workspace ?? Buffer.alloc(0))) {
+    throw new Error('Packed renderer command raster output is not byte-identical across runs and with the workspace.')
+  }
+
   const failures = await Promise.all([
     runOutcome([cli, 'render', 'malformed.yaml'], directory),
     runOutcome([cli, 'render', 'missing.yaml'], directory),

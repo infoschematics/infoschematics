@@ -1,6 +1,6 @@
 # Render from the command line
 
-Use the `infoschematics` command when a build, documentation pipeline, or shell script needs deterministic SVG from a canonical YAML or JSON Infoschematic. The command does not start a browser and does not execute authored code.
+Use the `infoschematics` command when a build, documentation pipeline, or shell script needs a deterministic SVG or PNG from a canonical YAML or JSON Infoschematic. The command does not start a browser and does not execute authored code.
 
 ## Install
 
@@ -34,6 +34,33 @@ generate-infoschematic | infoschematics render - > architecture.svg
 
 The accepted file extensions are `.yaml`, `.yml`, and `.json`. The command will not load a `.ts` file.
 
+## Render a PNG
+
+SVG is the default and existing invocations are unchanged. Ask for a raster image with `--format png`:
+
+```bash
+infoschematics render architecture.yaml --format png > architecture.png
+infoschematics render architecture.yaml --format png --scale 2 --output architecture@2x.png
+```
+
+`--scale` multiplies the document's own pixel size, so `--scale 2` doubles both dimensions without changing the diagram. Standard output stays binary-clean, so redirecting or piping the bytes is safe. `--scale` and `--font` apply to raster output only and are rejected as usage errors when the output stays SVG.
+
+Conversion runs through a pinned build of resvg rather than a browser, chosen in [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md). There is no background option: the renderer already paints an opaque backdrop across the whole image, so there is no transparency behind it to fill.
+
+### Pin fonts for reproducible text
+
+Everything except text is fully determined by the document: the same input renders to identical bytes every time on one machine, and equivalent YAML and JSON produce the same image. Text is drawn with whatever fonts the machine has, so a render on a build agent can differ from a render on your laptop.
+
+Name the font files to remove that variable. `--font` is repeatable and, once given, the host font stack is ignored entirely:
+
+```bash
+infoschematics render architecture.yaml --format png \
+  --font ./fonts/Inter-Regular.ttf --font ./fonts/Inter-SemiBold.ttf \
+  --output architecture.png
+```
+
+A font file the command cannot read fails with status `3` rather than quietly falling back, because a silent fallback would produce exactly the machine-dependent output the option exists to prevent.
+
 ## Render a TypeScript definition
 
 The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
@@ -50,7 +77,7 @@ This is the same renderer the command calls, over the same canonical model, so a
 
 ## Handle diagnostics
 
-SVG is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write failures use `5`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into an SVG stream.
+Rendered output — SVG text or PNG bytes — is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write and raster-conversion failures use `5`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into a rendered stream.
 
 For example:
 

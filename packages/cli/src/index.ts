@@ -1,6 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { formatInfoschematicIssue, infoschematicFormatOf, parseInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { type ParsedArguments, parseArguments, usage } from './options.ts'
+import { rasteriseInfoschematicSvg } from './raster.ts'
 
 export const rendererCliExit = {
   success: 0,
@@ -11,59 +13,33 @@ export const rendererCliExit = {
 } as const
 
 export type RendererCliIo = Readonly<{
+  readBytes: (pathname: string) => Promise<Uint8Array>
   readFile: (pathname: string) => Promise<string>
   readStdin: () => Promise<string>
-  writeFile: (pathname: string, contents: string) => Promise<void>
+  writeFile: (pathname: string, contents: string | Uint8Array) => Promise<void>
   writeStderr: (contents: string) => void
-  writeStdout: (contents: string) => void
+  writeStdout: (contents: string | Uint8Array) => void
 }>
 
-const usage = `Render a canonical YAML or JSON Infoschematic as SVG.
-
-Usage: infoschematics render <input> [--output <path>]
-
-  input                 A .yaml, .yml, or .json document; use - for standard input.
-  -o, --output <path>   Write SVG to a file instead of standard output.
-  -h, --help            Show this message.
-
-TypeScript modules are not executable input. Import the programmatic libraries instead.`
+export { usage } from './options.ts'
+export { rasteriseInfoschematicSvg } from './raster.ts'
 
 const defaultIo: RendererCliIo = {
+  readBytes: async (pathname) => new Uint8Array(await readFile(pathname)),
   readFile: (pathname) => readFile(pathname, 'utf8'),
   readStdin: async () => {
     const chunks: Buffer[] = []
     for await (const chunk of process.stdin) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
     return Buffer.concat(chunks).toString('utf8')
   },
-  writeFile: (pathname, contents) => writeFile(pathname, contents, 'utf8'),
+  writeFile: (pathname, contents) => writeFile(pathname, contents),
   writeStderr: (contents) => process.stderr.write(contents),
   writeStdout: (contents) => process.stdout.write(contents)
 }
 
-type ParsedArguments = Readonly<{ input: string; output?: string }> | Readonly<{ help: true }>
-
-const parseArguments = (argv: readonly string[]): ParsedArguments => {
-  if (argv.length === 1 && (argv[0] === '--help' || argv[0] === '-h')) return { help: true }
-  if (argv[0] !== 'render') throw new Error('Expected the render command.')
-  if (argv[1] === '--help' || argv[1] === '-h') return { help: true }
-
-  const input = argv[1]
-  if (!input || (input.startsWith('-') && input !== '-')) throw new Error('Expected one input document.')
-
-  let output: string | undefined
-  for (let index = 2; index < argv.length; index += 1) {
-    const token = argv[index]
-    if (token !== '--output' && token !== '-o') throw new Error(`Unknown option ${token}.`)
-    if (output !== undefined) throw new Error('The output option may be provided only once.')
-    output = argv[index + 1]
-    if (!output || output.startsWith('-')) throw new Error('The output option requires a path.')
-    index += 1
-  }
-
-  return output ? { input, output } : { input }
-}
-
 const line = (contents: string) => (contents.endsWith('\n') ? contents : `${contents}\n`)
+
+const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
 /** Execute the renderer command against injectable streams and filesystem operations. */
 export async function runRendererCli(argv: readonly string[], io: RendererCliIo = defaultIo): Promise<number> {
@@ -71,7 +47,7 @@ export async function runRendererCli(argv: readonly string[], io: RendererCliIo 
   try {
     parsed = parseArguments(argv)
   } catch (error) {
-    io.writeStderr(`${error instanceof Error ? error.message : String(error)}\n\n${usage}\n`)
+    io.writeStderr(`${message(error)}\n\n${usage}\n`)
     return rendererCliExit.usage
   }
 
@@ -89,7 +65,7 @@ export async function runRendererCli(argv: readonly string[], io: RendererCliIo 
   try {
     authored = parsed.input === '-' ? await io.readStdin() : await io.readFile(parsed.input)
   } catch (error) {
-    io.writeStderr(`Cannot read ${parsed.input}: ${error instanceof Error ? error.message : String(error)}\n`)
+    io.writeStderr(`Cannot read ${parsed.input}: ${message(error)}\n`)
     return rendererCliExit.input
   }
 
@@ -99,17 +75,41 @@ export async function runRendererCli(argv: readonly string[], io: RendererCliIo 
     return rendererCliExit.validation
   }
 
-  const svg = line(renderInfoschematicSvg(result.model))
+  const svg = renderInfoschematicSvg(result.model)
+
+  // A raster image is bytes, so it never gains the trailing newline that keeps SVG pleasant in a shell.
+  let rendered: string | Uint8Array
+  if (parsed.format === 'svg') rendered = line(svg)
+  else {
+    // resvg ignores a font file it cannot open, so an unreadable --font would silently fall back to the host stack and
+    // produce output that looks right here and different elsewhere. Read each one first and fail loudly instead.
+    for (const font of parsed.fonts) {
+      try {
+        await io.readBytes(font)
+      } catch (error) {
+        io.writeStderr(`Cannot read font ${font}: ${message(error)}\n`)
+        return rendererCliExit.input
+      }
+    }
+
+    try {
+      rendered = rasteriseInfoschematicSvg(svg, { fonts: parsed.fonts, scale: parsed.scale })
+    } catch (error) {
+      io.writeStderr(`Cannot rasterise ${parsed.input}: ${message(error)}\n`)
+      return rendererCliExit.output
+    }
+  }
+
   if (!parsed.output) {
-    io.writeStdout(svg)
+    io.writeStdout(rendered)
     return rendererCliExit.success
   }
 
   try {
-    await io.writeFile(parsed.output, svg)
+    await io.writeFile(parsed.output, rendered)
     return rendererCliExit.success
   } catch (error) {
-    io.writeStderr(`Cannot write ${parsed.output}: ${error instanceof Error ? error.message : String(error)}\n`)
+    io.writeStderr(`Cannot write ${parsed.output}: ${message(error)}\n`)
     return rendererCliExit.output
   }
 }
