@@ -4,12 +4,12 @@ area: TOOL
 title: Copyable example packages
 theme: tool
 horizon: next
-status: draft
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:15:21Z
-updated_at: 2026-09-13T20:15:21Z
+updated_at: 2026-09-15T04:44:26Z
 ---
 
 # Copyable example packages
@@ -39,8 +39,8 @@ All three example directories are Bun workspace packages with private versioned 
 - [ ] Add package-local `check` and `render` commands that work both inside the workspace and after copying the directory into a clean location.
 - [ ] Add concise package READMEs explaining purpose, files, install, render, edit, and host integration, with direct links to the canonical YAML.
 - [ ] Keep example-specific assets and presentation data inside the owning package and remove undocumented dependencies on Site source.
-- [ ] Make the repository and Site derive example discovery from package-owned metadata where practical instead of maintaining unrelated hard-coded catalogues.
-- [ ] Add a clean-copy smoke test that installs and renders each example outside the monorepo using published package dependency shapes or packed local equivalents.
+- [ ] Replace the hard-coded `renderableExamples` catalogue in `scripts/render-example.ts` so the repository and Site derive example discovery from package-owned metadata.
+- [ ] Extend the existing packed-tarball harness in `scripts/release/pack-smoke.ts` with a clean-copy case that installs and renders each example outside the monorepo, rather than adding a second temporary-project harness.
 - [ ] Decide separately whether any example package should become publishable; portability and copyability must not depend on npm publication.
 
 ## Files touched
@@ -48,7 +48,7 @@ All three example directories are Bun workspace packages with private versioned 
 - `examples/is-blank/`
 - `examples/is-infoschematics/`
 - `examples/is-system/`
-- root workspace verification and clean-copy smoke-test scripts
+- `scripts/render-example.ts` and `scripts/release/pack-smoke.ts` for discovery and clean-copy verification
 - package-boundary and dependency-cruiser configuration where required
 - Site example discovery consumers without moving ownership into Site
 - `docs/design/architecture.md`
@@ -56,11 +56,11 @@ All three example directories are Bun workspace packages with private versioned 
 
 ## Verify
 
-Run each package's local checks and renderer command plus `bun run self:check`. Copy each example directory into a clean temporary project, install against packed repository packages, run its documented validation and render commands, and confirm the resulting canonical model and SVG match the in-repository example. Confirm Site and Playground still consume package exports rather than copied definitions.
+Run each package's local checks, `bun run self:examples:render`, `bun run self:packages:pack-smoke`, and `bun run self:check`. Copy each example directory into a clean temporary project, install against packed repository packages, run its documented validation and render commands, and confirm the resulting canonical model and SVG match the in-repository example. Confirm Site and Playground still consume package exports rather than copied definitions.
 
 ## Dependencies / blocks
 
-No hard dependency is known. Coordinate YAML authoring with [Preserve YAML edits](INFOSCHEMATICS-TOOL-033-preserve-yaml-edits.md) only where lossless structured edits are involved; static package source can become YAML-first independently.
+No hard dependency is known. The lossless YAML document model has already landed, so package sources can become YAML-first immediately; follow [the authored-YAML editing guide](../guides/editing-authored-yaml.md) for the round-trip expectations rather than inventing a package-local convention.
 
 ## Documentation impact
 

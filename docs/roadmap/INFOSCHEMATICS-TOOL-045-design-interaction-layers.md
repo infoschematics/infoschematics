@@ -4,12 +4,12 @@ area: TOOL
 title: Design interaction layers
 theme: tool
 horizon: next
-status: draft
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:03:15Z
-updated_at: 2026-09-13T20:03:15Z
+updated_at: 2026-09-15T04:44:26Z
 ---
 
 # Design interaction layers
@@ -48,7 +48,7 @@ Design mode can select and manipulate supported element types, but SVG paint ord
 - `packages/view-canvas/src/` for SVG hit testing and temporary foreground rendering
 - `packages/view-studio/src/app/` for Producer controls and Design-session state
 - focused browser-rendered interaction tests
-- `docs/specs/view-studio.md`
+- `docs/specs/design-session.md` and `docs/specs/design-editing.md`
 - affected Producer guides under `docs/guides/`
 
 ## Verify
@@ -57,7 +57,7 @@ Run focused View Model, Canvas, and Studio tests plus `bun run self:check`. In a
 
 ## Dependencies / blocks
 
-No hard dependency is known. Coordinate the browser matrix with the `INFOSCHEMATICS-TOOL-037` design-editing regression contract so layer controls reuse its gesture, selection, viewport, and undo assertions rather than creating a parallel interaction harness.
+No hard dependency is known. The design-editing regression contract has landed as `DESIGN-015` in [the Design session specification](../specs/design-session.md), whose rendered matrix lives in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`. Extend those suites with the layer cases so this work reuses their gesture, selection, viewport, and undo assertions rather than creating a parallel interaction harness.
 
 ## Documentation impact
 
@@ -75,7 +75,7 @@ Explain how Producers isolate an element type while editing dense diagrams and h
 
 ### Roadmap
 
-Keep fixes to existing editing operations within `INFOSCHEMATICS-TOOL-037`; this item owns the new interaction-layer controls and generalized foreground-selection behaviour.
+Coordinate toolbar placement with [Configurable design grid](INFOSCHEMATICS-TOOL-053-configurable-design-grid.md), which shares the Design control surface. This item owns the new interaction-layer controls and generalised foreground-selection behaviour; regressions in existing editing operations belong to the `DESIGN-015` matrix.
 
 ## Discussion
 
