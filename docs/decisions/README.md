@@ -37,8 +37,10 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 25. [ADR-INFOSCHEMATICS-019](ADR-INFOSCHEMATICS-019-unify-presentation-sequences.md) — express expanded or collapsed, timed or manual presentation through one Sequence concept.
 26. [ADR-INFOSCHEMATICS-020](ADR-INFOSCHEMATICS-020-preserve-authored-source-through-validated-edits.md) — retain authored YAML choices through stable-ID, transactional, host-owned edits.
 27. [ADR-INFOSCHEMATICS-021](ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) — keep command-line input inert and leave TypeScript execution with the consumer.
+28. [ADR-INFOSCHEMATICS-022](ADR-INFOSCHEMATICS-022-generate-example-exports-from-authored-yaml.md) — author every example as YAML and generate its typed export from that document.
+29. [ADR-INFOSCHEMATICS-023](ADR-INFOSCHEMATICS-023-keep-example-packages-copyable-not-published.md) — keep example packages copyable and unpublished rather than members of the coordinated release.
 
 ## Repository operation
 
-28. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-29. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+30. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+31. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.

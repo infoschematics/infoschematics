@@ -15,9 +15,10 @@ Ownership determines the top-level workspace root:
   - [Studio View](packages/view-studio/) — `@infoschematics/view-studio`, the current combined Canvas, Present, and Studio implementation.
 - **Applications** contain deployable composition roots:
   - [Site](apps/site/) — the designed homepage, public documentation, examples, and Cloudflare deployment boundary.
-- **Examples** contain independently authored Infoschematic definitions:
+- **Examples** contain independently authored Infoschematic definitions. Each one is a copyable starting point: it authors its Infoschematic as YAML, ships a generated typed export, and carries its own `check` and `render` commands that keep working after the directory is copied elsewhere.
   - [Blank Infoschematic](examples/is-blank/) — `@infoschematics/is-blank`, the minimum executable definition.
   - [Infoschematics examples](examples/is-infoschematics/) — `@infoschematics/is-infoschematics`, a concise homepage overview and substantial self-description.
+  - [A system, explained](examples/is-system/) — `@infoschematics/is-system`, a four-stage narrative from observed signals to a shared view.
 
 ## Use Studio View
 

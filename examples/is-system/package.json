@@ -1,14 +1,31 @@
 {
-  "name": "@infoschematics/is-system",
-  "description": "An authored Infoschematic of the four-stage journey from signals to a shared view.",
-  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
+  },
+  "description": "An authored Infoschematic of the four-stage journey from signals to a shared view.",
+  "devDependencies": {
+    "@infoschematics/cli": "0.1.0"
   },
   "exports": {
     ".": "./src/index.ts"
   },
+  "infoschematics": {
+    "examples": [
+      {
+        "export": "systemExample",
+        "id": "system",
+        "source": "infoschematic.yaml",
+        "title": "A system, explained"
+      }
+    ]
+  },
   "license": "MIT",
+  "name": "@infoschematics/is-system",
   "private": true,
-  "type": "module"
+  "scripts": {
+    "check": "infoschematics render infoschematic.yaml --output /dev/null",
+    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

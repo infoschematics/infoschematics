@@ -1,14 +1,31 @@
 {
-  "name": "@infoschematics/is-blank",
-  "description": "A blank Infoschematic definition for examples and host integration checks.",
-  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
+  },
+  "description": "A blank Infoschematic definition for examples and host integration checks.",
+  "devDependencies": {
+    "@infoschematics/cli": "0.1.0"
   },
   "exports": {
     ".": "./src/index.ts"
   },
+  "infoschematics": {
+    "examples": [
+      {
+        "export": "blankInfoschematic",
+        "id": "blank",
+        "source": "infoschematic.yaml",
+        "title": "A blank Infoschematic"
+      }
+    ]
+  },
   "license": "MIT",
+  "name": "@infoschematics/is-blank",
   "private": true,
-  "type": "module"
+  "scripts": {
+    "check": "infoschematics render infoschematic.yaml --output /dev/null",
+    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

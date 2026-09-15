@@ -90,7 +90,7 @@ Each named item at `awaiting-review` with a six-heading review packet. No item i
 | ------------------------- | ------- | ------- | -------- | ----------------- |
 | `INFOSCHEMATICS-TOOL-050` | `ready` | `awaiting-review` | `ADR-INFOSCHEMATICS-021`; `CLI-004` retained unchanged | Review the decision |
 | `INFOSCHEMATICS-TOOL-051` | `ready` | `awaiting-review` | `DESIGN-017`; host-fixture browser suite; found `TOOL-058` | Review the suite and the captured defect |
-| `INFOSCHEMATICS-TOOL-054` | `ready` | pending | —        | —                 |
+| `INFOSCHEMATICS-TOOL-054` | `ready` | `awaiting-review` | YAML-first example packages; `ADR-INFOSCHEMATICS-022`, `ADR-INFOSCHEMATICS-023`; clean-copy case in the release smoke | Copy an example out and try it |
 | `INFOSCHEMATICS-TOOL-047` | `ready` | pending | —        | —                 |
 | `INFOSCHEMATICS-TOOL-048` | `ready` | pending | —        | —                 |
 | `INFOSCHEMATICS-TOOL-049` | `ready` | pending | —        | —                 |

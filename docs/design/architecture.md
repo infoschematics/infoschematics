@@ -87,6 +87,14 @@ Bun treats every package, application, and example as part of one workspace grap
 
 Authored Infoschematic examples use the `is-` prefix. Reusable packages and host applications use role-based names. Published package names retain the `@infoschematics/*` namespace.
 
+## Example package contract
+
+Every example package is a copyable starting point rather than a fixture the repository happens to share. Each one authors its Infoschematic as canonical YAML beside its manifest, declares what it contains under an `infoschematics.examples` key, ships a generated typed export for browser consumers, and carries a README, a `check` command, and a `render` command that work unchanged after the directory is copied out of this repository.
+
+The YAML is the single authored source. The typed export is generated from it by `bun run self:examples:generate`, embeds the exact document it was generated from, and parses that document at import time, so a consumer's model and a reader's document cannot disagree. `bun run self:verify:examples` fails the repository check when a committed export no longer matches its YAML. Two hand-maintained copies of one diagram would drift silently, which is the reason for generating rather than authoring the export; [ADR-INFOSCHEMATICS-022](../decisions/ADR-INFOSCHEMATICS-022-generate-example-exports-from-authored-yaml.md) records the trade.
+
+Discovery follows the same metadata. `scripts/render-example.ts` builds its renderable catalogue from what the packages declare rather than from a list held in the script, so adding an example is a change to that package alone.
+
 ## Host boundary
 
 A host imports one complete canonical `Infoschematic`, owns the document title, and passes the definition into a View:

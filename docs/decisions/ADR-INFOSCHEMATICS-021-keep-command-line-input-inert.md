@@ -18,7 +18,7 @@ The request is real: a TypeScript definition can express a model that repeats co
 
 Parsing data and loading a module are different acts. `bun run` style execution runs arbitrary code with the invoking user's authority — imports, environment access, network calls, filesystem writes — before any Infoschematic exists to validate. A command that decides to execute based on a filename extension makes that escalation invisible: `infoschematics render model.ts` looks exactly like `infoschematics render model.yaml` in a Makefile, a CI job, or a documentation pipeline, and a renamed or attacker-chosen path silently changes which of the two happens.
 
-The workaround is also already complete rather than hypothetical. `scripts/render-example.ts` imports the authored example packages directly and renders them through `@infoschematics/render-svg` with no CLI bridge at all. A consumer with a TypeScript definition writes the same handful of lines and keeps execution inside a file they own, where its trust properties are legible.
+The workaround is also already complete rather than hypothetical. `scripts/render-example.ts` renders authored documents through `@infoschematics/render-svg` with no CLI bridge at all, and a consumer holding a TypeScript definition rather than a document writes the same handful of lines against the same library. Execution stays inside a file the consumer owns, which leaves the trust properties legible.
 
 ## Decision
 

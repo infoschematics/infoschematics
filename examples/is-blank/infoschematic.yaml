@@ -1,0 +1,13 @@
+id: INFOSCHEMATIC
+title: Infoschematics
+diagram:
+  bounds: 0 0 1920 1080
+  appearance:
+    surface: blueprint
+    grid: major-plus-minor
+    card:
+      description: false
+      stereotype: false
+      compact: false
+      identity: false
+  gridSize: 10

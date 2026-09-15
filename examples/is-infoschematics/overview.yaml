@@ -1,11 +1,4 @@
-/**
- * Generated from `overview.yaml` by `bun run self:examples:generate`. Do not edit.
- *
- * The YAML in this package is the authored source. Edit it, then regenerate.
- */
-import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
-
-const source = `id: infoschematic-overview
+id: infoschematic-overview
 title: What makes an Infoschematic
 subtitle: Structure and presentation, rendered or presented
 description: Structure and presentation material combine in one Infoschematic, which can be rendered as static output or presented as a live, interactive view.
@@ -166,14 +159,3 @@ scopes:
       - DIRECT
       - RENDER
       - PRESENT
-`
-
-const parsed = parseInfoschematic(source, { pathname: 'overview.yaml' })
-if (!parsed.ok) {
-  throw new Error(
-    ['overview.yaml is not a valid Infoschematic:', ...parsed.issues.map(formatInfoschematicIssue)].join('\n')
-  )
-}
-
-/** Structure and presentation combined in one Infoschematic */
-export const homepageInfoschematic = parsed.model

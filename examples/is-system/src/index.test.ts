@@ -6,6 +6,8 @@ const diagram = systemExample.diagram
 
 const expectSerialisable = (value: unknown): void => {
   if (value === null) return
+  // The canonical parser materialises absent optional fields as explicit undefined, which JSON serialisation drops.
+  if (value === undefined) return
 
   if (Array.isArray(value)) {
     for (const item of value) expectSerialisable(item)

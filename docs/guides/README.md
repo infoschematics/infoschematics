@@ -6,6 +6,7 @@ The public consumer journey is Site-owned under `apps/site/content/` by [ADR-INF
 
 ## Operating guides
 
+- [Author an example package](authoring-example-packages.md) — keep every `examples/` directory a copyable starting point with one authored document and a generated export.
 - [Cloudflare hosting](cloudflare.md) — configure public hosting, custom domains, redirects, and Workers Builds.
 - [Edit authored YAML](editing-authored-yaml.md) — apply stable-ID edits without losing comments, scalar styles, ordering, or host source authority.
 - [Integrate a host renderer](integrating-renderers.md) — register versioned Fabric, Overlay, and Callout implementations with validated properties and accessible fallbacks.

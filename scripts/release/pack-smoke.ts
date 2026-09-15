@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
 import { spawn } from 'node:child_process'
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { basename, join, resolve } from 'node:path'
+import { basename, extname, join, resolve, sep } from 'node:path'
+import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { type CliSpec, isDirectInvocation, runCli } from '../cli.ts'
+import { type ExamplePackage, examplePackages, examplesRoot } from '../examples.ts'
 import { checkReleaseVersions } from './check-versions.ts'
 import {
   type PackageManifest,
@@ -257,8 +260,8 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   await run(['bun', 'install', '--production', '--ignore-scripts'], directory)
 
   const cli = join(directory, 'node_modules', '.bin', 'infoschematics')
-  const yaml = 'id: CLI\ntitle: Release CLI smoke\ndiagram:\n  bounds: 0 0 100 100\n'
-  const json = `${JSON.stringify({ id: 'CLI', title: 'Release CLI smoke', diagram: { bounds: '0 0 100 100' } })}\n`
+  const yaml = 'id: CLI\ntitle: Release CLI smoke\ndiagram:\n  bounds: 0 0 100 100\n  gridSize: 10\n'
+  const json = `${JSON.stringify({ id: 'CLI', title: 'Release CLI smoke', diagram: { bounds: '0 0 100 100', gridSize: 10 } })}\n`
   await writeFile(join(directory, 'model.yaml'), yaml)
   await writeFile(join(directory, 'model.json'), json)
   await writeFile(join(directory, 'malformed.yaml'), 'id: [\n')
@@ -300,6 +303,97 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   return run(['bun', 'run', 'smoke.ts'], directory)
 }
 
+/** The SVG an example's `render` command writes beside a document. */
+const previewOf = (source: string) => `${basename(source, extname(source))}.svg`
+
+/** Render the copy's generated export and compare it with the document the copy also renders through the command. */
+const exampleConsumerSource = (example: ExamplePackage) => `
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { ${example.documents.map((document) => document.export).join(', ')} } from './src/index.ts'
+
+const rendered = ${JSON.stringify(
+  Object.fromEntries(example.documents.map((document) => [document.export, previewOf(document.source)]))
+)}
+for (const [name, model] of Object.entries({ ${example.documents.map((document) => document.export).join(', ')} })) {
+  const svg = renderInfoschematicSvg(model)
+  const document = await Bun.file(rendered[name]).text()
+  if (svg.trim() !== document.trim()) {
+    throw new Error(\`Generated export \${name} does not render what its document renders.\`)
+  }
+}
+
+console.log(JSON.stringify({ exports: Object.keys(rendered).length }))
+`
+
+/**
+ * Every example must work for someone who copied its directory out, not only inside this workspace.
+ *
+ * The copy installs packed tarballs instead of the workspace, runs the package's own documented `check` and `render`
+ * commands, and is compared against what this repository renders from the same document. An example that renders only
+ * in the monorepo is not a copyable example, and nothing else would notice the difference.
+ */
+const exampleCopySmoke = async (packed: readonly PackedPackage[], directory: string) => {
+  const tarballs = new Map(packed.map(({ entry, tarball }) => [entry.name, `file:${tarball}`]))
+  const overrides = Object.fromEntries(tarballs)
+  const renderer = tarballs.get('@infoschematics/render-svg')
+  if (!renderer) throw new Error('Release set no longer packs the static renderer the example copies verify against.')
+
+  const copies: { example: string; rendered: number }[] = []
+  for (const example of await examplePackages()) {
+    const destination = join(directory, example.directory)
+    await cp(join(examplesRoot, example.directory), destination, {
+      filter: (source) => !source.includes(`${sep}node_modules`),
+      recursive: true
+    })
+
+    const manifestPath = join(destination, 'package.json')
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as PackageManifest
+    const retarget = (section: Readonly<Record<string, string>> = {}) =>
+      Object.fromEntries(Object.entries(section).map(([name, range]) => [name, tarballs.get(name) ?? range]))
+    await writeFile(
+      manifestPath,
+      `${JSON.stringify(
+        {
+          ...manifest,
+          dependencies: retarget(manifest.dependencies),
+          devDependencies: { ...retarget(manifest.devDependencies), '@infoschematics/render-svg': renderer },
+          overrides
+        },
+        null,
+        2
+      )}\n`
+    )
+    await run(['bun', 'install', '--ignore-scripts'], destination)
+
+    await run(['bun', 'run', 'check'], destination)
+    await run(['bun', 'run', 'render'], destination)
+
+    for (const document of example.documents) {
+      const source = await readFile(join(destination, document.source), 'utf8')
+      const parsed = parseInfoschematic(source, { pathname: document.source })
+      if (!parsed.ok) {
+        throw new Error(
+          [
+            `Copied example ${example.directory}/${document.source} no longer parses:`,
+            ...parsed.issues.map(formatInfoschematicIssue)
+          ].join('\n')
+        )
+      }
+      const preview = await readFile(join(destination, previewOf(document.source)), 'utf8')
+      if (preview.trim() !== renderInfoschematicSvg(parsed.model).trim()) {
+        throw new Error(
+          `Copied example ${example.directory}/${document.source} rendered differently outside the monorepo.`
+        )
+      }
+    }
+
+    await writeFile(join(destination, 'example-smoke.ts'), exampleConsumerSource(example))
+    const outcome = JSON.parse(await run(['bun', 'run', 'example-smoke.ts'], destination)) as { exports: number }
+    copies.push({ example: example.name, rendered: outcome.exports })
+  }
+  return copies
+}
+
 export type PackAndSmokeOptions = Readonly<{
   /** Retain the temporary pack and consumer directory for inspection. Defaults to off. */
   keepTemp?: boolean
@@ -318,7 +412,9 @@ export async function packAndSmoke({ keepTemp = false }: PackAndSmokeOptions = {
     )
     if (errors.length > 0) throw new Error(`Packed package inspection failed:\n- ${errors.join('\n- ')}`)
     const smoke = await smokeConsumer(packed, join(temporary, 'consumer'))
+    const examples = await exampleCopySmoke(packed, join(temporary, 'examples'))
     return {
+      examples,
       packages: packed.map(({ entry, tarball }) => ({ name: entry.name, tarball: basename(tarball) })),
       smoke: JSON.parse(smoke) as unknown
     }
@@ -347,5 +443,6 @@ if (isDirectInvocation(import.meta.url)) {
     }
     for (const { name, tarball } of result.packages) console.log(`${name} -> ${tarball}`)
     console.log(`Clean-consumer smoke passed for ${result.packages.length} packages.`)
+    for (const { example, rendered } of result.examples) console.log(`${example} copied clean -> ${rendered} rendered`)
   })
 }

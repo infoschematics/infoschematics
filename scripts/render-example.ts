@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import { spawnSync } from 'node:child_process'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { basename, dirname, extname, resolve } from 'node:path'
+import { basename, dirname, extname, join, resolve } from 'node:path'
 import {
   formatInfoschematicIssue,
   infoschematicFormatExtensions,
@@ -9,20 +9,22 @@ import {
   parseInfoschematic
 } from '@infoschematics/domain-core'
 import type { InfoschematicInput } from '@infoschematics/domain-model'
-import { blankInfoschematic } from '@infoschematics/is-blank'
-import { homepageInfoschematic, infoschematicsExample } from '@infoschematics/is-infoschematics'
-import { systemExample } from '@infoschematics/is-system'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { type CliSpec, CliUsageError, isDirectInvocation, runCli } from './cli.ts'
+import { examplePackages, examplesRoot } from './examples.ts'
 
-/** Authored examples this repository can render without a browser or dev server. */
-export const renderableExamples: Readonly<Record<string, InfoschematicInput>> = {
-  blank: blankInfoschematic,
-  homepage: homepageInfoschematic,
-  infoschematics: infoschematicsExample,
-  system: systemExample
-}
+/**
+ * Authored examples this repository can render without a browser or dev server.
+ *
+ * Each entry addresses the example package's own YAML rather than its typed export: packages declare what they
+ * contain, so adding an example is a change to that package and to nothing here.
+ */
+export const renderableExamples: Readonly<Record<string, string>> = Object.fromEntries(
+  (await examplePackages()).flatMap((example) =>
+    example.documents.map((document) => [document.id, join(examplesRoot, example.directory, document.source)])
+  )
+)
 
 const known = (subject: string) =>
   `Choose a registered example (${Object.keys(renderableExamples).join(', ')}) or a document pathname ending in ${infoschematicFormatExtensions.join(', ')}. Received ${subject}.`
@@ -34,12 +36,12 @@ export const isDocumentSubject = (subject: string): boolean =>
 /** Load one subject, whether it names a registered example or a YAML-based document. */
 export async function loadRenderable(subject: string): Promise<InfoschematicInput> {
   const registered = renderableExamples[subject]
-  if (registered) return registered
-  if (!isDocumentSubject(subject)) throw new Error(`Unknown example ${subject}. ${known(subject)}`)
-  if (!infoschematicFormatOf(subject)) throw new Error(`Unsupported document format. ${known(subject)}`)
+  const pathname = registered ?? subject
+  if (!registered && !isDocumentSubject(subject)) throw new Error(`Unknown example ${subject}. ${known(subject)}`)
+  if (!infoschematicFormatOf(pathname)) throw new Error(`Unsupported document format. ${known(subject)}`)
 
-  const text = await readFile(resolve(subject), 'utf8')
-  const parsed = parseInfoschematic(text, { pathname: subject })
+  const text = await readFile(resolve(pathname), 'utf8')
+  const parsed = parseInfoschematic(text, { pathname })
   if (parsed.ok) return parsed.model
   throw new Error(
     [`${subject} is not a valid Infoschematic:`, ...parsed.issues.map(formatInfoschematicIssue)].join('\n')

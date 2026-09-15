@@ -1,14 +1,37 @@
 {
-  "name": "@infoschematics/is-infoschematics",
-  "description": "A self-describing authored Infoschematic of the Infoschematics package architecture.",
-  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
+  },
+  "description": "A self-describing authored Infoschematic of the Infoschematics package architecture.",
+  "devDependencies": {
+    "@infoschematics/cli": "0.1.0"
   },
   "exports": {
     ".": "./src/index.ts"
   },
+  "infoschematics": {
+    "examples": [
+      {
+        "export": "infoschematicsInfoschematic",
+        "id": "infoschematics",
+        "source": "infoschematic.yaml",
+        "title": "The Infoschematics package architecture"
+      },
+      {
+        "export": "homepageInfoschematic",
+        "id": "homepage",
+        "source": "overview.yaml",
+        "title": "Structure and presentation combined in one Infoschematic"
+      }
+    ]
+  },
   "license": "MIT",
+  "name": "@infoschematics/is-infoschematics",
   "private": true,
-  "type": "module"
+  "scripts": {
+    "check": "infoschematics render infoschematic.yaml --output /dev/null && infoschematics render overview.yaml --output /dev/null",
+    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg && infoschematics render overview.yaml --output overview.svg"
+  },
+  "type": "module",
+  "version": "0.1.0"
 }

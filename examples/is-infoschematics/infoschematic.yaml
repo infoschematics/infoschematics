@@ -1,0 +1,453 @@
+id: infoschematics-architecture
+title: An Infoschematic of Infoschematics
+subtitle: One serialisable product from authored data to public host
+description: The repository separates its authored contract, framework-neutral behaviour, interactive Views, renderers, examples, and hosts with dependencies pointing toward lower-level packages.
+diagram:
+  bounds: 0 0 1400 920
+  appearance:
+    surface: blueprint
+    grid: major-plus-minor
+    card:
+      description: false
+      stereotype: true
+      compact: true
+      identity: true
+  collections:
+    - id: product-foundation
+      label: Product foundation
+      description: Reusable contracts and framework-neutral behaviour.
+      appearance:
+        color: "#2456a6"
+        fill: "#e8f0ff"
+    - id: interactive-experience
+      label: Interactive experience
+      description: Interactive capability for Producers and Audiences.
+      appearance:
+        color: "#087f5b"
+        fill: "#e4f7ef"
+    - id: publication
+      label: Publication
+      description: Authored and rendered outlets for sharing Infoschematics.
+      appearance:
+        color: "#a23b72"
+        fill: "#fdebf5"
+  families:
+    - id: dependency
+      label: Depends on
+      description: A package or host consumes a lower-level package.
+      color: "#52606d"
+  cards:
+    - id: PKG-DM
+      label: Domain Model
+      description: Serialisable authored product types with no package dependencies.
+      collection: product-foundation
+      stereotype: package
+      bounds: 560 60 280 90
+      ports: 6 2
+    - id: PKG-DC
+      label: Domain Core
+      description: Framework-neutral defaults and domain behaviour.
+      collection: product-foundation
+      stereotype: package
+      bounds: 180 265 280 90
+      ports: 6 2
+    - id: PKG-VM
+      label: View Model
+      description: Framework-neutral geometry, routing, presentation, and editing calculations.
+      collection: product-foundation
+      stereotype: package
+      bounds: 900 265 280 90
+      ports: 6 2
+    - id: PKG-VC
+      label: Canvas View
+      description: Reusable interactive Infoschematic surface.
+      collection: interactive-experience
+      stereotype: package
+      bounds: 60 535 280 90
+      ports: 6 2
+    - id: PKG-VP
+      label: Present View
+      description: Audience focus, navigation, Callouts, and Story playback over Canvas.
+      collection: interactive-experience
+      stereotype: package
+      bounds: 380 535 280 90
+      ports: 6 2
+    - id: PKG-VS
+      label: Studio View
+      description: Producer-facing Design and Direct capability over Present.
+      collection: interactive-experience
+      stereotype: package
+      bounds: 700 535 280 90
+      ports: 6 2
+    - id: PKG-SVG
+      label: SVG Renderer
+      description: Deterministic static SVG from the same authored definition.
+      collection: publication
+      stereotype: package
+      bounds: 1080 535 280 90
+      ports: 6 2
+    - id: EX-IS
+      label: Authored examples
+      description: Independent serialisable products depending only on Domain Core.
+      collection: publication
+      stereotype: Infoschematic
+      bounds: 220 765 280 90
+      ports: 6 2
+    - id: HOST-SITE
+      label: Public Site
+      description: Host-owned routing, metadata, composition, and deployment.
+      collection: publication
+      stereotype: application
+      bounds: 900 765 280 90
+      ports: 6 2
+  regions:
+    - id: row-domain-contract
+      label: Authored contract
+      bounds: 20 20 1360 150
+      appearance:
+        label:
+          placement: north-west
+          mount: boundary
+        cornerRadius: 12
+        frame:
+          style: solid
+    - id: panel-domain-model
+      label: Dependency root
+      bounds: 34 34 1332 122
+      appearance:
+        label:
+          placement: south-east
+        fill: "#e8f0ff"
+    - id: row-neutral-behaviour
+      label: Framework-neutral behaviour
+      bounds: 20 230 1360 160
+      appearance:
+        label:
+          placement: north-east
+          mount: boundary
+        cornerRadius: 12
+        frame:
+          style: dashed
+    - id: panel-domain-behaviour
+      label: Domain behaviour
+      bounds: 34 244 666 132
+      appearance:
+        label:
+          placement: west
+        fill: "#f4f0ff"
+    - id: panel-view-calculations
+      label: View calculations
+      bounds: 706 244 660 132
+      appearance:
+        label:
+          placement: east
+        fill: "#ece9ff"
+    - id: row-output-packages
+      label: View and renderer packages
+      bounds: 20 500 1360 170
+      appearance:
+        label:
+          placement: north-east
+          mount: boundary
+        cornerRadius: 12
+        frame:
+          style: dotted
+    - id: panel-interactive-views
+      label: Additive interactive Views
+      bounds: 34 514 986 142
+      appearance:
+        label:
+          placement: south-west
+        fill: "#e4f7ef"
+    - id: panel-static-output
+      label: Static output
+      bounds: 1034 514 332 142
+      appearance:
+        label:
+          placement: south-east
+        fill: "#fff4d6"
+    - id: row-composition
+      label: Authored composition
+      bounds: 20 740 1360 150
+      appearance:
+        label:
+          placement: south
+          mount: boundary
+        cornerRadius: 12
+        frame:
+          style: solid
+    - id: panel-authored-examples
+      label: Authored examples
+      bounds: 34 754 666 122
+      appearance:
+        label:
+          placement: north-west
+        fill: "#fdebf5"
+    - id: panel-application-hosts
+      label: Application hosts
+      bounds: 706 754 660 122
+      appearance:
+        label:
+          placement: north-east
+        fill: "#fff0e5"
+  flows:
+    - id: DEP-001
+      family: dependency
+      link: PKG-DC N5 -> PKG-DM S3
+      waypoints: 220,212 640,212
+    - id: DEP-002
+      family: dependency
+      link: PKG-VM N5 -> PKG-DM S4
+      waypoints: 940,188 760,188
+    - id: DEP-003
+      family: dependency
+      link: PKG-VC N5 -> PKG-DM S5
+      waypoints: 100,496 600,496
+    - id: DEP-004
+      family: dependency
+      link: PKG-VC N3 -> PKG-VM S5
+      waypoints: 140,436 940,436
+    - id: DEP-005
+      family: dependency
+      link: PKG-VP N5 -> PKG-DM S1
+      waypoints: 420,484 680,484
+    - id: DEP-006
+      family: dependency
+      link: PKG-VP N3 -> PKG-VM S3
+      waypoints: 460,424 980,424
+    - id: DEP-007
+      family: dependency
+      link: PKG-VP W1 -> PKG-VC E1
+    - id: DEP-008
+      family: dependency
+      link: PKG-VS N3 -> PKG-DC S5
+      waypoints: 780,448 220,448
+    - id: DEP-009
+      family: dependency
+      link: PKG-VS N5 -> PKG-DM S2
+      waypoints: 740,472 720,472
+    - id: DEP-010
+      family: dependency
+      link: PKG-VS N1 -> PKG-VM S1
+      waypoints: 820,412 1020,412
+    - id: DEP-011
+      family: dependency
+      link: PKG-VS S5 -> PKG-VC S6
+      waypoints: 740,643 300,643
+    - id: DEP-012
+      family: dependency
+      link: PKG-VS W1 -> PKG-VP E1
+    - id: DEP-013
+      family: dependency
+      link: PKG-SVG N5 -> PKG-DM S6
+      waypoints: 1120,460 800,460
+    - id: DEP-014
+      family: dependency
+      link: PKG-SVG N3 -> PKG-VM S2
+      waypoints: 1160,400 1060,400
+    - id: DEP-015
+      family: dependency
+      link: EX-IS N5 -> PKG-DC S3
+      waypoints: 260,700 360,700 360,380 260,380
+    - id: DEP-016
+      family: dependency
+      link: HOST-SITE N5 -> PKG-VS S3
+      waypoints: 940,712 780,712
+    - id: DEP-017
+      family: dependency
+      link: HOST-SITE W1 -> EX-IS E1
+  gridSize: 10
+scopes:
+  - id: domain-contract
+    label: Domain contract
+    description: Dependency-free authored product types.
+    elements:
+      - PKG-DM
+  - id: neutral-behaviour
+    label: Framework-neutral behaviour
+    description: Framework-neutral domain and visual calculations.
+    elements:
+      - PKG-DC
+      - PKG-VM
+  - id: interactive-views
+    label: Interactive Views
+    description: Additive interactive Views.
+    elements:
+      - PKG-VC
+      - PKG-VP
+      - PKG-VS
+  - id: renderer-output
+    label: Renderer output
+    description: Framework-neutral rendering output.
+    elements:
+      - PKG-SVG
+  - id: authored-examples
+    label: Authored examples
+    description: Independently authored Infoschematic definitions.
+    elements:
+      - EX-IS
+  - id: application-hosts
+    label: Application hosts
+    description: Deployable composition and publication hosts.
+    elements:
+      - HOST-SITE
+sequences:
+  - id: STORY-01
+    label: From contract to Audience
+    description: How does one authored Infoschematic reach its Audience?
+    presentation:
+      display: collapsed
+      timed: true
+      callouts: true
+    scenes:
+      - id: story-scene-foundations
+        label: Define the product
+        description: The dependency-free contract supports two independent framework-neutral behaviour packages.
+        focus:
+          elements:
+            - PKG-DM
+            - PKG-DC
+            - PKG-VM
+            - DEP-001
+            - DEP-002
+        callout:
+          body: Begin with serialisable product data and a dependency-free contract.
+          takeaways:
+            - The Domain Model imports no package.
+          placement:
+            element: PKG-DM
+        duration: 5
+      - id: story-scene-views
+        label: Choose the narrowest View
+        description: Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.
+        focus:
+          elements:
+            - PKG-DM
+            - PKG-VM
+            - PKG-VC
+            - PKG-VP
+            - PKG-VS
+            - DEP-003
+            - DEP-004
+            - DEP-005
+            - DEP-006
+            - DEP-007
+            - DEP-009
+            - DEP-010
+            - DEP-011
+            - DEP-012
+        callout:
+          body: Add Canvas, Present, and Studio capability without moving authored state into a View.
+          takeaways:
+            - Views depend downward; authored products do not depend on Views.
+          placement:
+            element: PKG-VS
+        duration: 6
+      - id: story-scene-outlets
+        label: Publish through a host
+        description: Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.
+        focus:
+          elements:
+            - PKG-DC
+            - PKG-DM
+            - PKG-VM
+            - PKG-VS
+            - PKG-SVG
+            - EX-IS
+            - HOST-SITE
+            - DEP-013
+            - DEP-014
+            - DEP-015
+            - DEP-016
+            - DEP-017
+        callout:
+          body: Let examples own reusable data and let the Site own routing, metadata, and deployment.
+          takeaways:
+            - The same definition can drive Studio and deterministic SVG.
+          placement:
+            element: HOST-SITE
+        duration: 6
+  - id: OVERVIEW
+    label: Overview
+    presentation:
+      display: expanded
+      timed: false
+      callouts: false
+    scenes:
+      - id: SCN-01
+        label: Start with the foundations
+        description: The dependency-free contract supports two independent framework-neutral behaviour packages.
+        focus:
+          elements:
+            - PKG-DM
+            - PKG-DC
+            - PKG-VM
+            - DEP-001
+            - DEP-002
+      - id: SCN-02
+        label: Add interactive Views
+        description: Canvas, Present, and Studio add interactive capability in one direction while retaining the lower-level contracts.
+        focus:
+          elements:
+            - PKG-DM
+            - PKG-VM
+            - PKG-VC
+            - PKG-VP
+            - PKG-VS
+            - DEP-003
+            - DEP-004
+            - DEP-005
+            - DEP-006
+            - DEP-007
+            - DEP-009
+            - DEP-010
+            - DEP-011
+            - DEP-012
+      - id: SCN-03
+        label: Compose examples and hosts
+        description: Static rendering stays framework-neutral, authored examples contain only product data, and the Site owns publication.
+        focus:
+          elements:
+            - PKG-DC
+            - PKG-DM
+            - PKG-VM
+            - PKG-VS
+            - PKG-SVG
+            - EX-IS
+            - HOST-SITE
+            - DEP-013
+            - DEP-014
+            - DEP-015
+            - DEP-016
+            - DEP-017
+      - id: SCN-04
+        label: See the complete architecture
+        description: The complete product graph keeps dependencies pointing toward lower-level packages.
+        focus:
+          elements:
+            - PKG-DM
+            - PKG-DC
+            - PKG-VM
+            - PKG-VC
+            - PKG-VP
+            - PKG-VS
+            - PKG-SVG
+            - EX-IS
+            - HOST-SITE
+            - DEP-001
+            - DEP-002
+            - DEP-003
+            - DEP-004
+            - DEP-005
+            - DEP-006
+            - DEP-007
+            - DEP-008
+            - DEP-009
+            - DEP-010
+            - DEP-011
+            - DEP-012
+            - DEP-013
+            - DEP-014
+            - DEP-015
+            - DEP-016
+            - DEP-017
