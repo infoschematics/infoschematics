@@ -10,7 +10,7 @@
     "@infoschematics/domain-core": "0.1.0"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "exports": {
     ".": {

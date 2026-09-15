@@ -7,7 +7,7 @@
     "@infoschematics/domain-model": "0.1.0"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "exports": {
     "./appearance": {

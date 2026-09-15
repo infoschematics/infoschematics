@@ -12,7 +12,7 @@
     "lucide-react": "^1.31.0"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "exports": {
     ".": {

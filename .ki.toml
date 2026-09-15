@@ -37,7 +37,9 @@ supported_runtimes = ["claude-code", "chatgpt-codex"]
 
 [skills.ki-engineering]
 # Each hold is a deliberate deferral of a major release pending its own verified migration.
-dependency_holds = []
+dependency_holds = [
+  "@types/node — major releases (24, 26); the definitions track the oldest Node the packages promise in engines, per GDR-INFOSCHEMATICS-004, so this lifts when that floor does",
+]
 # -----------------------------------------------------------------------------
 # Change management
 # -----------------------------------------------------------------------------

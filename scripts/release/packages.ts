@@ -23,8 +23,8 @@ export const releasePackages: readonly ReleasePackage[] = Object.freeze([
 export const releasePackageNames = new Set(releasePackages.map(({ name }) => name))
 export const releaseRepositoryUrl = 'git+https://github.com/infoschematics/infoschematics.git'
 
-/** The Node line every published package promises, per GDR-INFOSCHEMATICS-004: the Active LTS line, raised deliberately. */
-export const releaseNodeEngine = '>=24'
+/** The Node line every published package promises, per GDR-INFOSCHEMATICS-004: the oldest line still in support. */
+export const releaseNodeEngine = '>=22'
 
 export type PackageManifest = Readonly<{
   bin?: Readonly<Record<string, string>> | string

@@ -4,7 +4,7 @@ Use the `infoschematics` command when a build, documentation pipeline, or shell 
 
 ## Install
 
-The CLI is part of the coordinated package release but has not yet been published. Once a release is available, install the package in a Node 24 or later project:
+The CLI is part of the coordinated package release but has not yet been published. Once a release is available, install the package in a Node 22 or later project:
 
 ```bash
 npm install --save-dev @infoschematics/cli
