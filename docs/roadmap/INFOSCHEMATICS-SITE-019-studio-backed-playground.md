@@ -4,12 +4,12 @@ area: SITE
 title: Studio-backed playground
 theme: site-experience
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 5e3f2751de75f2d346adfed3369208eb2fb10e16
 created_at: 2026-09-13T15:55:21Z
-updated_at: 2026-09-15T05:05:33Z
+updated_at: 2026-09-15T05:17:28Z
 ---
 
 # Studio-backed playground
@@ -98,6 +98,10 @@ The Playground now demonstrates the same reusable authoring experience consumers
 ### Mini recap
 
 SITE-019 replaces the temporary Site editor with Studio, keeps all four curated presets and compatibility routes, documents the no-install workflow, and passes the full repository gate. No durable learning requires a separate guide or decision record; bundle optimisation can be routed through `ki-next` if it becomes a priority.
+
+## Done
+
+Accepted 2026-09-15 by Kris Brown on the review packet above.
 
 ## Discussion
 
