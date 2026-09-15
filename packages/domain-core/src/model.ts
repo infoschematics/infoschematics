@@ -334,13 +334,12 @@ const portCount = (ports: { north?: number; east?: number; south?: number; west?
   return true
 }
 
+/** Authored id lists are sets, so they are deduplicated and ordered rather than kept in the order they were typed. */
+const sortedIds = (values: readonly string[]): readonly string[] =>
+  [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
+
 const normaliseRealisedBy = <T extends { realisedBy?: readonly string[] }>(value: T): T =>
-  value.realisedBy
-    ? {
-        ...value,
-        realisedBy: [...new Set(value.realisedBy)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
-      }
-    : value
+  value.realisedBy ? { ...value, realisedBy: sortedIds(value.realisedBy) } : value
 
 /** Normalise and validate a directly authored canonical Infoschematic. */
 export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschematic => {
@@ -354,6 +353,11 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
         ports: card.ports ?? standardPorts
       })),
       collections: input.diagram.collections ?? [],
+      dynamics: (input.diagram.dynamics ?? []).map((dynamic) =>
+        dynamic.kind === 'signal-flow'
+          ? { ...dynamic, flows: sortedIds(dynamic.flows) }
+          : { ...dynamic, elements: sortedIds(dynamic.elements) }
+      ),
       fabrics: (input.diagram.fabrics ?? []).map((fabric) => ({
         ...fabric,
         ports: fabric.ports ?? standardPorts
@@ -430,6 +434,25 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
         throw new Error(`Flow ${flow.id} ${terminal} references unavailable Port: ${endpoint.port}`)
       }
     }
+  }
+  const flowIds = ids(model.diagram.flows)
+  const dynamicIds = new Set<string>()
+  for (const dynamic of model.diagram.dynamics) {
+    if (dynamicIds.has(dynamic.id)) throw new Error(`Duplicate Diagram Dynamic id: ${dynamic.id}`)
+    dynamicIds.add(dynamic.id)
+    const context = `Diagram Dynamic ${dynamic.id}`
+    if (dynamic.kind === 'signal-flow') {
+      if (dynamic.flows.length === 0) throw new Error(`${context} names no Flow to signal`)
+      for (const flow of dynamic.flows) {
+        // A Card id here would be a plausible mistake that silently resolved to nothing, so name the kind that is wrong.
+        if (!flowIds.has(flow) && elementIds.has(flow))
+          throw new Error(`${context} references a non-Flow element: ${flow}`)
+        requireReference(flowIds, flow, context)
+      }
+      continue
+    }
+    if (dynamic.elements.length === 0) throw new Error(`${context} names no element to emphasise`)
+    for (const element of dynamic.elements) requireReference(elementIds, element, context)
   }
   for (const scope of model.scopes) {
     for (const element of scope.elements) requireReference(elementIds, element, `Architectural Scope ${scope.id}`)

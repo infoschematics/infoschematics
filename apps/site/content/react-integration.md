@@ -144,6 +144,32 @@ Do not create signals in response to hover, filtering, selection, or inspection.
 
 For a still export, pass explicit Flow identifiers through the static SVG renderer's `signals` option. The renderer ignores unknown identifiers and emits deterministic non-animated emphasis; it does not infer transient Present state.
 
+## Bind an event to a named Dynamic
+
+A host that knows an application event happened does not need to know which Flow depicts it. Where the document declares [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic), bind their ids and pass occurrences through the `dynamics` prop of Canvas or Present:
+
+```tsx
+import { Canvas, type DynamicOccurrence } from '@infoschematics/view-canvas'
+import '@infoschematics/view-canvas/styles.css'
+import { useState } from 'react'
+
+export function PipelineStatus({ config }: { config: InfoschematicInput }) {
+  const [occurrences, setOccurrences] = useState<readonly DynamicOccurrence[]>([])
+
+  useDeliveryEvents((event) => {
+    setOccurrences([{ dynamicId: event.name, occurrenceKey: event.id }])
+  })
+
+  return <Canvas config={config} dynamics={occurrences} />
+}
+```
+
+The occurrence key is yours, and it works exactly as it does for a Flow signal: hold it across re-renders and the Dynamic does not replay, change it for a genuinely new event and it does, drop the occurrence and it cancels. An occurrence naming a Dynamic the current document does not declare is ignored, so a host stays working while a document is revised.
+
+Everything else is the renderer's. A `signal-flow` Dynamic resolves into the same occurrence the `signals` prop takes, so both paths reach one treatment; an `emphasise-elements` Dynamic outlines the elements the document named, in a decorative layer that never changes their own output, never receives pointer events, and never reaches content Scope filtering hid. Canvas announces the Dynamic's authored label once per occurrence — its meaning, not the shape drawn — and uses a still treatment under `prefers-reduced-motion`. Do not add a second announcement of your own.
+
+For a still export, pass the same occurrences to the static renderer's `dynamics` option; with none supplied, output is the quiet document.
+
 ## Host responsibilities
 
 The host owns:

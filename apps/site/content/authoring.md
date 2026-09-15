@@ -128,6 +128,30 @@ sequences:
 
 Use `display: expanded` or `collapsed`, combine either with `timed: true` or `false`, and use `callouts` to control authored Callout rendering independently. Copying a Scene between Sequences creates independently owned material; do not retain hidden object links, inheritance, or runtime references between them.
 
+## Name the Dynamics a host can play
+
+A Diagram may declare the named changes an audience should be able to perceive, under `diagram.dynamics`:
+
+```yaml
+diagram:
+  dynamics:
+    - id: segment-published
+      label: A segment is published
+      description: The packager produced a new segment and the manifest that names it.
+      kind: signal-flow
+      flows: [PUBLISHED]
+    - id: playback-stalled
+      label: Playback has stalled
+      kind: emphasise-elements
+      elements: [PLAYER, VIEWED]
+```
+
+Each [Diagram Dynamic](/docs/reference/vocabulary/#diagram-dynamic) is a meaning with a stable `id` and one of two kinds. `signal-flow` signals the Flows it names; `emphasise-elements` briefly emphasises the elements it names, which may be Regions, Fabrics, Cards, Points, Flows, or Overlays. Targets must be identities the same document declares, so validation tells you when a Dynamic still points at something you removed.
+
+What a Dynamic never carries is how to depict it. There is no duration, easing, colour, selector, callback, event source, or element geometry to author — that is what keeps the document portable and keeps every Dynamic meaningful in a still image. Write the `label` as the thing that happened, because it is what a screen reader announces.
+
+Nothing plays by itself. A host supplies an occurrence naming the `id` and its own occurrence key, so the same document serves an application wired to real events, a Producer rehearsing in Studio, and a still export that stays quiet unless its caller asks. [The React integration guide](/docs/react-integration/) covers that binding.
+
 ## Keep Flow signals outside authored data
 
 Author a Flow with stable identity, endpoints, family, and route. Do not add signal state, occurrence keys, timers, callbacks, animation duration, event correlation, or Scene signal policy to the Flow or any other part of `InfoschematicConfig`.

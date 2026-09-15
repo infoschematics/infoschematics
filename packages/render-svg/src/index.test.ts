@@ -147,6 +147,7 @@ describe('renderInfoschematicSvg', () => {
         calloutPositions: [],
         cards: [],
         collections: [],
+        dynamics: [],
         fabrics: [],
         families: [],
         flows: [],
@@ -287,6 +288,7 @@ describe('renderInfoschematicSvg', () => {
         calloutPositions: [],
         cards: [],
         collections: [],
+        dynamics: [],
         fabrics: [],
         families: [],
         flows: [],
@@ -533,6 +535,113 @@ describe('renderInfoschematicSvg', () => {
     expect(signalled).toContain(`stroke-width="${visualTokens.canvas.flows.signalStillWidth}"`)
     expect(signalled).not.toContain('<animate')
     expect(signalled).not.toContain('missing')
+  })
+
+  it('interprets Dynamic occurrences as a still treatment and changes nothing without one', () => {
+    const authored: DefinedInfoschematic = {
+      id: 'dynamics',
+      title: 'Dynamics',
+      diagram: {
+        bounds: { height: 200, width: 400, x: 0, y: 0 },
+        calloutPositions: [],
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { height: 60, width: 100, x: 40, y: 40 } },
+          { id: 'SNK', label: 'Sink', bounds: { height: 60, width: 100, x: 260, y: 40 } }
+        ],
+        collections: [],
+        dynamics: [
+          { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
+          { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] }
+        ],
+        fabrics: [],
+        families: [{ id: 'calls', label: 'Calls', appearance: { color: '#79c9ff' } }],
+        flows: [
+          {
+            id: 'LOAD',
+            family: 'calls',
+            source: { element: 'SRC', port: 'E1' },
+            target: { element: 'SNK', port: 'W1' }
+          }
+        ],
+        gridSize: 10,
+        overlays: [],
+        points: [],
+        regions: [{ id: 'ZONE', label: 'Zone', bounds: { height: 120, width: 360, x: 20, y: 20 } }]
+      },
+      scopes: [],
+      sequences: [],
+      specifications: []
+    }
+
+    const baseline = renderInfoschematicSvg(authored)
+    expect(baseline).not.toContain('infoschematic-element-emphasis')
+    expect(baseline).not.toContain('data-signalled=')
+    expect(baseline).not.toContain('Dynamics:')
+    expect(renderInfoschematicSvg(authored, { dynamics: [] })).toBe(baseline)
+    expect(renderInfoschematicSvg(authored, { dynamics: [{ dynamicId: 'absent', occurrenceKey: 'run-1' }] })).toBe(
+      baseline
+    )
+
+    const emphasised = renderInfoschematicSvg(authored, {
+      dynamics: [{ dynamicId: 'attention', occurrenceKey: 'run-1' }]
+    })
+    expect(emphasised).toContain('data-artefact-id="SNK" data-dynamic-id="attention" data-emphasised="true"')
+    expect(emphasised).toContain('data-artefact-id="ZONE" data-dynamic-id="attention" data-emphasised="true"')
+    expect(emphasised.match(/class="infoschematic-element-emphasis"/g)).toHaveLength(2)
+    expect(emphasised).toContain(`stroke="${visualTokens.canvas.emphasis.stroke}"`)
+    expect(emphasised).toContain('Dynamics: Sink needs attention')
+    expect(emphasised).not.toContain('<animate')
+    // The occurrence key is a host's identity for a replay, not part of deterministic output.
+    expect(emphasised).not.toContain('run-1')
+    expect(renderInfoschematicSvg(authored, { dynamics: [{ dynamicId: 'attention', occurrenceKey: 'run-2' }] })).toBe(
+      emphasised
+    )
+
+    const signalled = renderInfoschematicSvg(authored, {
+      dynamics: [{ dynamicId: 'delivered', occurrenceKey: 'run-1' }]
+    })
+    expect(signalled).toContain('data-signalled="true"')
+    expect(signalled).toContain('Dynamics: Record delivered')
+    expect(signalled).not.toContain('infoschematic-element-emphasis')
+    expect(signalled).toContain(`stroke-width="${visualTokens.canvas.flows.signalStillWidth}"`)
+  })
+
+  it('emphasises only elements the render drew', () => {
+    const authored: DefinedInfoschematic = {
+      id: 'hidden',
+      title: 'Hidden',
+      diagram: {
+        bounds: { height: 200, width: 400, x: 0, y: 0 },
+        calloutPositions: [],
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { height: 60, width: 100, x: 40, y: 40 } },
+          { id: 'SNK', label: 'Sink', bounds: { height: 60, width: 100, x: 260, y: 40 } }
+        ],
+        collections: [],
+        dynamics: [{ id: 'attention', label: 'Attention', kind: 'emphasise-elements', elements: ['SNK'] }],
+        fabrics: [],
+        families: [],
+        flows: [],
+        gridSize: 10,
+        overlays: [],
+        points: [],
+        regions: []
+      },
+      scopes: [
+        { id: 'shown', label: 'Shown', elements: ['SRC'] },
+        { id: 'hidden', label: 'Hidden', elements: ['SNK'] }
+      ],
+      sequences: [],
+      specifications: []
+    }
+
+    const filtered = renderInfoschematicSvg(authored, {
+      dynamics: [{ dynamicId: 'attention', occurrenceKey: 'run-1' }],
+      visibility: { scopes: ['shown'] }
+    })
+
+    expect(filtered).not.toContain('data-artefact-id="SNK"')
+    expect(filtered).not.toContain('infoschematic-element-emphasis')
   })
 
   it('emits Flow code annotations only when requested, at the shared placement', () => {

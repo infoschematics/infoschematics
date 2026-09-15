@@ -11,6 +11,13 @@ import { usePresentation } from './use-presentation.ts'
 export type PresentProps = Readonly<{
   className?: string
   config: InfoschematicInput
+  /**
+   * Host-owned occurrences of authored Diagram Dynamics, passed straight through to the Canvas.
+   *
+   * Presentation drives Scene signalling itself; a Dynamic is the other direction — something outside the
+   * presentation happened, and the document already says what it means.
+   */
+  dynamics?: CanvasProps['dynamics']
   renderers?: CanvasProps['renderers']
   /** Opt into rendered-size Card detail reduction in the Canvas. */
   responsiveCardDetails?: boolean
@@ -21,6 +28,7 @@ export type PresentProps = Readonly<{
 export function Present({
   className,
   config,
+  dynamics,
   renderers,
   responsiveCardDetails = false,
   signalPolicy = 'focused-flows'
@@ -145,6 +153,7 @@ export function Present({
             annotated={state.annotated}
             className="isp-canvas"
             config={config}
+            dynamics={dynamics}
             flows={derived.visibleFlows}
             graphic={derived.activeSequenceScene?.graphic}
             highlight={derived.highlight}

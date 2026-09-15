@@ -192,6 +192,57 @@ sequences:
     expect(JSON.parse(json).sequences[0].scenes[0].focus.elements).toEqual(['ADP', 'SNK', 'SRC'])
   })
 
+  it('round-trips authored Dynamics and rejects a target field belonging to the other kind', () => {
+    const authored = compact.replace(
+      '\nscopes:',
+      `
+  dynamics:
+    - id: record-delivered
+      label: Record delivered
+      description: A record reached the sink.
+      kind: signal-flow
+      flows: [LOAD]
+    - id: sink-attention
+      label: Sink needs attention
+      kind: emphasise-elements
+      elements: [SNK, ADP, SNK]
+scopes:`
+    )
+    const model = modelOf(authored)
+
+    expect(model.diagram.dynamics).toEqual([
+      {
+        id: 'record-delivered',
+        label: 'Record delivered',
+        description: 'A record reached the sink.',
+        kind: 'signal-flow',
+        flows: ['LOAD']
+      },
+      { id: 'sink-attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['ADP', 'SNK'] }
+    ])
+
+    const yaml = serialiseInfoschematicYaml(model)
+    expect(yaml.indexOf('kind: signal-flow')).toBeGreaterThan(yaml.indexOf('dynamics:'))
+    expect(yaml.indexOf('dynamics:')).toBeGreaterThan(yaml.indexOf('flows:'))
+    expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
+    expect(modelOf(yaml)).toEqual(model)
+    expect(serialiseInfoschematicYaml(modelOf(compact))).not.toContain('dynamics:')
+
+    const crossed = parseInfoschematic(
+      compact.replace(
+        '\nscopes:',
+        `
+  dynamics:
+    - id: confused
+      label: Confused
+      kind: signal-flow
+      elements: [SNK]
+scopes:`
+      )
+    )
+    expect(crossed.ok).toBe(false)
+  })
+
   it('keeps bidirectionality in the borrowed arrow notation', () => {
     const bidirectional = compact.replace('SRC E2 -> SNK W2', 'SRC E2 <-> SNK W2')
     expect(modelOf(bidirectional).diagram.flows[0]?.direction).toBe('bidirectional')

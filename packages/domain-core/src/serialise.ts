@@ -19,6 +19,7 @@ const diagramOrder = [
   'regions',
   'flows',
   'overlays',
+  'dynamics',
   'calloutPositions'
 ]
 
@@ -63,6 +64,7 @@ const fieldOrder = [
   'regions',
   'flows',
   'overlays',
+  'dynamics',
   'calloutPositions',
   'summary',
   'visibility',
@@ -147,7 +149,7 @@ const isMapping = (value: unknown): value is Mapping =>
 const emptyCollectionIsDefault = (key: string, context: string): boolean =>
   (context === '<root>' && ['scopes', 'specifications', 'sequences'].includes(key)) ||
   (context === 'diagram' &&
-    ['collections', 'families', 'cards', 'fabrics', 'points', 'regions', 'flows', 'overlays'].includes(key))
+    ['collections', 'families', 'cards', 'fabrics', 'points', 'regions', 'flows', 'overlays', 'dynamics'].includes(key))
 
 const compactMapping = (input: Readonly<Mapping>, context: string): Mapping => {
   const value: Mapping = { ...input }

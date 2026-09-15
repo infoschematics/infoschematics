@@ -1,4 +1,4 @@
-import { defineInfoschematic, parseInfoschematicDocument } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel, parseInfoschematicDocument } from '@infoschematics/domain-core'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -422,4 +422,65 @@ diagram:
   restore.click()
   await expect.poll(() => changed.mock.calls.at(-1)?.[0].model.diagram.gridSize).toBe(10)
   await expect.poll(() => gridSize.value).toBe('10')
+})
+
+test('Studio plays an authored Diagram Dynamic, replays it, and lets it retire', async () => {
+  window.localStorage.clear()
+  const dynamicConfig = defineInfoschematicModel({
+    id: 'studio-dynamics',
+    title: 'Studio dynamics',
+    diagram: {
+      bounds: { height: 320, width: 640, x: 0, y: 0 },
+      gridSize: 10,
+      families: [{ id: 'request', label: 'Request', description: 'Requests', appearance: { color: '#7c3aed' } }],
+      cards: [
+        { id: 'CARD-A', label: 'Card A', bounds: { height: 50, width: 100, x: 80, y: 170 } },
+        { id: 'CARD-B', label: 'Card B', bounds: { height: 50, width: 100, x: 360, y: 170 } }
+      ],
+      flows: [
+        {
+          id: 'FLOW-A',
+          family: 'request',
+          source: { element: 'CARD-A', port: 'E1' },
+          target: { element: 'CARD-B', port: 'W1' }
+        }
+      ],
+      dynamics: [
+        { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['FLOW-A'] },
+        { id: 'attention', label: 'Card B needs attention', kind: 'emphasise-elements', elements: ['CARD-B'] }
+      ]
+    }
+  })
+
+  const { container } = await render(<Studio config={dynamicConfig} />)
+  const bank = container.querySelector('section[aria-label="Diagram Dynamics"]')
+  if (!bank) throw new Error('Studio did not render the Dynamics controls')
+
+  const play = (label: string) => {
+    const button = [...bank.querySelectorAll<HTMLButtonElement>('button')].find(
+      (candidate) => candidate.textContent === label
+    )
+    if (!button) throw new Error(`Studio has no control for ${label}`)
+    button.click()
+    return button
+  }
+
+  const emphasis = () =>
+    container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="CARD-B"]')
+
+  const attention = play('Card B needs attention')
+  await expect.poll(() => emphasis()?.dataset.occurrenceKey).toBe('studio-1')
+  expect(attention.getAttribute('aria-pressed')).toBe('true')
+
+  play('Card B needs attention')
+  await expect.poll(() => emphasis()?.dataset.occurrenceKey).toBe('studio-2')
+
+  // The occurrence is finite without the author doing anything further.
+  await expect.poll(() => emphasis(), { timeout: 4000 }).toBeNull()
+
+  play('Record delivered')
+  await expect
+    .poll(() => container.querySelector('[data-artefact-id="FLOW-A"] .infoschematic-flow-signal'))
+    .not.toBeNull()
+  expect(emphasis()).toBeNull()
 })

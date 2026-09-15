@@ -183,6 +183,34 @@ export type SpecificationGroup = {
   specifications: readonly Specification[]
 }
 
+/** Shared identity of a named Diagram Dynamic: what changed, not how a renderer depicts it. */
+export type DiagramDynamicIdentity = {
+  id: string
+  label: string
+  description?: string
+}
+
+/** A finite signal carried over authored Flows. */
+export type SignalFlowDynamic = DiagramDynamicIdentity & {
+  kind: 'signal-flow'
+  flows: readonly string[]
+}
+
+/** Finite emphasis on authored visual elements. */
+export type EmphasiseElementsDynamic = DiagramDynamicIdentity & {
+  kind: 'emphasise-elements'
+  elements: readonly string[]
+}
+
+/**
+ * A named semantic change an audience should perceive.
+ *
+ * The declaration names the meaning and its authored targets; a host binds it by id and each renderer chooses a
+ * treatment, so motion, a still emphasis, and an announcement are interpretations of one authored concept rather than
+ * separate authored instructions.
+ */
+export type DiagramDynamic = SignalFlowDynamic | EmphasiseElementsDynamic
+
 export type Diagram = {
   bounds: Box
   /** Diagram-unit lattice used by authoring and rendering; zero disables it. */
@@ -197,6 +225,7 @@ export type Diagram = {
   points?: readonly Point[]
   flows?: readonly Flow[]
   overlays?: readonly Overlay[]
+  dynamics?: readonly DiagramDynamic[]
 }
 
 export type Infoschematic = {
@@ -212,11 +241,21 @@ export type Infoschematic = {
 
 export type DefinedDiagram = Omit<
   Diagram,
-  'calloutPositions' | 'cards' | 'collections' | 'fabrics' | 'families' | 'flows' | 'overlays' | 'points' | 'regions'
+  | 'calloutPositions'
+  | 'cards'
+  | 'collections'
+  | 'dynamics'
+  | 'fabrics'
+  | 'families'
+  | 'flows'
+  | 'overlays'
+  | 'points'
+  | 'regions'
 > & {
   calloutPositions: readonly Coordinate[]
   cards: readonly Card[]
   collections: readonly CardCollection[]
+  dynamics: readonly DiagramDynamic[]
   fabrics: readonly Fabric[]
   families: readonly FlowFamily[]
   flows: readonly Flow[]

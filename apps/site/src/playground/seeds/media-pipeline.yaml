@@ -88,3 +88,17 @@ diagram:
     - id: VIEWED
       family: PLAYBACK
       link: CDN E1 -> PLAYER W1
+  dynamics:
+    - id: segment-published
+      label: A segment is published
+      description: The packager produced a new segment and the manifest that names it.
+      kind: signal-flow
+      flows:
+        - PUBLISHED
+    - id: playback-stalled
+      label: Playback has stalled
+      description: The player ran out of buffered media and is waiting for delivery.
+      kind: emphasise-elements
+      elements:
+        - PLAYER
+        - VIEWED

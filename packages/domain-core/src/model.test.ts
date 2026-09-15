@@ -305,3 +305,81 @@ describe('infoschematicModelOf', () => {
     ).toThrow('Flow FLOW target references unknown id: MISSING')
   })
 })
+
+describe('Diagram Dynamics', () => {
+  const dynamicModel = (dynamics: unknown) =>
+    defineInfoschematicModel({
+      id: 'DYNAMIC',
+      title: 'Dynamics',
+      diagram: {
+        bounds: { x: 0, y: 0, width: 400, height: 300 },
+        gridSize: 10,
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 100, height: 60 } },
+          { id: 'SNK', label: 'Sink', bounds: { x: 260, y: 20, width: 100, height: 60 } }
+        ],
+        flows: [
+          { id: 'LOAD', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } },
+          { id: 'REPLY', source: { element: 'SNK', port: 'W1' }, target: { element: 'SRC', port: 'E1' } }
+        ],
+        regions: [{ id: 'ZONE', label: 'Zone', bounds: { x: 0, y: 0, width: 400, height: 120 } }],
+        dynamics: dynamics as never
+      }
+    })
+
+  it('defaults to no Dynamics and normalises authored targets as sorted sets', () => {
+    expect(
+      defineInfoschematicModel({
+        id: 'NONE',
+        title: 'None',
+        diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 }, gridSize: 0 }
+      }).diagram.dynamics
+    ).toEqual([])
+
+    const model = dynamicModel([
+      { id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['REPLY', 'LOAD', 'REPLY'] },
+      { id: 'attention', label: 'Needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE', 'SNK'] }
+    ])
+
+    expect(model.diagram.dynamics).toEqual([
+      { id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD', 'REPLY'] },
+      { id: 'attention', label: 'Needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] }
+    ])
+  })
+
+  it('emphasises any authored visual element but signals only Flows', () => {
+    expect(
+      dynamicModel([
+        { id: 'everything', label: 'Everything', kind: 'emphasise-elements', elements: ['LOAD', 'SRC', 'ZONE'] }
+      ]).diagram.dynamics[0]
+    ).toMatchObject({ elements: ['LOAD', 'SRC', 'ZONE'] })
+
+    expect(() => dynamicModel([{ id: 'wrong', label: 'Wrong kind', kind: 'signal-flow', flows: ['SRC'] }])).toThrow(
+      'Diagram Dynamic wrong references a non-Flow element: SRC'
+    )
+  })
+
+  it('rejects unknown targets, duplicate ids, and declarations that target nothing', () => {
+    expect(() => dynamicModel([{ id: 'missing', label: 'Missing', kind: 'signal-flow', flows: ['ABSENT'] }])).toThrow(
+      'Diagram Dynamic missing references unknown id: ABSENT'
+    )
+
+    expect(() =>
+      dynamicModel([{ id: 'missing', label: 'Missing', kind: 'emphasise-elements', elements: ['ABSENT'] }])
+    ).toThrow('Diagram Dynamic missing references unknown id: ABSENT')
+
+    expect(() =>
+      dynamicModel([
+        { id: 'twice', label: 'First', kind: 'signal-flow', flows: ['LOAD'] },
+        { id: 'twice', label: 'Second', kind: 'emphasise-elements', elements: ['SRC'] }
+      ])
+    ).toThrow('Duplicate Diagram Dynamic id: twice')
+
+    expect(() => dynamicModel([{ id: 'empty', label: 'Empty', kind: 'signal-flow', flows: [] }])).toThrow(
+      'Diagram Dynamic empty names no Flow to signal'
+    )
+    expect(() => dynamicModel([{ id: 'empty', label: 'Empty', kind: 'emphasise-elements', elements: [] }])).toThrow(
+      'Diagram Dynamic empty names no element to emphasise'
+    )
+  })
+})

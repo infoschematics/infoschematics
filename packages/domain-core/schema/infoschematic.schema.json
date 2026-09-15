@@ -951,6 +951,78 @@
             "additionalProperties": false
           }
         },
+        "dynamics": {
+          "readOnly": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "signal-flow"
+                  },
+                  "flows": {
+                    "readOnly": true,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "kind",
+                  "flows"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "const": "emphasise-elements"
+                  },
+                  "elements": {
+                    "readOnly": true,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "label",
+                  "kind",
+                  "elements"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
         "calloutPositions": {
           "readOnly": true,
           "type": "array",

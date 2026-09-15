@@ -58,6 +58,21 @@ describe('Playground', () => {
     ])
   })
 
+  it('gives the hosted Studio named Dynamics to play, so a Producer can rehearse a host binding', () => {
+    const parsed = parseInfoschematic(mediaPipelineSeed)
+    expect(parsed.ok).toBe(true)
+    if (!parsed.ok) return
+
+    expect(parsed.model.diagram.dynamics.map(({ id }) => id)).toEqual(['segment-published', 'playback-stalled'])
+
+    const page = renderToStaticMarkup(<Playground preset="media-pipeline" />)
+    expect(page).toContain('aria-label="Diagram Dynamics"')
+    expect(page).toContain('>Playback has stalled</button>')
+    expect(page).toContain('>A segment is published</button>')
+    // Nothing plays until a Producer asks: the preset loads quiet.
+    expect(page).not.toContain('infoschematic-element-emphasis')
+  })
+
   it('retains every canonical preset as a valid authored YAML document', () => {
     for (const preset of presets) {
       const document = authoredDocumentForPreset(preset.key)

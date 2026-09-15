@@ -1,4 +1,10 @@
 import type { FlowSignal } from '@infoschematics/view-model/signals'
+import {
+  advanceOccurrenceAnnouncement,
+  type OccurrenceAnnouncement,
+  reconcileOccurrences,
+  retireOccurrences
+} from './occurrences.ts'
 
 export const flowSignalDuration = 900
 
@@ -7,16 +13,6 @@ export const flowSignalDuration = 900
  * when either contains punctuation used by the other.
  */
 export const flowSignalKey = (signal: FlowSignal) => JSON.stringify([signal.flowId, signal.occurrenceKey])
-
-const uniqueFlowSignals = (signals: readonly FlowSignal[]): readonly FlowSignal[] => {
-  const keys = new Set<string>()
-  return signals.filter((signal) => {
-    const key = flowSignalKey(signal)
-    if (keys.has(key)) return false
-    keys.add(key)
-    return true
-  })
-}
 
 export type FlowSignalReconciliation = Readonly<{
   activeSignals: readonly FlowSignal[]
@@ -31,10 +27,7 @@ export type FlowSignalAnnouncement = Readonly<{
 export const retireFlowSignals = (
   current: readonly FlowSignal[],
   retiring: readonly FlowSignal[]
-): readonly FlowSignal[] => {
-  const retiringKeys = new Set(retiring.map(flowSignalKey))
-  return current.filter((signal) => !retiringKeys.has(flowSignalKey(signal)))
-}
+): readonly FlowSignal[] => retireOccurrences(current, retiring, flowSignalKey)
 
 /**
  * Advances the live-region input only for newly accepted occurrences. The
@@ -46,10 +39,15 @@ export const advanceFlowSignalAnnouncement = (
   acceptedSignals: readonly FlowSignal[],
   activeSignals: readonly FlowSignal[]
 ): FlowSignalAnnouncement | undefined => {
-  if (acceptedSignals.length > 0) {
-    return { revision: (current?.revision ?? 0) + 1, signals: acceptedSignals }
+  const held: OccurrenceAnnouncement<FlowSignal> | undefined = current && {
+    occurrences: current.signals,
+    revision: current.revision
   }
-  return activeSignals.length > 0 ? current : undefined
+  const announcement = advanceOccurrenceAnnouncement(held, acceptedSignals, activeSignals)
+  if (!announcement) return undefined
+  // A retained announcement stays the same object, so a live region does not read content it has already read.
+  if (announcement.revision === current?.revision) return current
+  return { revision: announcement.revision, signals: announcement.occurrences }
 }
 
 /**
@@ -64,28 +62,12 @@ export const reconcileFlowSignals = (
   shownFlowIds: ReadonlySet<string>,
   seenSignals: Set<string>
 ): FlowSignalReconciliation => {
-  const uniqueCurrent = uniqueFlowSignals(current)
-  const uniqueSupplied = uniqueFlowSignals(suppliedSignals)
-  const suppliedKeys = new Set(uniqueSupplied.map(flowSignalKey))
-
-  for (const key of seenSignals) {
-    if (!suppliedKeys.has(key)) seenSignals.delete(key)
-  }
-
-  const acceptedSignals = uniqueSupplied.filter((signal) => {
-    const key = flowSignalKey(signal)
-    const fresh = !seenSignals.has(key)
-    seenSignals.add(key)
-    return fresh && shownFlowIds.has(signal.flowId)
-  })
-
-  const activeKeys = new Set<string>()
-  const activeSignals = [...uniqueCurrent, ...acceptedSignals].filter((signal) => {
-    const key = flowSignalKey(signal)
-    if (!suppliedKeys.has(key) || !shownFlowIds.has(signal.flowId) || activeKeys.has(key)) return false
-    activeKeys.add(key)
-    return true
-  })
-
-  return { acceptedSignals, activeSignals }
+  const { accepted, active } = reconcileOccurrences(
+    current,
+    suppliedSignals,
+    flowSignalKey,
+    (signal) => shownFlowIds.has(signal.flowId),
+    seenSignals
+  )
+  return { acceptedSignals: accepted, activeSignals: active }
 }

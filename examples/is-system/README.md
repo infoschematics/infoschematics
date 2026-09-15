@@ -38,3 +38,28 @@ export const Page = () => <Studio config={systemExample} />
 ```
 
 A host that would rather load the document at runtime can read the YAML and call `parseInfoschematic` from `@infoschematics/domain-core` instead; both paths produce the same canonical model. [The React integration guide](../../apps/site/content/react-integration.md) explains the ownership boundary between an authored Infoschematic and the host that mounts it.
+
+## Play its Dynamics
+
+The document declares two named Diagram Dynamics: `signal-observed` signals the `SELECT` Flow, and `view-revised` emphasises the shared-view Card. Neither one runs by itself — the document says what a Dynamic means and what it touches, and your host says when it happened:
+
+```tsx
+import { systemExample } from '@infoschematics/is-system'
+import { Canvas, type DynamicOccurrence } from '@infoschematics/view-canvas'
+import '@infoschematics/view-canvas/styles.css'
+import { useState } from 'react'
+
+export const Page = () => {
+  const [occurrence, setOccurrence] = useState<DynamicOccurrence>()
+  return (
+    <>
+      <button onClick={() => setOccurrence({ dynamicId: 'view-revised', occurrenceKey: crypto.randomUUID() })} type="button">
+        The view changed
+      </button>
+      <Canvas config={systemExample} dynamics={occurrence ? [occurrence] : []} />
+    </>
+  )
+}
+```
+
+A new `occurrenceKey` replays the Dynamic; the same key held across renders does not. Dropping the occurrence cancels it. Under `prefers-reduced-motion` the treatment is still rather than moving, and the live region says the Dynamic's own label either way. `bun run render` produces the quiet document: static output changes only when a caller asks for an occurrence explicitly.

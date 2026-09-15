@@ -100,6 +100,19 @@ diagram:
       family: progression
       link: LIT-03 E1 -> SEE-04 W1
       labelAt: 0.5
+  dynamics:
+    - id: signal-observed
+      label: A fresh signal arrives
+      description: Something new was observed and is on its way into structure.
+      kind: signal-flow
+      flows:
+        - SELECT
+    - id: view-revised
+      label: The shared view is revised
+      description: The shared view changed because meaning was revised.
+      kind: emphasise-elements
+      elements:
+        - SEE-04
   gridSize: 10
 scopes:
   - id: system

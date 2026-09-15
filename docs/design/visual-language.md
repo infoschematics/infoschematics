@@ -153,6 +153,8 @@ Automatic Scene signalling uses an explicit `focused-flows` policy and can be di
 
 The underlying Flow route remains present and interactive throughout. A travelling pulse is decorative; a concise live announcement carries the semantic event. Under `prefers-reduced-motion`, the route receives brief in-place emphasis instead of spatial travel. Static SVG accepts only an explicit list of signalled Flow identifiers and renders deterministic still emphasis, so motion is never required to understand the Infoschematic.
 
+A named Diagram Dynamic is the authored way to ask for motion, and it asks for a meaning rather than an effect. `signal-flow` reuses the Flow signal treatment exactly. `emphasise-elements` draws a brief outline outset from the element's own geometry, in the shared emphasis stroke and width, so the treatment reads as being about the element rather than part of it: the element's own output, hit target, and selection behaviour are untouched, and the outline is decorative, hidden from assistive technology, and inert to the pointer. Every measurement is a View Model token, so the still and moving treatments agree. The live announcement is the Dynamic's authored label, stated once however many elements one occurrence outlines.
+
 Animation explains change; it is not ambient decoration.
 
 - A signal should travel once and then leave the underlying Flow static.

@@ -2,6 +2,8 @@
 
 Finite runtime Flow occurrences, replay, cancellation, announcements, and reduced-motion treatment. Part of the [Specifications corpus](index.md).
 
+A host may also reach these occurrences by naming an authored Dynamic rather than a Flow; see [Diagram Dynamics](diagram-dynamics.md).
+
 ## User-observable behaviours
 
 ### SIGNAL-001 — Signals are finite keyed occurrences

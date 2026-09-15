@@ -24,3 +24,5 @@ Signal state, timers, callbacks, and occurrence keys never enter the authored In
 ## Consequences
 
 Scene-driven and external activity share one occurrence contract without compromising portable authored data. Replay and cancellation are intentional, motion is never the sole carrier of meaning, and static output remains deterministic.
+
+[`ADR-INFOSCHEMATICS-026`](ADR-INFOSCHEMATICS-026-name-dynamics-in-the-document.md) generalises this occurrence contract to named authored Dynamics without changing it: a resolved Flow signal is the same occurrence a host could have supplied directly.

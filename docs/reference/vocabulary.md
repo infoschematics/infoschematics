@@ -27,6 +27,7 @@ The **product** is one Infoschematic: its structural Diagram plus optional Scope
 | `sequence-scene` | <span id="sequence-scene"></span>Sequence Scene | step, thematic scene |
 | `sequence` | <span id="sequence"></span>Sequence | theme, story, walkthrough, deck |
 | `callout` | <span id="callout"></span>Callout | narration card, caption card |
+| `diagram-dynamic` | <span id="diagram-dynamic"></span>Diagram Dynamic | animation, transition, motion effect |
 
 The alternatives help readers recognise a concept; they do not introduce additional public terms.
 
@@ -90,6 +91,12 @@ Entering a Scene produces the same focus and Overlay visibility regardless of th
 A **Sequence** owns an ordered collection of Scenes. Its required presentation settings independently choose whether every Scene is expanded as a selector or the Sequence is collapsed behind one selector, whether progression is timed or manual, and whether Scene Callouts render.
 
 Sequences may be empty while being authored and may not contain another Sequence. Reusing a Scene is a Studio copy operation rather than inheritance or a domain reference.
+
+## Diagram Dynamics
+
+A **Diagram Dynamic** is a named semantic change an Audience should perceive: a record delivered, a service degraded, a view revised. A Diagram declares the Dynamics it can express, each with a stable id, a label, and one finite kind — signalling named Flows, or briefly emphasising named elements.
+
+A Dynamic is not an animation. It says what changed and what the change is about, never how to depict it: no duration, easing, colour, selector, or timer is authored. A host says only that a named Dynamic occurred, by id and a host-owned occurrence key; each renderer then chooses a treatment, including a still one for reduced motion and for static output, and states the Dynamic's own label to assistive technology.
 
 ## Roles and modes
 

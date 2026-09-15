@@ -42,6 +42,10 @@ Entering a Scene produces one transient signal per focused Flow under the defaul
 
 Under `prefers-reduced-motion`, a travelling pulse becomes finite in-place emphasis, and every signal is announced in a live region. Motion is never the only evidence.
 
+## Diagram Dynamics
+
+Where a document declares named [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic), Present passes host occurrences straight through to the Canvas: `dynamics={[{ dynamicId: 'playback-stalled', occurrenceKey: event.id }]}` signals or emphasises whatever that Dynamic names, without the host knowing the diagram. Scene signalling is untouched by it, a new occurrence key replays, dropping the occurrence cancels, and the live region says the Dynamic's own label whether the treatment moves or not.
+
 ## Where next
 
 Present is one of three mount choices. The [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present, and Studio and supplying host renderers. To understand Scenes and Sequences before authoring them, see [Components](/docs/components/) and then continue to [authoring](/docs/authoring/).

@@ -4,14 +4,19 @@ import type { Presentation } from '../hooks/use-presentation.ts'
 
 export function ProducerControls({
   onPlay: _onPlay,
+  onPlayDynamic,
+  playingDynamicId,
   ref,
   presentation
 }: {
   onPlay?: (story: RuntimeStory) => void
+  /** Play one authored Diagram Dynamic, the way a host binding its id would. */
+  onPlayDynamic?: (dynamicId: string) => void
+  playingDynamicId?: string
   ref: Ref<HTMLElement>
   presentation: Presentation
 }) {
-  const { infoschematicFamilies, infoschematicFlows, infoschematicRegister, infoschematicScopes, sequences } =
+  const { config, infoschematicFamilies, infoschematicFlows, infoschematicRegister, infoschematicScopes, sequences } =
     useInfoschematic()
   const { scopeIcons } = useInfoschematicRenderers()
   const validElements = new Set(infoschematicRegister.all.map(({ id }) => id))
@@ -63,6 +68,24 @@ export function ProducerControls({
           </button>
         ))}
       </section>
+
+      {onPlayDynamic && config.diagram.dynamics.length ? (
+        <section className="producer-bank" aria-label="Diagram Dynamics">
+          <span className="producer-label">Dynamics</span>
+          {config.diagram.dynamics.map((dynamic) => (
+            <button
+              aria-pressed={playingDynamicId === dynamic.id}
+              className="toggle-button"
+              key={dynamic.id}
+              onClick={() => onPlayDynamic(dynamic.id)}
+              title={`${dynamic.label}${dynamic.description ? ` — ${dynamic.description}` : ''}`}
+              type="button"
+            >
+              {dynamic.label}
+            </button>
+          ))}
+        </section>
+      ) : null}
 
       {sequences.length ? (
         <section className="producer-bank" aria-label="Sequences">

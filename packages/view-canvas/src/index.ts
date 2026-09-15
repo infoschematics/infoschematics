@@ -1,4 +1,5 @@
 export type { CardDetailOverrides } from '@infoschematics/view-model/appearance'
+export type { DynamicOccurrence, ElementEmphasis } from '@infoschematics/view-model/dynamics'
 export type {
   InfoschematicRuntime,
   RuntimeCard,
@@ -15,6 +16,8 @@ export type {
 } from '@infoschematics/view-model/runtime'
 export type { FlowSignal } from '@infoschematics/view-model/signals'
 export { Canvas, type CanvasProps } from './Canvas.tsx'
+export { elementEmphasisDuration } from './element-emphasis.ts'
+export { flowSignalDuration } from './flow-signals.ts'
 export {
   type CanvasMode,
   type DiagramMinimapPosition,

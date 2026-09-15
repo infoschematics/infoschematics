@@ -47,6 +47,22 @@ describe('systemExample', () => {
     for (const flow of diagram.flows) expect(flow.route?.labelAt).toBe(0.5)
   })
 
+  it('names two Diagram Dynamics a host can bind without knowing the diagram', () => {
+    expect(diagram.dynamics.map((dynamic) => dynamic.id)).toEqual(['signal-observed', 'view-revised'])
+    expect(diagram.dynamics[0]).toMatchObject({
+      kind: 'signal-flow',
+      flows: ['SELECT'],
+      label: 'A fresh signal arrives'
+    })
+    expect(diagram.dynamics[1]).toMatchObject({ kind: 'emphasise-elements', elements: ['SEE-04'] })
+    // Each Dynamic names authored identities the document itself declares, which is what makes the binding stable.
+    const identities = new Set([...diagram.cards.map((card) => card.id), ...diagram.flows.map((flow) => flow.id)])
+    for (const dynamic of diagram.dynamics) {
+      const targets = dynamic.kind === 'signal-flow' ? dynamic.flows : dynamic.elements
+      for (const target of targets) expect(identities).toContain(target)
+    }
+  })
+
   it('remains serialisable data with no runtime values', () => {
     expectSerialisable(systemExample)
   })

@@ -9,6 +9,7 @@ import {
 } from '@infoschematics/view-model/appearance'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
+import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
@@ -20,6 +21,7 @@ import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/t
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 import {
   type CSSProperties,
+  type ReactNode,
   type Ref,
   useCallback,
   useEffect,
@@ -42,6 +44,7 @@ import {
   type RuntimeFlow as InfoschematicFlow,
   type RuntimeFabric
 } from '@infoschematics/view-model/runtime'
+import { elementEmphasisKey } from './element-emphasis.ts'
 import { flowSignalDuration, flowSignalKey } from './flow-signals.ts'
 import {
   type FabricRendererProps,
@@ -147,6 +150,16 @@ function DefaultGraphic({ graphic, bounds }: { graphic: Overlay; bounds: Box }) 
 const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeWidth } = visualTokens.canvas.geometry
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
+const emphasisTokens = visualTokens.canvas.emphasis
+
+/** An emphasised box is outset from the element, so the treatment reads as being about it rather than part of it. */
+const boxEmphasis = (box: Box) => ({
+  height: box.height + emphasisTokens.inset * 2,
+  rx: emphasisTokens.radius,
+  width: box.width + emphasisTokens.inset * 2,
+  x: box.x - emphasisTokens.inset,
+  y: box.y - emphasisTokens.inset
+})
 
 export function InfoschematicDiagram({
   artefactOperations = [],
@@ -184,6 +197,7 @@ export function InfoschematicDiagram({
   selected,
   selectedArtefact,
   signals = [],
+  emphasis = [],
   flows: suppliedFlows,
   annotated,
   cardDetails,
@@ -256,6 +270,13 @@ export function InfoschematicDiagram({
   selectedArtefact?: ArtefactSelection | null
   /** Transient host-owned Flow occurrences; stable keys prevent accidental replay. */
   signals?: readonly FlowSignal[]
+  /**
+   * Transient host-owned element emphasis, already resolved from authored Diagram Dynamics.
+   *
+   * The treatment is this renderer's choice; the accessible meaning belongs to the Dynamic, which is why the
+   * announcement is made by the Canvas and the graphics here are decorative.
+   */
+  emphasis?: readonly ElementEmphasis[]
   flows: readonly InfoschematicFlow[]
   annotated?: boolean
   /** Output-only Card metadata visibility; authored data remains unchanged. */
@@ -1536,6 +1557,38 @@ export function InfoschematicDiagram({
     )
   })
 
+  /* Emphasis is a layer over the diagram and nothing else: it needs only geometry, and only from what this render
+     actually drew, so an occurrence can never make hidden or filtered content appear. Drawn last for the same reason
+     the static renderer draws it last — no emphasised element's own output, ordering, or geometry changes. */
+  const emphasisGeometry = new Map<string, ReactNode>()
+  for (const region of infoschematicRegions) {
+    emphasisGeometry.set(region.id, <rect {...boxEmphasis(region.box)} />)
+  }
+  for (const placeable of placeables) {
+    emphasisGeometry.set(placeable.id, <rect {...boxEmphasis(placeable.box)} />)
+  }
+  for (const flow of flows) {
+    emphasisGeometry.set(flow.id, <path className="infoschematic-element-emphasis-route" d={flow.d} />)
+  }
+  const emphasisLayer = emphasis.flatMap((occurrence) => {
+    const geometry = emphasisGeometry.get(occurrence.elementId)
+    if (!geometry) return []
+    return [
+      // biome-ignore lint/a11y/noAriaHiddenOnFocusable: decorative emphasis graphic with no focusable descendants; the Canvas announces the Dynamic.
+      <g
+        aria-hidden="true"
+        className="infoschematic-element-emphasis"
+        data-artefact-id={occurrence.elementId}
+        data-dynamic-id={occurrence.dynamicId}
+        data-emphasised="true"
+        data-occurrence-key={occurrence.occurrenceKey}
+        key={elementEmphasisKey(occurrence)}
+      >
+        {geometry}
+      </g>
+    ]
+  })
+
   return (
     <div className="infoschematic-frame" ref={diagramFrame} style={frameStyle}>
       <svg
@@ -2359,6 +2412,7 @@ export function InfoschematicDiagram({
         ) : null}
 
         {editing ? null : graphicLayer}
+        {emphasisLayer.length > 0 ? <g className="infoschematic-emphasis">{emphasisLayer}</g> : null}
       </svg>
       {!fitted && minimap ? (
         <button

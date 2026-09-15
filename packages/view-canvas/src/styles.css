@@ -391,6 +391,23 @@
   stroke-width: var(--infoschematic-canvas-flows-signal-still-width);
 }
 
+/* An emphasis is a layer over the diagram: it takes no pointer events and changes nothing an element draws. */
+.infoschematic-element-emphasis {
+  pointer-events: none;
+}
+
+.infoschematic-element-emphasis > * {
+  animation: infoschematic-element-emphasis var(--infoschematic-canvas-emphasis-duration) ease-out both;
+  fill: none;
+  stroke: var(--infoschematic-canvas-emphasis-stroke);
+  stroke-width: var(--infoschematic-canvas-emphasis-stroke-width);
+}
+
+.infoschematic-element-emphasis-route {
+  stroke-linecap: var(--infoschematic-canvas-flows-line-cap);
+  stroke-linejoin: var(--infoschematic-canvas-flows-line-join);
+}
+
 .infoschematic-signal-announcement {
   block-size: 1px;
   clip-path: inset(50%);
@@ -407,6 +424,24 @@
 
   .infoschematic-flow-signal-still {
     animation: infoschematic-signal-emphasis 900ms ease-out both;
+  }
+
+  /* A still outline for the same finite span, which is what the static renderer draws. */
+  .infoschematic-element-emphasis > * {
+    animation: none;
+    opacity: 0.9;
+  }
+}
+
+@keyframes infoschematic-element-emphasis {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  20%,
+  70% {
+    opacity: 0.9;
   }
 }
 

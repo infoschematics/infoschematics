@@ -27,6 +27,7 @@ IDs are append-only within their registered prefix and are never reused. The one
 | command-line-rendering.md     | `CLI`     | Portable YAML and JSON input, SVG streams, diagnostics, exit status, and publishable command boundaries.        |
 | renderer-extensions.md        | `EXTEND`  | Host-provided visual implementations, compatibility, validation, and accessible generic fallbacks.              |
 | flow-signals.md               | `SIGNAL`  | Finite runtime Flow occurrences, replay, cancellation, announcements, and reduced-motion treatment.             |
+| diagram-dynamics.md           | `DYNAMIC` | Named authored Dynamics, host-owned occurrences, occurrence resolution, and non-motion interpretations.         |
 | presentation.md               | `PRESENT` | Audience-facing focus, filtering, controls, information, viewport use, zoom, pan, and overview navigation.      |
 | scenes-and-callouts.md        | `SCENE`   | Activatable Scenes, ordered presentation, Callout placement, custom Callouts, timing, and playback stability.   |
 | design-session.md             | `DESIGN`  | Producer mode state, selection, hover, editing visibility, inspection, and rendered Studio verification.        |

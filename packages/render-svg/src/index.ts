@@ -8,6 +8,7 @@ import {
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
+import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
@@ -38,6 +39,8 @@ export type RenderInfoschematicSvgOptions = {
   responsiveCardDetails?: RenderedSize
   /** An authored Scene to render without introducing playback or other motion. */
   scene?: SvgSceneSelection
+  /** Host-owned Dynamic occurrences, interpreted as this renderer's still treatment. Defaults to none. */
+  dynamics?: readonly DynamicOccurrence[]
   /** Flow ids to emphasise deterministically without serialising animation. */
   signals?: readonly string[]
   /** Host-owned prefix for internal SVG resource ids. Use a unique value for each inline SVG. */
@@ -168,6 +171,54 @@ const includedByFocus = (
  * The function reads no DOM state and has no renderer registry. Authored Graphics
  * therefore use a labelled geometric fallback in this framework-neutral output.
  */
+type EmphasisShape = readonly [element: string, values: Attributes]
+
+const emphasis = canvasTokens.emphasis
+
+/**
+ * The still interpretation of element emphasis: an outline around whatever the element already occupies.
+ *
+ * It is drawn from geometry alone, so emphasising a Card, a Region, a Point or a Flow needs no knowledge of how that
+ * element is painted, and emphasis can never change the element's own output.
+ */
+const boxEmphasis = (box: { height: number; width: number; x: number; y: number }): EmphasisShape => [
+  'rect',
+  [
+    ['fill', 'none'],
+    ['height', box.height + emphasis.inset * 2],
+    ['rx', emphasis.radius],
+    ['stroke', emphasis.stroke],
+    ['stroke-width', emphasis.strokeWidth],
+    ['width', box.width + emphasis.inset * 2],
+    ['x', box.x - emphasis.inset],
+    ['y', box.y - emphasis.inset]
+  ]
+]
+
+const pointEmphasis = (at: { x: number; y: number }): EmphasisShape => [
+  'circle',
+  [
+    ['cx', at.x],
+    ['cy', at.y],
+    ['fill', 'none'],
+    ['r', canvasTokens.geometry.pointRadius + emphasis.inset],
+    ['stroke', emphasis.stroke],
+    ['stroke-width', emphasis.strokeWidth]
+  ]
+]
+
+const routeEmphasis = (d: string): EmphasisShape => [
+  'path',
+  [
+    ['d', d],
+    ['fill', 'none'],
+    ['stroke', emphasis.stroke],
+    ['stroke-linecap', canvasTokens.flows.lineCap],
+    ['stroke-linejoin', canvasTokens.flows.lineJoin],
+    ['stroke-width', emphasis.strokeWidth]
+  ]
+]
+
 export const renderInfoschematicSvg = (
   input: InfoschematicInput,
   options: RenderInfoschematicSvgOptions = {}
@@ -188,7 +239,15 @@ export const renderInfoschematicSvg = (
       : requestedVisualTreatment.card
   }
   const legacyFlowIds = new Map(runtime.compatibilityConfig.infoschematic.flows.map((flow) => [flow.id, flow.code]))
-  const signalledFlows = new Set((options.signals ?? []).map((id) => legacyFlowIds.get(id) ?? id))
+  const declaredDynamics = new Map(definition.dynamics.map((dynamic) => [dynamic.id, dynamic]))
+  const resolvedDynamics = resolveDiagramDynamics(definition.dynamics, options.dynamics ?? [])
+  /* A resolved Flow signal and the direct `signals` option say the same thing, so they meet here and receive one
+     treatment rather than two that could drift. */
+  const signalledFlows = new Set(
+    [...(options.signals ?? []), ...resolvedDynamics.signals.map(({ flowId }) => flowId)].map(
+      (id) => legacyFlowIds.get(id) ?? id
+    )
+  )
   /* The interactive Canvas draws the blueprint palette natively and overrides
      only what neutral changes, so this renderer has to pick the same side for
      every surface-sensitive token. Anything left on the `output` set alone
@@ -234,9 +293,29 @@ export const renderInfoschematicSvg = (
         : Boolean(focus?.graphics.has(graphic.id)))
   )
 
+  /* Emphasis needs geometry and nothing else, and only from elements this render actually drew: an occurrence must
+     never make hidden or filtered content appear. */
+  const emphasisShapes = new Map<string, EmphasisShape>()
+  for (const region of runtime.infoschematicRegions) emphasisShapes.set(region.id, boxEmphasis(region.box))
+  for (const card of cards) emphasisShapes.set(card.id, boxEmphasis(card.bounds))
+  for (const fabric of fabrics) emphasisShapes.set(fabric.id, boxEmphasis(fabric.bounds))
+  for (const graphic of graphics) if (graphic.bounds) emphasisShapes.set(graphic.id, boxEmphasis(graphic.bounds))
+  for (const point of points) emphasisShapes.set(point.id, pointEmphasis(point.at))
+  for (const flow of flows) emphasisShapes.set(flow.id, routeEmphasis(flow.d))
+
+  /* The accessible statement is the Dynamic's meaning, not the treatment used to depict it. */
+  const occurredDynamics = [
+    ...new Set(
+      (options.dynamics ?? [])
+        .map(({ dynamicId }) => declaredDynamics.get(dynamicId)?.label)
+        .filter((label): label is string => label !== undefined)
+    )
+  ]
+
   const accessibleSummary = [
     config.subtitle,
     config.description,
+    occurredDynamics.length > 0 ? `Dynamics: ${occurredDynamics.join('; ')}` : undefined,
     cards.length > 0
       ? `Cards: ${cards
           .map((card) => [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · '))
@@ -845,6 +924,26 @@ export const renderInfoschematicSvg = (
             xmlText(graphic.label ?? renderer.key)
           )
         ]
+      ).join('\n')
+    )
+  }
+
+  /* Emphasis is drawn last so it reads as a layer over the diagram: no authored element's own output, ordering, or
+     geometry changes because a host asked for a Dynamic. */
+  for (const { dynamicId, elementId } of resolvedDynamics.emphasis) {
+    const shape = emphasisShapes.get(elementId)
+    if (!shape) continue
+    const [element, values] = shape
+    body.push(
+      group(
+        1,
+        [
+          ['class', 'infoschematic-element-emphasis'],
+          ['data-artefact-id', elementId],
+          ['data-dynamic-id', dynamicId],
+          ['data-emphasised', true]
+        ],
+        [line(2, element, values)]
       ).join('\n')
     )
   }

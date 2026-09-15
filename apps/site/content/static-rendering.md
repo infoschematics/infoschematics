@@ -73,6 +73,7 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
   cardDetails: { identity: false, stereotype: true, description: false },
   annotations: true,
   signals: ['flow-payment'],
+  dynamics: [{ dynamicId: 'payment-taken', occurrenceKey: 'export-1' }],
   resourceIdPrefix: 'checkout-export'
 })
 ```
@@ -82,6 +83,7 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
 - **`cardDetails`** overrides identity, stereotype, and description visibility without touching the authored definition — never compactness, which is authored because it changes a Card's composition.
 - **`annotations`** draws each visible [Flow](/docs/reference/vocabulary/#flow)'s code chip at the shared placement Canvas uses; a Flow can pin its chip with an authored `label: { along: 0.5 }`.
 - **`signals`** names Flows to emphasise in a deterministic, non-animated still output; unknown identifiers are ignored, and the renderer never infers signals from Scene focus or authored data.
+- **`dynamics`** names occurrences of authored [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic) to draw in the same still language: a `signal-flow` Dynamic emphasises the Flows it names, and an `emphasise-elements` Dynamic outlines the elements it names. An occurrence of a Dynamic the document does not declare is ignored, output never varies with the occurrence key, and the accessible description states each occurred Dynamic's label. Omit the option and the output is byte-identical to the quiet document.
 - **`resourceIdPrefix`** namespaces renderer-owned marker and pattern IDs. Its default preserves standalone output; use a unique letter-or-underscore-prefixed value for every SVG inserted into the same document.
 
 Output shares the Canvas's visual language — the same tokens, appearance resolution, Region geometry, Card layout, and luminance-resolved text ink — so a static export and the interactive Canvas read as the same diagram.

@@ -6,11 +6,13 @@ import {
 import {
   type DiagramViewportController,
   defineInfoschematicRenderers,
+  elementEmphasisDuration,
   InfoschematicContext,
   InfoschematicDiagram,
   InfoschematicRenderersContext,
   useInfoschematic
 } from '@infoschematics/view-canvas'
+import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import type {
   ArtefactGeometry,
   ArtefactSelection,
@@ -549,6 +551,24 @@ function AppContent({
    * leaves the model exactly as it was. It becomes a change only when the
    * family is chosen, which is also when there is a code to record it against.
    */
+  /* Studio plays one authored Dynamic at a time, to see what a host binding it would show. The occurrence key counts
+     clicks, so pressing the same Dynamic twice replays it rather than being taken for the occurrence still running. */
+  const [dynamicOccurrence, setDynamicOccurrence] = useState<DynamicOccurrence>()
+  const dynamicPlays = useRef(0)
+  const playDynamic = useCallback((dynamicId: string) => {
+    dynamicPlays.current += 1
+    setDynamicOccurrence({ dynamicId, occurrenceKey: `studio-${dynamicPlays.current}` })
+  }, [])
+  const resolvedDynamics = useMemo(
+    () => resolveDiagramDynamics(runtime.config.diagram.dynamics, dynamicOccurrence ? [dynamicOccurrence] : []),
+    [dynamicOccurrence, runtime.config.diagram.dynamics]
+  )
+  useEffect(() => {
+    if (!dynamicOccurrence) return
+    const timer = window.setTimeout(() => setDynamicOccurrence(undefined), elementEmphasisDuration)
+    return () => window.clearTimeout(timer)
+  }, [dynamicOccurrence])
+
   const [proposed, setProposed] = useState<{
     at: { x: number; y: number }
     ends: { source: string; sourcePort: string; target: string; targetPort: string }
@@ -1014,6 +1034,8 @@ function AppContent({
                   editor.editing ? (selection) => editorRef.current.selectArtefact(selection) : undefined
                 }
                 portCounts={editor.portCounts}
+                emphasis={resolvedDynamics.emphasis}
+                signals={resolvedDynamics.signals}
                 flows={drawnFlows}
                 selected={editor.selected}
                 selectedArtefact={editor.selectedArtefact}
@@ -1095,7 +1117,13 @@ function AppContent({
               ) : null}
             </section>
           </div>
-          <ProducerControls onPlay={playStory} ref={infoschematicControls} presentation={presentation} />
+          <ProducerControls
+            onPlay={playStory}
+            onPlayDynamic={playDynamic}
+            playingDynamicId={dynamicOccurrence?.dynamicId}
+            ref={infoschematicControls}
+            presentation={presentation}
+          />
         </div>
 
         {collapsed ? null : (

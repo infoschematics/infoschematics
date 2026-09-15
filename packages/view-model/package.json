@@ -26,6 +26,10 @@
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"
     },
+    "./dynamics": {
+      "types": "./dist/dynamics.d.ts",
+      "import": "./dist/dynamics.js"
+    },
     "./editable": {
       "types": "./dist/editable.d.ts",
       "import": "./dist/editable.js"

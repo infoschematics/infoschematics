@@ -422,6 +422,24 @@ const overlay = z.strictObject({
   properties: properties.optional()
 })
 
+const dynamicIdentity = {
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional()
+}
+
+/**
+ * A Dynamic declares a named semantic change and its authored targets.
+ *
+ * The kind is the discriminator because each kind owns a different target field: a Flow signal and element emphasis are
+ * not the same statement with a different value, and a strict union says so rather than accepting either field for either
+ * kind.
+ */
+const dynamic = z.discriminatedUnion('kind', [
+  z.strictObject({ ...dynamicIdentity, kind: z.literal('signal-flow'), flows: elementIdentifiers }),
+  z.strictObject({ ...dynamicIdentity, kind: z.literal('emphasise-elements'), elements: elementIdentifiers })
+])
+
 const selection = z.strictObject({
   elements: elementIdentifiers.optional(),
   scopes: identifiers.optional()
@@ -514,6 +532,7 @@ const diagram = z.strictObject({
   regions: z.array(region).readonly().optional(),
   flows: z.array(flow).readonly().optional(),
   overlays: z.array(overlay).readonly().optional(),
+  dynamics: z.array(dynamic).readonly().optional(),
   calloutPositions: z.array(coordinate).readonly().optional()
 })
 

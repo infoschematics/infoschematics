@@ -41,8 +41,9 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 29. [ADR-INFOSCHEMATICS-023](ADR-INFOSCHEMATICS-023-keep-example-packages-copyable-not-published.md) — keep example packages copyable and unpublished rather than members of the coordinated release.
 30. [ADR-INFOSCHEMATICS-024](ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md) — rasterise PNG output through a pinned native resvg binding named in the command's dependency allowlist.
 31. [ADR-INFOSCHEMATICS-025](ADR-INFOSCHEMATICS-025-keep-the-preview-server-local-and-in-memory.md) — bind the development preview to loopback, serve it from memory, and keep it on the standard library.
+32. [ADR-INFOSCHEMATICS-026](ADR-INFOSCHEMATICS-026-name-dynamics-in-the-document.md) — let a document name the Dynamics it can express and leave every occurrence to the host.
 
 ## Repository operation
 
-32. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-33. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+33. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+34. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.

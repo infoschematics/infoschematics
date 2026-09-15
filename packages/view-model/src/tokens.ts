@@ -58,6 +58,14 @@ export const visualTokens = Object.freeze({
       routeWidth: 4,
       signalStillWidth: 7
     }),
+    /** One emphasis treatment, interpreted as motion, a reduced-motion fade, or a still outline. */
+    emphasis: tokenGroup({
+      duration: '900ms',
+      inset: 6,
+      radius: 14,
+      stroke: '#f2a63b',
+      strokeWidth: 3
+    }),
     focus: tokenGroup({
       dimmedOpacity: 0.14,
       focusedOpacity: 1,
