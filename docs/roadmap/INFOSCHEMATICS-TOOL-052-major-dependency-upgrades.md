@@ -4,12 +4,12 @@ area: TOOL
 title: Major dependency upgrades
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T20:08:57Z
-updated_at: 2026-09-15T15:10:00Z
+updated_at: 2026-09-15T15:55:00Z
 ---
 
 # Major dependency upgrades
