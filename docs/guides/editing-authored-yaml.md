@@ -8,41 +8,59 @@ Use the Domain Core document API when a host needs to apply structured edits to 
 import {
   infoschematicDocumentModel,
   infoschematicDocumentSource,
-  parseInfoschematicDocument
-} from '@infoschematics/domain-core'
+  parseInfoschematicDocument,
+} from "@infoschematics/domain-core";
 
-const parsed = parseInfoschematicDocument(source, { pathname: 'infoschematic.yaml' })
-if (!parsed.ok) throw new Error(parsed.issues.map((issue) => issue.message).join('\n'))
+const parsed = parseInfoschematicDocument(source, {
+  pathname: "infoschematic.yaml",
+});
+if (!parsed.ok)
+  throw new Error(parsed.issues.map((issue) => issue.message).join("\n"));
 
-const document = parsed.document
-const model = infoschematicDocumentModel(document)
-const exactSource = infoschematicDocumentSource(document)
+const document = parsed.document;
+const model = infoschematicDocumentModel(document);
+const exactSource = infoschematicDocumentSource(document);
 ```
 
 `InfoschematicDocument` is opaque. YAML nodes never cross the Domain Core boundary, and the model returned to views is the same validated canonical model produced by the ordinary loader.
 
+## Declare the diagram grid
+
+Every Diagram must declare `gridSize` beside `bounds`; a document that omits it is rejected rather than defaulted:
+
+```yaml
+diagram:
+  bounds: { x: 0, y: 0, width: 960, height: 540 }
+  gridSize: 10
+```
+
+Use `10` for the ordinary grid, `1` to place on whole units, a larger value for a coarser lattice, and `0` to disable grid geometry and rounding entirely. Existing documents authored before the field became required need this one line added. Programmatic callers going through `InfoschematicConfig` keep resolving to `10` without a change.
+
+Grid size is geometry, not appearance: it sets what placement snaps to, while the authored grid appearance treatment independently decides whether a lattice is drawn.
+
 ## Address edits by fields and stable IDs
 
 ```ts
-import { applyInfoschematicDocumentEdit } from '@infoschematics/domain-core'
+import { applyInfoschematicDocumentEdit } from "@infoschematics/domain-core";
 
 const result = applyInfoschematicDocumentEdit(document, {
   version: 1,
   operations: [
     {
-      op: 'replace',
+      op: "replace",
       path: [
-        { field: 'diagram' },
-        { field: 'cards' },
-        { id: 'SRC' },
-        { field: 'label' }
+        { field: "diagram" },
+        { field: "cards" },
+        { id: "SRC" },
+        { field: "label" },
       ],
-      value: 'Source system'
-    }
-  ]
-})
+      value: "Source system",
+    },
+  ],
+});
 
-if (!result.ok) throw new Error(result.issues.map((issue) => issue.message).join('\n'))
+if (!result.ok)
+  throw new Error(result.issues.map((issue) => issue.message).join("\n"));
 ```
 
 Paths never contain numeric collection indices. An ID segment selects one member of the immediately preceding collection. `add` and `move` may carry `{ before: 'ID' }` or `{ after: 'ID' }`; omit the anchor to append.
@@ -63,8 +81,8 @@ Pass either established `config` input or an authored `document`, never both. In
 <Studio
   document={document}
   onDocumentChange={(change) => {
-    preview(change.source)
-    acceptWhenReady(change.document)
+    preview(change.source);
+    acceptWhenReady(change.document);
   }}
 />
 ```

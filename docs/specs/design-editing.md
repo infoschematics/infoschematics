@@ -194,7 +194,7 @@ _Evidence:_ port reseating in `packages/view-studio/src/app/editor/infoschematic
 
 ### EDIT-018 — Placement inputs have equivalent semantics
 
-Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY use guides, grid-enabled keyboard movement MAY step by one grid unit, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
+Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY use guides, keyboard movement MAY step by one unit of the authored `gridSize` when that size is non-zero, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
 
 Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the authored Canvas coordinate resulting from a pointer placement. A drag begun before a viewport change MUST either finish against one stable coordinate transform or cancel without recording a partial edit.
 

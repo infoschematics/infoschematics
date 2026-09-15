@@ -60,13 +60,13 @@ _Evidence:_ active-mode composition in `packages/view-studio/src/app/App.tsx` an
 
 ### DESIGN-006 — Editing aids appear only while editing
 
-The editing grid, ports and manipulation handles MUST be available while editing and MUST NOT appear in the ordinary presented view. The grid MUST be drawn beneath routes and artefacts so it cannot obscure the content it aligns.
+The editing grid, ports and manipulation handles MUST be available while editing and MUST NOT appear in the ordinary presented view. The grid MUST be drawn beneath routes and artefacts so it cannot obscure the content it aligns. Its spacing MUST follow the Diagram's authored `gridSize`, and an authored size of `0` MUST suppress both the overlay and grid rounding while leaving alignment-guide snapping independently controllable.
 
 _Conformance:_ conforming
 
-_Verify:_ inspect editing layers in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`. against this requirement.
+_Verify:_ inspect editing layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`. against this requirement.
 
-_Evidence:_ editing layers in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`.
+_Evidence:_ editing layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`.
 
 ### DESIGN-007 — Selection does not imply mutation
 

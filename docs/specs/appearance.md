@@ -44,7 +44,7 @@ Canvas MUST consume View Model's resolved visual treatment and region geometry r
 
 Absent appearance MUST render the backward-compatible defaults: neutral surface, no authored grid, non-compact Cards, hidden optional Card metadata, and unframed, unfilled Regions with plain internal labels. An absent or hidden Region label MUST suppress a requested notch without changing the authored frame style. Label placement and rounded or notched outlines MUST use the framework-neutral geometry returned by View Model.
 
-The `cardDetails` output option MAY override authored identity, stereotype, and description visibility. It MUST NOT remove authored metadata or override Card compactness. The legacy boolean Design grid MUST remain an editing overlay independent of the authored grid treatment.
+The `cardDetails` output option MAY override authored identity, stereotype, and description visibility. It MUST NOT remove authored metadata or override Card compactness. The Design editing grid MUST derive its spacing from the authored `gridSize` declared by the Diagram, and MUST remain independent of the authored grid appearance treatment: appearance decides whether a lattice is drawn, `gridSize` decides the geometry it aligns to.
 
 _Conformance:_ conforming
 

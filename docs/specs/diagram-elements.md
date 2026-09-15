@@ -97,3 +97,15 @@ _Conformance:_ conforming
 _Verify:_ parse and render Regions with repeated axes, move or remove one Region, and assert no other Region geometry changes.
 
 _Evidence:_ `packages/domain-model/src/model.ts` requires complete Region `bounds`; `packages/domain-core/src/schema.ts` validates them independently; both renderers consume resolved independent Region boxes.
+
+### DIAGRAM-010 — Diagram grid size is authored and required
+
+Every canonical Diagram MUST declare `gridSize` as a non-negative integer alongside `bounds`, and a document that omits it MUST be rejected rather than resolved to a default. A value of `0` MUST disable grid geometry and grid rounding, `1` MUST permit unit placement, and any greater value MUST define a coarser lattice. The established `InfoschematicConfig` compatibility boundary MAY supply `10` so existing programmatic callers stay source-compatible, but that default MUST NOT weaken the canonical requirement.
+
+Grid size MUST remain diagram geometry. It MUST NOT be merged with the authored grid appearance treatment, which independently decides whether a lattice is drawn, and a non-zero size MUST NOT by itself make a grid visible outside Design.
+
+_Conformance:_ conforming
+
+_Verify:_ parse a Diagram omitting `gridSize` and assert rejection; parse `0`, `1`, and a custom value and assert editing and rendered geometry follow the authored value; resolve an `InfoschematicConfig` and assert it yields `10`.
+
+_Evidence:_ `packages/domain-model/src/model.ts` declares the required field and `packages/domain-core/src/schema.ts` validates it as a non-negative integer; `packages/domain-core/src/schema.test.ts` asserts rejection of an omitted and a negative value and acceptance of `0` and `1`; `packages/view-model/src/tokens.ts` supplies the compatibility default; `packages/view-studio/src/app/App.browser.test.tsx` exercises the rendered Design grid control.
