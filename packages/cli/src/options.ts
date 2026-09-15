@@ -23,7 +23,8 @@ export const renderOptionSpecs = {
   format: { describe: 'Output format: svg or png. Defaults to svg.', kind: 'value', placeholder: '<format>' },
   help: { alias: 'h', describe: 'Show this message.', kind: 'flag' },
   output: { alias: 'o', describe: 'Write to a file instead of standard output.', kind: 'value', placeholder: '<path>' },
-  scale: { describe: 'Multiply the raster pixel size. Defaults to 1.', kind: 'value', placeholder: '<number>' }
+  scale: { describe: 'Multiply the raster pixel size. Defaults to 1.', kind: 'value', placeholder: '<number>' },
+  watch: { alias: 'w', describe: 'Re-render whenever the input document changes. Requires --output.', kind: 'flag' }
 } as const satisfies Readonly<Record<string, OptionSpec>>
 
 export type RenderOptionName = keyof typeof renderOptionSpecs
@@ -37,6 +38,8 @@ export type RenderArguments = Readonly<{
   input: string
   output?: string
   scale: number
+  /** Keep rendering until the process is interrupted, rather than converting once and exiting. */
+  watch: boolean
 }>
 
 export type ParsedArguments = Readonly<{ help: true }> | RenderArguments
@@ -64,6 +67,7 @@ Usage: infoschematics render <input> [options]
 ${(Object.keys(renderOptionSpecs) as RenderOptionName[]).map(optionLine).join('\n')}
 
 Rendering the same document twice on one machine produces identical bytes. Pass --font to pin text across machines.
+Watch mode keeps the last good output while a document does not parse, and recovers when it parses again.
 
 TypeScript modules are not executable input. Use the programmatic libraries instead.`
 
@@ -133,5 +137,11 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
     }
   }
 
-  return { fonts, format, input, ...(output ? { output } : {}), scale }
+  const watch = parsed.flags.has('watch')
+  // Rewriting a stream nobody re-reads is not a useful loop, and standard input is consumed once and never changes.
+  if (watch && !output)
+    throw new Error('The watch option requires --output, because standard output cannot be rewritten.')
+  if (watch && input === '-') throw new Error('The watch option requires a file to watch, not standard input.')
+
+  return { fonts, format, input, ...(output ? { output } : {}), scale, watch }
 }

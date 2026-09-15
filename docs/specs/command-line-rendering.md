@@ -64,6 +64,26 @@ _Verify:_ compare repeated renders byte for byte in the workspace and from a pac
 
 _Evidence:_ `packages/cli/src/index.test.ts`, `packages/cli/src/raster.ts`, and `scripts/release/pack-smoke.ts`.
 
+### CLI-008 — Watched authoring loop
+
+`--watch` MUST require `--output` and a file input, render once on start, and re-render after each change to the named document. It MUST watch only that document, and MUST coalesce a burst of writes — including a save that replaces the file by rename — into a single render.
+
+_Conformance:_ conforming
+
+_Verify:_ through the injected watch primitive, assert the initial render, a render per change, one render for a burst, and the usage failures for standard output and standard input; assert the real primitive against a rename on disk.
+
+_Evidence:_ `packages/cli/src/index.test.ts` and `packages/cli/src/index.ts`.
+
+### CLI-009 — Retained output and recovery
+
+A watched render that fails MUST write its diagnostic to standard error, leave the last successful output untouched, and keep watching, recovering on the next document that validates. Interruption MUST release the watcher and return status `130`, distinct from every failure status.
+
+_Conformance:_ conforming
+
+_Verify:_ invalidate a watched document, assert the retained output and the diagnostic, restore it, and cancel the session.
+
+_Evidence:_ `packages/cli/src/index.test.ts`.
+
 ## Quality properties
 
 ### CLI-005 — Publishable package boundary

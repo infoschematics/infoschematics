@@ -61,6 +61,22 @@ infoschematics render architecture.yaml --format png \
 
 A font file the command cannot read fails with status `3` rather than quietly falling back, because a silent fallback would produce exactly the machine-dependent output the option exists to prevent.
 
+## Keep an output up to date while editing
+
+`--watch` renders once and then again after every save, until you interrupt it:
+
+```bash
+infoschematics render architecture.yaml --output architecture.svg --watch
+```
+
+It needs `--output`, because a stream nobody re-reads is not a useful loop, and it needs a file rather than standard input. Only the named document is watched: this is a rendering loop, not a build system.
+
+A document caught mid-edit does not destroy your last good output. The diagnostic goes to standard error, `architecture.svg` keeps its previous contents, and the next save that validates replaces it — no restart needed. A burst of rapid saves produces one render, and a save that replaces the file rather than modifying it, as many editors do, keeps working.
+
+Press `Ctrl-C` to stop. The watcher is released and the command exits with status `130`, which is distinct from every rendering failure status, so a script can tell an interrupted loop from a broken document.
+
+Raster output works the same way, so `--watch --format png --output architecture.png` keeps a PNG current while you edit.
+
 ## Render a TypeScript definition
 
 The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
@@ -77,7 +93,7 @@ This is the same renderer the command calls, over the same canonical model, so a
 
 ## Handle diagnostics
 
-Rendered output — SVG text or PNG bytes — is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write and raster-conversion failures use `5`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into a rendered stream.
+Rendered output — SVG text or PNG bytes — is the only successful standard output. Help uses status `0`; usage and unsupported input use `2`; read failures use `3`; malformed or invalid documents use `4`; output write and raster-conversion failures use `5`; and an interrupted watch session uses `130`. Every failure diagnostic goes to standard error, so a failed render cannot mix an error message into a rendered stream.
 
 For example:
 
