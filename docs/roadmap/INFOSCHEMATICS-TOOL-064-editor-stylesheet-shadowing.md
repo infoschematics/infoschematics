@@ -1,18 +1,18 @@
 ---
 id: INFOSCHEMATICS-TOOL-064
 area: TOOL
-title: Editor stylesheet shadows the Canvas one
+title: Editor stylesheet shadowing
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T13:30:00Z
-updated_at: 2026-09-15T13:30:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
-# Editor stylesheet shadows the Canvas one
+# Editor stylesheet shadowing
 
 ## Goal
 
@@ -75,3 +75,17 @@ None.
 ### Roadmap
 
 None.
+
+## Discussion
+
+### The cascade is the risk, not the import
+
+Moving one line changes the appearance of every selection treatment at once. Imported rules come first, so Studio's own copies still win wherever they disagree — which means the immediately visible change is confined to rules Studio never copied, and the invisible change is that every duplicate is now shadowing rather than defining. Appearance actually moves at the step that removes them, so that is the step to render and compare, not the import.
+
+### Hex versus tokens
+
+Studio's copies were written with literal colours, so they have already drifted from the generated visual tokens by construction — a token change reaches Canvas and stops at the editor. Converting them is what makes future Canvas treatments reach Studio for free. Keeping them is a decision to let the editor look deliberately different, which is defensible but needs a record rather than an accident of a misplaced `@import`.
+
+### Why the suite could not see it
+
+Canvas browser suites load the Canvas stylesheet directly, so a treatment written there always passes. The defect lives in what Studio loads. Only a case asserted on the Studio surface can observe it, which is the same shape of blind spot as a suite that never mounts two instances.

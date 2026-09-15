@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-059
 area: TOOL
 title: Held element emphasis
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-055]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T07:25:00Z
-updated_at: 2026-09-15T07:25:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
 # Held element emphasis
@@ -77,3 +77,17 @@ Host-binding guidance gains the distinction between reporting an event and descr
 ### Roadmap
 
 None.
+
+## Discussion
+
+### A kind, or a property of an occurrence
+
+A held variant of `emphasise-elements` lengthens the kind list for something that is not a different statement — the presenter is still saying "this one matters", only for longer. An occurrence-level statement that the host is describing a state is the smaller surface, but it moves the distinction into the host binding where the document cannot see it, and a document that cannot express "this is a state" cannot be read as one. That tension is the decision, and the first Step should not be taken without resolving it.
+
+### Reduced motion for something that persists
+
+A finite pulse degrades to a still outline that then disappears. A held emphasis has nowhere to degrade except a steady treatment, which is the still treatment — so under reduced motion, held and still converge. That is probably acceptable, but it should be confirmed as a decision rather than discovered in implementation, because it means reduced-motion users get no signal that the state is live rather than drawn.
+
+### The persistence line
+
+`ADR-INFOSCHEMATICS-026` ruled out persistent presentation state. A hold whose life the host still owns is arguably not that, but the argument has to be written down, because the request after "keep it while the step is on screen" is "keep it while the document is open", and that one is the thing the record excluded.

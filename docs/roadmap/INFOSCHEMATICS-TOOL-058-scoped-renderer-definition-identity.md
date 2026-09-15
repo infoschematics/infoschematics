@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-058
 area: TOOL
 title: Scoped renderer definition identity
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T07:05:00Z
-updated_at: 2026-09-15T07:05:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
 # Scoped renderer definition identity
@@ -80,3 +80,17 @@ Host-integration guidance needs a line only if hosts gain a responsibility, whic
 ### Roadmap
 
 None.
+
+## Discussion
+
+### Default correctness over host configuration
+
+`STATIC-015` makes the prefix host-supplied because a static render has no mount to derive identity from. Canvas does, which is why `useId` is the better default here: the two renderers converge on scoped identifiers without converging on "the host names them". Keeping the host-supplied option is worth it for a host that needs stable identifiers across renders, but it must stay optional, or the contract has moved the bug onto the consumer.
+
+### The stylesheet rule is the awkward part
+
+`packages/view-canvas/src/styles.css` names `url(#infoschematic-grid-major-plus-minor)` in a rule, and a per-mount identifier cannot appear in a static stylesheet. Either the grid fill declaration moves inline onto the element, or the patterns keep global identifiers and only the markers get scoped. The second is a half-fix, and the grid is the wider blast radius of the two, so this should be settled before any code is written.
+
+### Why a green suite missed it
+
+Every existing Canvas test mounts one instance, and document-order collision needs two. The host fixture that found this is the shape the suite was missing rather than a one-off, and the same reasoning applies to anything else Canvas emits into a shared document.

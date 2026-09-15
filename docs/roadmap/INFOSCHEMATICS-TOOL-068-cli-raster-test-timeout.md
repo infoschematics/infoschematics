@@ -1,18 +1,18 @@
 ---
 id: INFOSCHEMATICS-TOOL-068
 area: TOOL
-title: The raster command-line tests time out under a parallel gate
+title: Raster CLI test timeout
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T14:50:00Z
-updated_at: 2026-09-15T14:50:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
-# The raster command-line tests time out under a parallel gate
+# Raster CLI test timeout
 
 ## Goal
 

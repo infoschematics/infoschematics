@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-063
 area: TOOL
 title: Point interactivity in Design
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T12:10:00Z
-updated_at: 2026-09-15T12:10:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
 # Point interactivity in Design
@@ -76,3 +76,17 @@ Producer guidance gains a Point section once there is something to do with one.
 ### Roadmap
 
 None.
+
+## Discussion
+
+### The one open question decides everything
+
+As its own `ArtefactKind`, a Point gets a layer, a control, a Properties panel and a capability row by construction — at the cost of a sixth kind whose capability row is mostly "no", and which every host and the matrix must now carry. As an addressable part of the Flow that owns it, it inherits the Flow's layer and selection — at the cost of `DESIGN-014`'s six-kind wording, and of a hit target belonging to two things at once. Neither is obviously right, which is why the first Step is the decision rather than the code.
+
+### Size is the usability risk
+
+A Point is small enough that a handle can be correct and still unusable. Hit target size, keyboard reachability, and what happens when two Points sit close enough to overlap are the parts that need looking at on a rendered surface, not asserting in a unit test.
+
+### What the exception costs while it stands
+
+`DESIGN-018` records the gap honestly, so the corpus is not lying. But `DESIGN-014` promises six kinds to any reader who does not follow the exception through, and the vocabulary carries `point` as a canonical term with authored geometry. The gap is visible to a consumer in a way the specification's own bookkeeping does not convey.

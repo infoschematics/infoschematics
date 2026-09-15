@@ -1,18 +1,18 @@
 ---
 id: INFOSCHEMATICS-TOOL-066
 area: TOOL
-title: Docked panels follow the production mode
+title: Panels follow the mode
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T14:05:00Z
-updated_at: 2026-09-15T14:05:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
-# Docked panels follow the production mode
+# Panels follow the mode
 
 ## Goal
 

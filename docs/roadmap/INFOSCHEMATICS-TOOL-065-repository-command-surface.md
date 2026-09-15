@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-065
 area: TOOL
 title: Repository command surface
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T14:05:00Z
-updated_at: 2026-09-15T14:05:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
 # Repository command surface
@@ -20,11 +20,11 @@ Make the repository's own commands comprehensible: one obvious way to run each j
 
 ## Context
 
-The root manifest carries twenty-eight scripts across three naming regimes, `scripts/` carries nine executable entry points beside its tests, and `packages/cli` now publishes a command of its own. The surface grew one command at a time with each feature and has never been read as a whole, so it is no longer clear which command a contributor or an agent should reach for. Raised directly: "I'm wondering if it's all understood really how it works."
+The root manifest carries thirty scripts across three naming regimes, `scripts/` carries eight executable entry points beside its tests and its two libraries, and `packages/cli` now publishes a command of its own. The surface grew one command at a time with each feature and has never been read as a whole, so it is no longer clear which command a contributor or an agent should reach for. Raised directly: "I'm wondering if it's all understood really how it works."
 
 The published CLI is the reason to look now. `packages/cli` renders an Infoschematic document to SVG, PNG, or a preview server; `scripts/render-example.ts` renders an Infoschematic document to SVG or PNG and differs only in resolving a registered example id rather than a pathname. One of those two is the product and the other is a development convenience that could be a thin call into it.
 
-The monorepo migration in flight is the other reason to hold this rather than act on it immediately: a task runner changes which scripts need to exist at the root at all, so auditing the list before that lands would audit a list that is about to move.
+The monorepo migration was the reason to hold this rather than act immediately, and it has since landed (`INFOSCHEMATICS-TOOL-067`, delivered). Turborepo now owns the task graph, several root scripts have become thin `turbo run` wrappers, and `scripts/build-packages.ts` and `scripts/typecheck.ts` are gone — so the list is settled enough to audit.
 
 ## Boundary
 
@@ -34,7 +34,7 @@ This item rationalises how the repository's own jobs are invoked. It does not ch
 
 Concrete findings from reading the surface, each to be confirmed against the tree at delivery rather than trusted from here:
 
-- `build` and `self:cf:build` express the same pipeline twice — packages then site — differing only in whether the site leg is spelled directly or through `ki:site:build`.
+- `build` and `self:cf:build` are now byte-identical: both are `turbo run build`. The migration collapsed the pipeline without collapsing the two names for it, so one of them is pure duplication.
 - `scripts/render-example.ts` duplicates what `packages/cli` does, as above.
 - `scripts/ibc-visual-compatibility.ts` is fifteen kilobytes of `sharp`-based comparison reachable from no script entry at all; only its own test calls it. That contradicts the premise stated in `scripts/cli.ts` that every script is a real command.
 - `ki:deps:update` is `bun update --latest`, which would drive straight through the four major-version holds recorded in `.ki.toml` rather than respecting them.
@@ -64,7 +64,7 @@ Run `bun run self:check` and confirm the gate covers exactly what it covered bef
 
 ## Dependencies / blocks
 
-Sequence after the monorepo migration in flight, which changes which root scripts a task runner needs. Coordinate with major dependency upgrades (`INFOSCHEMATICS-TOOL-052`) only to the extent that both touch the root manifest.
+Nothing blocks this now. The monorepo migration it was sequenced behind has landed (`INFOSCHEMATICS-TOOL-067`, delivered), which is what settled the root script list. Coordinate with major dependency upgrades (`INFOSCHEMATICS-TOOL-052`) only to the extent that both touch the root manifest.
 
 ## Documentation impact
 

@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-060
 area: TOOL
 title: Travelling element emphasis
 theme: tool
-horizon: triage
-status: draft
+horizon: next
+status: ready
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-055]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T08:50:00Z
-updated_at: 2026-09-15T08:50:00Z
+updated_at: 2026-09-15T15:00:00Z
 ---
 
 # Travelling element emphasis
@@ -76,3 +76,17 @@ Host-binding guidance gains the distinction between marking a thing and tracing 
 ### Roadmap
 
 None.
+
+## Discussion
+
+### Renderer choice or authored meaning
+
+If travelling is a renderer interpretation, a document cannot ask for it and a presenter cannot rely on getting it. If it is an authored meaning, the vocabulary gains a term dangerously close to "animate", which the boundary forbids. The way out is a meaning a presenter would say out loud — tracing a path, walking a cycle — that happens to be carried by movement, rather than a technique wearing a meaning's name.
+
+### Geometry that cannot carry it
+
+A Point has no perimeter. A Flow may already have a signal treatment running along it, so a second travelling mark competes on the same channel. A Region containing other elements would have the mark cross its children. The boundary already permits not supporting every kind; this item should name which kinds it excludes and why, because degrading silently is worse than refusing.
+
+### The still interpretation is the hard half
+
+Static output has no time, so travelling has to mean something in a single frame, and it has to differ from the finite emphasis or the two are indistinguishable in print. A direction marker on the perimeter is one answer. Stating that the still case deliberately cannot distinguish them is another, but it is a decision to record, not an omission to leave.

@@ -6,7 +6,7 @@ theme: tool
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-055]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-08T02:09:11Z
 updated_at: 2026-09-14T08:38:20Z
