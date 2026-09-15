@@ -48,6 +48,7 @@ Each term carries a stable `Id`. Code and documents cite a concept by that id ra
 | `producer-controls` | <span id="producer-controls"></span>Producer controls | control surface |
 | `details-panel` | <span id="details-panel"></span>Details panel | sidebar, inspector, state |
 | `interaction-layer` | <span id="interaction-layer"></span>Interaction layer | selectable kind, layer filter |
+| `selection-anchor` | <span id="selection-anchor"></span>Selection anchor | primary selection, first held element |
 | `info` | <span id="info"></span>Info | what is currently shown |
 | `schematics` | <span id="schematics"></span>Schematics | technical references and interfaces |
 

@@ -172,13 +172,29 @@ _Verify:_ inspect the rendered document order for a selected Region that an over
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.tsx` resolves the selection's controls once and draws them in a trailing `infoschematic-foreground` group; `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` asserts the order for every non-Flow kind. A selected Flow already draws as a whole route above the Cards, so its controls travel with it.
 
+### DESIGN-020 — A Design selection may hold several elements
+
+Design MUST allow several elements to be held at once, MUST keep them in the order they were taken, and MUST treat the first as the [selection anchor](../reference/vocabulary.md#selection-anchor). A single selection MUST remain the one-element case of the same selection, so every control that acts on the selection acts on the anchor. Adding one element to the group, and taking one back out, MUST be available by pointer and by keyboard; a range gesture that gathers everything it covers MAY be pointer-only.
+
+Only kinds the capability matrix records as movable MAY take part in a group geometry operation, so a Flow held in the group MUST be left to the ports it is attached to rather than aligned directly. An element whose [interaction layer](../reference/vocabulary.md#interaction-layer) closes MUST leave the group exactly as it leaves a single selection.
+
+Align MUST offer left, horizontal centre, right, top, vertical centre and bottom. Each MUST bring every other participant onto that edge or centre line of the anchor, MUST leave the anchor where it is, and MUST NOT move any participant on the other axis. Distribute MUST offer horizontal and vertical spacing, MUST equalise the gaps between participants, and MUST leave the two outermost participants where they are. Two participants MUST be required to align and three to distribute; a control that cannot act MUST be disabled rather than absent.
+
+Every group operation MUST record ordinary coordinate changes that a later editor can change freely, MUST NOT persist any alignment relationship, and MUST be reversible in one undo step. The reviewable change set MAY list one row per changed element, because a row names the authored source a review has to read.
+
+_Conformance:_ conforming
+
+_Verify:_ run the group cases in `packages/view-model/src/editable-capabilities.test.ts`, `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`.
+
+_Evidence:_ `packages/view-model/src/editable.ts` holds the ordered selection set, reads participation from `artefactCapabilities`, and computes `alignOffsets` and `distributeOffsets` as pure geometry; `packages/view-canvas/src/InfoschematicDiagram.tsx` adds Shift to a press and to Enter, sweeps a range band over the geometry it drew, and marks non-anchor members `group-held`; `packages/view-studio/src/app/editor/use-editor.ts` records every participant's move inside one checkpoint; `packages/view-studio/src/app/editor/EditorTools.tsx` presents the six align and two distribute controls.
+
 ## Quality properties
 
 ### DESIGN-015 — The rendered editor is tested
 
 Studio MUST have rendered interaction tests covering both read-only and editing-capable composition. Model-only and static-markup tests MUST NOT be the sole verification for controls whose behaviour depends on rendered layering, pointer capture, coordinate conversion or interaction between draft layers.
 
-At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal, whole-draft discard, and closing and reopening an interaction layer. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
+At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal, whole-draft discard, closing and reopening an interaction layer, additive and range selection, moving a held group as one, each align and distribute operation, and reversing a whole group operation with one undo. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
 
 _Conformance:_ conforming
 
