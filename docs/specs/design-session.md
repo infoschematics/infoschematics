@@ -173,3 +173,13 @@ _Conformance:_ conforming
 _Verify:_ render narrow and wide Details panels with short and long identifiers and compare column alignment.
 
 _Evidence:_ `packages/view-studio/src/app/panels/ModelRegister.tsx`, `SpecificationTree.tsx`, and the shared Studio styles use explicit identity columns.
+
+### DESIGN-017 — Embedded instances stay independent
+
+A host document MAY mount several inline Canvases over different authored Infoschematics at once. Hover, selection, accessible naming, and authored artefact identity MUST resolve per instance even when two documents author the same codes, and mounting or unmounting one instance MUST NOT change another's rendered state or listeners. A remounted instance MUST behave as a fresh mount.
+
+_Conformance:_ conforming, with a known appearance exception: renderer-internal SVG `defs` identifiers are document-global, so two instances that share a Flow-family or grid identifier resolve to the first definition in the document. Tracked separately; interaction, identity, and naming isolation are unaffected.
+
+_Verify:_ run the Chromium host-fixture suite; it fails when identity or naming leaks across instances, which can be confirmed by giving both fixtures the same title and Card labels.
+
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.host.browser.test.tsx` mounts two deliberately code-colliding documents in one host, exercises per-instance hover and selection, and unmounts and remounts one instance while the other stays live.
