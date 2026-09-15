@@ -129,6 +129,7 @@ const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor
   setPortCount: vi.fn(),
   source: '',
   text: {},
+  toggleLayer: vi.fn(),
   toggleView: vi.fn(),
   undo: vi.fn(),
   view: { snapping: true },

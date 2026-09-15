@@ -8,13 +8,18 @@ import {
   type ArtefactSelection,
   artefactCan,
   artefactCapabilities,
+  artefactKinds,
   createArtefactOperation,
   defineArtefactSelection,
+  everyInteractionLayer,
+  interactionLayerOpen,
   moveArtefactOperation,
   orderArtefactOperations,
   removeArtefactOperation,
   reorderArtefactOperation,
-  resizeArtefactOperation
+  resizeArtefactOperation,
+  selectionWithinLayers,
+  toggleInteractionLayer
 } from './editable.ts'
 
 const regionSelection = defineArtefactSelection({
@@ -210,5 +215,42 @@ describe('dependency-safe operation ordering', () => {
     ).toEqual(['create:region', 'create:card', 'create:flow', 'remove:flow', 'remove:card', 'remove:region'])
     expect(orderArtefactOperations(operations)).not.toBe(operations)
     expect(Object.isFrozen(orderArtefactOperations(operations))).toBe(true)
+  })
+})
+
+describe('Design-session interaction layers', () => {
+  it('opens every kind the capability matrix covers', () => {
+    expect([...artefactKinds].sort()).toEqual(Object.keys(artefactCapabilities).sort())
+    expect([...everyInteractionLayer()].sort()).toEqual([...artefactKinds].sort())
+    for (const kind of artefactKinds) expect(interactionLayerOpen(kind, everyInteractionLayer())).toBe(true)
+  })
+
+  it('reads an absent set as an unfiltered session rather than a closed one', () => {
+    for (const kind of artefactKinds) expect(interactionLayerOpen(kind)).toBe(true)
+    expect(interactionLayerOpen('card', new Set())).toBe(false)
+  })
+
+  it('closes and reopens one kind without disturbing the others', () => {
+    const closed = toggleInteractionLayer(everyInteractionLayer(), 'graphic')
+
+    expect(interactionLayerOpen('graphic', closed)).toBe(false)
+    expect(artefactKinds.filter((kind) => interactionLayerOpen(kind, closed))).toEqual([
+      'region',
+      'fabric',
+      'card',
+      'flow'
+    ])
+    expect([...toggleInteractionLayer(closed, 'graphic')].sort()).toEqual([...artefactKinds].sort())
+    expect(interactionLayerOpen('graphic', everyInteractionLayer())).toBe(true)
+  })
+
+  it('drops a selection whose layer has closed and keeps every other', () => {
+    const withoutCards = toggleInteractionLayer(everyInteractionLayer(), 'card')
+
+    expect(selectionWithinLayers(cardSelection, withoutCards)).toBeNull()
+    expect(selectionWithinLayers(flowSelection, withoutCards)).toBe(flowSelection)
+    expect(selectionWithinLayers(cardSelection, everyInteractionLayer())).toBe(cardSelection)
+    expect(selectionWithinLayers(cardSelection)).toBe(cardSelection)
+    expect(selectionWithinLayers(null, withoutCards)).toBeNull()
   })
 })

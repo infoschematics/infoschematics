@@ -95,6 +95,6 @@ Each named item at `awaiting-review` with a six-heading review packet. No item i
 | `INFOSCHEMATICS-TOOL-048` | `ready` | `awaiting-review` | `--watch` over an injected watch primitive; retained output and recovery; `CLI-008`, `CLI-009`; interrupt status `130` | Leave `--watch` running, break a document, fix it |
 | `INFOSCHEMATICS-TOOL-049` | `ready` | `awaiting-review` | `--serve` on loopback, in memory, three routes; shares the watch loop; `ADR-INFOSCHEMATICS-025`; `CLI-010`, `CLI-011` | Open the preview, break a document, watch it recover |
 | `INFOSCHEMATICS-TOOL-055` | `ready` | `awaiting-review` | `ADR-INFOSCHEMATICS-026`; `DYNAMIC-001`–`DYNAMIC-006`; Studio rehearsal bank; found `TOOL-059` and `TOOL-060` | Play a Dynamic in Studio and in the playground; say whether a held or travelling emphasis is wanted next |
-| `INFOSCHEMATICS-TOOL-045` | `ready` | pending | —        | —                 |
+| `INFOSCHEMATICS-TOOL-045` | `ready` | `awaiting-review` | Five interaction-layer controls; foreground selection controls; `DESIGN-018`, `DESIGN-019`, amended `DESIGN-015`; `interaction-layer` vocabulary; `elementFromPoint` browser cases; found `TOOL-063` | Close a layer over a stack and edit what is under it; say whether Points need their own layer |
 | `INFOSCHEMATICS-TOOL-046` | `ready` | pending | —        | —                 |
 | `INFOSCHEMATICS-TOOL-052` | `ready` | pending | —        | —                 |

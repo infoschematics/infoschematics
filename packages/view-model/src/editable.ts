@@ -123,6 +123,49 @@ export const artefactCapabilities: Readonly<Record<ArtefactKind, ArtefactCapabil
 export const artefactCan = (kind: ArtefactKind, capability: ArtefactCapability): boolean =>
   artefactCapabilities[kind][capability]
 
+/** Every kind a Design session can reach, in the order a control surface presents them. */
+export const artefactKinds: readonly ArtefactKind[] = Object.freeze([
+  'region',
+  'fabric',
+  'card',
+  'flow',
+  'graphic'
+] as const)
+
+/**
+ * Which visual element kinds the open Design session lets a Producer reach.
+ *
+ * A layer is a filter over interaction, not over the diagram: a closed layer keeps its elements drawn exactly as
+ * authored and only stops them answering the pointer and the keyboard, so a Graphic laid across a Card can be edited
+ * without moving either of them. Nothing here is authored, so nothing here is written back: the set belongs to the
+ * session, and leaving Design restores every layer.
+ */
+export type InteractionLayers = ReadonlySet<ArtefactKind>
+
+/** The state a Design session opens in: every kind interactive. */
+export const everyInteractionLayer = (): InteractionLayers => new Set(artefactKinds)
+
+/** Whether a kind answers interaction. An absent set is an unfiltered session rather than a closed one. */
+export const interactionLayerOpen = (kind: ArtefactKind, layers?: InteractionLayers): boolean =>
+  layers?.has(kind) ?? true
+
+export const toggleInteractionLayer = (layers: InteractionLayers, kind: ArtefactKind): InteractionLayers => {
+  const next = new Set(layers)
+  if (!next.delete(kind)) next.add(kind)
+  return next
+}
+
+/**
+ * The selection a closed layer leaves behind: none of it.
+ *
+ * Holding a selection whose kind can no longer be reached leaves handles on screen that nothing can operate, so
+ * closing a layer clears what it was holding rather than stranding it.
+ */
+export const selectionWithinLayers = (
+  selection: ArtefactSelection | null,
+  layers?: InteractionLayers
+): ArtefactSelection | null => (selection && interactionLayerOpen(selection.kind, layers) ? selection : null)
+
 export const defineArtefactSelection = <T extends ArtefactSelection>(selection: T): T =>
   Object.freeze({ ...selection }) as T
 

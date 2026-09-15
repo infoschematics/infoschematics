@@ -11,11 +11,15 @@ import {
   artefactCapabilities as capabilitiesByKind,
   createArtefactOperation,
   type EditableDiagram,
+  everyInteractionLayer,
+  type InteractionLayers,
   moveArtefactOperation,
   orderChanges,
   type ResizeMinimum,
   reorderArtefactOperation,
-  resizeArtefactOperation
+  resizeArtefactOperation,
+  selectionWithinLayers,
+  toggleInteractionLayer
 } from '@infoschematics/view-model/editable'
 import type { Box, Offset, Point } from '@infoschematics/view-model/geometry'
 import { type Guide, snapBoxToGuides, snapToGuides } from '@infoschematics/view-model/guides'
@@ -256,6 +260,14 @@ export function useEditor(
   const [mode, setMode] = useState<EditorMode>(null)
   const editing = mode !== null
   const [view, setView] = useState<EditorView>(closedView)
+  /*
+   * Which kinds answer interaction, for this session only.
+   *
+   * Nothing here is authored, so nothing is written back and there is no draft to persist: a closed layer is a filter
+   * over what the Producer can reach, never over what the diagram shows. Every mode change reopens the set, because a
+   * filter carried silently into the next sitting is indistinguishable from an element that has stopped working.
+   */
+  const [layers, setLayers] = useState<InteractionLayers>(everyInteractionLayer)
   const [guides, setGuides] = useState<readonly Guide[]>([])
   // What a nudge acts on. Set by dragging, because the last thing touched is
   // what a presenter means by "this one" - there is no separate selection to make.
@@ -437,6 +449,18 @@ export function useEditor(
    * The rest hold absolute values, so for them the value being what the model
    * already says is enough to know they have been applied.
    */
+  /*
+   * A selection held in a layer that has just closed goes with it.
+   *
+   * Leaving it would leave an element selected and unreachable: its own handles are the only way back to it, and the
+   * layer that closed has just taken them away. Selection and layers are separate state, so the rule that binds them
+   * is applied where they meet rather than inside whichever control happened to change one of them.
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `selectKey` is rebuilt every render and only ever resets the same three pieces of state, so listing it would re-run this on every render without changing what it does.
+  useEffect(() => {
+    if (selectedArtefact && !selectionWithinLayers(selectedArtefact, layers)) selectKey(null)
+  }, [layers, selectedArtefact])
+
   const swept = useRef(false)
   useEffect(() => {
     if (swept.current) return
@@ -1409,6 +1433,7 @@ export function useEditor(
       if (next === editing) return
       setMode(next ? 'design' : null)
       setView(next ? openView : closedView)
+      setLayers(everyInteractionLayer())
       if (!next) {
         selectKey(null)
       }
@@ -1424,9 +1449,18 @@ export function useEditor(
       closeGesture()
       setMode(next)
       setView(next === 'design' ? openView : closedView)
+      setLayers(everyInteractionLayer())
       selectKey(null)
     },
     mode,
+    layers,
+    /*
+     * Close or reopen one kind's interaction layer.
+     *
+     * Read from the set rather than the argument, so two controls pressed inside one tick both take effect instead
+     * of the later one deciding on a set that predates the earlier.
+     */
+    toggleLayer: (kind: ArtefactKind) => setLayers((current) => toggleInteractionLayer(current, kind)),
     toggleView: (key: keyof EditorView) => setView((current) => ({ ...current, [key]: !current[key] })),
     view
   }

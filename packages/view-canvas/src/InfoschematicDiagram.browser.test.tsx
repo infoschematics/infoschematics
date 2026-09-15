@@ -1,10 +1,17 @@
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
-import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import {
+  type ArtefactSelection,
+  everyInteractionLayer,
+  type InteractionLayers,
+  toggleInteractionLayer
+} from '@infoschematics/view-model/editable'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Canvas } from './Canvas.tsx'
+// Hit testing is the subject below, and `pointer-events` is declared in the stylesheet rather than in the markup.
+import './styles.css'
 
 const config = defineInfoschematic({
   title: 'Editing interaction',
@@ -178,6 +185,26 @@ function RouteInteractionHarness({ initialSelection }: { initialSelection: Artef
         selectedArtefact={selected}
       />
       <output data-testid="route-events">{events.join('|')}</output>
+    </>
+  )
+}
+
+function LayeredHarness({ layers }: { layers: InteractionLayers }) {
+  const [selected, setSelected] = useState<ArtefactSelection | null>(null)
+  const [events, setEvents] = useState<string[]>([])
+  return (
+    <>
+      <Canvas
+        config={config}
+        layers={layers}
+        mode="design"
+        onArtefactSelect={(selection) => {
+          setSelected(selection)
+          setEvents((current) => [...current, `select:${selection?.id ?? 'none'}`])
+        }}
+        selectedArtefact={selected}
+      />
+      <output data-testid="layer-events">{events.join('|')}</output>
     </>
   )
 }
@@ -506,4 +533,66 @@ test('Waypoint and interior-segment gestures share one rendered route lifecycle'
   window.dispatchEvent(new PointerEvent('pointermove', { ...screenPoint(svg, 300, 211), bubbles: true, pointerId: 17 }))
   window.dispatchEvent(new PointerEvent('pointerup', { ...screenPoint(svg, 300, 211), bubbles: true, pointerId: 17 }))
   await expect.poll(events).toContain('segment:FLOW-ADAPTER:1')
+})
+
+/*
+ * Hit testing rather than markup, because that is the part a Producer feels.
+ *
+ * `elementFromPoint` answers with whatever the browser would have delivered the press to, so it sees `pointer-events`
+ * exactly as a pointer does - which is the only way to show that a closed layer stops standing in the way, rather
+ * than merely stops listening.
+ */
+const atPoint = (svg: SVGSVGElement, x: number, y: number) => {
+  const { clientX, clientY } = screenPoint(svg, x, y)
+  return document.elementFromPoint(clientX, clientY)
+}
+
+const artefactAt = (svg: SVGSVGElement, x: number, y: number) =>
+  atPoint(svg, x, y)?.closest('[data-artefact-id]')?.getAttribute('data-artefact-id') ?? null
+
+test('an open Flow layer offers a port over the Card edge beneath it', async () => {
+  const { container } = await render(<LayeredHarness layers={everyInteractionLayer()} />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  if (!svg) throw new Error('rendered fixture is incomplete')
+
+  // CARD-A runs to x=180 and carries E1 there, so its own edge and the port's target circle share this point.
+  expect(atPoint(svg, 176, 195)?.closest('.audit-port')).not.toBeNull()
+  expect(artefactAt(svg, 176, 195)).toBeNull()
+})
+
+test('closing the Flow layer hands the Card edge back to the Card', async () => {
+  const { container } = await render(
+    <LayeredHarness layers={toggleInteractionLayer(everyInteractionLayer(), 'flow')} />
+  )
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  if (!svg) throw new Error('rendered fixture is incomplete')
+
+  expect(artefactAt(svg, 176, 195)).toBe('CARD-A')
+  expect(container.querySelector('.audit-port')).toBeNull()
+  // The route itself is still drawn, and still no longer answers.
+  expect(container.querySelector('[data-artefact-id="FLOW-A"]')?.getAttribute('class')).toContain('layer-inert')
+  expect(atPoint(svg, 270, 195)?.closest('[data-artefact-id="FLOW-A"]')).toBeNull()
+  // So is the code chip, which is read as well as dragged: it keeps its place and loses only the drag.
+  const chip = container.querySelector<SVGGElement>('.audit-flow')
+  expect(chip?.getAttribute('class')).toContain('layer-inert')
+  const box = chip?.getBoundingClientRect()
+  if (!box) throw new Error('the Flow code chip is not rendered')
+  expect(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('.audit-flow')).toBeNull()
+})
+
+test('a closed Card layer leaves the Card drawn, unreachable, and unselectable', async () => {
+  const { container } = await render(
+    <LayeredHarness layers={toggleInteractionLayer(everyInteractionLayer(), 'card')} />
+  )
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  if (!svg || !card) throw new Error('rendered fixture is incomplete')
+
+  expect(card.getAttribute('class')).toContain('layer-inert')
+  expect(card.getAttribute('tabindex')).toBeNull()
+  expect(artefactAt(svg, 130, 195)).toBeNull()
+
+  const { clientX, clientY } = screenPoint(svg, 130, 195)
+  card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX, clientY, pointerId: 40 }))
+  await expect.poll(() => container.querySelector('[data-testid="layer-events"]')?.textContent).toBe('')
 })

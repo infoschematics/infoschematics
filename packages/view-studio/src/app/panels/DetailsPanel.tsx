@@ -7,6 +7,7 @@ import type {
   ArtefactKind,
   ArtefactSelection,
   ArtefactValueByKind,
+  InteractionLayers,
   Placement
 } from '@infoschematics/view-model/editable'
 import { type PortCounts, portsForBox, type Side } from '@infoschematics/view-model/ports'
@@ -131,6 +132,9 @@ export type DetailsPanelEditor = {
   setPortCount: (code: string, side: Side, count: number) => void
   source: string
   text: Readonly<Record<string, TextDraft>>
+  /** Which kinds a Design session lets the Producer reach. */
+  layers?: InteractionLayers
+  toggleLayer: (kind: ArtefactKind) => void
   toggleView: (key: keyof EditorView) => void
   undo: () => void
   view: EditorView
@@ -345,6 +349,8 @@ export function DetailsPanel({
     setPortCount: (code: string, side: Side, count: number) => void
     source: string
     text: Readonly<Record<string, TextDraft>>
+    layers?: InteractionLayers
+    toggleLayer: (kind: ArtefactKind) => void
     toggleView: (key: keyof EditorView) => void
     view: EditorView
   }
@@ -754,7 +760,9 @@ export function DetailsPanel({
               onCreateCard={onCreateCard}
               onGridSizeChange={onGridSizeChange}
               onResetRoute={onResetRoute}
+              layers={editor.layers}
               onToggle={editor.toggleView}
+              onToggleLayer={editor.toggleLayer}
               view={editor.view}
             />
           </div>

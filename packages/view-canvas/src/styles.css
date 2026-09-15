@@ -288,6 +288,17 @@
   pointer-events: auto;
 }
 
+/* A kind whose interaction layer the Producer has closed. It keeps its authored
+   appearance and its place in the diagram, and answers nothing: withholding the
+   handlers alone would not be enough, because an element that still takes pointer
+   events blocks whatever sits beneath it even with nothing listening. Keyboard
+   reach goes from the markup, since pointer-events leaves the tab order alone. */
+.infoschematic-svg.editing .layer-inert,
+.infoschematic-svg.editing .layer-inert * {
+  cursor: default;
+  pointer-events: none;
+}
+
 .infoschematic-svg.editing .infoschematic-region.artefact-selectable {
   pointer-events: auto;
 }

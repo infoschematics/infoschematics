@@ -2597,6 +2597,27 @@ button:focus-visible,
   color: #dff3ff;
 }
 
+/* A layer control is pressed in the state a session opens in, so five lit
+   buttons would be the resting appearance of the row and would say nothing.
+   The closed layer is the exceptional one, so it is the one that is marked. */
+.tool-button.layer-button[aria-pressed="true"] {
+  background: #ffffff08;
+  border-color: #ffffff18;
+  color: #9fb4cc;
+}
+
+.tool-button.layer-button[aria-pressed="true"]:hover {
+  border-color: #79c9ff55;
+  color: #dff3ff;
+}
+
+.tool-button.layer-button[aria-pressed="false"] {
+  background: #f0b35714;
+  border-color: #f0b35799;
+  color: #f0b357;
+  opacity: 0.85;
+}
+
 .grid-size-control {
   align-items: center;
   background: #ffffff08;

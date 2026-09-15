@@ -47,6 +47,7 @@ Each term carries a stable `Id`. Code and documents cite a concept by that id ra
 | `infoschematic-panel` | <span id="infoschematic-panel"></span>Infoschematic panel | canvas, main view |
 | `producer-controls` | <span id="producer-controls"></span>Producer controls | control surface |
 | `details-panel` | <span id="details-panel"></span>Details panel | sidebar, inspector, state |
+| `interaction-layer` | <span id="interaction-layer"></span>Interaction layer | selectable kind, layer filter |
 | `info` | <span id="info"></span>Info | what is currently shown |
 | `schematics` | <span id="schematics"></span>Schematics | technical references and interfaces |
 
@@ -109,6 +110,8 @@ The application has three modes:
 - **Direct** — edits Sequences, their Scenes, Callouts and Storyboards.
 
 Its persistent regions are the **Infoschematic panel**, **Producer controls**, and **Details panel**. A region keeps its identity as the selected mode changes what it exposes.
+
+Design divides its elements into one **Interaction layer** per artefact kind. A layer is a filter over what answers the Producer, not over what the Diagram draws: closing one leaves its elements exactly as authored and exactly where they were, and stops them taking a press or a keystroke meant for something else. It is session state, chosen by the Producer for the sitting and never written to authored source.
 
 ## Code conventions
 

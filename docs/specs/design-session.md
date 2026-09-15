@@ -150,13 +150,35 @@ _Verify:_ inspect `packages/view-model/src/editable.ts`, `packages/view-canvas/s
 
 _Evidence:_ `packages/view-model/src/editable.ts`, `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/editor/ArtefactControls.tsx`.
 
+### DESIGN-018 — Design interaction is filterable by element kind
+
+Design MUST let a Producer choose, per element kind, whether elements of that kind answer interaction, and MUST open every session with every kind interactive. Closing a kind MUST remove its elements from pointer hit testing and from keyboard reach, and MUST leave their authored data, their place in the document, and their rendered appearance unchanged. An affordance that exists only to operate a kind — a Card port, which exists to attach a Flow — MUST follow that kind's layer rather than its host's.
+
+A selection whose kind is closed MUST be released, because its own controls would otherwise be the only way to reach an element that no longer answers. The chosen filter is session state: it MUST NOT be written to authored source, and it MUST reset to every kind interactive whenever the Design session opens or closes.
+
+_Conformance:_ conforming, with a known gap: `DESIGN-014` names Point as a selectable kind, but no renderer in Canvas hit-tests a Point, so there is no Point interaction for a layer to filter. Tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md); the five kinds Canvas does hit-test are each filterable.
+
+_Verify:_ run the Chromium layer cases in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`. They resolve each press through `elementFromPoint`, so a closed kind that merely stopped listening while still taking pointer events fails.
+
+_Evidence:_ `packages/view-model/src/editable.ts` defines the layer set and the selection rule; `packages/view-canvas/src/InfoschematicDiagram.tsx` withholds the selectable classes, the `role`, and the `tabIndex` of a closed kind and marks it `layer-inert`; `packages/view-canvas/src/styles.css` takes `layer-inert` out of hit testing; `packages/view-studio/src/app/editor/EditorTools.tsx` presents one control per kind and `use-editor.ts` holds the set for the session only.
+
+### DESIGN-019 — A selection's controls draw above the diagram
+
+While an element is selected, its resize handle and within-kind actions MUST be rendered above every element the diagram places, and MUST return to the ordinary order as soon as the selection changes, clears, or Design mode ends. Nothing about this promotion MAY be authored, and it MUST NOT change the canonical order of any authored array.
+
+_Conformance:_ conforming
+
+_Verify:_ inspect the rendered document order for a selected Region that an overlapping Card would otherwise cover; the controls MUST follow every `data-artefact-id` group.
+
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.tsx` resolves the selection's controls once and draws them in a trailing `infoschematic-foreground` group; `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` asserts the order for every non-Flow kind. A selected Flow already draws as a whole route above the Cards, so its controls travel with it.
+
 ## Quality properties
 
 ### DESIGN-015 — The rendered editor is tested
 
 Studio MUST have rendered interaction tests covering both read-only and editing-capable composition. Model-only and static-markup tests MUST NOT be the sole verification for controls whose behaviour depends on rendered layering, pointer capture, coordinate conversion or interaction between draft layers.
 
-At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal and whole-draft discard. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
+At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal, whole-draft discard, and closing and reopening an interaction layer. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
 
 _Conformance:_ conforming
 

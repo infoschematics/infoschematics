@@ -989,6 +989,7 @@ function AppContent({
                  * step.
                  */
                 mode={canvasMode}
+                layers={editor.layers}
                 litByScene={presentation.mode === 'direct' ? directLit : undefined}
                 onLight={presentation.mode === 'direct' ? directToggle : undefined}
                 createdCards={editor.createdCards}

@@ -196,7 +196,9 @@ describe('InfoschematicDiagram Design editing', () => {
     const adapterSection = source.slice(adapterStart, source.indexOf('{/* Geometry from the placeables', adapterStart))
 
     expect(source).toContain('{ x: true, y: true }')
-    expect(source).toContain('axes={{ height: true, width: true }}')
+    // One resolver decides a selection's controls, so a box kind's handle is described once and in one place.
+    expect(source).toContain('axes: resizable ? { height: true, width: true } : null')
+    expect(source.match(/<ResizeHandle/g)).toHaveLength(1)
     expect(source).not.toContain('{ x: false, y: true }')
     expect(source).not.toContain('{ x: true, y: false }')
     expect(source).toContain("event.key === 'Enter' || event.key === ' '")
@@ -246,6 +248,75 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(dormant(idle) - design({ hovered: 'port:SYS-002:N1' })).toBe(1)
   })
 
+  it('leaves a closed interaction layer drawn, unreachable, and unchanged in the document', () => {
+    const open = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const closed = renderToStaticMarkup(
+      <Canvas config={config} layers={new Set(['card'] as const)} mode="design" onArtefactSelect={() => undefined} />
+    )
+
+    // Every kind still renders, in the same order, with the same identity: a layer filters interaction, not the diagram.
+    for (const selection of selections) expect(closed).toContain(`data-artefact-id="${selection.id}"`)
+    expect(closed.match(/data-artefact-kind="[a-z]+"/g)).toEqual(open.match(/data-artefact-kind="[a-z]+"/g))
+    expect(closed).toContain('class="infoschematic-region layer-inert"')
+    expect(closed).not.toContain('artefact-selectable')
+
+    // Only the open kind keeps its keyboard reach, because pointer-events leaves the tab order alone.
+    // Two Cards remain reachable and nothing else does; the adapter-free config has no sixth target to account for.
+    expect(closed.match(/tabindex="0"/g)?.length).toBe(2)
+    expect(open.match(/tabindex="0"/g)?.length).toBeGreaterThan(2)
+    // The accessible name stays either way: a group a Producer cannot select is still a group a reader can be told about.
+    expect(closed).toContain('aria-label="Region Delivery"')
+    expect(closed.match(/role="button"/g)?.length).toBe(2)
+    expect(closed).toContain('data-artefact-kind="card" data-collection="system" data-ink="dark" role="button"')
+  })
+
+  it("withholds a selection's controls once its own layer closes", () => {
+    const region = selections.find((selection) => selection.kind === 'region')
+    const withoutRegions = renderToStaticMarkup(
+      <Canvas
+        config={config}
+        layers={new Set(['card'] as const)}
+        mode="design"
+        onArtefactRemove={() => undefined}
+        onArtefactReorder={() => undefined}
+        onArtefactResize={() => undefined}
+        onArtefactSelect={() => undefined}
+        selectedArtefact={region}
+      />
+    )
+
+    expect(withoutRegions).not.toContain('infoschematic-foreground')
+    expect(withoutRegions).not.toContain('aria-label="Resize Delivery"')
+  })
+
+  it.each(selections.filter((selection) => selection.kind !== 'flow'))(
+    'draws the controls for a selected $kind above every element the diagram places',
+    (selection) => {
+      const markup = renderToStaticMarkup(
+        <Canvas
+          config={config}
+          mode="design"
+          onArtefactRemove={() => undefined}
+          onArtefactReorder={() => undefined}
+          onArtefactResize={() => undefined}
+          onArtefactSelect={() => undefined}
+          selectedArtefact={selection}
+        />
+      )
+
+      /*
+       * SVG has no stacking property, so a control drawn inside the element it operates sits wherever that element
+       * sits - a Region's corner under a Card that overlaps it. One late layer carries every selection's controls,
+       * and it is temporary: nothing is authored, so the moment the selection goes the layer goes with it.
+       */
+      const foreground = markup.indexOf('infoschematic-foreground')
+      expect(foreground).toBeGreaterThan(-1)
+      expect(foreground).toBeGreaterThan(markup.lastIndexOf('data-artefact-id='))
+      expect(markup.indexOf('artefact-resize-handle')).toBeGreaterThan(foreground)
+      expect(markup.indexOf('artefact-action')).toBeGreaterThan(foreground)
+    }
+  )
+
   it('dims editing affordances rather than removing the diagram they sit on', async () => {
     const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')
 
@@ -254,5 +325,9 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(styles).toContain('.infoschematic-svg.editing .audit-flow.editable:not(.selected):not(.pointed)')
     expect(styles).toContain('.infoschematic-svg.editing .audit-port.dormant')
     expect(styles).toContain('.infoschematic-svg.editing .infoschematic-graphic:hover')
+
+    // A closed layer is the one case where the element does leave hit testing, because a press has to reach past it.
+    expect(styles).toContain('.infoschematic-svg.editing .layer-inert *')
+    expect(styles).not.toContain('!important')
   })
 })

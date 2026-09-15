@@ -484,3 +484,55 @@ test('Studio plays an authored Diagram Dynamic, replays it, and lets it retire',
     .not.toBeNull()
   expect(emphasis()).toBeNull()
 })
+
+test('Studio layer controls close a kind to interaction and release whatever it held selected', async () => {
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={config} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  // The editor mode follows the production mode through an effect, so the Design tools arrive a render later.
+  const control = (label: string) => container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
+  await expect.poll(() => control('Cards interactive')).not.toBeNull()
+  const cards = control('Cards interactive')
+  const flows = control('Flows interactive')
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  if (!cards || !flows || !card) throw new Error('Studio did not render the Design layer controls')
+
+  // Every kind is interactive when Design opens, so the control reads pressed before anything is done to it.
+  expect(cards.getAttribute('aria-pressed')).toBe('true')
+  card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 31 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 31 }))
+  await expect.poll(() => card.classList.contains('selected')).toBe(true)
+
+  /*
+   * Closing the layer the selection lives in releases it. Keeping it would leave a selected element that no longer
+   * answers the pointer, reachable only through the very handles the closed layer has just taken away.
+   */
+  cards.click()
+  await expect.poll(() => cards.getAttribute('aria-pressed')).toBe('false')
+  await expect.poll(() => card.classList.contains('layer-inert')).toBe(true)
+  await expect.poll(() => card.classList.contains('selected')).toBe(false)
+  await expect.poll(() => card.getAttribute('tabindex')).toBeNull()
+  // Closed to interaction, not hidden, and nothing about it authored: the diagram still draws it where it was.
+  expect(card.getAttribute('transform')).toBe('translate(80 170)')
+  expect(container.querySelector('.change-list')?.textContent ?? '').not.toContain('CARD-A')
+
+  // One kind at a time: closing Cards left the Flows control alone, and its ports with it.
+  expect(flows.getAttribute('aria-pressed')).toBe('true')
+  expect(container.querySelector('.audit-port')).not.toBeNull()
+  flows.click()
+  await expect.poll(() => container.querySelector('.audit-port')).toBeNull()
+
+  // Leaving Design and returning reopens every layer, so a filter never outlives the sitting that set it.
+  const present = container.querySelector<HTMLButtonElement>('button[aria-label^="Direct"]')
+  if (!present) throw new Error('Studio has no presentation mode control')
+  present.click()
+  await expect.poll(() => control('Cards interactive')).toBeNull()
+  design.click()
+  await expect.poll(() => control('Cards interactive')?.getAttribute('aria-pressed')).toBe('true')
+  expect(control('Flows interactive')?.getAttribute('aria-pressed')).toBe('true')
+  expect(container.querySelector('.audit-port')).not.toBeNull()
+})

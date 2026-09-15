@@ -1,10 +1,43 @@
-import { Eraser, Grid3x3, Magnet, Spline, SquarePlus, SquareStack } from 'lucide-react'
+import {
+  type ArtefactKind,
+  artefactKinds,
+  type InteractionLayers,
+  interactionLayerOpen
+} from '@infoschematics/view-model/editable'
+import {
+  Eraser,
+  Frame,
+  Grid3x3,
+  Magnet,
+  Network,
+  RectangleHorizontal,
+  Shapes,
+  Spline,
+  SquarePlus,
+  SquareStack,
+  Workflow
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { EditorMode, EditorView } from './use-editor.ts'
 
 const toggles: [keyof EditorView, string, string, typeof Magnet][] = [
   ['snapping', 'Snap to guides', 'Pull a drop onto the nearest edge, centre, or label', Magnet]
 ]
+
+/*
+ * One control per kind the Design session can reach, in the order the diagram stacks them.
+ *
+ * Turning a kind off leaves it drawn exactly as authored and stops it answering the pointer or the keyboard, so a
+ * Card resting over a Region can be worked on without the Region catching every press, and the Region can be caught
+ * without moving the Card off it first. Ports go with Flows, because that is what they exist to attach.
+ */
+const layerControls: Readonly<Record<ArtefactKind, readonly [string, string, typeof Magnet]>> = {
+  card: ['Cards', 'Cards and the adapters around them', RectangleHorizontal],
+  fabric: ['Fabrics', 'Fabric bounds', Network],
+  flow: ['Flows', 'Flow routes, their waypoints, and Card ports', Workflow],
+  graphic: ['Graphics', 'Authored graphics over the diagram', Shapes],
+  region: ['Regions', 'Region boxes and their labels', Frame]
+}
 
 function GridSizeControl({ onChange, value }: Readonly<{ onChange?: (gridSize: number) => void; value: number }>) {
   const [draft, setDraft] = useState(String(value))
@@ -63,7 +96,9 @@ export function EditorTools({
   onGridSizeChange,
   onResetRoute,
   mode,
+  layers,
   onToggle,
+  onToggleLayer,
   view
 }: {
   /** A flow is selected, so its route can be worked on. */
@@ -75,7 +110,10 @@ export function EditorTools({
   onCreateCard?: (kind: 'adapter' | 'card') => void
   onGridSizeChange?: (gridSize: number) => void
   onResetRoute?: () => void
+  /** Which kinds answer interaction. Absent leaves every kind interactive, which is how a session opens. */
+  layers?: InteractionLayers
   onToggle: (key: keyof EditorView) => void
+  onToggleLayer?: (kind: ArtefactKind) => void
   view: EditorView
   /** Which editor is open. The tab decides it; this only reads it. */
   mode?: EditorMode
@@ -113,6 +151,25 @@ export function EditorTools({
           >
             10
           </button>
+          <span className="tool-divider" />
+          {artefactKinds.map((kind) => {
+            const [label, hint, Icon] = layerControls[kind]
+            const open = interactionLayerOpen(kind, layers)
+            return (
+              <button
+                aria-label={`${label} interactive`}
+                aria-pressed={open}
+                className="tool-button layer-button"
+                disabled={!onToggleLayer}
+                key={kind}
+                onClick={() => onToggleLayer?.(kind)}
+                title={`${label} — ${open ? `stop ${hint.toLowerCase()} answering selection` : `let ${hint.toLowerCase()} be selected again`}`}
+                type="button"
+              >
+                <Icon aria-hidden="true" size={15} />
+              </button>
+            )
+          })}
           <span className="tool-divider" />
         </>
       ) : null}

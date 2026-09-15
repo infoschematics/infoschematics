@@ -10,7 +10,14 @@ import {
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
-import type { ArtefactSelection, CreatedComponent, ResizeMinimum } from '@infoschematics/view-model/editable'
+import {
+  type ArtefactKind,
+  type ArtefactSelection,
+  type CreatedComponent,
+  type InteractionLayers,
+  interactionLayerOpen,
+  type ResizeMinimum
+} from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
@@ -66,6 +73,15 @@ type Highlight = { endpoints: ReadonlySet<string>; flows: ReadonlySet<string> }
 type LabelOffsets = ReadonlyMap<string, { dx: number; dy: number }>
 type MovableArtefactSelection = Exclude<ArtefactSelection, { kind: 'flow' }>
 type ResizeAxes = Readonly<{ height: boolean; width: boolean }>
+/** The selection's own controls, resolved once so one layer can draw them wherever the element itself sits. */
+type SelectionControls = Readonly<{
+  actionsAt: Point
+  /** Absent where the kind has no box of its own to resize, which is the case for an adapter. */
+  axes: ResizeAxes | null
+  bounds: Box
+  label: string
+  selection: MovableArtefactSelection
+}>
 type PanGesture = Readonly<{
   clientX: number
   clientY: number
@@ -78,6 +94,19 @@ type MinimapGesture = Readonly<{ pointerId: number }>
 
 const sameArtefact = (left: ArtefactSelection | null | undefined, right: ArtefactSelection) =>
   left?.kind === right.kind && left.id === right.id
+
+const controlsFor = (
+  selection: MovableArtefactSelection,
+  bounds: Box,
+  label: string,
+  resizable: boolean
+): SelectionControls => ({
+  actionsAt: { x: bounds.x + bounds.width - 48, y: bounds.y + 12 },
+  axes: resizable ? { height: true, width: true } : null,
+  bounds,
+  label,
+  selection
+})
 
 const pointInDiagram = (svg: SVGSVGElement, clientX: number, clientY: number): Point | undefined => {
   const matrix = svg.getScreenCTM()
@@ -179,6 +208,7 @@ export function InfoschematicDiagram({
   onRouteRelease,
   hovered,
   onAttach,
+  layers,
   mode = null,
   litByScene,
   onLight,
@@ -233,6 +263,13 @@ export function InfoschematicDiagram({
   /** Release for a waypoint or segment drag, closing the gesture the way a component drag does. */
   onRouteRelease?: () => void
   onAttach?: (code: string, end: 'source' | 'target', port: string, component: string) => void
+  /**
+   * Which visual element kinds this Design session lets a Producer reach.
+   *
+   * Absent leaves every kind interactive, which is what a host that has no layer control wants. The set is the
+   * session's, never the document's: nothing here is written back, and no authored order changes because of it.
+   */
+  layers?: InteractionLayers
   /** Which editor is open, if either. The Infoschematic does not infer it. */
   mode?: CanvasMode
   /** In scene editing, what the selected scene lights, so the Infoschematic can show it. */
@@ -506,6 +543,18 @@ export function InfoschematicDiagram({
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
   const focusing = mode === 'scenes' || mode === 'stories'
+
+  /*
+   * Which kinds a press or a key may reach, which is a different question from which kinds are drawn.
+   *
+   * A closed interaction layer leaves its elements exactly as authored - same geometry, same treatment, same place in
+   * the paint order - and only stops them answering, so a Graphic laid across a Card stops taking the press meant for
+   * the Card without either of them being moved to make room. Keyboard reach has to leave the markup as well:
+   * `pointer-events: none` takes an element out of hit testing and leaves it in the tab order.
+   */
+  const interactive = (kind: ArtefactKind) => editing && interactionLayerOpen(kind, layers)
+  /** The class that takes a closed layer out of hit testing, paired with withholding the selectable classes. */
+  const inert = (kind: ArtefactKind) => (editing && !interactive(kind) ? ' layer-inert' : '')
 
   // Which waypoint carries the delete control. Local rather than editor state:
   // it names a dot on screen for as long as it is looked at, not an edit worth
@@ -825,13 +874,11 @@ export function InfoschematicDiagram({
     axes,
     bounds,
     label,
-    renderOrigin,
     selection
   }: {
     axes: ResizeAxes
     bounds: Box
     label: string
-    renderOrigin?: Point
     selection: MovableArtefactSelection
   }) => {
     if (!onArtefactResize) return null
@@ -880,7 +927,7 @@ export function InfoschematicDiagram({
         }}
         role="button"
         tabIndex={0}
-        transform={`translate(${(renderOrigin?.x ?? bounds.x) + bounds.width} ${(renderOrigin?.y ?? bounds.y) + bounds.height})`}
+        transform={`translate(${bounds.x + bounds.width} ${bounds.y + bounds.height})`}
       >
         <rect height="12" width="12" x="-6" y="-6" />
       </g>
@@ -1305,12 +1352,12 @@ export function InfoschematicDiagram({
         aria-label={`Flow ${flow.code}`}
         data-artefact-id={selection.id}
         data-artefact-kind={selection.kind}
-        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${pendingRemovals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}`}
+        className={`flow-family-${flow.family}${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${flowSelected ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${pendingRemovals[flow.code] ? ' going' : ''}${focusing && litByScene?.has(flow.id) ? ' lit' : ''}${inert('flow')}`}
         key={flow.id}
-        onKeyDown={editing ? artefactKeyDown(selection, flow.code) : undefined}
-        role={editing ? 'button' : undefined}
+        onKeyDown={interactive('flow') ? artefactKeyDown(selection, flow.code) : undefined}
+        role={interactive('flow') ? 'button' : undefined}
         style={{ color: family.color }}
-        tabIndex={editing ? 0 : undefined}
+        tabIndex={interactive('flow') ? 0 : undefined}
       >
         {/* Names for a reader, ports for an editor. It said
             origin:E1 → cdn-ingress:W1 to everyone, which is the question
@@ -1353,11 +1400,13 @@ export function InfoschematicDiagram({
         <path
           className="infoschematic-route-hit"
           d={flow.d}
-          onPointerDown={editing ? routeClicked(flow) : focusing ? () => onLight?.(flow.id, true) : undefined}
+          onPointerDown={
+            interactive('flow') ? routeClicked(flow) : focusing ? () => onLight?.(flow.id, true) : undefined
+          }
           onPointerEnter={onHover ? () => onHover(flow.code) : undefined}
           onPointerLeave={onHover ? () => onHover(null) : undefined}
         />
-        {editing && flowSelected
+        {interactive('flow') && flowSelected
           ? flow.points.slice(1, -2).map((_, offset) => {
               const index = offset + 1
               const start = flow.points[index]
@@ -1381,7 +1430,7 @@ export function InfoschematicDiagram({
         {/* Offered where the pointer is, on the line, snapped to the grid.
             Its own control rather than a click on the line, so a line can
             be looked at without gaining a corner. */}
-        {editing && flowSelected && armed && addAt && !hoveredWaypoint && onAddWaypoint ? (
+        {interactive('flow') && flowSelected && armed && addAt && !hoveredWaypoint && onAddWaypoint ? (
           // biome-ignore lint/a11y/useSemanticElements: SVG has no button element, so a group carrying the role is the pattern inside one.
           <g
             aria-label={`Add a waypoint to ${flow.code}`}
@@ -1406,7 +1455,7 @@ export function InfoschematicDiagram({
             <path d={`M${addAt.x - 3} ${addAt.y} H${addAt.x + 3} M${addAt.x} ${addAt.y - 3} V${addAt.y + 3}`} />
           </g>
         ) : null}
-        {editing && flowSelected && onFreeEnd
+        {interactive('flow') && flowSelected && onFreeEnd
           ? (['start', 'end'] as const)
               .filter((end) => !anchoredEnds.has(`${flow.code}:${end}`))
               .map((end) => {
@@ -1424,7 +1473,7 @@ export function InfoschematicDiagram({
                 )
               })
           : null}
-        {editing && flowSelected
+        {interactive('flow') && flowSelected
           ? flow.points.slice(1, -1).map((point, offset) => {
               const index = offset + 1
               const waypointSelected = selectedWaypoint?.code === flow.code && selectedWaypoint.index === index
@@ -1474,7 +1523,7 @@ export function InfoschematicDiagram({
               )
             })
           : null}
-        {editing && flowSelected && flow.points[0] ? (
+        {interactive('flow') && flowSelected && flow.points[0] ? (
           <ArtefactActions at={flow.points[0]} label={flow.code} selection={selection} />
         ) : null}
       </g>
@@ -1509,15 +1558,15 @@ export function InfoschematicDiagram({
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
       <g
         aria-label={entry.label ?? entry.id}
-        className={`infoschematic-graphic${editing ? ' artefact-selectable' : ''}${pendingRemovals[entry.id] ? ' going' : ''}${
+        className={`infoschematic-graphic${interactive('graphic') ? ' artefact-selectable' : ''}${pendingRemovals[entry.id] ? ' going' : ''}${
           artefactSelected(selection, legacyKey) ? ' selected' : ''
-        }`}
+        }${inert('graphic')}`}
         data-artefact-id={selection.id}
         data-artefact-kind="overlay"
         key={entry.id}
-        onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+        onKeyDown={interactive('graphic') ? artefactKeyDown(selection, legacyKey) : undefined}
         onPointerDown={
-          editing
+          interactive('graphic')
             ? dragArtefact(
                 selection,
                 legacyKey,
@@ -1526,8 +1575,8 @@ export function InfoschematicDiagram({
               )
             : undefined
         }
-        role={editing ? 'button' : 'img'}
-        tabIndex={editing ? 0 : undefined}
+        role={interactive('graphic') ? 'button' : 'img'}
+        tabIndex={interactive('graphic') ? 0 : undefined}
       >
         <title>{entry.label ?? entry.id}</title>
         {Renderer ? (
@@ -1538,24 +1587,43 @@ export function InfoschematicDiagram({
         {editing ? (
           <rect className="graphic-frame" height={bounds.height} width={bounds.width} x={bounds.x} y={bounds.y} />
         ) : null}
-        {editing && artefactSelected(selection, legacyKey) ? (
-          <>
-            <ResizeHandle
-              axes={{ height: true, width: true }}
-              bounds={bounds}
-              label={entry.label ?? entry.id}
-              selection={selection}
-            />
-            <ArtefactActions
-              at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
-              label={entry.label ?? entry.id}
-              selection={selection}
-            />
-          </>
-        ) : null}
       </g>
     )
   })
+
+  /*
+   * The selected element's controls, for the one layer that draws them above everything else.
+   *
+   * A handle drawn inside the element it operates sits wherever that element sits: a Region's resize corner under a
+   * Card that overlaps it, an adapter's remove button under the Card it holds. Lifting the controls rather than the
+   * element leaves every authored order, treatment and position exactly as it was - there is no stacking property to
+   * write and nothing to put back - and the layer goes when the selection changes, clears, or Design mode ends.
+   */
+  const selectionControls = ((): SelectionControls | null => {
+    // A selected Flow already paints above the cards as a whole route, so its own controls travel with it.
+    if (!selectedArtefact || selectedArtefact.kind === 'flow' || !interactive(selectedArtefact.kind)) return null
+    const selection = selectedArtefact
+    if (selection.kind === 'region') {
+      const region = infoschematicRegions.find((candidate) => candidate.id === selection.id)
+      return region ? controlsFor(selection, region.box, region.label, true) : null
+    }
+    if (selection.kind === 'fabric') {
+      const fabric = infoschematicFabrics.find(
+        (candidate) => candidate.id === selection.id && infoschematicFabricIsVisible(candidate, visibleScopes)
+      )
+      return fabric ? controlsFor(selection, movedBox(fabric.bounds, fabric.code), fabric.label, true) : null
+    }
+    if (selection.kind === 'graphic') {
+      const entry = graphics.find((candidate) => candidate.id === selection.id)
+      return entry
+        ? controlsFor(selection, graphicBounds(entry, infoschematicViewBox), entry.label ?? entry.id, true)
+        : null
+    }
+    // A Card, or the adapter clasping one: an adapter identifies itself but has no box of its own to resize.
+    const placeable = placeables.find((candidate) => candidate.id === selection.id)
+    const identity = placeable ? register.cardAt(placeable.code) : undefined
+    return placeable && identity ? controlsFor(selection, placeable.box, identity.label, !identity.wraps) : null
+  })()
 
   /* Emphasis is a layer over the diagram and nothing else: it needs only geometry, and only from what this render
      actually drew, so an occurrence can never make hidden or filtered content appear. Drawn last for the same reason
@@ -1738,16 +1806,16 @@ export function InfoschematicDiagram({
             // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
               aria-label={`Region ${region.label}`}
-              className={`infoschematic-region artefact-selectable${pendingRemovals[region.id] ? ' going' : ''}${artefactSelected(selection, legacyKey) ? ' selected' : ''}`}
+              className={`infoschematic-region${interactive('region') || !editing ? ' artefact-selectable' : ''}${pendingRemovals[region.id] ? ' going' : ''}${artefactSelected(selection, legacyKey) ? ' selected' : ''}${inert('region')}`}
               data-artefact-id={selection.id}
               data-artefact-kind={selection.kind}
               data-frame-treatment={treatment.frame}
               data-label-placement={treatment.label ?? 'none'}
               data-label-treatment={treatment.labelTreatment}
               key={region.id}
-              onKeyDown={editing ? artefactKeyDown(selection, legacyKey) : undefined}
+              onKeyDown={interactive('region') ? artefactKeyDown(selection, legacyKey) : undefined}
               onPointerDown={
-                editing
+                interactive('region')
                   ? dragArtefact(
                       selection,
                       legacyKey,
@@ -1756,8 +1824,8 @@ export function InfoschematicDiagram({
                     )
                   : undefined
               }
-              role={editing ? 'button' : undefined}
-              tabIndex={editing ? 0 : undefined}
+              role={interactive('region') ? 'button' : undefined}
+              tabIndex={interactive('region') ? 0 : undefined}
             >
               {region.fill ? (
                 <rect
@@ -1779,7 +1847,7 @@ export function InfoschematicDiagram({
               ) : null}
               {geometry.label ? (
                 <text
-                  className={`infoschematic-region-label${editing && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
+                  className={`infoschematic-region-label${interactive('region') && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
                     artefactSelected(selection, legacyKey) ? ' selected' : ''
                   }${hovered === legacyKey ? ' pointed' : ''}`}
                   data-ink={ink ?? undefined}
@@ -1794,21 +1862,6 @@ export function InfoschematicDiagram({
                 >
                   {region.label.toUpperCase()}
                 </text>
-              ) : null}
-              {editing && artefactSelected(selection, legacyKey) ? (
-                <>
-                  <ResizeHandle
-                    axes={{ height: true, width: true }}
-                    bounds={region.box}
-                    label={region.label}
-                    selection={selection}
-                  />
-                  <ArtefactActions
-                    at={{ x: region.box.x + region.box.width - 48, y: region.box.y + 12 }}
-                    label={region.label}
-                    selection={selection}
-                  />
-                </>
               ) : null}
             </g>
           )
@@ -1864,13 +1917,13 @@ export function InfoschematicDiagram({
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
               <g
                 aria-label={fabric.label}
-                className={`${fabricClass(fabric.id)}${editing ? ' selectable artefact-selectable' : ''}${pendingRemovals[fabric.code] ? ' going' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}`}
+                className={`${fabricClass(fabric.id)}${interactive('fabric') ? ' selectable artefact-selectable' : ''}${pendingRemovals[fabric.code] ? ' going' : ''}${artefactSelected(selection, fabric.code) ? ' selected' : ''}${hovered === fabric.code ? ' pointed' : ''}${inert('fabric')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 key={fabric.id}
-                onKeyDown={editing ? artefactKeyDown(selection, fabric.code) : undefined}
+                onKeyDown={interactive('fabric') ? artefactKeyDown(selection, fabric.code) : undefined}
                 onPointerDown={
-                  editing
+                  interactive('fabric')
                     ? dragArtefact(
                         selection,
                         fabric.code,
@@ -1881,8 +1934,8 @@ export function InfoschematicDiagram({
                 }
                 onPointerEnter={onHover ? () => onHover(fabric.code) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
-                role={editing ? 'button' : undefined}
-                tabIndex={editing ? 0 : undefined}
+                role={interactive('fabric') ? 'button' : undefined}
+                tabIndex={interactive('fabric') ? 0 : undefined}
               >
                 <title>{fabricTitle(fabric)}</title>
                 {Renderer ? (
@@ -1899,21 +1952,6 @@ export function InfoschematicDiagram({
                     x={bounds.x}
                     y={bounds.y}
                   />
-                ) : null}
-                {editing && artefactSelected(selection, fabric.code) ? (
-                  <>
-                    <ResizeHandle
-                      axes={{ height: true, width: true }}
-                      bounds={bounds}
-                      label={fabric.label}
-                      selection={selection}
-                    />
-                    <ArtefactActions
-                      at={{ x: bounds.x + bounds.width - 48, y: bounds.y + 12 }}
-                      label={fabric.label}
-                      selection={selection}
-                    />
-                  </>
                 ) : null}
               </g>
             )
@@ -2000,15 +2038,15 @@ export function InfoschematicDiagram({
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
               <g
                 aria-label={`${adapter.label}, holding ${adapter.wraps}`}
-                className={`infoschematic-adapter${editing ? ' selectable' : ''}${pendingRemovals[adapter.code] ? ' going' : ''}${
+                className={`infoschematic-adapter${interactive('card') ? ' selectable' : ''}${pendingRemovals[adapter.code] ? ' going' : ''}${
                   highlight?.endpoints.has(adapter.id) ? ' highlighted' : ''
-                }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}`}
+                }${artefactSelected(selection, adapter.code) ? ' selected' : ''}${hovered === adapter.code ? ' pointed' : ''}${inert('card')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 key={placed.id}
-                onKeyDown={editing ? artefactKeyDown(selection, adapter.code) : undefined}
+                onKeyDown={interactive('card') ? artefactKeyDown(selection, adapter.code) : undefined}
                 onPointerDown={
-                  editing
+                  interactive('card')
                     ? (event) => {
                         // Selects the adapter, drags the card. An adapter is a
                         // grip on the thing it holds rather than a thing with a
@@ -2033,8 +2071,8 @@ export function InfoschematicDiagram({
                 }
                 onPointerEnter={onHover ? () => onHover(adapter.code) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
-                role={editing ? 'button' : undefined}
-                tabIndex={editing ? 0 : undefined}
+                role={interactive('card') ? 'button' : undefined}
+                tabIndex={interactive('card') ? 0 : undefined}
               >
                 <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
                 <path className="adapter-socket" d={socket} />
@@ -2046,13 +2084,6 @@ export function InfoschematicDiagram({
                 >
                   {adapter.label}
                 </text>
-                {editing && artefactSelected(selection, adapter.code) ? (
-                  <ArtefactActions
-                    at={{ x: box.x + box.width - 48, y: box.y + 12 }}
-                    label={adapter.label}
-                    selection={selection}
-                  />
-                ) : null}
               </g>
             )
           })}
@@ -2125,17 +2156,17 @@ export function InfoschematicDiagram({
               <g
                 aria-label={accessibleDetail}
                 className={`infoschematic-service ${card.group}${visualTreatment.card.compact ? ' compact' : ''}${highlight?.endpoints.has(card.id) ? ' highlighted' : ''}${
-                  editing || focusing ? ' selectable' : ''
+                  interactive('card') || focusing ? ' selectable' : ''
                 }${artefactSelected(selection, card.code) ? ' selected' : ''}${hovered === card.code ? ' pointed' : ''}${
                   pendingRemovals[card.code] ? ' going' : ''
-                }${focusing && litByScene?.has(card.id) ? ' lit' : ''}`}
+                }${focusing && litByScene?.has(card.id) ? ' lit' : ''}${inert('card')}`}
                 data-artefact-id={selection.id}
                 data-artefact-kind={selection.kind}
                 data-card-compact={visualTreatment.card.compact || undefined}
                 data-collection={domain?.id}
                 data-ink={resolveReadableInk(appearance.fill)}
                 key={card.id}
-                onKeyDown={editing ? artefactKeyDown(selection, card.code) : undefined}
+                onKeyDown={interactive('card') ? artefactKeyDown(selection, card.code) : undefined}
                 /*
                  * Two editors, two meanings for the same press. In the Infoschematic
                  * editor a card is selected and dragged; in the scene editor it
@@ -2143,7 +2174,7 @@ export function InfoschematicDiagram({
                  * nothing to drag because a scene has no geometry.
                  */
                 onPointerDown={
-                  editing
+                  interactive('card')
                     ? (event) => {
                         if (onArtefactMove) {
                           dragArtefact(
@@ -2163,9 +2194,9 @@ export function InfoschematicDiagram({
                 }
                 onPointerEnter={onHover ? () => onHover(card.code) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
-                role={editing ? 'button' : undefined}
+                role={interactive('card') ? 'button' : undefined}
                 style={{ color: 'color' in appearance ? appearance.color : appearance.stroke }}
-                tabIndex={editing ? 0 : undefined}
+                tabIndex={interactive('card') ? 0 : undefined}
                 transform={`translate(${layout.x} ${layout.y})`}
               >
                 <title>{accessibleDetail}</title>
@@ -2223,18 +2254,6 @@ export function InfoschematicDiagram({
                     {text.description.text}
                   </text>
                 ) : null}
-                {editing && artefactSelected(selection, card.code) ? (
-                  <>
-                    <ResizeHandle
-                      axes={{ height: true, width: true }}
-                      bounds={layout}
-                      label={card.label}
-                      renderOrigin={{ x: 0, y: 0 }}
-                      selection={selection}
-                    />
-                    <ArtefactActions at={{ x: layout.width - 48, y: 12 }} label={card.label} selection={selection} />
-                  </>
-                ) : null}
               </g>
             )
           })}
@@ -2242,6 +2261,25 @@ export function InfoschematicDiagram({
         {/* Above the cards, so a selected line and its controls are never behind
           one. It leaves this layer the moment it is deselected. */}
         {selectedFlow ? <g className="infoschematic-flows">{renderFlow(selectedFlow)}</g> : null}
+
+        {/* The selection's own controls, above every element the diagram places, for as long as it is selected. */}
+        {selectionControls ? (
+          <g className="infoschematic-foreground">
+            {selectionControls.axes ? (
+              <ResizeHandle
+                axes={selectionControls.axes}
+                bounds={selectionControls.bounds}
+                label={selectionControls.label}
+                selection={selectionControls.selection}
+              />
+            ) : null}
+            <ArtefactActions
+              at={selectionControls.actionsAt}
+              label={selectionControls.label}
+              selection={selectionControls.selection}
+            />
+          </g>
+        ) : null}
 
         {annotated || editing ? (
           <g aria-label="Infoschematic annotations" className="infoschematic-audit">
@@ -2294,7 +2332,10 @@ export function InfoschematicDiagram({
                 </g>
               )
             })}
-            {editing
+            {/* A port is a Flow control rather than part of a Card, so it goes with the Flow layer: absent rather
+              than dimmed, the way the other editors' handles are, and a press near a Card's edge then reaches the
+              Card instead of a port beside it. */}
+            {interactive('flow')
               ? placeables.flatMap((placeable) =>
                   portsForBox(placeable.box, placeable.ports).map((port) => {
                     const inUse = used.has(`${placeable.id}:${port.id}`) || dropPort === `${placeable.id}:${port.id}`
@@ -2370,10 +2411,12 @@ export function InfoschematicDiagram({
               } as const satisfies ArtefactSelection
               return (
                 <g
-                  className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}`}
+                  /* The chip is where a Flow's code is read as well as where its label is dragged from, so a closed
+                    Flow layer leaves it drawn and takes only the dragging - unlike a port, which is affordance only. */
+                  className={`audit-flow${highlight?.flows.has(flow.id) ? ' highlighted' : ''}${editing ? ' editable' : ''}${artefactSelected(selection, flow.code) ? ' selected' : ''}${hovered === flow.code ? ' pointed' : ''}${inert('flow')}`}
                   key={flow.code}
                   onPointerDown={
-                    editing
+                    interactive('flow')
                       ? (event) => {
                           // Select on the press, not on the drag: below the drag
                           // threshold nothing else would, and a label that cannot
