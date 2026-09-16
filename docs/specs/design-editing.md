@@ -10,7 +10,7 @@ Studio MUST ask the current diagram for handles, guides, placement constraints, 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `EditableDiagram` in `packages/view-model/src/editable.ts` and its use by `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ in Design, read where a handle, a guide and a placement constraint come from: each MUST arrive from the diagram's own editing description. Give one artefact kind a movement rule Studio infers from the rendered React element instead, and the rule survives a change to the diagram that should have withdrawn it — which is the failure this requirement forbids.
 
 _Evidence:_ `EditableDiagram` in `packages/view-model/src/editable.ts` and its use by `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -20,7 +20,7 @@ Keyboard nudging MUST move the current movable selection by the exact requested 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `nudge` in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ select a movable artefact, note its coordinate, and nudge it once by key. The coordinate MUST change by exactly the requested increment, with no guide snapping applied on top; a nudge that lands on a guide instead of the increment fails the requirement.
 
 _Evidence:_ `nudge` in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -30,7 +30,7 @@ When a component movement, endpoint reattachment or direct route edit changes a 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect derived changes, attachments and routes in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ move a Card that a Flow attaches to, reattach a Flow end, and drag a Waypoint, reading the pending change set after each. Every one MUST list the resulting route points; a change set that records the new attachment while the route it reports still ends at the former coordinate fails the requirement.
 
 _Evidence:_ derived changes, attachments and routes in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -40,7 +40,7 @@ Studio MUST allow each side's port count to be edited independently. Changing on
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers layering a side-specific count over the counts in force.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases layer a side-specific port count over the counts in force. Then change one side's count in Design and read the other three: a count edit that rewrites an untouched side fails the requirement.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers layering a side-specific count over the counts in force.
 
@@ -50,7 +50,7 @@ While editing, a port MUST visually distinguish whether a flow currently termina
 
 _Conformance:_ conforming
 
-_Verify:_ inspect port classes and labels in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`. against this requirement.
+_Verify:_ in Design, look at a port a Flow terminates on beside one nothing attaches to: the two MUST be visually distinguishable. Then ask for a port's identity and confirm it can be had on demand without every port label being left on the canvas.
 
 _Evidence:_ port classes and labels in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`.
 
@@ -60,7 +60,7 @@ A producer MUST be able to drag a selected flow endpoint to any compatible port 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect endpoint drag and `dropPort` state in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ drag a selected Flow endpoint over a compatible port and confirm the candidate is indicated before release; then release over empty canvas and over an incompatible target. Each MUST leave the endpoint where it was: a release with no valid candidate that quietly reattaches the Flow fails the requirement.
 
 _Evidence:_ endpoint drag and `dropPort` state in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -70,7 +70,7 @@ A selected flow MUST expose its interior waypoints. Adding or removing a waypoin
 
 _Conformance:_ conforming
 
-_Verify:_ inspect waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ select a Flow and confirm its interior waypoints are exposed; then click the route the way a producer selects it and read the change set. Adding or removing a waypoint MUST take a deliberate editing action, so a selection click that alters the route fails the requirement.
 
 _Evidence:_ waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -104,7 +104,7 @@ Code allocation and allowed families MUST be supplied by the current Infoschemat
 
 _Conformance:_ conforming
 
-_Verify:_ inspect creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ drag from one port to a different, valid port and confirm a Flow is created that then selects, routes, edits and removes like an authored one; release on the originating port, on empty canvas and on an incompatible target and confirm nothing is created. Read the created Flow's code and family: both MUST come from the current Infoschematic rather than a Studio constant.
 
 _Evidence:_ creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -116,7 +116,7 @@ Identity allocation, scope choice and default appearance MUST be supplied by the
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `CreatedComponent` in `packages/view-model/src/editable.ts` and card creation state in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ create a Card, then put it through selection, movement, a port-count change and removal without refining anything first: each MUST work on the defaults alone. Read its identity, scope and appearance against the current Infoschematic — values Studio hard-coded rather than took from the document fail the requirement — and confirm one undo removes the whole creation.
 
 _Evidence:_ `CreatedComponent` in `packages/view-model/src/editable.ts` and card creation state in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -140,7 +140,7 @@ Card and Fabric creation MUST apply the current Scope and requested Canvas place
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/view-studio/src/app/editor/artefact-factories.test.ts` and `packages/view-studio/src/app/editor/LibraryPanel.test.tsx`.
+_Verify:_ run `bun run --filter=@infoschematics/view-studio test`, whose Library cases cover the seed copy, fresh `id` and `code` allocation, and the operation shape. Then instantiate one template twice and mutate a nested value in the first instance: the second MUST be unaffected, and neither created value MUST carry Library metadata, template identity or provenance. Instantiate a Flow template with fewer than two distinct endpoints, or without a Flow family, and creation MUST refuse.
 
 _Evidence:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/view-studio/src/app/editor/artefact-factories.test.ts` and `packages/view-studio/src/app/editor/LibraryPanel.test.tsx`.
 
@@ -154,7 +154,7 @@ Draft projection MUST follow dependency order: effective component geometry, eff
 
 _Conformance:_ conforming
 
-_Verify:_ inspect composition in `packages/view-studio/src/app/App.tsx` and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ in Design, apply an Audience filter and confirm the Design preview ignores it; then make a create, a move, a resize, a property replacement, a within-kind reorder and a removal, and confirm each is visible without the host configuration changing. Move a Card whose Flow has a route draft and a placed route label: the endpoint MUST follow the moved port rather than the draft restoring the stale coordinate, which is what the dependency order exists to prevent. Reject an operation and the base output MUST be unchanged.
 
 _Evidence:_ composition in `packages/view-studio/src/app/App.tsx` and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -166,7 +166,7 @@ The underlying materialiser MUST remain total when it receives a direct Overlay 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/artefact-operations.test.ts` and `packages/view-model/src/artefact-draft.test.ts` cover removal plans, blocking and materialised cascades.
+_Verify:_ run `bun run --filter=@infoschematics/view-studio test` and `bun run --filter=@infoschematics/view-model test`, whose removal cases cover the plans, the blocking rule and the materialised cascade. Then remove a Card a Flow attaches to and read the plan: the Flow removals MUST precede their owner. Remove a Region and nothing else MUST cascade. Remove an Overlay a Sequence Scene references directly and Studio MUST refuse with a stated reason, while the materialiser given that removal directly MUST still clear the Scene's references atomically rather than throwing.
 
 _Evidence:_ `packages/view-studio/src/app/editor/artefact-operations.test.ts` and `packages/view-model/src/artefact-draft.test.ts` cover removal plans, blocking and materialised cascades.
 
@@ -178,7 +178,7 @@ Clearing an optional treatment MUST remove the authored member rather than write
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/region-treatments.test.ts` covers the control values, patches and clears, and `packages/view-studio/src/app/editor/artefact-operations.test.ts` covers member removal.
+_Verify:_ in Design, select a Region and edit its frame style, opacity, fill, label placement, label mount and label offset through their own controls rather than free text; then clear an optional one and read the authored record. The member MUST be gone rather than set to an empty or null value, no clear MUST be offered for a required treatment, and a control value the artefact cannot carry MUST leave it as it stands.
 
 _Evidence:_ `packages/view-studio/src/app/editor/region-treatments.test.ts` covers the control values, patches and clears, and `packages/view-studio/src/app/editor/artefact-operations.test.ts` covers member removal.
 
@@ -188,7 +188,7 @@ Changing one side's port count MUST leave every attached Flow on a valid port of
 
 _Conformance:_ conforming
 
-_Verify:_ inspect port reseating in `packages/view-studio/src/app/editor/infoschematic-editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ attach a Flow to a middle port, then change that side's count up and down. The Flow MUST stay on a valid port of the same artefact, holding its geometric position where that position still exists, and its port identity and rendered route MUST move together. Reduce the side to zero: a Flow left claiming a port no longer offered fails the requirement, so Studio MUST either take a valid replacement or raise a reviewable validation issue.
 
 _Evidence:_ port reseating in `packages/view-studio/src/app/editor/infoschematic-editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -200,7 +200,7 @@ Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the aut
 
 _Conformance:_ conforming
 
-_Verify:_ inspect coordinate conversion in `packages/view-canvas/src/InfoschematicDiagram.tsx`, placement commands in `packages/view-studio/src/app/App.tsx`, and draft construction in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ move one artefact the same distance three ways — pointer drag, keyboard nudge, typed coordinate — and compare the effective geometry and the dependent Flow projection after each: they MUST agree, and each MUST record the dependent changes. Then zoom, pan and change fit mode and panel layout, and repeat the pointer placement: the authored coordinate MUST be the same one. Change the viewport mid-drag and the drag MUST either complete against one transform or cancel without recording a partial edit.
 
 _Evidence:_ coordinate conversion in `packages/view-canvas/src/InfoschematicDiagram.tsx`, placement commands in `packages/view-studio/src/app/App.tsx`, and draft construction in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -210,7 +210,7 @@ Once created, a Card, Fabric or Flow MUST support every operation its authored c
 
 _Conformance:_ conforming
 
-_Verify:_ creation tests cover the full lifecycle after creation, including moving a created endpoint artefact and observing a connected created Flow.
+_Verify:_ create a Card and a Flow attached to it, then move the created Card and watch the created Flow: the route MUST follow, which is the case that proves dependent geometry resolves created identities and ports rather than a register built from authored configuration alone. Put each created artefact through property editing, attachment changes, removal, undo, redo and discard; then create and remove an artefact within one draft and confirm the change set carries no orphaned dependent operation.
 
 _Evidence:_ creation tests cover the full lifecycle after creation, including moving a created endpoint artefact and observing a connected created Flow.
 

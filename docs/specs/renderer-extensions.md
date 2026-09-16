@@ -10,7 +10,7 @@ An unavailable or invalid Fabric renderer MUST retain generic labelled bounds. A
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-canvas/src/renderers.test.tsx` covers inferred definition types, immutable snapshots, diagnostics, resolution and server rendering; `packages/view-canvas/src/Canvas.test.tsx` covers validated implementations and labelled fallbacks without losing interaction geometry.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then configure a Fabric renderer that does not exist and one that throws on its properties: the Fabric must keep generic labelled bounds, and an Overlay in the same state must produce the same labelled placeholder on every run. Tab to the fallback and confirm it carries an accessible name, then compare its geometry, selection, pointer behaviour, and editing frame against the same element with a working renderer — none may be lost to the fallback.
 
 _Evidence:_ `packages/view-canvas/src/renderers.test.tsx` covers inferred definition types, immutable snapshots, diagnostics, resolution and server rendering; `packages/view-canvas/src/Canvas.test.tsx` covers validated implementations and labelled fallbacks without losing interaction geometry.
 
@@ -36,7 +36,7 @@ Every visible authored Fabric MUST render independently. A configured renderer r
 
 _Conformance:_ conforming
 
-_Verify:_ renderer and Canvas integration tests under `packages/view-canvas/src/` cover configured, unknown, unsupported and invalid Fabric renderers.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then render a document whose Fabrics include one with a configured renderer, one with an unknown key, and one with no key at all. Each must appear on its own: the unknown and absent keys fall back to generic bounds-driven rendering, and hiding or breaking one Fabric must leave the others rendered. Confirm a configured renderer receives the Fabric's effective edited bounds rather than its authored ones by dragging it first.
 
 _Evidence:_ renderer and Canvas integration tests under `packages/view-canvas/src/` cover configured, unknown, unsupported and invalid Fabric renderers.
 
@@ -46,7 +46,7 @@ A Sequence Scene Overlay reference MUST resolve to an Overlay in the serialisabl
 
 _Conformance:_ conforming
 
-_Verify:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Sequence Scene Overlay references and accessible fallback rendering.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then give a Sequence Scene an Overlay reference that matches no Overlay in the authored definition: Studio must not invoke a host renderer for it, must not read the reference as a renderer key, and must not narrate a fallback of its own. Repeat with a reference that does resolve and confirm the matching host renderer is invoked with the authored Overlay.
 
 _Evidence:_ Canvas integration tests under `packages/view-canvas/src/` cover resolved and unresolved Sequence Scene Overlay references and accessible fallback rendering.
 
@@ -58,7 +58,7 @@ Canvas MUST accept renderer configuration as an optional application prop. The r
 
 _Conformance:_ conforming
 
-_Verify:_ inspect the renderer contract and context in `packages/view-canvas/src/renderers.tsx`, and the `renderers` prop in `packages/view-canvas/src/Canvas.tsx`. against this requirement.
+_Verify:_ Read the renderer configuration prop in `packages/view-canvas/src/Canvas.tsx` and its distribution in `packages/view-canvas/src/renderers.tsx`: the registry arrives as a prop, and no exported function lets a caller register a renderer after mount. Mutate the object a host passed in and confirm the mounted application does not see the change. Then read `InfoschematicConfig` and confirm Fabric and Overlay components, property validators, diagnostic callbacks, shared SVG definitions, and Scope icons are all absent from it.
 
 _Evidence:_ the renderer contract and context in `packages/view-canvas/src/renderers.tsx`, and the `renderers` prop in `packages/view-canvas/src/Canvas.tsx`.
 
@@ -80,6 +80,6 @@ Studio MUST accept host-owned renderer configuration separately from `Infoschema
 
 _Conformance:_ conforming
 
-_Verify:_ inspect compatibility exports in `packages/view-studio/src/index.ts`; the owning registry and context are in `packages/view-canvas/src/renderers.tsx`. against this requirement.
+_Verify:_ Read Studio's public surface in `packages/view-studio/src/index.ts`: renderer configuration is its own prop, separate from `InfoschematicConfig`, and it is passed down to the Canvas and Present contracts rather than re-declared. Falsified by a second registry type in Studio, by a Fabric, Overlay, Callout, shared SVG definition, or Scope icon implementation stored in authored configuration, or by a reusable package importing one particular realisation.
 
 _Evidence:_ compatibility exports in `packages/view-studio/src/index.ts`; the owning registry and context are in `packages/view-canvas/src/renderers.tsx`.

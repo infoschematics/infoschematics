@@ -10,7 +10,7 @@ Every authored artefact and flow MUST carry an identifier and a display code. Id
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts` and `packages/domain-model/src/point.ts`. against this requirement.
+_Verify:_ Read the shapes in `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts`, and `packages/domain-model/src/point.ts`: each declares its identifier and its display code as its own fields rather than deriving either. Then validate a document whose Flow names an endpoint no artefact declares and confirm it is refused rather than rendered, and reorder and filter a document and confirm every identifier is the one it started with.
 
 _Evidence:_ `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts` and `packages/domain-model/src/point.ts`.
 
@@ -20,7 +20,7 @@ A code MUST be part of the authored model rather than derived from array positio
 
 _Conformance:_ conforming
 
-_Verify:_ inspect the `code` fields in `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/point.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`. against this requirement.
+_Verify:_ Read the `code` fields in `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/point.ts`, `packages/domain-model/src/scene.ts`, and `packages/domain-model/src/story.ts`: each is authored, and none is an ordinal over its array. Then remove a middle entry from an authored document and diff the remaining codes — none may change. Falsified by a code computed from a position, or by a code-family convention baked into Domain Model rather than left to the host.
 
 _Evidence:_ the `code` fields in `packages/domain-model/src/artefact.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/point.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/story.ts`.
 
@@ -72,9 +72,9 @@ An Infoschematic definition MUST be expressible as serialisable data. It MUST NO
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/domain-model/src/modules.test.ts` checks the public module surface; dependency direction is checked by the repository `check:deps` script.
+_Verify:_ Run `bun run test --filter=@infoschematics/domain-model` and `bun run self:boundaries:verify`, then round-trip a complete authored definition through `JSON.stringify` and back and diff it against the original — anything lost was not data. Falsified by a field typed as a React component, a store, a browser object, or a registry, or by a renderer extension point keyed on anything but a stable string with serialisable properties.
 
-_Evidence:_ `packages/domain-model/src/modules.test.ts` checks the public module surface; dependency direction is checked by the repository `check:deps` script.
+_Evidence:_ `packages/domain-model/src/modules.test.ts` checks the public module surface; dependency direction is checked by `bun run self:boundaries:verify`.
 
 ### AUTHOR-008 — Authored data and calculations have separate owners
 
@@ -82,9 +82,9 @@ The Domain Model MUST declare data shapes without importing View Model or view p
 
 _Conformance:_ conforming
 
-_Verify:_ the repository `check:deps` script enforces the Domain Model dependency boundary.
+_Verify:_ Run `bun run self:boundaries:verify`, which decides this through the `domain-model-has-no-workspace-dependencies` and `domain-and-derivation-stay-framework-neutral` rules in `.dependency-cruiser.ts`, and which refuses a cruise that measured nothing, so a green result is one that looked. Then read Domain Model for calculation: a function that turns authored data into routes, ports, placements, or rendering state is a breach even where no import crosses.
 
-_Evidence:_ the repository `check:deps` script enforces the Domain Model dependency boundary.
+_Evidence:_ `bun run self:boundaries:verify` enforces the Domain Model dependency boundary through the `domain-model-has-no-workspace-dependencies` rule.
 
 ### AUTHOR-009 — Renderer references remain serialisable
 
@@ -118,7 +118,7 @@ Document validation MUST use a schema that mirrors `InfoschematicConfigInput` an
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `infoschematicSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md). against this requirement.
+_Verify:_ Run `bun run self:schema:verify` and `bun run self:typecheck`, then break the mirror on purpose in both directions: add a field to `InfoschematicConfigInput` and not to the schema, then to the schema and not to the contract. `SchemaMirrorsContract` must fail the type-check each time — a mirror that only holds one way is the drift this requirement exists to catch. Confirm `packages/domain-model/package.json` still declares no runtime dependency.
 
 _Evidence:_ `infoschematicSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md).
 

@@ -10,7 +10,7 @@ A flow endpoint that terminates on an artefact MUST name a port using `N`, `E`, 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `PortId` in `packages/domain-model/src/ports.ts` and flow endpoints in `packages/domain-model/src/flow.ts`. against this requirement.
+_Verify:_ Read `PortId` in `packages/domain-model/src/ports.ts` and the endpoint types in `packages/domain-model/src/flow.ts`: the identifier is a compass letter and a number, and nothing in it holds a coordinate. Then resolve the same endpoint against two different element geometries and confirm the identifier is unchanged while the rendered point moves. Falsified by an endpoint that can be read as a position without consulting its element, or by a port numbered from zero.
 
 _Evidence:_ `PortId` in `packages/domain-model/src/ports.ts` and flow endpoints in `packages/domain-model/src/flow.ts`.
 
@@ -20,7 +20,7 @@ A fabric MUST have authored identity and placement and MUST be available as a fl
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/flow.ts`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/flow.ts`: a Fabric declares its own identity and placement, and a flow endpoint may name it on the same terms as any other artefact. Then author a Fabric with no renderer reference and confirm it can still be a flow endpoint, and author one whose renderer key is unknown and confirm its relationships are unaffected. Falsified by participation in a relationship that depends on a Fabric being renderable.
 
 _Evidence:_ `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/flow.ts`.
 
@@ -32,7 +32,7 @@ An artefact MAY cross a Region boundary. Its placement, rather than membership i
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/region.ts` and `packages/domain-model/src/infoschematic.ts`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/region.ts` and `packages/domain-model/src/infoschematic.ts`: Regions are their own authored collection, and no field records containment between a Region and an artefact or between two Regions. Then place a Card so that it straddles a Region boundary and confirm it renders where its placement puts it, and nest two Regions by geometry and confirm the nesting is read from the boxes and the authored paint order rather than from a parent field. Falsified by any membership collection that decides where an artefact appears.
 
 _Evidence:_ `packages/domain-model/src/region.ts` and `packages/domain-model/src/infoschematic.ts`.
 
@@ -42,7 +42,7 @@ Cards and fabrics MUST carry explicit placement within the Infoschematic coordin
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/infoschematic.ts`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts`, and `packages/domain-model/src/infoschematic.ts`: every Card and Fabric carries an explicit placement in Infoschematic coordinates, not an implied slot. Then author a Fabric spanning two Regions and confirm its placement is still interpretable against the authored Regions and the view box — the same numbers put it in the same place with the Regions removed. Falsified by a placement that only means something relative to a Region.
 
 _Evidence:_ `packages/domain-model/src/card.ts`, `packages/domain-model/src/fabric.ts` and `packages/domain-model/src/infoschematic.ts`.
 
@@ -52,7 +52,7 @@ A card that adapts or wraps another card MUST name the card it wraps. That relat
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `wraps` in `packages/domain-model/src/card.ts`. against this requirement.
+_Verify:_ Read `wraps` in `packages/domain-model/src/card.ts`: an Adapter Card names the Card it wraps in authored data. Then move the wrapper away from the Card it wraps and confirm the relationship survives the distance, and place two unrelated Cards on top of each other and confirm no containment is inferred. Falsified by containment read out of proximity, or by a Flow that has to exist merely to restate a wrap.
 
 _Evidence:_ `wraps` in `packages/domain-model/src/card.ts`.
 
@@ -62,7 +62,7 @@ Artefacts MAY belong to one or more scopes and MAY require either any or all nam
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `scopes` and `scopeRule` in `packages/domain-model/src/artefact.ts`. against this requirement.
+_Verify:_ Read the scope fields in `packages/domain-model/src/artefact.ts`, then filter a document by scope both ways — requiring any of the named scopes and requiring all of them — and diff the surviving artefacts against the authored ones: identifiers, codes, and relationships must be unchanged, and only visibility may differ. Falsified by a filtered document whose identity or relationships differ from the authored one.
 
 _Evidence:_ `scopes` and `scopeRule` in `packages/domain-model/src/artefact.ts`.
 
@@ -72,7 +72,7 @@ Region, Fabric, Card, Flow and Overlay MUST remain distinct authored kinds, each
 
 _Conformance:_ conforming
 
-_Verify:_ inspect collections in `packages/domain-model/src/infoschematic.ts` and `packages/domain-model/src/region.ts`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/infoschematic.ts` and `packages/domain-model/src/region.ts`: Region, Fabric, Card, Flow, and Overlay each have their own ordered collection. Then reorder one kind and confirm the painted layering of the other four is unchanged — a reorder within a kind says nothing about which kind sits on top. Falsified by a single mixed collection, or by cross-kind layering that follows an authored index.
 
 _Evidence:_ collections in `packages/domain-model/src/infoschematic.ts` and `packages/domain-model/src/region.ts`.
 
@@ -84,7 +84,7 @@ An Overlay referenced directly by a Sequence Scene MUST either block the authore
 
 _Conformance:_ conforming
 
-_Verify:_ inspect relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/sequence.ts` against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then apply removals to a document built for it: remove a Card that an Adapter Card wraps transitively and confirm the wrappers go with it before any dependent Flow is kept; confirm no applied configuration retains a Flow whose source or target is gone; remove a Region and confirm nothing else follows; remove an Overlay a Sequence Scene references directly and confirm the change either refuses before application or clears that reference in the same step. Then read the focus collections of every Standalone and Sequence Scene and confirm the removed Overlay is in none of them.
 
 _Evidence:_ relationships in `packages/domain-model/src/card.ts`, `packages/domain-model/src/flow.ts`, `packages/domain-model/src/scene.ts` and `packages/domain-model/src/sequence.ts`.
 

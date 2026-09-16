@@ -10,7 +10,7 @@ A Flow MUST state its Family and the two things it joins independently of the po
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `Flow` and the specification hierarchy in `packages/domain-model/src/model.ts`. against this requirement.
+_Verify:_ Read the `Flow` type and the specification hierarchy in `packages/domain-model/src/model.ts`: a Flow states `family`, `source`, and `target` as its own fields, so discarding its `route` leaves the relationship intact, and a `realisedBy` entry names an identifier rather than a route. Falsified by any field that makes a conformance claim a function of the points a Flow is drawn through.
 
 _Evidence:_ `Flow` and the specification hierarchy in `packages/domain-model/src/model.ts`.
 
@@ -20,7 +20,7 @@ A Specification, Interface, or Operation MAY name an artefact that realises it. 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `realisedBy` in the specification hierarchy in `packages/domain-model/src/model.ts`. against this requirement.
+_Verify:_ Read `Realising` and its users in `packages/domain-model/src/model.ts`: `realisedBy` holds identifiers only, so what a claim asserts is decided by what each identifier resolves to — an artefact or a Flow — and no field records the two as one fact. Falsified by a merged realisation field, or by a resolver that reads a Flow identifier as an artefact claim.
 
 _Evidence:_ `realisedBy` in the specification hierarchy in `packages/domain-model/src/model.ts`.
 

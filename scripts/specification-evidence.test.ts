@@ -6,6 +6,11 @@ import { describe, expect, it } from 'vitest'
  * The Specifications corpus records, per requirement, a conformance state and the proof behind it. Nothing else in the
  * gate reads that proof, so evidence can stop resolving without any run turning red: nine requirements were recorded as
  * conforming on a path that moved package. These cases read the corpus the way a reader would.
+ *
+ * `_Verify:_` gets the same treatment, because a line nothing reads decays the same way. A hand-authored template tail
+ * was once applied over prose that was already written, and in 66 requirements it left the method half of the pair
+ * saying exactly what the proof half said, plus 45 more that were byte-identical without the tail to advertise it. A
+ * requirement that names its artefacts twice and calls one of them a method cannot be checked by a reader following it.
  */
 const specificationsDirectory = 'docs/specs'
 const conformanceStates = ['conforming', 'divergent', 'pending']
@@ -16,9 +21,11 @@ const citedExtensions = ['css', 'html', 'json', 'md', 'svg', 'ts', 'tsx', 'yaml'
 type Requirement = Readonly<{
   citations: readonly string[]
   conformance: string
+  evidence: string
   file: string
   id: string
   named: readonly Readonly<{ paths: readonly string[]; thing: string }>[]
+  verify: string
 }>
 
 const pathsUnder = async (directory: string): Promise<string[]> => {
@@ -48,6 +55,23 @@ const citations = (block: string) =>
     [...(line ?? '').matchAll(/`([^`]+)`/g)].map(([, cited]) => cited ?? '')
   )
 
+/** One lifecycle line's prose, however long, or nothing where the requirement does not carry that line. */
+const stated = (block: string, field: 'Evidence' | 'Verify') =>
+  block.match(new RegExp(`^_${field}:_ (.*)$`, 'm'))?.[1]?.trim() ?? ''
+
+/** The template tail, which restarts a sentence after the full stop the prose had already reached. */
+const templateTail = /\s*against this requirement\.$/
+
+/** What a `_Verify:_` line claims as its method, once the tail and the lead-in the tail was written around are gone. */
+const method = (verify: string) =>
+  verify
+    .replace(templateTail, '')
+    .replace(/^inspect /, '')
+    .trim()
+
+/** Where the two lines' jobs are written down, quoted into the failures below so a reader is not left guessing. */
+const convention = '`docs/specs/index.md`, "Reading a requirement"'
+
 const requirements = async (): Promise<Requirement[]> => {
   const files = (await readdir(specificationsDirectory)).filter((name) => name.endsWith('.md')).sort()
   const parsed = await Promise.all(
@@ -57,9 +81,11 @@ const requirements = async (): Promise<Requirement[]> => {
       return blocks.map((block) => ({
         citations: citations(block),
         conformance: block.match(/^_Conformance:_ (.*)$/m)?.[1]?.trim() ?? '',
+        evidence: stated(block, 'Evidence'),
         file,
         id: block.match(/^### ([A-Z][A-Z-]*-\d+) — /)?.[1] ?? '',
-        named: namedThings(block)
+        named: namedThings(block),
+        verify: stated(block, 'Verify')
       }))
     })
   )
@@ -143,7 +169,31 @@ describe('specification evidence', () => {
         ).toEqual([])
       }
 
-    expect(checked).toBeGreaterThan(60)
+    // A floor near the real count, which is 56 now that no `_Verify:_` line restates its `_Evidence:_` line: the pair
+    // of duplicated lines used to offer the same "`thing` in `path`" claim twice, so this case counted 73 by reading
+    // each of them once. Nothing was lost with them — the evidence half still names every thing it named before.
+    expect(checked).toBeGreaterThan(50)
+  })
+
+  it('ends a `_Verify:_` line where its sentence ends, not with the template tail', async () => {
+    const parsed = await requirements()
+
+    expect(
+      parsed.filter((requirement) => templateTail.test(requirement.verify)).map((it) => `${it.file} ${it.id}`),
+      `a tail bolted onto finished prose is not a method; see ${convention}`
+    ).toEqual([])
+  })
+
+  it('states a check in `_Verify:_` rather than restating `_Evidence:_`', async () => {
+    const parsed = await requirements()
+    const restated = parsed.filter(
+      (requirement) => requirement.verify !== '' && method(requirement.verify) === requirement.evidence
+    )
+
+    expect(
+      restated.map((it) => `${it.file} ${it.id}`),
+      `\`_Verify:_\` is an action a reader can take, \`_Evidence:_\` is where the proof already sits; see ${convention}`
+    ).toEqual([])
   })
 
   it('cites file names that name a file somewhere, so a moved file is still caught', async () => {

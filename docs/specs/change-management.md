@@ -10,7 +10,7 @@ Studio MUST offer undo and redo for every draft-changing action. One pointer ges
 
 _Conformance:_ conforming
 
-_Verify:_ inspect checkpoints, gesture closure, undo and redo in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then edit a draft in Studio and count undo steps against gestures: drag one Card across the canvas — many pointer events, one gesture — and confirm a single undo returns it to where it started rather than part of the way. Then issue a discrete command and confirm it takes its own step. Do this for each draft-changing action the editor offers and confirm every one is reachable by undo and then redo.
 
 _Evidence:_ checkpoints, gesture closure, undo and redo in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -20,7 +20,7 @@ Undo, redo, discard and change-set export SHOULD be presented together because t
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/editor/ChangePane.tsx` and `packages/view-studio/src/app/editor/EditorTools.tsx`. against this requirement.
+_Verify:_ Open Studio's editing tools with pending changes present and read the group: undo, redo, discard, and change-set export sit together, because they all act on the one pending set. Then reach a state where one of them cannot apply — no pending changes, nothing to redo — and confirm the action is still on screen, disabled, and says why rather than disappearing and leaving a reader to wonder where it went.
 
 _Evidence:_ `packages/view-studio/src/app/editor/ChangePane.tsx` and `packages/view-studio/src/app/editor/EditorTools.tsx`.
 
@@ -30,7 +30,7 @@ Draft data MAY survive reload, but undo and redo history MUST be scoped to the c
 
 _Conformance:_ conforming
 
-_Verify:_ inspect draft persistence and in-memory history in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then make several draft edits, undo one, reload the page, and try to undo again: the draft data may still be there, and the history must not be. Falsified by an undo after reload that changes anything, which means the history outlived the session that owned it.
 
 _Evidence:_ draft persistence and in-memory history in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -40,7 +40,7 @@ A pending change whose value the authored model now states MUST be removed. A dr
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/use-editor.test.ts` covers spent component, endpoint and port-count drafts, partial endpoint changes and missing model keys.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then set up drafts the model has caught up with: a component moved to where the authored model now places it, an endpoint change the model now states, and a port-count change it now states. Each must drop out of the pending set. Then remove an artefact a draft names and confirm that draft goes too. Change the endpoint but not the port count on one Flow and confirm only the spent half is dropped — comparing them together is how a live change disappears with a spent one.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.test.ts` covers spent component, endpoint and port-count drafts, partial endpoint changes and missing model keys.
 
@@ -52,7 +52,7 @@ The change set MUST order creates before updates and updates before removals. Cr
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/editor/editor-draft.ts`, `packages/view-studio/src/app/editor/artefact-operations.ts`, `packages/view-studio/src/app/editor/source-changes.ts` and `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then make a route change, an attachment change, a label edit, a port-count edit, and a typed artefact operation, and read the persisted draft: one serialisable envelope holds all of them. Confirm one pointer gesture produced one snapshot and one discrete operation produced one, and that undo, redo, discard, and the review pane all read the same draft value rather than their own copies. Then export the change set and confirm creates come before updates and updates before removals.
 
 _Evidence:_ `packages/view-studio/src/app/editor/editor-draft.ts`, `packages/view-studio/src/app/editor/artefact-operations.ts`, `packages/view-studio/src/app/editor/source-changes.ts` and `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -62,7 +62,7 @@ Every draft adjustment MUST appear in one reviewable change set. The producer MU
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `pending`, `changeCount` and `discard` in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then make draft adjustments of several kinds and open the review: every one of them is in the single change set, with a count that matches what was done. Discard once and confirm the whole set goes in that one action. Falsified by an adjustment that is in effect but not in the set, which is a change a Producer cannot review or discard.
 
 _Evidence:_ `pending`, `changeCount` and `discard` in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -72,7 +72,7 @@ Each independently authored pending change MUST be removable without discarding 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect pending origins and `drop` in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then build a pending set holding several independently authored changes plus one derived from another. Drop a single change and confirm the unrelated ones stand; undo and confirm the drop itself is undoable; then drop the change the derived one follows and confirm the derived change goes with it rather than being left pointing at nothing.
 
 _Evidence:_ pending origins and `drop` in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -82,7 +82,7 @@ Every pending change MUST identify the artefact or flow it describes. Selecting 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `PendingChange`, selection and hover in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then read each pending change and confirm it names the artefact or flow it describes. Select the change and confirm the described thing is selected; hover each of the two and confirm the relationship is visible from either end. Falsified by a pending entry a reader cannot trace to a thing on the diagram.
 
 _Evidence:_ `PendingChange`, selection and hover in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -92,6 +92,6 @@ The change set MUST contain at most one effective entry for a property of an aut
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/use-editor.test.ts` covers natural code ordering and property grouping.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then draft the same property of the same thing twice with different values: the change set must hold one effective entry, the later one. Draft changes to several things in a scattered order and read the entry order — it must follow authored code and property, so the same set of edits made in a different sequence lists identically. Falsified by an order that reflects when each edit arrived.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.test.ts` covers natural code ordering and property grouping.

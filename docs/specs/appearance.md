@@ -12,7 +12,7 @@ Omitted appearance MUST normalise to a neutral surface, no authored grid, non-co
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/region.ts`, and `packages/domain-core/src/index.ts`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/appearance.ts` and `packages/domain-model/src/region.ts`: frame, fill, label placement, and label mount are separate fields, and no field authors a notch. Then normalise a document that authors no appearance and read what comes back — neutral surface, no grid, non-compact Cards, hidden optional Card identity, stereotype, and description, and Regions unframed, unfilled, with a plain internal label. Author a boundary mount over a visible frame and confirm the notched treatment is resolved rather than read from the document. Falsified by CSS, a callback, a renderer component, a free coordinate, or derived geometry sitting in an appearance field.
 
 _Evidence:_ `packages/domain-model/src/appearance.ts`, `packages/domain-model/src/infoschematic.ts`, `packages/domain-model/src/region.ts`, and `packages/domain-core/src/index.ts`.
 
@@ -22,7 +22,7 @@ A Card MAY name one Card Collection and a Flow MAY name one Flow Family. Those a
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/model.ts` and `packages/domain-core/src/model.ts`. against this requirement.
+_Verify:_ Read the Collection and Family types in `packages/domain-model/src/model.ts`, then author a Card that names a Collection and no appearance of its own, and a Flow that names a Family and none: each must take its association's semantic and visual identity. Give a Fabric and a Region identity directly and confirm it holds. Then activate and deactivate Architectural Scopes and confirm no element's identity moves with them — a Scope decides what is shown, never what a thing is.
 
 _Evidence:_ `packages/domain-model/src/model.ts` and `packages/domain-core/src/model.ts`.
 
@@ -34,7 +34,7 @@ The catalogue MUST be keyed so that an option present in authored appearance and
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/domain-model/src/option-catalogue.ts` and `docs/reference/vocabulary.md`. against this requirement.
+_Verify:_ Read `packages/domain-model/src/option-catalogue.ts`, then walk the catalogue against the appearance fields it describes: each option states its control shape, its closed value set where it has one, the default renderers apply, and the vocabulary term it gives visual form to, resolvable in `docs/reference/vocabulary.md`. Add an appearance field without cataloguing it and confirm the gap shows in a consumer that builds its controls from the catalogue rather than from a hand-written list. Falsified by an entry that states an option's resolved appearance instead of its meaning.
 
 _Evidence:_ `packages/domain-model/src/option-catalogue.ts` and `docs/reference/vocabulary.md`.
 
@@ -48,7 +48,7 @@ The `cardDetails` output option MAY override authored identity, stereotype, and 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-canvas/src/Canvas.tsx`, `packages/view-canvas/src/InfoschematicDiagram.tsx`, and `packages/view-model/src/appearance.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then render a document that authors each treatment — neutral and blueprint surface, no grid and the standard grid, absent, solid, dashed, and dotted Region frames, plain and notched labels across the compass placements, compact and non-compact Cards, shown and hidden Card metadata, Domain-classified and unclassified Cards — and compare what Canvas drew against what View Model resolved for the same document. Hide a Region's label and confirm a requested notch is suppressed with the authored frame style untouched; filter a Domain-classified Card out of Scope and confirm its Domain colour is still its fill. Falsified by any appearance Canvas decides for itself.
 
 _Evidence:_ `packages/view-canvas/src/Canvas.tsx`, `packages/view-canvas/src/InfoschematicDiagram.tsx`, and `packages/view-model/src/appearance.ts`.
 
@@ -120,7 +120,7 @@ Representative treatment fixtures MUST prove the same resolved surface, grid, fr
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx` and `packages/view-model/src/region-geometry.test.ts`.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then hide the optional Card rows through output options and read the accessible tree rather than the picture: the root description must still summarise visible Card identity, stereotype, and description; each Card's accessible label must still carry its authored values; the whole Infoschematic and every interactive Region, Card, and Flow must still have a name. Read the same document with colour, surface, and grid disregarded and confirm nothing was said only by them. Then compare the resolved surface, grid, frame, label placement, Card detail, compactness, and Domain decisions against static SVG for the representative fixtures, by semantic attribute and deterministic geometry rather than by markup bytes.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx` and `packages/view-model/src/region-geometry.test.ts`.
 
@@ -132,7 +132,7 @@ It MUST draw the text the layout fits, including one line per fitted label line,
 
 _Conformance:_ conforming
 
-_Verify:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
+_Verify:_ Run `bun run self:scripts:test`, then render one Card at landscape, square, tall, and minimum proportions in Canvas and in static SVG and compare both the placed positions of its label, description, stereotype, and identity text and the strings actually drawn: they must match, because both read View Model's Card layout. Confirm every element is drawn from its visual centre with a middle dominant baseline, that an element the layout withholds is absent rather than clipped, and that a fitted label is drawn one line per fitted line. Falsified by a constant in Canvas that decides where Card text goes.
 
 _Evidence:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
 
@@ -142,7 +142,7 @@ The outer owning SVG group for every rendered Region, Fabric, Flow, Card, Point 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` covers all six kinds and collision-safe identifiers.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then query the rendered output for every Region, Fabric, Flow, Card, Point, and Overlay and read its outer owning group: each must carry `data-artefact-id` holding the authored identifier and `data-artefact-kind` holding exactly one of `region`, `fabric`, `flow`, `card`, `point`, or `overlay`. Then search the same output for a native `id` attribute holding an authored identifier — that space is document-wide and host-owned, so a copy there is a collision waiting for the page's second Infoschematic.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` covers all six kinds and collision-safe identifiers.
 
@@ -154,7 +154,7 @@ Rectangular component-scale shapes rendered by the supplied view library MUST us
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-canvas/src/InfoschematicDiagram.tsx` and supplied Fabric renderers. against this requirement.
+_Verify:_ Read `cornerRadius` in `packages/view-model/src/tokens.ts`, then search the component-scale view library for a radius declared locally: every rounded component-scale corner must resolve to that token, including in supplied Fabric renderers. Change the token, re-render, and confirm every such corner moved together. Falsified by a numeric radius sitting beside a component.
 
 _Evidence:_ `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-canvas/src/InfoschematicDiagram.tsx` and supplied Fabric renderers.
 

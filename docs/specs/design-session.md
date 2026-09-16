@@ -10,7 +10,7 @@ Opening a Producer capability MUST be an explicit action that changes the transi
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/hooks/use-persistent-state.ts`. against this requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose first case asserts a fresh session starts in Present with no Direct target; then, in a Playground served by `bun run self:dev`, enter Design, select an artefact, edit a property and reload. The session MUST come back in `present` with nothing selected and no Direct target, while the draft change MAY still be listed; a reload that restores the mode or the selection fails the requirement.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/hooks/use-persistent-state.ts`.
 
@@ -20,7 +20,7 @@ Studio MUST NOT write repository source, a deployment service or an external dat
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/editor/ChangePane.tsx`. against this requirement.
+_Verify:_ enter Design in the Playground, make and keep an edit, then run `git status --short examples apps`. The working tree MUST be clean, because the edit belongs in the reviewable change set until a host applies it; a modified authored document, or an edit that reaches a data store without a separately authorised step, fails the requirement.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/editor/ChangePane.tsx`.
 
@@ -30,7 +30,7 @@ Setting Studio to the mode it already occupies MUST preserve Audience preference
 
 _Conformance:_ conforming
 
-_Verify:_ inspect mode transitions in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ in Design, apply an Audience filter, start editing, select an artefact, then choose Design again. The filter, the draft and the selection MUST all survive; a reassertion that clears any of them fails the requirement.
 
 _Evidence:_ mode transitions in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -44,7 +44,7 @@ _Verification: `packages/view-present/src/production.test.ts` covers all nine so
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Studio application. against this requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose transition table covers all nine source-and-destination pairs and asserts that returning to Present neither resumes playback nor reactivates a Scene. Make `reduceProduction` carry playback across an entry into `design`, or drop an Audience filter on the way in, and those cases fail; the rendered half is an entry into Design while a Sequence plays, which MUST stop the playback and leave the filters standing.
 
 _Evidence:_ `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Studio application.
 
@@ -54,7 +54,7 @@ Design and Direct MUST derive their working Canvas from complete authored conten
 
 _Conformance:_ conforming
 
-_Verify:_ inspect active-mode composition in `packages/view-studio/src/app/App.tsx` and its Canvas derivation. against this requirement.
+_Verify:_ filter the Audience view so a Scope or a Flow family is hidden, then enter Design. Every hidden artefact and Flow MUST be reachable and editable on the Design Canvas; a Design Canvas that inherits the Audience filter fails the requirement. In Direct, draft a Scene focus and confirm the presented focus behind it does not move.
 
 _Evidence:_ active-mode composition in `packages/view-studio/src/app/App.tsx` and its Canvas derivation.
 
@@ -64,7 +64,7 @@ The editing grid, ports and manipulation handles MUST be available while editing
 
 _Conformance:_ conforming
 
-_Verify:_ inspect the editing layers `edit-grid`, `audit-port` and `artefact-resize-handle` in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`. against this requirement.
+_Verify:_ compare one document presented and in Design. Grid, ports and handles MUST be absent in `present` and available in Design, and the grid MUST paint beneath routes and artefacts rather than over them. Author `gridSize: 0` and both the overlay and grid rounding MUST stop while alignment-guide snapping stays independently available.
 
 _Evidence:_ the editing layers `edit-grid`, `audit-port` and `artefact-resize-handle` in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`.
 
@@ -74,7 +74,7 @@ Selecting an artefact, flow, label, region, port or waypoint MUST NOT move or ot
 
 _Conformance:_ conforming
 
-_Verify:_ inspect selection and handle contracts in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ select each of an artefact, a flow, a label, a region, a port and a waypoint in turn, then read the change set. It MUST stay empty, because selecting is not editing; a selection that records a change, or nudges what it selected, fails the requirement.
 
 _Evidence:_ selection and handle contracts in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -84,7 +84,7 @@ A producer MUST be able to clear selection by choosing the canvas rather than an
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `select` in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ select an artefact, then press the canvas away from anything selectable. The selection MUST clear; a canvas press that leaves the previous selection standing fails the requirement.
 
 _Evidence:_ `select` in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -94,7 +94,7 @@ The properties view MUST identify what kind of thing is selected before presenti
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `Placement` in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/panels/PlacementPanel.tsx`. against this requirement.
+_Verify:_ select a Card, a Region, a Flow and a Point in turn and read the properties view. Each MUST name the kind it has selected before offering placement, and a box extent MUST show all four of `x`, `y`, `width` and `height` — read-only on a fixed axis rather than dropped.
 
 _Evidence:_ `Placement` in `packages/view-model/src/editable.ts` and `packages/view-studio/src/app/panels/PlacementPanel.tsx`.
 
@@ -104,7 +104,7 @@ Every selectable kind SHOULD use one visual treatment family for pointing and se
 
 _Conformance:_ conforming
 
-_Verify:_ inspect selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts`, and the treatments `pointed` and `selected` in `packages/view-canvas/src/styles.css`. against this requirement.
+_Verify:_ point at an artefact and then select it, and look at the two treatments together. They MUST read as one family and MUST stay distinguishable; treatments that render identically fail the requirement, as does a pointing treatment that outlives the pointer.
 
 _Evidence:_ selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts`, and the treatments `pointed` and `selected` in `packages/view-canvas/src/styles.css`.
 
@@ -114,7 +114,7 @@ A producer MUST be able to select a flow by its rendered route rather than only 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-canvas/src/styles.css`. against this requirement.
+_Verify:_ press a Flow on its route, well away from its label, and confirm it selects; then press a unit or two off the visible stroke and confirm it still selects. A Flow reachable only through its label, or only by hitting the stroke exactly, fails the requirement.
 
 _Evidence:_ flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-canvas/src/styles.css`.
 
@@ -124,7 +124,7 @@ Selecting a flow MUST identify its source and target artefacts and ports. The at
 
 _Conformance:_ conforming
 
-_Verify:_ inspect selected-flow derivation and attachment port rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`, and the attachment presentation in `packages/view-studio/src/app/editor/FlowEnds.tsx`. against this requirement.
+_Verify:_ select a Flow and read its properties. Both the source and the target artefact and port MUST be named, and those two ports MUST be presented differently from the other ports on the same artefacts; attachment ports that render like every other port fail the requirement.
 
 _Evidence:_ selected-flow derivation and attachment port rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`, and the attachment presentation in `packages/view-studio/src/app/editor/FlowEnds.tsx`.
 
@@ -134,7 +134,7 @@ A fabric with authored placement and ports MUST be selectable and editable throu
 
 _Conformance:_ conforming
 
-_Verify:_ inspect placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`. against this requirement.
+_Verify:_ select an authored Fabric that has placement and ports, and exercise the generic artefact capabilities against it — move, resize, edit properties, remove, reorder — then do the same to a Card. A Fabric that answers fewer of them than a Card fails the requirement.
 
 _Evidence:_ placeable handles in `packages/view-studio/src/app/editor/infoschematic-editable.ts`.
 

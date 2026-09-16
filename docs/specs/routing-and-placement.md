@@ -10,7 +10,7 @@ Every rendered route MUST consist only of absolute horizontal and vertical runs.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/routing.test.ts` and `packages/view-model/src/waypoints.test.ts` exercise orthogonal route edits; `routePath` in `packages/view-model/src/geometry.ts` rejects diagonals.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose routing and waypoint cases exercise orthogonal edits. Then author a route with a diagonal run and confirm it is rejected rather than drawn: a `routePath` that quietly straightens the diagonal into something orthogonal fails the requirement as surely as one that draws it.
 
 _Evidence:_ `packages/view-model/src/routing.test.ts` and `packages/view-model/src/waypoints.test.ts` exercise orthogonal route edits; `routePath` in `packages/view-model/src/geometry.ts` rejects diagonals.
 
@@ -20,7 +20,7 @@ Moving one end of a route MUST carry the endpoint to its requested position whil
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose route cases cover end movement, bend insertion and orthogonality. Then drag one end of a straight two-point route off its axis: the far endpoint MUST stay where it is and a bend MUST appear, so a route that stays straight by dragging the other end with it fails the requirement.
 
 _Evidence:_ `packages/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality.
 
@@ -30,7 +30,7 @@ Inserting, moving or deleting an interior waypoint, and moving an interior run, 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/waypoints.test.ts` covers insertion, movement, deletion, segment movement and terminal protection.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose waypoint cases cover insertion, movement, deletion, segment movement and terminal protection. Then insert, move and delete an interior waypoint and drag an interior run, checking the terminals after each: every run MUST stay orthogonal and neither terminal MUST have moved.
 
 _Evidence:_ `packages/view-model/src/waypoints.test.ts` covers insertion, movement, deletion, segment movement and terminal protection.
 
@@ -40,7 +40,7 @@ Normalising a route MUST remove repeated points and merge consecutive collinear 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/routing.test.ts` covers repeated points, collinear runs and already-normal routes.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose normalisation cases cover repeated points, collinear runs and a route that is already normal. Then normalise a route twice: the second pass MUST return the first pass unchanged, and a normalisation that drops a bend the route needs to stay orthogonal fails the requirement.
 
 _Evidence:_ `packages/view-model/src/routing.test.ts` covers repeated points, collinear runs and already-normal routes.
 
@@ -50,7 +50,7 @@ Every calculated port MUST lie on the edge named by its compass-side identifier.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers edge placement and per-side counts.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover edge placement and per-side counts. Then take a port identity such as `N2` and check its coordinate against the artefact box: a port whose coordinate leaves the edge its compass side names, or which was derived from anything but the box and the counts in force, fails the requirement.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers edge placement and per-side counts.
 
@@ -60,7 +60,7 @@ Ports on one side MUST be spread across the usable side length. Numbering MUST p
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers subdivision, centre-outward numbering and the position of port one.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover subdivision, centre-outward numbering and the position of port one. Then ask a side for three ports and read their coordinates: they MUST be spread across the usable side length with port one nearest the centre, so a run of ports packed from one end fails the requirement.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers subdivision, centre-outward numbering and the position of port one.
 
@@ -70,7 +70,7 @@ A side MUST accept every port count for which its ports can occupy distinct inte
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover the allowed counts, even distribution, saturation and the maximum safe count. Then ask a short side for zero ports and for far more than it can hold: zero MUST be accepted, and the excess MUST come back as the greatest count that side can place on distinct interior grid lines rather than as colliding ports.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count.
 
@@ -80,7 +80,7 @@ When an artefact side has no authored count, port calculation MUST use the View 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers the default count; `defaultPortCount` is exported by `packages/view-model/src/ports.ts`.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover the default count. Then grep the consumers for a numeric port-count fallback of their own: every one MUST read `defaultPortCount`, because a second implicit count is what this requirement forbids and a side with no authored count would still place ports without anything going red.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers the default count; `defaultPortCount` is exported by `packages/view-model/src/ports.ts`.
 
@@ -90,7 +90,7 @@ A port audit MUST report routes landing on the same port, ports that are closer 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `auditPorts` in `packages/view-model/src/ports.ts`. against this requirement.
+_Verify:_ run an audit over a document authored to break each rule in turn — two routes landing on one port, two ports closer than the minimum spacing, and one port identity whose calculated coordinates disagree. `auditPorts` MUST report all three; a document that breaks a rule and audits clean fails the requirement.
 
 _Evidence:_ `auditPorts` in `packages/view-model/src/ports.ts`.
 
@@ -100,7 +100,7 @@ Grid snapping MUST operate in the Infoschematic's coordinate space. The standard
 
 _Conformance:_ conforming
 
-_Verify:_ inspect grid projection in `packages/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `packages/view-model/src/ports.ts`. against this requirement.
+_Verify:_ nudge an artefact once with the grid active and read the authored coordinate, not the screen one: the step MUST be ten diagram units, matching `minimumPortGap`. Repeat while zoomed and panned — a step that changes size with the zoom is snapping in screen space, which is what this requirement forbids.
 
 _Evidence:_ grid projection in `packages/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `packages/view-model/src/ports.ts`.
 
@@ -110,7 +110,7 @@ Alignment guides MUST be derived from visible box edges, box centres and other h
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers box edges, centres, handles and duplicate suppression.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover box edges, centres, handles and duplicate suppression. Then move an artefact and confirm the guides that appear correspond to the visible boxes and handles around it; add an artefact and confirm new guides come with it, since a hard-coded coordinate list would not change.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers box edges, centres, handles and duplicate suppression.
 
@@ -120,7 +120,7 @@ Snapping MUST choose the nearest guide within threshold on each axis independent
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/guides.test.ts` covers independent axes, nearest-guide preference and no-guide behaviour.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover independent axes, nearest-guide preference and no-guide behaviour. Then drag an artefact so one axis has a guide in range and the other has none: the first MUST snap to the nearest guide and the second MUST keep the coordinate requested, so an axis dragged along by its neighbour's snap fails the requirement.
 
 _Evidence:_ `packages/view-model/src/guides.test.ts` covers independent axes, nearest-guide preference and no-guide behaviour.
 
@@ -130,7 +130,7 @@ A flow-label position MUST be represented as a share of route length rather than
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `packages/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run --filter=@infoschematics/view-studio test`, which cover projection onto horizontal and vertical runs and label-share precision. Then place a route label, edit the route's geometry, and look at the label: held as a share of route length it stays on the route, so a label that leaves the route when the route changes has been stored as a free coordinate.
 
 _Evidence:_ `packages/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `packages/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision.
 
@@ -140,7 +140,7 @@ Automatically placed route labels MUST try candidate positions in a stable order
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `placeLabels` in `packages/view-model/src/placement.ts`. against this requirement.
+_Verify:_ place two Flows whose labels compete for the same gap between Cards and look at the result: `placeLabels` MUST try its candidates in a stable order and avoid Card boxes and already-placed labels where it can. Render the same document twice and the placement MUST be identical. Then draft a label position by hand: it MUST be kept rather than re-placed automatically.
 
 _Evidence:_ `placeLabels` in `packages/view-model/src/placement.ts`.
 
@@ -150,7 +150,7 @@ A floating overlay position MUST be clamped inside the view before being scored.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose placement cases cover the preferred, clear, least-obstructed and clamped candidates. Then open a floating overlay near a view edge: its position MUST be clamped inside the view before any candidate is scored, so an overlay scored where it could not be seen fails the requirement.
 
 _Evidence:_ `packages/view-model/src/placement.test.ts` covers preferred, clear, least-obstructed and clamped candidates.
 
@@ -162,7 +162,7 @@ The label MUST always be placed. An optional element MUST be withheld where its 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/card-layout.test.ts` covers the reference, square, tall, narrow, and undersized boxes; `scripts/visual-treatment-parity.test.ts` compares placed Card geometry across both renderers.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run self:scripts:test`, which cover the reference, square, tall, narrow and undersized boxes and compare placed Card geometry across both renderers. Then render a Card small enough that a band does not fit and look at it: the label MUST still be placed, the optional elements MUST be withheld rather than overflowing, and the identity chip MUST give way to an authored stereotype rather than being drawn over it.
 
 _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers the reference, square, tall, narrow, and undersized boxes; `scripts/visual-treatment-parity.test.ts` compares placed Card geometry across both renderers.
 
@@ -174,7 +174,7 @@ A fitted string is a visual reduction only. Every renderer MUST keep the authore
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run self:scripts:test`, which cover untouched short text, width-aware wrapping, a truncated compact label, a single over-long word and the fitted stereotype and description bands, and compare the drawn strings across both renderers. Then render a Card with text too long for it and look at it: nothing MUST be drawn past the border, wrapping MUST break on word boundaries against the usable width rather than a character count, and the full authored label, stereotype and description MUST still be readable in the accessible name.
 
 _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name.
 

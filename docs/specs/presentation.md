@@ -10,7 +10,7 @@ The interactive application MUST represent its current production mode as exactl
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `ProductionMode` and `createProductionState` in `packages/view-present/src/production.ts`, composed by `packages/view-studio`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then read `createProductionState` in `packages/view-present/src/production.ts`: the mode is one of `present`, `design`, or `direct`, never two and never none. Mount fresh and confirm it starts in `present`; switch to `direct`, reload, and confirm it is back in `present`. Then search the persisted Audience preferences and the authored document for the mode — a stored mode is what makes a reload land somewhere a reader did not ask for.
 
 _Evidence:_ `ProductionMode` and `createProductionState` in `packages/view-present/src/production.ts`, composed by `packages/view-studio`.
 
@@ -22,7 +22,7 @@ Reasserting the current mode MUST leave all three state areas unchanged.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-present/src/production.test.ts` covers every mode-to-mode transition; rendered Studio tests cover the reload boundary.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then walk every mode-to-mode transition with all three kinds of state set: Scope and Flow-family filters chosen, a Sequence playing with a Scene active, and Producer editing state in place. Entering `design` or `direct` must stop playback and clear the active Standalone or Sequence Scene while the filters and preferences stand; returning to `present` must keep the preferences and must not resume playback or restore the cleared focus by itself; reasserting the current mode must change none of the three.
 
 _Evidence:_ `packages/view-present/src/production.test.ts` covers every mode-to-mode transition; rendered Studio tests cover the reload boundary.
 
@@ -32,7 +32,7 @@ Every Architectural Scope and Flow Family MUST have an independently toggleable 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect initial selection and individual toggle actions in `packages/view-present/src/presentation.ts`; controls in `packages/view-present/src/PresentationControls.tsx`, `packages/view-studio/src/app/panels/ProducerControls.tsx` and `packages/view-studio/src/app/panels/PanelRail.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then open the filter banks on a new presentation: every Architectural Scope and Flow Family has its own toggle, and all of them start selected. Toggle one and confirm the others are unmoved. Then read the banks for a show-all or hide-all action — the vocabulary banks list Scopes and Families, so an action that is neither belongs outside them, where a presentation reset may still restore the all-visible state.
 
 _Evidence:_ initial selection and individual toggle actions in `packages/view-present/src/presentation.ts`; controls in `packages/view-present/src/PresentationControls.tsx`, `packages/view-studio/src/app/panels/ProducerControls.tsx` and `packages/view-studio/src/app/panels/PanelRail.tsx`.
 
@@ -42,7 +42,7 @@ When no Standalone Scene or Sequence Scene is active, every visible artefact and
 
 _Conformance:_ conforming
 
-_Verify:_ inspect focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then present with no Standalone Scene and no Sequence Scene active and read the drawn opacity of every visible artefact and Flow: nothing may be dimmed when there is no Scene to dim it for. Then select a Standalone Scene while a Sequence Scene is active, and the reverse, and confirm the previous focus source is cleared rather than left alongside the new one.
 
 _Evidence:_ focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -52,7 +52,7 @@ Selecting, stepping or clearing a Scene MUST change emphasis without changing au
 
 _Conformance:_ conforming
 
-_Verify:_ inspect Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-model/src/runtime.ts` and consumed through `packages/view-canvas/src/runtime-context.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then capture the resolved Card and Fabric placements, Flow routes, ports, and label placements with no Scene active; select a Scene, step it, and clear it; and diff the geometry at each stop against that first capture. Only emphasis may differ. Falsified by a Scene that moves anything, which is what a focus implementation that reaches into the runtime rather than into visibility and highlight sets does.
 
 _Evidence:_ Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-model/src/runtime.ts` and consumed through `packages/view-canvas/src/runtime-context.tsx`.
 
@@ -64,7 +64,7 @@ Design and Direct MUST NOT use that filtered Audience projection as their editab
 
 _Conformance:_ conforming
 
-_Verify:_ inspect presentation derivation in `packages/view-present/src/presentation.ts` and compatible integrated derivation in `packages/view-studio/src/app/hooks/use-presentation.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then filter out a Scope and a Flow family whose members a Scene names as focused: the filtered artefacts and Flows must stay invisible, and the resulting focus set must not include them. Reverse the order in reading too — derive the Scene emphasis and confirm it was computed over the already-filtered content rather than over the whole document. Then enter Design and Direct and confirm their editable content is the authored document, not the Audience projection a filter just narrowed.
 
 _Evidence:_ presentation derivation in `packages/view-present/src/presentation.ts` and compatible integrated derivation in `packages/view-studio/src/app/hooks/use-presentation.ts`.
 
@@ -74,7 +74,7 @@ Info MUST derive its Card, Fabric and Flow register from the current Infoschemat
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/panels/ModelRegister.tsx` reads the runtime register, scopes, families, interfaces and endpoint labels. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then change an authored Card label, a Flow family, and a Flow endpoint and reopen Info without reloading: each row must already say the new thing, because the register is read from the runtime rather than kept beside it. Confirm every Flow row names both endpoints, and names the represented interface relationship where the document states one. Falsified by a register entry that survives the removal of the artefact it describes.
 
 _Evidence:_ `packages/view-studio/src/app/panels/ModelRegister.tsx` reads the runtime register, scopes, families, interfaces and endpoint labels.
 
@@ -84,7 +84,7 @@ Present View MUST expose in-view keyboard help for Sequence stepping and exit, p
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages/view-studio/src/app/panels/SceneCallout.tsx` and global presentation-key handling in `packages/view-studio/src/app/App.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then present a Sequence and open the in-view keyboard help: stepping and exit must both be listed, and a timed Sequence must additionally list its automatic-advance control. Then do each of those from the Callout with a pointer instead — every action the help names must also exist as a labelled button, so the keyboard is a shortcut rather than the only way through.
 
 _Evidence:_ `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages/view-studio/src/app/panels/SceneCallout.tsx` and global presentation-key handling in `packages/view-studio/src/app/App.tsx`.
 

@@ -22,7 +22,7 @@ Each kind MUST support create, select, property editing, remove and within-kind 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `ArtefactSelection`, `artefactCapabilities` and `artefactCan` in `packages/view-model/src/editable.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then select one of each kind — Region, Fabric, Card, Flow, Overlay — and read what comes back: every selection carries `kind`, a stable `id`, its geometry role, and an authored `code` that may be null. Then ask each kind for its capabilities: create, select, property editing, remove, and within-kind reorder must be available for all five, move and resize for the four boxed kinds, and a generic move or resize of a Flow must be refused rather than silently ignored.
 
 _Evidence:_ `ArtefactSelection`, `artefactCapabilities` and `artefactCan` in `packages/view-model/src/editable.ts`.
 
@@ -32,7 +32,7 @@ Region, Fabric, Card and Overlay geometry MUST use a box movable and resizable o
 
 _Conformance:_ conforming
 
-_Verify:_ inspect geometry records and `artefactResizeMinimums` in `packages/view-model/src/editable.ts`; immutable application in `packages/view-model/src/artefact-draft.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then move and resize a Region, Fabric, Card, and Overlay on both axes and confirm an authored Region corner radius survives. Resize each toward nothing and confirm it stops at 20 by 20 for Region and Overlay and 40 by 40 for Fabric and Card. Then submit geometry that is invalid, stale, or aimed at the wrong kind: each must be rejected whole, with no half-applied box left behind.
 
 _Evidence:_ geometry records and `artefactResizeMinimums` in `packages/view-model/src/editable.ts`; immutable application in `packages/view-model/src/artefact-draft.ts`.
 
@@ -44,7 +44,7 @@ Create, property replacement, geometry, reorder and remove operations MUST apply
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/artefact-draft.test.ts` covers all six kinds, immutability, authored order, property replacement, rejection and cascades.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then apply a batch of artefact operations and compare the host configuration before and after by deep equality — it must be untouched, and the created and replacement values in the result must not share references with what was supplied. Include one operation that must be rejected and confirm the materialised value is unchanged and the diagnostic names its index. Reorder one kind and confirm only that authored array moved, then confirm a Flow property replacement may set route points while a generic Flow move or resize stays invalid.
 
 _Evidence:_ `packages/view-model/src/artefact-draft.test.ts` covers all six kinds, immutability, authored order, property replacement, rejection and cascades.
 
@@ -56,7 +56,7 @@ Unrelated Scopes, Flow families, renderer keys, renderer properties and authored
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `applyArtefactOperations` in `packages/view-model/src/artefact-draft.ts`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then remove artefacts from a document built to expose the cascades: a Card wrapped by an Adapter Card that is itself wrapped, with Flows ending on each; a Fabric with endpoint Flows; a Region containing all of it; an Overlay referenced by a Sequence Scene and present in Standalone and Sequence focus collections. Removing the Card must take the transitive Adapter Cards and every Flow ending on a removed Card; removing the Fabric must take its endpoint Flows; removing the Region must take nothing else; removing the Overlay must clear its references and focus entries. Then diff the result for Scopes, Flow families, renderer keys, renderer properties, and authored route data — all must survive unchanged.
 
 _Evidence:_ `applyArtefactOperations` in `packages/view-model/src/artefact-draft.ts`.
 
@@ -66,7 +66,7 @@ Canvas MAY derive a transient runtime by materialising operations over the compl
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx` covers six-kind creation, geometry, ordering, property replacement, safe removal, draft overlay precedence and Present Overlay independence.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then derive a preview runtime from operations over a complete host configuration: the host configuration must be unchanged afterwards, and `createInfoschematicRuntime` must have received the materialised result rather than a patch. Hold a component-offset draft and a route draft across the preview and confirm both still win as later overlays, then confirm a supplied Flow left untouched does not mask a materialised route or property replacement of the same Flow.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx` covers six-kind creation, geometry, ordering, property replacement, safe removal, draft overlay precedence and Present Overlay independence.
 

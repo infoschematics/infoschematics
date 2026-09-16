@@ -10,7 +10,7 @@ While a Sequence is active, the Audience MUST be able to step forward, step back
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `stepSequence`, `toggleAutoAdvance` and `stopSequence` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/SceneCallout.tsx`; keyboard handling in `packages/view-studio/src/app/App.tsx`.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then activate a Sequence in Studio and steer it from both the controls and the keyboard: forward, backward, and stop must all be reachable while it is active, and stepping past the last Scene must wrap to the first rather than leave the Sequence. Activate a timed Sequence as well and confirm its automatic advance can be held and resumed. Falsified by a steering action reachable only for timed Sequences.
 
 _Evidence:_ `stepSequence`, `toggleAutoAdvance` and `stopSequence` in `packages/view-studio/src/app/hooks/use-presentation.ts`; controls in `packages/view-studio/src/app/panels/SceneCallout.tsx`; keyboard handling in `packages/view-studio/src/app/App.tsx`.
 
@@ -22,7 +22,7 @@ An empty Sequence MUST NOT be activatable in Present. Clear and step actions aga
 
 _Conformance:_ conforming
 
-_Verify:_ presentation-state tests cover focus conflicts, empty Sequences, stale identifiers and invalid steps.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then activate a Standalone Scene and a Sequence Scene in turn and confirm each clears the other rather than leaving two focus sources. Then attack the state: activate an empty Sequence, clear an empty Sequence, step a stale identifier, and step past a bound. Each must return usable state, throw nothing, and activate nothing unavailable.
 
 _Evidence:_ presentation-state tests cover focus conflicts, empty Sequences, stale identifiers and invalid steps.
 
@@ -34,7 +34,7 @@ _Implementation surface: `chooseSpot` in `packages/view-model/src/placement.ts`;
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-model/src/placement.test.ts` covers candidate order, weighted obstruction, least-cost fallback and view-box clamping.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model`, then drive `chooseSpot` in `packages/view-model/src/placement.ts` with a Scene that authors no position: it must take the candidates in their declared order, return the first clear of the focused content, otherwise return the lowest-cost one, and in every case stay inside the view box. Repeat with an authored position and confirm that position wins. Falsified by a chosen spot outside the box, or an authored position losing to a candidate.
 
 _Evidence:_ `packages/view-model/src/placement.test.ts` covers candidate order, weighted obstruction, least-cost fallback and view-box clamping.
 
@@ -48,7 +48,7 @@ _Verification: `packages/view-present/src/SceneCallout.test.tsx` covers standard
 
 _Conformance:_ conforming
 
-_Verify:_ inspect renderer resolution in `packages/view-canvas/src/renderers.tsx` and Callout composition in `packages/view-present/src/SceneCallout.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then request a Callout renderer by exact key and version. An unknown key, an unregistered version, and an invalid property value must each emit the matching structured host diagnostic and fall back to the standard Callout with the authored title, body, and takeaways still shown rather than hidden. With a valid custom renderer, confirm its visual content replaces only that: placement, the live-status frame, Sequence navigation, the automatic-advance controls where they apply, and the exit action must all survive.
 
 _Evidence:_ renderer resolution in `packages/view-canvas/src/renderers.tsx` and Callout composition in `packages/view-present/src/SceneCallout.tsx`.
 

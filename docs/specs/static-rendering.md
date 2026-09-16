@@ -44,7 +44,7 @@ The standalone SVG root MUST retain its accessible role, title, and whole-diagra
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg` and `bun run self:scripts:test`, then render a document across the treatment matrix — neutral and blueprint surface, authored grid and none, absent, solid, dashed, and dotted frames, plain and notched Region labels at their placements, compact and non-compact Cards, optional Card metadata shown and hidden, Domain-classified and unclassified Cards — and compare the emitted values against what View Model resolved for the same document rather than against what looks right. Strip the appearance and confirm the fallback is neutral surface, no grid, non-compact Cards, hidden optional metadata, and unframed, unfilled Regions with plain labels. Read the root `<title>` and `<desc>` and each Card's accessible name and `<title>` and confirm the authored detail the picture hides is still there. Falsified by a notch calculation or an appearance default in the renderer, by `cardDetails` changing Card compactness, or by Domain colour that follows Scope visibility.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts`, `packages/view-model/src/appearance.test.ts`, and `packages/view-model/src/region-geometry.test.ts`.
 
@@ -58,7 +58,7 @@ Signalled emphasis MUST leave the normal Flow route, direction, accessible label
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render with `signals` naming one known Flow twice and one Flow the document does not declare: the output must equal naming it once, and the unknown identifier must leave no trace. Render again with `signals` omitted and with an empty list and diff both against the ordinary output — byte-identical. Then search the signalled output for an occurrence key, an animation element, a timer, a callback, a browser preference, or runtime completion state, none of which may be serialised, and diff the signalled Flow's route, direction, accessible label, authored geometry, and place in the output order against the quiet render. Confirm the still treatment takes its measurements from the shared signal token rather than a constant here, and that nothing derives a signal from Scene focus, filtering, or authored Flow data.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output.
 
@@ -68,7 +68,7 @@ The `annotations` render option MAY request a code chip for each visible Flow. W
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render with `annotations` omitted and confirm the output carries no annotation markup at all. Enable it and confirm each visible Flow's chip holds the authored code verbatim at the placement View Model resolved — compare the position against Canvas for the same document rather than against a second calculation here. Author a `label.along` fraction and confirm the chip moved to it. Focus a Scene and confirm a chip dims with its Flow; hide a Flow and confirm its absence changes nothing.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming.
 
@@ -78,7 +78,7 @@ Card and Region-label text colour MUST resolve through View Model's readable-ink
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg` and `bun run self:scripts:test`, then render a Card over a dark authored fill on a light surface and the reverse, and read `data-ink` on the Card group and on a plain Region label drawn over an authored fill: the resolved ink must follow the fill the text sits on, not the surface treatment. Compare the same documents' resolved ink against Canvas. Falsified by ink that changes when only the surface changes, or by a surface-conditional CSS rule deciding text colour after the fact.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers ink resolution and `data-ink` emission; `scripts/visual-treatment-parity.test.ts` compares resolved ink across renderers.
 
@@ -88,7 +88,7 @@ Authored `grid: 'dots'` MUST render a mark at each grid intersection, sized from
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg` and `bun run self:scripts:test`, then author `grid: 'dots'` and read the output: one mark at each grid intersection, spaced by the same `gridSize` token the line grids use, under the shared `data-grid-treatment` attribute. Render twice and diff for determinism, compare against Canvas for the same document, and confirm `major` and `major-plus-minor` output is unchanged from before `dots` existed.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts`, `InfoschematicDiagram.treatments.test.tsx`, and `scripts/visual-treatment-parity.test.ts` cover the `dots` treatment across both renderers.
 
@@ -100,7 +100,7 @@ It MUST draw the text the layout fits, including one line per fitted label line,
 
 _Conformance:_ conforming
 
-_Verify:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
+_Verify:_ Run `bun run self:scripts:test`, then render one Card at landscape, square, tall, and minimum proportions and compare the placed positions of its label, description, stereotype, and identity text, and the strings drawn, against Canvas for the same Card: they must match, because both read View Model's Card layout. Confirm each element is drawn with a middle dominant baseline, that metadata the layout withholds on a small Card is absent from the markup rather than drawn past the border, and that a fitted label is emitted one line per fitted line. Falsified by a constant here that decides where Card text goes, or by wrapping performed in the renderer.
 
 _Evidence:_ `scripts/visual-treatment-parity.test.ts` compares placed Card geometry at landscape, square, tall, and minimum proportions, and the drawn Card strings at long-text proportions.
 
@@ -110,7 +110,7 @@ The outer owning SVG group for every rendered Region, Fabric, Flow, Card, Point 
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render a document containing all six kinds and read each outer owning group: `data-artefact-id` holds the authored identifier and `data-artefact-kind` holds exactly one of `region`, `fabric`, `flow`, `card`, `point`, or `overlay`. Then search the output for a native `id` attribute carrying an authored identifier — that namespace is document-wide and host-owned, so a copy there collides with the page's second Infoschematic. Where `data-id` is retained for compatibility, confirm it agrees with `data-artefact-id`.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers.
 
@@ -122,7 +122,7 @@ The same configuration and options MUST produce byte-for-byte identical SVG. Out
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` snapshots title-only and representative configured output.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render the same configuration and options twice in one process and twice in separate ones and diff all four: identical bytes, or the output depends on something it must not. Reorder the keys of an authored object without touching the authored collections and confirm the output is unchanged; reorder an authored collection and confirm the output order followed it. Falsified by output that depends on enumeration of anything but a declared authored collection.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` snapshots title-only and representative configured output.
 
@@ -132,7 +132,7 @@ All authored text and attribute values MUST be XML escaped, generated output MUS
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` covers XML-significant text, handler-shaped authored values, absent executable markup, and invalid coordinates.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then author text and attribute values carrying XML-significant characters, a value shaped like an event handler, and a coordinate that is `NaN` or infinite. Parse the output with an XML parser and confirm the escaped text round-trips; search it for a script element and for an inline event attribute and find neither; and confirm the non-finite geometry was refused before serialisation rather than written as an attribute a parser accepts and no renderer can draw.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text, handler-shaped authored values, absent executable markup, and invalid coordinates.
 

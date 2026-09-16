@@ -7,8 +7,10 @@ This corpus states the accepted user-observable behaviour and quality properties
 Each requirement has a stable `<PREFIX>-NNN` identity, one BCP-14 statement, and lifecycle fields:
 
 - `_Conformance:_ conforming | pending | divergent` states how the implementation relates to the accepted contract now.
-- `_Verify:_` names the check capable of deciding conformance.
-- `_Evidence:_` names current proof and is required when conforming.
+- `_Verify:_` names the check capable of deciding conformance: an action a reader can take — a command to run, a suite to run, a render to look at, a comparison to make — written so someone who doubts the requirement can settle it.
+- `_Evidence:_` names current proof and is required when conforming: where the proof already sits, rather than what to do.
+
+The two lines carry different jobs and must not restate each other. A `_Verify:_` line that repeats its `_Evidence:_` line names the requirement's artefacts twice and calls one of them a method, which leaves the requirement with no verification instruction at all; `scripts/specification-evidence.test.ts` refuses both that and the bolted-on "against this requirement." tail it used to hide behind. Where the honest method is a suite that does not exist, say so and set `_Conformance:_` accordingly rather than inventing one.
 
 Requirements are grouped as **user-observable behaviours** or **quality properties**. A numbered requirement remains accepted while pending or divergent. Unnumbered Gaps are candidates not yet accepted.
 

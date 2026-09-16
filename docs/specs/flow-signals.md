@@ -16,7 +16,7 @@ The travelling pulse MUST be finite and presentational. Signal graphics MUST be 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect signal props in `packages/view-canvas/src/Canvas.tsx` and signal rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then drive the `signals` prop directly: re-render the same `flowId` and `occurrenceKey` and no completed pulse may restart; change only the key and the Flow replays; remove the occurrence and it cancels; signal two Flows at once and neither disturbs the other; supply an unknown `flowId` and the render stands with nothing newly visible. Filter, hover, focus, and select without signalling and confirm no occurrence appears, and compare each Flow's route, hit target, and selection behaviour before and after a pulse.
 
 _Evidence:_ signal props in `packages/view-canvas/src/Canvas.tsx` and signal rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
@@ -30,7 +30,7 @@ Under `none`, Present MUST derive no automatic occurrences. The policy MUST NOT 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect signal derivation in `packages/view-model/src/signals.ts` and Scene-entry coordination in `packages/view-present`. against this requirement.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then step a Sequence under each `signalPolicy`. Entering a Scene must derive one occurrence per resolved focused Flow; re-rendering, filtering, hovering, selecting, or inspecting focus within that entry must derive none; stepping on must derive fresh keys, including for a Flow an earlier entry signalled; `none` must derive nothing while a host's own occurrences still reach Canvas. Reload with the authored document unchanged to confirm the policy and the active occurrences were never authored state.
 
 _Evidence:_ signal derivation in `packages/view-model/src/signals.ts` and Scene-entry coordination in `packages/view-present`.
 
@@ -42,7 +42,7 @@ Unknown Flow identifiers MUST be ignored by focused-Flow resolution. Scene signa
 
 _Conformance:_ conforming
 
-_Verify:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Sequence stepping, cancellation, and filtering without signalling.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then clear the active Scene and confirm its occurrences cancel; replace it and confirm occurrences the new entry does not own cancel before new ones derive; re-render with the same Scene active and confirm a completed occurrence stays completed; put an unknown Flow identifier in a Scene's focus and confirm resolution ignores it. Derive twice from the same inputs without advancing any clock: the occurrences must match, because nothing here may read a timer.
 
 _Evidence:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Sequence stepping, cancellation, and filtering without signalling.
 
@@ -58,6 +58,6 @@ Signal measurements shared with deterministic still output MUST come from View M
 
 _Conformance:_ conforming
 
-_Verify:_ pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-canvas` and `bun run test:browser --filter=@infoschematics/view-canvas`, then watch the live region: each newly received known occurrence is announced once, a re-render of that occurrence adds nothing, and removing or cancelling announces nothing new. With reduced motion emulated, the pulse must become finite in-place emphasis on the same route while its announcement, its occurrence identity, its cancellation, and the still route semantics all survive. Confirm any measurement the deterministic still output also depends on is read from View Model tokens rather than declared in Canvas.
 
 _Evidence:_ pure occurrence and announcement-state tests cover replay, concurrent signals, cancellation, and live-region revisions; server-rendered Canvas tests cover pulse and reduced-motion markup, the announcement surface, and unchanged Flow interaction geometry.
