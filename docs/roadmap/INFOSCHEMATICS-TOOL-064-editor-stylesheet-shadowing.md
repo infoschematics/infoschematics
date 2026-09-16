@@ -4,12 +4,12 @@ area: TOOL
 title: Editor stylesheet shadowing
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: df05c180942ccfb9b0b992745d54a4fbbb918496
 created_at: 2026-09-15T13:30:00Z
-updated_at: 2026-09-15T15:00:00Z
+updated_at: 2026-09-16T10:05:00Z
 ---
 
 # Editor stylesheet shadowing
@@ -20,9 +20,11 @@ Let the editor surface read the Canvas stylesheet, so a Canvas treatment reaches
 
 ## Context
 
-Found while delivering Multi-selection alignment (`INFOSCHEMATICS-TOOL-046`). Its held-group treatment was written in `packages/view-canvas/src/styles.css`, the class reached the element, the whole suite was green — and the editor drew held elements exactly like unheld ones. `packages/view-studio/src/styles.css` never loads the Canvas stylesheet: its last line is `@import "@infoschematics/view-present/styles.css"`, and an `@import` that follows other statements is dead. PostCSS warns on every build, the browser ignores it, and the editor runs entirely on this stylesheet's own hand-maintained copies of the Canvas rules — copies written with literal colours rather than the generated visual tokens.
+Found while delivering Multi-selection alignment (`INFOSCHEMATICS-TOOL-046`). Its held-group treatment was written in `packages/view-canvas/src/styles.css`, the class reached the element, the whole suite was green — and the editor drew held elements exactly like unheld ones. The reason recorded at the time was that `packages/view-studio/src/styles.css` never loads the Canvas stylesheet, because its `@import "@infoschematics/view-present/styles.css"` sits on the last line and an `@import` that follows other statements is dead.
 
-Two consequences are visible today. A treatment has to be written twice, which is how a green suite can report a feature that is not there. And a Canvas affordance Studio never copied has no rules at all: `.artefact-action` and `.artefact-resize-handle` style the selected element's reorder, remove and resize controls in Canvas, and in Studio those controls render as unstyled black shapes over the Card.
+That diagnosis was half right. The rule about `@import` position is real and the authored file was invalid CSS, but neither consumption path was affected: `packages/view-studio/build.mjs` lifts every `@import` to the head of the file it emits, and Vite's `postcss-import` does the same for the site. The Canvas rules were arriving. What actually drew held elements like unheld ones is that Studio carried its own copy of the held-group treatment further down the same file, and a later rule of equal specificity wins.
+
+So the cost is one thing rather than two: every treatment has to be written twice, which is how a green suite reports a feature that is not there. The copies are written with literal colours rather than the generated visual tokens, so a token change stops at the editor as well.
 
 ## Boundary
 
@@ -30,25 +32,26 @@ This item makes one stylesheet read another and removes the duplication that sta
 
 ## Current state
 
-- `packages/view-studio/src/styles.css` is about 81 KB and carries its own copies of the Canvas selection, hover, layer and handle treatments, in hex rather than `var(--infoschematic-canvas-*)`.
-- Its `@import` of the Present stylesheet sits at the end of the file, so neither Present nor the Canvas stylesheet Present imports is applied.
-- `apps/site/src/Playground.tsx` imports `@infoschematics/view-studio/styles.css` alone, so the deployed editor has the same gap.
-- `packages/view-canvas/src/styles.css` imports the generated tokens and is the only stylesheet the Canvas browser suites load, which is why those suites cannot see this.
+- `packages/view-studio/src/styles.css` is 81 KB across 469 rules, and carries its own copies of the Canvas selection, hover, layer and handle treatments, in hex rather than `var(--infoschematic-canvas-*)`.
+- Its `@import` of the Present stylesheet sits at the end of the file. Both build paths hoist it, so the chain is loaded; the authored file is still invalid CSS and nothing checks that it stays hoisted.
+- `.artefact-action` and `.artefact-resize-handle` are styled, from Canvas, in the deployed editor today. Studio's copy of the Design grid is the visible defect instead: `.edit-grid rect { fill: url(#edit-grid-major) }` names a pattern no renderer defines anywhere in the repository, so the Design grid paints nothing.
+- `packages/view-canvas/src/styles.css` imports the generated tokens and is the only stylesheet the Canvas browser suites load, which is why those suites cannot see any of this.
 
 ## Steps
 
-- [ ] Move the `@import` to the head of the Studio stylesheet and record what the cascade then does: the imported rules come first, so Studio's own copies still win where they disagree.
-- [ ] Render the editor before and after and compare, because this changes the appearance of every selection treatment at once.
-- [ ] Remove each Studio copy that the Canvas stylesheet now supplies, keeping only rules that are genuinely about the editor rather than the diagram.
-- [ ] Confirm `.artefact-action` and `.artefact-resize-handle` are styled in Studio, which is the defect a reader can see today.
-- [ ] Decide whether the remaining Studio copies should read the visual tokens rather than literal hex, and either convert them or state why not.
-- [ ] Give the browser suite a case that would have caught the original defect: a Canvas treatment asserted on the Studio surface, not only on a Canvas fixture.
+- [x] Move the `@import` to the head of the Studio stylesheet and record what the cascade then does: the imported rules come first, so Studio's own copies still win where they disagree.
+- [x] Render the editor before and after and compare, because this changes the appearance of every selection treatment at once.
+- [x] Remove each Studio copy that the Canvas stylesheet now supplies, keeping only rules that are genuinely about the editor rather than the diagram.
+- [x] Confirm `.artefact-action` and `.artefact-resize-handle` are styled in Studio, which is the defect a reader can see today.
+- [x] Decide whether the remaining Studio copies should read the visual tokens rather than literal hex, and either convert them or state why not.
+- [x] Give the browser suite a case that would have caught the original defect: a Canvas treatment asserted on the Studio surface, not only on a Canvas fixture.
 
 ## Files touched
 
 - `packages/view-studio/src/styles.css`
-- `packages/view-studio/src/app/App.browser.test.tsx` for the Studio-surface treatment case
-- possibly `packages/view-present/src/styles.css`, if the import chain is better made explicit
+- `packages/view-studio/src/app/App.treatments.browser.test.tsx` — new, for the Studio-surface treatment cases
+- `packages/view-studio/src/app/viewport-frame.test.ts` — its frame assertion now reads the stylesheet that owns the rule
+- `scripts/stylesheet-shadowing.test.ts` — new, the mechanical guard across the import chain
 
 ## Verify
 
@@ -62,7 +65,7 @@ None. Multi-selection alignment (`INFOSCHEMATICS-TOOL-046`) declares its held-gr
 
 ### Decision Records
 
-One is possible if the answer is that the editor deliberately keeps its own copy of diagram treatments. That would be a durable boundary claim and should be written down rather than left as an accident of a misplaced `@import`.
+None. The conditional was "if the editor deliberately keeps its own copy of diagram treatments", and it does not: every copy is gone and the guard keeps it that way. What remains in Studio is application chrome with no Canvas counterpart, which needs no boundary claim.
 
 ### Specifications
 
@@ -75,6 +78,46 @@ None.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+The editor reads the Canvas stylesheet rather than a copy of it. Studio's stylesheet lost 103 of its 469 rules — 81 KB down to 63 KB — and what remains is application chrome with no Canvas counterpart. A treatment written in Canvas now reaches the Studio surface uncopied, and a repository check fails if a copy comes back.
+
+### Summary of changes
+
+- `packages/view-studio/src/styles.css` — `@import "@infoschematics/view-present/styles.css"` hoisted to the head, and 103 rules removed: 91 token-equivalent duplicates of Canvas selectors, 8 combinator near-misses, a `prefers-reduced-motion` copy, the dead `.edit-grid-line` pair, and the Design grid rule pointing at a pattern that does not exist.
+- `scripts/stylesheet-shadowing.test.ts` — new, in the repository-level suite. Two cases: no selector is declared twice across the Canvas → Present → Studio chain, and each stylesheet actually imports the one it is compared against, at the head of the file where a conforming parser will keep it.
+- `packages/view-studio/src/app/App.treatments.browser.test.tsx` — new. A selected Card on the Studio surface is painted from `--infoschematic-canvas-selection-selected`, and its identity chip keeps its own Scope colour rather than inheriting the Card's selection treatment.
+- `packages/view-studio/src/app/viewport-frame.test.ts` — the `.infoschematic-frame` assertion moved to the Canvas stylesheet that now owns the rule, with a second case asserting Studio does not redeclare it.
+
+### Verification
+
+- Removal was established as appearance-neutral before anything was removed, by expanding every generated token and comparing normalised rule bodies: 83 of the 86 overlapping rules were byte-identical once tokens resolved, and each of the 3 that differed had Canvas as the better version.
+- Rendered and compared, because a green suite is not evidence that output looks right. Present mode is byte-identical across every pass. The one pixel movement in the whole change was 1.18% of the Design surface, and the crop showed exactly the intended effect: Card identity chips losing the Card's own selection stroke and drop-shadow, which is what Canvas's `>` scoping exists to prevent. The final two removals moved zero pixels on all four captures, with a Region on screen.
+- The Design grid now paints. Before, `.edit-grid rect` computed `fill: url("#edit-grid-major")`, a reference nothing in the repository defines, so the grid rendered nothing; after, it computes `url("#infoschematic-grid-major-plus-minor")`, which the Canvas renderer emits.
+- Held-group treatment read from the live editor after adding the class by hand: `rgb(130, 179, 102)`, `5px, 4px`, `2px` — Canvas's rule supplying precisely what Studio's deleted copy said.
+- Every new assertion was proved to fail against a deliberate breakage and then restored: the import moved back to the end of the file, a Canvas rule copied back into Studio, the Studio stylesheet removed from the browser fixture, and the identity-chip scoping loosened.
+- `bun run self:check` green, 43 tasks.
+
+### Outstanding concerns
+
+`.artefact-action` and `.artefact-resize-handle` were never the defect. The record claimed they rendered as unstyled black shapes; measurement found them painted from Canvas, correctly, before this change. The item's premise was carried forward from a diagnosis nobody had re-checked, and the real defect — the grid painting nothing — was sitting next to it unrecorded.
+
+The shadowing check compares selectors, not declarations. Two stylesheets can still say the same thing under different selector shapes, which is how `.infoschematic-region path` shadowed `.infoschematic-region-frame` until it was read by hand. Catching that class mechanically means resolving what each rule matches, which is a CSS engine rather than a check.
+
+The intended browser case for the Design grid was dropped. `grid={editor.editing}` stayed false in the fixture even with the surface in Design mode and the Design toolbar rendered, because the editor mode is set from an effect that appears to want an authored document. The shadowing check covers that defect class mechanically, which is the stronger guard, but the rendered assertion is missing.
+
+### Post-change review
+
+The question the item asked — convert the remaining literals to tokens, or record why not — resolved into neither answer. Every generated token is `--infoschematic-canvas-*`: it is the diagram's vocabulary, and after the removals nothing in Studio's stylesheet is about the diagram. Of 104 remaining literals, five coincide with a token value, and all five are chrome: a focus ring, a pressed toggle border, an eyebrow. Writing `var(--infoschematic-canvas-selection-pointed)` on `.eyebrow` would assert a relationship that is not there. The editor chrome has no token vocabulary, and inventing one is not this item.
+
+The stale premise is the part worth keeping. Two of the three defects the record named were fixed or never existed, and the one that was real went unmentioned — so the record was describing the repository as it stood when someone last looked, which is exactly what a `ready` item is at risk of being. Measuring first cost an hour and changed what was delivered.
+
+### Mini recap
+
+The editor was drawing the diagram from its own 81 KB copy of the Canvas rules, so a treatment written once arrived nowhere and a token change stopped at the editor door. The copies are gone, the chain is loaded from the head of the file, and a check now fails if a selector is declared twice along it.
 
 ## Discussion
 
