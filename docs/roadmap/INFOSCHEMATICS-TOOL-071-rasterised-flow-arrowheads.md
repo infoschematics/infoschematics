@@ -65,8 +65,8 @@ New:
 
 ## Verify
 
-- `bun run --cwd packages/render-svg test`, `bun run self:verify:repo`, then `bun run self:check`.
-- `bun run self:verify:examples` unchanged: no example's SVG bytes may change unless the document authors a bidirectional Flow.
+- `bun run --cwd packages/render-svg test`, `bun run self:scripts:test`, then `bun run self:check`.
+- `bun run self:examples:verify` unchanged: no example's SVG bytes may change unless the document authors a bidirectional Flow.
 - Render and look, because this is visual treatment and a green suite already failed to notice it: `bun packages/cli/src/bin.ts render examples/is-infoschematics/infoschematic.yaml --format png --scale 1 --output /tmp/arrows.png`, then open it. Every Flow must terminate in a triangle pointing into its target Card. Compare against the same document through `rsvg-convert`; the arrowheads must now agree.
 - Render the bidirectional case and confirm its arrowhead points back at its source.
 - Confirm the blueprint backdrop and Region framing are unchanged, both having previously survived a green run in a broken state.
@@ -79,7 +79,7 @@ Blocked by scoped renderer definition identity (`INFOSCHEMATICS-TOOL-058`), whic
 
 ### Specifications
 
-Likely: `docs/specs/static-rendering.md` gains or amends a requirement that rasterised output preserves Flow direction, with the rendered evidence path. Every new requirement lands with a conformance state and resolvable evidence or `bun run self:verify:repo` fails.
+Likely: `docs/specs/static-rendering.md` gains or amends a requirement that rasterised output preserves Flow direction, with the rendered evidence path. Every new requirement lands with a conformance state and resolvable evidence or `bun run self:scripts:test` fails.
 
 ### Guides
 

@@ -43,7 +43,7 @@ To be determined by step 3. Candidates: `packages/view-model/src` for layout res
 
 ## Verify
 
-Rendering and looking is the whole point of this item: every Region label legible in both engines at the widths the repository renders, with the two outputs kept side by side. Plus `bun run self:verify:examples` for any change to rendered bytes, and `bun run self:check`.
+Rendering and looking is the whole point of this item: every Region label legible in both engines at the widths the repository renders, with the two outputs kept side by side. Plus `bun run self:examples:verify` for any change to rendered bytes, and `bun run self:check`.
 
 ## Dependencies / blocks
 

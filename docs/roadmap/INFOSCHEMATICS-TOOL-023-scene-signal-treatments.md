@@ -54,14 +54,14 @@ Read against the tree on 2026-09-16. Two of this record's earlier claims are now
 - `docs/specs/flow-signals.md:41` (`SIGNAL-003`, conforming): "Scene signal derivation MUST remain pure, framework-neutral, and independent of timers." A Present-owned schedule contradicts that sentence as written.
 - `docs/specs/diagram-dynamics.md:15` (`DYNAMIC-001`): a declaration MUST NOT carry duration, easing, timer, or any other runtime instruction. `:29` (`DYNAMIC-002`): occurrences, keys, and timers MUST remain host or View state and MUST NOT enter the authored Infoschematic.
 - `docs/specs/scenes-and-callouts.md:67-75` records `SCENE-006`, bounded automatic playback, **divergent** on an unreproduced out-of-memory observation, tracked by bounded playback profile (`INFOSCHEMATICS-TOOL-069`). Adding repeated playback on top of an unmeasured playback loop would make that divergence harder to attribute, not easier.
-- `scripts/specification-evidence.test.ts` runs in the gate through `bun run self:verify:repo` and fails when a requirement declares no recognised conformance state or cites a path that does not resolve, so any new requirement must land with real evidence paths.
+- `scripts/specification-evidence.test.ts` runs in the gate through `bun run self:scripts:test` and fails when a requirement declares no recognised conformance state or cites a path that does not resolve, so any new requirement must land with real evidence paths.
 
 ## Steps
 
 1. [ ] **Needs the owner decision named under Discussion.** Record the playback-policy decision as an amendment to `ADR-INFOSCHEMATICS-026` or a companion record: which of once, repeat, and continuous is authored data, which is host or View policy, and which is held element emphasis (`INFOSCHEMATICS-TOOL-059`) rather than this record. Verifiable by the record existing, naming its consequence for `DYNAMIC-001` and `SIGNAL-003`, and being linked from `docs/decisions/README.md`.
 2. [ ] Add the Scene cue field to `packages/domain-model/src/model.ts:124-131` in whatever shape step 1 settles — at minimum a list of stable Diagram Dynamic ids, plus an optional non-negative integer cascade stage. Verifiable by `bun run --cwd packages/domain-model typecheck` and by a document that declares a cue typechecking.
-3. [ ] Mirror the field in `packages/domain-core/src/schema.ts:462-469`, validate it in `packages/domain-core/src/model.ts` beside the Dynamic checks at `:439-456`, and add its key to the serialisation order in `packages/domain-core/src/serialise.ts`. Verifiable by `bun run self:verify:schema` regenerating `packages/domain-core/schema/infoschematic.schema.json` with no diff, and by new cases in `packages/domain-core/src/model.test.ts` rejecting an unknown Dynamic id, a duplicate cue for one Dynamic in one Scene, and a negative stage.
-4. [ ] Prove a document that declares no cue is byte-identical through the whole pipeline, as `DYNAMIC-001` requires of the Dynamics collection. Verifiable by `bun run self:verify:examples` and by `bun run self:examples:render --all` producing unchanged SVG bytes.
+3. [ ] Mirror the field in `packages/domain-core/src/schema.ts:462-469`, validate it in `packages/domain-core/src/model.ts` beside the Dynamic checks at `:439-456`, and add its key to the serialisation order in `packages/domain-core/src/serialise.ts`. Verifiable by `bun run self:schema:verify` regenerating `packages/domain-core/schema/infoschematic.schema.json` with no diff, and by new cases in `packages/domain-core/src/model.test.ts` rejecting an unknown Dynamic id, a duplicate cue for one Dynamic in one Scene, and a negative stage.
+4. [ ] Prove a document that declares no cue is byte-identical through the whole pipeline, as `DYNAMIC-001` requires of the Dynamics collection. Verifiable by `bun run self:examples:verify` and by `bun run self:examples:render --all` producing unchanged SVG bytes.
 5. [ ] Project the cue onto the runtime Scene in `packages/view-model/src/runtime.ts` beside `hold` at `:381`, and derive ordered stage timing from `hold` alone — no authored milliseconds — falling back to `defaultSceneDuration` at `:131` when `duration` is absent. Verifiable by pure tests in `packages/view-model/src/runtime.test.ts` asserting the stage boundaries for a two-stage and a three-stage cascade at an authored and a defaulted duration.
 6. [ ] Extend `SceneSignalPolicy` at `packages/view-present/src/presentation.ts:13` and originate `DynamicOccurrence` values in `derivePresentation` at `:184-189`, keyed off `sceneOccurrence` so a re-render does not replay and a Scene change cancels. Verifiable by pure reducer tests in `packages/view-present/src/presentation.test.ts` covering initial play, replay on re-entry, cancellation on Scene change and on clear, and the `none` policy deriving nothing.
 7. [ ] Merge the Scene-originated occurrences with the existing host `dynamics` prop in `packages/view-present/src/Present.tsx:156` without letting either suppress the other, and correct the prop comment at `:14-20`, which currently states that a Dynamic is the opposite direction from Scene signalling. Verifiable by a rendered case in `packages/view-present/src/Present.dynamics.test.tsx` where a host occurrence and a Scene cue are live together and both reach the Canvas.
@@ -69,7 +69,7 @@ Read against the tree on 2026-09-16. Two of this record's earlier claims are now
 9. [ ] Give repetition a bounded measurement before it ships, because `SCENE-006` is divergent. Drive a repeated cue through many cycles under fake timers and assert the pending-timer count stays flat. Verifiable by the case failing when an effect cleanup is removed. Coordinate with bounded playback profile (`INFOSCHEMATICS-TOOL-069`) so one measurement serves both.
 10. [ ] Author the first combined example: give `examples/is-infoschematics/infoschematic.yaml` Dynamics beside its Sequence at `:294`, or give `examples/is-system/infoschematic.yaml` a Sequence beside its Dynamics at `:103-114`. Verifiable by `bun run self:examples:generate` and the example package's own suite.
 11. [ ] Add a Dynamics specimen kind to `apps/site/src/visual-guide/specimens.ts` and `curriculum.ts` covering each policy the decision admits, plus receipt and cascade, so each treatment can be watched side by side in full and reduced motion. Verifiable by `bun run --cwd apps/site test` and by the specimen appearing in the built guide.
-12. [ ] Update the contracts: the requirements listed under Current state, and the authoring guidance under `docs/guides/`. Verifiable by `bun run self:verify:repo`, which fails on an unrecognised conformance state or an unresolvable evidence path.
+12. [ ] Update the contracts: the requirements listed under Current state, and the authoring guidance under `docs/guides/`. Verifiable by `bun run self:scripts:test`, which fails on an unrecognised conformance state or an unresolvable evidence path.
 
 ## Files touched
 
@@ -99,10 +99,10 @@ New:
 
 Suites and checks:
 
-- `bun run self:verify:schema` and `bun run self:verify:examples` pass with no regenerated diff.
+- `bun run self:schema:verify` and `bun run self:examples:verify` pass with no regenerated diff.
 - `bun run --cwd packages/domain-core test`, `bun run --cwd packages/view-model test`, `bun run --cwd packages/view-present test`, and `bunx turbo run test --filter=...@infoschematics/view-model` for everything downstream of the runtime change.
 - `bun run --cwd packages/view-studio test:browser` and `bun run --cwd packages/view-canvas test:browser`.
-- `bun run self:verify:repo`, which runs `scripts/specification-evidence.test.ts` over the amended requirements.
+- `bun run self:scripts:test`, which runs `scripts/specification-evidence.test.ts` over the amended requirements.
 - `bun run self:packages:build`, then `bun run self:check`.
 
 Rendering the result and looking at it, because this changes visual treatment and a green suite is not evidence:
@@ -139,7 +139,7 @@ Expected, in three documents under `docs/specs/`:
 - `docs/specs/diagram-dynamics.md` — `DYNAMIC-002` gains the Scene-originated occurrence as a recognised source, since today it names only a host.
 - `docs/specs/scenes-and-callouts.md` — a new `SCENE` requirement for cue declaration, validation, and derived cascade timing, and a note against `SCENE-006` that repeated playback now depends on its measurement.
 
-Every new requirement lands with a conformance state and evidence paths that resolve, or `bun run self:verify:repo` fails.
+Every new requirement lands with a conformance state and evidence paths that resolve, or `bun run self:scripts:test` fails.
 
 ### Guides
 

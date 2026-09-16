@@ -76,3 +76,4 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 | ---- | ---- | ------ | -------- | ----------------- |
 | INFOSCHEMATICS-TOOL-070 | 1 | Awaiting review | Guard red with `packages/cli` removed; forced gate 43/43 | Accept, or return |
 | INFOSCHEMATICS-TOOL-064 | 1 | Awaiting review | First-rule duplicate caught; cite gate red when staled | Accept after a look |
+| INFOSCHEMATICS-TOOL-065 | 1 | Awaiting review | Hold check and README check proven red; stale lockfile repaired | Accept; 7 of 8 steps |
