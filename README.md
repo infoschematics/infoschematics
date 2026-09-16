@@ -103,7 +103,7 @@ The `self:` commands, by subject:
 | Subject | Commands | What it covers |
 | --- | --- | --- |
 | the whole gate | `self:check`, `self:dev` | `self:check` is the gate to run before committing; `self:dev` builds the packages then starts the site. |
-| boundaries | `self:boundaries:verify` | dependency-cruiser over every workspace source root and `scripts/`. |
+| boundaries | `self:boundaries:verify` | dependency-cruiser over every workspace source root and `scripts/`, through the TypeScript 6 install root at `tooling/boundaries`, refusing a cruise that measured too little to be evidence. |
 | the deployment seam | `self:cf:build` | Cloudflare Pages' configured build command, which delegates to `build` rather than restating it. |
 | examples | `self:examples:generate`, `self:examples:render`, `self:examples:verify` | The generated example registry, and rendering one authored document to a standalone SVG under `reports/`. |
 | lockfile | `self:lockfile:verify` | The frozen install that proves `bun.lock` still agrees with every manifest, the way continuous integration and the release workflow resolve dependencies. |

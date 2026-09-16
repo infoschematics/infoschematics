@@ -16,6 +16,7 @@
     ".": {
       "entry": [
         "scripts/**/*.test.ts",
+        "scripts/boundaries.ts",
         "scripts/examples.ts",
         "scripts/generate-schema.ts",
         "scripts/generate-visual-tokens.ts",

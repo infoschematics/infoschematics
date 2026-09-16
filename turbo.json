@@ -105,7 +105,11 @@
         "apps/site/package.json",
         "examples/*/src/**",
         "examples/*/package.json",
-        "scripts/**"
+        "scripts/**",
+        "tsconfig.json",
+        "package.json",
+        "tooling/boundaries/package.json",
+        "tooling/boundaries/bun.lock"
       ]
     },
     "//#self:scripts:test": {

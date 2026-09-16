@@ -21,3 +21,4 @@ policy: safe-local-v1
 | Item | Result | Baseline | Result commit | Exception |
 | --- | --- | --- | --- | --- |
 | INFOSCHEMATICS-TOOL-075 | awaiting-review | `993988f2960b90a9aadd254fbcd98cbb29f7d4df` | `f4ac2deaefd8ebf38df1e84eba422f9fd5630280` | None |
+| INFOSCHEMATICS-TOOL-073 | awaiting-review | `f4ac2deaefd8ebf38df1e84eba422f9fd5630280` | `fce74a415b13dfe9290c4cb0d9774b99553da00d` | None |

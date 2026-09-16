@@ -10,6 +10,12 @@
  * A resolved workspace import lands in the exporting package's built output and
  * a relative import lands in its source, so rules are anchored on package roots:
  * `packages/view-model/dist` and `packages/view-model/src` are one owner.
+ *
+ * Nothing here is enforced by running `depcruise` directly: `scripts/boundaries.ts`
+ * is the gate, because these rules passed empty for the whole time dependency-cruiser
+ * could not read TypeScript 7. It cruises through the TypeScript 6 install root at
+ * `tooling/boundaries`, and it holds a module floor and a cross-package type-only
+ * count so a parser that stops reading this repository fails instead of agreeing.
  */
 import type { IConfiguration } from 'dependency-cruiser'
 
