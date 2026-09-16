@@ -48,6 +48,14 @@ Three waves, sequenced by the file collisions the readiness reviews found rather
 
 Each item is delivered by one agent in its own git worktree, so several writers never share a checkout. The lead merges each worktree to `main` and removes it in the same pass. No agent merges its own work, and no agent touches another item's files.
 
+## Decision-record numbers
+
+Three items in this batch each name "the next free number after `ADR-INFOSCHEMATICS-027`", so concurrent delivery would have two of them writing the same record. The numbers are allocated here instead, and each agent is told its own:
+
+- `ADR-INFOSCHEMATICS-028` — `TOOL-066`, the panel-visibility decision.
+- `ADR-INFOSCHEMATICS-029` — `TOOL-059`, the held-emphasis authored surface. `TOOL-060` extends that same record rather than opening another; its own record already says the surface decision is taken once for both.
+- `ADR-INFOSCHEMATICS-030` — `TOOL-057`, the composition-constraint siting instrument.
+
 ## Completion target
 
 Each named item at `awaiting-review` with a six-heading review packet, plus an independent recheck of that packet against the tree. No item is accepted or pruned by this run.
