@@ -4,12 +4,12 @@ area: TOOL
 title: Travelling element emphasis
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-059]
 baseline_ref: null
 created_at: 2026-09-15T08:50:00Z
-updated_at: 2026-09-16T15:05:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Travelling element emphasis

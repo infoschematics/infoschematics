@@ -4,12 +4,12 @@ area: TOOL
 title: Release workflow package set
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-041]
 blocked_by: []
 baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-16T10:30:00Z
-updated_at: 2026-09-16T11:26:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Release workflow package set

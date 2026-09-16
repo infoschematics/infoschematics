@@ -4,12 +4,12 @@ area: TOOL
 title: Held element emphasis
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-060]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T07:25:00Z
-updated_at: 2026-09-16T13:20:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Held element emphasis

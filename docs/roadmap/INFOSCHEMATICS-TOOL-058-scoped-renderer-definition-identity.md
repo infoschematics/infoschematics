@@ -4,12 +4,12 @@ area: TOOL
 title: Scoped renderer definition identity
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-15T07:05:00Z
-updated_at: 2026-09-16T12:20:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Scoped renderer definition identity

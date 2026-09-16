@@ -4,12 +4,12 @@ area: TOOL
 title: Point interactivity in Design
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-066]
 baseline_ref: f9c1c7af81a528380f89ba3f7811ebf79a7b62a0
 created_at: 2026-09-15T12:10:00Z
-updated_at: 2026-09-16T15:20:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Point interactivity in Design

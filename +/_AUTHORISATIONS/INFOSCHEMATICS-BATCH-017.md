@@ -72,17 +72,23 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 
 <!-- ki-batch-run: INFOSCHEMATICS-BATCH-017-RUN-001 -->
 
-| Item | Wave | Result | Evidence | Next human action |
-| ---- | ---- | ------ | -------- | ----------------- |
-| INFOSCHEMATICS-TOOL-070 | 1 | Awaiting review | Guard red with `packages/cli` removed; forced gate 43/43 | Accept, or return |
-| INFOSCHEMATICS-TOOL-064 | 1 | Awaiting review | First-rule duplicate caught; cite gate red when staled | Accept after a look |
-| INFOSCHEMATICS-TOOL-065 | 1 | Awaiting review | Hold check and README check proven red; stale lockfile repaired | Accept; 7 of 8 steps |
-| INFOSCHEMATICS-TOOL-066 | 2 | Awaiting review | Dock open on Design seen in a PNG; sticky-tab case red | Accept; clipping in `076` |
-| INFOSCHEMATICS-TOOL-058 | 2 | Awaiting review | Ids scoped per rendering; gate 43/43 with `064` landed | Accept; arrowheads in `071` |
-| INFOSCHEMATICS-TOOL-069 | 3 | Awaiting review | Steering case red 240/240 with the cleanup removed | Accept; 6 of 7 steps |
-| INFOSCHEMATICS-TOOL-059 | 3 | Awaiting review | Reduced-motion restatement proven red; gate 44/44 | Accept; `079`/`080` parked |
-| INFOSCHEMATICS-TOOL-060 | 3 | Awaiting review | Mark's removal proven red; region fold output-identical | Accept; all ten steps |
-| INFOSCHEMATICS-TOOL-063 | 3 | Awaiting review | Widened target red in one case; endpoint cascade red | Accept; guide gap `SITE-028` |
+| Item | Wave | Result | Evidence | What it left behind |
+| ---- | ---- | ------ | -------- | ------------------- |
+| INFOSCHEMATICS-TOOL-070 | 1 | Accepted | Guard red with `packages/cli` removed; forced gate 43/43 | Nothing outstanding |
+| INFOSCHEMATICS-TOOL-064 | 1 | Accepted | First-rule duplicate caught; cite gate red when staled | Reopened once, then held |
+| INFOSCHEMATICS-TOOL-065 | 1 | Accepted | Hold check and README check proven red; stale lockfile repaired | 7 of 8 steps; `073` parked |
+| INFOSCHEMATICS-TOOL-066 | 2 | Accepted | Dock open on Design seen in a PNG; sticky-tab case red | Clipping parked in `076` |
+| INFOSCHEMATICS-TOOL-058 | 2 | Accepted | Ids scoped per rendering; gate 43/43 with `064` landed | Arrowheads parked in `071` |
+| INFOSCHEMATICS-TOOL-069 | 3 | Accepted | Steering case red 240/240 with the cleanup removed | 6 of 7 steps; `078` parked |
+| INFOSCHEMATICS-TOOL-059 | 3 | Accepted | Reduced-motion restatement proven red; gate 44/44 | `079` and `080` parked |
+| INFOSCHEMATICS-TOOL-060 | 3 | Accepted | Mark's removal proven red; region fold output-identical | All ten steps done |
+| INFOSCHEMATICS-TOOL-063 | 3 | Accepted | Widened target red in one case; endpoint cascade red | Guide gap in `SITE-028` |
+
+## Acceptance
+
+The owner accepted all nine delivered items on 2026-09-16 and authorised pruning them. The records were set to `status: done` and then pruned; each remains recoverable from the commit that closed it, and `docs/roadmap/_ISSUES.md` keeps every number reserved.
+
+`INFOSCHEMATICS-TOOL-057` was still in delivery when the acceptance arrived, so it is neither accepted nor closed here. It is the one item of the frozen ten that this run has not finished, and it carries its own review when it lands.
 
 ## Findings held for a later wave
 

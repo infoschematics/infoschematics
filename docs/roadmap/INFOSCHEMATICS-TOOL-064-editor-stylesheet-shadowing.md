@@ -4,12 +4,12 @@ area: TOOL
 title: Editor stylesheet shadowing
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-15T13:30:00Z
-updated_at: 2026-09-16T11:36:04Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Editor stylesheet shadowing
