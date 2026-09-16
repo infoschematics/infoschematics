@@ -1010,6 +1010,13 @@
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "depicts": {
+                    "type": "string",
+                    "enum": [
+                      "event",
+                      "state"
+                    ]
                   }
                 },
                 "required": [

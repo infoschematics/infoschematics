@@ -243,6 +243,59 @@ scopes:`
     expect(crossed.ok).toBe(false)
   })
 
+  it('round-trips a state-depicting emphasis and rejects the claim on a Flow signal or an unknown value', () => {
+    const held = (dynamic: string) =>
+      compact.replace(
+        '\nscopes:',
+        `
+  dynamics:
+${dynamic}
+scopes:`
+      )
+    const authored = held(`    - id: on-this-stage
+      label: We are on this stage
+      kind: emphasise-elements
+      elements: [SNK]
+      depicts: state`)
+    const model = modelOf(authored)
+
+    expect(model.diagram.dynamics).toEqual([
+      {
+        id: 'on-this-stage',
+        label: 'We are on this stage',
+        kind: 'emphasise-elements',
+        elements: ['SNK'],
+        depicts: 'state'
+      }
+    ])
+
+    // The field survives a round trip in the authored order it is declared in, after the targets it qualifies.
+    const yaml = serialiseInfoschematicYaml(model)
+    expect(yaml).toContain('depicts: state')
+    expect(yaml.indexOf('depicts: state')).toBeGreaterThan(yaml.indexOf('elements:'))
+    expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
+
+    expect(
+      parseInfoschematic(
+        held(`    - id: sustained
+      label: Sustained signal
+      kind: signal-flow
+      flows: [LOAD]
+      depicts: state`)
+      ).ok
+    ).toBe(false)
+
+    expect(
+      parseInfoschematic(
+        held(`    - id: forever
+      label: Forever
+      kind: emphasise-elements
+      elements: [SNK]
+      depicts: always`)
+      ).ok
+    ).toBe(false)
+  })
+
   it('keeps bidirectionality in the borrowed arrow notation', () => {
     const bidirectional = compact.replace('SRC E2 -> SNK W2', 'SRC E2 <-> SNK W2')
     expect(modelOf(bidirectional).diagram.flows[0]?.direction).toBe('bidirectional')

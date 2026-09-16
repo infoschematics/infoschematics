@@ -33,7 +33,14 @@ const config = defineInfoschematicModel({
     ],
     dynamics: [
       { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
-      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] }
+      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] },
+      {
+        id: 'on-this-stage',
+        label: 'We are on this stage',
+        kind: 'emphasise-elements',
+        elements: ['SNK', 'ZONE'],
+        depicts: 'state'
+      }
     ]
   },
   scopes: [
@@ -43,6 +50,7 @@ const config = defineInfoschematicModel({
 })
 
 const occurrence = { dynamicId: 'attention', occurrenceKey: 'run-1' }
+const held = { dynamicId: 'on-this-stage', occurrenceKey: 'run-1' }
 
 describe('Canvas Diagram Dynamics', () => {
   it('draws an emphasis layer for each element the occurrence names, leaving their own output alone', () => {
@@ -115,6 +123,60 @@ describe('Canvas Diagram Dynamics', () => {
     expect(styles.slice(styles.indexOf('@media (prefers-reduced-motion: reduce)'))).toContain(
       '.infoschematic-element-emphasis > * {\n    animation: none;'
     )
+  })
+
+  it('marks a state-depicting emphasis in the markup and leaves an event emitting exactly what it always did', () => {
+    const event = renderToStaticMarkup(<Canvas config={config} dynamics={[occurrence]} />)
+    const markup = renderToStaticMarkup(<Canvas config={config} dynamics={[held]} />)
+
+    expect(event).not.toContain('data-depicts')
+    expect(markup).toContain('data-artefact-id="SNK" data-depicts="state" data-dynamic-id="on-this-stage"')
+    expect(markup).toContain('data-artefact-id="ZONE" data-depicts="state" data-dynamic-id="on-this-stage"')
+    // The state is the only difference between the two renderings: same layer, same geometry, same class.
+    expect(markup.replaceAll(' data-depicts="state"', '').replaceAll('on-this-stage', 'attention')).toBe(
+      event.replaceAll('Sink needs attention', 'We are on this stage')
+    )
+  })
+
+  it('ends a held occurrence by every route that ends an event, because a hold is still host-owned', () => {
+    const scoped = renderToStaticMarkup(<Canvas config={config} dynamics={[held]} visibleScopes={new Set(['shown'])} />)
+    // Scope filtering reaches a hold exactly as it reaches an event: the Card the Canvas did not draw is not held.
+    expect(scoped).not.toContain('data-artefact-id="SNK" data-depicts="state"')
+    expect(scoped).toContain('data-artefact-id="ZONE" data-depicts="state"')
+
+    expect(renderToStaticMarkup(<Canvas config={config} dynamics={[]} />)).toBe(
+      renderToStaticMarkup(<Canvas config={config} />)
+    )
+
+    const first = { depicts: 'state', dynamicId: 'on-this-stage', elementId: 'SNK', occurrenceKey: 'run-1' } as const
+    const replay = { ...first, occurrenceKey: 'run-2' }
+    const shown = new Set(['SNK', 'ZONE'])
+    const seen = new Set<string>()
+
+    const started = reconcileElementEmphasis([], [first], shown, seen)
+    const replaced = reconcileElementEmphasis(started.activeEmphasis, [replay], shown, seen)
+    const withdrawn = reconcileElementEmphasis(replaced.activeEmphasis, [], shown, seen)
+    const hidden = reconcileElementEmphasis(replaced.activeEmphasis, [replay], new Set(), seen)
+
+    expect(started.activeEmphasis).toEqual([first])
+    expect(replaced.activeEmphasis).toEqual([replay])
+    expect(withdrawn.activeEmphasis).toEqual([])
+    expect(hidden.activeEmphasis).toEqual([])
+  })
+
+  it('sustains a held treatment on the shared token period and holds it steady under reduced motion', async () => {
+    const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')
+    const reduced = styles.slice(styles.indexOf('@media (prefers-reduced-motion: reduce)'))
+
+    expect(styles).toContain(
+      'animation: infoschematic-element-emphasis-held var(--infoschematic-canvas-emphasis-duration) ease-in-out infinite\n    alternate;'
+    )
+    expect(styles).toContain('@keyframes infoschematic-element-emphasis-held')
+    // A hold is painted at every moment of its life, so neither end of the sustained keyframes reaches transparency.
+    const keyframes = styles.slice(styles.indexOf('@keyframes infoschematic-element-emphasis-held'))
+    expect(keyframes.slice(0, keyframes.indexOf('}\n}'))).not.toContain('opacity: 0;')
+    // Restated inside the media block, because a media query adds no specificity to beat a class plus an attribute.
+    expect(reduced).toContain('.infoschematic-element-emphasis[data-depicts="state"] > * {\n    animation: none;')
   })
 
   it('accepts each emphasis once while supporting replay, cancellation, and hidden elements', () => {

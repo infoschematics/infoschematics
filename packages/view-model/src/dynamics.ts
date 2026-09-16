@@ -1,4 +1,4 @@
-import type { DiagramDynamic } from '@infoschematics/domain-model'
+import type { DiagramDynamic, DiagramDynamicDepiction } from '@infoschematics/domain-model'
 import type { FlowSignal } from './signals.ts'
 
 /**
@@ -22,13 +22,17 @@ export type DynamicOccurrence = Readonly<{
 }>
 
 /**
- * One authored visual element asked to take finite emphasis.
+ * One authored visual element asked to take emphasis.
  *
  * The Dynamic id travels with it because the accessible meaning of the emphasis is the Dynamic's, not the element's: a
- * renderer announces what happened, and only the declaration knows that.
+ * renderer announces what happened, and only the declaration knows that. `depicts` travels with it for the same
+ * reason: whether this is an event or a state a presenter is describing is the declaration's statement, and a renderer
+ * cannot infer it from an element.
  */
 export type ElementEmphasis = Readonly<{
   dynamicId: string
+  /** `state` while the occurrence stands for as long as the host holds it; absent is the finite event it always was. */
+  depicts?: DiagramDynamicDepiction
   elementId: string
   occurrenceKey: string
 }>
@@ -40,6 +44,18 @@ export type ResolvedDynamics = Readonly<{
 }>
 
 const noDynamics: ResolvedDynamics = { emphasis: [], signals: [] }
+
+/**
+ * Whether an authored Dynamic describes a state rather than reporting an event.
+ *
+ * Absence is an event, and that default is read here rather than in each renderer, so a document written before
+ * `depicts` existed keeps the finite reading it has always had and no renderer holds a different opinion about it.
+ */
+export const dynamicDepictsState = (dynamic: DiagramDynamic): boolean =>
+  dynamic.kind === 'emphasise-elements' && dynamic.depicts === 'state'
+
+/** The same question of a resolved occurrence, so a renderer never compares the string itself. */
+export const emphasisDepictsState = (emphasis: ElementEmphasis): boolean => emphasis.depicts === 'state'
 
 /**
  * Resolve host occurrences against the authored Dynamics of one Diagram.
@@ -72,7 +88,14 @@ export const resolveDiagramDynamics = (
       resolved.add(identity)
 
       if (dynamic.kind === 'signal-flow') signals.push({ flowId: target, occurrenceKey: occurrence.occurrenceKey })
-      else emphasis.push({ dynamicId: dynamic.id, elementId: target, occurrenceKey: occurrence.occurrenceKey })
+      else
+        emphasis.push(
+          // Only a state is carried, so a document that does not use `depicts` resolves to exactly the occurrence it
+          // resolved to before the field existed.
+          dynamicDepictsState(dynamic)
+            ? { depicts: 'state', dynamicId: dynamic.id, elementId: target, occurrenceKey: occurrence.occurrenceKey }
+            : { dynamicId: dynamic.id, elementId: target, occurrenceKey: occurrence.occurrenceKey }
+        )
     }
   }
 

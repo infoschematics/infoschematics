@@ -1,4 +1,5 @@
 import { defineInfoschematic, defineInfoschematicModel, parseInfoschematicDocument } from '@infoschematics/domain-core'
+import { elementEmphasisDuration } from '@infoschematics/view-canvas'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -493,6 +494,67 @@ test('Studio plays an authored Diagram Dynamic, replays it, and lets it retire',
     .poll(() => container.querySelector('[data-artefact-id="FLOW-A"] .infoschematic-flow-signal'))
     .not.toBeNull()
   expect(emphasis()).toBeNull()
+})
+
+test('Studio rehearses a state-depicting Dynamic as a hold the Producer ends, not a pulse that ends itself', async () => {
+  window.localStorage.clear()
+  const heldConfig = defineInfoschematicModel({
+    id: 'studio-held-dynamic',
+    title: 'Studio held dynamic',
+    diagram: {
+      bounds: { height: 320, width: 640, x: 0, y: 0 },
+      gridSize: 10,
+      cards: [
+        { id: 'CARD-A', label: 'Card A', bounds: { height: 50, width: 100, x: 80, y: 170 } },
+        { id: 'CARD-B', label: 'Card B', bounds: { height: 50, width: 100, x: 360, y: 170 } }
+      ],
+      dynamics: [
+        { id: 'arrived', label: 'Record arrived', kind: 'emphasise-elements', elements: ['CARD-A'] },
+        {
+          id: 'on-this-stage',
+          label: 'We are on this stage',
+          kind: 'emphasise-elements',
+          elements: ['CARD-B'],
+          depicts: 'state'
+        }
+      ]
+    }
+  })
+
+  const { container } = await render(<Studio config={heldConfig} />)
+  const bank = container.querySelector('section[aria-label="Diagram Dynamics"]')
+  if (!bank) throw new Error('Studio did not render the Dynamics controls')
+
+  const control = (label: string) => {
+    const button = [...bank.querySelectorAll<HTMLButtonElement>('button')].find(
+      (candidate) => candidate.textContent === label
+    )
+    if (!button) throw new Error(`Studio has no control for ${label}`)
+    return button
+  }
+  const emphasisOn = (elementId: string) =>
+    container.querySelector<SVGGElement>(`.infoschematic-element-emphasis[data-artefact-id="${elementId}"]`)
+
+  // First the event, rehearsed alone, so this case knows rehearsal does still withdraw an occurrence on its own.
+  control('Record arrived').click()
+  await expect.poll(() => emphasisOn('CARD-A')).not.toBeNull()
+  await expect.poll(() => emphasisOn('CARD-A'), { timeout: elementEmphasisDuration * 4 }).toBeNull()
+  expect(control('Record arrived').getAttribute('aria-pressed')).toBe('false')
+
+  control('We are on this stage').click()
+  await expect.poll(() => emphasisOn('CARD-B')?.dataset.depicts).toBe('state')
+
+  // Nothing but the wait, and longer than the withdrawal that has just been watched happen to the event.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration * 3)
+  })
+  expect(emphasisOn('CARD-B')).not.toBeNull()
+  expect(control('We are on this stage').getAttribute('aria-pressed')).toBe('true')
+
+  // The same control ends it, which is the only way a Producer can: the hold is the host's to withdraw.
+  control('We are on this stage').click()
+  await expect.poll(() => emphasisOn('CARD-B')).toBeNull()
+  await expect.poll(() => control('We are on this stage').getAttribute('aria-pressed')).toBe('false')
 })
 
 test('Studio layer controls close a kind to interaction and release whatever it held selected', async () => {

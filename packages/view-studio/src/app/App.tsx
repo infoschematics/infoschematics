@@ -12,7 +12,11 @@ import {
   InfoschematicRenderersContext,
   useInfoschematic
 } from '@infoschematics/view-canvas'
-import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
+import {
+  type DynamicOccurrence,
+  dynamicDepictsState,
+  resolveDiagramDynamics
+} from '@infoschematics/view-model/dynamics'
 import type {
   ArtefactGeometry,
   ArtefactSelection,
@@ -582,19 +586,36 @@ function AppContent({
      clicks, so pressing the same Dynamic twice replays it rather than being taken for the occurrence still running. */
   const [dynamicOccurrence, setDynamicOccurrence] = useState<DynamicOccurrence>()
   const dynamicPlays = useRef(0)
-  const playDynamic = useCallback((dynamicId: string) => {
-    dynamicPlays.current += 1
-    setDynamicOccurrence({ dynamicId, occurrenceKey: `studio-${dynamicPlays.current}` })
-  }, [])
+  const heldDynamic = useCallback(
+    (dynamicId: string) => {
+      const declared = runtime.config.diagram.dynamics.find((dynamic) => dynamic.id === dynamicId)
+      return declared !== undefined && dynamicDepictsState(declared)
+    },
+    [runtime.config.diagram.dynamics]
+  )
+  /* A Dynamic that depicts a state has no end of its own, so the control that started it is the one that ends it:
+     pressing it again withdraws the occurrence, which is the host withdrawal the contract already requires rather than
+     a Studio-only stop. An event is still momentary, and `aria-pressed` on either now means what it says. */
+  const playDynamic = useCallback(
+    (dynamicId: string) => {
+      if (dynamicOccurrence?.dynamicId === dynamicId && heldDynamic(dynamicId)) {
+        setDynamicOccurrence(undefined)
+        return
+      }
+      dynamicPlays.current += 1
+      setDynamicOccurrence({ dynamicId, occurrenceKey: `studio-${dynamicPlays.current}` })
+    },
+    [dynamicOccurrence, heldDynamic]
+  )
   const resolvedDynamics = useMemo(
     () => resolveDiagramDynamics(runtime.config.diagram.dynamics, dynamicOccurrence ? [dynamicOccurrence] : []),
     [dynamicOccurrence, runtime.config.diagram.dynamics]
   )
   useEffect(() => {
-    if (!dynamicOccurrence) return
+    if (!dynamicOccurrence || heldDynamic(dynamicOccurrence.dynamicId)) return
     const timer = window.setTimeout(() => setDynamicOccurrence(undefined), elementEmphasisDuration)
     return () => window.clearTimeout(timer)
-  }, [dynamicOccurrence])
+  }, [dynamicOccurrence, heldDynamic])
 
   const [proposed, setProposed] = useState<{
     at: { x: number; y: number }

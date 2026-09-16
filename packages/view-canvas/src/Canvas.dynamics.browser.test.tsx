@@ -30,7 +30,14 @@ const config = defineInfoschematicModel({
     ],
     dynamics: [
       { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
-      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] }
+      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] },
+      {
+        id: 'on-this-stage',
+        label: 'We are on this stage',
+        kind: 'emphasise-elements',
+        elements: ['ZONE'],
+        depicts: 'state'
+      }
     ]
   }
 })
@@ -89,6 +96,53 @@ test('replays on a changed occurrence key and cancels when the host withdraws th
 
   await screen.getByRole('button', { name: 'Stop' }).click()
   await expect.poll(() => emphasisOf(container)).toBeNull()
+})
+
+test('sustains a held emphasis long past the finite duration and ends it when the host withdraws it', async () => {
+  function Host() {
+    const [held, setHeld] = useState(true)
+    return (
+      <>
+        <button onClick={() => setHeld(false)} type="button">
+          Leave
+        </button>
+        <Canvas config={config} dynamics={held ? [{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }] : []} />
+      </>
+    )
+  }
+
+  const screen = await render(<Host />)
+  const container = screen.container as HTMLElement
+  const heldOf = () => container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="ZONE"]')
+  const status = () => container.querySelectorAll('[role="status"]')[1] as HTMLElement
+
+  await expect.poll(() => heldOf()?.dataset.depicts).toBe('state')
+  await expect.poll(() => status().textContent).toBe('Dynamic update 1. We are on this stage.')
+
+  // Nothing but the wait: the finite treatment would have been retired by the Canvas several times over by now.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration * 3)
+  })
+
+  const outline = heldOf()?.firstElementChild as SVGRectElement | undefined
+  expect(outline).toBeDefined()
+  const painted = getComputedStyle(outline as SVGRectElement)
+  expect(painted.animationName).toBe('infoschematic-element-emphasis-held')
+  expect(painted.animationIterationCount).toBe('infinite')
+  expect(painted.stroke).toBe('rgb(242, 166, 59)')
+  // An SVG element has no offsetParent to consult, so ask the two things that do decide whether a reader sees it:
+  // it occupies space on the page, and the sustained treatment is part way between its two opacities, never off.
+  const box = (outline as SVGRectElement).getBoundingClientRect()
+  expect(box.width).toBeGreaterThan(0)
+  expect(box.height).toBeGreaterThan(0)
+  expect(Number(painted.opacity)).toBeGreaterThanOrEqual(0.55)
+  expect(Number(painted.opacity)).toBeLessThanOrEqual(0.9)
+  // A hold that is still the same hold says nothing further: the reader was told once, and no revision followed.
+  expect(status().textContent).toBe('Dynamic update 1. We are on this stage.')
+
+  await screen.getByRole('button', { name: 'Leave' }).click()
+  await expect.poll(heldOf).toBeNull()
+  await expect.poll(() => status().textContent).toBe('')
 })
 
 test('signals the Flow a signal-flow Dynamic names, leaving every other element untouched', async () => {

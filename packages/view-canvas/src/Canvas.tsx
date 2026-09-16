@@ -2,6 +2,7 @@ import type { InfoschematicInput } from '@infoschematics/domain-model'
 import {
   type DynamicOccurrence,
   type ElementEmphasis,
+  emphasisDepictsState,
   resolveDiagramDynamics
 } from '@infoschematics/view-model/dynamics'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -173,9 +174,12 @@ function CanvasContent({
     )
   }, [shownElementIds, suppliedEmphasis])
 
+  /* An event emphasis retires on the shared token duration, as it always has. A state has no end of its own, so
+     nothing here ends one: only the host withdrawing the occurrence, a replaced key, or the element leaving what this
+     Canvas drew — all of which reconciliation already handles, because a hold is still a host-owned occurrence. */
   useEffect(() => {
-    if (activeEmphasis.length === 0) return
-    const retiring = activeEmphasis
+    const retiring = activeEmphasis.filter((emphasis) => !emphasisDepictsState(emphasis))
+    if (retiring.length === 0) return
     const timer = window.setTimeout(() => {
       const retained = retireElementEmphasis(activeEmphasisRef.current, retiring)
       activeEmphasisRef.current = retained

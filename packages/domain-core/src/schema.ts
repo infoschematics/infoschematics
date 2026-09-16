@@ -437,7 +437,14 @@ const dynamicIdentity = {
  */
 const dynamic = z.discriminatedUnion('kind', [
   z.strictObject({ ...dynamicIdentity, kind: z.literal('signal-flow'), flows: elementIdentifiers }),
-  z.strictObject({ ...dynamicIdentity, kind: z.literal('emphasise-elements'), elements: elementIdentifiers })
+  z.strictObject({
+    ...dynamicIdentity,
+    kind: z.literal('emphasise-elements'),
+    elements: elementIdentifiers,
+    // Whether the change is an event or a state a presenter is describing. A strict union keeps it off `signal-flow`,
+    // which has no sustained treatment in any renderer to promise.
+    depicts: z.enum(['event', 'state']).optional()
+  })
 ])
 
 const selection = z.strictObject({

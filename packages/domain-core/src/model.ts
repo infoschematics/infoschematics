@@ -442,6 +442,9 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     dynamicIds.add(dynamic.id)
     const context = `Diagram Dynamic ${dynamic.id}`
     if (dynamic.kind === 'signal-flow') {
+      // A Flow signal has no sustained treatment in any renderer, so the contract does not accept the claim that one
+      // depicts a state: the field belongs to the other kind exactly as a target field does.
+      if ('depicts' in dynamic) throw new Error(`${context} is a signal-flow Dynamic and cannot declare depicts`)
       if (dynamic.flows.length === 0) throw new Error(`${context} names no Flow to signal`)
       for (const flow of dynamic.flows) {
         // A Card id here would be a plausible mistake that silently resolved to nothing, so name the kind that is wrong.

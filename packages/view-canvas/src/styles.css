@@ -462,6 +462,14 @@
   stroke-width: var(--infoschematic-canvas-emphasis-stroke-width);
 }
 
+/* A state lasts as long as the host holds it, so the treatment sustains rather than plays: it breathes on the same
+   token period, alternates instead of restarting, and never reaches full transparency — a reader arriving part way
+   through a hold sees the outline, and a reader watching one begin never sees it flash off. */
+.infoschematic-element-emphasis[data-depicts="state"] > * {
+  animation: infoschematic-element-emphasis-held var(--infoschematic-canvas-emphasis-duration) ease-in-out infinite
+    alternate;
+}
+
 .infoschematic-element-emphasis-route {
   stroke-linecap: var(--infoschematic-canvas-flows-line-cap);
   stroke-linejoin: var(--infoschematic-canvas-flows-line-join);
@@ -490,6 +498,14 @@
     animation: none;
     opacity: 0.9;
   }
+
+  /* Stated again for the held case rather than inherited from the rule above, because a media query adds no
+     specificity: the sustained rule carries a class and an attribute, so it would otherwise keep animating here. A
+     held emphasis has nowhere to degrade but a steady outline, so reduced motion and still output converge. */
+  .infoschematic-element-emphasis[data-depicts="state"] > * {
+    animation: none;
+    opacity: 0.9;
+  }
 }
 
 @keyframes infoschematic-element-emphasis {
@@ -500,6 +516,18 @@
 
   20%,
   70% {
+    opacity: 0.9;
+  }
+}
+
+/* No zero and no fill mode: the outline is painted at every moment of a hold, which is what makes it a state rather
+   than a pulse that happens to repeat. */
+@keyframes infoschematic-element-emphasis-held {
+  from {
+    opacity: 0.55;
+  }
+
+  to {
     opacity: 0.9;
   }
 }

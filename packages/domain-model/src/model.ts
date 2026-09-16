@@ -196,10 +196,20 @@ export type SignalFlowDynamic = DiagramDynamicIdentity & {
   flows: readonly string[]
 }
 
-/** Finite emphasis on authored visual elements. */
+/**
+ * Whether a Dynamic reports something that happened or describes a state that lasts.
+ *
+ * This is a property of the change, not of its depiction: an author states which one they mean, and every renderer
+ * decides for itself how long it paints an event and how it sustains a state. Absence is an event.
+ */
+export type DiagramDynamicDepiction = 'event' | 'state'
+
+/** Emphasis on authored visual elements, reporting an event by default or describing a state that lasts. */
 export type EmphasiseElementsDynamic = DiagramDynamicIdentity & {
   kind: 'emphasise-elements'
   elements: readonly string[]
+  /** `state` holds the emphasis until the host withdraws the occurrence; absent or `event` retires it as before. */
+  depicts?: DiagramDynamicDepiction
 }
 
 /**

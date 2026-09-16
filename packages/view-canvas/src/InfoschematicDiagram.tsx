@@ -1851,6 +1851,9 @@ export function InfoschematicDiagram({
         aria-hidden="true"
         className="infoschematic-element-emphasis"
         data-artefact-id={occurrence.elementId}
+        /* Present only for a state, so a document that reports events emits exactly the markup it always did. The
+           treatment is selected from it rather than from a second class, because it is a property of the occurrence. */
+        data-depicts={occurrence.depicts}
         data-dynamic-id={occurrence.dynamicId}
         data-emphasised="true"
         data-occurrence-key={occurrence.occurrenceKey}

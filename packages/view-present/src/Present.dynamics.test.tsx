@@ -19,7 +19,14 @@ const config = defineInfoschematicModel({
     ],
     dynamics: [
       { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
-      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] }
+      { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] },
+      {
+        id: 'on-this-stage',
+        label: 'We are on this stage',
+        kind: 'emphasise-elements',
+        elements: ['SNK'],
+        depicts: 'state'
+      }
     ]
   }
 })
@@ -45,6 +52,21 @@ describe('Present Diagram Dynamics', () => {
 
     expect(signalled).toContain('class="infoschematic-flow-signal"')
     expect(signalled).not.toContain('infoschematic-element-emphasis')
+  })
+
+  it('passes a held occurrence through as the document stated it, and keeps no trace of one once withdrawn', () => {
+    const quiet = renderToStaticMarkup(<Present config={config} />)
+    const held = renderToStaticMarkup(
+      <Present config={config} dynamics={[{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }]} />
+    )
+
+    expect(held).toContain('data-artefact-id="SNK" data-depicts="state" data-dynamic-id="on-this-stage"')
+    // Presentation drives Scene signalling, never a Dynamic: the hold reaches the Canvas as authored and the
+    // presentation around it draws exactly what it drew quiet.
+    expect(held.replace(/<g class="infoschematic-emphasis">.*?<\/g><\/g>/s, '')).toBe(quiet)
+    // A hold lives in the host's occurrence list, so withdrawing it leaves Present precisely where it started —
+    // nothing here sustains a treatment of its own that could outlive what the host asked for.
+    expect(renderToStaticMarkup(<Present config={config} dynamics={[]} />)).toBe(quiet)
   })
 
   it('ignores an occurrence naming a Dynamic the document does not declare', () => {

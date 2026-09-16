@@ -382,4 +382,26 @@ describe('Diagram Dynamics', () => {
       'Diagram Dynamic empty names no element to emphasise'
     )
   })
+
+  it('lets an emphasis depict a state and refuses the claim on the kind that cannot sustain one', () => {
+    // Authored as the document wrote it: nothing is defaulted in, so a declaration that says nothing about depiction
+    // canonicalises exactly as it did before the field existed.
+    expect(
+      dynamicModel([
+        { id: 'stage', label: 'We are on this stage', kind: 'emphasise-elements', elements: ['SNK'], depicts: 'state' },
+        { id: 'arrived', label: 'A record arrived', kind: 'emphasise-elements', elements: ['SRC'], depicts: 'event' },
+        { id: 'quiet', label: 'Needs attention', kind: 'emphasise-elements', elements: ['ZONE'] }
+      ]).diagram.dynamics
+    ).toEqual([
+      { id: 'stage', label: 'We are on this stage', kind: 'emphasise-elements', elements: ['SNK'], depicts: 'state' },
+      { id: 'arrived', label: 'A record arrived', kind: 'emphasise-elements', elements: ['SRC'], depicts: 'event' },
+      { id: 'quiet', label: 'Needs attention', kind: 'emphasise-elements', elements: ['ZONE'] }
+    ])
+
+    expect(() =>
+      dynamicModel([
+        { id: 'sustained', label: 'Sustained signal', kind: 'signal-flow', flows: ['LOAD'], depicts: 'state' }
+      ])
+    ).toThrow('Diagram Dynamic sustained is a signal-flow Dynamic and cannot declare depicts')
+  })
 })

@@ -44,6 +44,7 @@ const fieldOrder = [
   'operations',
   'scopes',
   'elements',
+  'depicts',
   'adapts',
   'wraps',
   'bounds',

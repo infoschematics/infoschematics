@@ -551,7 +551,14 @@ describe('renderInfoschematicSvg', () => {
         collections: [],
         dynamics: [
           { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
-          { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] }
+          { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] },
+          {
+            id: 'on-this-stage',
+            label: 'Sink needs attention',
+            kind: 'emphasise-elements',
+            elements: ['SNK', 'ZONE'],
+            depicts: 'state'
+          }
         ],
         fabrics: [],
         families: [{ id: 'calls', label: 'Calls', appearance: { color: '#79c9ff' } }],
@@ -596,6 +603,14 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(authored, { dynamics: [{ dynamicId: 'attention', occurrenceKey: 'run-2' }] })).toBe(
       emphasised
     )
+
+    // A still image has no duration to express, so a state draws what an event draws. The two declarations differ
+    // only by depiction and share a label, and the bytes agree: nothing here silently reads the authored depiction.
+    const stillHeld = renderInfoschematicSvg(authored, {
+      dynamics: [{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }]
+    })
+    expect(stillHeld).not.toContain('data-depicts')
+    expect(stillHeld.replaceAll('on-this-stage', 'attention')).toBe(emphasised)
 
     const signalled = renderInfoschematicSvg(authored, {
       dynamics: [{ dynamicId: 'delivered', occurrenceKey: 'run-1' }]
