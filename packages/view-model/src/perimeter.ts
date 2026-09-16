@@ -59,3 +59,13 @@ export const emphasisPerimeterPath = (box: Box) => {
     radius
   )
 }
+
+/**
+ * How far out an emphasis treatment for a Point runs.
+ *
+ * A Point has a coordinate rather than a box, so the one thing an emphasis needs from it is a radius: outset from the
+ * mark by the same emphasis inset a box is, so the treatment reads as being about the Point rather than part of it.
+ * It lives here for the reason the box perimeter does — both renderers draw the Point a disc, and a renderer computing
+ * `pointRadius + inset` for itself is a second calculation that can drift from the first without anything saying so.
+ */
+export const emphasisPointRadius = visualTokens.canvas.geometry.pointRadius + visualTokens.canvas.emphasis.inset

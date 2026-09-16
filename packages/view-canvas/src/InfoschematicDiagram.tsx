@@ -22,7 +22,7 @@ import {
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
@@ -220,11 +220,33 @@ const pointTokens = { fill: visualTokens.canvas.surfaces.backdrop, stroke: visua
  *
  * A travelling mark is offered only where the element has a closed perimeter a mark can be seen to follow. A Flow is
  * a route that may already be carrying a signal along its own length, so a second mark on the same line would be read
- * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-029` records which geometries are declined and why.
+ * as one; it keeps the finite route outline. A Point is a coordinate rather than a box: its disc is a few units
+ * across, so a mark going round it would be the same size as the thing it marks and is declined for legibility. Both
+ * still get the treatment they can carry, because an element a Dynamic names is never left unmarked.
+ * `ADR-INFOSCHEMATICS-029` records which geometries are declined and why.
  */
-type CanvasEmphasisGeometry = Readonly<{ d: string; travels: boolean }>
+type CanvasEmphasisGeometry =
+  | Readonly<{ at: { x: number; y: number }; shape: 'disc' }>
+  | Readonly<{ d: string; shape: 'perimeter'; travels: boolean }>
 
-const emphasisTreatment = ({ d, travels }: CanvasEmphasisGeometry, depicts: ElementEmphasis['depicts']): ReactNode => (
+const emphasisTreatment = (geometry: CanvasEmphasisGeometry, depicts: ElementEmphasis['depicts']): ReactNode =>
+  geometry.shape === 'disc' ? (
+    /* The same disc the static renderer draws, at the same shared radius, so the two renderings agree about where a
+       Point's emphasis runs exactly as they already agree about where a box's perimeter runs. */
+    <circle cx={geometry.at.x} cy={geometry.at.y} r={emphasisPointRadius} />
+  ) : (
+    <EmphasisPerimeter d={geometry.d} depicts={depicts} travels={geometry.travels} />
+  )
+
+const EmphasisPerimeter = ({
+  d,
+  depicts,
+  travels
+}: {
+  d: string
+  depicts: ElementEmphasis['depicts']
+  travels: boolean
+}) => (
   <>
     <path className={travels ? undefined : 'infoschematic-element-emphasis-route'} d={d} />
     {travels ? (
@@ -1942,13 +1964,18 @@ export function InfoschematicDiagram({
      the static renderer draws it last — no emphasised element's own output, ordering, or geometry changes. */
   const emphasisGeometry = new Map<string, CanvasEmphasisGeometry>()
   for (const region of infoschematicRegions) {
-    emphasisGeometry.set(region.id, { d: emphasisPerimeterPath(region.box), travels: true })
+    emphasisGeometry.set(region.id, { d: emphasisPerimeterPath(region.box), shape: 'perimeter', travels: true })
   }
   for (const placeable of placeables) {
-    emphasisGeometry.set(placeable.id, { d: emphasisPerimeterPath(placeable.box), travels: true })
+    emphasisGeometry.set(placeable.id, { d: emphasisPerimeterPath(placeable.box), shape: 'perimeter', travels: true })
   }
   for (const flow of flows) {
-    emphasisGeometry.set(flow.id, { d: flow.d, travels: false })
+    emphasisGeometry.set(flow.id, { d: flow.d, shape: 'perimeter', travels: false })
+  }
+  /* Every kind this render drew, which since a Point became an artefact kind of its own includes the Point. Leaving it
+     out left a Producer pressing a Dynamic that named one and seeing nothing happen at all. */
+  for (const point of infoschematicPoints) {
+    emphasisGeometry.set(point.id, { at: point.at, shape: 'disc' })
   }
   const emphasisLayer = emphasis.flatMap((occurrence) => {
     const geometry = emphasisGeometry.get(occurrence.elementId)

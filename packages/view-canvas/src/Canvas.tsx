@@ -95,6 +95,10 @@ function CanvasContent({
     for (const fabric of runtime.infoschematicFabrics) {
       if (runtime.infoschematicFabricIsVisible(fabric, scopes)) shown.add(fabric.id)
     }
+    /* A Point is drawn whatever the Scope selection, because it carries a coordinate rather than a membership. It
+       belongs here for the same reason every other drawn kind does: this set is what decides whether an occurrence
+       reaches a treatment at all, so a kind missing from it is one a Dynamic can name to no effect whatsoever. */
+    for (const point of runtime.infoschematicPoints) shown.add(point.id)
     return shown
   }, [runtime, scopes, shownFlowIds])
   const initialSignals = useRef<{

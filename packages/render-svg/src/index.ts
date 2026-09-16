@@ -9,7 +9,7 @@ import {
 } from '@infoschematics/view-model/appearance'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -195,7 +195,7 @@ const pointEmphasis = (at: { x: number; y: number }): EmphasisShape => [
     ['cx', at.x],
     ['cy', at.y],
     ['fill', 'none'],
-    ['r', canvasTokens.geometry.pointRadius + emphasis.inset],
+    ['r', emphasisPointRadius],
     ['stroke', emphasis.stroke],
     ['stroke-width', emphasis.strokeWidth]
   ]

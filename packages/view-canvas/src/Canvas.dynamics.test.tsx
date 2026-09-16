@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -248,11 +248,14 @@ describe('Canvas Diagram Dynamics', () => {
     expect(flow).not.toContain('infoschematic-element-emphasis-mark')
     expect(flow).not.toContain('<animateMotion')
 
-    // The Canvas draws no Points, so the occurrence never reaches a treatment at all — the existing rule that an
-    // emphasis reaches only what this render actually drew. The static renderer does draw one, and draws no mark.
-    const point = played('edge-attention')
-    expect(emphasisGroup(point, 'EDGE')).toBeNull()
-    expect(point).not.toContain('infoschematic-element-emphasis')
+    // A Point's disc is a few units across, so a mark going round it would be the size of the thing it marks. It
+    // declines the mark and keeps the disc, at the radius the static renderer draws, because declining a geometry
+    // must not quietly mean drawing nothing. This read the other way round while Canvas drew no Points at all.
+    const point = emphasisGroup(played('edge-attention'), 'EDGE')
+    expect(point).toContain(`r="${emphasisPointRadius}"`)
+    expect(point).toContain('cx="400"')
+    expect(point).not.toContain('infoschematic-element-emphasis-mark')
+    expect(point).not.toContain('<animateMotion')
   })
 
   it('removes the travelling mark under reduced motion, because no CSS property can still SVG motion', async () => {
