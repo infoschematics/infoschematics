@@ -206,6 +206,7 @@ const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeW
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
 const emphasisTokens = visualTokens.canvas.emphasis
+const arrowTokens = visualTokens.canvas.arrowhead
 // The travelling mark is Canvas-only, like the Flow pulse above: still output shares the perimeter and draws nothing
 // travelling on it, because the direction a mark traces is chosen from the geometry and not stated by the document.
 const emphasisMarkRadius = 5
@@ -222,11 +223,30 @@ const pointTokens = { fill: visualTokens.canvas.surfaces.backdrop, stroke: visua
  * a route that may already be carrying a signal along its own length, so a second mark on the same line would be read
  * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-029` records which geometries are declined and why.
  */
-type CanvasEmphasisGeometry = Readonly<{ d: string; travels: boolean }>
+type CanvasEmphasisGeometry = Readonly<{
+  d: string
+  /** The Flow head this overlay redraws in the emphasis stroke, if the element has one. */
+  markerEnd?: string
+  markerStart?: string
+  travels: boolean
+}>
 
-const emphasisTreatment = ({ d, travels }: CanvasEmphasisGeometry, depicts: ElementEmphasis['depicts']): ReactNode => (
+const emphasisTreatment = (
+  { d, markerEnd, markerStart, travels }: CanvasEmphasisGeometry,
+  depicts: ElementEmphasis['depicts']
+): ReactNode => (
   <>
-    <path className={travels ? undefined : 'infoschematic-element-emphasis-route'} d={d} />
+    {/* The overlay draws its own head over the Flow's, so an emphasised Flow reads as one emphasised thing rather
+        than an amber route ending in a family-coloured point. `.arrow-head { fill: context-stroke }` means this
+        costs no second marker definition here — the head takes the stroke of the path referencing it, which is the
+        emphasis stroke. The Flow's own head is untouched underneath, which is the distinction DYNAMIC-003 draws
+        between what an occurrence may decorate and what an element outputs. */}
+    <path
+      className={travels ? undefined : 'infoschematic-element-emphasis-route'}
+      d={d}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
+    />
     {travels ? (
       /* The mark travels the very path string the outline is drawn from, so it cannot cut a corner the outline
          rounds. One circuit per token period; for a state it repeats for as long as the host holds the occurrence,
@@ -538,6 +558,17 @@ export function InfoschematicDiagram({
      a React root and stable across a render pass, which is what makes an unconfigured two-Canvas host correct while
      keeping identical markup identical. A host that assembles a document from separate passes supplies its own. */
   const resourcePrefix = svgResourcePrefix(resourceIdPrefix, useId())
+  /* One definition per family serves both ends of every Flow here, because a browser resolves the SVG 2
+     `orient="auto-start-reverse"` and turns the same triangle to face back out of a source when it is a
+     `marker-start`. The static renderer cannot: the rasteriser behind the command line ignores that value, so it
+     mirrors the geometry into a second definition instead. The divergence is deliberate and is stated in both
+     places, so that neither reads as an oversight in the other.
+
+     A registration is bidirectional, and six heads converging on the registry said nothing a reader did not
+     already know — every one of them points there. The head that carries meaning is the one at the provider, so a
+     two-way line keeps that and drops the other. */
+  const flowArrowhead = (flow: { bidirectional?: boolean; family: string }, end: 'end' | 'start') =>
+    (flow.bidirectional ? end === 'start' : end === 'end') ? `url(#${resourcePrefix}-arrow-${flow.family})` : undefined
   const activeGraphicRenderer =
     mode !== 'design' && graphic
       ? resolveInfoschematicRenderer(
@@ -1603,12 +1634,8 @@ export function InfoschematicDiagram({
         <path
           className={`infoschematic-route${flow.dashed ? ' dashed' : ''}`}
           d={flow.d}
-          /* A registration is bidirectional, and six heads converging on the
-             registry said nothing a reader did not already know - every one of
-             them points there. The head that carries meaning is the one at the
-             provider, so a two-way line keeps that and drops the other. */
-          markerEnd={flow.bidirectional ? undefined : `url(#${resourcePrefix}-arrow-${flow.family})`}
-          markerStart={flow.bidirectional ? `url(#${resourcePrefix}-arrow-${flow.family})` : undefined}
+          markerEnd={flowArrowhead(flow, 'end')}
+          markerStart={flowArrowhead(flow, 'start')}
           stroke={family.color}
         />
         {signals
@@ -1948,7 +1975,12 @@ export function InfoschematicDiagram({
     emphasisGeometry.set(placeable.id, { d: emphasisPerimeterPath(placeable.box), travels: true })
   }
   for (const flow of flows) {
-    emphasisGeometry.set(flow.id, { d: flow.d, travels: false })
+    emphasisGeometry.set(flow.id, {
+      d: flow.d,
+      markerEnd: flowArrowhead(flow, 'end'),
+      markerStart: flowArrowhead(flow, 'start'),
+      travels: false
+    })
   }
   const emphasisLayer = emphasis.flatMap((occurrence) => {
     const geometry = emphasisGeometry.get(occurrence.elementId)
@@ -2076,21 +2108,27 @@ export function InfoschematicDiagram({
             <marker
               id={`${resourcePrefix}-arrow-${family.id}`}
               key={family.id}
-              markerHeight="32"
+              markerHeight={arrowTokens.size}
               /* In user units, not stroke widths: the default scales an arrowhead
                with its line, so focusing a line inflated its head by a quarter
                and a bidirectional line grew two of them. */
               markerUnits="userSpaceOnUse"
-              markerWidth="32"
+              markerWidth={arrowTokens.size}
+              /* SVG 2, and kept: a browser turns this head to face back out of a
+                 source when it is a `marker-start`, which is what lets one definition
+                 serve both ends of every Flow. The static renderer emits `auto` and a
+                 mirrored second definition instead, because the rasteriser behind the
+                 command line ignores this value and paints the head unrotated rather
+                 than failing. Deliberate divergence, stated in both places. */
               orient="auto-start-reverse"
-              refX="24"
-              refY="12"
+              refX={arrowTokens.forwardRefX}
+              refY={arrowTokens.refY}
             >
               {/* The family colour is the fallback. Where `context-stroke` is
                 understood the stylesheet overrides it and the head takes the
                 colour of the line it sits on, so pointing at a line brightens
                 its head with it rather than leaving it behind. */}
-              <path className="arrow-head" d="M0,0 L0,24 L24,12 z" fill={family.color} />
+              <path className="arrow-head" d={arrowTokens.forward} fill={family.color} />
             </marker>
           ))}
         </defs>

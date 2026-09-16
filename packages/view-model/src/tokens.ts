@@ -52,6 +52,26 @@ export const visualTokens = Object.freeze({
       region: '#ffffff65',
       strong: '#dff3ff'
     }),
+    /**
+     * One arrowhead, stated once for both renderers.
+     *
+     * Direction is carried by `orient`, and the two renderers cannot use the same value for it. A browser
+     * implements the SVG 2 `auto-start-reverse`, which turns a `marker-start` to face back out of its source; the
+     * rasteriser chosen in `ADR-INFOSCHEMATICS-024` does not, and draws the head unrotated rather than failing. So
+     * the static renderer orients every head with `auto` and reaches for `reversed` — the same triangle mirrored,
+     * with its apex as the reference point — where a browser would reverse the axis instead.
+     *
+     * The geometry is shared because a Flow that arrives blunt in one renderer and sharp in the other is the defect
+     * the visual-treatment parity check exists to catch, and a path string stated twice is how it would happen.
+     */
+    arrowhead: tokenGroup({
+      forward: 'M0 0 L0 24 L24 12 z',
+      forwardRefX: 24,
+      refY: 12,
+      reversed: 'M24 0 L24 24 L0 12 z',
+      reversedRefX: 0,
+      size: 32
+    }),
     flows: tokenGroup({
       dash: '13 11',
       highlightedWidth: 5,

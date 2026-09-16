@@ -56,7 +56,7 @@ _Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`
 
 ### CLI-007 — Raster determinism and the font boundary
 
-Rendering one document to PNG twice on one machine MUST produce identical bytes, and equivalent YAML and JSON documents MUST produce identical bytes. Text is the only host-dependent part: without `--font` the host font stack is used and identity is not promised across machines; with `--font` only the named files are consulted. An unreadable `--font` file MUST fail with the input status rather than falling back silently to the host stack.
+Rendering one document to PNG twice on one machine MUST produce identical bytes, and equivalent YAML and JSON documents MUST produce identical bytes. Text is the only host-dependent part: without `--font` the host font stack is used and identity is not promised across machines; with `--font` only the named files are consulted. An unreadable `--font` file MUST fail with the input status rather than falling back silently to the host stack. Determinism is not fidelity: the converter implements a subset of SVG, so output a browser draws correctly MAY rasterise wrongly and do so identically every time. PNG output MUST be the same picture as the SVG the command would have written for the same document, which puts the rasteriser-safe static output STATIC-013 in [the static rendering specification](static-rendering.md) requires inside this promise rather than outside it, where a byte comparison cannot see it.
 
 _Conformance:_ conforming
 

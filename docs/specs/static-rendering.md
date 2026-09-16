@@ -140,9 +140,11 @@ _Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text,
 
 Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and output-default values directly from View Model's readonly `visualTokens` manifest. It MUST NOT duplicate those literals or import generated CSS. Equivalent built-in Canvas artefacts MUST retain the same semantic treatment across interactive and static output, while authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig`.
 
+Where an interactive renderer states a treatment through an SVG 2 feature a browser resolves — `orient="auto-start-reverse"` on a marker, `fill: context-stroke` on the head inside it — static output MUST NOT depend on that feature. The geometry MUST stay one View Model token both renderers draw from, and static output MUST emit whichever literal definition reproduces the same picture: a mirrored head for one that faces back out of its source, and a separately painted head for one an emphasis recolours. The rasteriser behind the command line ignores both features without complaint, so depending on them yields a plausible SVG and a wrong PNG. Each renderer's divergent choice MUST be recorded where it is made, so neither reads as an oversight in the other.
+
 _Conformance:_ conforming
 
-_Verify:_ run `scripts/visual-treatment-parity.test.ts`, and confirm the static renderer imports no stylesheet.
+_Verify:_ run `scripts/visual-treatment-parity.test.ts`, confirm the static renderer imports no stylesheet, and rasterise a document whose Flows include a reversed and an emphasised head — a browser and the command line must show the same picture.
 
 _Evidence:_ `packages/render-svg/src/index.ts` reads geometry, surface, text, Flow, focus and output-default values from `visualTokens` and imports no CSS at all. `packages/render-svg/src/index.test.ts` uses the shared static tokens while preserving authored colours, and `scripts/visual-treatment-parity.test.ts` holds the interactive and static paths to the same semantic treatment.
 

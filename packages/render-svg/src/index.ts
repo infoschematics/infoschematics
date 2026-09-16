@@ -166,6 +166,22 @@ const includedByFocus = (
 type EmphasisShape = readonly [element: string, values: Attributes]
 
 const emphasis = canvasTokens.emphasis
+const arrow = canvasTokens.arrowhead
+
+/**
+ * One arrowhead definition: which way its triangle faces, and what paints it.
+ *
+ * Neither axis is authored. Direction comes from the route — a bidirectional Flow carries its one head at the start,
+ * facing back out of its source — and paint comes from whether an emphasis is drawn over that route. This renderer
+ * writes a colour as a literal attribute, because `context-stroke` is SVG 2 and the rasteriser behind the command
+ * line does not resolve it, so an emphasised head is a second definition here where the Canvas needs only a second
+ * stroke.
+ */
+type Arrowhead = Readonly<{ color: string; direction: 'forward' | 'reversed'; id: string }>
+
+/** The reference for one end of a route, or nothing when the head belongs at the other end. */
+const arrowReference = (head: Arrowhead | undefined, end: 'end' | 'start'): string | undefined =>
+  head && (head.direction === 'reversed' ? end === 'start' : end === 'end') ? `url(#${head.id})` : undefined
 
 /**
  * The still interpretation of element emphasis: an outline around whatever the element already occupies.
@@ -201,11 +217,16 @@ const pointEmphasis = (at: { x: number; y: number }): EmphasisShape => [
   ]
 ]
 
-const routeEmphasis = (d: string): EmphasisShape => [
+const routeEmphasis = (d: string, head: Arrowhead | undefined): EmphasisShape => [
   'path',
   [
     ['d', d],
     ['fill', 'none'],
+    /* The overlay carries its own head, drawn over the Flow's, so an emphasised Flow reads as one emphasised thing
+    rather than an amber route ending in a family-coloured point. The Flow's own head is untouched underneath —
+    which is the distinction DYNAMIC-003 draws between what an occurrence may decorate and what an element outputs. */
+    ['marker-end', arrowReference(head, 'end')],
+    ['marker-start', arrowReference(head, 'start')],
     ['stroke', emphasis.stroke],
     ['stroke-linecap', canvasTokens.flows.lineCap],
     ['stroke-linejoin', canvasTokens.flows.lineJoin],
@@ -279,6 +300,39 @@ export const renderInfoschematicSvg = (
       runtime.infoschematicFlowIsVisible(flow, visibleFamilies, visibleScopes) &&
       includedByFocus(flow.id, focus?.flows, unfocused)
   )
+  /*
+   * Which arrowheads this document needs, under whose identity.
+   *
+   * Only the combinations something references are defined, so a document that authors no bidirectional Flow and
+   * receives no Dynamic emits the one head per family it always did rather than carrying three it never draws.
+   * Identity runs through the same `svgResourcePrefix` as every other definition, so two renders on one page cannot
+   * resolve each other's heads.
+   */
+  const emphasisedElements = new Set(resolvedDynamics.emphasis.map(({ elementId }) => elementId))
+  const arrowheadFor = (flow: { bidirectional?: boolean; family: string }, emphasised: boolean) => {
+    const resolved = families.get(flow.family)
+    if (!resolved) return undefined
+    const direction = flow.bidirectional ? ('reversed' as const) : ('forward' as const)
+    return {
+      color: emphasised ? emphasis.stroke : resolved.family.color,
+      direction,
+      id: `${resourceIdPrefix}-arrow-${resolved.index}${emphasised ? '-emphasised' : ''}${
+        direction === 'reversed' ? '-reversed' : ''
+      }`
+    } satisfies Arrowhead
+  }
+  const arrowheads = [
+    ...new Map(
+      flows
+        .flatMap((flow) => [
+          arrowheadFor(flow, false),
+          emphasisedElements.has(flow.id) ? arrowheadFor(flow, true) : undefined
+        ])
+        .filter((head): head is Arrowhead => head !== undefined)
+        .map((head) => [head.id, head] as const)
+    ).values()
+  ]
+
   const graphics = runtime.infoschematicOverlays.filter(
     (graphic) =>
       graphicVisibility !== 'none' &&
@@ -295,7 +349,7 @@ export const renderInfoschematicSvg = (
   for (const fabric of fabrics) emphasisShapes.set(fabric.id, boxEmphasis(fabric.bounds))
   for (const graphic of graphics) if (graphic.bounds) emphasisShapes.set(graphic.id, boxEmphasis(graphic.bounds))
   for (const point of points) emphasisShapes.set(point.id, pointEmphasis(point.at))
-  for (const flow of flows) emphasisShapes.set(flow.id, routeEmphasis(flow.d))
+  for (const flow of flows) emphasisShapes.set(flow.id, routeEmphasis(flow.d, arrowheadFor(flow, true)))
 
   /* The accessible statement is the Dynamic's meaning, not the treatment used to depict it. */
   const occurredDynamics = [
@@ -332,28 +386,31 @@ export const renderInfoschematicSvg = (
     ])
   )
 
-  if (flows.length > 0) {
-    /* A `marker` element, not a `g`: `marker-end` resolves nothing else, so a
-       group here defines an arrowhead that is referenced and never drawn. The
-       geometry matches the Canvas exactly — both are user-space triangles on a
-       four-unit route, so the same Flow cannot arrive blunt in one renderer. */
-    const markers = [...families.values()].map(({ family, index }) =>
+  if (arrowheads.length > 0) {
+    /* A `marker` element, not a `g`: a marker reference resolves nothing else, so a group here defines an
+       arrowhead that is referenced and never drawn. The geometry is the shared token rather than a path string
+       stated here, so the same Flow cannot arrive blunt in one renderer and sharp in the other. */
+    const markers = arrowheads.map(({ color, direction, id }) =>
       container(
         3,
         'marker',
         [
-          ['id', `${resourceIdPrefix}-arrow-${index}`],
-          ['markerHeight', 32],
+          ['id', id],
+          ['markerHeight', arrow.size],
           ['markerUnits', 'userSpaceOnUse'],
-          ['markerWidth', 32],
-          ['orient', 'auto-start-reverse'],
-          ['refX', 24],
-          ['refY', 12]
+          ['markerWidth', arrow.size],
+          /* `auto`, never the SVG 2 `auto-start-reverse` the Canvas uses: the rasteriser chosen in
+             `ADR-INFOSCHEMATICS-024` ignores that value and paints the head unrotated rather than failing, so
+             every PNG hung a flat pennant off its target and every check agreed. A head that has to face back
+             out of its source is mirrored geometry here rather than a reversed axis. */
+          ['orient', 'auto'],
+          ['refX', direction === 'reversed' ? arrow.reversedRefX : arrow.forwardRefX],
+          ['refY', arrow.refY]
         ],
         [
           line(4, 'path', [
-            ['d', 'M0 0 L0 24 L24 12 z'],
-            ['fill', family.color]
+            ['d', direction === 'reversed' ? arrow.reversed : arrow.forward],
+            ['fill', color]
           ])
         ]
       ).join('\n')
@@ -587,7 +644,7 @@ export const renderInfoschematicSvg = (
   for (const flow of flows) {
     const resolved = families.get(flow.family)
     const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
-    const marker = resolved ? `url(#${resourceIdPrefix}-arrow-${resolved.index})` : undefined
+    const head = arrowheadFor(flow, false)
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
     const signalled = signalledFlows.has(flow.id)
     const content = [
@@ -603,8 +660,8 @@ export const renderInfoschematicSvg = (
       line(2, 'path', [
         ['d', flow.d],
         ['fill', 'none'],
-        ['marker-end', flow.bidirectional ? undefined : marker],
-        ['marker-start', flow.bidirectional ? marker : undefined],
+        ['marker-end', arrowReference(head, 'end')],
+        ['marker-start', arrowReference(head, 'start')],
         ['stroke', color],
         ['stroke-dasharray', flow.dashed ? canvasTokens.flows.dash : undefined],
         ['stroke-linecap', canvasTokens.flows.lineCap],

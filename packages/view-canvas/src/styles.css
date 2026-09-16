@@ -1018,6 +1018,10 @@
    whatever references the marker, so the head follows the line into every state
    it has rather than only the one it was authored in.
 
+   An emphasis overlay leans on this: it references the same marker from
+   its own path, so the head arrives in the emphasis stroke and no second
+   definition exists to keep in step.
+
    The fill attribute on the path stays as the fallback: where this value is not
    understood the declaration is dropped and the family colour applies, which is
    what the head looked like before. */
