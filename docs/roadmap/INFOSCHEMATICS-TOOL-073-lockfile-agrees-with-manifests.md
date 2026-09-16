@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-073
 area: TOOL
 title: Lockfile agrees with the manifests
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-16T13:20:00Z
-updated_at: 2026-09-16T13:20:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Lockfile agrees with the manifests

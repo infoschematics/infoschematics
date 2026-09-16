@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-071
 area: TOOL
 title: Rasterised Flow arrowheads
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-058]
 baseline_ref: null
 created_at: 2026-09-16T12:40:00Z
-updated_at: 2026-09-16T12:40:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Rasterised Flow arrowheads

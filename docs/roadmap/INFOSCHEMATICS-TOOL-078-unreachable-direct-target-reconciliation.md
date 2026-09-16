@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-078
 area: TOOL
 title: Unreachable direct-target reconciliation
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-16T14:55:00Z
-updated_at: 2026-09-16T14:55:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Unreachable direct-target reconciliation

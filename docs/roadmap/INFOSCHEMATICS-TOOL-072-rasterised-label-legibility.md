@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-072
 area: TOOL
 title: Rasterised label legibility
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-16T12:40:00Z
-updated_at: 2026-09-16T12:40:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Rasterised label legibility

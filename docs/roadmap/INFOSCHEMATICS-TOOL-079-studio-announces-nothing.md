@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-079
 area: TOOL
 title: Studio announces nothing
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: 00c067a113f38e84959d8eb0ce71358f092672e5
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T15:30:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # Studio announces nothing

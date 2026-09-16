@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-074
 area: TOOL
 title: The boundary gate cruises nothing
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-16T13:55:00Z
-updated_at: 2026-09-16T13:55:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # The boundary gate cruises nothing

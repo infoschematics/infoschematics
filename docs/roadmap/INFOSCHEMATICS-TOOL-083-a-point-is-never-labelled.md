@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-083
 area: TOOL
 title: A Point is never labelled
 theme: rendering
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: 83fa1a84dafec4a67c99425501d74f3684741252
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T15:30:00Z
+updated_at: 2026-09-16T16:49:00Z
 ---
 
 # A Point is never labelled
