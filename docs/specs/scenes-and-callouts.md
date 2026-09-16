@@ -70,9 +70,9 @@ Automatic Scene playback MUST run for repeated cycles without accumulating timer
 
 _Conformance:_ divergent
 
-_Verify:_ run automated playback for a sustained interval under fake timers and a browser memory profile.
+_Verify:_ run automatic playback for a sustained interval under fake timers, asserting the pending-timer count stays flat across cycles, and take a browser memory profile over the same run.
 
-_Evidence:_ Repeated automated demo cycles have produced an out-of-memory failure during regression review.
+_Evidence:_ not established. Repeated automated demo cycles produced an out-of-memory failure during regression review, and that observation has never been reproduced or profiled. Both playback effects — `packages/view-present/src/Present.tsx` and `packages/view-studio/src/app/App.tsx` — clear their timeout on cleanup, and `packages/view-present/src/presentation.ts` holds no per-cycle collection, so the accumulation the requirement forbids has no obvious home; that is an argument, not a measurement. Tracked as [Bounded playback profile](../roadmap/INFOSCHEMATICS-TOOL-069-bounded-playback-profile.md).
 
 ## Gaps
 

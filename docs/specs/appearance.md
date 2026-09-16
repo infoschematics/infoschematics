@@ -60,9 +60,11 @@ Shared corner geometry, notch padding, type scales, line widths, fallback colour
 
 An output MAY override whether Card identity, stereotype, and description are visible. Such an override MUST NOT alter the authored data or become part of `InfoschematicConfig`.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ inspect `packages/domain-model/src/appearance.ts` for renderer invariants, and the output override in `packages/render-svg/src/index.ts` for leakage into `InfoschematicConfig`.
+
+_Evidence:_ authored appearance in `packages/domain-model/src/appearance.ts` carries a surface, a grid treatment, Card detail defaults and Region treatment, and no corner geometry, notch padding, type scale, line width or fallback colour; those live in `packages/view-model/src/tokens.ts`. `cardDetails` is an option of `renderInfoschematicSvg` in `packages/render-svg/src/index.ts` and appears nowhere under `packages/domain-model`, and `packages/render-svg/src/index.test.ts` renders authored treatments alongside output-only Card detail overrides.
 
 ### APPEAR-006 — Shared visual semantics have one source
 
@@ -70,25 +72,31 @@ View Model MUST export a deeply readonly `visualTokens` manifest for visual valu
 
 Authored Scope fills and Flow-family colours MUST remain `InfoschematicConfig` data. Present chrome, Studio chrome, and intentional one-off composition values MUST NOT be promoted solely because they repeat within one View.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ inspect the manifest in `packages/view-model/src/tokens.ts` for its grouping and its names.
+
+_Evidence:_ `packages/view-model/src/tokens.ts` freezes a `visualTokens` manifest grouping Canvas values by geometry, surfaces, text, flows, emphasis, focus, selection and output defaults, and `packages/view-model/src/tokens.test.ts` asserts the semantic names and representative values. Authored Scope fills and Flow-family colours stay in `packages/domain-model/src/model.ts`.
 
 ### APPEAR-007 — CSS projection is deterministic
 
 `scripts/generate-visual-tokens.ts` MUST project every manifest leaf to one CSS custom property named `--infoschematic-canvas-<group>-<token>` in `packages/view-model/src/tokens.generated.css`. Output MUST use deterministic lexical ordering, MUST reject colliding generated names, and MUST expose a check mode that fails when committed generated output differs from fresh output. Generated CSS MUST NOT become a second source of truth.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ run `bun run self:verify:visual-tokens`, which is the generator's own check mode and part of the gate.
+
+_Evidence:_ `scripts/generate-visual-tokens.ts` projects each manifest leaf to `--infoschematic-canvas-<group>-<token>` in `packages/view-model/src/tokens.generated.css`, and `scripts/generate-visual-tokens.test.ts` asserts stable sorted names, rejects distinct semantic paths that collide after CSS normalisation, and proves check mode fails when the committed output is stale.
 
 ### APPEAR-008 — Renderer values remain consistent
 
 Interactive Canvas output MUST consume the generated CSS projection for shared values. Framework-neutral renderers MUST consume the TypeScript manifest directly without importing CSS or an interactive View. Representative tests MUST prove matching semantic names and values across TypeScript, generated CSS, interactive Canvas output, and static output.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ run `scripts/visual-treatment-parity.test.ts`, which renders one configuration through both paths and compares the treatment it finds.
+
+_Evidence:_ `packages/view-canvas/src/tokens.test.tsx` asserts Canvas consumes only the generated custom properties for shared CSS decisions; `packages/render-svg/src/index.ts` imports no stylesheet and reads `visualTokens` directly; `scripts/visual-treatment-parity.test.ts` renders the same document through Canvas and the static renderer and compares the semantic values both produce.
 
 ### APPEAR-009 — Shared Canvas semantics use generated tokens
 
@@ -96,9 +104,11 @@ Canvas MUST consume the generated CSS projection of View Model's `visualTokens` 
 
 Canvas-only hit targets, drag handles, editing guides, and transient motion MAY remain local when no framework-neutral calculation or renderer must agree on their value. Authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig` rather than the generated token set.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ inspect the custom properties Canvas resolves, and confirm authored colours still arrive as data.
+
+_Evidence:_ `packages/view-canvas/src/tokens.test.tsx` covers the three clauses in turn: shared CSS decisions come only from generated custom properties, component and editing-grid geometry come from the manifest, and authored Scope, Flow-family and Region colours stay in the rendered data rather than the generated token set.
 
 ### APPEAR-010 — Visual reduction preserves accessible meaning
 

@@ -8,17 +8,21 @@ Deterministic, accessible, framework-neutral SVG output from the canonical model
 
 The caller MAY select a Standalone Scene or a Sequence Scene. The renderer MUST apply the selected Scene's focus deterministically and MUST make the treatment of unfocused content explicit through options rather than interactive state.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ render one document with and without a Scene selection and compare; an unknown Scene must fail rather than render everything.
+
+_Evidence:_ `packages/render-svg/src/index.ts` takes a discriminated `scene` selection and an explicit `unfocused` option of `dim`, `hide` or `show`, defaulting to `dim`. `packages/render-svg/src/index.test.ts` applies explicit Scope visibility and Scene focus without motion or browser state, and fails explicitly when a selected Scene does not exist.
 
 ### STATIC-002 — Scope visibility is explicit
 
 The caller MAY select visible Scopes. When omitted, all configured Scopes MUST be visible. Flow visibility MUST continue to respect both its family and endpoint visibility.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ render with `scopes` omitted and with a subset, and check Flow visibility against both endpoints.
+
+_Evidence:_ `packages/render-svg/src/index.ts` resolves visible Scopes as `options.visibility?.scopes ?? config.scopes.map(...)`, so an omitted field shows every declared Scope, and filters Flows on family and on both endpoints. `packages/render-svg/src/index.test.ts` applies explicit Scope visibility and Scene focus without motion or browser state.
 
 ### STATIC-003 — Overlays remain serialisable
 
@@ -136,9 +140,11 @@ _Evidence:_ `packages/render-svg/src/index.test.ts` covers XML-significant text,
 
 Static SVG MUST consume shared Canvas geometry, surface, text, Flow, focus, and output-default values directly from View Model's readonly `visualTokens` manifest. It MUST NOT duplicate those literals or import generated CSS. Equivalent built-in Canvas artefacts MUST retain the same semantic treatment across interactive and static output, while authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig`.
 
-_Conformance:_ pending
+_Conformance:_ conforming
 
-_Verify:_ add a focused implementation or rendered-output check for this accepted requirement.
+_Verify:_ run `scripts/visual-treatment-parity.test.ts`, and confirm the static renderer imports no stylesheet.
+
+_Evidence:_ `packages/render-svg/src/index.ts` reads geometry, surface, text, Flow, focus and output-default values from `visualTokens` and imports no CSS at all. `packages/render-svg/src/index.test.ts` uses the shared static tokens while preserving authored colours, and `scripts/visual-treatment-parity.test.ts` holds the interactive and static paths to the same semantic treatment.
 
 ### STATIC-014 — Static rendering stays framework-neutral
 

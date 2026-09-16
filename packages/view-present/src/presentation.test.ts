@@ -177,6 +177,33 @@ describe('presentation state', () => {
     }
   })
 
+  it('keeps an empty Sequence inert, so a Sequence can be drafted before it has Scenes', () => {
+    const source = createInfoschematicRuntime(
+      defineInfoschematicModel({
+        id: 'EMPTY',
+        title: 'Empty sequence',
+        diagram: { bounds: { x: 0, y: 0, width: 100, height: 100 }, gridSize: 10 },
+        sequences: [
+          {
+            id: 'drafting',
+            label: 'Drafting',
+            presentation: { callouts: false, display: 'expanded', timed: false },
+            scenes: []
+          }
+        ]
+      })
+    )
+    const sequence = source.sequences[0]
+    const start = createPresentationState(source)
+
+    expect(sequence).toBeDefined()
+    if (!sequence) return
+
+    // Identity, not equality: an empty Sequence must leave presentation focus exactly as it found it.
+    expect(reducePresentation(start, { type: 'start-sequence', sequence })).toBe(start)
+    expect(reducePresentation(start, { type: 'toggle-sequence-scene', sequence, step: 0 })).toBe(start)
+  })
+
   it('shows all filters initially and hides cross-Scope Flows when either endpoint is hidden', () => {
     const source = runtime()
     const initial = createPresentationState(source)
