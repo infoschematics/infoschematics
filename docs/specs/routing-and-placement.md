@@ -189,3 +189,15 @@ _Conformance:_ conforming
 _Verify:_ Compare resolved geometry and both renderer outputs for short, long, narrow, mixed-case, numeric, and non-ASCII labels across compass placements and internal and boundary mounts.
 
 _Evidence:_ `packages/view-model/src/region-geometry.test.ts` covers shared values, representative label classes, compass placements, internal and boundary mounts, and constrained frames; `scripts/visual-treatment-parity.test.ts` compares Canvas and static SVG geometry.
+
+### ROUTE-019 — A Region label survives a route that crosses its band
+
+A Flow route MAY occupy a Region label's band. A Flow between a Card inside a Region and one outside it crosses that Region's frame, and a label mounted on the frame shares the crossing legitimately, so the band MUST NOT be reserved by refusing the route: the label MUST survive the crossing instead. Every renderer MUST draw a Region label above the routes that cross its band, over an opaque backing in the Region's resolved surface colour, so no route stroke is left standing between the glyph strokes. The backing MUST be derived from the same resolved label geometry both renderers already consume, so each covers the same band rather than estimating its own.
+
+Legibility here MUST NOT be pursued by moving the label. ROUTE-018 fixes Region label geometry to shared deterministic metrics, and a label whose position depends on which engine measured it would break the parity that requirement exists to hold.
+
+_Conformance:_ divergent
+
+_Verify:_ Render a document that routes a Flow through a Region label's band through both renderers and read the label. `examples/is-infoschematics/infoschematic.yaml` is one: two routes cross its "View and renderer packages" band.
+
+_Evidence:_ Divergent in both renderers as of 2026-09-16. `infoschematic-region-label` in `packages/render-svg/src/index.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx` carries no backing, and the static renderer emits every Region before every Flow, so a crossing route erases glyphs; the same label loses the same glyphs in Chromium. Both engines place it within a pixel of each other, so this is paint order rather than measurement.
