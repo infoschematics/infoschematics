@@ -4,12 +4,12 @@ area: TOOL
 title: Bounded playback profile
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: f9c1c7af
 created_at: 2026-09-16T09:00:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T13:20:00Z
 ---
 
 # Bounded playback profile
@@ -43,13 +43,13 @@ This item establishes what happens over sustained playback and fixes a leak if i
 
 ## Steps
 
-- [ ] Choose where the sustained run lives and record why: Studio's existing browser suite (`packages/view-studio/vitest.browser.config.ts`), or a new browser suite in `packages/view-present` with its own `vitest.browser.config.ts` and `test:browser` script. Verifiable by the chosen `bun run --cwd <package> test:browser` collecting the new file.
-- [ ] Confirm in that runner that `vi.useFakeTimers` actually controls `window.setTimeout` for a mounted component, before writing assertions on top of it. This is untried in this repository; if it does not hold, fall back to a short real `hold` and a bounded wall-clock run, and say so in the case.
-- [ ] Drive a timed Sequence through many cycles — enough that a per-cycle retention would be unmistakable — and assert both that the pending-timer count stays flat and that the Canvas `seen` set does not grow with cycles.
-- [ ] Prove the assertion can fail: remove the cleanup at `Present.tsx:60` (or `App.tsx:694`) and confirm the case fails, then restore it. A measurement that cannot fail is not a measurement.
-- [ ] Take a browser memory profile over the same sustained run in Chromium and record the heap shape across cycles as the evidence text, not as a screenshot.
-- [ ] If growth exists, name the retained object and fix it in the module that owns it. If it does not, record `SCENE-006` as conforming and cite the case and the profile.
-- [ ] Decide whether the sustained run stays in the gate or becomes a procedure a Producer runs, and update `SCENE-006`'s verification plan to say which. The plan already names the measurement, so this changes its wording rather than adding it.
+- [x] Choose where the sustained run lives and record why: Studio's existing browser suite (`packages/view-studio/vitest.browser.config.ts`), or a new browser suite in `packages/view-present` with its own `vitest.browser.config.ts` and `test:browser` script. Verifiable by the chosen `bun run --cwd <package> test:browser` collecting the new file.
+- [x] Confirm in that runner that `vi.useFakeTimers` actually controls `window.setTimeout` for a mounted component, before writing assertions on top of it. This is untried in this repository; if it does not hold, fall back to a short real `hold` and a bounded wall-clock run, and say so in the case.
+- [x] Drive a timed Sequence through many cycles — enough that a per-cycle retention would be unmistakable — and assert both that the pending-timer count stays flat and that the Canvas `seen` set does not grow with cycles.
+- [x] Prove the assertion can fail: remove the cleanup at `Present.tsx:60` (or `App.tsx:694`) and confirm the case fails, then restore it. A measurement that cannot fail is not a measurement.
+- [x] Take a browser memory profile over the same sustained run in Chromium and record the heap shape across cycles as the evidence text, not as a screenshot.
+- [x] If growth exists, name the retained object and fix it in the module that owns it. If it does not, record `SCENE-006` as conforming and cite the case and the profile.
+- [x] Decide whether the sustained run stays in the gate or becomes a procedure a Producer runs, and update `SCENE-006`'s verification plan to say which. The plan already names the measurement, so this changes its wording rather than adding it.
 
 ## Files touched
 
@@ -83,6 +83,70 @@ None.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+`SCENE-006` is decided on a measurement rather than on an argument, and the measurement says there is no leak. Sustained automatic playback accumulates no pending timers, no retained transition state, no retained occurrence keys, and no heap in proportion to elapsed cycles or elapsed seconds. No production module needed a fix, which is the outcome this item was written to be able to reach — and the reason most of the work went into making each assertion capable of going red first.
+
+All seven steps are delivered. Step 1's answer is a new browser suite in `packages/view-present` rather than a case in Studio's existing one: the playback effect under measurement lives in `packages/view-present/src/Present.tsx`, and measuring it through Studio would have put Studio's own dock, editor and persisted preferences inside the same heap and timer counts. Step 4's proposed falsification was carried out and found not to falsify — removing the cleanup at `Present.tsx:60` leaves the uninterrupted sustained case green on every cycle — so a second case was added that does catch it, and the finding is recorded rather than papered over.
+
+### Summary of changes
+
+`packages/view-present/vitest.browser.config.ts` and `packages/view-present/package.json` — the package's first browser suite, configured through `workspaceBrowserTests` in `scripts/vitest-workspace.ts` rather than as another hand-written config, and a `test:browser` script matching the other packages' shape. This is the gate's 44th Turborepo task.
+
+`packages/view-present/src/vite-env.d.ts` — `vite/client` types, so the profile can read its mode off `import.meta.env` under the package's own typecheck.
+
+`packages/view-present/src/Present.playback.browser.test.tsx` — the gate cases. Three tests. The first establishes the instrument, because nothing in this repository had relied on it before: `vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })` does control a mounted component's `window.setTimeout`, and `vi.getTimerCount()` does report the pending count exactly. The second drives a timed Sequence through 240 cycles and asserts the steady state absolutely, not merely flatly. The third steers the Sequence mid-hold through 240 cycles, which is the only shape that exercises a step timeout's cleanup at all.
+
+Two details in that file are load-bearing and were each arrived at by watching a weaker version pass wrongly. Observation happens at quiescence — macrotasks are yielded until two consecutive readings agree, throwing on a 20-attempt cap — because React commits and runs passive effects outside the faked clock, and a single `requestAnimationFrame` flush passed and then failed on a later run with the step committed and the next timer not yet scheduled. And the assertion is against the absolute constant `'1/2'` rather than against the run's own first cycle, because a flatness-only assertion accepted the deliberately broken build: a leaked timeout per step settles at a constant offset and reads as perfectly bounded. Each measurement test also asserts `keysSeen`, the count of distinct Scene occurrence keys the page actually showed, so a run that stalled on its first step fails instead of satisfying every flatness assertion trivially.
+
+`packages/view-canvas/src/occurrences.bounded.test.ts` — 2000 cycles of per-step occurrence keys through `reconcileOccurrences`, asserting the `seen` set holds exactly one key and one active occurrence at every cycle while accepting all 2000 as fresh. This is measured at the module that owns the set rather than through the page, because a retained key changes no markup, retires no occurrence and alters no timer: it is invisible until it is a heap profile. It is the one structure a Sequence running indefinitely could actually grow.
+
+`packages/view-present/src/Present.playback.profile.browser.test.tsx` — the elapsed-time half, as an on-demand procedure gated behind `VITE_PLAYBACK_PROFILE` and skipped in the gate. It reads retained bytes over the DevTools protocol — `HeapProfiler.collectGarbage` then `Runtime.getHeapUsage` — and has a `leak` mode that retains ballast for the whole run, so the procedure can be shown seeing a leak before a flat reading from it is believed. The first attempt used `performance.memory` and was a measurement of nothing: Chromium caches the value, and a 30-second run retaining about 24 MB of deliberate ballast reported the same 33.47 MB at every sample as a clean run, to the last digit.
+
+`docs/specs/scenes-and-callouts.md` — `SCENE-006` moves from `divergent` to `conforming`. Its verification plan is split explicitly: what accumulates per cycle is a gate case, what accumulates per elapsed second is a Producer procedure, with the reason the second is not gated stated in the requirement rather than left as an omission. The evidence line records the measured numbers and the caveat about uninterrupted cleanup. A `Gaps` bullet records that the elapsed-time half is ungated.
+
+No production module changed. `packages/view-present/src/Present.tsx` and `packages/view-canvas/src/occurrences.ts` are byte-identical to baseline; both were edited to falsify and both were restored.
+
+### Verification
+
+`bun run self:check` — 44 tasks, 44 successful, and then re-run with `--force` across the whole task list: 44 successful, 0 cached, 23.4s. The forced run is what is cited, because a replayed task is not a fresh result. Within it, `@infoschematics/view-present:test:browser` ran fresh: 3 passed, 1 skipped, the skip being the profile.
+
+The new test files are cited from `docs/specs/scenes-and-callouts.md`, which makes `//#self:scripts:test` read them through the specification-evidence check. Its declared `inputs` already cover them via `packages/*/src/**` and `docs/**`, and that was proved rather than assumed: the task replayed `>>> FULL TURBO` twice in a row, then appending one comment line to `packages/view-canvas/src/occurrences.bounded.test.ts` produced `0 cached, 1 total`. The probe line was removed. No `turbo.json` change was needed.
+
+Three falsifications, each run and then reverted to a zero diff:
+
+- Deleting the withdrawn-key release from `reconcileOccurrences` fails the bounded case, with the retained-set sizes becoming `1, 2, 3, 4, …` across 2000 cycles instead of the single value `1`.
+- Deleting `return () => window.clearTimeout(timer)` from `Present.tsx:60` fails the steering case on all 240 of 240 cycles, each observing `'1/3'` — one pending timeout left behind per steer — while the uninterrupted sustained case and the instrument case both stay green. That asymmetry is the finding behind the caveat in the evidence line.
+- Running the profile in `leak` mode makes the heap trend unmistakable, which is what stops a flat reading from `measure` mode being a reading of nothing.
+
+The two profile modes were then run back to back on the same machine within the same minute, 30 seconds each at a 12ms hold, so the comparison is paired rather than taken against a remembered baseline. `measure`: 2004 steps, retained heap moving within 20.15–21.08 MB, falling as often as rising, drifting 131 KB in total from its warm floor — 0.065 KB per step. `leak`: 2005 steps, retained heap rising strictly monotonically at every one of 15 samples from 21.97 MB to 43.52 MB, drifting 22,059 KB — 11.0 KB per step, 169 times the clean run. One signal node was live at every sample in both. The longer 150-second run recorded in the evidence line held the same shape over 9,902 steps.
+
+`bun run --cwd packages/view-present test:browser` in isolation, repeatedly during development, including five consecutive runs of the instrument case to confirm the quiescence loop is deterministic where the `requestAnimationFrame` version was not.
+
+### Outstanding concerns
+
+The elapsed-time half is not gated, and a leak driven by elapsed time rather than by cycle count would therefore reach a release unnoticed. This was decided deliberately rather than deferred for convenience: a memory budget wide enough to survive a loaded machine cannot catch a slow leak, and a budget tight enough to catch one goes red on an unrelated commit and is then widened until it is the first kind. Recorded as a `Gaps` bullet on the specification rather than shipped as a threshold that cannot fail. Gating it would need a machine-independent instrument — a forced-collection heap delta under `--expose-gc` with a per-step rather than per-run budget is the shape to try — and that is a separate item, not a tightening of this one.
+
+Uninterrupted playback does not exercise a step timeout's cleanup, because the timeout has always already fired by the time the effect re-runs. The cleanup is real and is covered, but by the steering case only. Anyone reading the sustained case as the guard on that line will be wrong.
+
+The profile's absolute numbers are machine-dependent and this machine had other agents active throughout. That is why the claim rests on a paired same-minute comparison and on a ratio, not on either run's absolute band; the ratio between clean and leaking is nearly three orders of magnitude and no plausible contention accounts for it.
+
+`self:unused:verify` is red, and was already red: `packages/view-studio/src/app/panels/ThemeStrip.tsx` is an unused file and `apps/site/src/routes.ts` and `apps/site/src/VisualGuide.tsx` each carry an unused export. None of the five files this item adds is flagged, and the built `packages/view-present/dist` contains no test or environment artefact. It sits outside `self:check`, so it is left alone rather than fixed here.
+
+`self:boundaries:verify` is green in the gate runs above and is not cited as evidence for anything here, because it reports `0 modules, 0 dependencies cruised` and so cannot have checked this change. That is `INFOSCHEMATICS-TOOL-074`.
+
+### Post-change review
+
+No visual treatment changed, so there is no rendered comparison to make. What was looked at instead is the live page during the real-time profile, which is the only part of this work that observes a running Present at all: across every sample of both a clean and a deliberately leaking 30-second run, exactly one `.infoschematic-flow-signal` node was live in the document while the Sequence advanced through more than two thousand steps. Signal nodes are minted per Scene entry and retired on a timer, so that count staying at one while the step ordinal climbed past 2000 is the DOM-level statement of the same boundedness the counts assert, seen rather than inferred.
+
+The step ordinal itself is read out of the occurrence key — `derivePresentation` names each one `present-scene-N` from a monotonic counter — after an earlier version that accumulated keys seen at each sample undercounted by two orders of magnitude, reporting a few dozen steps for a run that had taken thousands. A profile reporting the wrong step count would have divided its drift by the wrong denominator.
+
+### Mini recap
+
+The measurement says playback is bounded, and the reason to believe it is that every assertion was watched failing first. Three independent statements now hold it: the page's pending-timer and signal counts under fake timers, absolutely and not merely flatly; the `seen` set at the module that owns it, where growth would be invisible from the page; and a Chromium heap profile validated against a deliberate leak. The genuinely hard part was not the leak hunt — there was no leak — but building instruments that could report one, since the first attempt at each of the three was a false green: a single frame flush that was nondeterministic, a flatness assertion that accepted a constant offset, and a `performance.memory` reading that was identical to the last digit whether 24 MB was retained or not.
 
 ## Discussion
 
