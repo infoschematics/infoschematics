@@ -66,3 +66,4 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 
 | Item | Wave | Result | Evidence | Next human action |
 | ---- | ---- | ------ | -------- | ----------------- |
+| INFOSCHEMATICS-TOOL-070 | 1 | Awaiting review | Guard red with `packages/cli` removed; forced gate 43/43 | Accept, or return |

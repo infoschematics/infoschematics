@@ -47,6 +47,9 @@ dist/
 # Generated project-local KI links — never committed.
 .claude/agents/
 
+# Isolated agent checkouts — one worktree per delegated writer, never committed.
+.claude/worktrees/
+
 # Toolchain output — never committed.
 .rumdl_cache/
 .turbo/
