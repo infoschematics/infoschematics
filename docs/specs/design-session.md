@@ -114,9 +114,9 @@ A producer MUST be able to select a flow by its rendered route rather than only 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-studio/src/styles.css`. against this requirement.
+_Verify:_ inspect flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-canvas/src/styles.css`. against this requirement.
 
-_Evidence:_ flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-studio/src/styles.css`.
+_Evidence:_ flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx` and pointer-target styles in `packages/view-canvas/src/styles.css`.
 
 ### DESIGN-012 — A selected flow exposes both attachments
 
@@ -124,9 +124,9 @@ Selecting a flow MUST identify its source and target artefacts and ports. The at
 
 _Conformance:_ conforming
 
-_Verify:_ inspect selected-flow derivation in `packages/view-studio/src/app/App.tsx` and port rendering in `packages/view-studio/src/app/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ inspect selected-flow derivation and attachment port rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`, and the attachment presentation in `packages/view-studio/src/app/editor/FlowEnds.tsx`. against this requirement.
 
-_Evidence:_ selected-flow derivation in `packages/view-studio/src/app/App.tsx` and port rendering in `packages/view-studio/src/app/InfoschematicDiagram.tsx`.
+_Evidence:_ selected-flow derivation and attachment port rendering in `packages/view-canvas/src/InfoschematicDiagram.tsx`, and the attachment presentation in `packages/view-studio/src/app/editor/FlowEnds.tsx`.
 
 ### DESIGN-013 — Fabrics participate as artefacts
 
@@ -144,7 +144,9 @@ Design MUST use discriminated Region, Fabric, Card, Flow, Point and Overlay sele
 
 The selected kind MUST determine the Properties controls. A stale or empty selection MUST render a total empty state rather than interpreting an identifier as another kind.
 
-_Conformance:_ conforming
+_Conformance:_ divergent
+
+Every kind but Point holds. Point is declared pointer-selectable and keyboard-selectable, and no renderer in Canvas hit-tests one, so a Point can be neither pointed at nor reached; the rest of its capability contract is in place. Tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md).
 
 _Verify:_ inspect `packages/view-model/src/editable.ts`, `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/editor/ArtefactControls.tsx`. against this requirement.
 
@@ -156,7 +158,9 @@ Design MUST let a Producer choose, per element kind, whether elements of that ki
 
 A selection whose kind is closed MUST be released, because its own controls would otherwise be the only way to reach an element that no longer answers. The chosen filter is session state: it MUST NOT be written to authored source, and it MUST reset to every kind interactive whenever the Design session opens or closes.
 
-_Conformance:_ conforming, with a known gap: `DESIGN-014` names Point as a selectable kind, but no renderer in Canvas hit-tests a Point, so there is no Point interaction for a layer to filter. Tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md); the five kinds Canvas does hit-test are each filterable.
+_Conformance:_ conforming
+
+The five kinds Canvas hit-tests are each filterable. Point is filterable vacuously, because no renderer in Canvas hit-tests a Point and so there is no Point interaction for a layer to withhold; that gap belongs to `DESIGN-014`, which records it, and is tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md).
 
 _Verify:_ run the Chromium layer cases in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`. They resolve each press through `elementFromPoint`, so a closed kind that merely stopped listening while still taking pointer events fails.
 
@@ -216,7 +220,9 @@ _Evidence:_ `packages/view-studio/src/app/panels/ModelRegister.tsx`, `Specificat
 
 A host document MAY mount several inline Canvases over different authored Infoschematics at once. Hover, selection, accessible naming, and authored artefact identity MUST resolve per instance even when two documents author the same codes, and mounting or unmounting one instance MUST NOT change another's rendered state or listeners. A remounted instance MUST behave as a fresh mount.
 
-_Conformance:_ conforming, with a known appearance exception: renderer-internal SVG `defs` identifiers are document-global, so two instances that share a Flow-family or grid identifier resolve to the first definition in the document. Tracked separately; interaction, identity, and naming isolation are unaffected.
+_Conformance:_ divergent
+
+Interaction, identity, and accessible naming do resolve per instance. Rendered appearance does not: renderer-internal SVG `defs` identifiers are document-global, so two instances sharing a Flow-family or grid identifier both resolve to the first definition in the document, which is one instance's rendering changing with another's presence. Tracked as [Scoped renderer definition identity](../roadmap/INFOSCHEMATICS-TOOL-058-scoped-renderer-definition-identity.md).
 
 _Verify:_ run the Chromium host-fixture suite; it fails when identity or naming leaks across instances, which can be confirmed by giving both fixtures the same title and Card labels.
 

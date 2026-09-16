@@ -42,9 +42,9 @@ When no Standalone Scene or Sequence Scene is active, every visible artefact and
 
 _Conformance:_ conforming
 
-_Verify:_ inspect focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-studio/src/app/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ inspect focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
 
-_Evidence:_ focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-studio/src/app/InfoschematicDiagram.tsx`.
+_Evidence:_ focus precedence, `lightNothing` and Scene selection in `packages/view-studio/src/app/hooks/use-presentation.ts`; highlight classes in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
 ### PRESENT-005 — Focus does not change geometry
 
@@ -52,9 +52,9 @@ Selecting, stepping or clearing a Scene MUST change emphasis without changing au
 
 _Conformance:_ conforming
 
-_Verify:_ inspect Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-studio/src/app/infoschematic-context.tsx`. against this requirement.
+_Verify:_ inspect Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-model/src/runtime.ts` and consumed through `packages/view-canvas/src/runtime-context.tsx`. against this requirement.
 
-_Evidence:_ Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-studio/src/app/infoschematic-context.tsx`.
+_Evidence:_ Present state is reduced to visibility and highlight sets in `packages/view-studio/src/app/hooks/use-presentation.ts`; geometry remains derived by `packages/view-model/src/runtime.ts` and consumed through `packages/view-canvas/src/runtime-context.tsx`.
 
 ### PRESENT-006 — Visibility is resolved before focus
 

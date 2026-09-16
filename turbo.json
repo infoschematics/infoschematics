@@ -89,6 +89,7 @@
       "inputs": [
         "scripts/**",
         "vite.config.ts",
+        ".dependency-cruiser.ts",
         "docs/**",
         "packages/*/src/**",
         "packages/*/schema/**",

@@ -50,9 +50,9 @@ While editing, a port MUST visually distinguish whether a flow currently termina
 
 _Conformance:_ conforming
 
-_Verify:_ inspect port classes and labels in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`. against this requirement.
+_Verify:_ inspect port classes and labels in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`. against this requirement.
 
-_Evidence:_ port classes and labels in `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`.
+_Evidence:_ port classes and labels in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`.
 
 ### EDIT-006 — A flow end can be reattached to an offered port
 
@@ -60,9 +60,9 @@ A producer MUST be able to drag a selected flow endpoint to any compatible port 
 
 _Conformance:_ conforming
 
-_Verify:_ inspect endpoint drag and `dropPort` state in `packages/view-studio/src/app/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ inspect endpoint drag and `dropPort` state in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
 
-_Evidence:_ endpoint drag and `dropPort` state in `packages/view-studio/src/app/InfoschematicDiagram.tsx`.
+_Evidence:_ endpoint drag and `dropPort` state in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
 ### EDIT-007 — Flow waypoints can be edited deliberately
 
@@ -70,9 +70,9 @@ A selected flow MUST expose its interior waypoints. Adding or removing a waypoin
 
 _Conformance:_ conforming
 
-_Verify:_ inspect waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ inspect waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
 
-_Evidence:_ waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/InfoschematicDiagram.tsx`.
+_Evidence:_ waypoint actions in `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
 ### EDIT-008 — Artefact geometry follows kind constraints
 
@@ -104,9 +104,9 @@ Code allocation and allowed families MUST be supplied by the current Infoschemat
 
 _Conformance:_ conforming
 
-_Verify:_ inspect creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx`. against this requirement.
+_Verify:_ inspect creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx`. against this requirement.
 
-_Evidence:_ creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-studio/src/app/InfoschematicDiagram.tsx`.
+_Evidence:_ creation state in `packages/view-studio/src/app/editor/use-editor.ts` and flow interaction in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
 ### EDIT-011 — A card can be created with a valid default
 

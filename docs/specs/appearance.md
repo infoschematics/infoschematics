@@ -144,9 +144,9 @@ Rectangular component-scale shapes rendered by the supplied view library MUST us
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-studio/src/app/InfoschematicDiagram.tsx` and supplied Fabric renderers. against this requirement.
+_Verify:_ inspect `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-canvas/src/InfoschematicDiagram.tsx` and supplied Fabric renderers. against this requirement.
 
-_Evidence:_ `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-studio/src/app/InfoschematicDiagram.tsx` and supplied Fabric renderers.
+_Evidence:_ `cornerRadius` in `packages/view-model/src/tokens.ts`, consumed by `packages/view-canvas/src/InfoschematicDiagram.tsx` and supplied Fabric renderers.
 
 ### APPEAR-014 — Annotation labels fit their identities
 
