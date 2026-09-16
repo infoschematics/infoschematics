@@ -140,17 +140,27 @@ diagram:
       description: The packager produced a new segment and the manifest that names it.
       kind: signal-flow
       flows: [PUBLISHED]
-    - id: playback-stalled
-      label: Playback has stalled
+    - id: manifest-rejected
+      label: The edge rejected a manifest
       kind: emphasise-elements
+      elements: [CDN]
+    - id: playback-stalled
+      label: Playback is stalled
+      description: The player has run out of buffered media and is waiting.
+      kind: emphasise-elements
+      depicts: state
       elements: [PLAYER, VIEWED]
 ```
 
-Each [Diagram Dynamic](/docs/reference/vocabulary/#diagram-dynamic) is a meaning with a stable `id` and one of two kinds. `signal-flow` signals the Flows it names; `emphasise-elements` briefly emphasises the elements it names, which may be Regions, Fabrics, Cards, Points, Flows, or Overlays. Targets must be identities the same document declares, so validation tells you when a Dynamic still points at something you removed.
+Each [Diagram Dynamic](/docs/reference/vocabulary/#diagram-dynamic) is a meaning with a stable `id` and one of two kinds. `signal-flow` signals the Flows it names; `emphasise-elements` emphasises the elements it names, which may be Regions, Fabrics, Cards, Points, Flows, or Overlays. Targets must be identities the same document declares, so validation tells you when a Dynamic still points at something you removed.
 
-What a Dynamic never carries is how to depict it. There is no duration, easing, colour, selector, callback, event source, or element geometry to author — that is what keeps the document portable and keeps every Dynamic meaningful in a still image. Write the `label` as the thing that happened, because it is what a screen reader announces.
+An `emphasise-elements` declaration may add `depicts`, saying whether it names an `event` — something that happened — or a `state` — something that is now the case. It is optional, and an absent one reads as `event`, so every document written before the field existed keeps the meaning it has. A `signal-flow` declaration cannot carry it, because a passage along a Flow has nothing to sustain.
+
+What a Dynamic never carries is how to depict it. There is no duration, easing, colour, selector, callback, event source, or element geometry to author — that is what keeps the document portable and keeps every Dynamic meaningful in a still image. `depicts` is not an exception to that, and the test that separates the two is whether a Producer would say the thing out loud while presenting. “Segments were published” and “we are on this stage” are both things they would say, and both are properties of the change itself, legible in review before any wiring exists; “pulse for nine hundred milliseconds” and “run a mark round the perimeter” are things only a renderer would say. So `depicts` states what the change is while fixing no treatment, no duration, and no way of playing — a renderer that can sustain nothing at all still honours it. Write the `label` as the thing itself, what happened for an event and what is the case for a state, because it is what a screen reader announces.
 
 Nothing plays by itself. A host supplies an occurrence naming the `id` and its own occurrence key, so the same document serves an application wired to real events, a Producer rehearsing in Studio, and a still export that stays quiet unless its caller asks. [The React integration guide](/docs/react-integration/) covers that binding.
+
+What differs between an event and a state is who ends it. An event ends on the renderer's own duration, and the document is asking for that. A state has no duration of its own to expire, so it ends only when the host withdraws the occurrence, replays it under a new key, or stops drawing the element — retaining the key holds it for as long as the presenter needs. None of that is written back to the document: no occurrence, key, or timer ever becomes authored data.
 
 ## Keep Flow signals outside authored data
 
@@ -158,7 +168,7 @@ Author a Flow with stable identity, endpoints, family, and route. Do not add sig
 
 A Scene may focus Flows because focus is durable presentation material. Present can interpret entering that Scene as one transient signal occurrence per resolved focused Flow, while a host can disable that policy or supply explicit occurrences for application events. Neither choice mutates the authored Scene or Flow. Filtering, hover, selection, and inspection do not constitute signal authoring.
 
-Ensure the Flow's label, direction, endpoints, and surrounding explanation make sense in a still image. Interactive Canvas announces a signal and replaces travel with in-place emphasis for reduced-motion users; static SVG can show deterministic emphasis only when its caller explicitly requests Flow identifiers. Motion must never carry meaning absent from authored or persistent content.
+Ensure the Flow's label, direction, endpoints, and surrounding explanation make sense in a still image. Interactive Canvas announces a signal and replaces travel with in-place emphasis for reduced-motion users; static SVG can show deterministic emphasis only when its caller explicitly requests Flow identifiers. A mark a renderer may run round an emphasised element's perimeter is a different thing from that travel: it is the renderer's own reading of an `emphasise-elements` declaration, taken from the element's geometry rather than from anything the document said, and there is no way to author it. Motion must never carry meaning absent from authored or persistent content.
 
 ## Author with Studio
 
