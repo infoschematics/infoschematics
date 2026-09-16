@@ -22,6 +22,8 @@ The registry MAY expose several versions for one key. Resolution MUST select the
 
 Shared SVG definitions and Scope icons MAY remain unversioned host-level support because authored renderer properties do not select their implementation contract directly.
 
+Identifiers inside a host-supplied shared SVG `Definitions` component are the host's own namespace. Canvas renders that component into its own `defs` and MUST NOT rewrite identifiers it did not author. A renderer scopes only the definitions it authors itself, so a host that mounts several Canvases and supplies shared definitions owns keeping those identifiers distinct across them.
+
 _Conformance:_ conforming
 
 _Verify:_ `packages/domain-core/src/authoring.test.ts` covers reference normalisation and `packages/view-canvas/src/renderers.test.tsx` covers exact version selection and mismatch diagnostics.

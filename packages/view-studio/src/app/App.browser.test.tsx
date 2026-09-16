@@ -391,13 +391,13 @@ diagram:
   await expect.poll(() => gridSize.value).toBe('7')
   await expect
     .poll(() =>
-      [...container.querySelectorAll('pattern#infoschematic-grid-minor')].map((pattern) =>
-        pattern.getAttribute('height')
-      )
+      // Canvas names the definitions it owns per mount, so the grid is found by what it is rather than
+      // by a literal identifier. The composite pattern's own id ends in `-plus-minor`, so it is not caught here.
+      [...container.querySelectorAll('pattern[id$="-grid-minor"]')].map((pattern) => pattern.getAttribute('height'))
     )
     .toEqual(['7'])
   expect(
-    [...container.querySelectorAll('pattern#infoschematic-grid-major-plus-minor')].map((pattern) =>
+    [...container.querySelectorAll('pattern[id$="-grid-major-plus-minor"]')].map((pattern) =>
       pattern.getAttribute('height')
     )
   ).toEqual(['35'])

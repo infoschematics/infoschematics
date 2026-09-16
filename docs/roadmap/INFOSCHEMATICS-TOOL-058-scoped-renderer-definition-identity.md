@@ -4,12 +4,12 @@ area: TOOL
 title: Scoped renderer definition identity
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-15T07:05:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T12:20:00Z
 ---
 
 # Scoped renderer definition identity
@@ -52,15 +52,15 @@ Five suites assert the literal identifiers and move with them: `packages/view-ca
 
 ## Steps
 
-1. [ ] Settle the stylesheet first, because it decides whether the grid can be scoped at all: move the `fill` declaration from `packages/view-canvas/src/styles.css:920` onto the `edit-grid` rect at `InfoschematicDiagram.tsx:2072`, leaving `pointer-events: none` in the rule. Verifiable: `grep -n 'url(#' packages/view-canvas/src/styles.css` returns nothing, and `bun run self:verify:repo` still passes `scripts/stylesheet-shadowing.test.ts`.
-2. [ ] Put the prefix validator somewhere both renderers can reach. `packages/view-canvas` and `packages/render-svg` both depend on `@infoschematics/view-model` and neither may depend on the other, so it belongs in `packages/view-model/src/` with a matching export subpath. Verifiable: `bun run self:verify:depcruise` passes and `bun run --cwd packages/render-svg test` still rejects `'unsafe prefix'`.
-3. [ ] Add an optional `resourceIdPrefix` prop to `InfoschematicDiagram`, defaulting to `useId()` and validated by that shared validator. `Canvas` needs no change of its own: `CanvasProps` is derived from `ComponentProps<typeof InfoschematicDiagram>` at `packages/view-canvas/src/Canvas.tsx:32,39`. Verifiable: a unit case mounts two Canvases in one tree and asserts the two `pattern` identifier sets are disjoint and each value satisfies the validator.
-4. [ ] Apply the prefix to every identifier and every reference named in Current state — `InfoschematicDiagram.tsx` lines 1561, 1562, 1882, 1895, 1908, 1914, 1926, 1942, 1966 and 2072. Verifiable: `grep -n 'infoschematic-grid-\|infoschematic-arrow-' packages/view-canvas/src/InfoschematicDiagram.tsx` leaves no occurrence that is not read through the prefix value.
-5. [ ] Move the literal-identifier assertions onto the rendered prefix in `tokens.test.tsx:45,47`, `InfoschematicDiagram.treatments.test.tsx:83,84,96,199,209` and `App.browser.test.tsx:384,390`. Verifiable: `bun run --cwd packages/view-canvas test` and `bun run --cwd packages/view-studio test:browser`.
-6. [ ] Change `scripts/visual-treatment-parity.test.ts:392,406,407` to compare the pattern each renderer references against the pattern that renderer defines, instead of a shared literal. Verifiable: `bun run self:verify:repo` passes, and the case still fails if either renderer's reference is pointed at a pattern it never defines.
-7. [ ] Extend `InfoschematicDiagram.host.browser.test.tsx` with two appearance cases: two instances with different family colours each draw their own arrowhead, read as the computed fill of the `marker` path inside each instance root rather than as an identifier; and two instances with different authored `gridSize` each paint their own pattern, read as the `height` of the `pattern` inside each instance root. Verifiable: `bun run --cwd packages/view-canvas test:browser`, and both cases fail when the prefix is removed — prove that rather than asserting it passes today.
-8. [ ] Return `DESIGN-017` (`docs/specs/design-session.md:219-229`) to `conforming`, restate its `_Verify:_` and `_Evidence:_` lines to name the appearance cases, and state in `docs/specs/renderer-extensions.md` that identifiers inside a host-supplied `Definitions` component are the host's own namespace. Verifiable: `bun run self:verify:repo` — `scripts/specification-evidence.test.ts` checks both the conformance value and that every cited path resolves.
-9. [ ] Render two Infoschematics with different family colours and different grid sizes into one page and look at the result. Shortest route: `bun run self:dev`, open the Card component page of the visual guide, and give one comparison variant a different grid treatment locally. Verifiable by eye, which is the point — a fully green suite did not notice this.
+1. [x] Settle the stylesheet first, because it decides whether the grid can be scoped at all: move the `fill` declaration from `packages/view-canvas/src/styles.css:920` onto the `edit-grid` rect at `InfoschematicDiagram.tsx:2072`, leaving `pointer-events: none` in the rule. Verifiable: `grep -n 'url(#' packages/view-canvas/src/styles.css` returns nothing, and `bun run self:verify:repo` still passes `scripts/stylesheet-shadowing.test.ts`.
+2. [x] Put the prefix validator somewhere both renderers can reach. `packages/view-canvas` and `packages/render-svg` both depend on `@infoschematics/view-model` and neither may depend on the other, so it belongs in `packages/view-model/src/` with a matching export subpath. Verifiable: `bun run self:verify:depcruise` passes and `bun run --cwd packages/render-svg test` still rejects `'unsafe prefix'`.
+3. [x] Add an optional `resourceIdPrefix` prop to `InfoschematicDiagram`, defaulting to `useId()` and validated by that shared validator. `Canvas` needs no change of its own: `CanvasProps` is derived from `ComponentProps<typeof InfoschematicDiagram>` at `packages/view-canvas/src/Canvas.tsx:32,39`. Verifiable: a unit case mounts two Canvases in one tree and asserts the two `pattern` identifier sets are disjoint and each value satisfies the validator.
+4. [x] Apply the prefix to every identifier and every reference named in Current state — `InfoschematicDiagram.tsx` lines 1561, 1562, 1882, 1895, 1908, 1914, 1926, 1942, 1966 and 2072. Verifiable: `grep -n 'infoschematic-grid-\|infoschematic-arrow-' packages/view-canvas/src/InfoschematicDiagram.tsx` leaves no occurrence that is not read through the prefix value.
+5. [x] Move the literal-identifier assertions onto the rendered prefix in `tokens.test.tsx:45,47`, `InfoschematicDiagram.treatments.test.tsx:83,84,96,199,209` and `App.browser.test.tsx:384,390`. Verifiable: `bun run --cwd packages/view-canvas test` and `bun run --cwd packages/view-studio test:browser`.
+6. [x] Change `scripts/visual-treatment-parity.test.ts:392,406,407` to compare the pattern each renderer references against the pattern that renderer defines, instead of a shared literal. Verifiable: `bun run self:verify:repo` passes, and the case still fails if either renderer's reference is pointed at a pattern it never defines.
+7. [x] Extend `InfoschematicDiagram.host.browser.test.tsx` with two appearance cases: two instances with different family colours each draw their own arrowhead, read as the computed fill of the `marker` path inside each instance root rather than as an identifier; and two instances with different authored `gridSize` each paint their own pattern, read as the `height` of the `pattern` inside each instance root. Verifiable: `bun run --cwd packages/view-canvas test:browser`, and both cases fail when the prefix is removed — prove that rather than asserting it passes today.
+8. [x] Return `DESIGN-017` (`docs/specs/design-session.md:219-229`) to `conforming`, restate its `_Verify:_` and `_Evidence:_` lines to name the appearance cases, and state in `docs/specs/renderer-extensions.md` that identifiers inside a host-supplied `Definitions` component are the host's own namespace. Verifiable: `bun run self:verify:repo` — `scripts/specification-evidence.test.ts` checks both the conformance value and that every cited path resolves.
+9. [x] Render two Infoschematics with different family colours and different grid sizes into one page and look at the result. Shortest route: `bun run self:dev`, open the Card component page of the visual guide, and give one comparison variant a different grid treatment locally. Verifiable by eye, which is the point — a fully green suite did not notice this.
 
 ## Files touched
 
@@ -104,6 +104,86 @@ None. `docs/guides/integrating-renderers.md` gains a line only if step 8's state
 ### Roadmap
 
 This record only. Once delivered, `INFOSCHEMATICS-TOOL-057` should cite it as a worked composition — a change to that record, and the lead owns whether it is also recorded as a dependency.
+
+## Review
+
+### Delivered
+
+Each rendered Infoschematic now resolves its own SVG definitions. Canvas prefixes every `marker` and `pattern` it defines, and every reference to one, with a value unique per mount within a React root, so two Canvases embedded in one host document can no longer borrow each other's arrowheads or grid patterns. The prefix validator the static renderer already owned is now shared by both renderers from View Model.
+
+Inside the approved boundary: authored appearance, the `STATIC-010` artefact identity contract, and interaction behaviour are unchanged; an unconfigured host is correct by default; identifiers inside a host-supplied `Definitions` component remain the host's own namespace and are documented rather than rewritten.
+
+Immutable baseline: `dbd57e2f5abf88681c0f4a2f68917b32fca38d28`, whose `bun run self:check` was verified clean before any edit.
+
+Two exclusions held deliberately. `packages/render-svg/src/index.ts`'s `orient="auto-start-reverse"` was left byte-for-byte untouched, because the raster engine's failure to honour it is a separate confirmed defect sequenced after this item. And `docs/specs/static-rendering.md` was left unchanged, which this record permits: `STATIC-015`'s requirement, conformance, and cited evidence all remain exactly true after the validator moved packages.
+
+### Summary of changes
+
+- `packages/view-model/src/resources.ts` — new. `svgResourcePrefix(value, fallback)` carries the rule both renderers need, with the caller supplying the default. Its export subpath was added to `packages/view-model/package.json`.
+- `packages/render-svg/src/index.ts` — its local validator was deleted in favour of the shared one. The single call site is untouched and the `'infoschematic'` default is now the shared function's default parameter, which is why behaviour is unchanged.
+- `packages/view-canvas/src/InfoschematicDiagram.tsx` — an optional `resourceIdPrefix` prop, defaulting to `useId()` and validated by that shared validator, applied to all ten identifier and reference sites. `Canvas` needed no change, as `CanvasProps` derives from the component's props.
+- `packages/view-canvas/src/styles.css` — the `fill` declaration on `.edit-grid rect` is gone; `pointer-events: none` stays. `grep -n 'url(#' packages/view-canvas/src/styles.css` now returns nothing.
+- Suites moved off literal identifiers onto the rendered prefix: `tokens.test.tsx`, `InfoschematicDiagram.treatments.test.tsx`, and `App.browser.test.tsx`, which now selects `pattern[id$="-grid-minor"]`.
+- `scripts/visual-treatment-parity.test.ts` — a shared literal identifier is replaced by a closed-loop check: every `url(#…)` reference in a rendering must resolve to a `marker` or `pattern` that same rendering defines, and both renderers must reach a dots pattern by treatment suffix.
+- `packages/view-canvas/src/InfoschematicDiagram.host.browser.test.tsx` — two appearance cases, resolving references the way a browser does and asserting each instance draws its own arrowhead colour and its own grid pitch.
+- `docs/specs/design-session.md` — `DESIGN-017` returns to `conforming`, with rendered appearance named in the requirement and the per-mount scope of the default stated.
+- `docs/specs/renderer-extensions.md` — `EXTEND-002` gains the statement that a host-supplied `Definitions` component owns its own identifiers.
+
+Two material decisions, both open questions this record left to be settled during delivery.
+
+**What the default promises**, the question the record required settling before step 3. It promises uniqueness _per mount within a React root_, not per document. That covers the reported defect and every ordinary embedding host, and it preserves the byte-identical-markup property `Canvas.dynamics.test.tsx` asserts — measured directly: two independent `renderToStaticMarkup` calls still produce identical output. The same fact means a host that assembles one document from separate render passes still collides, because no pass can see another's identifiers; `resourceIdPrefix` is that host's escape hatch, exactly as `STATIC-015` already obliges static-renderer hosts. So the step 7 appearance cases are the whole proof of what the default claims rather than half of it, and `DESIGN-017` now states the scope rather than implying it.
+
+**The stylesheet rule**, the question affecting step 1. The fill moved inline as the step directed, rather than going through a custom property. The custom-property alternative does not actually close the shadowing hole it was proposed for: a differently-spelled, higher-specificity selector such as `.infoschematic-svg .edit-grid rect` beats `fill: var(--…)` exactly as it beats an inline presentation attribute, because specificity is settled before the variable is substituted. It would add a mechanism for no gain in protection, and the authored grid rect already carries its fill as a presentation attribute with identical exposure — so the inline route makes the Design edit grid consistent with the authored grid instead of introducing an asymmetry.
+
+One deviation from `Files touched`: the step 3 unit case went into a new `packages/view-canvas/src/InfoschematicDiagram.resources.test.tsx` rather than into an existing suite, because renderer definition identity is its own concern and none of the listed files is about it.
+
+### Verification
+
+| Gate | Outcome |
+| --- | --- |
+| `bun run self:check` at baseline, before any edit | passed, exit 0 |
+| Full gate, all 43 tasks, `--concurrency=1 --force` | 43 successful, 43 total |
+| `bun run --cwd packages/view-canvas test` | 11 files, 74 tests passed |
+| `bun run --cwd packages/view-canvas test:browser` | 4 files, 26 tests passed |
+| `bun run self:verify:repo` | 13 files, 50 tests passed |
+| `bun run self:verify:depcruise` | no dependency violations |
+| `bun run self:verify:examples` | `Generated example exports current: 4`, no regenerated diff |
+
+The record required two things be proved rather than observed, and a third followed from the item's own boundary.
+
+**The appearance cases fail when the prefix is removed.** With the per-mount default replaced by the old document-global `'infoschematic'`, both new cases fail, and on the _second_ instance in each pair — which is the defect. Suspending the containment assertions to reach the appearance reads underneath showed the rendered consequence directly: the billing instance reported `fill: '#7c3aed'` where `'#b91c1c'` was authored, and the fine-gridded Diagram reported `pitch: '60'` where `'20'` was authored. Both files were restored from copies taken before the experiment.
+
+**The parity case still fails when a reference points at a pattern its renderer never defines.** Proved three ways, each naming the dangling reference in the failure: the static renderer referencing `infoschematic-grid-major` under the dots treatment, Canvas referencing `_R_1_-grid-elsewhere`, and Canvas referencing `_R_1_-arrow-absent`. The first attempt at this proof tripped a length assertion rather than the resolution assertion, so the check was sharpened to filter references by `-grid-` and test resolution, which is the claim worth making.
+
+**The static renderer's output is byte-identical.** Not merely asserted by its suite: all four examples were rendered with the working tree, then re-rendered with `packages/render-svg/src/index.ts` restored from the baseline commit, and compared. `diff -r` reported no difference and all four SHA-1 hashes match — `blank` `e7c8f846…`, `homepage` `d558c537…`, `infoschematics` `e78fb1d7…`, `system` `c5546554…`.
+
+**Rendered and looked at.** Two Infoschematics were server-rendered into one page — a purple family on a `gridSize` 16 lattice above a red family on a `gridSize` 4 lattice — with the Canvas stylesheet chain inlined, and photographed in Chromium through Playwright. Fixed, each panel shows its own family colour on its own grid pitch. With the prefix removed, the same page shows the fine-gridded lower panel painting the _coarse_ lattice of the panel above it — the defect, visible as a Producer would see it. The throwaway script was deleted rather than committed.
+
+### Outstanding concerns
+
+One finding refines this record's own account of the defect, and belongs with the item rather than outside it. The record's step 7 proposed reading the arrowhead as "the computed fill of the `marker` path". That read cannot see this bug. `.infoschematic-svg .arrow-head` declares `fill: context-stroke`, so wherever `context-stroke` is understood the head takes the colour of the _referencing_ line's stroke, and a wrongly-resolved marker still comes out the right colour — confirmed in the rendered page, where the arrowheads stayed correct in the broken build while the grid was visibly wrong. The `fill` attribute underneath is the per-family value, and it is what gets drawn wherever `context-stroke` is not understood, which includes the raster engine the command line renders PNGs through. The appearance case therefore asserts the attribute, and additionally asserts that the resolved `marker` element is inside its own instance, which is the defect stated directly. The test says so in a comment, so the next reader is not misled the same way.
+
+Nothing else is unresolved, failing, or unchecked within this item's boundary.
+
+### Post-change review
+
+The goal is met at the level the boundary asked for. An unconfigured host that mounts two Canvases is correct, with no new obligation on hosts; the one residual collision — separately rendered passes pasted into one document — is now named in `DESIGN-017` and has a prop that answers it, rather than being an unstated gap.
+
+Regression risk is low and concentrated where it can be seen. The static renderer's output is proved byte-identical, so nothing published changes. Canvas's rendered identifiers do change, which is the point, and the risk that carries is a host or suite that depended on the old literal names: the repository's own five such sites were moved, and no committed SVG artefact or site content named a Canvas identifier. The `useId` default rests on a React implementation detail, so `InfoschematicDiagram.resources.test.tsx` asserts the shape of its output rather than relying on it — a React release that reintroduced the colons of its 18 series fails in the suite instead of in a host, and the validator would throw rather than emit an unusable identifier.
+
+The weakest remaining point is the one the stylesheet decision names: the Design edit grid's fill is now a presentation attribute that any sufficiently specific downstream selector can beat, and `scripts/stylesheet-shadowing.test.ts` compares flattened selectors so it would not catch a differently-spelled one. That exposure is not new — the authored grid rect has always had it — but it is now shared by both grids, and it is the thing to revisit if a downstream stylesheet ever starts styling grid rects.
+
+Acceptance readiness: ready for review. Every step is complete, every stated gate passes on a quiet serial run, and the two proofs the record demanded were produced as failures rather than as assertions that things pass.
+
+### Mini recap
+
+Delivered per-rendering SVG definition identity for Canvas, with the prefix validator shared from View Model, the Design grid fill moved off the stylesheet, five literal-identifier assertion sites moved onto the rendered prefix, the cross-renderer parity check converted from a shared literal to a closed reference loop, `DESIGN-017` returned to `conforming`, and the host-`Definitions` namespace stated in `EXTEND-002`.
+
+Verified by the full 43-task gate run serially, by three negative proofs that each reproduce the defect or catch a dangling reference, by a byte-for-byte comparison of the static renderer's four example renders against the baseline commit, and by photographing two Infoschematics in one page before and after.
+
+Concerns: one, recorded above — the computed arrowhead fill cannot observe this defect because `context-stroke` masks it, which changed how step 7 had to be written.
+
+Proposed learning routes, none promoted automatically. The durable lesson is that a visual-treatment check comparing two renderers against a shared literal string was asserting a coincidence of naming rather than a property, and that the closed-loop form — a reference must resolve within the rendering that made it — is the shape that would have caught both this defect and the undrawn-arrowhead defect that shipped before it; that belongs in whatever guidance owns renderer parity testing. A second, smaller route: `context-stroke` means a marker's _computed_ fill is not evidence about which marker resolved, which is worth knowing before the next appearance test is written against a marker.
 
 ## Discussion
 

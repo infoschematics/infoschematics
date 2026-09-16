@@ -54,6 +54,10 @@
       "types": "./dist/region-geometry.d.ts",
       "import": "./dist/region-geometry.js"
     },
+    "./resources": {
+      "types": "./dist/resources.d.ts",
+      "import": "./dist/resources.js"
+    },
     "./routing": {
       "types": "./dist/routing.d.ts",
       "import": "./dist/routing.js"

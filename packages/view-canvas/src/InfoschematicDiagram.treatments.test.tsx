@@ -65,6 +65,19 @@ const treatmentConfig = defineInfoschematic({
   }
 })
 
+/**
+ * The prefix this rendering gave the definitions it owns, read back off its own markup.
+ *
+ * The identifiers are per-mount by design, so a suite that named one literally would be asserting the
+ * default generator rather than the treatment. Reading the prefix back keeps each assertion about the
+ * pattern a rect actually resolves to, while leaving what it is called to the renderer.
+ */
+const resourcePrefixOf = (markup: string) => {
+  const found = markup.match(/id="([^"]*)-grid-minor"/)
+  if (!found?.[1]) throw new Error('the rendered markup defines no prefixed minor grid pattern')
+  return found[1]
+}
+
 describe('Canvas visual treatments', () => {
   it('uses the authored grid size and suppresses a zero-sized lattice', () => {
     const canonical = (gridSize: number) =>
@@ -80,8 +93,9 @@ describe('Canvas visual treatments', () => {
 
     const custom = renderToStaticMarkup(<Canvas config={canonical(4)} />)
     expect(custom).toContain('data-grid-treatment="major-plus-minor"')
-    expect(custom).toContain('<pattern height="4" id="infoschematic-grid-minor"')
-    expect(custom).toContain('<pattern height="20" id="infoschematic-grid-major"')
+    const customPrefix = resourcePrefixOf(custom)
+    expect(custom).toContain(`<pattern height="4" id="${customPrefix}-grid-minor"`)
+    expect(custom).toContain(`<pattern height="20" id="${customPrefix}-grid-major"`)
 
     const disabled = renderToStaticMarkup(<Canvas config={canonical(0)} />)
     expect(disabled).toContain('data-grid-treatment="none"')
@@ -93,7 +107,7 @@ describe('Canvas visual treatments', () => {
 
     expect(markup).toContain('data-surface-treatment="blueprint"')
     expect(markup).toContain('data-grid-treatment="major-plus-minor"')
-    expect(markup).toContain('fill="url(#infoschematic-grid-major-plus-minor)"')
+    expect(markup).toContain(`fill="url(#${resourcePrefixOf(markup)}-grid-major-plus-minor)"`)
     expect(markup).toContain('data-frame-treatment="dashed"')
     expect(markup).toContain('data-label-placement="south-east"')
     expect(markup).toContain('data-frame-treatment="dotted"')
@@ -196,7 +210,7 @@ describe('Canvas visual treatments', () => {
       const config = defineInfoschematic({ title: grid, infoschematic: { appearance: { grid } } })
       const markup = renderToStaticMarkup(<Canvas config={config} grid={false} />)
 
-      expect(markup).toContain(`fill="url(#infoschematic-grid-${grid})"`)
+      expect(markup).toContain(`fill="url(#${resourcePrefixOf(markup)}-grid-${grid})"`)
       expect(markup).not.toContain('<g class="edit-grid">')
     }
   )
@@ -206,7 +220,7 @@ describe('Canvas visual treatments', () => {
 
     expect(markup).toContain('data-grid-treatment="none"')
     expect(markup).toContain('<g class="edit-grid">')
-    expect(markup).toContain('fill="url(#infoschematic-grid-major-plus-minor)"')
+    expect(markup).toContain(`fill="url(#${resourcePrefixOf(markup)}-grid-major-plus-minor)"`)
   })
 
   it('keeps an authored hidden label accessible and converts an impossible notch to a plain frame', () => {

@@ -7,9 +7,10 @@
  * case rather than the awkward one. A suite that gave each fixture its own
  * codes would pass whether or not the instances were isolated.
  */
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { InfoschematicInput } from '@infoschematics/domain-model'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { useState } from 'react'
 import { expect, test } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -128,6 +129,53 @@ const instance = (container: HTMLElement, testid: string) => {
 const pointer = (target: Element, type: 'pointerdown' | 'pointerover') =>
   target.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerId: 1 }))
 
+/**
+ * Resolve a `url(#…)` reference the way a browser does: the first matching element in *document* order.
+ *
+ * That rule is the whole defect. It is not "the nearest definition" or "the one in my subtree", so an
+ * instance whose sibling emitted the same identifier first silently draws the sibling's definition. The
+ * lookup is scoped to the rendered container rather than run against `document`, which keeps the same
+ * ordering semantics without letting a stray earlier fixture decide the result.
+ */
+const resolve = (container: HTMLElement, reference: string | null) => {
+  const id = reference?.match(/^url\(#(.+)\)$/)?.[1]
+  return id ? container.querySelector(`[id="${CSS.escape(id)}"]`) : null
+}
+
+/** Two Diagrams whose authored grids differ, which is what makes one painting the other's grid visible. */
+const gridded = (id: string, gridSize: number) =>
+  defineInfoschematicModel({
+    id,
+    title: id,
+    diagram: {
+      appearance: { grid: 'major-plus-minor' },
+      bounds: { height: 160, width: 240, x: 0, y: 0 },
+      gridSize
+    }
+  })
+
+function GridDocument() {
+  return (
+    <main>
+      <div data-testid="coarse">
+        <Canvas config={gridded('COARSE', 12)} />
+      </div>
+      <div data-testid="fine">
+        <Canvas config={gridded('FINE', 4)} />
+      </div>
+    </main>
+  )
+}
+
+const majorFor = (authored: number) =>
+  authored * (visualTokens.canvas.geometry.gridMajorSize / visualTokens.canvas.geometry.gridSize)
+
+const rootOf = (container: HTMLElement, testid: string) => {
+  const root = container.querySelector<HTMLElement>(`[data-testid="${testid}"]`)
+  if (!root) throw new Error(`instance ${testid} is not mounted`)
+  return root
+}
+
 test('an authored code addresses its own instance when both documents use it', async () => {
   const { container } = await render(<HostDocument />)
 
@@ -188,4 +236,52 @@ test('unmounting one instance leaves the survivor interactive, and a remount sta
   pointer(remounted.card, 'pointerover')
   await expect.poll(() => instance(container, 'orders').events()).toBe('hover:CARD-A')
   expect(instance(container, 'billing').events()).toBe('hover:CARD-A|select:CARD-A')
+})
+
+test('each instance draws the arrowhead it defined, not the one that reached the document first', async () => {
+  const { container } = await render(<HostDocument />)
+
+  for (const [testid, colour] of [
+    ['orders', '#7c3aed'],
+    ['billing', '#b91c1c']
+  ] as const) {
+    const root = rootOf(container, testid)
+    const route = root.querySelector<SVGPathElement>('path.infoschematic-route')
+    const marker = resolve(container, route?.getAttribute('marker-end') ?? null)
+
+    // Resolution has to land inside the instance that authored the reference. This is the assertion the
+    // fixture was missing: it already proved both instances *emit* the right marker, which was true while
+    // both still *drew* the first one.
+    expect({ ownMarker: marker ? root.contains(marker) : false, testid }).toEqual({ ownMarker: true, testid })
+
+    // The family colour on the head is what the collision actually corrupts. `.arrow-head` asks for
+    // `context-stroke`, so where that is understood the head borrows the referencing line's stroke and a
+    // wrongly-resolved marker still comes out the right colour — the computed fill cannot see this bug.
+    // The `fill` attribute underneath is per-family and is what gets drawn wherever `context-stroke` is
+    // not understood, which includes the raster engine the command line renders PNGs through.
+    const head = marker?.querySelector('path.arrow-head')
+    expect({ fill: head?.getAttribute('fill'), testid }).toEqual({ fill: colour, testid })
+  }
+})
+
+test('each instance paints its own authored grid when two Diagrams size it differently', async () => {
+  const { container } = await render(<GridDocument />)
+
+  for (const [testid, authored] of [
+    ['coarse', 12],
+    ['fine', 4]
+  ] as const) {
+    const root = rootOf(container, testid)
+    const grid = root.querySelector<SVGRectElement>('rect.infoschematic-authored-grid')
+    const pattern = resolve(container, grid?.getAttribute('fill') ?? null)
+
+    expect({ ownPattern: pattern ? root.contains(pattern) : false, testid }).toEqual({ ownPattern: true, testid })
+
+    // Read as a tile size rather than an identifier: the grid a Producer sees is the pitch, and borrowing a
+    // sibling's pattern changes it. A coarse Diagram next to a fine one is the visible form of this defect.
+    expect({ pitch: pattern?.getAttribute('height'), testid }).toEqual({
+      pitch: String(majorFor(authored)),
+      testid
+    })
+  }
 })

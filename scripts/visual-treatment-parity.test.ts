@@ -6,6 +6,23 @@ import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
 import { visualTokens } from '../packages/view-model/src/tokens.ts'
 
+/**
+ * Every `url(#…)` reference in one rendering, paired with whether that same rendering defines it.
+ *
+ * Both renderers now name the SVG resources they own per rendering — the static one from a host-owned
+ * prefix, Canvas from a per-mount value — so parity can no longer be a shared literal identifier, and
+ * asserting one would only pin the default generator. What must still hold in both is the closed loop:
+ * a reference resolves to a definition in the same document. A reference to an identifier the rendering
+ * never defines is the defect that shipped once already, and it survives every structural assertion.
+ */
+const resolvedReferences = (markup: string) => {
+  const defined = new Set([...markup.matchAll(/<(?:marker|pattern)\b[^>]*\bid="([^"]+)"/g)].map((found) => found[1]))
+  return [...markup.matchAll(/url\(#([^)"]+)\)/g)].map((found) => ({
+    defined: defined.has(found[1]),
+    reference: found[1]
+  }))
+}
+
 const config = defineInfoschematic({
   title: 'Cross-renderer treatment reference',
   infoschematic: {
@@ -389,7 +406,12 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain('refX="24"')
       expect(markup).toContain('refY="12"')
       expect(markup).toMatch(/M0[ ,]0 L0[ ,]24 L24[ ,]12 z/)
-      expect(markup).toMatch(/marker-end="url\(#infoschematic-arrow-[^"]+\)"|markerEnd/)
+
+      // The Flow must reference an arrowhead, and it must be one this rendering defines. The two
+      // renderers name an arrowhead differently — the static one by the family's index, Canvas by its
+      // id — so what parity compares is that each resolves its own, not that they agree on a string.
+      expect(markup).toMatch(/marker-(?:end|start)="url\(#[^)"]+\)"/)
+      expect(resolvedReferences(markup).filter((entry) => !entry.defined)).toEqual([])
     }
   })
 
@@ -403,8 +425,15 @@ describe('visual treatment renderer parity', () => {
 
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
     expect(values(canvas, 'data-grid-treatment')).toEqual(['dots'])
-    expect(canvas).toContain('fill="url(#infoschematic-grid-dots)"')
-    expect(svg).toContain('fill="url(#infoschematic-grid-dots)"')
+
+    // Each renderer must fill its grid from a dots pattern it defines itself. The prefix is per-rendering;
+    // the treatment the identifier names is the part parity is about, so the suffix is what is compared.
+    for (const markup of [canvas, svg]) {
+      const grids = resolvedReferences(markup).filter((entry) => entry.reference.includes('-grid-'))
+      expect(grids.length).toBeGreaterThan(0)
+      expect(grids.filter((entry) => !entry.defined)).toEqual([])
+      expect(grids.some((entry) => entry.reference.endsWith('-grid-dots'))).toBe(true)
+    }
 
     // Both renderers must tile the dots on the major pitch, and centre each dot
     // in its tile so the edge does not clip it to a quarter. Either renderer

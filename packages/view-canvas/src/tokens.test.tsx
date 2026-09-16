@@ -8,6 +8,19 @@ import { Canvas } from './Canvas.tsx'
 
 const cssValue = (css: string, name: string) => css.match(new RegExp(`${name}: ([^;]+);`))?.[1]
 
+/**
+ * The prefix this rendering gave the definitions it owns, read back off its own markup.
+ *
+ * The identifiers are per-mount by design, so a suite that named one literally would be asserting the
+ * default generator rather than the treatment. Reading the prefix back keeps the assertion about the
+ * pattern while leaving what it is called to the renderer.
+ */
+const resourcePrefixOf = (markup: string) => {
+  const found = markup.match(/id="([^"]*)-grid-minor"/)
+  if (!found?.[1]) throw new Error('the rendered markup defines no prefixed minor grid pattern')
+  return found[1]
+}
+
 describe('Canvas visual tokens', () => {
   it('consumes only generated custom properties for shared CSS decisions', async () => {
     const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')
@@ -42,9 +55,10 @@ describe('Canvas visual tokens', () => {
     expect(source).not.toMatch(
       /const (?:addReach|attachmentReach|cornerRadius|dragThreshold|gridMajorSize|gridSize) = \d/
     )
-    expect(markup).toContain(`<pattern height="${visualTokens.canvas.geometry.gridSize}" id="infoschematic-grid-minor"`)
+    const prefix = resourcePrefixOf(markup)
+    expect(markup).toContain(`<pattern height="${visualTokens.canvas.geometry.gridSize}" id="${prefix}-grid-minor"`)
     expect(markup).toContain(
-      `<pattern height="${visualTokens.canvas.geometry.gridMajorSize}" id="infoschematic-grid-major"`
+      `<pattern height="${visualTokens.canvas.geometry.gridMajorSize}" id="${prefix}-grid-major"`
     )
   })
 

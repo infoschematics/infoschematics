@@ -24,6 +24,7 @@ import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
+import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
@@ -33,6 +34,7 @@ import {
   type Ref,
   useCallback,
   useEffect,
+  useId,
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
@@ -263,7 +265,8 @@ export function InfoschematicDiagram({
   visibleScopes,
   minimap = 'top-right',
   viewportControllerRef,
-  viewportControls = 'overlay'
+  viewportControls = 'overlay',
+  resourceIdPrefix
 }: {
   /** Authored Design operations previewed without changing the host configuration. */
   artefactOperations?: readonly ArtefactDraftOperation[]
@@ -375,6 +378,16 @@ export function InfoschematicDiagram({
   viewportControllerRef?: Ref<DiagramViewportController>
   /** Studio supplies its own toolbar; ordinary Canvas hosts retain the overlay controls. */
   viewportControls?: 'external' | 'overlay'
+  /**
+   * Prefix for the SVG `marker` and `pattern` identifiers this rendering defines for itself.
+   *
+   * A host never has to supply one. The default is derived from `useId`, which makes every Canvas mounted in one React
+   * root name its own definitions, so an unconfigured page that embeds two Infoschematics is already correct. Supply a
+   * value only when the host composes one document out of separately rendered passes — two independent
+   * `renderToStaticMarkup` calls produce the same identifiers by design, and nothing inside either pass can see the
+   * other. Authored artefact identity is untouched: this names only what the renderer itself puts in `defs`.
+   */
+  resourceIdPrefix?: string
 }) {
   const hostRuntime = useInfoschematic()
   // Removal is a review state, not a materialised preview state. Keeping
@@ -489,6 +502,11 @@ export function InfoschematicDiagram({
   const gridMajorSize = gridSize * (visualTokens.canvas.geometry.gridMajorSize / visualTokens.canvas.geometry.gridSize)
   const domains = infoschematicCollections
   const Definitions = renderers.definitions
+  /* Every `marker` and `pattern` below is resolved by document order, not by proximity, so an unprefixed identifier
+     lets a sibling rendering on the same page draw this one's arrowheads and grid. `useId` is unique per mount within
+     a React root and stable across a render pass, which is what makes an unconfigured two-Canvas host correct while
+     keeping identical markup identical. A host that assembles a document from separate passes supplies its own. */
+  const resourcePrefix = svgResourcePrefix(resourceIdPrefix, useId())
   const activeGraphicRenderer =
     mode !== 'design' && graphic
       ? resolveInfoschematicRenderer(
@@ -1558,8 +1576,8 @@ export function InfoschematicDiagram({
              registry said nothing a reader did not already know - every one of
              them points there. The head that carries meaning is the one at the
              provider, so a two-way line keeps that and drops the other. */
-          markerEnd={flow.bidirectional ? undefined : `url(#infoschematic-arrow-${flow.family})`}
-          markerStart={flow.bidirectional ? `url(#infoschematic-arrow-${flow.family})` : undefined}
+          markerEnd={flow.bidirectional ? undefined : `url(#${resourcePrefix}-arrow-${flow.family})`}
+          markerStart={flow.bidirectional ? `url(#${resourcePrefix}-arrow-${flow.family})` : undefined}
           stroke={family.color}
         />
         {signals
@@ -1879,7 +1897,7 @@ export function InfoschematicDiagram({
         <defs>
           <pattern
             height={gridSize}
-            id="infoschematic-grid-minor"
+            id={`${resourcePrefix}-grid-minor`}
             patternUnits="userSpaceOnUse"
             width={gridSize}
             x="0"
@@ -1892,7 +1910,7 @@ export function InfoschematicDiagram({
           </pattern>
           <pattern
             height={gridMajorSize}
-            id="infoschematic-grid-major"
+            id={`${resourcePrefix}-grid-major`}
             patternUnits="userSpaceOnUse"
             width={gridMajorSize}
             x="0"
@@ -1905,13 +1923,19 @@ export function InfoschematicDiagram({
           </pattern>
           <pattern
             height={gridMajorSize}
-            id="infoschematic-grid-major-plus-minor"
+            id={`${resourcePrefix}-grid-major-plus-minor`}
             patternUnits="userSpaceOnUse"
             width={gridMajorSize}
             x="0"
             y="0"
           >
-            <rect fill="url(#infoschematic-grid-minor)" height={gridMajorSize} width={gridMajorSize} x="0" y="0" />
+            <rect
+              fill={`url(#${resourcePrefix}-grid-minor)`}
+              height={gridMajorSize}
+              width={gridMajorSize}
+              x="0"
+              y="0"
+            />
             <path
               className="infoschematic-grid-line major"
               d={`M ${gridMajorSize} 0 V ${gridMajorSize} M 0 ${gridMajorSize} H ${gridMajorSize}`}
@@ -1923,7 +1947,7 @@ export function InfoschematicDiagram({
             the tile's corner would be clipped to a quarter by the tile edge. */}
           <pattern
             height={gridMajorSize}
-            id="infoschematic-grid-dots"
+            id={`${resourcePrefix}-grid-dots`}
             patternUnits="userSpaceOnUse"
             width={gridMajorSize}
             x={-gridMajorSize / 2}
@@ -1939,7 +1963,7 @@ export function InfoschematicDiagram({
           {Definitions ? <Definitions /> : null}
           {infoschematicFamilies.map((family) => (
             <marker
-              id={`infoschematic-arrow-${family.id}`}
+              id={`${resourcePrefix}-arrow-${family.id}`}
               key={family.id}
               markerHeight="32"
               /* In user units, not stroke widths: the default scales an arrowhead
@@ -1963,7 +1987,7 @@ export function InfoschematicDiagram({
         {visualTreatment.grid !== 'none' ? (
           <rect
             className="infoschematic-authored-grid"
-            fill={`url(#infoschematic-grid-${visualTreatment.grid})`}
+            fill={`url(#${resourcePrefix}-grid-${visualTreatment.grid})`}
             height={infoschematicViewBox.height}
             pointerEvents="none"
             width={infoschematicViewBox.width}
@@ -2069,7 +2093,7 @@ export function InfoschematicDiagram({
         {editing && grid && authoredGridSize > 0 ? (
           <g className="edit-grid">
             <rect
-              fill="url(#infoschematic-grid-major-plus-minor)"
+              fill={`url(#${resourcePrefix}-grid-major-plus-minor)`}
               height={infoschematicViewBox.height}
               width={infoschematicViewBox.width}
               x={infoschematicViewBox.x}

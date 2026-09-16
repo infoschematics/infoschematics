@@ -10,6 +10,7 @@ import {
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
+import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 
@@ -69,16 +70,6 @@ const xmlAttribute = (value: string) => xmlText(value).replaceAll('"', '&quot;')
 const number = (value: number) => {
   if (!Number.isFinite(value)) throw new TypeError(`SVG coordinates must be finite numbers; received ${value}`)
   return Object.is(value, -0) ? '0' : String(value)
-}
-
-const svgResourcePrefix = (value: string | undefined) => {
-  const prefix = value ?? 'infoschematic'
-  if (!/^[A-Za-z_][A-Za-z0-9_.-]*$/.test(prefix)) {
-    throw new TypeError(
-      `SVG resource id prefixes must start with a letter or underscore and contain only letters, digits, underscores, dots or hyphens; received ${prefix}`
-    )
-  }
-  return prefix
 }
 
 const attributes = (values: Attributes) =>

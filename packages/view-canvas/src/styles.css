@@ -916,8 +916,9 @@
 }
 
 /* Drawn only while editing: what components, waypoints and labels align to. */
+/* The fill names a pattern whose identifier is scoped per rendering, so it is
+   stated on the rect where that prefix is known; only what is prefix-free stays here. */
 .edit-grid rect {
-  fill: url(#infoschematic-grid-major-plus-minor);
   pointer-events: none;
 }
 
