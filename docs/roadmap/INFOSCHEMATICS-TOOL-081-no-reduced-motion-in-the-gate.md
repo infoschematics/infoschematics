@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: 99d68b5fdeb2d645d4349dd8383eaef82aa294a7
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T16:10:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # No reduced motion in the gate
@@ -20,7 +20,9 @@ Let a browser case assert what a treatment actually does under `prefers-reduced-
 
 ## Context
 
-Raised by the delivery of travelling element emphasis (`INFOSCHEMATICS-TOOL-060`) and true of every animated treatment in the repository. No browser suite emulates reduced motion — `scripts/vitest-workspace.ts` configures Chromium for all three browser suites and sets no media emulation, and no `.browser.test.tsx` calls `emulateMedia`. Every reduced-motion assertion in the tree is therefore a string assertion against the stylesheet text: it proves a rule was written, never that it wins.
+Raised by the delivery of travelling element emphasis (`INFOSCHEMATICS-TOOL-060`) and true of every animated treatment in the repository. No browser suite emulates reduced motion — `scripts/vitest-workspace.ts:50-59` configures Chromium (`:54`) for every browser suite and sets no media emulation, and no `.browser.test.tsx` calls `emulateMedia`; the token appears nowhere in the repository. Four workspaces consume `workspaceBrowserTests`, not three: `packages/view-canvas`, `packages/view-present`, `packages/view-studio` and `apps/site`. The doc comment at `scripts/vitest-workspace.ts:40` still says "the three that render into a real page" and is itself stale. Every reduced-motion assertion in the tree is therefore a string assertion against the stylesheet text — `packages/view-canvas/src/InfoschematicDiagram.signals.test.tsx:97`, `packages/view-canvas/src/Canvas.dynamics.test.tsx:138`, `:189`, `:260`, and `scripts/stylesheet-shadowing.test.ts:126`, all node suites: it proves a rule was written, never that it wins.
+
+DYNAMIC-006 has already anticipated the objection and then not been held to it. `docs/specs/diagram-dynamics.md:99` requires that every reduced-motion rule be restated for each selector the full-motion treatment states "and MUST be held there by an assertion rather than by inspection", and the requirement reads `_Conformance:_ conforming` at `:107`. Whether a stylesheet-text assertion satisfies "an assertion rather than by inspection" is the substance of this item: it is an assertion, but it inspects the rule rather than the page.
 
 Which is exactly the distinction that bit twice in one afternoon. `INFOSCHEMATICS-TOOL-059` found that `@media (prefers-reduced-motion: reduce)` adds no specificity, so a sustained rule carrying a class and an attribute keeps animating inside the media query unless the held case is restated there; a stylesheet-text assertion catches the restatement's absence only because someone knew to assert it. `INFOSCHEMATICS-TOOL-060` then found that `animation: none` cannot still an `animateMotion` element at all, because declarative SVG motion is not a CSS animation, so the travelling mark had to be removed with `display: none` instead. Both are cascade and platform questions, and both were settled by hand-driven screenshots rather than by the gate.
 
@@ -32,11 +34,11 @@ The capability and one real case that uses it. Not a reduced-motion audit of eve
 
 ## Steps
 
-1. [ ] Establish how reduced motion is emulated for these suites, and prove the emulation takes effect before writing any assertion on it: a case that reads `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and expects `true`. Verifiable by that case failing without the emulation and passing with it. `scripts/vitest-workspace.ts` generates all three browser configurations from one shared shape for a documented reason — extend that shape rather than diverging one workspace.
+1. [ ] Establish how reduced motion is emulated for these suites, and prove the emulation takes effect before writing any assertion on it: a case that reads `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and expects `true`. Verifiable by that case failing without the emulation and passing with it. `scripts/vitest-workspace.ts` generates all four browser configurations from one shared shape for a documented reason — extend that shape rather than diverging one workspace, and correct the stale "three" in its comment at `:40` while there.
 2. [ ] Decide how a suite opts in. A whole-suite setting makes the ordinary cases run under reduced motion too, which changes what they measure; a per-case switch keeps that local. Record which, and why. Verifiable by the ordinary browser cases' behaviour being unchanged.
 3. [ ] Convert the two assertions that motivated this into real browser cases: the held emphasis staying steady rather than animating, and the travelling mark being absent rather than parked. Verifiable by each failing when its stylesheet rule is removed — the same inverse edit that proved them at the node level.
 4. [ ] Keep the node assertions. They catch a deleted rule cheaply; the browser cases catch a rule that loses. Say that in a comment so a later reader does not treat one as redundant.
-5. [ ] Note in `AGENTS.md`, beside the existing line about rendering and looking, that a reduced-motion promise is now gateable — so the next treatment is expected to bring one.
+5. [ ] Note in `AGENTS.md`, beside the existing line about rendering and looking (`AGENTS.md:13`), that a reduced-motion promise is now gateable — so the next treatment is expected to bring one. If step 3 lands, say in DYNAMIC-006 which kind of assertion its restatement clause now means.
 
 ## Files touched
 
@@ -54,6 +56,20 @@ The capability and one real case that uses it. Not a reduced-motion audit of eve
 ## Dependencies / blocks
 
 None. Wants a quiet tree, because it edits the shared test configuration every browser suite reads.
+
+## Documentation impact
+
+### Specifications
+
+DYNAMIC-006 (`docs/specs/diagram-dynamics.md:93`) already requires at `:99` that every restated reduced-motion rule "be held there by an assertion rather than by inspection", and it reads `_Conformance:_ conforming` at `:107` on the strength of stylesheet-text assertions. Whichever way this item lands, that clause gains the distinction it is currently silent about: whether asserting the rule's text satisfies it, or whether it takes a page under emulation. If the answer is the latter, the conformance state is wrong until step 3 lands.
+
+### Decision Records
+
+None. How a test harness emulates a media feature settles no product question.
+
+### Guides
+
+`AGENTS.md:13` carries the existing "render the result and look at it" line, and step 5 adds the sibling sentence beside it: a reduced-motion promise is now gateable, so the next treatment is expected to bring one. Nothing under `docs/guides/` moves.
 
 ## Discussion
 

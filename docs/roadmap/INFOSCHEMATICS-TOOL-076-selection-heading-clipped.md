@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T13:55:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # Selection heading clipped in Design
@@ -20,7 +20,9 @@ Keep every panel heading in the Design dock fully legible at the viewport sizes 
 
 ## Context
 
-Seen on 2026-09-16 in Chromium at 1440×900, in the Playground's Design mode, while reviewing docked panels following the mode (`INFOSCHEMATICS-TOOL-066`). The `SELECTION` heading is cut across the middle by the split-pane resizer: roughly the lower half of the letterforms is hidden, and the `CHANGES` heading sits immediately below it, so the panel reads as though a heading were half-deleted.
+Seen on 2026-09-16 in Chromium at 1440×900, in the Playground's Design mode, while reviewing docked panels following the mode (`INFOSCHEMATICS-TOOL-066`). The `SELECTION` heading is cut across the middle by `.split-handle` (`packages/view-studio/src/styles.css:815`), the horizontal divider between the editor panel's two halves — not `.panel-resizer` (`:330`), which is the dock-to-Canvas column divider: roughly the lower half of the letterforms is hidden, and the `CHANGES` heading sits immediately below it, so the panel reads as though a heading were half-deleted. The heading itself is rendered at `packages/view-studio/src/app/editor/ArtefactControls.tsx:139`, and the `CHANGES` heading below it at `packages/view-studio/src/app/editor/ChangePane.tsx:37`.
+
+There is already a mitigation for this exact symptom, and it does not cover this case: `packages/view-studio/src/styles.css:792-794` strips the trailing margin from the editor panel's last child, and `:802-804` puts `margin-bottom: 10px` back when a `.pane-heading` is `:last-child`, with a comment saying "the divider came to rest against the lettering". `SELECTION` is not `:last-child` whenever something is selected, so the rule that was written for this never fires here. That is the likely mechanism and step 1 should start there.
 
 Pre-existing rather than introduced by that item — it was reported as a parked observation by its delivery and confirmed independently in a separate screenshot. It becomes visible more often now, because entering Design opens the dock instead of leaving an empty rail.
 
@@ -38,8 +40,8 @@ The clipped heading, and only in the docked panel column. Not a redesign of the 
 ## Files touched
 
 - `packages/view-studio/src/styles.css`
-- possibly `packages/view-studio/src/app/panels/DetailsPanel.tsx`
-- `packages/view-studio/src/app/App.browser.test.tsx`
+- possibly `packages/view-studio/src/app/editor/ArtefactControls.tsx` or `packages/view-studio/src/app/panels/SplitPane.tsx:34,43`, which own the heading and the handle respectively — not `DetailsPanel.tsx`, whose headings are `THEMES`, `SCENES` and `STORIES`
+- `packages/view-studio/src/app/App.treatments.browser.test.tsx`, which is the existing home for geometry and treatment cases, or `App.browser.test.tsx`
 
 ## Verify
 
@@ -48,6 +50,20 @@ Rendering and looking is the evidence, at a minimum of two viewport heights, wit
 ## Dependencies / blocks
 
 None. Sequenced naturally after `INFOSCHEMATICS-TOOL-066`, which is what made the dock routinely visible.
+
+## Documentation impact
+
+### Specifications
+
+Possible, and worth deciding rather than assuming. Nothing in the corpus requires a panel heading to be legible: DESIGN-021 (`docs/specs/design-session.md:195`) owns the dock opening, and DESIGN-015 (`:211`) owns the rendered editor being tested. The cheapest honest outcome is that step 3's case joins DESIGN-015's evidence; a requirement that no editing chrome may occlude a panel heading would be stronger and is the alternative to weigh.
+
+### Decision Records
+
+None. A clipped heading is a defect, not a decision.
+
+### Guides
+
+None.
 
 ## Discussion
 

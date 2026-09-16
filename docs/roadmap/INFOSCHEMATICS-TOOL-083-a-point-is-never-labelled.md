@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: 83fa1a84dafec4a67c99425501d74f3684741252
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # A Point is never labelled
@@ -20,11 +20,11 @@ Decide whether a Point's authored label should be drawn, so a reader of a still 
 
 ## Context
 
-Every Point carries a required `label` — `packages/domain-core/src/schema.ts:336` makes it mandatory, not optional. Neither renderer draws it. `packages/render-svg/src/index.ts:851-869` emits a `<title>` and a circle; the interactive Canvas does the same through `aria-label` and `<title>`. A title is reachable by a screen reader and, in some viewers, by hovering; it is not in the image.
+Every Point carries a required `label` — `packages/domain-core/src/schema.ts:336` makes it mandatory, not optional. Neither renderer draws it. `packages/render-svg/src/index.ts:851-876` emits a `<title>` and a circle; the interactive Canvas does the same through `aria-label` and `<title>`. A title is reachable by a screen reader and, in some viewers, by hovering; it is not in the image.
 
 Rendering the media pipeline seed shows the cost. `CAPTIONS`, labelled "Caption feed", draws as an amber ring at the foot of a Flow running up into the Packager. The Flow reads correctly, the dot reads as a deliberate terminus, and nothing on the page says what enters there. A Card in the same rendering carries its code chip, its classification and its title.
 
-This predates `INFOSCHEMATICS-TOOL-063` — it is how the static renderer has always drawn a Point — so it is a treatment decision rather than a regression. The decision is not obviously "draw it": a Point is often an entry arrow's tail where the label duplicates what the Flow already says, and a text run beside a six-unit mark competes with the Flow label a few units away. The alternative is that a Point is deliberately anonymous and the Flow carries the meaning, in which case a required `label` is the wrong shape and the schema should say so.
+This predates `INFOSCHEMATICS-TOOL-063` — it is how the static renderer has always drawn a Point — so it is a treatment decision rather than a regression. The decision is not obviously "draw it": a Point is often an entry arrow's tail where the label duplicates what the Flow already says, and a text run beside a six-unit mark competes with the Flow label a few units away. The alternative is that a Point is deliberately anonymous and the Flow carries the meaning, in which case a required `label` is the wrong shape and the schema should say so. That option is the more invasive of the two, which is worth knowing before choosing it: three places interpolate `point.label` unconditionally into an accessible name — `render-svg/src/index.ts:865`, `view-canvas/src/InfoschematicDiagram.tsx:1850` and `:1869` — and `docs/specs/diagram-dynamics.md:75` holds the static renderer to an accessible-description test, so relaxing the field means supplying a fallback name in all three and touching the corpus.
 
 ## Boundary
 
@@ -50,6 +50,20 @@ This predates `INFOSCHEMATICS-TOOL-063` — it is how the static renderer has al
 ## Dependencies / blocks
 
 None. Independent of `INFOSCHEMATICS-TOOL-082`.
+
+## Documentation impact
+
+### Specifications
+
+Either answer touches the corpus, which is part of why this is a decision rather than a fix. If the label is drawn, STATIC-004 (`docs/specs/static-rendering.md:37`) is the requirement that owns label placement through the shared View Model resolvers, and it gains the Point's label and its placement rule; `docs/specs/appearance.md` gains the token if a new one appears. If a Point is deliberately anonymous, the required field is the wrong shape: `docs/specs/authoring.md` AUTHOR-001 (`:7`) governs authored identity, and DYNAMIC-004's evidence line (`docs/specs/diagram-dynamics.md:75`) holds the static renderer to an accessible-description test that today leans on the label being present.
+
+### Decision Records
+
+Likely, and more so for the anonymity answer than the drawn one. Drawing a label is treatment and belongs in the requirement; making a required field optional changes what a document must carry, which is the kind of contract change the decision records exist for.
+
+### Guides
+
+`apps/site/content/authoring.md` describes what a Point is for. If the label is drawn it gains a sentence; if the field becomes optional it gains a stronger one, because an author currently has no way to know the label they are obliged to write is never shown.
 
 ## Discussion
 

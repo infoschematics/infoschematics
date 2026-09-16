@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T13:20:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # Lockfile agrees with the manifests
@@ -20,11 +20,13 @@ Fail the gate when `bun.lock` and the workspace manifests disagree, so a depende
 
 ## Context
 
-Found while merging the repository command surface (`INFOSCHEMATICS-TOOL-065`) on 2026-09-16. That item removed `syncpack` from the root `devDependencies` and left `bun.lock` naming it. `bun run self:check` reported 43 of 43 tasks successful on that tree, twice, because every task it runs works from an already-installed `node_modules` and none of them installs anything. `bun install --frozen-lockfile` on the same tree failed outright: "lockfile had changes, but lockfile is frozen".
+Found while merging the repository command surface (`INFOSCHEMATICS-TOOL-065`) on 2026-09-16. That item removed `syncpack` from the root `devDependencies` and left `bun.lock` naming it. `bun run self:check` reported 43 of 43 tasks successful on that tree, twice, because every task it runs works from an already-installed `node_modules` and none of them installs anything. The total has since moved — the gate prints 44, and `turbo run --dry` resolves 55 task ids in the graph of which 44 carry a command — so treat the number as dated rather than as something to reproduce. `bun install --frozen-lockfile` on the same tree failed outright: "lockfile had changes, but lockfile is frozen".
 
 That is the shape worth fixing rather than the single stale entry. A frozen install is what continuous integration and the release workflow do, so the disagreement is invisible locally and fatal remotely — the gate is green exactly where it matters least.
 
-Repaired in place at merge time by running `bun install` and committing the resulting lockfile. Nothing in the repository would have caught it.
+Repaired in place at merge time by running `bun install` and committing the resulting lockfile; `syncpack` now appears in no manifest and in no lockfile entry, and a frozen dry-run install completes clean.
+
+No test would have caught it. `bun.lock` is not unwatched, though: `turbo.json:99` already declares it in the `inputs` of `//#self:scripts:test`, so that task reruns when the lockfile moves. Nothing under `scripts/` reads the lockfile, so the rerun observes nothing — which is the gap, and which also means step 2 is extending an existing `inputs` declaration rather than inventing one.
 
 ## Boundary
 
@@ -35,7 +37,7 @@ One check and its placement. This item does not change dependency versions, does
 1. [ ] Decide where the check belongs. A `//#` root task in `turbo.json` is the obvious home, but an install-shaped check has to be honest about cost and network: `bun install --frozen-lockfile --dry-run` is the candidate to measure first. Verifiable by the recorded timing of the candidate on a warm and a cold cache.
 2. [ ] Add the check to `bun run self:check` in whatever form step 1 settles, declaring `bun.lock` and every `package.json` in its `inputs` so it replays only when one of them moves. Verifiable by editing a manifest and watching the task rerun rather than replay.
 3. [ ] Prove it red the way it actually broke: remove a dependency from a manifest without touching the lockfile and watch the check fail. Verifiable by that failure, not by the check passing.
-4. [ ] State in the releasing guide that a frozen install is the remote contract, so the reason the check exists survives the person who added it.
+4. [ ] State in the releasing guide _why_ a frozen install is the remote contract. `docs/guides/releasing-packages.md:22` already carries the command; what is missing is the consequence of the lockfile disagreeing, so the reason the check exists survives the person who added it.
 
 ## Files touched
 
@@ -52,6 +54,20 @@ One check and its placement. This item does not change dependency versions, does
 ## Dependencies / blocks
 
 None. Independent of everything else on the board, and cheap.
+
+## Documentation impact
+
+### Specifications
+
+None. No requirement in the corpus governs repository tooling or the gate's task list, and this item does not propose adding one — the gate is proved by running, not by being specified.
+
+### Decision Records
+
+None. Adding a task to `self:check` is a gate change the commit records; it settles no contested question.
+
+### Guides
+
+`docs/guides/releasing-packages.md` already prints `bun install --frozen-lockfile` at `:22` as the first line of the release sequence. It gains the reason — what an unfrozen install would have let through — so a reader who skips the line knows what they are skipping.
 
 ## Discussion
 

@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T13:55:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # The boundary gate cruises nothing
@@ -25,9 +25,9 @@ Found on 2026-09-16 while delivering scoped renderer definition identity (`INFOS
     $ bun run self:boundaries:verify
     ✔ no dependency violations found (0 modules, 0 dependencies cruised)
 
-Zero modules. The check reports success because it found nothing to examine, and it prints the reason a few lines earlier: dependency-cruiser cannot use the TypeScript 7 compiler API, advises installing `typescript@^6`, and states that support for `typescript@>=7` "will follow when its API is published and stable". The repository is on `typescript: ^7.0.2`, so the boundary gate went vacuous the moment TypeScript was upgraded, and nothing said so.
+Zero modules. The check reports success because it found nothing to examine, and it prints the reason immediately afterwards — after the success line, not before it, so the green is read and acted on before the caveat appears: dependency-cruiser cannot use the TypeScript 7 compiler API, advises installing `typescript@^6`, and states that support for `typescript@>=7` "will follow when its API is published and stable". The repository is on `typescript: ^7.0.2`, so the boundary gate went vacuous the moment TypeScript was upgraded, and nothing said so.
 
-This matters more than the individual finding. `AGENTS.md` states that `bun run self:check` "verifies tests, every TypeScript workspace, dependency boundaries, and the production website build", and [the architecture guide](../design/architecture.md) documents a dependency direction that this check exists to hold. Every green run since the TypeScript upgrade has asserted a boundary guarantee it did not test — including every item delivered in `INFOSCHEMATICS-BATCH-017`.
+This matters more than the individual finding. `AGENTS.md` states that `bun run self:check` "verifies tests, every TypeScript workspace, dependency boundaries, and the production website build", and [the architecture guide](../design/architecture.md) documents a dependency direction that this check exists to hold. Every green run since the TypeScript upgrade has asserted a boundary guarantee it did not test — including all nine items accepted at `2988e104` and pruned at `8c2a8c35`.
 
 It is the third instance of one pattern found in a single day, which is the real lesson: a check that passes while measuring nothing is worse than no check, because it is read as evidence. The others were a raster comparison proving two outputs agree rather than either being right, and a task whose `inputs` let it replay a green it had not earned.
 

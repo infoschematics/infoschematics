@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: 00c067a113f38e84959d8eb0ce71358f092672e5
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # Studio announces nothing
@@ -20,11 +20,11 @@ Give the Studio surface the accessible announcement its renderers already compos
 
 ## Context
 
-Reported by the delivery of held element emphasis (`INFOSCHEMATICS-TOOL-059`) and confirmed independently on 2026-09-16. `packages/view-canvas/src/Canvas.tsx:203` and `:218` hold the two `role="status"` live regions that announce a signal or an emphasis. Studio does not mount `Canvas`: `packages/view-studio/src/app/App.tsx:1034` mounts `InfoschematicDiagram` directly. So Studio has no live region in any mode, and rehearsing a Dynamic there announces nothing.
+Reported by the delivery of held element emphasis (`INFOSCHEMATICS-TOOL-059`) and confirmed independently on 2026-09-16. `packages/view-canvas/src/Canvas.tsx:203` and `:218` hold the two `role="status"` live regions that announce a signal or an emphasis. Studio does not mount `Canvas`: nothing under `packages/view-studio/` imports it, and `packages/view-studio/src/app/App.tsx:1044` mounts `InfoschematicDiagram` directly. So Studio mounts no live region for a Flow signal or an element emphasis in any mode, and rehearsing a Dynamic there announces nothing.
 
-This is wider than the item that found it. It is not specific to held emphasis, or to Dynamics — a Flow signal rehearsed in Studio is equally silent, and has been for as long as Studio has mounted the Diagram directly. `packages/view-present/src/SceneCallout.tsx:164` and `packages/view-studio/src/app/panels/SceneCallout.tsx:189` each carry their own `role="status"` for Callout text, which is why the absence is easy to miss: Studio does announce something, just never the thing a renderer composed.
+This is wider than the item that found it. It is not specific to held emphasis, or to Dynamics — a Flow signal rehearsed in Studio is equally silent, and has been for as long as Studio has mounted the Diagram directly. `packages/view-present/src/SceneCallout.tsx:164` and `packages/view-studio/src/app/panels/SceneCallout.tsx:189` each carry their own `role="status"` for Callout text, and `packages/view-studio/src/app/panels/SourcePanel.tsx:68` is polite too, which is why the absence is easy to miss: Studio does announce things, just never the thing a renderer composed.
 
-The accessible obligation is owned by `ADR-INFOSCHEMATICS-026`, which placed it on the Dynamic kind list, and `ADR-INFOSCHEMATICS-029` extended it to `depicts: state`. Both are satisfied by the renderer and defeated by the host.
+The obligation is not only a decision record: DYNAMIC-006 (`docs/specs/diagram-dynamics.md:103`) states that "an interactive renderer MUST announce each newly accepted occurrence once through a concise polite live region", and that requirement reads `_Conformance:_ conforming` at `:107` with a `_Verify:_` line at `:109` naming "the live regions in `packages/view-canvas/src/Canvas.tsx`". So this is a conformance regression against a requirement the corpus already asserts, not merely an unstated host duty. `ADR-INFOSCHEMATICS-026` placed the obligation on the Dynamic kind list and `ADR-INFOSCHEMATICS-029` extended it to `depicts: state`; all three are satisfied by the renderer and defeated by the host.
 
 ## Boundary
 
@@ -35,8 +35,8 @@ The announcement path from renderer to Studio's page. Not the wording of announc
 1. [ ] Establish where the obligation belongs: whether the live region is `InfoschematicDiagram`'s to render, so any host gets it by mounting the Diagram, or `Canvas`'s to keep with Studio composing its own. The first makes it impossible for a host to omit; the second keeps the Diagram free of page-level furniture. Verifiable by the reasoning being written where a future host author reads it, and by which package the change lands in.
 2. [ ] Make the case that would have caught this, before fixing it: assert that the Studio surface reports a rehearsed Flow signal and a rehearsed Dynamic to assistive technology. Verifiable by that case failing against today's tree.
 3. [ ] Deliver step 1's answer, and confirm Present's existing announcement is unchanged rather than duplicated — two live regions reporting the same event is its own defect.
-4. [ ] Check the remaining hosts. `apps/site` mounts Canvas and Studio both, and an inline Canvas in a documentation page is a third case.
-5. [ ] State the host obligation in `docs/specs/` beside whichever requirement owns accessible naming for Dynamics, so a host that mounts the Diagram directly is told what it still owes.
+4. [ ] Check the remaining hosts. `apps/site` mounts Studio at `apps/site/src/Playground.tsx:134` and its only `Canvas` at `apps/site/src/visual-guide/DemoFrame.tsx:107` — two cases, not three; `DocumentPage.tsx` renders imported Markdown and mounts no Diagram.
+5. [ ] State the host obligation in DYNAMIC-006 (`docs/specs/diagram-dynamics.md:93`), which already owns the announcement, so a host that mounts the Diagram directly is told what it still owes — and correct that requirement's conformance state if step 3 has not yet made it true.
 
 ## Files touched
 
@@ -54,6 +54,20 @@ The announcement path from renderer to Studio's page. Not the wording of announc
 ## Dependencies / blocks
 
 None. Independent of the emphasis work that found it.
+
+## Documentation impact
+
+### Specifications
+
+Required, not optional. DYNAMIC-006 (`docs/specs/diagram-dynamics.md:93`) states at `:103` that "an interactive renderer MUST announce each newly accepted occurrence once through a concise polite live region", reads `_Conformance:_ conforming` at `:107`, and has a `_Verify:_` line at `:109` that names only `packages/view-canvas/src/Canvas.tsx`. So the requirement is asserted conforming while one of the repository's own hosts does not satisfy it. Whatever step 1 decides, DYNAMIC-006 gains the host obligation in words, and if delivery does not land in the same change its conformance state has to say so. FLOW-00x in `docs/specs/flow-signals.md` may want the same sentence for the signal case.
+
+### Decision Records
+
+Likely. Step 1 decides whether a live region is `InfoschematicDiagram`'s to render or the host's to compose, which is a package-boundary choice of exactly the kind `ADR-INFOSCHEMATICS-026` and `ADR-INFOSCHEMATICS-029` already record for Dynamics. If the answer is that the Diagram owns it, that reverses the current division of labour and needs its own record rather than a line in this one.
+
+### Guides
+
+None. No guide tells a host what it owes; the specification is the right place for it.
 
 ## Discussion
 

@@ -6,10 +6,10 @@ theme: tool
 horizon: now
 status: ready
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-058]
-baseline_ref: null
+blocked_by: []
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T12:40:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # Rasterised Flow arrowheads
@@ -28,24 +28,24 @@ This is exactly the failure [the repository guidance](../../AGENTS.md) describes
 
 ## Boundary
 
-This item corrects marker orientation in the static renderer and guards it. It does not change the Canvas DOM path, which renders correctly because browsers implement the attribute; it does not change arrowhead geometry, size, or colour; it does not revisit the rasteriser choice made in [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-resvg.md); and it does not address the text-metric differences between engines, which are separate and captured as `INFOSCHEMATICS-TOOL-072`.
+This item corrects marker orientation in the static renderer and guards it. It does not change the Canvas DOM path, which renders correctly because browsers implement the attribute; it does not change arrowhead geometry, size, or colour; it does not revisit the rasteriser choice made in [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); and it does not address the text-metric differences between engines, which are separate and captured as `INFOSCHEMATICS-TOOL-072`.
 
 ## Current state
 
-- `packages/render-svg/src/index.ts:346` emits `['orient', 'auto-start-reverse']` on the one marker per Flow family. `auto-start-reverse` is SVG 2. `@resvg/resvg-js` — the engine `packages/cli/src/raster.ts:1` imports — does not implement it and falls back to no rotation rather than failing, which is why nothing reports an error.
+- `packages/render-svg/src/index.ts:349` emits `['orient', 'auto-start-reverse']` on the one marker per Flow family. `auto-start-reverse` is SVG 2. `@resvg/resvg-js` — the engine `packages/cli/src/raster.ts:1` imports — does not implement it and falls back to no rotation rather than failing, which is why nothing reports an error.
 - Rewriting only that attribute to `auto` in a copy of the same SVG and rasterising again produces correct arrowheads, which pins the attribute as the whole cause of the rotation failure.
-- **`auto` is not a safe substitution on its own.** `packages/render-svg/src/index.ts:604` gives a bidirectional Flow `marker-start` and no `marker-end`. Under `auto-start-reverse` that arrowhead points back out of its source, which is the intent; under `auto` it would point forward along the path instead. No document in `examples/` authors `bidirectional: true`, so today's corpus would not reveal the regression and the fix must not be applied as a single token.
-- The comment at `packages/render-svg/src/index.ts:333` states that `marker-end` "resolves nothing else", which is stale against `:604` and is part of why the change reads as smaller than it is.
-- `scripts/visual-treatment-parity.test.ts:385-392` asserts the marker exists and that `marker-end` references it. It asserts nothing about `orient`, so the parity guard is blind to this.
-- `packages/view-canvas/src/InfoschematicDiagram.tsx:1974` uses the same attribute in the DOM path. That is correct there and is not in scope, but the two renderers now differ deliberately rather than accidentally, which needs saying in a comment or the difference will be "corrected" later.
+- **`auto` is not a safe substitution on its own.** `packages/render-svg/src/index.ts:606-607` gives a bidirectional Flow `marker-start` and no `marker-end`. Under `auto-start-reverse` that arrowhead points back out of its source, which is the intent; under `auto` it would point forward along the path instead. No document in `examples/` authors `bidirectional: true`, so today's corpus would not reveal the regression and the fix must not be applied as a single token.
+- The comment at `packages/render-svg/src/index.ts:336` states that `marker-end` "resolves nothing else", which is stale against `:606-607` and is part of why the change reads as smaller than it is.
+- `scripts/visual-treatment-parity.test.ts:413-430` asserts the marker exists and that `marker-end` references it. It asserts nothing about `orient`, so the parity guard is blind to this.
+- `packages/view-canvas/src/InfoschematicDiagram.tsx:2085` uses the same attribute in the DOM path. That is correct there and is not in scope, but the two renderers now differ deliberately rather than accidentally, which needs saying in a comment or the difference will be "corrected" later.
 
 ## Steps
 
 1. [ ] Emit an orientation both engines implement, without reversing any bidirectional Flow. Either define a second marker per family whose path geometry is pre-reversed and reference it from `marker-start`, or give the start case its own explicit marker; keep the extra definition out of documents that author no bidirectional Flow, so `defs` does not grow for every document to serve a case most do not have. Verifiable by `bun run --cwd packages/render-svg test` and by the emitted markup containing no `auto-start-reverse`.
-2. [ ] Correct the stale comment at `packages/render-svg/src/index.ts:333`, and state at `packages/view-canvas/src/InfoschematicDiagram.tsx:1974` why the DOM path keeps the SVG 2 value while the static path does not. Verifiable by reading them.
+2. [ ] Correct the stale comment at `packages/render-svg/src/index.ts:336`, and state at `packages/view-canvas/src/InfoschematicDiagram.tsx:2085` why the DOM path keeps the SVG 2 value while the static path does not. Verifiable by reading them.
 3. [ ] Guard the class of defect, not the token. Add a case asserting that every marker orientation the static renderer emits is one the selected raster engine implements, citing `ADR-INFOSCHEMATICS-024` for why that set is what it is. Verifiable by restoring `auto-start-reverse` and watching the case go red — a guard never seen failing is the same unearned green this defect already survived.
 4. [ ] Author the bidirectional case that does not exist. Add a document — a fixture or an example — with a bidirectional Flow, render it to PNG, and confirm by eye that its arrowhead points back at its source and has not swung forward. Verifiable by the rendered file and by a recorded observation of both ends.
-5. [ ] Extend `scripts/visual-treatment-parity.test.ts:385-392` so the parity assertion covers arrowhead orientation in whatever form each renderer expresses it, since it is currently satisfied by a marker that never rotates.
+5. [ ] Extend `scripts/visual-treatment-parity.test.ts:413-430` so the parity assertion covers arrowhead orientation in whatever form each renderer expresses it, since it is currently satisfied by a marker that never rotates.
 6. [ ] Note in `scripts/release/pack-smoke.ts`, or in the releasing guide beside it, that the raster comparison proves agreement rather than correctness, so the next reader does not mistake a green pack smoke for a good-looking PNG.
 
 ## Files touched
@@ -57,7 +57,7 @@ Existing:
 - `packages/view-canvas/src/InfoschematicDiagram.tsx` — comment only
 - `scripts/visual-treatment-parity.test.ts`
 - `scripts/release/pack-smoke.ts` or `docs/guides/releasing-packages.md`
-- `docs/specs/static-rendering.md` — if a requirement states rasterised fidelity, it gains the orientation clause
+- `docs/specs/command-line-rendering.md` — CLI-006 (`:47`) and CLI-007 (`:57`) own raster output; one of them gains the orientation clause
 
 New:
 
@@ -73,13 +73,13 @@ New:
 
 ## Dependencies / blocks
 
-Blocked by scoped renderer definition identity (`INFOSCHEMATICS-TOOL-058`), which edits the same `defs` block and the same marker id construction. Delivering them concurrently in one checkout would collide; delivering this one first would force that item to rebase onto a marker set it did not plan for.
+None outstanding. Scoped renderer definition identity (`INFOSCHEMATICS-TOOL-058`) was the blocker and has landed: marker ids now run through `svgResourcePrefix` (`packages/render-svg/src/index.ts:261` and `:345`, `packages/view-canvas/src/InfoschematicDiagram.tsx:540` and `:2077`). This item therefore rebases onto the prefixed marker set rather than waiting for it, and any second marker definition step 1 adds must take its identity from the same prefix.
 
 ## Documentation impact
 
 ### Specifications
 
-Likely: `docs/specs/static-rendering.md` gains or amends a requirement that rasterised output preserves Flow direction, with the rendered evidence path. Every new requirement lands with a conformance state and resolvable evidence or `bun run self:scripts:test` fails.
+Likely: `docs/specs/command-line-rendering.md` gains or amends a requirement that rasterised output preserves Flow direction, with the rendered evidence path. It is the owner, not `docs/specs/static-rendering.md` — STATIC-001 through STATIC-016 are all about SVG output and the word "raster" does not appear in that file, while CLI-006 (`:47-53`) and CLI-007 (`:57-65`) own raster output and its determinism boundary. Every new requirement lands with a conformance state and resolvable evidence or `bun run self:scripts:test` fails.
 
 ### Guides
 

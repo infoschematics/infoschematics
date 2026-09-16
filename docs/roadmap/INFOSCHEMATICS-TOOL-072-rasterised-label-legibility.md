@@ -7,9 +7,9 @@ horizon: now
 status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T12:40:00Z
-updated_at: 2026-09-16T16:49:00Z
+updated_at: 2026-09-16T18:20:00Z
 ---
 
 # Rasterised label legibility
@@ -20,9 +20,9 @@ Keep a Region label readable in rasterised output, rather than letting Flow rout
 
 ## Context
 
-Found beside the arrowhead defect (`INFOSCHEMATICS-TOOL-071`) while rendering `examples/is-infoschematics/infoschematic.yaml` to PNG on 2026-09-16 and looking at it. The right-aligned Region label "VIEW AND RENDERER PACKAGES" reads as "IEW ND RENDERER PACKAGES": two Flow routes cross the glyphs and erase parts of them.
+Found beside the arrowhead defect (`INFOSCHEMATICS-TOOL-071`) while rendering `examples/is-infoschematics/infoschematic.yaml` to PNG on 2026-09-16 and looking at it. The right-aligned Region label "VIEW AND RENDERER PACKAGES" reads as "IEW ND RENDERER PACKAGES": two Flow routes cross the glyphs and erase parts of them. The document authors it as `label: View and renderer packages` (`examples/is-infoschematics/infoschematic.yaml:146`); the capitals are applied at render time by both renderers (`packages/render-svg/src/index.ts:518`, `packages/view-canvas/src/InfoschematicDiagram.tsx:2184`), so the quoted string is what is painted, not what is authored.
 
-The cause is understood and is not a layout bug. resvg and a browser measure text differently, so a right-aligned label starts at a different x in each, and [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-resvg.md) already documents host-font-stack variance as an accepted cost of the engine. What the decision did not anticipate is that the variance moves a label into a Flow route rather than merely shifting it, so the accepted cost lands as unreadable output.
+The cause is understood and is not a layout bug. resvg and a browser measure text differently, so a right-aligned label starts at a different x in each, and [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md) already documents host-font-stack variance as an accepted cost of the engine. What the decision did not anticipate is that the variance moves a label into a Flow route rather than merely shifting it, so the accepted cost lands as unreadable output.
 
 This is a separate concern from arrowhead orientation and must not be folded into it: one is a wrong attribute with a correct fix, this is a question about whether label placement may depend on measured text at all.
 
@@ -33,8 +33,8 @@ Diagnosis and a recommendation first. This item does not presume a fix, does not
 ## Steps
 
 1. [ ] Measure the actual difference: render the same document through both engines, extract each Region label's resolved x, and record the deltas. Verifiable by the recorded numbers.
-2. [ ] Establish whether any Flow route may legitimately occupy a Region label's band, or whether the label band should be reserved in layout regardless of measurement. Verifiable by a statement against the governing requirement in `docs/specs/`.
-3. [ ] Recommend one of: reserving the band in the view model so no measurement can move a label into a route; pinning the font so both engines measure alike (`--font` already exists in the command line); or painting the label over an opaque backing. State the cost of each. Verifiable by the recommendation naming its consequence for existing rendered bytes.
+2. [ ] Establish whether any Flow route may legitimately occupy a Region label's band, or whether the label band should be reserved in layout regardless of measurement. No requirement governs this today — the nearest is STATIC-004 (`docs/specs/static-rendering.md:37`), which says nothing about a label's band against routing — so this step writes the requirement rather than citing one. Verifiable by the new requirement carrying a conformance state and resolvable evidence.
+3. [ ] Recommend one of: reserving the band in the view model so no measurement can move a label into a route; pinning the font so both engines measure alike (`--font` already exists: `packages/cli/src/options.ts:91`, under CLI-007 at `docs/specs/command-line-rendering.md:59`); or painting the label over an opaque backing. State the cost of each. Verifiable by the recommendation naming its consequence for existing rendered bytes.
 4. [ ] Whatever is chosen, prove it by rendering and looking, and keep the before and after side by side.
 
 ## Files touched
