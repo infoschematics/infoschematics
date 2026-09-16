@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
+import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
@@ -23,6 +25,8 @@ const config = defineInfoschematicModel({
       { id: 'SRC', label: 'Source', bounds: { height: 60, width: 120, x: 20, y: 40 } },
       { id: 'SNK', label: 'Sink', bounds: { height: 60, width: 120, x: 260, y: 40 } }
     ],
+    fabrics: [{ id: 'MESH', label: 'Mesh', bounds: { height: 30, width: 200, x: 20, y: 120 } }],
+    points: [{ id: 'EDGE', label: 'Edge', at: { x: 400, y: 100 } }],
     flows: [
       {
         id: 'LOAD',
@@ -34,6 +38,9 @@ const config = defineInfoschematicModel({
     dynamics: [
       { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
       { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] },
+      { id: 'mesh-attention', label: 'Mesh needs attention', kind: 'emphasise-elements', elements: ['MESH'] },
+      { id: 'edge-attention', label: 'Edge needs attention', kind: 'emphasise-elements', elements: ['EDGE'] },
+      { id: 'route-attention', label: 'Route needs attention', kind: 'emphasise-elements', elements: ['LOAD'] },
       {
         id: 'on-this-stage',
         label: 'We are on this stage',
@@ -51,6 +58,14 @@ const config = defineInfoschematicModel({
 
 const occurrence = { dynamicId: 'attention', occurrenceKey: 'run-1' }
 const held = { dynamicId: 'on-this-stage', occurrenceKey: 'run-1' }
+
+/** One emphasis group out of a rendering, so a treatment can be read for the element it names and not repo-wide. */
+const emphasisGroup = (markup: string, elementId: string) =>
+  markup.match(
+    new RegExp(
+      `<g aria-hidden="true" class="infoschematic-element-emphasis" data-artefact-id="${elementId}"[\\s\\S]*?</g>`
+    )
+  )?.[0] ?? null
 
 describe('Canvas Diagram Dynamics', () => {
   it('draws an emphasis layer for each element the occurrence names, leaving their own output alone', () => {
@@ -132,10 +147,15 @@ describe('Canvas Diagram Dynamics', () => {
     expect(event).not.toContain('data-depicts')
     expect(markup).toContain('data-artefact-id="SNK" data-depicts="state" data-dynamic-id="on-this-stage"')
     expect(markup).toContain('data-artefact-id="ZONE" data-depicts="state" data-dynamic-id="on-this-stage"')
-    // The state is the only difference between the two renderings: same layer, same geometry, same class.
-    expect(markup.replaceAll(' data-depicts="state"', '').replaceAll('on-this-stage', 'attention')).toBe(
-      event.replaceAll('Sink needs attention', 'We are on this stage')
-    )
+    // The state is the only difference between the two renderings, and both places it shows are consequences of it:
+    // the markup says which it is, and the travelling mark keeps going round instead of making one circuit and
+    // stopping. Same layer, same geometry, same classes, same perimeter.
+    expect(
+      markup
+        .replaceAll(' data-depicts="state"', '')
+        .replaceAll(' repeatCount="indefinite"', '')
+        .replaceAll('on-this-stage', 'attention')
+    ).toBe(event.replaceAll('Sink needs attention', 'We are on this stage'))
   })
 
   it('ends a held occurrence by every route that ends an event, because a hold is still host-owned', () => {
@@ -177,6 +197,79 @@ describe('Canvas Diagram Dynamics', () => {
     expect(keyframes.slice(0, keyframes.indexOf('}\n}'))).not.toContain('opacity: 0;')
     // Restated inside the media block, because a media query adds no specificity to beat a class plus an attribute.
     expect(reduced).toContain('.infoschematic-element-emphasis[data-depicts="state"] > * {\n    animation: none;')
+  })
+
+  it('travels a mark along the very perimeter its own outline is drawn from', () => {
+    const markup = renderToStaticMarkup(<Canvas config={config} dynamics={[occurrence]} />)
+
+    for (const [elementId, box] of [
+      ['SNK', { height: 60, width: 120, x: 260, y: 40 }],
+      ['ZONE', { height: 140, width: 380, x: 10, y: 20 }]
+    ] as const) {
+      const group = emphasisGroup(markup, elementId)
+      if (!group) throw new Error(`no emphasis was drawn for ${elementId}`)
+      const outline = group.match(/<path[^>]*\bd="([^"]+)"/)?.[1]
+      const travelled = group.match(/<animateMotion[^>]*\bpath="([^"]+)"/)?.[1]
+
+      // One string and not two. This is the whole reason the perimeter moved into View Model: an outline stated as a
+      // `rect` and a motion path stated separately can disagree, and a mark cutting a corner is what that looks like.
+      expect(outline).toBe(emphasisPerimeterPath(box))
+      expect(travelled).toBe(outline)
+      // Outset from the element and rounded at the emphasis radius rather than the element's own.
+      expect(outline).toContain(`A${visualTokens.canvas.emphasis.radius} ${visualTokens.canvas.emphasis.radius} 0 0 1`)
+      // One circuit per token period for an event, so the mark and the outline's fade are the same length of time.
+      expect(group).toContain(`dur="${visualTokens.canvas.emphasis.duration}"`)
+      expect(group).not.toContain('repeatCount')
+    }
+  })
+
+  it('keeps a held mark going round for as long as the hold lasts instead of making one circuit', () => {
+    const group = emphasisGroup(renderToStaticMarkup(<Canvas config={config} dynamics={[held]} />), 'ZONE')
+
+    // Held and travelling compose without either knowing about the other: one chose the span, the other the shape.
+    expect(group).toContain('repeatCount="indefinite"')
+    expect(group).toContain(`dur="${visualTokens.canvas.emphasis.duration}"`)
+    expect(group).toContain(emphasisPerimeterPath({ height: 140, width: 380, x: 10, y: 20 }))
+  })
+
+  it('offers a travelling mark only where a perimeter exists, and leaves every other geometry its outline', () => {
+    const played = (dynamicId: string) =>
+      renderToStaticMarkup(<Canvas config={config} dynamics={[{ dynamicId, occurrenceKey: 'run-1' }]} />)
+
+    // A Fabric is a box, so it travels exactly as a Card and a Region do.
+    const fabric = emphasisGroup(played('mesh-attention'), 'MESH')
+    expect(fabric).toContain('infoschematic-element-emphasis-mark')
+    expect(fabric).toContain(emphasisPerimeterPath({ height: 30, width: 200, x: 20, y: 120 }))
+
+    // A Flow may already be carrying a signal along its own length, so a second mark on the same line would be read
+    // as one. It keeps the finite route outline: declining a geometry must not quietly mean drawing nothing.
+    const flow = emphasisGroup(played('route-attention'), 'LOAD')
+    expect(flow).toContain('infoschematic-element-emphasis-route')
+    expect(flow).not.toContain('infoschematic-element-emphasis-mark')
+    expect(flow).not.toContain('<animateMotion')
+
+    // The Canvas draws no Points, so the occurrence never reaches a treatment at all — the existing rule that an
+    // emphasis reaches only what this render actually drew. The static renderer does draw one, and draws no mark.
+    const point = played('edge-attention')
+    expect(emphasisGroup(point, 'EDGE')).toBeNull()
+    expect(point).not.toContain('infoschematic-element-emphasis')
+  })
+
+  it('removes the travelling mark under reduced motion, because no CSS property can still SVG motion', async () => {
+    const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')
+    const reduced = styles.slice(styles.indexOf('@media (prefers-reduced-motion: reduce)'))
+
+    // The mark travels on `animateMotion`. The two `animation: none` rules above reach the outline's fade and leave
+    // the disc going round exactly as before, so nothing short of taking it out of the render stops it.
+    expect(renderToStaticMarkup(<Canvas config={config} dynamics={[occurrence]} />)).toContain('<animateMotion')
+    expect(styles).toContain(
+      '.infoschematic-element-emphasis-mark {\n  fill: var(--infoschematic-canvas-emphasis-stroke);'
+    )
+    expect(reduced).toContain('.infoschematic-element-emphasis-mark {\n    display: none;\n  }')
+    // Switched off by class, as the Flow signal pulse already is, and for the same reason.
+    expect(reduced).toContain('.infoschematic-flow-signal-pulse {\n    display: none;\n  }')
+    // And the steady outline is still painted, so a reduced-motion reader is left a treatment rather than nothing.
+    expect(reduced).toContain('.infoschematic-element-emphasis > * {\n    animation: none;\n    opacity: 0.9;\n  }')
   })
 
   it('accepts each emphasis once while supporting replay, cancellation, and hidden elements', () => {

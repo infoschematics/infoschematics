@@ -9,6 +9,7 @@ import {
 } from '@infoschematics/view-model/appearance'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
+import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -171,18 +172,20 @@ const emphasis = canvasTokens.emphasis
  *
  * It is drawn from geometry alone, so emphasising a Card, a Region, a Point or a Flow needs no knowledge of how that
  * element is painted, and emphasis can never change the element's own output.
+ *
+ * The box perimeter is the shared View Model calculation rather than a `rect` stated here, because the interactive
+ * renderer sends a mark along that same line and the two cannot be allowed to disagree about where it runs. Nothing
+ * travels here: a single frame has no time to travel, and the direction a mark traces is chosen from the geometry
+ * rather than stated by the document, so there is no authored direction for a still frame to record.
+ * `ADR-INFOSCHEMATICS-029` records that decision and its cost.
  */
 const boxEmphasis = (box: { height: number; width: number; x: number; y: number }): EmphasisShape => [
-  'rect',
+  'path',
   [
+    ['d', emphasisPerimeterPath(box)],
     ['fill', 'none'],
-    ['height', box.height + emphasis.inset * 2],
-    ['rx', emphasis.radius],
     ['stroke', emphasis.stroke],
-    ['stroke-width', emphasis.strokeWidth],
-    ['width', box.width + emphasis.inset * 2],
-    ['x', box.x - emphasis.inset],
-    ['y', box.y - emphasis.inset]
+    ['stroke-width', emphasis.strokeWidth]
   ]
 ]
 

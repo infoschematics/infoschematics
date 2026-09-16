@@ -1,4 +1,4 @@
-import { defineInfoschematic } from '@infoschematics/domain-core'
+import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
 import {
   type ArtefactSelection,
@@ -701,4 +701,75 @@ test('a Shift sweep gathers what it crossed and leaves an Adapter to the Card it
   // ADAPTER-A covers the same ground and is absent: it moves through the Card it holds, which the sweep already took.
   await expect.poll(events).toBe('range:CARD-A+CARD-B')
   await expect.poll(() => container.querySelector('.infoschematic-range-band')).toBeNull()
+})
+
+/*
+ * A Card emphasised while a neighbour overlaps the line the emphasis runs on.
+ *
+ * `CARD-A`'s perimeter is outset six, which puts its right edge at x=186 — inside `CARD-B`, which the Dynamic says
+ * nothing about. The emphasis layer is drawn last, so at that point the travelling mark is the topmost thing in the
+ * document, and the state depiction keeps it there for as long as the test needs rather than retiring mid-assertion.
+ */
+const emphasisPointerConfig = defineInfoschematicModel({
+  id: 'emphasis-pointer',
+  title: 'Emphasis pointer safety',
+  diagram: {
+    bounds: { height: 320, width: 640, x: 0, y: 0 },
+    gridSize: 10,
+    cards: [
+      { id: 'CARD-A', label: 'Card A', bounds: { height: 50, width: 100, x: 80, y: 170 } },
+      { id: 'CARD-B', label: 'Card B', bounds: { height: 50, width: 100, x: 176, y: 170 } }
+    ],
+    dynamics: [
+      {
+        id: 'attention',
+        label: 'Card A needs attention',
+        kind: 'emphasise-elements',
+        elements: ['CARD-A'],
+        depicts: 'state'
+      }
+    ]
+  }
+})
+
+function EmphasisPointerHarness() {
+  const [selected, setSelected] = useState<ArtefactSelection | null>(null)
+  const [events, setEvents] = useState<string[]>([])
+  return (
+    <>
+      <Canvas
+        config={emphasisPointerConfig}
+        dynamics={[{ dynamicId: 'attention', occurrenceKey: 'hold-1' }]}
+        mode="design"
+        onArtefactSelect={(selection) => {
+          setSelected(selection)
+          setEvents((current) => [...current, `select:${selection?.id ?? 'none'}`])
+        }}
+        selectedArtefact={selected}
+      />
+      <output data-testid="emphasis-events">{events.join('|')}</output>
+    </>
+  )
+}
+
+test('a travelling emphasis answers no pointer, so the element under its line still takes the press', async () => {
+  const { container } = await render(<EmphasisPointerHarness />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  if (!svg) throw new Error('rendered fixture is incomplete')
+  const emphasis = container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="CARD-A"]')
+  const mark = emphasis?.querySelector<SVGCircleElement>('.infoschematic-element-emphasis-mark')
+  if (!emphasis || !mark) throw new Error('the emphasised Card has no travelling mark')
+
+  // Inherited from the group rather than stated on the mark, which is why the mark is asked separately: a moving
+  // element that answered the pointer would make a Card intermittently unclickable, once per circuit.
+  expect(getComputedStyle(emphasis).pointerEvents).toBe('none')
+  expect(getComputedStyle(mark).pointerEvents).toBe('none')
+
+  expect(atPoint(svg, 186, 195)?.closest('.infoschematic-element-emphasis')).toBeNull()
+  expect(artefactAt(svg, 186, 195)).toBe('CARD-B')
+
+  const beneath = atPoint(svg, 186, 195)
+  const { clientX, clientY } = screenPoint(svg, 186, 195)
+  beneath?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX, clientY, pointerId: 60 }))
+  await expect.poll(() => container.querySelector('[data-testid="emphasis-events"]')?.textContent).toBe('select:CARD-B')
 })

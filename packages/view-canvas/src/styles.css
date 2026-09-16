@@ -475,6 +475,14 @@
   stroke-linejoin: var(--infoschematic-canvas-flows-line-join);
 }
 
+/* The travelling mark: a filled disc running the perimeter the outline is drawn from, so the eye follows one element
+   rather than taking in a whole outline at once. It is filled where everything else in this layer is stroked, and it
+   takes the opacity envelope above so it fades with the emphasis rather than arriving and leaving on its own. */
+.infoschematic-element-emphasis-mark {
+  fill: var(--infoschematic-canvas-emphasis-stroke);
+  stroke: none;
+}
+
 .infoschematic-signal-announcement {
   block-size: 1px;
   clip-path: inset(50%);
@@ -505,6 +513,14 @@
   .infoschematic-element-emphasis[data-depicts="state"] > * {
     animation: none;
     opacity: 0.9;
+  }
+
+  /* Removed rather than stilled, and the two rules above are why this one has to exist. The mark travels on
+     `animateMotion`, which is declarative SVG motion and not a CSS animation, so `animation: none` reaches the
+     outline's fade and leaves the disc going round exactly as before. Switched off by class, as the Flow signal
+     pulse already is, which leaves the steady outline as the whole treatment — the picture still output draws. */
+  .infoschematic-element-emphasis-mark {
+    display: none;
   }
 }
 

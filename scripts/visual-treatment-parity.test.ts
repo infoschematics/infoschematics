@@ -1,9 +1,10 @@
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
-import { defineInfoschematic } from '../packages/domain-core/src/index.ts'
+import { defineInfoschematic, defineInfoschematicModel } from '../packages/domain-core/src/index.ts'
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
+import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
 import { visualTokens } from '../packages/view-model/src/tokens.ts'
 
 /**
@@ -113,6 +114,21 @@ const cardStrings = (output: string) => ({
   ),
   stereotype: strings(output, /class="infoschematic-card-stereotype"[^>]*>([^<]*)</g)
 })
+
+/**
+ * The line each renderer draws round an emphasised element, keyed by the element it names.
+ *
+ * Both renderers take it from one calculation over the element's own box, so the two paths are comparable as
+ * strings. Attribute order differs between them, but the element's identity precedes its geometry in both.
+ */
+const emphasisOutlines = (output: string) =>
+  Object.fromEntries(
+    [
+      ...output.matchAll(
+        /<g[^>]*class="infoschematic-element-emphasis"[^>]*data-artefact-id="([^"]+)"[\s\S]*?<path[^>]*\bd="([^"]+)"/g
+      )
+    ].map((match) => [match[1] as string, match[2] as string])
+  )
 
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
@@ -446,5 +462,36 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain(`cx="${gridMajorSize / 2}"`)
       expect(markup).toContain(`cy="${gridMajorSize / 2}"`)
     }
+  })
+
+  it('draws the same emphasis perimeter round the same element in both renderers', () => {
+    const emphasised = defineInfoschematicModel({
+      id: 'emphasis-parity',
+      title: 'Emphasis parity reference',
+      diagram: {
+        bounds: { height: 200, width: 420, x: 0, y: 0 },
+        gridSize: 10,
+        regions: [{ id: 'ZONE', label: 'Zone', bounds: { height: 140, width: 380, x: 10, y: 20 } }],
+        cards: [{ id: 'SNK', label: 'Sink', bounds: { height: 60, width: 120, x: 260, y: 40 } }],
+        dynamics: [
+          { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] }
+        ]
+      }
+    })
+    const dynamics = [{ dynamicId: 'attention', occurrenceKey: 'run-1' }]
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: emphasised, dynamics }))
+    const svg = renderInfoschematicSvg(emphasised, { dynamics })
+
+    const outlines = emphasisOutlines(canvas)
+    expect(Object.keys(outlines).sort()).toEqual(['SNK', 'ZONE'])
+    expect(outlines).toEqual(emphasisOutlines(svg))
+    expect(outlines.SNK).toBe(emphasisPerimeterPath({ height: 60, width: 120, x: 260, y: 40 }))
+
+    // Parity says the two renderers agree; it cannot say either is right, and looking at the output is what
+    // settles that. What the agreement is worth here is that the mark Canvas sends round the element travels the
+    // very string the still renderer draws as its outline, so a corner the outline rounds is not one the mark
+    // cuts — and that the still frame states no direction, because the document does not state one either.
+    expect(canvas).toContain(`<animateMotion dur="${visualTokens.canvas.emphasis.duration}" path="${outlines.SNK}"`)
+    expect(svg).not.toContain('animateMotion')
   })
 })

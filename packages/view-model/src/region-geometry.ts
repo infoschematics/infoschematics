@@ -1,6 +1,7 @@
 import type { RegionLabelPlacement } from '@infoschematics/domain-model/appearance'
 import type { Box } from '@infoschematics/domain-model/geometry'
 import type { ResolvedRegionTreatment } from './appearance.ts'
+import { roundedRectanglePath } from './perimeter.ts'
 import { visualTokens } from './tokens.ts'
 
 export type RegionLabelGeometry = Readonly<{
@@ -44,23 +45,9 @@ export const regionGeometryDefaults = Object.freeze({
 const number = (value: number) => String(Number(value.toFixed(3)))
 const point = (x: number, y: number) => `${number(x)} ${number(y)}`
 
-const roundedFrame = (box: Box, radius: number) => {
-  const { x, y, width, height } = box
-  const right = x + width
-  const bottom = y + height
-  return [
-    `M${point(x + radius, y)}`,
-    `H${number(right - radius)}`,
-    `A${number(radius)} ${number(radius)} 0 0 1 ${point(right, y + radius)}`,
-    `V${number(bottom - radius)}`,
-    `A${number(radius)} ${number(radius)} 0 0 1 ${point(right - radius, bottom)}`,
-    `H${number(x + radius)}`,
-    `A${number(radius)} ${number(radius)} 0 0 1 ${point(x, bottom - radius)}`,
-    `V${number(y + radius)}`,
-    `A${number(radius)} ${number(radius)} 0 0 1 ${point(x + radius, y)}`,
-    'Z'
-  ].join(' ')
-}
+/* A plain region frame is a rounded rectangle and nothing more, so it is the shared perimeter rather than a second
+   copy of it. Only the notched frame below is this module's own, because only it breaks the line for a label. */
+const roundedFrame = roundedRectanglePath
 
 const labelGeometry = (
   box: Box,

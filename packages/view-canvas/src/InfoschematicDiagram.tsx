@@ -22,6 +22,7 @@ import {
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
+import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
@@ -204,15 +205,38 @@ const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeW
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
 const emphasisTokens = visualTokens.canvas.emphasis
+// The travelling mark is Canvas-only, like the Flow pulse above: still output shares the perimeter and draws nothing
+// travelling on it, because the direction a mark traces is chosen from the geometry and not stated by the document.
+const emphasisMarkRadius = 5
 
-/** An emphasised box is outset from the element, so the treatment reads as being about it rather than part of it. */
-const boxEmphasis = (box: Box) => ({
-  height: box.height + emphasisTokens.inset * 2,
-  rx: emphasisTokens.radius,
-  width: box.width + emphasisTokens.inset * 2,
-  x: box.x - emphasisTokens.inset,
-  y: box.y - emphasisTokens.inset
-})
+/**
+ * What an emphasis draws for one element.
+ *
+ * A travelling mark is offered only where the element has a closed perimeter a mark can be seen to follow. A Flow is
+ * a route that may already be carrying a signal along its own length, so a second mark on the same line would be read
+ * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-029` records which geometries are declined and why.
+ */
+type CanvasEmphasisGeometry = Readonly<{ d: string; travels: boolean }>
+
+const emphasisTreatment = ({ d, travels }: CanvasEmphasisGeometry, depicts: ElementEmphasis['depicts']): ReactNode => (
+  <>
+    <path className={travels ? undefined : 'infoschematic-element-emphasis-route'} d={d} />
+    {travels ? (
+      /* The mark travels the very path string the outline is drawn from, so it cannot cut a corner the outline
+         rounds. One circuit per token period; for a state it repeats for as long as the host holds the occurrence,
+         which is how held and travelling compose without either knowing about the other. Declarative SVG motion is
+         beyond the reach of any CSS animation property, so reduced motion removes this element rather than stilling
+         it — the rule is in `styles.css` and `Canvas.dynamics.test.tsx` holds it there. */
+      <circle className="infoschematic-element-emphasis-mark" opacity="0" r={emphasisMarkRadius}>
+        <animateMotion
+          dur={emphasisTokens.duration}
+          path={d}
+          repeatCount={depicts === 'state' ? 'indefinite' : undefined}
+        />
+      </circle>
+    ) : null}
+  </>
+)
 
 export function InfoschematicDiagram({
   artefactOperations = [],
@@ -1832,15 +1856,15 @@ export function InfoschematicDiagram({
   /* Emphasis is a layer over the diagram and nothing else: it needs only geometry, and only from what this render
      actually drew, so an occurrence can never make hidden or filtered content appear. Drawn last for the same reason
      the static renderer draws it last — no emphasised element's own output, ordering, or geometry changes. */
-  const emphasisGeometry = new Map<string, ReactNode>()
+  const emphasisGeometry = new Map<string, CanvasEmphasisGeometry>()
   for (const region of infoschematicRegions) {
-    emphasisGeometry.set(region.id, <rect {...boxEmphasis(region.box)} />)
+    emphasisGeometry.set(region.id, { d: emphasisPerimeterPath(region.box), travels: true })
   }
   for (const placeable of placeables) {
-    emphasisGeometry.set(placeable.id, <rect {...boxEmphasis(placeable.box)} />)
+    emphasisGeometry.set(placeable.id, { d: emphasisPerimeterPath(placeable.box), travels: true })
   }
   for (const flow of flows) {
-    emphasisGeometry.set(flow.id, <path className="infoschematic-element-emphasis-route" d={flow.d} />)
+    emphasisGeometry.set(flow.id, { d: flow.d, travels: false })
   }
   const emphasisLayer = emphasis.flatMap((occurrence) => {
     const geometry = emphasisGeometry.get(occurrence.elementId)
@@ -1859,7 +1883,7 @@ export function InfoschematicDiagram({
         data-occurrence-key={occurrence.occurrenceKey}
         key={elementEmphasisKey(occurrence)}
       >
-        {geometry}
+        {emphasisTreatment(geometry, occurrence.depicts)}
       </g>
     ]
   })

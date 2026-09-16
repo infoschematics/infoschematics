@@ -48,11 +48,15 @@ Resolution MUST carry a declared state depiction onto every emphasis it resolves
 
 Resolution MUST remain pure and framework-neutral: no renderer reads authored Dynamic shorthand, and each renderer chooses its own treatment from the resolved occurrences.
 
+Where a treatment needs geometry more specific than a box — a line a mark can be seen to travel rather than a rectangle to outline — that calculation MUST live in View Model and MUST be the single calculation every renderer draws from, so two renderers cannot disagree about where an element's perimeter runs. The calculation MUST answer only where the perimeter is: it MUST NOT state what is drawn on it, which way round it is travelled, or where anything rests along it, all of which stay renderer choices.
+
+Resolution MUST NOT say which geometries a treatment is offered for. A renderer MAY decline a treatment for an element whose geometry cannot carry it legibly, and MUST then draw that element the treatment it can carry rather than nothing, so an element a Dynamic names is never left unmarked. Which geometries a renderer declines, and at what cost to the reader, MUST be recorded in [ADR-INFOSCHEMATICS-029](../decisions/ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means.md) rather than discovered from the output.
+
 _Conformance:_ conforming
 
-_Verify:_ inspect `resolveDiagramDynamics` and `dynamicDepictsState` in `packages/view-model/src/dynamics.ts` and the emphasis layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/render-svg/src/index.ts` against this requirement.
+_Verify:_ inspect `resolveDiagramDynamics` and `dynamicDepictsState` in `packages/view-model/src/dynamics.ts`, the shared perimeter calculation in `packages/view-model/src/perimeter.ts`, and the emphasis layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/render-svg/src/index.ts` against this requirement.
 
-_Evidence:_ byte-identical resolved and directly supplied signal output, scope-hidden elements left unemphasised, and unchanged element output in `packages/view-canvas/src/Canvas.dynamics.test.tsx`, `packages/view-present/src/Present.dynamics.test.tsx`, and `packages/render-svg/src/index.test.ts`.
+_Evidence:_ byte-identical resolved and directly supplied signal output, scope-hidden elements left unemphasised, and unchanged element output in `packages/view-canvas/src/Canvas.dynamics.test.tsx`, `packages/view-present/src/Present.dynamics.test.tsx`, and `packages/render-svg/src/index.test.ts`; the closed, clockwise, radius-fitted perimeter and its outset in `packages/view-model/src/perimeter.test.ts`, both renderers drawing that same perimeter for the same box in `scripts/visual-treatment-parity.test.ts`, and a travelling treatment offered where a closed perimeter exists while a Flow keeps its route outline and a Point its disc in `packages/view-canvas/src/Canvas.dynamics.test.tsx`.
 
 ### DYNAMIC-004 — Static output stays quiet unless a caller asks
 
@@ -60,13 +64,15 @@ Deterministic still output MUST be byte-identical with no declared Dynamics, wit
 
 Still output MUST NOT distinguish a state from an event: one image has no duration to express, so a held occurrence and a momentary one draw the same outline. A caller that needs to show what is currently the case does so by supplying the occurrence.
 
+Nor MUST still output distinguish a travelling treatment from a finite one. A single frame has no time in which to travel, and the direction a mark traces is a renderer's choice made from the geometry rather than anything the document states, so there is no authored direction for a still frame to record and it MUST NOT invent one: a frozen mark or a start marker would show a reader a movement the document never asserts. Where an interactive renderer sends a mark along an element's perimeter, still output MUST draw that same perimeter as its outline and nothing travelling on it.
+
 Still output MUST NOT contain animation, and MUST NOT vary with the occurrence key: two occurrences of the same Dynamic differing only by key MUST produce identical output. Emphasised elements MUST carry stable authored artefact identity together with the Dynamic id so a caller can locate the treatment, and the accessible description MUST state the occurred Dynamics' labels.
 
 _Conformance:_ conforming
 
 _Verify:_ inspect the still emphasis treatment and accessible description in `packages/render-svg/src/index.ts` against this requirement.
 
-_Evidence:_ quiet-baseline, explicit-occurrence, key-independence, and accessible-description tests in `packages/render-svg/src/index.test.ts`.
+_Evidence:_ quiet-baseline, explicit-occurrence, key-independence, and accessible-description tests in `packages/render-svg/src/index.test.ts`, where the emphasis outline is asserted to be the shared perimeter calculation and the output to contain no travelling markup at all.
 
 ### DYNAMIC-005 — A Producer can rehearse a document's Dynamics
 
@@ -88,6 +94,10 @@ _Evidence:_ rendered Studio rehearsal, replay, and retirement in `packages/view-
 
 Each kind MUST have a full-motion treatment, a finite `prefers-reduced-motion` treatment that is still rather than travelling, and a deterministic non-motion interpretation in still output. Motion MUST NOT be the only carrier of a Dynamic's meaning.
 
+A full-motion treatment MAY send a mark travelling round an element. When it does, the mark MUST travel the very path the outline is drawn from, so it cannot cut a corner the outline rounds, and MUST complete its circuit in the same View Model token period the finite treatment takes. A mark travelling for a state MUST keep going for as long as the host holds the occurrence; one travelling for an event MUST make a single circuit. A travelling mark MUST NOT obscure an element's own text, and MUST NOT receive pointer events at any point on its circuit, so an element beneath the line it travels stays selectable throughout.
+
+A travelling treatment carried by declarative SVG motion rather than by a CSS animation MUST be removed under `prefers-reduced-motion` rather than stilled, because no CSS animation property reaches it and a treatment that only appears to be switched off would keep moving. The steady outline MUST remain as the whole treatment, which is the picture still output already draws. Because a media query adds no specificity, every reduced-motion rule MUST be restated for each selector the full-motion treatment states, including the more specific sustained one, and MUST be held there by an assertion rather than by inspection.
+
 A sustained treatment for a state MUST be painted at every moment of the hold, never reaching full transparency, and MUST take its period from the same View Model token as the finite treatment. Under `prefers-reduced-motion` a hold MUST be steady rather than sustained, which is the outline still output already draws.
 
 An interactive renderer MUST announce each newly accepted occurrence once through a concise polite live region, and the announcement MUST state the Dynamic's own label rather than describing the graphic or listing the elements it touched. Re-rendering the same occurrence MUST NOT repeat the announcement; cancelling or completing an occurrence MUST NOT announce new activity, so a hold is announced when it begins and its ending is silent — a reader who must know that a state has ended is told by the host, through whatever the host uses to say so. However many elements one occurrence touches, it MUST be announced once.
@@ -98,4 +108,4 @@ _Conformance:_ conforming
 
 _Verify:_ inspect the emphasis tokens in `packages/view-model/src/tokens.ts`, the treatments in `packages/view-canvas/src/styles.css`, and the live regions in `packages/view-canvas/src/Canvas.tsx` against this requirement.
 
-_Evidence:_ token-derived painted emphasis, retirement, announcement revisions, and reduced-motion treatment in `packages/view-canvas/src/Canvas.dynamics.test.tsx` and `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, including a sustained hold measured part way through as painted and unannounced, and the restated reduced-motion rule in `packages/view-canvas/src/styles.css`.
+_Evidence:_ token-derived painted emphasis, retirement, announcement revisions, and reduced-motion treatment in `packages/view-canvas/src/Canvas.dynamics.test.tsx` and `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, including a sustained hold measured part way through as painted and unannounced, and the restated reduced-motion rules in `packages/view-canvas/src/styles.css`; the travelling mark sampled in a browser moving round the perimeter and staying on it, and the element beneath its line still taking a press, in `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx` and `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`.

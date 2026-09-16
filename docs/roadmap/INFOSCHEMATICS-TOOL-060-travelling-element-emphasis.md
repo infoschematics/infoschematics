@@ -4,12 +4,12 @@ area: TOOL
 title: Travelling element emphasis
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-059]
 baseline_ref: null
 created_at: 2026-09-15T08:50:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T15:05:00Z
 ---
 
 # Travelling element emphasis
@@ -129,6 +129,85 @@ Expected: one follow-up record for the site content above, captured as Triage, a
 ### Vocabulary
 
 None expected. `diagram-dynamic` is already a canonical term at `docs/reference/vocabulary.md:30`; a travelling treatment is an interpretation of it, not a new concept. If step 1 chooses a distinct authored meaning, that adds a term and `scripts/vocabulary-terms.test.ts` and `scripts/vocabulary-citations.test.ts` will hold the change to the house form.
+
+## Review
+
+### Delivered
+
+An emphasis now travels. Where an element has a closed perimeter, the interactive renderer sends a filled disc once round the line its own outline is drawn from, at the `canvas.emphasis` period; where the emphasis depicts a state, the disc keeps going round for as long as the host holds the occurrence. Every other geometry keeps the finite outline it already had. The still renderer draws that same perimeter and nothing travelling on it. All ten steps are delivered, two of them reshaped by a decision that was already taken.
+
+Step 1 extended `ADR-INFOSCHEMATICS-029` rather than opening a second record, as the batch allocation requires. The record had already settled that a travelling mark is not authored, so there is no `technique` value, no third Dynamic kind, and no new authored field anywhere in this change: the whole feature is renderer-internal. What the extension adds is the part being a renderer's choice does not license — which geometries are offered a mark and why the others are declined, what full motion costs, what reduced motion does, and what the still frame deliberately cannot say.
+
+Step 6 took the second of the two options the step allowed: the recorded decision that a still frame cannot distinguish a travelling emphasis from a finite one, rather than a deterministic direction marker. The reason is the record's own: the direction a mark traces is chosen from the element's geometry, not from anything the document states, so a start marker or a frozen disc would show a reader a movement the document never asserts. That also answers the `## Discussion` question about who owns the perimeter, which the item said was not a detail to discover during step 6. Because the still case declines a direction, the shared calculation is a path and nothing else — no ordered positions along it, no start angle, no sense of rotation — which keeps View Model free of treatment choices while still making the perimeter one calculation rather than two.
+
+### Summary of changes
+
+`packages/view-model/src/perimeter.ts` — new. `roundedRectanglePath(box, radius)` returns one closed, clockwise, rounded-rectangle path whose last point is its first, and `emphasisPerimeterPath(box)` outsets a box by the emphasis inset and rounds it at the emphasis radius. The radius is fitted to the box, so an extreme aspect ratio draws a stadium rather than arcs that overshoot and cross. It answers only where the perimeter is: nothing about what is drawn on it, which way round it is travelled, or where anything rests along it. `roundedOutline` in `./geometry.ts` was read first and is not reused — it walks an arbitrary run of corners with a per-run radius clamp, and reusing it would change region-frame output.
+
+`packages/view-model/src/perimeter.test.ts` — new. Five cases: the closed clockwise path and its seam, radius fitting at flat, tall and square extremes with every arc coordinate proved inside the box, a zero-extent box, the emphasis outset matching the `rect` both renderers drew before, and an element too small to carry the full radius.
+
+`packages/view-model/package.json` — a `./perimeter` export between `./placement` and `./ports`.
+
+`packages/view-model/src/region-geometry.ts` — the private 20-line `roundedFrame` is now the shared perimeter. A judgement call beyond the literal step text, flagged under `### Outstanding concerns`.
+
+`packages/view-canvas/src/InfoschematicDiagram.tsx` — `boxEmphasis` becomes `emphasisTreatment`, which draws the outline as a path and, where the geometry travels, one `circle` carrying an `animateMotion` whose `path` is the identical string. `repeatCount="indefinite"` only where the occurrence depicts a state. The geometry map now answers `{ d, travels }`: Regions, Cards, Fabrics and bounded Graphics travel; a Flow keeps `infoschematic-element-emphasis-route` and no mark. No `defs` element was needed, so `svgResourcePrefix` is not involved and two mounted Canvases cannot resolve each other's.
+
+`packages/view-canvas/src/styles.css` — `.infoschematic-element-emphasis-mark` fills from the existing emphasis stroke token, introducing no new custom property, so neither the generator nor `tokens.test.tsx` needed anything. Inside the reduced-motion block the mark is `display: none`.
+
+`packages/render-svg/src/index.ts` — `boxEmphasis` emits a `path` whose `d` is `emphasisPerimeterPath(box)` rather than a `rect` stated locally. `pointEmphasis` and `routeEmphasis` are unchanged, and nothing travels.
+
+`docs/decisions/ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means.md` — five paragraphs before `## Consequences` and two additions to its closing paragraph.
+
+`docs/specs/diagram-dynamics.md` — `DYNAMIC-003` gains the shared-calculation obligation and the right to decline a geometry without drawing nothing; `DYNAMIC-004` gains the requirement that still output not distinguish travelling from finite and not invent a direction; `DYNAMIC-006` gains the travelling treatment's full-motion, pointer and reduced-motion obligations, including that a reduced-motion rule must be restated per selector because a media query adds no specificity. Every `_Verify:_` and `_Evidence:_` path resolves.
+
+Tests: four new cases in `packages/view-canvas/src/Canvas.dynamics.test.tsx`, two in `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx` and `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`, the first emphasis case in `scripts/visual-treatment-parity.test.ts`, and extended still-output assertions in `packages/render-svg/src/index.test.ts`. The `059` case asserting a state is the only difference between two renderings was widened honestly: `repeatCount` is a second difference, and it is a consequence of the same state.
+
+### Verification
+
+Targeted, in the item's order: `view-model` 191 passed, `view-canvas` 82 passed (from 78), `view-canvas test:browser` 29 passed (from 27), `render-svg` 18 passed, `view-present` unchanged, `self:tokens:verify` clean with no regeneration needed, `self:scripts:test` 78 passed (from 77).
+
+Full gate: `bun run self:check` 44/44, then the same task list under `turbo run … --force` at 44/44 with 0 cached, because a replay is not a fresh result.
+
+`turbo.json` needed no change, and that was proved rather than assumed: `//#self:scripts:test` replayed `FULL TURBO` on an unchanged tree, then re-ran when `packages/view-model/src/perimeter.ts` was edited, so the existing `packages/*/src/**` input genuinely covers the new module.
+
+Layering was argued by reading imports, because `self:boundaries:verify` reports `0 modules, 0 dependencies cruised` and is evidence of nothing. `perimeter.ts` imports one type from `@infoschematics/domain-model/geometry` and its own `./tokens.ts`. Its consumers are `view-canvas`, `render-svg`, `view-model`'s own `region-geometry.ts`, and the parity script — all of which already depended on View Model. No new package edge and no upward import.
+
+Eight assertions were proved able to fail, each restored by the inverse edit rather than by discarding a file:
+
+1. Reduced-motion `display: none` weakened to `opacity: 0.9` — the node reduced-motion case went red, the browser suite stayed green, exactly the trap `059` set.
+2. The still renderer's perimeter shifted one unit — the `render-svg` still case and the new parity case both went red.
+3. `repeatCount` dropped — the held-mark node case went red.
+4. A Flow allowed to travel — the geometry-coverage case went red.
+5. `pointer-events: none` changed to `all` — the new pointer-safety browser case went red.
+6. `animateMotion path` parked at `M0 0` — the new moving-mark browser case went red.
+7. The still emphasis tag changed to `animateMotion` — the still case's negative assertion went red, so it is live rather than vacuous.
+8. The radius clamp removed — three perimeter cases went red.
+
+### Post-change review
+
+The suite cannot see whether a mark follows a perimeter, so the result was rendered and watched. A page was built from the server-rendered Canvas with the real stylesheet inlined, and driven in Chromium at two viewport sizes over four box shapes at once: a wide flat Card (240×44), a tall narrow Card (90×170), a Fabric (260×34), and a Region (640×240), with a Flow and a Point also emphasised.
+
+What I saw, frame by frame across one 900 ms circuit. Each mark sits centred on its own outline and stays there; at the third of six frames every mark had reached the far edge of its box and by the fifth had wrapped back to the top, so one circuit completes in the declared period and the wrap shows no jump — which the closed path's last-point-equals-first-point assertion is the reason for. On a tight crop of one corner the disc is visibly riding the rounded arc, and in the next frame it has come off the arc onto the straight edge; it does not cut the corner. Because the perimeter is outset, no mark ever crosses a Card's label or code text. The emphasised Flow reads as a route treatment — a thickened amber line along the route — and carries no disc, so it cannot be mistaken for a signal travelling the same line.
+
+Under `reducedMotion: 'reduce'` there is no disc anywhere and the steady outlines remain at full strength; six frames 150 ms apart are byte-identical files, so nothing is moving. That is the picture still output draws, which is the convergence the record claims.
+
+The still check the item names was run against `examples/is-system/infoschematic.yaml` with `view-revised` occurring. One emphasis group, no animation markup of any kind, no mark class, byte-identical across two different occurrence keys, and the quiet baseline unchanged. Opened and looked at: one amber rounded outline outset round the `SEE-04` Card and nothing else — no direction marker, and no visible difference from the finite outline the same command produced before, which is the recorded decision rather than a gap.
+
+### Outstanding concerns
+
+`INFOSCHEMATICS-TOOL-080` is visible in the render and was left alone: the emphasised Flow repaints its route in the emphasis colour while keeping its family-coloured arrowhead, so an amber line arrives at a purple head. It is parked and not this item's, and it is not caused by this change — the Flow's route treatment is the same path and the same class as before.
+
+The interactive Canvas draws no Point at all, so an emphasis over a Point reaches nothing there while the still renderer rings it. That is pre-existing and is the existing rule about reaching only what a renderer drew, not a refusal introduced here; the record now says so plainly rather than implying a Canvas outline a reader would never see. Worth an owner's eye as a renderer-coverage gap, but deliberately not touched.
+
+Reduced motion has no browser-level evidence in the gate. Every reduced-motion assertion in this repository is a stylesheet-text assertion in a node suite, and adding `page.emulateMedia` machinery would mean changing `scripts/vitest-workspace.ts`, which every workspace shares — not a change to make mid-batch. So the `display: none` rule is held by an assertion, and the browser-level confirmation is the hand-driven screenshot run described above rather than something the gate repeats.
+
+Folding `region-geometry.ts`'s private `roundedFrame` into the shared perimeter goes beyond the literal step text. It was done because leaving two identical rounded-rectangle builders in the same package is the condition under which they drift; the output is proved unchanged by the existing 191-case View Model suite, and only the notched frame remains that module's own. Reversible in isolation if the reviewer would rather it were not part of this change.
+
+The site-content follow-up the item anticipates is still outstanding: `apps/site/content/authoring.md:149` promises emphasis over all six element kinds, which was already inaccurate about Canvas coverage before this change and is now also silent about travelling. The item places that capture in `ki-next` rather than in this delivery, so no roadmap record was opened here.
+
+### Mini recap
+
+One perimeter calculation, owned by View Model, drawn by both renderers, and travelled by the interactive one. The travelling mark is unauthored and stays that way; what the extended record adds is what a renderer owes a reader once it makes that choice. Reduced motion removes the mark rather than stilling it, because declarative SVG motion is beyond the reach of any CSS animation property — the medium-level analogue of the specificity trap `059` left behind. The still frame draws the perimeter and states no direction, because the document states none either.
 
 ## Discussion
 

@@ -46,6 +46,10 @@
       "types": "./dist/placement.d.ts",
       "import": "./dist/placement.js"
     },
+    "./perimeter": {
+      "types": "./dist/perimeter.d.ts",
+      "import": "./dist/perimeter.js"
+    },
     "./ports": {
       "types": "./dist/ports.d.ts",
       "import": "./dist/ports.js"

@@ -1,4 +1,5 @@
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
+import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
 import { renderInfoschematicSvg } from './index.ts'
@@ -598,6 +599,17 @@ describe('renderInfoschematicSvg', () => {
     expect(emphasised).toContain(`stroke="${visualTokens.canvas.emphasis.stroke}"`)
     expect(emphasised).toContain('Dynamics: Sink needs attention')
     expect(emphasised).not.toContain('<animate')
+
+    // The outline is the shared perimeter calculation and not a `rect` restated here, so the line this render draws
+    // is the very line the interactive renderer sends a mark along. One box, one answer about where its edge runs.
+    expect(emphasised).toContain(`<path d="${emphasisPerimeterPath({ height: 60, width: 100, x: 260, y: 40 })}"`)
+    expect(emphasised).toContain(`<path d="${emphasisPerimeterPath({ height: 120, width: 360, x: 20, y: 20 })}"`)
+    // Nothing travels in a still frame, and this output cannot tell a travelling emphasis from a finite one. That is
+    // a recorded decision rather than an oversight: the direction a mark traces is chosen from the geometry, so there
+    // is no authored direction for a still frame to record, and inventing one would show the reader a movement the
+    // document never states. `ADR-INFOSCHEMATICS-029`.
+    expect(emphasised).not.toContain('animateMotion')
+    expect(emphasised).not.toContain('infoschematic-element-emphasis-mark')
     // The occurrence key is a host's identity for a replay, not part of deterministic output.
     expect(emphasised).not.toContain('run-1')
     expect(renderInfoschematicSvg(authored, { dynamics: [{ dynamicId: 'attention', occurrenceKey: 'run-2' }] })).toBe(

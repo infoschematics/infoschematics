@@ -6,6 +6,7 @@
  * the name of the element it happened to outline.
  */
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
+import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { useState } from 'react'
 import { expect, test } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -52,14 +53,18 @@ test('paints an emphasis from the shared tokens and retires it without the host 
 
   const emphasis = emphasisOf(container)
   expect(emphasis).not.toBeNull()
-  const outline = emphasis?.firstElementChild as SVGRectElement
+  const outline = emphasis?.firstElementChild as SVGPathElement
   const painted = getComputedStyle(outline)
   expect(painted.stroke).toBe('rgb(242, 166, 59)')
   expect(painted.fill).toBe('none')
   expect(painted.strokeWidth).toBe('3px')
-  // Outset from the Card, so the treatment reads as being about the Card rather than part of it.
-  expect(outline.getAttribute('x')).toBe('294')
-  expect(outline.getAttribute('width')).toBe('132')
+  // Outset from the Card, so the treatment reads as being about the Card rather than part of it. Asked of the
+  // geometry the browser actually resolved, so the answer survives the outline being a path a mark can travel
+  // rather than the `rect` it used to be.
+  expect(outline.getAttribute('d')).toBe(emphasisPerimeterPath({ height: 60, width: 120, x: 300, y: 60 }))
+  const drawn = outline.getBBox()
+  expect(drawn.x).toBe(294)
+  expect(drawn.width).toBe(132)
 
   const status = container.querySelectorAll('[role="status"]')[1]
   await expect.poll(() => status.textContent).toBe('Dynamic update 1. Sink needs attention.')
@@ -124,15 +129,15 @@ test('sustains a held emphasis long past the finite duration and ends it when th
     setTimeout(resolve, elementEmphasisDuration * 3)
   })
 
-  const outline = heldOf()?.firstElementChild as SVGRectElement | undefined
+  const outline = heldOf()?.firstElementChild as SVGPathElement | undefined
   expect(outline).toBeDefined()
-  const painted = getComputedStyle(outline as SVGRectElement)
+  const painted = getComputedStyle(outline as SVGPathElement)
   expect(painted.animationName).toBe('infoschematic-element-emphasis-held')
   expect(painted.animationIterationCount).toBe('infinite')
   expect(painted.stroke).toBe('rgb(242, 166, 59)')
   // An SVG element has no offsetParent to consult, so ask the two things that do decide whether a reader sees it:
   // it occupies space on the page, and the sustained treatment is part way between its two opacities, never off.
-  const box = (outline as SVGRectElement).getBoundingClientRect()
+  const box = (outline as SVGPathElement).getBoundingClientRect()
   expect(box.width).toBeGreaterThan(0)
   expect(box.height).toBeGreaterThan(0)
   expect(Number(painted.opacity)).toBeGreaterThanOrEqual(0.55)
@@ -156,4 +161,58 @@ test('signals the Flow a signal-flow Dynamic names, leaving every other element 
   await expect
     .poll(() => container.querySelectorAll('[role="status"]')[0].textContent)
     .toContain('Flow LOAD, Source to Sink, signalled.')
+})
+
+test('sends the mark round the element over time, and never off the line it is travelling', async () => {
+  const { container } = await render(
+    <Canvas config={config} dynamics={[{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }]} />
+  )
+
+  const group = () => container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="ZONE"]')
+  await expect.poll(group).not.toBeNull()
+  const emphasis = group() as SVGGElement
+  const outline = emphasis.firstElementChild as SVGPathElement
+  const mark = emphasis.querySelector<SVGCircleElement>('.infoschematic-element-emphasis-mark')
+  expect(mark).not.toBeNull()
+
+  /* Where the mark actually is, as the browser resolves it. `getBoundingClientRect` carries the transform
+     `animateMotion` contributes; `getBBox` would not, and would report the disc parked at the origin for ever. */
+  const seen = mark as SVGCircleElement
+  const positions: { x: number; y: number }[] = []
+  for (let sample = 0; sample < 8; sample += 1) {
+    const at = seen.getBoundingClientRect()
+    positions.push({ x: Math.round(at.left), y: Math.round(at.top) })
+    await new Promise((resolve) => {
+      setTimeout(resolve, elementEmphasisDuration / 8)
+    })
+  }
+
+  // It moves, and it keeps moving: a mark that arrived somewhere once and stopped would pass a single reading.
+  expect(new Set(positions.map(({ x, y }) => `${x},${y}`)).size).toBeGreaterThan(3)
+
+  /* And it moves round the element rather than across it. The outline's own box plus the mark's radius is the
+     whole region a perimeter walk may visit, so a mark cutting the interior or straying outside fails here — which
+     is the assertion that the mark and the outline are one path rather than two statements of the same shape. */
+  const line = outline.getBoundingClientRect()
+  const slack = 8
+  for (const { x, y } of positions) {
+    expect(x).toBeGreaterThanOrEqual(Math.floor(line.left) - slack)
+    expect(x).toBeLessThanOrEqual(Math.ceil(line.right) + slack)
+    expect(y).toBeGreaterThanOrEqual(Math.floor(line.top) - slack)
+    expect(y).toBeLessThanOrEqual(Math.ceil(line.bottom) + slack)
+  }
+
+  // Held, so it is still going round after the finite treatment would have been retired: `repeatCount` earning its
+  // place in the markup, not merely being present in it.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration * 2)
+  })
+  const late = seen.getBoundingClientRect()
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration / 4)
+  })
+  const later = seen.getBoundingClientRect()
+  expect(`${Math.round(late.left)},${Math.round(late.top)}`).not.toBe(
+    `${Math.round(later.left)},${Math.round(later.top)}`
+  )
 })
