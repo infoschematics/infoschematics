@@ -4,12 +4,12 @@ area: TOOL
 title: Raster CLI test timeout
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6921b1606dbfd754ac7209483e920c1b6a98ce47
 created_at: 2026-09-15T14:50:00Z
-updated_at: 2026-09-15T15:05:00Z
+updated_at: 2026-09-16T10:35:00Z
 ---
 
 # Raster CLI test timeout

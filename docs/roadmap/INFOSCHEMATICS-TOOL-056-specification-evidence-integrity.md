@@ -4,12 +4,12 @@ area: TOOL
 title: Specification evidence integrity
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6c48dc0332cceb39900858bc2480423fb6798844
 created_at: 2026-09-15T05:19:55Z
-updated_at: 2026-09-16T09:30:00Z
+updated_at: 2026-09-16T10:35:00Z
 ---
 
 # Specification evidence integrity
@@ -32,9 +32,9 @@ This item does not rewrite the specification format, renumber requirements, rela
 
 ## Current state
 
-The corpus holds 188 requirements across 16 feature areas, citing 128 distinct evidence paths. Two of those paths do not exist — `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/infoschematic-context.tsx` — and between them they are the evidence for ten requirements recorded as conforming.
+The corpus holds 187 requirements across 16 feature areas, citing 128 distinct evidence paths. Two of those paths do not exist — `packages/view-studio/src/app/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/infoschematic-context.tsx` — and between them they are the evidence for ten requirements recorded as conforming.
 
-Of the 188, 177 are conforming, 10 are pending, and 1 is divergent. A further requirement, `DESIGN-017`, carries a `_Conformance:_` value that is not one of the three; `ki repo audit` reports it, but no repository check does.
+Of the 187, 176 are conforming, 10 are pending, and 1 is divergent. A further requirement, `DESIGN-017`, carries a `_Conformance:_` value that is not one of the three; `ki repo audit` reports it, but no repository check does.
 
 Nothing in the gate parses the corpus. `//#self:verify:repo` already hashes `docs/**` and `packages/*/src/**`, so a check that reads both needs no change to `turbo.json` inputs — the task already reruns when either side moves.
 
@@ -88,7 +88,7 @@ The gate now reads the Specifications corpus. Every requirement's conformance st
 
 - `scripts/specification-evidence.test.ts` — new, in the repository-level suite. Three cases: one recognised conformance state per requirement, cited paths resolve, cited file names name a file that exists somewhere.
 - `turbo.json` — `//#self:verify:repo` gains `.dependency-cruiser.ts`, the one cited file outside the paths the task already hashed.
-- `docs/specs/appearance.md`, `design-editing.md`, `design-session.md`, `presentation.md` — ten evidence lines repointed, each re-verified in its new home.
+- `docs/specs/appearance.md`, `design-editing.md`, `design-session.md`, `presentation.md` — nine evidence lines repointed, each re-verified in its new home.
 - `docs/specs/design-session.md` — `DESIGN-017` and `DESIGN-018` no longer carry their caveat inside the conformance value; `DESIGN-014` is divergent.
 - `docs/specs/appearance.md`, `directing.md`, `static-rendering.md` — ten requirements moved from pending to conforming, each with the verification plan and evidence that already existed and had never been written down.
 - `docs/specs/scenes-and-callouts.md` — `SCENE-006` stays divergent and says why.
@@ -100,13 +100,13 @@ The gate now reads the Specifications corpus. Every requirement's conformance st
 - All three cases were proved by breaking the corpus deliberately, one at a time: a renamed evidence path, a conformance value of `conformant`, and a renamed cited file name. Each failed naming the file, the requirement and what it could not resolve, and each was restored.
 - The new `turbo.json` input was proved load-bearing by appending random content to `.dependency-cruiser.ts` and observing `//:self:verify:repo: cache miss`.
 - `bun run self:check` green; `ki repo audit --repo .` findings 10 → 8, the two `CONFORMANCE-1` failures gone and nothing added.
-- Each of the ten repointings was checked against the code rather than repointed on faith, and two were wrong: `DESIGN-012`'s selected-flow derivation is in Canvas now, with the attachment presentation in `FlowEnds.tsx`; `PRESENT-005`'s geometry is derived by View Model's runtime and reaches Canvas through `runtime-context.tsx`. `EDIT-005` and `DESIGN-011` cited View Studio's stylesheet for port and route rules that live in Canvas's.
+- Each of the nine repointings was checked against the code rather than repointed on faith, and two were wrong: `DESIGN-012`'s selected-flow derivation is in Canvas now, with the attachment presentation in `FlowEnds.tsx`; `PRESENT-005`'s geometry is derived by View Model's runtime and reaches Canvas through `runtime-context.tsx`. `EDIT-005` and `DESIGN-011` cited View Studio's stylesheet for port and route rules that live in Canvas's.
 
 ### Outstanding concerns
 
 `EDIT-005` and `DESIGN-011` now cite Canvas's stylesheet, but View Studio's still carries near-identical `.audit-port` and `.infoschematic-route-hit` rules. Which one a reader is looking at when both are loaded is [Editor stylesheet shadowing](INFOSCHEMATICS-TOOL-064-editor-stylesheet-shadowing.md), not this item, and the evidence deliberately names the stylesheet that ships with the component that renders the class.
 
-The file-name case is weaker than the path case by design: it asks only that a cited name exists somewhere, because a bare file name in prose has no directory to resolve against. A file moved between packages still passes it. The path case is what catches a move, which is why nine of the ten stale citations were paths.
+The file-name case is weaker than the path case by design: it asks only that a cited name exists somewhere, because a bare file name in prose has no directory to resolve against. A file moved between packages still passes it. The path case is what catches a move, which is why every one of the nine stale citations was a full path.
 
 `SCENE-006` is the one requirement this pass could not settle, because settling it means running a sustained playback profile rather than reading code.
 
