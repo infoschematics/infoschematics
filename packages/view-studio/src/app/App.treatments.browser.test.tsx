@@ -10,6 +10,7 @@
  */
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { expect, test } from 'vitest'
+import { page } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
 import '../styles.css'
@@ -108,4 +109,46 @@ test("keeps a Card's identity chip out of the Card's own selection treatment", a
   if (!chip) throw new Error('Card A has no identity chip')
   // Its own Scope colour, not the Card's selection: asserting the positive catches a chip left unstyled as well.
   expect(getComputedStyle(chip).stroke).toBe('rgb(36, 99, 235)')
+})
+
+test('lets the split seam show that a pane continues past it, rather than cutting whatever lies on the clip edge', async () => {
+  await page.viewport(1440, 900)
+  const container = await designing()
+  await selectCardA(container)
+
+  const panes = container.querySelector<HTMLElement>('.editor-panes')
+  const handle = container.querySelector('.split-handle')
+  if (!panes || !handle) throw new Error('Studio did not render the split editor panes')
+
+  // None of the rest means anything unless the pane is actually clipping its contents at this size.
+  expect(panes.scrollHeight).toBeGreaterThan(panes.clientHeight)
+
+  /*
+   * The divider is drawn on the pane's clip edge, and a presence assertion cannot see the consequence: every label in
+   * the pane is in the tree, displayed, and has a box, and the one the scroll offset leaves on that edge is still
+   * painted half-height under a line that says the pane ends here. Which label that is depends on the scroll offset
+   * and on where the Producer has dragged the divider, so this asserts the property rather than a chosen heading:
+   * something in the pane's own treatment has to distinguish a clipped label from a deleted one.
+   */
+  const label = [...panes.querySelectorAll('.pane-heading, legend')].find((candidate) => {
+    const box = candidate.getBoundingClientRect()
+    const seam = handle.getBoundingClientRect()
+    return box.top < seam.bottom && box.bottom > seam.top
+  })
+  expect(
+    label,
+    'no label lies across the seam at this size, so this case is no longer measuring anything'
+  ).toBeDefined()
+  expect(getComputedStyle(panes).maskImage).not.toBe('none')
+
+  /*
+   * And the fade has to fall on empty space once there is nothing more to show, or the end of the scroll dims the
+   * pane's real last line instead. The pane keeps at least the faded depth past its final child.
+   */
+  panes.scrollTop = panes.scrollHeight
+  await expect.poll(() => panes.scrollTop).toBeGreaterThan(0)
+  const last = panes.lastElementChild
+  if (!last) throw new Error('The editor panes rendered nothing to scroll')
+  const clipped = panes.getBoundingClientRect().top + panes.clientTop + panes.clientHeight
+  expect(clipped - last.getBoundingClientRect().bottom).toBeGreaterThanOrEqual(12)
 })

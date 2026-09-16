@@ -803,6 +803,22 @@ h2 {
   margin-bottom: 10px;
 }
 
+/*
+ * The pane says where its own contents end, so the seam cannot say it for them.
+ *
+ * The top half scrolls, and the divider is drawn exactly where it clips. So whatever the scroll position happens to
+ * leave on that edge is bisected by a line whose whole meaning is "the pane ends here": `SERIALISABLE PROPERTIES`
+ * read as a deleted heading rather than as one continuing below, with no scrollbar to say otherwise. Which element it
+ * is depends on the scroll offset and the divider's position, so there is no element to fix - the fix is that the
+ * clip stops looking like a cut. The pane fades its own last few units, which leaves a half-glyph legible as
+ * scrollable content, and keeps that much room past its final child, so once there is nothing more to show the fade
+ * falls on empty space instead of on real text. The trailing-margin rule above cannot reach any of this.
+ */
+.split-pane > .editor-panes {
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 12px), transparent);
+  padding-bottom: 12px;
+}
+
 /* A hairline that stays grabbable: the element is nine units tall for the
    pointer, but only the one-unit line through its centre is drawn. */
 /*
