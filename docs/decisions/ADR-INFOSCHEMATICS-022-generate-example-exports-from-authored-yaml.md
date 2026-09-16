@@ -16,11 +16,11 @@ Each package under `examples/` exists to be read, copied, and adapted. Until now
 
 Moving the canonical definition into `infoschematic.yaml` fixes that, but browser consumers still need a typed export. Site imports `blankInfoschematic` and `homepageInfoschematic` directly, and a bundler cannot read a YAML file without a loader that hosts should not be required to configure. So each package needs both a document and a module, and the question is which one is authored.
 
-Two authored copies of one diagram drift. Nothing in a type system relates a YAML file to a hand-written module that happens to describe the same Cards, and the failure is silent: the rendered homepage and the document a reader was told to copy diverge, each internally valid. The repository has already paid this cost elsewhere, which is why `bun run self:verify:schema` and `bun run self:verify:visual-tokens` exist.
+Two authored copies of one diagram drift. Nothing in a type system relates a YAML file to a hand-written module that happens to describe the same Cards, and the failure is silent: the rendered homepage and the document a reader was told to copy diverge, each internally valid. The repository has already paid this cost elsewhere, which is why `bun run self:schema:verify` and `bun run self:tokens:verify` exist.
 
 ## Decision
 
-The YAML document is the single authored source in every example package. The typed export is generated from it by `bun run self:examples:generate`, committed beside the package source, and verified by `bun run self:verify:examples` inside `bun run self:check`.
+The YAML document is the single authored source in every example package. The typed export is generated from it by `bun run self:examples:generate`, committed beside the package source, and verified by `bun run self:examples:verify` inside `bun run self:check`.
 
 The generated module embeds the exact bytes of the document it was generated from and calls `parseInfoschematic` on them at import time. It does not restate the model as an object literal. A consumer therefore imports the result of parsing the same document a reader copies, and a generated module that somehow survived a change to its YAML would still fail its own parse rather than serve a stale model. Package metadata under `infoschematics.examples` names the document, the export, and the stable identifier, so generation, discovery, and rendering all read one declaration.
 

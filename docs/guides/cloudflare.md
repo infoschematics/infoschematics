@@ -30,7 +30,9 @@ Workers Builds is connected under Settings → Build → Git repository `infosch
 - Deploy command: `bun run ki:site:deploy`
 - Root directory: `/`
 
-`self:cf:build` is the repository-owned Cloudflare build entry point. It builds every package before the site, producing the `dist/` output that workspace packages such as `@infoschematics/view-studio` need to resolve. Those outputs are gitignored, so a fresh Workers Builds clone has none of them and a site-only build command fails during the Vite build.
+`self:cf:build` is the repository-owned Cloudflare build entry point, and it exists because the Workers Builds configuration above names it. It delegates to `build`, so it is not a second definition of how this repository builds: `turbo run build` orders every workspace by the dependency graph and so builds the packages before the site, producing the `dist/` output that workspace packages such as `@infoschematics/view-studio` need to resolve. Those outputs are gitignored, so a fresh Workers Builds clone has none of them and a site-only build command fails during the Vite build.
+
+The name is therefore load-bearing outside this repository. Renaming or removing the script breaks the deploy at the next push to `main`, and nothing in the gate can see it — the only record that Cloudflare calls this command is this guide. Change the Workers Builds setting first, in the same pass.
 
 A manual deploy from the repository root remains available when needed:
 

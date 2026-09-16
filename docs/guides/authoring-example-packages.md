@@ -32,14 +32,14 @@ Copy the closest existing package, then:
 
 3. Run `bun run self:examples:generate` to write `src/infoschematic.ts`, and re-export it from `src/index.ts`.
 4. Give the package what every workspace has: a `tsconfig.json` extending the root one, a `vitest.config.ts` that re-exports `workspaceTests(import.meta.url)`, and `test` and `typecheck` scripts in its manifest. Turborepo's cache unit is a task in a package, so a workspace without those scripts is one `turbo run` skips silently and greenly; `scripts/workspace-sources.test.ts` fails and names it. The `vitest.config.ts` is what points the suite at its siblings' source rather than their last build, so a package without one passes against stale output.
-5. Add the package's `src` to `self:verify:depcruise` in the root `package.json`, which still enumerates the directories it cruises.
+5. Add the package's `src` to `self:boundaries:verify` in the root `package.json`, which still enumerates the directories it cruises.
 6. Run `bun run self:check`.
 
 Nothing else needs to learn about the new example. `scripts/render-example.ts` builds its catalogue from the declared metadata, so `bun run self:examples:render --all` picks the document up on its own.
 
 ## Change an example
 
-Edit the YAML, then run `bun run self:examples:generate`. `bun run self:verify:examples` — part of `bun run self:check` — fails and names any generated module that no longer matches its document, so a forgotten regeneration cannot reach a commit.
+Edit the YAML, then run `bun run self:examples:generate`. `bun run self:examples:verify` — part of `bun run self:check` — fails and names any generated module that no longer matches its document, so a forgotten regeneration cannot reach a commit.
 
 Never edit a generated module. Its header says so, and the next generation would discard the change silently.
 

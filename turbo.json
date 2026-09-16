@@ -55,10 +55,10 @@
     "//#self:packages:check-versions": {
       "inputs": ["scripts/cli.ts", "scripts/release/**", "packages/*/package.json", "package.json"]
     },
-    "//#self:verify:typecheck:scripts": {
+    "//#self:scripts:typecheck": {
       "inputs": ["scripts/**", ".dependency-cruiser.ts", "vite.config.ts", "tsconfig.scripts.json", "package.json"]
     },
-    "//#self:verify:schema": {
+    "//#self:schema:verify": {
       "inputs": [
         "scripts/generate-schema.ts",
         "scripts/cli.ts",
@@ -67,13 +67,13 @@
         "packages/domain-model/src/**"
       ]
     },
-    "//#self:verify:visual-tokens": {
+    "//#self:tokens:verify": {
       "inputs": ["scripts/generate-visual-tokens.ts", "scripts/cli.ts", "packages/view-model/src/**"]
     },
-    "//#self:verify:examples": {
+    "//#self:examples:verify": {
       "inputs": ["scripts/examples.ts", "scripts/cli.ts", "examples/*/src/**", "examples/*/*.yaml"]
     },
-    "//#self:verify:depcruise": {
+    "//#self:boundaries:verify": {
       "inputs": [
         ".dependency-cruiser.ts",
         "packages/*/src/**",
@@ -85,22 +85,28 @@
         "scripts/**"
       ]
     },
-    "//#self:verify:repo": {
+    "//#self:scripts:test": {
       "inputs": [
-        ".github/workflows/release-npm.yml",
-        "scripts/**",
-        "vite.config.ts",
         ".dependency-cruiser.ts",
-        "docs/**",
-        "packages/*/src/**",
-        "packages/*/schema/**",
-        "packages/*/package.json",
-        "apps/site/src/**",
+        ".github/workflows/release-npm.yml",
+        ".husky/**",
+        ".ki.toml",
+        "README.md",
+        "apps/*/package.json",
         "apps/site/content/**",
         "apps/site/package.json",
-        "examples/*/src/**",
+        "apps/site/src/**",
+        "bun.lock",
+        "docs/**",
         "examples/*/package.json",
-        "package.json"
+        "examples/*/src/**",
+        "package.json",
+        "packages/*/package.json",
+        "packages/*/schema/**",
+        "packages/*/src/**",
+        "scripts/**",
+        "turbo.json",
+        "vite.config.ts"
       ]
     }
   }

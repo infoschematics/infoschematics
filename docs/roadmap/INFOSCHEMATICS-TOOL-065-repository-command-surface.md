@@ -4,12 +4,12 @@ area: TOOL
 title: Repository command surface
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: dbd57e2f
 created_at: 2026-09-15T14:05:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T12:55:00Z
 ---
 
 # Repository command surface
@@ -44,14 +44,20 @@ Read against the tree on 2026-09-16, at `package.json:62-92`, `turbo.json`, `kni
 
 ## Steps
 
-1. [ ] Write the inventory as a test, not a document: a case under `scripts/` that reads `package.json`, `turbo.json`, `.husky/pre-commit`, and the `scripts/` tree, and fails when an executable script has no invoker or a root script names no reachable target. It must fail on the current tree before anything is fixed — that failing run is the inventory.
-2. [ ] Resolve `scripts/ibc-visual-compatibility.ts` explicitly: keep it as a documented cross-repository procedure with a stated fixture prerequisite, reduce it to the pure comparison its test actually uses, or delete it and its fixture. Whichever is chosen, the step-1 test stops failing on it for a stated reason rather than an exemption.
-3. [ ] Resolve `self:verify:typecheck` and `knip.json` the same way: give each a real invoker or remove it. If `knip` is wired in, narrow `entry` so scripts are analysed rather than assumed live, and drop `ignoreDependencies` for `syncpack` by removing the dependency.
-4. [ ] Collapse the build duplication without breaking the external caller: make `self:cf:build` delegate to `build` rather than restate it, and correct `docs/guides/cloudflare.md:33` to explain the seam by who calls it rather than by what it does.
+1. [x] Write the inventory as a test, not a document: a case under `scripts/` that reads `package.json`, `turbo.json`, `.husky/pre-commit`, and the `scripts/` tree, and fails when an executable script has no invoker or a root script names no reachable target. It must fail on the current tree before anything is fixed — that failing run is the inventory.
+2. [x] Resolve `scripts/ibc-visual-compatibility.ts` explicitly: keep it as a documented cross-repository procedure with a stated fixture prerequisite, reduce it to the pure comparison its test actually uses, or delete it and its fixture. Whichever is chosen, the step-1 test stops failing on it for a stated reason rather than an exemption.
+3. [x] Resolve `self:verify:typecheck` and `knip.json` the same way: give each a real invoker or remove it. If `knip` is wired in, narrow `entry` so scripts are analysed rather than assumed live, and drop `ignoreDependencies` for `syncpack` by removing the dependency.
+4. [x] Collapse the build duplication without breaking the external caller: make `self:cf:build` delegate to `build` rather than restate it, and correct `docs/guides/cloudflare.md:33` to explain the seam by who calls it rather than by what it does.
 5. [ ] Reduce `scripts/render-example.ts` to example-id resolution plus a call into `@infoschematics/cli`, so the repository has one renderer, one argument parser, and one rasteriser. Confirm `bun run self:examples:render --all` still produces the same SVG bytes for every registered example before and after.
-6. [ ] Make `ki:deps:update` respect `.ki.toml:40-42`, or delete it in favour of the conformance-governed route. Prove it either way by attempting an update with the `@types/node` hold in place and showing the hold survives.
-7. [ ] Settle the prefix regimes and the subject-then-verb order, record the rule in a Decision Record, then rename to match and fix every reference the step-1 test can see.
-8. [ ] Add the command surface to `README.md` beside the existing `scripts/` contract at `README.md:78`, stating what each prefix means and where a new command belongs.
+
+   Not done, and not partially done: the tree is at its pre-change state for this step. Two independent findings stopped it.
+
+   The argument parser cannot be unified as stated. `packages/cli/src/index.ts:107` returns its SVG through `line()`, which appends a trailing newline, so delegating the SVG path would change the bytes this item's own verification requires to be identical. Delegation would also drop four options the script has and the published command does not — `--annotations`, `--json`, `--all`, and the `reports/<stem>.svg` default output path — so it is a reduction in capability, not a deduplication.
+
+   The rasteriser cannot be unified today either, and the reason is a live product defect rather than anything about this script. Swapping `rsvg-convert` for `rasteriseInfoschematicSvg` kept all four SVGs byte-identical and changed the PNG visibly: every Flow arrowhead rendered as an unrotated pennant. `@resvg/resvg-js` does not implement the `orient="auto-start-reverse"` the renderer emits, so it applies no rotation at all, which means every PNG the published `@infoschematics/cli` emits today carries the same fault. Captured as `INFOSCHEMATICS-TOOL-071`, sequenced after `INFOSCHEMATICS-TOOL-058`; the obvious one-token fix to `orient="auto"` is wrong, because `packages/render-svg/src/index.ts:613` uses `marker-start` for a bidirectional Flow and that arrowhead is meant to point back out of its source.
+6. [x] Make `ki:deps:update` respect `.ki.toml:40-42`, or delete it in favour of the conformance-governed route. Prove it either way by attempting an update with the `@types/node` hold in place and showing the hold survives.
+7. [x] Settle the prefix regimes and the subject-then-verb order, record the rule in a Decision Record, then rename to match and fix every reference the step-1 test can see.
+8. [x] Add the command surface to `README.md` beside the existing `scripts/` contract at `README.md:78`, stating what each prefix means and where a new command belongs.
 
 ## Files touched
 
@@ -94,6 +100,70 @@ Two changes. `README.md` gains the command surface beside its existing `scripts/
 ### Roadmap
 
 None to this record. If step 2 keeps `scripts/ibc-visual-compatibility.ts` as a cross-repository procedure, that procedure's own home is a separate capture, not a step here.
+
+## Review
+
+### Delivered
+
+Seven of the eight steps. Step 5 is not delivered, and it is recorded above with the two findings that stopped it, one of which became `INFOSCHEMATICS-TOOL-071`.
+
+The inventory is now a test rather than a document: `scripts/command-surface.test.ts` reads `package.json`, `turbo.json`, `.husky/pre-commit`, `README.md`, `.ki.toml`, and the `scripts/` tree, and holds ten cases over them. The naming regime it enforces is recorded in `GDR-INFOSCHEMATICS-005`, the surface it requires to be written down is in `README.md` under `### Command surface`, and every reference in the living documents has been renamed to match.
+
+### Summary of changes
+
+`scripts/command-surface.test.ts` is new. It parses every root script into the targets it names — a task, another root script, a workspace script, a file, a directory, or a binary in `node_modules/.bin` — and fails when any of them does not resolve. It then holds five rules: every command module under `scripts/` is reached by a root script, the commit hook, or the README section; every root script appears in that README section; every `//#` task in `turbo.json` has a root script behind it; every bare script name passes straight through to the task it is named after; and every `self:` name reads subject first. A sixth pairs each `*:generate` with a `*:verify` that runs the same script with `--check`. A second block enforces the `.ki.toml` dependency hold that `ki:deps:update` would otherwise cross, comparing the declared `@types/node` major against `releaseNodeEngine` rather than restating `22` as a second literal.
+
+`package.json` renamed seven scripts into subject-then-verb order — `self:verify:schema` to `self:schema:verify`, `self:verify:visual-tokens` to `self:tokens:verify`, `self:verify:examples` to `self:examples:verify`, `self:verify:depcruise` to `self:boundaries:verify`, `self:verify:repo` to `self:scripts:test`, `self:verify:typecheck:scripts` to `self:scripts:typecheck`, and `self:verify:typecheck` to `self:typecheck` — and `turbo.json` renamed the six root tasks to match. `self:check` names the same checks it named before, in the same order. `self:cf:build` now delegates to `build`. `self:unused:verify` is new and is the invoker `knip.json` never had. `syncpack` is gone from `devDependencies`, and with it the `ignoreDependencies` entry that was hiding it.
+
+`knip.json` names the real entry points under `scripts/` instead of treating every file there as one, and drops the stale `.claude/skills` and `.agents/skills` ignores. `ignoreBinaries: ["rsvg-convert"]` stays, because step 5 stayed reverted and the shell-out survives.
+
+`turbo.json` widens the `inputs` of `//#self:scripts:test` by six entries — `.husky/**`, `.ki.toml`, `README.md`, `apps/*/package.json`, `bun.lock`, and `turbo.json` — because the new test reads all of them.
+
+Three commands were deliberately not renamed. `self:check`, `self:release:verify`, and `self:packages:build` are named by workflows under `.github/workflows/`, and `self:cf:build` is named by the Cloudflare Workers Builds configuration, which lives outside this repository entirely. `docs/guides/cloudflare.md` now says so: the seam is explained by who calls it, and by the fact that renaming it breaks the deploy at the next push with nothing in the gate able to see it.
+
+`scripts/ibc-visual-compatibility.ts` is resolved as step 2's first option. It is documented in the README command surface as a cross-repository procedure with its fixture prerequisite stated — the fixture workspace must already have `sharp`, which the script resolves by walking upward from `--fixture` and never from here — and the reason it is not a root script is given: a root script would advertise a command that fails for every contributor without that fixture.
+
+### Verification
+
+`bun run self:check` passes: 43 tasks, 43 successful. `bun run self:scripts:test` is 14 files and 60 tests; the new file is 10 of those tests.
+
+The test was proved red three times rather than assumed:
+
+- Removing `self:unused:verify` from the README section: `expected [ 'self:unused:verify' ] to deeply equal []`.
+- Renaming `self:tokens:verify` back to `self:verify:visual-tokens`: three cases failed at once — `expected [ 'self:verify:visual-tokens' ] to deeply equal []` for the ordering rule, `expected [ 'self:tokens:verify' ] to deeply equal []` for the dangling root task, and `self:tokens:generate has no self:tokens:verify` for the generator pairing.
+- Bumping `@types/node` to `^24.9.2`: `@types/node is ^24.9.2; GDR-INFOSCHEMATICS-004 holds it at 22 until releaseNodeEngine moves: expected 24 to be 22`.
+
+The widened `inputs` were proved the same way. `bunx turbo run self:scripts:test` twice gives `1 cached, 1 total` and `>>> FULL TURBO`; appending a line to `README.md` gives `0 cached, 1 total`; restoring it returns to `FULL TURBO`; appending a line to `.ki.toml` gives `0 cached, 1 total`, and restoring it returns to `FULL TURBO`. Both files are newly listed inputs, and neither was an input before this change.
+
+`bun run self:examples:render --all` was compared against SVGs captured from the pre-change tree. `cmp` is silent for all four: `blank`, `infoschematics`, `homepage`, `system`. Nothing here changes rendered output, and `scripts/render-example.ts` is at its committed state.
+
+Every surviving root script ran once by hand. `self:typecheck` (13 tasks), `self:packages:clean` (8 tasks), `self:release:verify` (clean-consumer smoke passed for 8 packages, 3 examples copied clean), `ki:site:build`, `self:cf:build` (9 tasks, which is what proves the delegation), and the three generators, which produced no diff. `self:unused:verify` fails, which is covered below. `self:dev`, `ki:site:dev`, `ki:site:preview`, and `ki:site:deploy` were not run: three start servers and the fourth deploys.
+
+### Outstanding concerns
+
+**`self:unused:verify` fails on the current tree, and is deliberately not in the gate.** Giving `knip.json` an invoker is what made its findings visible, and there are three, all real and all outside this item: `packages/view-studio/src/app/panels/ThemeStrip.tsx` has no importer anywhere, and `isComponentsPath` (`apps/site/src/routes.ts:318`) and `componentsGuideContents` (`apps/site/src/VisualGuide.tsx:10`) are exported and unused. Wiring the command into `self:check` would therefore break the gate on someone else's code. It is a narrowing command for now, and it can join the gate in the change that clears those three.
+
+**A check that proves two outputs agree cannot notice that both are wrong.** `scripts/release/pack-smoke.ts` compares the packed consumer's PNG against the workspace PNG, so it passed throughout the arrowhead defect: the two outputs agreed, because they share the renderer and the rasteriser that are both wrong. The lesson generalises past this one file — a parity check is evidence of agreement, never of correctness, and needs at least one assertion against something that is not the other side of the comparison.
+
+**The repository still has two argument parsers and two rasterisers**, which is what step 5 existed to remove. The four blockers are named in step 5 above so a follow-up inherits the reason rather than rediscovering it: the trailing newline `packages/cli/src/index.ts:107` adds through `line()`, and the `--annotations`, `--json`, `--all`, and default-output-path options the script has and the published command does not. Unifying them means giving the published command those options first, which is a product change and not this item's.
+
+**`docs/roadmap/*` was left alone.** Those records name `self:verify:*` commands that no longer exist, deliberately: they are point-in-time records, and one of them is being actively delivered in another worktree. A reader following a command name out of an old roadmap record will not find it.
+
+**The subject-first rule is enforced against a known-verb list.** A verb the list does not know is treated as a subject, so the check never invents a violation and will not catch a new verb standing in the subject position until that verb is added. `GDR-INFOSCHEMATICS-005` records that as the deliberate direction of the trade.
+
+### Post-change review
+
+The inventory-as-a-test decision was right for a reason that only became visible afterwards. Writing the surface as a document would have produced the same list and none of the pressure: the reason `self:unused:verify` had to be created rather than noted is that the test fails on a `//#` task with no script and on a command module with no invoker, and the reason `syncpack` came out is that removing the knip exemption left nothing pointing at it. A document would have recorded all three as observations and changed none of them.
+
+`self:verify:repo` is the name that taught the most. It said nothing — every command in the file is about the repository — and renaming it to `self:scripts:test` immediately exposed that its `inputs` were wrong: once the name said it tested `scripts/`, the question of what `scripts/` reads answered itself, and six files were missing. The old name had been hiding an unearned green for as long as it existed.
+
+The step 5 investigation is the part that paid for itself in a way the item did not anticipate. Nothing in the suite could have found the arrowhead defect, because the defect is in the rasteriser's reading of an SVG attribute and every check compares that output against another copy of itself. It was found by rendering a PNG and looking at it, which is what `AGENTS.md` already says to do, and it is now `INFOSCHEMATICS-TOOL-071`.
+
+What I would do differently: the manifest and task-graph edits were made through throwaway scripts to keep the renames atomic and the sort order stable, and that was the right mechanism, but it meant the two files changed shape before the README section documenting them existed. The test was then red for the wrong reason for a while — undocumented commands rather than a real inventory failure — which cost a cycle of reading failures that were not findings. The README section should have been written first.
+
+### Mini recap
+
+The repository's commands are now one list, in one order, written down in one place, and held by one test. Names read owner, then subject, then verb; `GDR-INFOSCHEMATICS-005` says why; `README.md` says what each one is for; and `scripts/command-surface.test.ts` fails if any of that stops being true. Two dead entries are gone, knip has an invoker and honest findings, and the `.ki.toml` dependency hold is now enforced by a check that has been seen to fail. Step 5 is not done, and the reason it is not done turned out to be a defect in the published PNG output rather than anything about the script it was meant to simplify.
 
 ## Discussion
 

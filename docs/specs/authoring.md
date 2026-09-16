@@ -128,7 +128,7 @@ The JSON Schema offered to editors MUST be projected from the same schema the lo
 
 _Conformance:_ conforming
 
-_Verify:_ `bun run self:verify:schema`, which fails when the committed file is stale.
+_Verify:_ `bun run self:schema:verify`, which fails when the committed file is stale.
 
 _Evidence:_ `infoschematicJsonSchema` in `packages/domain-core/src/schema.ts` and `scripts/generate-schema.ts`.
 

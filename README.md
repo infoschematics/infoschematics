@@ -72,7 +72,7 @@ Every workspace owns its own suite and typecheck, so narrow the run instead of r
 bun run --cwd packages/view-model test -- runtime             # one file, or a name substring, in one package
 bunx vitest --root packages/view-model                        # watch that package
 bunx turbo run test --filter=...@infoschematics/domain-core   # a package and everything that depends on it
-bun run self:verify:repo                                      # only the checks under scripts/ that span workspaces
+bun run self:scripts:test                                     # only the checks under scripts/ that span workspaces
 ```
 
 Each script under `scripts/` is a self-describing command as well as a `bun run` target: run it directly (`./scripts/render-example.ts`), ask it for `--help`, and read its exit code — 0 for success, 1 for failure, 2 for misuse. Unknown options are rejected rather than ignored.
@@ -87,6 +87,47 @@ Each script under `scripts/` is a self-describing command as well as a `bun run`
 `self:examples:render` writes an authored example, or any JSON or YAML document, to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
 
 Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
+
+### Command surface
+
+Every command this repository offers is a script in the root `package.json`, and a script's name says which authority owns it.
+
+| Prefix | Owner | Meaning |
+| --- | --- | --- |
+| none | the package manager and Turborepo | The lifecycle idioms every workspace answers to: `build`, `clean`, `prepare`, `test`, `test:browser`. A bare name passes straight through to the task it is named after, so `bun run test` and `turbo run test` are the same run. |
+| `ki:` | a Knowledge Islands capability | A command whose shape is mandated outside this repository, so its name and its behaviour are not ours to reword: `ki:deps:update`, `ki:site:build`, `ki:site:clean`, `ki:site:deploy`, `ki:site:dev`, `ki:site:preview`. |
+| `self:` | this repository | Everything specific to Infoschematics, named subject first and verb last. |
+
+The `self:` commands, by subject:
+
+| Subject | Commands | What it covers |
+| --- | --- | --- |
+| the whole gate | `self:check`, `self:dev` | `self:check` is the gate to run before committing; `self:dev` builds the packages then starts the site. |
+| boundaries | `self:boundaries:verify` | dependency-cruiser over every workspace source root and `scripts/`. |
+| the deployment seam | `self:cf:build` | Cloudflare Pages' configured build command, which delegates to `build` rather than restating it. |
+| examples | `self:examples:generate`, `self:examples:render`, `self:examples:verify` | The generated example registry, and rendering one authored document to a standalone SVG under `reports/`. |
+| packages | `self:packages:build`, `self:packages:check-versions`, `self:packages:clean`, `self:packages:pack-smoke` | The publishable packages under `packages/`: their build, their version agreement, and packed clean-consumer verification. |
+| releases | `self:release:verify` | Builds the packages, then runs the packed-consumer smoke test over them. |
+| the schema | `self:schema:generate`, `self:schema:verify` | The published JSON Schema generated from the domain contract. |
+| `scripts/` | `self:scripts:test`, `self:scripts:typecheck` | The cross-workspace checks that live under `scripts/`, and their own typecheck. |
+| visual tokens | `self:tokens:generate`, `self:tokens:verify` | The generated visual token module shared by the renderers. |
+| types | `self:typecheck` | Every workspace typecheck plus the one for `scripts/`. |
+| unused code | `self:unused:verify` | knip over the workspaces, against `knip.json`. |
+
+Two rules keep the surface honest, and `scripts/command-surface.test.ts` enforces them.
+
+A generated artefact's `generate` command is always paired with a `verify` command that runs the same script in check mode, so the gate can prove the committed artefact matches its generator without a second implementation of the generator's rules. And a `self:` name reads subject first, then verb — `self:tokens:verify`, never `self:verify:visual-tokens` — so the commands for one subject sort together and a new verb cannot start a rival naming scheme. The reasoning is recorded in [GDR-INFOSCHEMATICS-005](docs/decisions/GDR-INFOSCHEMATICS-005-command-naming.md).
+
+A new command belongs in the root manifest when it spans workspaces, and in the workspace's own manifest when it does not — a package's suite, typecheck, or build stays with the package, so Turborepo can cache it there. A root script that wraps a module under `scripts/` names that module directly, because the test above rejects a command module no root script, commit hook, or this section reaches.
+
+One command is deliberately not a root script. `scripts/ibc-visual-compatibility.ts` captures and compares visual compatibility evidence against an external IBC fixture package, so it cannot run from a checkout of this repository alone:
+
+```bash
+bun scripts/ibc-visual-compatibility.ts capture --fixture <IBC package> --manifest <file> --output <directory>
+bun scripts/ibc-visual-compatibility.ts compare --fixture <IBC package> --manifest <file> --output <directory>
+```
+
+The fixture directory must be a workspace that already has `sharp` installed — the script resolves Sharp by walking upward from the fixture, never from here, so this repository holds no dependency on it. A root script would advertise a command that fails for every contributor without that fixture, so the procedure is documented rather than wrapped.
 
 ## Licence
 

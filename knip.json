@@ -14,13 +14,20 @@
       "entry": ["src/*.ts", "src/**/*.test.ts"]
     },
     ".": {
-      "entry": ["scripts/**/*.ts"],
+      "entry": [
+        "scripts/**/*.test.ts",
+        "scripts/examples.ts",
+        "scripts/generate-schema.ts",
+        "scripts/generate-visual-tokens.ts",
+        "scripts/ibc-visual-compatibility.ts",
+        "scripts/release/check-versions.ts",
+        "scripts/release/pack-smoke.ts",
+        "scripts/render-example.ts"
+      ],
       "project": ["scripts/**/*.ts"]
     }
   },
-  "ignore": [".claude/skills", ".agents/skills"],
   "ignoreBinaries": ["rsvg-convert"],
-  "ignoreDependencies": ["syncpack"],
   "ignoreExportsUsedInFile": true,
   "exclude": ["duplicates"]
 }

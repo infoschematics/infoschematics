@@ -84,7 +84,7 @@ _Evidence:_ `packages/view-model/src/tokens.ts` freezes a `visualTokens` manifes
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run self:verify:visual-tokens`, which is the generator's own check mode and part of the gate.
+_Verify:_ run `bun run self:tokens:verify`, which is the generator's own check mode and part of the gate.
 
 _Evidence:_ `scripts/generate-visual-tokens.ts` projects each manifest leaf to `--infoschematic-canvas-<group>-<token>` in `packages/view-model/src/tokens.generated.css`, and `scripts/generate-visual-tokens.test.ts` asserts stable sorted names, rejects distinct semantic paths that collide after CSS normalisation, and proves check mode fails when the committed output is stale.
 
