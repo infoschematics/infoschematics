@@ -1200,3 +1200,43 @@
 .infoschematic-svg.editing .infoschematic-graphic:hover {
   opacity: 1;
 }
+
+/*
+ * A Point, and the disc that makes one reachable.
+ *
+ * The mark is six units across. The press target is therefore the wider transparent disc drawn beneath it rather
+ * than the mark, and `pointer-events: all` is what makes an unpainted circle answer a press at all - a circle with
+ * `fill: transparent` and the default `visiblePainted` would answer only where a browser considers it painted. The
+ * mark itself takes no events, so the target is the single hit region however the two overlap.
+ */
+.infoschematic-svg.editing .infoschematic-point.selectable {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.point-target {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.point-mark {
+  pointer-events: none;
+}
+
+/* Selection, hover and being held are stated on the mark rather than as a ring around it: the Point is the smallest
+   thing on the surface, and a second shape appearing beside it reads as another element rather than as this one
+   answering. Each of these overrides the authored stroke, which arrives as a presentation attribute. */
+.infoschematic-svg.editing .infoschematic-point.selected .point-mark {
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-width: 3px;
+}
+
+.infoschematic-svg.editing .infoschematic-point.pointed .point-mark {
+  stroke: var(--infoschematic-canvas-selection-pointed);
+}
+
+.infoschematic-svg.editing .infoschematic-point.group-held .point-mark {
+  stroke: var(--infoschematic-canvas-selection-selected);
+  stroke-dasharray: 5 4;
+  stroke-width: 2px;
+}

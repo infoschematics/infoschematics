@@ -37,6 +37,7 @@ const collectionName: Readonly<Record<ArtefactKind, string>> = {
   fabric: 'fabrics',
   flow: 'flows',
   graphic: 'overlays',
+  point: 'points',
   region: 'regions'
 }
 
@@ -52,10 +53,42 @@ const collection = (model: DefinedInfoschematic, kind: ArtefactKind): readonly R
       return model.diagram.flows
     case 'graphic':
       return model.diagram.overlays
+    case 'point':
+      return model.diagram.points
     case 'region':
       return model.diagram.regions
   }
 }
+
+/*
+ * The order removals are written in, dependents first.
+ *
+ * A Flow names the endpoint it runs to, so taking the endpoint away while the Flow still names it describes a
+ * document that could not be read back. Emitting the Flow first means every intermediate state is one a parser
+ * would accept, which is what lets a removal be undone in a single step rather than repaired in two.
+ */
+const removalOrder: readonly ArtefactKind[] = ['flow', 'graphic', 'card', 'fabric', 'point', 'region']
+
+/*
+ * Everything a removal actually took, not just the element the Producer named.
+ *
+ * A Point exists so that Flows can enter or leave, so removing one nearly always removes Flows with it; the same
+ * is true of a Card and the Adapters around it. Those were already worked out when the operation was applied, so
+ * they are read off the two models rather than derived a second time from the relationships.
+ */
+const removedMembers = (
+  before: DefinedInfoschematic,
+  after: DefinedInfoschematic
+): readonly InfoschematicDocumentOperation[] =>
+  removalOrder.flatMap((kind) => {
+    const remaining = new Set(collection(after, kind).map((value) => value.id))
+    return collection(before, kind)
+      .filter((value) => !remaining.has(value.id))
+      .map((value) => ({
+        op: 'remove' as const,
+        path: [field('diagram'), field(collectionName[kind]), id(value.id)]
+      }))
+  })
 
 const jsonValue = (value: unknown): JsonValue => JSON.parse(JSON.stringify(value)) as JsonValue
 
@@ -83,6 +116,20 @@ const anchorFor = (
   return after ? { after } : {}
 }
 
+/*
+ * A coordinate, written back the way it was authored.
+ *
+ * The serialiser compacts an `at:` to the pair `x y`, so replacing one with a mapping would expand a line a
+ * Producer wrote by hand - the change would be correct and the document would still read as damaged. This is the
+ * same courtesy `compactWaypoints` does for a route, applied to the one key that states a place.
+ */
+const compactCoordinate = (key: string, value: unknown): JsonValue | undefined => {
+  if (key !== 'at' || value === null || typeof value !== 'object' || Array.isArray(value)) return undefined
+  const { x, y, ...rest } = value as Readonly<Record<string, unknown>>
+  if (typeof x !== 'number' || typeof y !== 'number' || Object.keys(rest).length > 0) return undefined
+  return `${x} ${y}`
+}
+
 const fieldDiff = (
   path: ReturnType<typeof memberPath>,
   before: Readonly<Record<string, unknown>>,
@@ -92,8 +139,9 @@ const fieldDiff = (
   keys.map((key): InfoschematicDocumentOperation => {
     const member = [...path, field(key)]
     if (after[key] === undefined) return { op: 'remove', path: member }
-    if (before[key] === undefined) return { op: 'add', path: member, value: jsonValue(after[key]) }
-    return { op: 'replace', path: member, value: jsonValue(after[key]) }
+    const value = compactCoordinate(key, after[key]) ?? jsonValue(after[key])
+    if (before[key] === undefined) return { op: 'add', path: member, value }
+    return { op: 'replace', path: member, value }
   })
 
 const compactFlowLink = (value: Readonly<Record<string, unknown>>): string | undefined => {
@@ -201,7 +249,7 @@ const projectOperation = (
         : []
     }
     case 'remove':
-      return [{ op: 'remove', path }, ...changedScopes]
+      return [...removedMembers(before, after), ...changedScopes]
     case 'reorder':
       return [{ ...anchorFor(afterValues, targetId), op: 'move', path }, ...changedScopes]
     case 'move':

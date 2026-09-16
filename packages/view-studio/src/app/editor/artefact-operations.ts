@@ -46,8 +46,9 @@ const kindOrder: Readonly<Record<ArtefactSelection['kind'], number>> = {
   region: 0,
   fabric: 1,
   card: 2,
-  graphic: 3,
-  flow: 4
+  point: 3,
+  graphic: 4,
+  flow: 5
 }
 
 const orderDraftOperations = (operations: readonly ArtefactDraftOperation[]): readonly ArtefactDraftOperation[] => {
@@ -148,6 +149,8 @@ const valueForTarget = (
       return config.infoschematic.flows.find((value) => matchesTarget(value, target))
     case 'graphic':
       return config.infoschematic.graphics.find((value) => matchesTarget(value, target))
+    case 'point':
+      return config.infoschematic.points.find((value) => matchesTarget(value, target))
   }
 }
 
@@ -244,6 +247,13 @@ export const createdArtefactDetails = (operation: CreateArtefactOperation): Edit
         const placement = (operation.value as InfoschematicConfig['infoschematic']['graphics'][number]).placement
         return placement ? { box: placement, role: 'box' as const } : undefined
       }
+      /* The authored coordinate is the whole geometry, so there is nothing to fall back to and nothing to
+         guard: `ADR-INFOSCHEMATICS-031` is what says a Point acquires no box on the way through here. */
+      case 'point':
+        return {
+          at: (operation.value as InfoschematicConfig['infoschematic']['points'][number]).point,
+          role: 'point' as const
+        }
       case 'region':
         return {
           box: (operation.value as InfoschematicConfig['infoschematic']['regions'][number]).box,
@@ -296,7 +306,12 @@ export const planArtefactRemoval = (
 
   const flows = effectiveConfig.infoschematic.flows
   const cascades: ArtefactOperation[] = []
-  if (target.kind === 'card' || target.kind === 'fabric') {
+  /*
+   * An endpoint takes its Flows with it. A Point is an endpoint in exactly the way a Card and a Fabric are - a Flow
+   * names it as its source or its target - so removing one without its Flows would leave a route attached to an id
+   * that no longer exists, which the document refuses to accept rather than drawing.
+   */
+  if (target.kind === 'card' || target.kind === 'fabric' || target.kind === 'point') {
     for (const flow of flows) {
       if (flow.source === sourceId || flow.target === sourceId) {
         cascades.push(removeArtefactOperation(flowSelection(flow)))
@@ -321,6 +336,8 @@ export const artefactIndex = (config: InfoschematicConfig, target: ArtefactSelec
         return config.infoschematic.flows.findIndex((entry) => matchesTarget(entry, target))
       case 'graphic':
         return config.infoschematic.graphics.findIndex((entry) => matchesTarget(entry, target))
+      case 'point':
+        return config.infoschematic.points.findIndex((entry) => matchesTarget(entry, target))
     }
   })()
   return index === undefined || index < 0 ? undefined : index

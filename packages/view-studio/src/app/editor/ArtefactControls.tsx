@@ -58,6 +58,10 @@ export const describeArtefactGeometry = (geometry: ArtefactGeometry | undefined)
       return `Box at ${geometry.box.x}, ${geometry.box.y}; ${geometry.box.width} × ${geometry.box.height}`
     case 'route':
       return `Orthogonal route with ${geometry.points.length} points`
+    /* A place, stated as a place: there is no extent to report, and reporting a zero one would invite a reader
+       to think a Point had been given a size. `ADR-INFOSCHEMATICS-031` is why there is nothing more to say. */
+    case 'point':
+      return `Point at ${geometry.at.x}, ${geometry.at.y}`
   }
 }
 
@@ -83,6 +87,10 @@ const submitOperation = (
       editor.createArtefact('flow', operation.value as ArtefactValueByKind['flow'], operation.at)
       break
   }
+  /* No `point` case belongs here: neither the factory nor the library can produce one, so the operation type
+     cannot name a Point and the compiler rejects a branch for it. A Point exists because a Flow needs somewhere
+     to enter or leave, which is a judgement about the Flow rather than a shape dropped on the canvas -
+     `ADR-INFOSCHEMATICS-031` records the choice. */
 }
 
 export function ArtefactControls({ editor, factoryContext, libraryContext }: ArtefactControlsProps) {
@@ -195,7 +203,7 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
           ) : null}
         </div>
       ) : (
-        <p className="contract-empty">Select a Region, Fabric, Card, Flow, or Graphic to edit it.</p>
+        <p className="contract-empty">Select a Region, Fabric, Card, Point, Flow, or Graphic to edit it.</p>
       )}
 
       {editor.artefactIssue ? (

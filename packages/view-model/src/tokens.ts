@@ -21,6 +21,10 @@ export const visualTokens = Object.freeze({
       gridMinorStrokeWidth: 0.5,
       gridSize: 10,
       pointRadius: 6,
+      /* What a pointer may press to take a Point, against the six units it paints. A Point is the smallest thing a
+         Producer selects, and the paint is smaller than the grid it snaps to, so the target is stated separately
+         rather than inherited from the mark — the same separation `addReach` makes for a waypoint. */
+      pointTargetRadius: 14,
       regionLabelCharacterWidth: 9.4,
       regionLabelHeight: 14,
       regionLabelInset: 16,

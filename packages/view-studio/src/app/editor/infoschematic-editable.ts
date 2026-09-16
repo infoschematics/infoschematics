@@ -1,4 +1,4 @@
-import type { Overlay } from '@infoschematics/domain-model'
+import type { Point as DiagramPoint, Overlay } from '@infoschematics/domain-model'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type {
   ArtefactCapabilities,
@@ -25,6 +25,7 @@ type InfoschematicScopeId = string
 type AuthoredEditableArtefacts = Readonly<{
   fabrics?: readonly RuntimeFabric[]
   overlays?: readonly Overlay[]
+  points?: readonly DiagramPoint[]
 }>
 
 const adapterCapabilities = (canMove: boolean): ArtefactCapabilities =>
@@ -240,6 +241,28 @@ export const infoschematicEditable = (
       return {
         capabilities: artefactCapabilities.region,
         geometry: { box: region.box, role: 'box' as const },
+        movementTarget: selection,
+        selection
+      }
+    }
+    /*
+     * A Point resolves by its own id, which is also its code: the document and the configuration agree on one
+     * identifier for a Point, so there is no separate code to key it by the way a Card has one. The geometry is
+     * the authored coordinate and nothing else, which is what `ADR-INFOSCHEMATICS-031` settles - no box is
+     * invented here for a thing that has none, and `artefactCapabilities.point` is what withholds the resize.
+     */
+    if (key.startsWith('point:')) {
+      const point = authoredArtefacts.points?.find((candidate) => candidate.id === key.slice('point:'.length))
+      if (!point) return undefined
+      const selection = defineArtefactSelection({
+        code: point.id,
+        geometry: 'point' as const,
+        id: point.id,
+        kind: 'point' as const
+      })
+      return {
+        capabilities: artefactCapabilities.point,
+        geometry: { at: point.at, role: 'point' as const },
         movementTarget: selection,
         selection
       }
@@ -558,6 +581,15 @@ export const infoschematicEditable = (
         const at = flow?.points[index]
         if (!at) return undefined
         return { kind: 'waypoint', label: 'Waypoint', at, flow: code, index }
+      }
+
+      /* Two numbers and no others, both typed: a Point is placed exactly as a Card is, and it has no extent
+         for the panel to state. A suppressed width and height would leave a reader deciding whether an absent
+         extent meant zero or unknown, which is the case `ADR-INFOSCHEMATICS-031` gives a Point its own kind for. */
+      if (key.startsWith('point:')) {
+        const point = authoredArtefacts.points?.find((candidate) => candidate.id === key.slice('point:'.length))
+        if (!point) return undefined
+        return { kind: 'coordinate', label: 'Point', at: point.at, editable: ['x', 'y'] }
       }
 
       if (key.startsWith('region:')) {

@@ -144,13 +144,13 @@ Design MUST use discriminated Region, Fabric, Card, Flow, Point and Overlay sele
 
 The selected kind MUST determine the Properties controls. A stale or empty selection MUST render a total empty state rather than interpreting an identifier as another kind.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-Every kind but Point holds. Point is declared pointer-selectable and keyboard-selectable, and no renderer in Canvas hit-tests one, so a Point can be neither pointed at nor reached; the rest of its capability contract is in place. Tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md).
+A Point carries the third geometry role rather than a box, which is what `ADR-INFOSCHEMATICS-031` settles: it is a sixth kind of its own, so it moves as a coordinate and offers no box resize to withhold.
 
-_Verify:_ inspect `packages/view-model/src/editable.ts`, `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/editor/ArtefactControls.tsx`. against this requirement.
+_Verify:_ run the Point cases in `packages/view-studio/src/app/App.browser.test.tsx`. They aim a press eight units off a Point's centre and resolve it through `elementFromPoint`, so a Point that is drawn but cannot be reached fails rather than passing on its presence in the tree; deleting the widened target circle from `packages/view-canvas/src/InfoschematicDiagram.tsx` fails that one case.
 
-_Evidence:_ `packages/view-model/src/editable.ts`, `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/app/editor/ArtefactControls.tsx`.
+_Evidence:_ `packages/view-model/src/editable.ts` declares the six-kind contract and gives a Point `move` without `resize`; `packages/view-canvas/src/InfoschematicDiagram.tsx` draws its press target, its selection treatment and its within-kind actions; `packages/view-studio/src/app/editor/infoschematic-editable.ts` resolves a `point:` key to that selection and to a `coordinate` placement; `packages/view-studio/src/app/editor/ArtefactControls.tsx` and `packages/view-studio/src/app/panels/PlacementPanel.tsx` present the properties and the typed coordinate.
 
 ### DESIGN-018 — Design interaction is filterable by element kind
 
@@ -160,7 +160,7 @@ A selection whose kind is closed MUST be released, because its own controls woul
 
 _Conformance:_ conforming
 
-The five kinds Canvas hit-tests are each filterable. Point is filterable vacuously, because no renderer in Canvas hit-tests a Point and so there is no Point interaction for a layer to withhold; that gap belongs to `DESIGN-014`, which records it, and is tracked as [Point interactivity in Design](../roadmap/INFOSCHEMATICS-TOOL-063-design-point-interactivity.md).
+All six kinds Canvas hit-tests are each filterable, and each layer withholds interaction a Producer could otherwise have had. A closed Point layer is the narrowest case: its press target is not drawn at all rather than drawn and ignored, so there is nothing under the pointer to take a press that nothing would answer.
 
 _Verify:_ run the Chromium layer cases in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`. They resolve each press through `elementFromPoint`, so a closed kind that merely stopped listening while still taking pointer events fails.
 
@@ -214,11 +214,13 @@ Studio MUST have rendered interaction tests covering both read-only and editing-
 
 At minimum, the rendered regression matrix MUST exercise selection and clearing, hover, pointer movement, keyboard movement, numeric placement, resize, within-kind reorder, property editing and clearing, creation, pending removal, port-count changes, Flow endpoint attachment, Waypoint and segment editing, route-label placement, undo, redo, individual change removal, whole-draft discard, closing and reopening an interaction layer, additive and range selection, moving a held group as one, each align and distribute operation, and reversing a whole group operation with one undo. Geometry cases MUST assert both what Canvas renders and what the reviewable change set records. Each dependent-geometry case MUST cover a plain authored route, a route with interior Waypoints, an existing route draft and a newly created Flow. At least one movement case MUST run while zoomed and panned.
 
+Where a kind's press target is not the shape it paints — a Flow's route, a Point's mark — at least one case MUST aim a press at a coordinate on the Infoschematic and resolve it through the browser's own hit testing, rather than dispatching an event at an element already found in the tree. Presence in the tree is not reach: it says nothing about what a pointer would land on.
+
 _Conformance:_ conforming
 
 _Verify:_ run the Chromium suites in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` and `packages/view-studio/src/app/App.browser.test.tsx`.
 
-_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` exercises native coordinate conversion, pointer lifecycle, viewport movement, selection, hover, resize, reorder, pending removal, Flow attachment, Waypoint and segment gestures, route-label placement and dependent route projection; `packages/view-studio/src/app/App.browser.test.tsx` exercises keyboard and numeric movement, port counts, creation, property replacement and clearing, undo, redo, individual change removal and whole-draft discard against rendered SVG and the change list.
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx` exercises native coordinate conversion, pointer lifecycle, viewport movement, selection, hover, resize, reorder, pending removal, Flow attachment, Waypoint and segment gestures, route-label placement and dependent route projection; `packages/view-studio/src/app/App.browser.test.tsx` exercises keyboard and numeric movement, port counts, creation, property replacement and clearing, undo, redo, individual change removal and whole-draft discard against rendered SVG and the change list, and resolves a press aimed eight units off a Point's centre through `elementFromPoint` before moving that Point by key and by typed coordinate and removing it with the Flow attached to it.
 
 ### DESIGN-016 — Register rows align without wrapping identity
 

@@ -125,7 +125,7 @@ describe('ArtefactControls', () => {
 
     expect(html).toContain('aria-label="Create Region"')
     expect(html).toContain('aria-label="Create Graphic"')
-    expect(html).toContain('Select a Region, Fabric, Card, Flow, or Graphic')
+    expect(html).toContain('Select a Region, Fabric, Card, Point, Flow, or Graphic')
   })
 })
 

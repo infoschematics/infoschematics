@@ -15,6 +15,7 @@ import {
   AlignStartHorizontal,
   AlignStartVertical,
   AlignVerticalDistributeCenter,
+  CircleDot,
   Eraser,
   Frame,
   Grid3x3,
@@ -46,6 +47,7 @@ const layerControls: Readonly<Record<ArtefactKind, readonly [string, string, typ
   fabric: ['Fabrics', 'Fabric bounds', Network],
   flow: ['Flows', 'Flow routes, their waypoints, and Card ports', Workflow],
   graphic: ['Graphics', 'Authored graphics over the diagram', Shapes],
+  point: ['Points', 'Points where Flows enter or leave the diagram', CircleDot],
   region: ['Regions', 'Region boxes and their labels', Frame]
 }
 

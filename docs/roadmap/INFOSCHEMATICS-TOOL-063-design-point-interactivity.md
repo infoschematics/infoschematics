@@ -4,12 +4,12 @@ area: TOOL
 title: Point interactivity in Design
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-066]
-baseline_ref: null
+baseline_ref: f9c1c7af81a528380f89ba3f7811ebf79a7b62a0
 created_at: 2026-09-15T12:10:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T15:20:00Z
 ---
 
 # Point interactivity in Design
@@ -124,6 +124,68 @@ Deferred, per this repository's practice of landing the feature first and captur
 ### Roadmap
 
 One new Triage record for the Guides work above. No change to any existing record beyond this one.
+
+## Review
+
+### Delivered
+
+Point interactivity in Design, as `DESIGN-014` promised it and `DESIGN-018` caveated it. A Point can now be pressed on the Diagram across a target wider than the mark it draws, moved by arrow key, dragged with the route that ends on it following, given coordinates by typing them, reordered, removed together with the Flows that name it, and taken out of interaction by closing its own layer while staying drawn exactly where it was. `ADR-INFOSCHEMATICS-031` records the step 1 decision and what it cost.
+
+Steps 1 through 10 are complete. One piece of this record's own Documentation impact is not delivered: the new Triage record for the Guides work is a roadmap record, and this run's authority does not extend to creating one, so Points remain absent from the consumer guidance and that gap is unrecorded. The lead should raise it.
+
+### Summary of changes
+
+A Point is its own artefact kind rather than an addressable part of the Flow that owns it, which is the question step 1 posed and `ADR-INFOSCHEMATICS-031` settles. `artefactKinds` is six long, and a Point carries `PointGeometry` — `{ at, role: 'point' }` — a third geometry role beside box and route, in `packages/view-model/src/editable.ts`. `MovableGeometry` admits it, `artefactResizeMinimums` now excludes `'point'` alongside `'flow'` because a Point has no extent to size, and `movableBox` measures it as a zero-extent box so the group arithmetic keeps working unchanged. A Point is addressed by a prefixed selection key, `point:POINT-A`, which is the convention `region:`, `port:`, `waypoint:` and `graphic:` already follow.
+
+Canvas draws the layer in `packages/view-canvas/src/InfoschematicDiagram.tsx`: one group per Point carrying `data-artefact-kind="point"`, holding a transparent fourteen-unit `.point-target` that is drawn first and only while the layer is interactive, then the six-unit `.point-mark` that takes no pointer events. The widened target is what makes a six-unit mark pressable; the layer is painted after the ordinary Flow layer and before a promoted selected Flow. `pointRadius` and `pointTargetRadius` are visual tokens rather than literals, and `packages/view-canvas/src/styles.css` states selection, hover and group-hold on the mark itself rather than as a second shape beside it, because a ring appearing next to the smallest thing on the surface reads as another element rather than as this one answering.
+
+Studio reaches it through `packages/view-studio/src/app/editor/infoschematic-editable.ts`, which handles the `point:` key; `ArtefactControls.tsx` describes point geometry and submits point operations; `PlacementPanel.tsx` gained the coordinate case it had no placement for; and `EditorTools.tsx` gets its sixth layer control by iterating `artefactKinds`, exactly as the record's Current state predicted.
+
+Two changes were not on the plan. `planArtefactRemoval` in `packages/view-studio/src/app/editor/artefact-operations.ts` treated a Point as a Region and removed it alone, which left every Flow that named it pointing at an id that no longer existed — a document the editor then refused rather than drew. A Point is a Flow endpoint in exactly the way a Card and a Fabric are, so it joins that disjunct; `'carries a Point Flows off with it'` fails without the fix. And `PlacementPanel.tsx` named its fields from the selection key, so a Point's inputs would have announced themselves as `point:POINT-A x`; `nameOf` drops the kind prefix, which is the editor's business and not a name a Producer needs.
+
+`apps/site/src/playground/seeds/media-pipeline.yaml` gains a `CAPTIONS` Point with a `CAPTIONED` Flow leaving it, so the preset a person actually opens has something on it that is a Point rather than a Card. In the specification corpus `DESIGN-014` is now `conforming` with its divergence paragraph replaced, `DESIGN-018`'s vacuous-Point note is rewritten around the narrowest closed layer there is, `EDIT-008` and `EDIT-009` carry real evidence in place of a vague gesture at Canvas tests, and `DESIGN-015` gained a MUST: where a kind's press target is not the shape it paints, at least one case must aim a press at a coordinate on the Infoschematic and resolve it through the browser's own hit testing, because presence in the tree is not reach.
+
+### Verification
+
+`bun run self:check --force` — 43 successful, 43 total, 0 cached, 22.3s. Forced, so every number here was earned rather than replayed. No `turbo.json` change was needed: every file this item touches already falls inside an existing task's `inputs`, and no new file was introduced outside those globs.
+
+Two proofs by deliberate breakage rather than by assertion. Deleting the `.point-target` circle from the Canvas Point layer makes exactly one case fail — the press aimed eight units off `POINT-A`'s centre — and nothing else; the widened target is therefore load-bearing and the case that covers it is not vacuous. Reverting the endpoint disjunct in `planArtefactRemoval` makes `'carries a Point Flows off with it'` fail with the Flow left behind, and makes the browser case's change list lose `FLOW-B`. Both were restored.
+
+The new pointer case lives in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`, beside the Card and Adapter drags it imitates: a Point is dragged and the route that ends on it is redrawn as `M300 140 H420 V100`, an exact path rather than a substring, so the assertion cannot pass by coincidence. The Studio browser suite resolves a press through `elementFromPoint` at four aimed coordinates: eight units off centre takes the Point, dead centre takes it, twenty units away takes the neighbouring Point whose widened target overlaps, and forty units away takes nothing even though a Flow's twelve-unit press stroke runs there.
+
+I looked at it rather than trusting the suite, in a real Chromium at 1440×900 with the real Studio mounted, and captured what I saw. The record's instruction to press **Show panels** first is obsolete — `INFOSCHEMATICS-TOOL-066` opens the dock on entering a Producer mode, and it did. In Present a Point draws as an open ring in its scope's colour, amber where the scope is amber, with the Flow leaving the ring cleanly and meeting the Card's arrowhead. In Design, selected, the mark switches to the selection green and thickens, and the three-control cluster — Earlier, Later, Remove — sits above the mark rather than inside it, which is the sensible difference from a Card whose cluster sits in its top corner. Hover, focus and selection are three distinguishable states on three different Points at once, measured as well as seen: selected `rgb(130, 179, 102)` at 3px, hovered `rgb(121, 201, 255)` at 2px, untouched its own `rgb(36, 99, 235)` at 2px. A real `Tab` reaches a Point and applies the shared focus glow, `drop-shadow(color(srgb 0.509804 0.701961 0.4 / 0.75) 0px 0px 7px)`; a programmatic `focus()` does not match `:focus-visible` and reports nothing, which is a false negative worth knowing about before anyone asserts on it. The Design panel for a selected Point reads `Point`, `X 200`, `Y 90` with no dimensions row, and the fields are named `X` and `Y` rather than by the prefixed key.
+
+Reach was measured rather than assumed. Each coordinate field is 68×20 and, once the panel's scroll region is brought to it, `elementFromPoint` at the field's own centre returns that field — it is the painted element there, not merely present in the tree. `offsetParent` was not used for the Point itself: an SVG element never has one, so that check would have reported a false negative on the mark.
+
+### Outstanding concerns
+
+A Point's colour cannot be authored or edited. Canvas already reads `point.appearance?.color`, but the config type has no `appearance` field, so colour derives from the Point's scope and no Studio round trip can carry one. This was out of this item's boundary and remains undone.
+
+A Point has no Identity part in the Details panel, because `identityOf` returns nothing for a `point:` key. Its authored `label` — which both the mark's `<title>` and its `aria-label` read out — can therefore only be changed in Source. Visible in the look: where a Card shows Identity, ID and NAME, a Point shows only Point, X and Y.
+
+The focus glow is faint on a Point. It is the same shared treatment every selectable artefact gets, and it is applied, but a seven-pixel drop shadow around an eleven-pixel circle reads far less clearly than the same shadow around a Card. This record's own Discussion says size is the usability risk and no suite can see it; that judgement is a designer's rather than mine, so I have left the shared treatment alone and flagged it.
+
+The coordinate fields sit below the fold of the `.editor-panes` scroll region at 1440×900 — the pane shows 324 pixels of 633 — so a Producer must scroll the panel to type a Point's coordinates. A Card's `x` field sits further down still, so this is a pre-existing property of the panel rather than anything this item introduced.
+
+Three defects in or near this surface are not mine and are not fixed. `INFOSCHEMATICS-TOOL-076`, the `SELECTION` heading cut by the split-pane resizer at 1440×900, is in the panel this item populates. The `key` is not a prop console error appears in the browser suites; I proved it pre-existing this session by stashing every change in this worktree and re-running the Canvas browser suite, where it still appeared, and the gate attributes it to an unrelated Dynamics case. `INFOSCHEMATICS-TOOL-074` leaves `self:boundaries:verify` cruising zero modules, so that task is not evidence of anything and the layering argument here rests on reading the imports: this item adds a kind to `packages/view-model/src/editable.ts` that both Canvas and Studio already import from, and creates no new package edge.
+
+A Card's `bounds` still expands from its `0 0 640 320` shorthand into a mapping when the document is edited. That is the same class of defect as the `at` expansion this item fixed with `compactCoordinate`, it predates this work, and it is out of boundary.
+
+`docs/roadmap/INFOSCHEMATICS-TOOL-057-cross-feature-interaction-coverage.md:37` still counts `DESIGN-014` among three divergent requirements and cites `docs/specs/design-session.md:147`. Both are stale as of this change. It is not my record to edit, so the lead should reconcile it.
+
+The Studio browser suite has no pointer-drag case of any kind, for any artefact; the drag proof for a Point is at the Canvas layer where the idiom exists. Movement through the real editor is proven by key and by typed coordinate rather than by dragging.
+
+### Post-change review
+
+Read `ADR-INFOSCHEMATICS-031` first: everything else follows from a Point being a sixth kind with a third geometry role, and the alternative — an addressable part of its Flow — would have spread Point handling through the route code instead of through a kind enumeration. The place to check that judgement is `artefactResizeMinimums`, which had assumed every non-Flow kind has a box and now has two exclusions; if a third arrives, that type wants restating as a positive list of box kinds rather than a growing exclusion.
+
+The riskiest change is the removal cascade, because it was wrong in a way the compiler could not see and no existing test noticed: a Point read as a Region and was removed alone. It is worth confirming that the disjunct is about being a Flow endpoint and not about being movable, since the next kind added will face the same fork.
+
+The thing most likely to come back is size. Every interaction now works, and a six-unit mark with a fourteen-unit target is still a small thing to hit and a small thing to see a focus ring on. I measured and photographed rather than inferred, but whether the treatment is strong enough on something this small is a design call that should be made deliberately rather than inherited from the Card.
+
+### Mini recap
+
+A Point is now a first-class artefact kind in Design: pressable across a widened invisible target, movable by key, drag and typed coordinate, removable with its Flows, and filterable by its own interaction layer, with `ADR-INFOSCHEMATICS-031` recording why it is a kind rather than part of a Flow. Two unplanned defects were fixed on the way — a removal that orphaned Flows, and a field name that read the editor's selection key out loud. The gate is 43 of 43 fresh, the widened target and the removal cascade are each proved by deliberate breakage, and the surface was rendered and looked at rather than inferred from a green suite. Left undone: the Guides Triage record, which needs authority this run does not have.
 
 ## Discussion
 

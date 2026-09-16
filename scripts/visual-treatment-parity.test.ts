@@ -431,6 +431,33 @@ describe('visual treatment renderer parity', () => {
     }
   })
 
+  /*
+   * A Point is the one element whose whole appearance is its geometry, so the two renderings have nothing else to
+   * agree about: same centre, same radius, same authored stroke. Canvas adds a press target the static renderer has
+   * no use for, and paints its fallback from the dark surface palette rather than the light one, exactly as a Card
+   * already does - so what is compared here is the mark, not the layer around it.
+   */
+  it('paints a Point at the same place and size in both renderers', () => {
+    const pointed = defineInfoschematic({
+      title: 'Point reference',
+      infoschematic: {
+        points: [{ code: 'PT-001', id: 'junction', label: 'Junction', point: { x: 120, y: 90 }, scopes: ['one'] }],
+        scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }]
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: pointed }))
+    const svg = renderInfoschematicSvg(pointed)
+    const { pointRadius } = visualTokens.canvas.geometry
+
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain('data-artefact-kind="point"')
+      expect(markup).toContain('cx="120"')
+      expect(markup).toContain('cy="90"')
+      expect(markup).toContain(`r="${pointRadius}"`)
+      expect(markup).toContain('stroke="#79c9ff"')
+    }
+  })
+
   it('keeps the dots grid treatment equivalent across renderers', () => {
     const dotted = defineInfoschematic({
       title: 'Dotted grid reference',

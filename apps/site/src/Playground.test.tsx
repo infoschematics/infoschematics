@@ -50,7 +50,16 @@ describe('Playground', () => {
     if (!parsed.ok) return
 
     expect(parsed.model.diagram.cards).toHaveLength(5)
-    expect(parsed.model.diagram.flows).toHaveLength(4)
+    expect(parsed.model.diagram.flows).toHaveLength(5)
+    /*
+     * One Point, with a Flow leaving it. A Producer trying Design on this preset needs something on the surface that
+     * is a Point rather than a Card, and one that nothing depends on would not show what moving it does to a route.
+     */
+    expect(parsed.model.diagram.points.map(({ id }) => id)).toEqual(['CAPTIONS'])
+    expect(parsed.model.diagram.flows.at(-1)).toMatchObject({
+      id: 'CAPTIONED',
+      source: { element: 'CAPTIONS', port: 'N1' }
+    })
     expect(parsed.model.diagram.families.map(({ label }) => label)).toEqual([
       'Audio and video',
       'Segments and manifest',

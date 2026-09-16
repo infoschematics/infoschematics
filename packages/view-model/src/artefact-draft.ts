@@ -3,6 +3,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { FocusConfig } from '@infoschematics/domain-model/scene'
 import type { StorySceneConfig } from '@infoschematics/domain-model/story'
@@ -14,6 +15,7 @@ import type {
   ArtefactValueByKind,
   BoxGeometry
 } from './editable.ts'
+import type { Offset } from './geometry.ts'
 import { portsForBox } from './ports.ts'
 import { moveRouteEnd } from './routing.ts'
 
@@ -130,6 +132,25 @@ const moveAttachedFlowEnds = (
   })
 }
 
+/* Every port on a Point resolves to the Point's own coordinate, so a Point has no per-port offset to look up: the
+   whole move is the delta for each attached Flow end, whichever port the Flow names. */
+const movePointFlowEnds = (flows: readonly FlowConfig[], pointId: string, delta: Offset): readonly FlowConfig[] => {
+  if (delta.dx === 0 && delta.dy === 0) return flows
+  return flows.map((flow) => {
+    let points = flow.points
+    let changed = false
+    if (flow.source === pointId) {
+      points = moveRouteEnd(points, 'start', delta)
+      changed = true
+    }
+    if (flow.target === pointId) {
+      points = moveRouteEnd(points, 'end', delta)
+      changed = true
+    }
+    return changed ? { ...flow, points } : flow
+  })
+}
+
 const moveCardAndAssemblyFlowEnds = (
   cards: readonly CardConfig[],
   flows: readonly FlowConfig[],
@@ -156,6 +177,8 @@ const valuesForKind = (config: InfoschematicConfig, kind: ArtefactKind): readonl
       return config.infoschematic.fabrics
     case 'card':
       return config.infoschematic.cards
+    case 'point':
+      return config.infoschematic.points
     case 'flow':
       return config.infoschematic.flows
     case 'graphic':
@@ -197,6 +220,11 @@ const createArtefact = (
       return withDefinition(config, {
         ...definition,
         flows: insertAt(definition.flows, cloneSerialisable(operation.value as FlowConfig), operation.at)
+      })
+    case 'point':
+      return withDefinition(config, {
+        ...definition,
+        points: insertAt(definition.points, cloneSerialisable(operation.value as PointConfig), operation.at)
       })
     case 'graphic':
       return withDefinition(config, {
@@ -246,6 +274,23 @@ const applyGeometry = (
         ...definition,
         [key]: replaceAt(values, index, updated),
         flows: moveCardAndAssemblyFlowEnds(definition.cards, definition.flows, value, updated.placement)
+      })
+    }
+    /* A Point's position is the authored `point:` coordinate, and any Flow attached to it anchors on that same
+       coordinate, so the ends of those Flows travel with it. There is no resize path to guard against here: a resize
+       can never carry point geometry, because `ResizeArtefactOperation` does not admit it. */
+    case 'point': {
+      if (operation.geometry.role !== 'point' || !finite(operation.geometry.at.x, operation.geometry.at.y)) {
+        return undefined
+      }
+      const index = definition.points.findIndex((point) => matchesTarget(point, operation.target))
+      const point = definition.points[index]
+      if (!point) return undefined
+      const at = cloneSerialisable(operation.geometry.at)
+      return withDefinition(config, {
+        ...definition,
+        flows: movePointFlowEnds(definition.flows, point.id, { dx: at.x - point.point.x, dy: at.y - point.point.y }),
+        points: replaceAt(definition.points, index, { ...point, point: at })
       })
     }
     case 'graphic': {
@@ -300,6 +345,10 @@ const reorderArtefact = (
     case 'flow': {
       const flows = reordered(definition.flows, operation.target, operation.from, operation.to)
       return flows ? withDefinition(config, { ...definition, flows }) : undefined
+    }
+    case 'point': {
+      const points = reordered(definition.points, operation.target, operation.from, operation.to)
+      return points ? withDefinition(config, { ...definition, points }) : undefined
     }
     case 'graphic': {
       const graphics = reordered(definition.graphics, operation.target, operation.from, operation.to)
@@ -376,6 +425,19 @@ const removeArtefact = (
         flows: definition.flows.filter((_, candidate) => candidate !== index)
       })
     }
+    /* Removing a Point takes the Flows that entered or left through it with it, exactly as removing a Fabric does: a
+       Flow whose endpoint no longer exists is not a Flow the document can draw. */
+    case 'point': {
+      const index = definition.points.findIndex((point) => matchesTarget(point, operation.target))
+      if (index < 0) return undefined
+      const removedId = definition.points[index]?.id
+      if (!removedId) return undefined
+      return withDefinition(config, {
+        ...definition,
+        flows: definition.flows.filter((flow) => flow.source !== removedId && flow.target !== removedId),
+        points: definition.points.filter((_, candidate) => candidate !== index)
+      })
+    }
     case 'graphic': {
       const index = definition.graphics.findIndex((graphic) => matchesTarget(graphic, operation.target))
       if (index < 0) return undefined
@@ -449,6 +511,15 @@ const replaceProperties = (
         : withDefinition(config, {
             ...definition,
             flows: replaceAt(definition.flows, index, replacement as FlowConfig)
+          })
+    }
+    case 'point': {
+      const index = definition.points.findIndex((value) => matchesTarget(value, operation.target))
+      return index < 0
+        ? undefined
+        : withDefinition(config, {
+            ...definition,
+            points: replaceAt(definition.points, index, replacement as PointConfig)
           })
     }
     case 'graphic': {

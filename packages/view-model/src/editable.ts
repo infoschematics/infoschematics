@@ -2,6 +2,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { Box, Offset, Point } from './geometry.ts'
 import type { Guide } from './guides.ts'
@@ -81,7 +82,7 @@ export type CreatedComponent = {
   wraps?: string
 }
 
-export type ArtefactKind = 'region' | 'fabric' | 'card' | 'flow' | 'graphic'
+export type ArtefactKind = 'region' | 'fabric' | 'card' | 'point' | 'flow' | 'graphic'
 
 type SelectionIdentity = Readonly<{
   /** Null where the authored kind has no code field. */
@@ -94,6 +95,10 @@ export type ArtefactSelection =
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'fabric' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'card' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'box'; kind: 'graphic' }>)
+  /* A Point is the one element whose position is a coordinate rather than an extent, so it carries its own geometry
+     role rather than a box with two axes suppressed: `EDIT-008` requires that a Point never acquire box geometry, and
+     a role the type system can discriminate is what makes that a compile error rather than a convention. */
+  | (SelectionIdentity & Readonly<{ geometry: 'point'; kind: 'point' }>)
   | (SelectionIdentity & Readonly<{ geometry: 'route'; kind: 'flow' }>)
 
 export type ArtefactCapability = 'create' | 'select' | 'move' | 'resize' | 'edit-properties' | 'remove' | 'reorder'
@@ -117,6 +122,8 @@ export const artefactCapabilities: Readonly<Record<ArtefactKind, ArtefactCapabil
   fabric: capabilities(true, true),
   flow: capabilities(false, false),
   graphic: capabilities(true, true),
+  // A Point moves as a coordinate and has no extent to resize, per `EDIT-008`.
+  point: capabilities(true, false),
   region: capabilities(true, true)
 })
 
@@ -128,6 +135,7 @@ export const artefactKinds: readonly ArtefactKind[] = Object.freeze([
   'region',
   'fabric',
   'card',
+  'point',
   'flow',
   'graphic'
 ] as const)
@@ -220,22 +228,33 @@ export const selectionSetWithinLayers = (
  *
  * Read out of the capability matrix rather than listed here, so a kind that cannot be moved cannot be aligned
  * either: a Flow runs between the ports it is attached to, and aligning its route directly would fight them.
+ *
+ * Route geometry is excluded by role as well as by capability, because that is the actual reason a Flow sits out: it
+ * has no single extent to bring onto an edge. A Point has no extent either, but it does have one position, and every
+ * edge and centre line of a zero-extent element resolves to that position - so a Point aligns and distributes exactly
+ * as `ADR-INFOSCHEMATICS-031` reasons, and only geometry that is a path rather than a place is filtered out here.
  */
 export const groupMovableSelection = (selection: ArtefactSelectionSet): ArtefactSelectionSet =>
-  selection.filter((artefact) => artefact.geometry === 'box' && artefactCan(artefact.kind, 'move'))
+  selection.filter((artefact) => artefact.geometry !== 'route' && artefactCan(artefact.kind, 'move'))
 
 export type BoxGeometry = Readonly<{ box: Box; role: 'box' }>
+/** A position with no extent. Nothing here is a size, which is what keeps a Point out of every resize path. */
+export type PointGeometry = Readonly<{ at: Point; role: 'point' }>
 export type RouteGeometry = Readonly<{
   points: readonly Point[]
   role: 'route'
 }>
-export type ArtefactGeometry = BoxGeometry | RouteGeometry
+export type ArtefactGeometry = BoxGeometry | PointGeometry | RouteGeometry
+
+/** The geometry a group operation can measure: an extent, or a coordinate standing in for one. */
+export type MovableGeometry = Exclude<ArtefactGeometry, RouteGeometry>
 
 export type ArtefactValueByKind = Readonly<{
   card: CardConfig
   fabric: FabricConfig
   flow: FlowConfig
   graphic: GraphicConfig
+  point: PointConfig
   region: RegionConfig
 }>
 
@@ -249,15 +268,17 @@ export type CreateArtefactOperation<K extends ArtefactKind = ArtefactKind> = Rea
 }>
 
 export type MoveArtefactOperation = Readonly<{
-  geometry: Exclude<ArtefactGeometry, RouteGeometry>
+  geometry: MovableGeometry
   operation: 'move'
   target: Exclude<ArtefactSelection, { kind: 'flow' }>
 }>
 
+/* Resize is the one geometry operation a Point is excluded from by type rather than by capability flag. A Point has no
+   extent to resize, so a resize carrying point geometry is not a rejected operation but an unwritable one. */
 export type ResizeArtefactOperation = Readonly<{
-  geometry: Exclude<ArtefactGeometry, RouteGeometry>
+  geometry: BoxGeometry
   operation: 'resize'
-  target: Exclude<ArtefactSelection, { kind: 'flow' }>
+  target: Exclude<ArtefactSelection, { kind: 'flow' | 'point' }>
 }>
 
 export type ReorderArtefactOperation = Readonly<{
@@ -289,12 +310,15 @@ export type EditableArtefact = Readonly<{
 
 export type ResizeMinimum = Readonly<{ height?: number; width?: number }>
 
-export const artefactResizeMinimums: Readonly<Record<Exclude<ArtefactKind, 'flow'>, ResizeMinimum>> = Object.freeze({
-  card: Object.freeze({ height: 40, width: 40 }),
-  fabric: Object.freeze({ height: 40, width: 40 }),
-  graphic: Object.freeze({ height: 20, width: 20 }),
-  region: Object.freeze({ height: 20, width: 20 })
-})
+/* Every kind with an extent states the smallest one worth having. A Flow's geometry belongs to the ports it attaches
+   to, and a Point has no extent at all, so neither can hold a minimum: the exclusion is what stops a caller asking. */
+export const artefactResizeMinimums: Readonly<Record<Exclude<ArtefactKind, 'flow' | 'point'>, ResizeMinimum>> =
+  Object.freeze({
+    card: Object.freeze({ height: 40, width: 40 }),
+    fabric: Object.freeze({ height: 40, width: 40 }),
+    graphic: Object.freeze({ height: 20, width: 20 }),
+    region: Object.freeze({ height: 20, width: 20 })
+  })
 
 const cloneFrozen = <T>(value: T): T => {
   if (Array.isArray(value)) {
@@ -335,12 +359,23 @@ export const createArtefactOperation = <K extends ArtefactKind>(
 const clamp = (value: number, minimum: number, maximum: number) =>
   Math.min(Math.max(value, minimum), Math.max(minimum, maximum))
 
-const moveGeometry = (
-  geometry: Exclude<ArtefactGeometry, RouteGeometry>,
-  offset: Offset,
-  bounds?: Box
-): Exclude<ArtefactGeometry, RouteGeometry> | undefined => {
+const moveGeometry = (geometry: MovableGeometry, offset: Offset, bounds?: Box): MovableGeometry | undefined => {
   if (!validNumber(offset.dx) || !validNumber(offset.dy)) return undefined
+
+  /* A coordinate clamps to the diagram's own edges, where a box clamps to where its far edge would leave them. There
+     is no extent to keep inside, so a Point may sit exactly on a boundary - which is where an entry or exit Point
+     usually belongs. */
+  if (geometry.role === 'point') {
+    const x = geometry.at.x + offset.dx
+    const y = geometry.at.y + offset.dy
+    return cloneFrozen({
+      at: {
+        x: bounds ? clamp(x, bounds.x, bounds.x + bounds.width) : x,
+        y: bounds ? clamp(y, bounds.y, bounds.y + bounds.height) : y
+      },
+      role: 'point' as const
+    })
+  }
 
   const x = geometry.box.x + offset.dx
   const y = geometry.box.y + offset.dy
@@ -384,12 +419,13 @@ export const resizeArtefactOperation = (
   geometry: ArtefactGeometry,
   size: ResizeMinimum,
   bounds?: Box,
-  minimum: ResizeMinimum = target.kind === 'flow' ? {} : artefactResizeMinimums[target.kind]
+  minimum: ResizeMinimum = target.kind === 'flow' || target.kind === 'point' ? {} : artefactResizeMinimums[target.kind]
 ): ResizeArtefactOperation | undefined => {
   if (
     !artefactCan(target.kind, 'resize') ||
     target.kind === 'flow' ||
-    geometry.role === 'route' ||
+    target.kind === 'point' ||
+    geometry.role !== 'box' ||
     target.geometry !== geometry.role ||
     (size.height !== undefined && !validNumber(size.height)) ||
     (size.width !== undefined && !validNumber(size.width))
@@ -397,7 +433,7 @@ export const resizeArtefactOperation = (
     return undefined
   }
 
-  const resized: Exclude<ArtefactGeometry, RouteGeometry> = {
+  const resized: BoxGeometry = {
     box: {
       ...geometry.box,
       height: boundedSize(
@@ -483,6 +519,19 @@ export const alignOffsets = (anchor: Box, boxes: readonly Box[], edge: AlignEdge
   boxes.map((box) => alignedOffset(anchor, box, edge))
 
 /**
+ * The extent a group geometry operation measures, for a geometry that may not have one.
+ *
+ * A Point is a place rather than a size, so it is measured as a zero-extent box at its coordinate. Every edge and
+ * centre line of that box is the Point's own coordinate, so aligning a Point to any edge puts the Point on the
+ * anchor's named line; and distribute counts it as one participant occupying none of the space the others share,
+ * which is what equalising the gaps around a thing with no width means. `ADR-INFOSCHEMATICS-031` works both through.
+ *
+ * This is a measurement, not a geometry: nothing here is written back, so a Point never acquires a box.
+ */
+export const movableBox = (geometry: MovableGeometry): Box =>
+  geometry.role === 'box' ? geometry.box : { height: 0, width: 0, x: geometry.at.x, y: geometry.at.y }
+
+/**
  * What it takes to space a run of boxes evenly, in the order the boxes arrived.
  *
  * The two outermost boxes stay where they are and everything between them is spread through the space they leave,
@@ -536,6 +585,9 @@ export type PlacementAxis = 'height' | 'width' | 'x' | 'y'
 
 export type Placement =
   | { kind: 'box'; label: string; box: Box; editable: readonly PlacementAxis[] }
+  /* A Point states the two numbers it has and no others. This is its own case rather than a box with width and
+     height suppressed, so the panel never has to decide whether an absent extent is zero or unknown. */
+  | { kind: 'coordinate'; label: string; at: Point; editable: readonly Extract<PlacementAxis, 'x' | 'y'>[] }
   | { kind: 'route'; label: string; from: string; to: string; points: number }
   | { kind: 'port'; label: string; at: Point; side: string; number: number; used: boolean }
   | { kind: 'waypoint'; label: string; at: Point; flow: string; index: number }
@@ -642,12 +694,15 @@ export const orderChanges = (diagram: EditableDiagram, changes: ReadonlyMap<stri
   return ordered.length === changes.size ? ordered : [...changes.values()]
 }
 
+/* A Point sits before a Flow because a Flow may attach to one: creating the Flow first would reference an endpoint the
+   document does not have yet, and removing runs the same order in reverse, so the Flow leaves before its Point does. */
 const kindDependencyOrder: Readonly<Record<ArtefactKind, number>> = {
   region: 0,
   fabric: 1,
   card: 2,
-  graphic: 3,
-  flow: 4
+  point: 3,
+  graphic: 4,
+  flow: 5
 }
 
 const operationOrder: Readonly<Record<ArtefactOperation['operation'], number>> = {

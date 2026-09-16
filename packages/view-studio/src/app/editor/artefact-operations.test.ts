@@ -60,6 +60,12 @@ const graphic = defineArtefactSelection({
   id: 'graphic-one',
   kind: 'graphic' as const
 })
+const point = defineArtefactSelection({
+  code: 'POINT-01',
+  geometry: 'point' as const,
+  id: 'point-one',
+  kind: 'point' as const
+})
 const region = defineArtefactSelection({
   code: null,
   geometry: 'box' as const,
@@ -110,6 +116,20 @@ const config = defineInfoschematic({
         sourcePort: 'E1',
         target: 'fabric-one',
         targetPort: 'W1'
+      },
+      /* Point to Point, so the Flow a Point carries on removal is not one the Card and Fabric plans also carry. */
+      {
+        code: 'FLOW-02',
+        family: 'family',
+        id: 'flow-two',
+        points: [
+          { x: 200, y: 200 },
+          { x: 200, y: 260 }
+        ],
+        source: 'point-one',
+        sourcePort: 'S1',
+        target: 'point-two',
+        targetPort: 'N1'
       }
     ],
     graphics: [
@@ -118,6 +138,24 @@ const config = defineInfoschematic({
         placement: { height: 60, width: 80, x: 100, y: 100 },
         properties: { caption: 'Graphic caption', opacity: 0.8 },
         renderer: 'graphic-special'
+      }
+    ],
+    points: [
+      {
+        code: 'POINT-01',
+        id: 'point-one',
+        label: 'Point',
+        point: { x: 200, y: 200 },
+        ports: { south: 1 },
+        scopes: ['scope']
+      },
+      {
+        code: 'POINT-02',
+        id: 'point-two',
+        label: 'Other point',
+        point: { x: 200, y: 260 },
+        ports: { north: 1 },
+        scopes: ['scope']
       }
     ],
     regions: [
@@ -156,12 +194,13 @@ describe('typed artefact operation lifecycle', () => {
     ).toBeUndefined()
   })
 
-  it('creates serialisable operations for all five artefact kinds', () => {
+  it('creates serialisable operations for all six artefact kinds', () => {
     const operations = [
       createArtefactOperation(card, config.infoschematic.cards[0]!, 0),
       createArtefactOperation(fabric, config.infoschematic.fabrics[0]!, 0),
       createArtefactOperation(flow, config.infoschematic.flows[0]!, 0),
       createArtefactOperation(graphic, config.infoschematic.graphics[0]!, 0),
+      createArtefactOperation(point, config.infoschematic.points[0]!, 0),
       createArtefactOperation(region, config.infoschematic.regions[0]!, 0)
     ]
 
@@ -171,20 +210,25 @@ describe('typed artefact operation lifecycle', () => {
       'fabric',
       'flow',
       'graphic',
+      'point',
       'region'
     ])
+    /*
+     * A Point reports the third geometry role. Nothing else on the surface does, and the roles are what the editor
+     * dispatches movement and resizing on, so a Point answering `box` here would be handled as an extent it has not got.
+     */
     expect(
       operations.map((operation) =>
         operation?.operation === 'create' ? createdArtefactDetails(operation)?.geometry.role : undefined
       )
-    ).toEqual(['box', 'box', 'route', 'box', 'box'])
+    ).toEqual(['box', 'box', 'route', 'box', 'point', 'box'])
     expect(JSON.parse(JSON.stringify(operations))).toEqual(operations)
-    expect([card, fabric, flow, graphic, region].map((target) => artefactIndex(config, target))).toEqual([
-      0, 0, 0, 0, 0
+    expect([card, fabric, flow, graphic, point, region].map((target) => artefactIndex(config, target))).toEqual([
+      0, 0, 0, 0, 0, 0
     ])
   })
 
-  it('replaces partial properties for all five kinds without losing authored fields', () => {
+  it('replaces partial properties for all six kinds without losing authored fields', () => {
     const replacements = [
       replaceArtefactPropertiesOperation(config, [], card, {
         kind: 'card',
@@ -201,6 +245,10 @@ describe('typed artefact operation lifecycle', () => {
       replaceArtefactPropertiesOperation(config, [], graphic, {
         kind: 'graphic',
         value: { properties: { opacity: 1 } }
+      }),
+      replaceArtefactPropertiesOperation(config, [], point, {
+        kind: 'point',
+        value: { label: 'Point replaced' }
       }),
       replaceArtefactPropertiesOperation(config, [], region, {
         kind: 'region',
@@ -245,6 +293,11 @@ describe('typed artefact operation lifecycle', () => {
       properties: { caption: 'Graphic caption', opacity: 1 },
       renderer: 'graphic-special'
     })
+    // Its coordinate is the whole of its geometry, so a property edit that leaves it alone has to leave it exactly.
+    expect(materialised.config.infoschematic.points[0]).toEqual({
+      ...config.infoschematic.points[0],
+      label: 'Point replaced'
+    })
     expect(materialised.config.infoschematic.regions[0]).toEqual({
       ...config.infoschematic.regions[0],
       fill: '#abc',
@@ -256,6 +309,7 @@ describe('typed artefact operation lifecycle', () => {
       'region',
       'fabric',
       'card',
+      'point',
       'graphic',
       'flow'
     ])
@@ -405,6 +459,20 @@ describe('typed artefact operation lifecycle', () => {
       'remove:fabric'
     ])
     expect(regionPlan.operations.map((entry) => `${entry.operation}:${entry.target.kind}`)).toEqual(['remove:region'])
+  })
+
+  /*
+   * A Point is a Flow endpoint, so removing one is the Card case rather than the Region case. Left out of the cascade
+   * it read as a Region - removed alone - and the Flow that named it stayed behind pointing at nothing.
+   */
+  it('carries a Point Flows off with it', () => {
+    const plan = planArtefactRemoval(config, point)
+
+    expect(plan.operations.map((entry) => `${entry.operation}:${entry.target.id}`)).toEqual([
+      'remove:flow-two',
+      'remove:point-one'
+    ])
+    expect(applyArtefactOperations(config, plan.operations).rejected).toEqual([])
   })
 
   it('blocks a Graphic referenced by Story with an explicit reason', () => {

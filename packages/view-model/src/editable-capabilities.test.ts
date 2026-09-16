@@ -18,6 +18,7 @@ import {
   everyInteractionLayer,
   groupMovableSelection,
   interactionLayerOpen,
+  movableBox,
   moveArtefactOperation,
   orderArtefactOperations,
   removeArtefactOperation,
@@ -61,6 +62,12 @@ const graphicSelection = defineArtefactSelection({
   id: 'graphic-one',
   kind: 'graphic'
 })
+const pointSelection = defineArtefactSelection({
+  code: 'POINT-01',
+  geometry: 'point',
+  id: 'point-one',
+  kind: 'point'
+})
 
 const region: RegionConfig = {
   box: { height: 80, radius: 8, width: 400, x: 0, y: 10 },
@@ -92,9 +99,9 @@ const flow: FlowConfig = {
 }
 
 describe('artefact capability matrix', () => {
-  const kinds: readonly ArtefactKind[] = ['region', 'fabric', 'card', 'flow', 'graphic']
+  const kinds: readonly ArtefactKind[] = ['region', 'fabric', 'card', 'point', 'flow', 'graphic']
 
-  it('covers every supported operation for all five kinds', () => {
+  it('covers every supported operation for all six kinds', () => {
     expect(Object.keys(artefactCapabilities)).toEqual(expect.arrayContaining([...kinds]))
     for (const kind of kinds) {
       expect(artefactCan(kind, 'create')).toBe(true)
@@ -107,6 +114,10 @@ describe('artefact capability matrix', () => {
     expect(artefactCan('region', 'resize')).toBe(true)
     expect(artefactCan('flow', 'move')).toBe(false)
     expect(artefactCan('flow', 'resize')).toBe(false)
+    /* A Point is the only kind that moves and cannot be resized. `EDIT-008` requires it to move as a coordinate
+       without acquiring box geometry, and a resize is the operation that would have to give it one. */
+    expect(artefactCan('point', 'move')).toBe(true)
+    expect(artefactCan('point', 'resize')).toBe(false)
   })
 
   it('retains stable identity and kind-specific geometry role', () => {
@@ -114,6 +125,7 @@ describe('artefact capability matrix', () => {
       regionSelection,
       fabricSelection,
       cardSelection,
+      pointSelection,
       flowSelection,
       graphicSelection
     ]
@@ -122,6 +134,7 @@ describe('artefact capability matrix', () => {
       { code: null, geometry: 'box', id: 'region-one', kind: 'region' },
       { code: 'FABRIC-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' },
       { code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' },
+      { code: 'POINT-01', geometry: 'point', id: 'point-one', kind: 'point' },
       { code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' },
       { code: null, geometry: 'box', id: 'graphic-one', kind: 'graphic' }
     ])
@@ -247,6 +260,7 @@ describe('Design-session interaction layers', () => {
       'region',
       'fabric',
       'card',
+      'point',
       'flow'
     ])
     expect([...toggleInteractionLayer(closed, 'graphic')].sort()).toEqual([...artefactKinds].sort())
@@ -316,11 +330,14 @@ describe('Ordered multi-selection', () => {
   })
 
   it('reads participation out of the capability matrix, so a Flow never joins a group move', () => {
-    const group: ArtefactSelectionSet = [cardSelection, flowSelection, regionSelection]
+    const group: ArtefactSelectionSet = [cardSelection, flowSelection, regionSelection, pointSelection]
 
-    expect(groupMovableSelection(group).map((artefact) => artefact.kind)).toEqual(['card', 'region'])
+    expect(groupMovableSelection(group).map((artefact) => artefact.kind)).toEqual(['card', 'region', 'point'])
     expect(artefactCan('flow', 'move')).toBe(false)
-    for (const artefact of groupMovableSelection(group)) expect(artefact.geometry).toBe('box')
+    /* Route geometry is the one a group operation cannot measure, because a Flow is a path rather than a place and
+       has no single extent to bring onto a line. A Point has no extent either and is still a place, so it takes
+       part - which is why this reads the geometry role rather than asserting every participant has a box. */
+    for (const artefact of groupMovableSelection(group)) expect(artefact.geometry).not.toBe('route')
   })
 })
 
@@ -392,6 +409,48 @@ describe('Group alignment geometry', () => {
     expect(offsets[1]).toEqual({ dx: 0, dy: 0 })
     expect(offsets[0]).toEqual({ dx: 0, dy: 0 })
     expect(placed.map((box) => box.y)).toEqual([300, 0, 150])
+  })
+
+  /*
+   * A mixed group, which is the case the third geometry role exists for.
+   *
+   * A Point is measured as a zero-extent box at its coordinate, so no group operation needs a special case for it:
+   * align resolves every edge of that box to the coordinate, and distribute counts the Point as a participant that
+   * occupies none of the run. Both halves of `ADR-INFOSCHEMATICS-031`'s arithmetic are asserted here, including its
+   * worked example, because the prediction before it was worked through was that distribute would be incoherent.
+   */
+  it('measures a Point as a place, so a mixed group aligns and distributes with one', () => {
+    const point = movableBox({ at: { x: 260, y: 40 }, role: 'point' })
+    const boxed = movableBox({ box: { height: 40, width: 100, x: 100, y: 100 }, role: 'box' })
+
+    expect(point).toEqual({ height: 0, width: 0, x: 260, y: 40 })
+    expect(boxed).toEqual({ height: 40, width: 100, x: 100, y: 100 })
+
+    // Left, centre and right all name the same line for a thing with no width, and the anchor stays still.
+    expect(alignOffsets(boxed, [boxed, point], 'left')).toEqual([
+      { dx: 0, dy: 0 },
+      { dx: -160, dy: 0 }
+    ])
+    expect(alignOffsets(boxed, [boxed, point], 'centre-x')).toEqual([
+      { dx: 0, dy: 0 },
+      { dx: -110, dy: 0 }
+    ])
+    expect(alignOffsets(boxed, [boxed, point], 'right')).toEqual([
+      { dx: 0, dy: 0 },
+      { dx: -60, dy: 0 }
+    ])
+
+    // Two Cards with a hundred units of clear space between them, and a Point that lands one gap from each.
+    const run = [
+      movableBox({ box: { height: 40, width: 100, x: 0, y: 0 }, role: 'box' }),
+      movableBox({ at: { x: 120, y: 0 }, role: 'point' }),
+      movableBox({ box: { height: 40, width: 100, x: 300, y: 0 }, role: 'box' })
+    ]
+    const offsets = distributeOffsets(run, 'horizontal')
+
+    expect(offsets[0]).toEqual({ dx: 0, dy: 0 })
+    expect(offsets[2]).toEqual({ dx: 0, dy: 0 })
+    expect(120 + (offsets[1]?.dx ?? 0)).toBe(200)
   })
 
   it('has nothing to space when fewer than three boxes are held', () => {

@@ -60,7 +60,7 @@ diagram:
       collection: PRODUCTION
       stereotype: processor
       bounds: 540 180 180 120
-      ports: 0 1 0 1
+      ports: 0 1 1 1
     - id: CDN
       label: Distribution
       description: Places media near its audience.
@@ -75,6 +75,11 @@ diagram:
       stereotype: client
       bounds: 1020 180 180 120
       ports: 0 0 0 1
+  points:
+    - id: CAPTIONS
+      label: Caption feed
+      at: 630 380
+      color: '#fbbf24'
   flows:
     - id: CAPTURE
       family: AV
@@ -88,6 +93,9 @@ diagram:
     - id: VIEWED
       family: PLAYBACK
       link: CDN E1 -> PLAYER W1
+    - id: CAPTIONED
+      family: PACKAGE
+      link: CAPTIONS N1 -> PACKAGER S1
   dynamics:
     - id: segment-published
       label: A segment is published

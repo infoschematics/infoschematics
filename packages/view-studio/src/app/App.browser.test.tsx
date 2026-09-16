@@ -21,7 +21,7 @@ const config = defineInfoschematic({
         detail: 'Source card',
         id: 'card-a',
         label: 'Card A',
-        placement: { box: { height: 50, width: 100, x: 80, y: 170 }, ports: { east: 1 } },
+        placement: { box: { height: 50, width: 100, x: 80, y: 170 }, ports: { east: 1, north: 1 } },
         scope: 'scope',
         scopes: ['scope']
       },
@@ -49,6 +49,38 @@ const config = defineInfoschematic({
         sourcePort: 'E1',
         target: 'card-b',
         targetPort: 'W1'
+      },
+      {
+        code: 'FLOW-B',
+        family: 'request',
+        id: 'flow-b',
+        points: [
+          { x: 200, y: 90 },
+          { x: 130, y: 90 },
+          { x: 130, y: 170 }
+        ],
+        source: 'point-a',
+        sourcePort: 'S1',
+        target: 'card-a',
+        targetPort: 'N1'
+      }
+    ],
+    /* Two Points twenty units apart: far enough that each centre is its own press, close enough that their widened
+       hit targets overlap, which is the arrangement that proves a press takes the Point it was aimed at. */
+    points: [
+      {
+        code: 'POINT-A',
+        id: 'point-a',
+        label: 'Point A',
+        point: { x: 200, y: 90 },
+        scopes: ['scope']
+      },
+      {
+        code: 'POINT-B',
+        id: 'point-b',
+        label: 'Point B',
+        point: { x: 220, y: 90 },
+        scopes: ['scope']
       }
     ],
     scopes: [{ color: '#2463eb', description: 'Cards', fill: '#dbeafe', id: 'scope', label: 'Scope', prefix: 'CARD' }],
@@ -612,6 +644,177 @@ test('Studio layer controls close a kind to interaction and release whatever it 
   await expect.poll(() => control('Cards interactive')?.getAttribute('aria-pressed')).toBe('true')
   expect(control('Flows interactive')?.getAttribute('aria-pressed')).toBe('true')
   expect(container.querySelector('.audit-port')).not.toBeNull()
+})
+
+/*
+ * Where a diagram coordinate lands on the screen, so a press can be aimed at a Point rather than dispatched at an
+ * element already found in the tree. Finding the element first proves nothing about what a pointer would reach: a
+ * Point's visible mark takes no pointer events at all, and what answers a press is a transparent disc more than
+ * twice its radius. `elementFromPoint` is the only assertion that distinguishes those two.
+ */
+const artefactAt = (svg: SVGSVGElement, at: { x: number; y: number }) => {
+  const aimed = svg.createSVGPoint()
+  aimed.x = at.x
+  aimed.y = at.y
+  const onScreen = () => {
+    const matrix = svg.getScreenCTM()
+    if (!matrix) throw new Error('the diagram reports no screen transform')
+    return aimed.matrixTransform(matrix)
+  }
+  /*
+   * The aimed coordinate is brought to the middle of the window before it is asked what is there.
+   *
+   * A hit test is answered in window coordinates, and this suite runs every case against one page: where it is
+   * scrolled when this case starts is whatever the previous case left. The diagram is also wider than the window
+   * the suite runs in, so scrolling the whole diagram into view still leaves its western half outside - centring
+   * the point rather than the diagram is what makes any coordinate on the surface askable.
+   */
+  const before = onScreen()
+  window.scrollBy(before.x - window.innerWidth / 2, before.y - window.innerHeight / 2)
+  const client = onScreen()
+  const element = document.elementFromPoint(client.x, client.y)
+  if (!element) throw new Error(`nothing is on screen at ${at.x},${at.y} - the diagram is out of the window`)
+  return element.closest('[data-artefact-kind="point"]')?.getAttribute('data-artefact-id') ?? null
+}
+
+test('a Point answers a press across its widened target and lets go when its layer closes', async () => {
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={config} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const svg = container.querySelector<SVGSVGElement>('.infoschematic-svg')
+  const pointA = () => container.querySelector<SVGGElement>('[data-artefact-id="POINT-A"]')
+  const markA = () => container.querySelector<SVGCircleElement>('[data-artefact-id="POINT-A"] .point-mark')
+  if (!svg || !pointA()) throw new Error('Studio did not render the authored Points')
+
+  // Six units of paint, where it was authored: Design adds a target to the static rendering without altering it.
+  expect(markA()?.getAttribute('r')).toBe('6')
+  expect(markA()?.getAttribute('cx')).toBe('200')
+
+  /*
+   * Eight units off centre is the case the widened target exists for: outside the mark, inside the disc. Deleting
+   * the `.point-target` circle from the Point layer makes this line, and only this line, fail.
+   */
+  await expect.poll(() => artefactAt(svg, { x: 192, y: 90 })).toBe('POINT-A')
+  expect(artefactAt(svg, { x: 200, y: 90 })).toBe('POINT-A')
+  // Twenty units apart, so the two discs overlap and each Point still takes the press aimed at it.
+  expect(artefactAt(svg, { x: 220, y: 90 })).toBe('POINT-B')
+  /*
+   * Thirty units west is nobody's. FLOW-B runs along y 90 out to x 130 with a twelve-unit press stroke of its own,
+   * and the Point layer is painted over it, so a target that reached this far would quietly take the line's presses.
+   */
+  expect(artefactAt(svg, { x: 160, y: 90 })).toBeNull()
+
+  pointA()?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 41 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 41 }))
+  await expect.poll(() => pointA()?.classList.contains('selected')).toBe(true)
+  // Reachable without a pointer as well, which is what the role and the tab stop are for.
+  expect(pointA()?.getAttribute('role')).toBe('button')
+  expect(pointA()?.getAttribute('tabindex')).toBe('0')
+
+  const control = (label: string) => container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
+  await expect.poll(() => control('Points interactive')?.offsetParent ?? null).not.toBeNull()
+  const points = control('Points interactive')
+  if (!points) throw new Error('Design has no Points layer control')
+  expect(points.getAttribute('aria-pressed')).toBe('true')
+
+  points.click()
+  await expect.poll(() => points.getAttribute('aria-pressed')).toBe('false')
+  await expect.poll(() => pointA()?.classList.contains('layer-inert')).toBe(true)
+  /*
+   * Polled rather than read once. Closing the layer and releasing what it held are two pieces of state meeting in an
+   * effect, so the class arrives a render after `layer-inert` does, and a single read here reports a Point that is
+   * still selected when it is about to be let go.
+   */
+  await expect.poll(() => pointA()?.classList.contains('selected')).toBe(false)
+  await expect.poll(() => pointA()?.getAttribute('tabindex')).toBeNull()
+  expect(pointA()?.getAttribute('role')).toBe('img')
+  // Closed to interaction, not hidden, and nothing authored about it: still drawn where it was.
+  expect(markA()?.getAttribute('cx')).toBe('200')
+  expect(markA()?.getAttribute('r')).toBe('6')
+  expect(container.querySelector('.change-list')).toBeNull()
+  /*
+   * And released in the sense that matters: the disc is not drawn at all for a layer that cannot answer, so there is
+   * nothing under the pointer to press rather than a control that silently ignores it.
+   */
+  expect(container.querySelector('[data-artefact-id="POINT-A"] .point-target')).toBeNull()
+  expect(artefactAt(svg, { x: 192, y: 90 })).toBeNull()
+  expect(artefactAt(svg, { x: 200, y: 90 })).toBeNull()
+})
+
+test('a selected Point moves by key and by typed coordinate, and takes its Flow when removed', async () => {
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={config} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const pointA = () => container.querySelector<SVGGElement>('[data-artefact-id="POINT-A"]')
+  const markA = () => container.querySelector<SVGCircleElement>('[data-artefact-id="POINT-A"] .point-mark')
+  if (!pointA()) throw new Error('Studio did not render the authored Points')
+
+  pointA()?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 51 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 51 }))
+  await expect.poll(() => pointA()?.classList.contains('selected')).toBe(true)
+
+  /*
+   * One grid step east. A Point has no box to translate, so the move has to arrive on the coordinate the mark is
+   * drawn at - a Point measured as a box would have moved by half an extent it has not got, or not at all.
+   */
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
+  await expect.poll(() => markA()?.getAttribute('cx')).toBe('210')
+  expect(markA()?.getAttribute('cy')).toBe('90')
+  await expect.poll(() => container.querySelector('.change-list')?.textContent ?? '').toContain('POINT-A')
+
+  const undo = container.querySelector<HTMLButtonElement>('button[aria-label="Undo"]')
+  if (!undo) throw new Error('Studio did not render history controls')
+  undo.click()
+  await expect.poll(() => markA()?.getAttribute('cx')).toBe('200')
+
+  /*
+   * Dragging cannot land on a chosen coordinate, which is why the number is typed. The field is named for the Point
+   * rather than for the key the editor addresses it by, so what a screen reader says is `POINT-A x`.
+   */
+  const x = container.querySelector<HTMLInputElement>('input[aria-label="POINT-A x"]')
+  const y = container.querySelector<HTMLInputElement>('input[aria-label="POINT-A y"]')
+  if (!x || !y) throw new Error('Studio did not render numeric placement for Point A')
+  const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  if (!setInputValue) throw new Error('browser has no native input value setter')
+  setInputValue.call(x, '120')
+  x.dispatchEvent(new Event('input', { bubbles: true }))
+  await expect.poll(() => markA()?.getAttribute('cx')).toBe('120')
+  // One axis at a time, and the other is left where it was rather than reset to whatever the field last showed.
+  setInputValue.call(y, '60')
+  y.dispatchEvent(new Event('input', { bubbles: true }))
+  await expect.poll(() => markA()?.getAttribute('cy')).toBe('60')
+  expect(markA()?.getAttribute('cx')).toBe('120')
+
+  const discard = container.querySelector<HTMLButtonElement>('button[aria-label="Discard every change"]')
+  if (!discard) throw new Error('Studio did not render draft discard control')
+  discard.click()
+  await expect.poll(() => container.querySelector('.change-list')).toBeNull()
+  expect(markA()?.getAttribute('cx')).toBe('200')
+
+  /*
+   * FLOW-B leaves POINT-A, so removing the Point has to offer to remove the line with it. Left behind, the line
+   * would name a source the document no longer has, and the edit would be refused rather than drawn.
+   */
+  pointA()?.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Delete' }))
+  await expect.poll(() => pointA()?.classList.contains('going')).toBe(true)
+  await expect.poll(() => container.querySelector('.change-list')?.textContent ?? '').toContain('POINT-A')
+  const changes = container.querySelector('.change-list')?.textContent ?? ''
+  expect(changes).toContain('FLOW-B')
+  // POINT-B is not attached to anything and was not selected, so nothing about it is proposed.
+  expect(changes).not.toContain('POINT-B')
+
+  pointA()?.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'Delete' }))
+  await expect.poll(() => pointA()?.classList.contains('going')).toBe(false)
+  expect(container.querySelector('.change-list')).toBeNull()
+  expect(markA()?.getAttribute('cx')).toBe('200')
 })
 
 /*

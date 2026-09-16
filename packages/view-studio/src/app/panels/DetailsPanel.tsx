@@ -1,16 +1,17 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-model'
 import { useInfoschematic } from '@infoschematics/view-canvas'
 import type { ArtefactDraftOperation } from '@infoschematics/view-model/artefact-draft'
-import type {
-  AlignEdge,
-  ArtefactCapabilities,
-  ArtefactGeometry,
-  ArtefactKind,
-  ArtefactSelection,
-  ArtefactValueByKind,
-  DistributeAxis,
-  InteractionLayers,
-  Placement
+import {
+  type AlignEdge,
+  type ArtefactCapabilities,
+  type ArtefactGeometry,
+  type ArtefactKind,
+  type ArtefactSelection,
+  type ArtefactValueByKind,
+  type DistributeAxis,
+  type InteractionLayers,
+  movableBox,
+  type Placement
 } from '@infoschematics/view-model/editable'
 import { type PortCounts, portsForBox, type Side } from '@infoschematics/view-model/ports'
 import type { RuntimeInterface } from '@infoschematics/view-model/runtime'
@@ -215,6 +216,7 @@ export const detailsArtefactContexts = (
     ...definition.fabrics,
     ...definition.flows,
     ...definition.graphics,
+    ...definition.points,
     ...definition.regions
   ]
   const usedIds = [
@@ -228,7 +230,12 @@ export const detailsArtefactContexts = (
   const view = definition.viewBox
   const width = Math.min(240, view.width)
   const height = Math.min(120, view.height)
-  const selectedBox = editor.artefactGeometry?.role === 'box' ? editor.artefactGeometry.box : undefined
+  /* A new artefact is placed clear of whatever is selected, and a selected Point is a place with no extent to
+     clear, so it is measured as the zero-extent box `movableBox` gives it rather than ignored. */
+  const selectedBox =
+    editor.artefactGeometry && editor.artefactGeometry.role !== 'route'
+      ? movableBox(editor.artefactGeometry)
+      : undefined
   const box = {
     height,
     width,

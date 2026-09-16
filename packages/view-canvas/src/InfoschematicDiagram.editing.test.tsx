@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
-import { annotationLabelWidth } from '@infoschematics/view-model/tokens'
+import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
@@ -72,6 +72,16 @@ const config = defineInfoschematic({
         scopes: ['system']
       }
     ],
+    points: [
+      {
+        code: 'PT-001',
+        id: 'junction',
+        label: 'Junction',
+        point: { x: 300, y: 250 },
+        ports: { north: 1 },
+        scopes: ['system']
+      }
+    ],
     flows: [
       {
         code: 'REQ-001',
@@ -103,6 +113,7 @@ const selections = [
   { code: null, geometry: 'box', id: 'delivery', kind: 'region' },
   { code: 'SYS-001', geometry: 'box', id: 'SYS-001', kind: 'fabric' },
   { code: 'SYS-002', geometry: 'box', id: 'SYS-002', kind: 'card' },
+  { code: 'PT-001', geometry: 'point', id: 'PT-001', kind: 'point' },
   { code: 'REQ-001', geometry: 'route', id: 'REQ-001', kind: 'flow' },
   { code: null, geometry: 'box', id: 'annotation', kind: 'graphic' }
 ] as const satisfies readonly ArtefactSelection[]
@@ -139,9 +150,10 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(markup).toContain('aria-label="SYS-002 · Card · Card detail"')
     expect(markup).toContain('aria-label="Flow REQ-001"')
     expect(markup).toContain('aria-label="Annotation"')
+    expect(markup).toContain('aria-label="Point Junction"')
   })
 
-  it.each(selections.filter((selection) => selection.kind !== 'flow'))(
+  it.each(selections.filter((selection) => selection.kind !== 'flow' && selection.kind !== 'point'))(
     'offers resize and within-kind actions for selected $kind',
     (selection) => {
       const markup = renderToStaticMarkup(
@@ -289,7 +301,7 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(withoutRegions).not.toContain('aria-label="Resize Delivery"')
   })
 
-  it.each(selections.filter((selection) => selection.kind !== 'flow'))(
+  it.each(selections.filter((selection) => selection.kind !== 'flow' && selection.kind !== 'point'))(
     'draws the controls for a selected $kind above every element the diagram places',
     (selection) => {
       const markup = renderToStaticMarkup(
@@ -316,6 +328,54 @@ describe('InfoschematicDiagram Design editing', () => {
       expect(markup.indexOf('artefact-action')).toBeGreaterThan(foreground)
     }
   )
+
+  /*
+   * A Point is the one selectable kind with no extent, so the two halves of this have to be asserted separately: it
+   * takes the same late control layer and the same within-kind actions as everything else, and it must never be
+   * offered a resize handle. `EDIT-008` requires that a Point move as a coordinate without acquiring box geometry,
+   * and a resize handle on screen is how that rule would be broken in practice rather than in the type system.
+   */
+  /*
+   * Six units of radius is about four screen pixels at a Playground fit, which is smaller than the grid a Point
+   * snaps to. The mark therefore states where a Point is and a wider transparent disc states what may be pressed to
+   * take it. The disc is drawn only while the layer is open: a rendering nobody can press should carry no target.
+   */
+  it('gives a Point a press target wider than the mark it paints', () => {
+    const { pointRadius, pointTargetRadius } = visualTokens.canvas.geometry
+    const open = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const closed = renderToStaticMarkup(
+      <Canvas config={config} layers={new Set([])} mode="design" onArtefactSelect={() => undefined} />
+    )
+
+    expect(pointTargetRadius).toBeGreaterThan(pointRadius * 2)
+    expect(open).toContain(`class="point-target" cx="300" cy="250" r="${pointTargetRadius}"`)
+    expect(open).toContain(`class="point-mark" cx="300" cy="250"`)
+    expect(closed).toContain('class="point-mark" cx="300" cy="250"')
+    expect(closed).not.toContain('point-target')
+  })
+
+  it('offers a selected Point its actions in the foreground layer and no resize handle', () => {
+    const markup = renderToStaticMarkup(
+      <Canvas
+        config={config}
+        mode="design"
+        onArtefactRemove={() => undefined}
+        onArtefactReorder={() => undefined}
+        onArtefactResize={() => undefined}
+        onArtefactSelect={() => undefined}
+        selectedArtefact={{ code: 'PT-001', geometry: 'point', id: 'PT-001', kind: 'point' }}
+      />
+    )
+    const foreground = markup.indexOf('infoschematic-foreground')
+
+    expect(foreground).toBeGreaterThan(-1)
+    expect(markup.indexOf('artefact-action')).toBeGreaterThan(foreground)
+    expect(markup).toContain('aria-label="Move Junction earlier"')
+    expect(markup).toContain('aria-label="Move Junction later"')
+    expect(markup).toContain('aria-label="Remove Junction"')
+    expect(markup).not.toContain('artefact-resize-handle')
+    expect(markup).not.toContain('aria-label="Resize Junction"')
+  })
 
   it('dims editing affordances rather than removing the diagram they sit on', async () => {
     const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')

@@ -86,7 +86,25 @@ const config = defineInfoschematic({
         sourcePort: 'E1',
         target: 'card-b',
         targetPort: 'W1'
+      },
+      /* A Flow between two Points and no Card, so what a dragged Point does to a route is read off this one alone. */
+      {
+        code: 'FLOW-POINTS',
+        family: 'request',
+        id: 'flow-points',
+        points: [
+          { x: 280, y: 100 },
+          { x: 420, y: 100 }
+        ],
+        source: 'point-x',
+        sourcePort: 'E1',
+        target: 'point-y',
+        targetPort: 'W1'
       }
+    ],
+    points: [
+      { code: 'POINT-X', id: 'point-x', label: 'Point X', point: { x: 280, y: 100 }, scopes: ['scope'] },
+      { code: 'POINT-Y', id: 'point-y', label: 'Point Y', point: { x: 420, y: 100 }, scopes: ['scope'] }
     ],
     scopes: [{ color: '#2463eb', description: 'Cards', fill: '#dbeafe', id: 'scope', label: 'Scope', prefix: 'CARD' }],
     viewBox: { height: 320, width: 640, x: 0, y: 0 }
@@ -125,10 +143,11 @@ function EditingHarness({ onMove, onRelease }: { onMove?: () => void; onRelease?
         onMove?.()
         setOperations([
           {
-            geometry: {
-              box: { height: 50, width: 100, x: point.x - 50, y: point.y - 25 },
-              role: 'box'
-            },
+            /* A Point is moved to where the pointer is rather than around it: it has no extent to centre. */
+            geometry:
+              selection.geometry === 'point'
+                ? { at: point, role: 'point' }
+                : { box: { height: 50, width: 100, x: point.x - 50, y: point.y - 25 }, role: 'box' },
             operation: 'move',
             target: selection
           }
@@ -242,6 +261,29 @@ test('pointer movement carries a Flow end with its Card port', async () => {
   window.dispatchEvent(new PointerEvent('pointerup', { ...at(170, 205), bubbles: true, pointerId: 1 }))
 
   await expect.poll(() => container.querySelector('.infoschematic-route')?.getAttribute('d')).toBe('M220 205 H360 V195')
+})
+
+/*
+ * The one movement case a unit test cannot stand in for: a Point is dragged, and the route that names it as an end
+ * is redrawn from where it was left. `DESIGN-014` states it, and every other proof of it works from an operation
+ * already built rather than from a pointer.
+ */
+test('dragging a Point carries the Flow that ends on it', async () => {
+  const { container } = await render(<EditingHarness />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const point = container.querySelector<SVGGElement>('[data-artefact-id="POINT-X"]')
+  if (!svg || !point) throw new Error('rendered Point fixture is incomplete')
+
+  const route = () => container.querySelector('[data-artefact-id="FLOW-POINTS"] .infoschematic-route')
+  point.dispatchEvent(new PointerEvent('pointerdown', { ...screenPoint(svg, 280, 100), bubbles: true, pointerId: 7 }))
+  window.dispatchEvent(new PointerEvent('pointermove', { ...screenPoint(svg, 300, 140), bubbles: true, pointerId: 7 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { ...screenPoint(svg, 300, 140), bubbles: true, pointerId: 7 }))
+
+  await expect
+    .poll(() => container.querySelector('[data-artefact-id="POINT-X"] .point-mark')?.getAttribute('cx'))
+    .toBe('300')
+  expect(container.querySelector('[data-artefact-id="POINT-X"] .point-mark')?.getAttribute('cy')).toBe('140')
+  expect(route()?.getAttribute('d')).toBe('M300 140 H420 V100')
 })
 
 test('dragging an Adapter moves its held Card and the Flow attached to the Adapter', async () => {

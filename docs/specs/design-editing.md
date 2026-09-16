@@ -82,9 +82,9 @@ Reorder MUST change authored order only inside the selected kind. Studio MUST NO
 
 _Conformance:_ conforming
 
-_Verify:_ Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover six-kind selection, constraints, actions and Flow, Point or Adapter exclusions.
+_Verify:_ run the geometry cases in `packages/view-model/src/editable-capabilities.test.ts` and `packages/view-studio/src/app/editor/artefact-operations.test.ts`; a Point reports the `point` geometry role rather than a box, and the resize operation cannot be constructed for one. Then run the Point cases in `packages/view-studio/src/app/App.browser.test.tsx`, which move it by key and by typed coordinate and read the coordinate back off the rendered mark.
 
-_Evidence:_ Canvas interaction tests under `packages/view-canvas/src/` and Studio artefact-control tests cover six-kind selection, constraints, actions and Flow, Point or Adapter exclusions.
+_Evidence:_ `packages/view-model/src/editable.ts` gives a Point `PointGeometry` and excludes it from `ResizeArtefactOperation`, so a Point with a box is not a state the editor can reach; `packages/view-canvas/src/InfoschematicDiagram.tsx` offers it no resize handle; `packages/view-studio/src/app/editor/use-editor.ts` moves it by writing a coordinate; `docs/decisions/ADR-INFOSCHEMATICS-031-a-point-is-its-own-artefact-kind.md` records why it is a kind of its own rather than a part of the Flow that owns it.
 
 ### EDIT-009 — Removal remains reviewable
 
@@ -92,9 +92,9 @@ Removing an authored artefact MUST mark it as pending removal rather than making
 
 _Conformance:_ conforming
 
-_Verify:_ inspect removal drafts in `packages/view-studio/src/app/editor/use-editor.ts`. against this requirement.
+_Verify:_ run the removal cases in `packages/view-studio/src/app/editor/artefact-operations.test.ts` and `packages/view-studio/src/app/App.browser.test.tsx`. Every kind a Flow can name as an endpoint carries its Flows off with it: a Point left out of that cascade read as a Region, was removed alone, and the Flow that named it stayed behind pointing at nothing.
 
-_Evidence:_ removal drafts in `packages/view-studio/src/app/editor/use-editor.ts`.
+_Evidence:_ removal drafts in `packages/view-studio/src/app/editor/use-editor.ts`; the cascade and its order in `packages/view-studio/src/app/editor/artefact-operations.ts`; the projection that carries dependent members out of the authored document in `packages/view-studio/src/app/editor/document-operations.ts`.
 
 ### EDIT-010 — A flow can be created between ports
 

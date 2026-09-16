@@ -20,6 +20,7 @@ import {
   everyInteractionLayer,
   groupMovableSelection,
   type InteractionLayers,
+  movableBox,
   moveArtefactOperation,
   orderChanges,
   type ResizeMinimum,
@@ -201,6 +202,8 @@ const selectionKey = (selection: ArtefactSelection): string => {
       return `region:${selection.id}`
     case 'graphic':
       return `graphic:${selection.id}`
+    case 'point':
+      return `point:${selection.id}`
     case 'fabric':
     case 'card':
     case 'flow':
@@ -238,6 +241,7 @@ const selectionForCreation = <K extends ArtefactKind>(
 ): ArtefactSelection | undefined => {
   const code = 'code' in value && typeof value.code === 'string' ? value.code : null
   if (kind === 'flow') return { code, geometry: 'route', id: value.id, kind }
+  if (kind === 'point') return { code, geometry: 'point', id: value.id, kind }
   return { code, geometry: 'box', id: value.id, kind }
 }
 
@@ -253,6 +257,8 @@ const artefactCount = (config: InfoschematicConfig, target: ArtefactSelection) =
       return config.infoschematic.flows.length
     case 'graphic':
       return config.infoschematic.graphics.length
+    case 'point':
+      return config.infoschematic.points.length
   }
 }
 
@@ -841,6 +847,15 @@ export function useEditor(
     return 'box' in value.placement ? value.placement.box : value.placement
   }
 
+  /*
+   * A Point's drafted coordinate, which is the whole of its drafted geometry.
+   *
+   * It exists for the reason `effectiveBoxFor` does: the diagram still reports the authored coordinate, so a
+   * second move measured against that would undo most of the first.
+   */
+  const effectivePointFor = (target: ArtefactSelection): Point | undefined =>
+    (effectiveArtefactValue(config, artefactOperations, target) as { point?: Point } | undefined)?.point
+
   const artefactDetailsFor = (selection: ArtefactSelection): EditableArtefact | undefined =>
     diagram.selectionFor(selectionKey(selection)) ?? createdArtefactDetailsFor(config, artefactOperations, selection)
 
@@ -855,13 +870,17 @@ export function useEditor(
     const target = details.movementTarget
     const moving = sameArtefact(target, details.selection) ? details : artefactDetailsFor(target)
     if (!moving?.capabilities.move) return undefined
-    return {
-      geometry:
-        moving.geometry.role === 'box'
-          ? { ...moving.geometry, box: effectiveBoxFor(target) ?? moving.geometry.box }
-          : moving.geometry,
-      target
-    }
+    const geometry = (() => {
+      switch (moving.geometry.role) {
+        case 'box':
+          return { ...moving.geometry, box: effectiveBoxFor(target) ?? moving.geometry.box }
+        case 'point':
+          return { ...moving.geometry, at: effectivePointFor(target) ?? moving.geometry.at }
+        case 'route':
+          return moving.geometry
+      }
+    })()
+    return { geometry, target }
   }
 
   // Snapping works on the box, not the pointer: the pointer sits somewhere
@@ -873,25 +892,46 @@ export function useEditor(
     const movement = movementFor(selectedArtefactDetails)
     if (!movement) return
     const { geometry, target } = movement
+    /*
+     * Where the wanted position actually lands, once the grid and the guides have had their say. It is shared
+     * between the roles because a Point must snap to exactly the lines everything else snaps to: a Point is an
+     * anchor for Flows, and one that came to rest half a unit off the grid would take its Flows off it too.
+     */
+    const place = (wanted: Box) => {
+      const placed = (() => {
+        if (exact) return { box: wanted, guides: [] as readonly Guide[] }
+        if (view.snapping)
+          return snapBoxToGuides(
+            wanted,
+            diagram.guidesFor(selectionKey(target)),
+            gridSize > 0 ? { grid: gridSize } : {}
+          )
+        return {
+          box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted,
+          guides: [] as readonly Guide[]
+        }
+      })()
+      setGuides(placed.guides)
+      return placed.box
+    }
     const offset = (() => {
       switch (geometry.role) {
         case 'box': {
-          const wanted = { ...geometry.box, x: point.x - geometry.box.width / 2, y: point.y - geometry.box.height / 2 }
-          const placed = (() => {
-            if (exact) return { box: wanted, guides: [] as readonly Guide[] }
-            if (view.snapping)
-              return snapBoxToGuides(
-                wanted,
-                diagram.guidesFor(selectionKey(target)),
-                gridSize > 0 ? { grid: gridSize } : {}
-              )
-            return {
-              box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted,
-              guides: [] as readonly Guide[]
-            }
-          })()
-          setGuides(placed.guides)
-          return { dx: placed.box.x - geometry.box.x, dy: placed.box.y - geometry.box.y }
+          const placed = place({
+            ...geometry.box,
+            x: point.x - geometry.box.width / 2,
+            y: point.y - geometry.box.height / 2
+          })
+          return { dx: placed.x - geometry.box.x, dy: placed.y - geometry.box.y }
+        }
+        /*
+         * A Point has no extent to centre the pointer inside, so the wanted coordinate is the pointer itself,
+         * measured as the zero-extent box `ADR-INFOSCHEMATICS-031` licenses. Every edge of that box is the
+         * Point's own coordinate, so a guide that catches an edge and one that catches the centre agree.
+         */
+        case 'point': {
+          const placed = place({ height: 0, width: 0, x: point.x, y: point.y })
+          return { dx: placed.x - geometry.at.x, dy: placed.y - geometry.at.y }
         }
         case 'route':
           return undefined
@@ -913,7 +953,9 @@ export function useEditor(
     groupMovableSelection(selectionSet).flatMap((selection) => {
       const details = artefactDetailsFor(selection)
       const movement = details ? movementFor(details) : undefined
-      return movement?.geometry.role === 'box' ? [{ box: movement.geometry.box, movement }] : []
+      /* A Point joins the group as the zero-extent box `movableBox` measures it as, so align and distribute
+         count it as a participant without ever writing a box back onto it. Only a Flow's route is left out. */
+      return movement && movement.geometry.role !== 'route' ? [{ box: movableBox(movement.geometry), movement }] : []
     })
 
   /*
@@ -1287,7 +1329,19 @@ export function useEditor(
     // which already includes any offset it is carrying.
     placeAt: (key: string, axis: 'x' | 'y', value: number) => {
       const at = diagram.placementFor(key)
-      if (at?.kind !== 'box' || !Number.isFinite(value)) return
+      if (!Number.isFinite(value)) return
+      /*
+       * A typed coordinate is a move to exactly that coordinate, and a Point has no extent to centre inside,
+       * so the number is the answer rather than an edge to convert. The offset-draft path below is not open to
+       * a Point: it is reached only through a structured operation, so an unselected Point is not placed.
+       */
+      if (at?.kind === 'coordinate') {
+        if (!selectedArtefactDetails || selectionKey(selectedArtefactDetails.selection) !== key) return
+        const current = effectivePointFor(selectedArtefactDetails.movementTarget) ?? at.at
+        moveSelectedArtefact({ x: axis === 'x' ? value : current.x, y: axis === 'y' ? value : current.y }, true)
+        return
+      }
+      if (at?.kind !== 'box') return
       if (selectedArtefactDetails && selectionKey(selectedArtefactDetails.selection) === key) {
         const target = selectedArtefactDetails.movementTarget
         const box = effectiveBoxFor(target) ?? at.box

@@ -3,6 +3,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
+import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import { describe, expect, it } from 'vitest'
 import { type ArtefactDraftOperation, applyArtefactOperations } from './artefact-draft.ts'
@@ -69,6 +70,15 @@ const graphic = (id: string, x: number): GraphicConfig => ({
   scopes: ['scope-one']
 })
 
+const point = (id: string, code: string, x: number): PointConfig => ({
+  code,
+  id,
+  label: `${id} label`,
+  point: { x, y: 110 },
+  ports: { north: 1 },
+  scopes: ['scope-one']
+})
+
 const config = (): InfoschematicConfig => ({
   calloutPositions: [{ x: 20, y: 20 }],
   infoschematic: {
@@ -87,7 +97,7 @@ const config = (): InfoschematicConfig => ({
     graphics: [graphic('graphic-one', 100), graphic('graphic-two', 300)],
     interfaces: [],
     regions: [region('region-one', 80), region('region-two', 220)],
-    points: [],
+    points: [point('point-one', 'P1', 500), point('point-two', 'P2', 700)],
     scopes: [
       {
         color: '#456',
@@ -166,6 +176,12 @@ const selections = {
     id: 'graphic-one',
     kind: 'graphic'
   },
+  point: {
+    code: 'P1',
+    geometry: 'point',
+    id: 'point-one',
+    kind: 'point'
+  },
   region: {
     code: null,
     geometry: 'box',
@@ -175,19 +191,21 @@ const selections = {
 } as const satisfies Record<string, ArtefactSelection>
 
 describe('applyArtefactOperations', () => {
-  it('creates all five kinds in authored order and deep-copies operation values', () => {
+  it('creates all six kinds in authored order and deep-copies operation values', () => {
     const initial = config()
     initial.infoschematic.regions = [] as never
     initial.infoschematic.cards = [] as never
     initial.infoschematic.fabrics = [] as never
     initial.infoschematic.flows = [] as never
     initial.infoschematic.graphics = [] as never
+    initial.infoschematic.points = [] as never
     const before = structuredClone(initial)
     const createdRegion = region('region-created', 120)
     const createdFabric = fabric('fabric-created', 'FC', 140)
     const createdCard = card('card-created', 'CC', 180)
     const createdFlow = flow('flow-created', 'LC', 'fabric-created', 'card-created')
     const createdGraphic = graphic('graphic-created', 220)
+    const createdPoint = point('point-created', 'PC', 260)
     const operations: readonly ArtefactDraftOperation[] = [
       {
         at: 0,
@@ -243,12 +261,24 @@ describe('applyArtefactOperations', () => {
           kind: 'graphic'
         },
         value: createdGraphic
+      },
+      {
+        at: 0,
+        operation: 'create',
+        target: {
+          code: 'PC',
+          geometry: 'point',
+          id: 'point-created',
+          kind: 'point'
+        },
+        value: createdPoint
       }
     ]
 
     const result = applyArtefactOperations(initial, operations)
     ;(createdGraphic.properties as { caption: string }).caption = 'mutated after apply'
     createdRegion.fill = 'mutated after apply'
+    createdPoint.point.x = -1
 
     expect(result.rejected).toEqual([])
     expect(result.config.infoschematic.regions[0]?.id).toBe('region-created')
@@ -257,6 +287,9 @@ describe('applyArtefactOperations', () => {
     expect(result.config.infoschematic.flows[0]?.id).toBe('flow-created')
     expect(result.config.infoschematic.graphics[0]?.properties?.caption).toBe('graphic-created caption')
     expect(result.config.infoschematic.regions[0]?.fill).toBe('#eef')
+    expect(result.config.infoschematic.points[0]?.id).toBe('point-created')
+    // A Point's coordinate is the whole of its geometry, so a shallow copy would let an authored value drift.
+    expect(result.config.infoschematic.points[0]?.point).toEqual({ x: 260, y: 110 })
     expect(initial).toEqual(before)
     expect(result.config).not.toBe(initial)
   })
@@ -357,6 +390,69 @@ describe('applyArtefactOperations', () => {
       { x: 300, y: 140 },
       { x: 300, y: 100 }
     ])
+  })
+
+  /*
+   * A Point moves as the coordinate it is, and takes the Flow ends attached to it.
+   *
+   * Every port on a Point resolves to the Point's own coordinate, so unlike a Card there is no per-port offset to
+   * look up: the whole move is the delta for each attached end. Leaving those ends where they were would detach a
+   * Flow from the thing it is authored as attached to, and nothing in the document would say so.
+   */
+  it('moves a Point as a coordinate and carries its attached Flow ends', () => {
+    const base = config()
+    const attached = flow('flow-point', 'LP', 'point-one', 'card-two')
+    const initial: InfoschematicConfig = {
+      ...base,
+      infoschematic: {
+        ...base.infoschematic,
+        flows: [
+          {
+            ...attached,
+            points: [
+              { x: 500, y: 110 },
+              { x: 600, y: 110 }
+            ]
+          }
+        ]
+      }
+    }
+
+    const result = applyArtefactOperations(initial, [
+      { geometry: { at: { x: 520, y: 150 }, role: 'point' }, operation: 'move', target: selections.point }
+    ])
+    const moved = result.config.infoschematic.points
+
+    expect(result.rejected).toEqual([])
+    expect(moved[0]?.point).toEqual({ x: 520, y: 150 })
+    // Nothing else about the Point changes, and it acquires no box.
+    expect(moved[0]).toEqual({ ...point('point-one', 'P1', 520), point: { x: 520, y: 150 } })
+    expect(moved[1]?.point).toEqual({ x: 700, y: 110 })
+    /* The attached end travels and the far end, on a Card nobody moved, stays - and the route keeps its right angle
+       by gaining the bend that costs, exactly as a moved Card's route does. */
+    expect(result.config.infoschematic.flows[0]?.points).toEqual([
+      { x: 520, y: 150 },
+      { x: 600, y: 150 },
+      { x: 600, y: 110 }
+    ])
+  })
+
+  it('removes a Point together with the Flows attached to it', () => {
+    const base = config()
+    const initial: InfoschematicConfig = {
+      ...base,
+      infoschematic: {
+        ...base.infoschematic,
+        flows: [...base.infoschematic.flows, flow('flow-point', 'LP', 'point-one', 'card-two')]
+      }
+    }
+
+    const removed = applyArtefactOperations(initial, [{ operation: 'remove', target: selections.point }])
+
+    expect(removed.rejected).toEqual([])
+    expect(removed.config.infoschematic.points.map((entry) => entry.id)).toEqual(['point-two'])
+    // A Flow whose end has gone cannot be authored, so removing the Point removes it - as it does for a Fabric.
+    expect(removed.config.infoschematic.flows.map((entry) => entry.id)).toEqual(['flow-one', 'flow-two'])
   })
 
   it('moves Flow ends attached to an Adapter when its wrapped Card moves', () => {
@@ -474,7 +570,7 @@ describe('applyArtefactOperations', () => {
     ])
   })
 
-  it('replaces all five authored values, including Flow route properties', () => {
+  it('replaces all six authored values, including Flow route properties', () => {
     const initial = config()
     const originalRegion = initial.infoschematic.regions[0]
     const operations: readonly ArtefactDraftOperation[] = [
@@ -513,6 +609,11 @@ describe('applyArtefactOperations', () => {
       },
       {
         operation: 'replace-properties',
+        target: selections.point,
+        value: { ...initial.infoschematic.points[0]!, label: 'Point replaced', ports: { north: 1, west: 1 } }
+      },
+      {
+        operation: 'replace-properties',
         target: selections.graphic,
         value: {
           ...initial.infoschematic.graphics[0]!,
@@ -547,6 +648,12 @@ describe('applyArtefactOperations', () => {
       renderer: 'graphic-special',
       scopes: ['scope-one']
     })
+    // A property edit must not disturb the coordinate that is the whole of a Point's geometry.
+    expect(result.config.infoschematic.points[0]).toMatchObject({
+      label: 'Point replaced',
+      point: { x: 500, y: 110 },
+      ports: { north: 1, west: 1 }
+    })
   })
 
   it('reorders only inside each fixed authored kind', () => {
@@ -556,6 +663,7 @@ describe('applyArtefactOperations', () => {
       fabric: { ...selections.fabric, code: 'F2', id: 'fabric-two' },
       flow: { ...selections.flow, code: 'L2', id: 'flow-two' },
       graphic: { ...selections.graphic, id: 'graphic-two' },
+      point: { ...selections.point, code: 'P2', id: 'point-two' },
       region: { ...selections.region, id: 'region-two' }
     } as const satisfies Record<string, ArtefactSelection>
     const operations = Object.values(secondSelections).map((target) => ({
@@ -573,6 +681,7 @@ describe('applyArtefactOperations', () => {
     expect(result.config.infoschematic.cards.map(({ id }) => id)).toEqual(['card-two', 'card-one'])
     expect(result.config.infoschematic.flows.map(({ id }) => id)).toEqual(['flow-two', 'flow-one'])
     expect(result.config.infoschematic.graphics.map(({ id }) => id)).toEqual(['graphic-two', 'graphic-one'])
+    expect(result.config.infoschematic.points.map(({ id }) => id)).toEqual(['point-two', 'point-one'])
   })
 
   it('cascades owned and referenced records while preserving unrelated content', () => {

@@ -69,6 +69,20 @@ const config = defineInfoschematic({
         sourcePort: 'E1',
         target: 'card-two',
         targetPort: 'W1'
+      },
+      {
+        code: 'FLOW-02',
+        family: 'family',
+        id: 'flow-two',
+        points: [
+          { x: 280, y: 150 },
+          { x: 200, y: 150 },
+          { x: 200, y: 50 }
+        ],
+        source: 'point-one',
+        sourcePort: 'N1',
+        target: 'card-two',
+        targetPort: 'S1'
       }
     ],
     graphics: [
@@ -77,6 +91,16 @@ const config = defineInfoschematic({
         placement: { height: 20, width: 30, x: 20, y: 70 },
         properties: { opacity: 0.5 },
         renderer: 'graphic-special',
+        scopes: ['scope']
+      }
+    ],
+    points: [
+      {
+        code: 'POINT-01',
+        id: 'point-one',
+        label: 'Point one',
+        point: { x: 280, y: 150 },
+        ports: { north: 1 },
         scopes: ['scope']
       }
     ],
@@ -108,6 +132,7 @@ const selections = {
   fabric: defineArtefactSelection({ code: 'FABRIC-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' }),
   flow: defineArtefactSelection({ code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' }),
   graphic: defineArtefactSelection({ code: null, geometry: 'box', id: 'graphic-one', kind: 'graphic' }),
+  point: defineArtefactSelection({ code: 'POINT-01', geometry: 'point', id: 'point-one', kind: 'point' }),
   region: defineArtefactSelection({ code: null, geometry: 'box', id: 'region-one', kind: 'region' })
 } as const
 
@@ -211,6 +236,45 @@ describe('Studio document operations', () => {
     if (!removedResult.ok) return
     expect(removedResult.model.diagram.overlays).toEqual([])
     expect(removedResult.model.scopes[0]?.elements).not.toContain('graphic-one')
+  })
+
+  it('names the authored Point entry for a move and carries its Flows on a removal', () => {
+    const moved: ArtefactDraftOperation = {
+      geometry: { at: { x: 300, y: 160 }, role: 'point' },
+      operation: 'move',
+      target: selections.point
+    }
+    const projection = projectStudioDocumentOperations(documentFor(), config, [moved])
+    expect(projection.ok).toBe(true)
+    if (!projection.ok) return
+    /*
+     * One row, against the authored `points:` entry, carrying the compact pair the document was written with.
+     * The Flow that anchors on the Point reprojects from the coordinate rather than being rewritten, so nothing
+     * names `flows:` here.
+     */
+    expect(projection.edit.operations).toEqual([
+      {
+        op: 'replace',
+        path: [{ field: 'diagram' }, { field: 'points' }, { id: 'POINT-01' }, { field: 'at' }],
+        value: '300 160'
+      }
+    ])
+
+    const movedResult = applyStudioDocumentOperations(documentFor(), config, [moved])
+    expect(movedResult.ok).toBe(true)
+    if (!movedResult.ok) return
+    expect(movedResult.model.diagram.points[0]?.at).toEqual({ x: 300, y: 160 })
+    expect(movedResult.changedElements).toEqual(['POINT-01'])
+    // The authored form survives: a coordinate goes back as the compact pair a Producer wrote, not as a mapping.
+    expect(movedResult.source).toContain('at: 300 160')
+
+    const removed: ArtefactDraftOperation = { operation: 'remove', target: selections.point }
+    const removedResult = applyStudioDocumentOperations(documentFor(), config, [removed])
+    expect(removedResult.ok).toBe(true)
+    if (!removedResult.ok) return
+    expect(removedResult.model.diagram.points).toEqual([])
+    expect(removedResult.model.diagram.flows.map((flow) => flow.id)).toEqual(['FLOW-01'])
+    expect(removedResult.model.scopes[0]?.elements).not.toContain('POINT-01')
   })
 
   it('edits compact Flow fields without discarding comments inside the Flow', () => {

@@ -45,10 +45,11 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 33. [ADR-INFOSCHEMATICS-027](ADR-INFOSCHEMATICS-027-one-ordered-selection-with-an-anchor.md) — make the Design selection one ordered set and measure every group operation from its anchor.
 34. [ADR-INFOSCHEMATICS-028](ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md) — keep the collapsed rail a Present affordance and open the panel dock on entry to a Producer mode.
 35. [ADR-INFOSCHEMATICS-029](ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means.md) — let a Dynamic say whether it depicts an event or a state, and leave every treatment choice to the renderer.
+36. [ADR-INFOSCHEMATICS-031](ADR-INFOSCHEMATICS-031-a-point-is-its-own-artefact-kind.md) — make a Point a sixth artefact kind with a coordinate geometry role rather than a part of the Flow that owns it.
 
 ## Repository operation
 
-36. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-37. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
-38. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
-39. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-command-naming.md) — name every command owner first, then subject, then verb, and hold the surface in one test.
+37. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+38. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+39. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
+40. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-command-naming.md) — name every command owner first, then subject, then verb, and hold the surface in one test.

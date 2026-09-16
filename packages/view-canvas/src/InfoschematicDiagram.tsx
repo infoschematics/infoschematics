@@ -201,13 +201,19 @@ function DefaultGraphic({ graphic, bounds }: { graphic: Overlay; bounds: Box }) 
   )
 }
 
-const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeWidth } = visualTokens.canvas.geometry
+const { addReach, attachmentReach, cornerRadius, dragThreshold, gridMinorStrokeWidth, pointRadius, pointTargetRadius } =
+  visualTokens.canvas.geometry
 // The moving pulse is Canvas-only; static output shares only the still-path treatment.
 const signalRadius = 5
 const emphasisTokens = visualTokens.canvas.emphasis
 // The travelling mark is Canvas-only, like the Flow pulse above: still output shares the perimeter and draws nothing
 // travelling on it, because the direction a mark traces is chosen from the geometry and not stated by the document.
 const emphasisMarkRadius = 5
+
+/* What an unscoped Point is painted in. The static renderer reaches for its own light-paper defaults here; the
+   interactive surface is dark, so the two renderings agree on the Point's geometry and differ on its palette
+   exactly as a Card's already does. */
+const pointTokens = { fill: visualTokens.canvas.surfaces.backdrop, stroke: visualTokens.canvas.text.muted }
 
 /**
  * What an emphasis draws for one element.
@@ -465,6 +471,7 @@ export function InfoschematicDiagram({
     infoschematicFlows,
     infoschematicLayout,
     infoschematicPlaceables,
+    infoschematicPoints,
     infoschematicRegions,
     infoschematicRegisterWith,
     infoschematicScopes,
@@ -1820,6 +1827,63 @@ export function InfoschematicDiagram({
   })
 
   /*
+   * A Point, painted as the static renderer paints it and reachable as Design needs it.
+   *
+   * The mark is the static circle: same radius, same authored fill and stroke, so the two renderings agree about
+   * where a Point is and how big it looks. What Design adds is a transparent disc more than twice that radius,
+   * because six units of paint is a target a pointer cannot be expected to find - `DESIGN-011` sets that precedent
+   * for a Flow's own stroke. The disc is drawn only while the layer is open, so nothing is added to a rendering
+   * that cannot be pressed, and it is drawn first so the visible mark is never painted under it.
+   */
+  const pointLayer = infoschematicPoints.map((point) => {
+    const selection = {
+      code: point.id,
+      geometry: 'point',
+      id: point.id,
+      kind: 'point'
+    } as const satisfies ArtefactSelection
+    const legacyKey = `point:${point.id}`
+    const stroke = point.appearance?.color ?? pointTokens.stroke
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
+      <g
+        aria-label={`Point ${point.label}`}
+        className={`infoschematic-point${interactive('point') ? ' selectable artefact-selectable' : ''}${
+          pendingRemovals[point.id] ? ' going' : ''
+        }${artefactSelected(selection, legacyKey) ? ' selected' : ''}${hovered === legacyKey ? ' pointed' : ''}${inGroup(
+          selection
+        )}${inert('point')}`}
+        data-artefact-id={selection.id}
+        data-artefact-kind="point"
+        key={point.id}
+        onKeyDown={interactive('point') ? artefactKeyDown(selection, legacyKey) : undefined}
+        onPointerDown={
+          interactive('point') ? dragArtefact(selection, legacyKey, point.at, { x: true, y: true }) : undefined
+        }
+        onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
+        onPointerLeave={onHover ? () => onHover(null) : undefined}
+        role={interactive('point') ? 'button' : 'img'}
+        style={{ color: stroke }}
+        tabIndex={interactive('point') ? 0 : undefined}
+      >
+        <title>{`${point.id}: ${point.label}`}</title>
+        {interactive('point') ? (
+          <circle className="point-target" cx={point.at.x} cy={point.at.y} r={pointTargetRadius} />
+        ) : null}
+        <circle
+          className="point-mark"
+          cx={point.at.x}
+          cy={point.at.y}
+          fill={point.appearance?.fill ?? pointTokens.fill}
+          r={pointRadius}
+          stroke={stroke}
+          strokeWidth={2}
+        />
+      </g>
+    )
+  })
+
+  /*
    * The selected element's controls, for the one layer that draws them above everything else.
    *
    * A handle drawn inside the element it operates sits wherever that element sits: a Region's resize corner under a
@@ -1840,6 +1904,26 @@ export function InfoschematicDiagram({
         (candidate) => candidate.id === selection.id && infoschematicFabricIsVisible(candidate, visibleScopes)
       )
       return fabric ? controlsFor(selection, movedBox(fabric.bounds, fabric.code), fabric.label, true) : null
+    }
+    /* A Point has no extent, so its controls are placed rather than fitted round it: the actions sit clear above the
+       hit target, and `axes: null` is what keeps a resize handle off a thing with nothing to resize. The bounds
+       stated here are the target disc and exist only to place a control - no operation ever carries them, which is
+       what `EDIT-008` means by a Point never acquiring box geometry. */
+    if (selection.kind === 'point') {
+      const point = infoschematicPoints.find((candidate) => candidate.id === selection.id)
+      if (!point) return null
+      return {
+        actionsAt: { x: point.at.x - 18, y: point.at.y - pointTargetRadius - 16 },
+        axes: null,
+        bounds: {
+          height: pointTargetRadius * 2,
+          width: pointTargetRadius * 2,
+          x: point.at.x - pointTargetRadius,
+          y: point.at.y - pointTargetRadius
+        },
+        label: point.label,
+        selection
+      }
     }
     if (selection.kind === 'graphic') {
       const entry = graphics.find((candidate) => candidate.id === selection.id)
@@ -2494,6 +2578,10 @@ export function InfoschematicDiagram({
               </g>
             )
           })}
+
+        {/* Above the cards and below the Flow a selection promotes, which is the order the static renderer paints
+          these in: a Point is small enough that a Card drawn over it would hide it entirely. */}
+        {pointLayer}
 
         {/* Above the cards, so a selected line and its controls are never behind
           one. It leaves this layer the moment it is deselected. */}

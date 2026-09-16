@@ -17,11 +17,12 @@ import {
   dynamicDepictsState,
   resolveDiagramDynamics
 } from '@infoschematics/view-model/dynamics'
-import type {
-  ArtefactGeometry,
-  ArtefactSelection,
-  CreatedComponent,
-  CreatedFlow
+import {
+  type ArtefactGeometry,
+  type ArtefactSelection,
+  type CreatedComponent,
+  type CreatedFlow,
+  movableBox
 } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { portsForBox } from '@infoschematics/view-model/ports'
@@ -61,9 +62,15 @@ export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: 
   const arrows = { ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1] } as const
   const arrow = arrows[key as keyof typeof arrows]
   if (!arrow || geometry.role === 'route') return undefined
+  /*
+   * The answer is where the artefact's centre lands after one step, and a Point's coordinate already
+   * is its centre: `movableBox` measures it as a zero-extent box, so the half-extent terms fall to
+   * zero rather than needing a branch. `ADR-INFOSCHEMATICS-031` is what licenses measuring it that way.
+   */
+  const box = movableBox(geometry)
   return {
-    x: geometry.box.x + geometry.box.width / 2 + arrow[0] * step,
-    y: geometry.box.y + geometry.box.height / 2 + arrow[1] * step
+    x: box.x + box.width / 2 + arrow[0] * step,
+    y: box.y + box.height / 2 + arrow[1] * step
   }
 }
 
@@ -266,6 +273,7 @@ function AppContent({
     infoschematicFlows,
     infoschematicOverlays,
     infoschematicPlaceables,
+    infoschematicPoints,
     infoschematicRegister,
     infoschematicRegisterWith,
     infoschematicScopes,
@@ -337,13 +345,15 @@ function AppContent({
         createdCards,
         {
           fabrics: infoschematicFabrics,
-          overlays: infoschematicOverlays
+          overlays: infoschematicOverlays,
+          points: infoschematicPoints
         }
       ),
     [
       flowsAfterCreations,
       infoschematicFabrics,
       infoschematicOverlays,
+      infoschematicPoints,
       presentation.visibleFlows,
       presentation.visibleScopes,
       runtime
