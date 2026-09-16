@@ -52,6 +52,15 @@
     "deploy": {
       "cache": false
     },
+    "//#self:lockfile:verify": {
+      "inputs": [
+        "bun.lock",
+        "package.json",
+        "packages/*/package.json",
+        "apps/*/package.json",
+        "examples/*/package.json"
+      ]
+    },
     "//#self:packages:check-versions": {
       "inputs": ["scripts/cli.ts", "scripts/release/**", "packages/*/package.json", "package.json"]
     },

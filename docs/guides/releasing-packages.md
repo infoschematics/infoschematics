@@ -24,6 +24,8 @@ bun run self:check
 bun run self:release:verify
 ```
 
+`bun install --frozen-lockfile` is the contract with every machine that is not this one. It refuses to change `bun.lock`, so it fails when a manifest and the lockfile disagree instead of quietly resolving a different dependency tree. The release workflow, CI, and a consumer installing a published tarball all resolve from the committed lockfile; a manifest edit that never reached `bun.lock` therefore builds here and breaks there, and the first sign of it is a failed protected publish. `self:check` runs the same frozen install as `self:lockfile:verify` so that disagreement surfaces before the commit rather than at the release gate.
+
 `self:release:verify` is the required dry run. It builds unbundled ESM and declarations, inspects packed contents, installs the tarballs in clean consumers, and exercises public entry points and server rendering. Review package filenames, exact internal dependency versions, and CSS entries before continuing.
 
 ## Tag the release

@@ -128,8 +128,8 @@ const targetsOf = (segment: string): readonly Target[] => {
       ]
     case 'bun':
       if (rest[0] !== 'run') {
-        // `bun update --latest` is the mandated dependency-maintenance action, not a target of its own.
-        return rest[0] === 'update' ? [] : rest[0] ? [{ kind: 'file', name: rest[0] }] : []
+        // `bun install` and `bun update --latest` act on the dependency tree itself, so neither names a file target.
+        return rest[0] === 'install' || rest[0] === 'update' ? [] : rest[0] ? [{ kind: 'file', name: rest[0] }] : []
       }
       if (rest[1] === '--cwd' && rest[2] && rest[3]) {
         return [{ kind: 'workspaceScript', name: rest[3], workspace: rest[2] }]

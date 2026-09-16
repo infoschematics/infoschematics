@@ -13,3 +13,11 @@ policy: safe-local-v1
 ---
 
 # INFOSCHEMATICS-BATCH-018
+
+## Run ledger
+
+<!-- ki-batch-run: INFOSCHEMATICS-BATCH-018-RUN-001 49ef3802828e7ae91a09256b59171728b647ba6f8bff84d96e46479e7fa38fe3 -->
+
+| Item | Result | Baseline | Result commit | Exception |
+| --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-TOOL-075 | awaiting-review | `993988f2960b90a9aadd254fbcd98cbb29f7d4df` | `f4ac2deaefd8ebf38df1e84eba422f9fd5630280` | None |

@@ -106,6 +106,7 @@ The `self:` commands, by subject:
 | boundaries | `self:boundaries:verify` | dependency-cruiser over every workspace source root and `scripts/`. |
 | the deployment seam | `self:cf:build` | Cloudflare Pages' configured build command, which delegates to `build` rather than restating it. |
 | examples | `self:examples:generate`, `self:examples:render`, `self:examples:verify` | The generated example registry, and rendering one authored document to a standalone SVG under `reports/`. |
+| lockfile | `self:lockfile:verify` | The frozen install that proves `bun.lock` still agrees with every manifest, the way continuous integration and the release workflow resolve dependencies. |
 | packages | `self:packages:build`, `self:packages:check-versions`, `self:packages:clean`, `self:packages:pack-smoke` | The publishable packages under `packages/`: their build, their version agreement, and packed clean-consumer verification. |
 | releases | `self:release:verify` | Builds the packages, then runs the packed-consumer smoke test over them. |
 | the schema | `self:schema:generate`, `self:schema:verify` | The published JSON Schema generated from the domain contract. |
