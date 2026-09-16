@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-057
 area: TOOL
 title: Cross-feature interaction coverage
 theme: tool
-horizon: next
+horizon: now
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-15T05:19:55Z
-updated_at: 2026-09-15T15:00:00Z
+updated_at: 2026-09-16T10:45:00Z
 ---
 
 # Cross-feature interaction coverage
@@ -20,76 +20,94 @@ Establish accepted requirements and coverage for what happens when two features 
 
 ## Context
 
-The Specifications corpus verifies features in isolation. Across 170 requirements in 16 feature areas there are no cross-area requirement references at all: no requirement in any area constrains how its behaviour composes with another area's. Every requirement is individually conforming and the suite is green, yet nothing in that arrangement can observe two correct features combining into a worse experience.
+The Specifications corpus verifies features in isolation. Every requirement can be individually conforming and the suite green, and nothing in that arrangement can observe two correct features combining into a worse experience.
 
-This matters now because several items about to be delivered land on the same surfaces. Design interaction layers, multi-selection alignment, and the configurable design grid all change the Design editing surface and compete for the same gestures, selection semantics, and toolbar space. The Studio-backed playground changes the host those features run inside. Diagram dynamics and Scene signal treatments both add motion to the same Canvas. Each will be verified against its own feature area, and the combinations will not be verified anywhere.
+It matters now because the features that share these surfaces have landed rather than being about to. Design interaction layers, multi-selection alignment, the authored grid size, Diagram Dynamics and the Studio-backed Playground were all accepted and pruned in the last few days, so the contention is live in the tree. What is still ahead on the same surfaces — Scene signal treatments, the held and travelling element emphases, Point interactivity and the docked panels — will be verified against its own feature area and nowhere against what it lands beside.
+
+`INFOSCHEMATICS-TOOL-064` is the proof that this is not hypothetical. A held-group treatment was written in Canvas, reached the element, passed the whole suite, and was still not drawn, because Studio's own stylesheet shadowed it. That defect lived in the composition of two correct things and no requirement named the composition.
 
 ## Boundary
 
-This item does not add end-to-end tests of whole user journeys as a substitute for feature coverage, re-verify individual requirements, define usability as a matter of taste, or block feature work behind a new gate before the collisions are understood. Repointing stale evidence and resolving non-conforming requirements is separate work.
+This item does not add end-to-end tests of whole user journeys as a substitute for feature coverage, re-verify individual requirements, define usability matters of taste, or block feature work behind a new gate before the collisions are understood.
+
+It also does not repoint stale evidence or resolve non-conforming requirements. `INFOSCHEMATICS-TOOL-056` did that and is awaiting review; this item consumes its result rather than repeating it.
 
 ## Current state
 
-188 requirements across 16 feature areas, and not one cross-area reference among them. Every area constrains its own behaviour in isolation; none constrains how that behaviour composes with another area's. The suite is green and each requirement is individually conforming, which is exactly the arrangement that cannot observe two correct features combining into a worse experience.
+The corpus holds 187 requirements across the 17 feature areas listed in `docs/specs/index.md`. Of those, 184 are `conforming` and 3 are `divergent`: `DESIGN-014` (`docs/specs/design-session.md:147`, Point neither pointed at nor reached, tracking `INFOSCHEMATICS-TOOL-063`), `DESIGN-017` (`docs/specs/design-session.md:223`, document-global `defs` identifiers, tracking `INFOSCHEMATICS-TOOL-058`) and `SCENE-006` (`docs/specs/scenes-and-callouts.md:71`, unreproduced playback memory growth, tracking `INFOSCHEMATICS-TOOL-069`). Nothing is `pending` any more — `8d3624ce` decided every one of them.
 
-The contended surfaces are already identifiable. Design editing, multi-selection alignment, and the configurable design grid all take pointer gestures and keyboard bindings on the same Design surface. Diagram dynamics and Scene signal treatments both drive motion on the same Canvas. The docked panels and the Design toolbar compete for the same screen region. Nothing names those contentions, so nothing verifies them.
+`INFOSCHEMATICS-TOOL-056` has already delivered the mechanical defence this item was going to need. `scripts/specification-evidence.test.ts` parses every requirement and asserts one recognised conformance state per requirement (lines 76-86), that every cited repository path resolves (88-101), and that every cited bare filename names a file somewhere (103-112). It runs under `bun run self:verify:repo`, which the root `package.json` defines as `vitest run --root .`. An evidence line added by this item is therefore checked, not trusted, and that step is done rather than outstanding.
 
-Browser tests exist in `packages/view-canvas`, `packages/view-studio`, and `apps/site`, run by `bun run test:browser`. That is the right home for composition cases, because these behaviours depend on real layering, pointer capture, and focus rather than on a simulated DOM.
+The earlier reading that the corpus holds no cross-feature constraint at all is wrong, and the correction is what shapes the work. Three requirements already carry one, each written as a clause inside one owning requirement: `DESIGN-015` requires that at least one movement case run while zoomed and panned, inside a flat `MUST exercise` matrix (`docs/specs/design-session.md:201`); `DESIGN-018` requires a Card port to follow the Flow's interaction layer rather than its host's (`:157`); `DESIGN-020` requires an element whose interaction layer closes to leave a held group exactly as it leaves a single selection (`:183`). All three link the shared concept by vocabulary id and none references another requirement by id — a cross-area grep over `docs/specs/*.md` finds only Decision Record and roadmap links leaving an area file. So the siting question has a working precedent in one area and no rule for the corpus.
+
+The code side of that last constraint is already implemented: `selectionSetWithinLayers` at `packages/view-model/src/editable.ts:213-216` filters a held selection set through the interaction-layer set, with a comment at 209-211 saying the group must not carry a second notion of selectability. What it does not have is a case that observes the composition on a rendered surface.
+
+`INFOSCHEMATICS-TOOL-064` (`adc0d6b6`, awaiting review) landed the first instrument of the kind this item wants, and landed it without a requirement. `scripts/stylesheet-shadowing.test.ts` fails when a stylesheet redeclares a selector its import chain already gives it, comparing one selector at a time with combinators flattened; `packages/view-studio/src/app/App.treatments.browser.test.tsx` asserts Canvas-owned treatments through Studio's own stylesheet, which is the only place the original defect was visible. That is a composition defended by a check that nothing in the corpus names — this item's gap in one concrete, already-paid-for instance.
+
+Ten browser test files exist: four under `apps/site/src/`, four under `packages/view-canvas/src/`, and `App.browser.test.tsx` and `App.treatments.browser.test.tsx` under `packages/view-studio/src/app/`. `packages/view-canvas`, `packages/view-studio` and `apps/site` each declare `test:browser` as `vitest run --config vitest.browser.config.ts`; the root `bun run test:browser` is `turbo run test:browser`. That is the right home for composition cases, because these behaviours depend on real layering, pointer capture and focus rather than a simulated DOM.
+
+No `turbo.json` change is needed. `//#self:verify:repo` already hashes `scripts/**`, `docs/**` and `packages/*/src/**` (lines 88-102), and `test` and `test:browser` declare no `inputs` at all (lines 35-40), so they rerun on any package file.
 
 ## Steps
 
-- [ ] Enumerate the contended resources — pointer gesture, keyboard binding, selection, screen region, render order, motion channel — and derive the feature pairs from them, so the matrix is small and each entry is justified by a resource two features share.
-- [ ] Settle where a cross-feature requirement lives: a dedicated area with its own prefix, or sited in one owning area and referenced from the other. This is structural and blocks every requirement written after it.
-- [ ] Run a manual exploration pass over the derived pairs and record each observed collision, since a collision is easier to notice than to specify.
-- [ ] Write one requirement and one browser regression case per confirmed collision, each with an evidence line that resolves.
-- [ ] Where a collision turns out to be a regression rather than a defect, state the property that was lost as the requirement, so it cannot be traded away silently a second time.
+1. [ ] Decide the instrument and record it as a Decision Record. Both candidates are already in the tree: extend a flat `MUST exercise` matrix inside the owning requirement, as `DESIGN-015` does, or give each composition its own requirement with its own conformance state and evidence line. The record must also say where a constraint is sited when neither feature is the newer one. Verifiable: `docs/decisions/ADR-INFOSCHEMATICS-028-<slug>.md` exists, is listed in `docs/decisions/README.md`, and answers both questions.
+2. [ ] Enumerate the contended resources and derive the pairs from them rather than from the feature list — the same pointer gesture, keyboard binding, selection, screen region, document order, or motion channel. Verifiable: the derived table lands in the Decision Record, one row per pair naming the shared resource, the two owning requirement ids, and the surface a case would run on. Restrict it to resources with two live claimants today.
+3. [ ] Retro-fit the composition that already has a check and no requirement: "a treatment written once in Canvas reaches the Studio surface", defended by `scripts/stylesheet-shadowing.test.ts` and `packages/view-studio/src/app/App.treatments.browser.test.tsx`. Doing this first proves the chosen instrument against evidence that already exists and costs nothing to produce. Verifiable: `bun run self:verify:repo` resolves the new requirement's evidence lines.
+4. [ ] Explore the live surfaces by hand and record what is found before writing anything. `bun run self:dev` serves the site with the Studio-backed Playground; drive Design mode with interaction layers closed, a held group of three, a non-default authored grid size, and a Dynamic running. Verifiable: each observation is written into this record's Discussion, so the finding survives whether or not it becomes a requirement.
+5. [ ] Write one requirement per confirmed collision in the home step 1 chose, each carrying `_Conformance:_`, `_Verify:_` and `_Evidence:_` lines, and a vocabulary link on first use of each canonical concept. Verifiable: `bun run self:verify:repo` — `scripts/specification-evidence.test.ts` checks the conformance value and the evidence paths, and `scripts/vocabulary-citations.test.ts` checks every cited vocabulary id resolves.
+6. [ ] Add one browser case per requirement to the suite that owns the surface, and prove each fails when the collision is reintroduced rather than only that it passes today. Verifiable: `bun run test:browser` green, plus a deliberate reintroduction per case with the failure observed.
+7. [ ] Where a collision turns out to be a regression rather than a defect, state the property that was lost as the requirement, so it cannot be traded away silently a second time. Verifiable: the requirement names the property, not the fix that restored it.
+8. [ ] Record what the pass did not reach as an unnumbered candidate in the `## Gaps` section of each touched area file, which is the corpus's existing convention for exactly that. Verifiable: each touched area file's `## Gaps` section names the pairs left unverified.
 
 ## Files touched
 
-- `docs/specs/index.md` and either a new area file or the owning area files, depending on the structural decision
-- Browser test files under `packages/view-canvas/src/` and `packages/view-studio/src/`
-- `docs/decisions/` — one record for where cross-feature requirements live
+- `docs/decisions/ADR-INFOSCHEMATICS-028-<slug>.md` — new; `ADR-INFOSCHEMATICS-027` is the current highest
+- `docs/decisions/README.md` — the index entry for it
+- `docs/specs/design-session.md`, `docs/specs/design-editing.md`, `docs/specs/presentation.md`, `docs/specs/diagram-dynamics.md`, `docs/specs/appearance.md` — the owning area files for the pairs on the Design, Present and Canvas surfaces
+- `docs/specs/index.md` — one new table row, and a new `docs/specs/<area>.md`, only if step 1 chooses a dedicated area with its own prefix
+- `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`, `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, `packages/view-canvas/src/InfoschematicDiagram.host.browser.test.tsx`, `packages/view-studio/src/app/App.browser.test.tsx`, `packages/view-studio/src/app/App.treatments.browser.test.tsx` — the existing suites that own these surfaces
+- One new browser file per surface whose pairs have no existing home, named for the composition rather than the feature, alongside the suites above
+- `docs/reference/vocabulary.md` — only if a composition needs a canonical term that does not exist; it currently declares its terms in the table around line 50
+- Not touched: `turbo.json`. `//#self:verify:repo` already hashes `docs/**`, `scripts/**` and `packages/*/src/**`, and the test tasks declare no `inputs`
 
 ## Verify
 
-`bun run test:browser` covers each new composition case, and each case fails when the collision is reintroduced — assert that, rather than only that it passes today. `bun run self:verify:repo` confirms every new requirement's evidence path resolves.
+`bun run test:browser` at the root runs every workspace's browser suite through Turborepo; `bun run --cwd packages/view-canvas test:browser` and `bun run --cwd packages/view-studio test:browser` run one at a time while iterating. `bun run self:verify:repo` runs the corpus checks this item's requirements have to satisfy — `scripts/specification-evidence.test.ts` and `scripts/vocabulary-citations.test.ts`. `bun run self:check` is the whole gate and belongs to whoever commits.
+
+Two things must be proved rather than observed. Each new case must fail when its collision is reintroduced — assert that, because a composition case that only ever passes is indistinguishable from one that tests nothing. And step 4's exploration must be done on a rendered surface, not reasoned about from the source.
 
 ## Dependencies / blocks
 
-Nothing blocks the shaping. [Specification evidence integrity](INFOSCHEMATICS-TOOL-056-specification-evidence-integrity.md) makes the new evidence lines mechanically defended rather than trusted, and is worth landing first for that reason. The feature items that share these surfaces — Design point interactivity, the held and travelling element emphases, and Scene signal treatments — each gain a composition requirement from this item, so this item is more useful shaped before they land than after.
+Nothing blocks the work. `INFOSCHEMATICS-TOOL-056` is awaiting review and has already landed the evidence check that makes this item's new evidence lines mechanically defended, so there is no remaining ordering constraint against it.
+
+`INFOSCHEMATICS-TOOL-058` shares this item's subject on the embedded-host surface, and there is a genuine ordering preference: landing 058 first supplies a worked composition with appearance cases already written, where landing this first only produces a requirement 058 then has to satisfy.
+
+The ready items on the contended surfaces — `INFOSCHEMATICS-TOOL-023`, `-059`, `-060`, `-063` and `-066` — each gain a composition requirement from this item. That is scope added to those records rather than new work items, and it is more useful to them shaped before they land than after.
 
 ## Documentation impact
 
 ### Decision Records
 
-One is needed. Where a cross-feature requirement lives is a structural choice about the corpus with two defensible answers, and the copies drift if the choice is left implicit.
+One is needed, and the next free number is `ADR-INFOSCHEMATICS-028`. The corpus already sites composition constraints three slightly different ways — a matrix clause in `DESIGN-015`, an affordance clause in `DESIGN-018`, a selection clause in `DESIGN-020` — so the choice exists implicitly today and the sitings will keep drifting until it is written down.
 
 ### Specifications
 
-This item is the specification change: a set of composition requirements that do not exist in any form today, possibly in a new area.
+This item is the specification change. Composition requirements land in the existing area files named above, or in a new area file with its own prefix and an `docs/specs/index.md` row if step 1 chooses that, and each touched area file's `## Gaps` section records what was left.
 
 ### Guides
 
-None. No consumer-facing or contributor procedure changes; the requirements are verified by the existing browser suite.
+None. There are no consumer-facing or contributor procedure changes, `docs/guides/` carries no specification-authoring guide to amend, and the new requirements are verified by the existing browser suites.
 
 ### Roadmap
 
-The feature items landing on these surfaces gain a composition requirement each, which is scope added to them rather than new items.
+Two changes. This record absorbs step 4's observations. And the five ready items sharing these surfaces each gain a composition requirement in their own `Documentation impact` — the lead owns whether any of that is also recorded as a `blocks` edge.
 
 ## Discussion
 
-### Naming the compositions that matter
+### Whether a composition can be addressed individually
 
-The useful unit is not "test everything against everything". It is the small set of pairs where two features contend for one resource: the same pointer gesture, the same keyboard binding, the same selection, the same screen region, the same rendering order, the same motion channel. Shaping should enumerate those contended resources and derive the pairs from them, which keeps the matrix small and justified.
+`DESIGN-015` proves a matrix clause works and also shows its cost. Its second paragraph lists twenty-odd behaviours the rendered matrix must exercise, carries one `_Conformance:_` value for all of them, and cites two browser files as evidence for the lot. A pair that regresses inside that list is invisible: the requirement stays conforming, the evidence paths still resolve, and `scripts/specification-evidence.test.ts` has nothing to catch. A requirement per pair is individually addressable and individually defended, but it multiplies a 187-requirement corpus by however many pairs step 2 derives and forces the siting question for every one. This is the first decision and everything after it depends on the answer, so it is worth settling deliberately rather than by precedent.
 
-### Where the requirements belong
+### What a pair is owned by when neither feature is newer
 
-A cross-feature requirement has no obvious home in a corpus organised one file per feature area, and duplicating it into both areas would let the copies drift. Shaping must decide whether these become a dedicated area with its own prefix, or requirements sited in one owning area and referenced from the other. This is the first structural question and should be settled before any requirement is written.
-
-### Manual testing is the discovery instrument
-
-A collision is easier to notice than to specify. Manual exploration should come first and feed this item: each observed collision becomes a named requirement and a regression case, so the finding is captured once and defended automatically thereafter. The rendered browser matrix is the natural home for the resulting cases, since these behaviours depend on real layering, pointer capture, and focus.
-
-### Regression, not just defect
-
-The suspicion prompting this item is that something used to be more usable than it is now. If that is borne out, the outcome is not only a fix but a requirement stating the property that was lost, so it cannot be traded away silently a second time.
+Each of the three existing constraints sits in the newer of its two features — the layer filter went into the newer `DESIGN-020`, not into `DESIGN-018`. That rule works only while a pair has a clear newer member, and makes ownership an accident of delivery order. It has no answer at all for the case this item has to handle first: the Canvas-treatment-reaches-Studio property belongs to neither Canvas nor Studio, but to the stylesheet chain between them, and its evidence is a `scripts/` check rather than a package. Whether the corpus accepts delivery order as the tie-break, or accepts an area that owns nothing but compositions, is genuinely open.

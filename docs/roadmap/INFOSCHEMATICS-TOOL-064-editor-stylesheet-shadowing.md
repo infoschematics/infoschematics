@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-064
 area: TOOL
 title: Editor stylesheet shadowing
 theme: tool
-horizon: next
-status: awaiting-review
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: df05c180942ccfb9b0b992745d54a4fbbb918496
 created_at: 2026-09-15T13:30:00Z
-updated_at: 2026-09-16T10:05:00Z
+updated_at: 2026-09-16T10:45:00Z
 ---
 
 # Editor stylesheet shadowing
@@ -132,3 +132,29 @@ Studio's copies were written with literal colours, so they have already drifted 
 ### Why the suite could not see it
 
 Canvas browser suites load the Canvas stylesheet directly, so a treatment written there always passes. The defect lives in what Studio loads. Only a case asserted on the Studio surface can observe it, which is the same shape of blind spot as a suite that never mounts two instances.
+
+## Review findings
+
+The review did not accept this item. The delivery is mostly real — 103 duplicated rules removed, 81 KB down to 63 KB, the import hoisted, the Design-grid defect genuine and fixed — but the claim the item exists to make is false, and the guard written to defend it cannot see the case that breaks it.
+
+### The guard drops the first rule of a stylesheet
+
+`scripts/stylesheet-shadowing.test.ts:36-56` takes everything between the previous block and the next `{` as one selector string, then skips it when it starts with `@`. A stylesheet opening with `@import` statements therefore folds its first rule's selector into that string and discards it. `packages/view-canvas/src/styles.css` opens with two `@import` lines, so running the guard's own logic over it yields 170 selectors with `.infoschematic-frame` present and `.infoschematic` absent.
+
+Rules nested inside `@media`, `@container` or `@keyframes` are skipped as well, because the loop consumes the at-rule's whole body. Studio retains 24 such rules, including the `prefers-reduced-motion` block whose duplicate the packet reports removing. The guard also flattens combinators, so a newly written `.infoschematic-svg .edit-grid rect` would outrank an inline presentation attribute and still pass.
+
+### A live shadow survives, on the diagram's own container
+
+`.infoschematic` is declared at `packages/view-canvas/src/styles.css:4` and again at `packages/view-studio/src/styles.css:549`, with the same eleven declarations. They differ in one: Studio writes `background: color-mix(in srgb, #081725 72%, #000)` where Canvas writes the token, and `#081725` is what `packages/view-model/src/tokens.generated.css:59` generates for that token today. Studio's copy sits after the import, so it wins the cascade — the exact token-drift class the change deleted 91 rules to remove. `packages/view-studio/src/app/viewport-frame.test.ts:12` asserts the literal, so the duplicate is pinned in place by a test.
+
+### Two specification citations went stale in the same pass
+
+`adc0d6b6` removed the Studio rules that `docs/specs/design-session.md:67,69` (`DESIGN-006`) and `:107,109` (`DESIGN-010`) cite as evidence. The cited path still exists, so the evidence gate delivered alongside it passes; Studio's stylesheet now has no match for `edit-grid`, `audit-port` or `artefact-resize-handle`, and one `.selected` rule unrelated to either requirement. Neither packet mentions it.
+
+## Rework steps
+
+- [ ] Rewrite `selectorsOf` so it cannot silently drop a rule: consume at-rule statements ending in `;` separately from blocks, descend into `@media` and `@container` bodies, and skip only `@keyframes` contents. Prove each case with a fixture that fails first.
+- [ ] Re-run the guard over the real chain and fix every duplicate it now reports, including `.infoschematic`. Removing Studio's copy means changing the assertion at `packages/view-studio/src/app/viewport-frame.test.ts:12` to expect the token rather than the literal.
+- [ ] Decide whether the guard should compare declarations rather than selectors, or state in the record why selector identity is the line being defended — the packet's outstanding concerns name this limitation without resolving it.
+- [ ] Repoint `DESIGN-006` and `DESIGN-010` at evidence that exists, and consider whether the evidence gate can be made to notice content that no longer supports a requirement rather than only a path that no longer resolves.
+- [ ] Re-render Studio and look at the diagram surface against Canvas, since the surviving duplicate was invisible to a fully green run.
