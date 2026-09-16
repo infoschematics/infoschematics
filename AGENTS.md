@@ -10,7 +10,7 @@ The public website is an outlet for this repository, not the owner of reusable p
 
 The consumer user guide is Site-owned content under `apps/site/content/`; repository documentation remains canonical under `docs/`, with selected documents rendered by Site rather than copied.
 
-A passing suite is not evidence that output looks right. When changing visual treatment, render the result and look at it: a Flow arrowhead that was referenced but never defined, and a light slab painted onto the blueprint backdrop, both survived a fully green run.
+A passing suite is not evidence that output looks right. When changing visual treatment, render the result and look at it: a Flow arrowhead that was referenced but never defined, and a light slab painted onto the blueprint backdrop, both survived a fully green run. Some of what output promises is only visible under a preference no default page expresses: the browser suites ask the runner for `prefers-reduced-motion` through a browser command, because a reduced-motion rule read out of the stylesheet is not the rule the browser resolved.
 
 Run `bun run self:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.
 

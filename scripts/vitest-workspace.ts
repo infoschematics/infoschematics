@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
-import { playwright } from '@vitest/browser-playwright'
+import { defineBrowserCommand, playwright } from '@vitest/browser-playwright'
 import { defineConfig, type ViteUserConfig } from 'vitest/config'
 import { workspaceSourceAliases } from './workspace-sources.ts'
 
@@ -37,7 +37,23 @@ export const workspaceTests = (workspace: string): ViteUserConfig =>
     }
   })
 
-/** The browser suite for one workspace, for the three that render into a real page. */
+/**
+ * Reduced motion, asked of the page rather than of the stylesheet.
+ *
+ * Media emulation belongs to the Playwright page, which lives in the runner rather than in the browser, so a case
+ * cannot reach it directly. This command is the bridge: `commands.emulateReducedMotion(true)` before a render, and
+ * the page answers `(prefers-reduced-motion: reduce)` for real. It is per case rather than per suite deliberately.
+ * A `contextOptions` setting here would put every browser case in the repository under reduced motion, which would
+ * quietly change what the rest of them measure — most of them measure a treatment that animates.
+ *
+ * A case that turns it on owns turning it off again: one context serves a whole file, so the setting outlives the
+ * case that made it.
+ */
+const emulateReducedMotion = defineBrowserCommand<[boolean]>(async ({ page }, reduce) => {
+  await page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' })
+})
+
+/** The browser suite for one workspace, for the four that render into a real page. */
 export const workspaceBrowserTests = (workspace: string): ViteUserConfig =>
   defineConfig({
     ...shared(),
@@ -49,6 +65,7 @@ export const workspaceBrowserTests = (workspace: string): ViteUserConfig =>
     resolve: { ...shared().resolve, dedupe: ['react', 'react-dom'] },
     test: {
       browser: {
+        commands: { emulateReducedMotion },
         enabled: true,
         headless: true,
         instances: [{ browser: 'chromium' }],

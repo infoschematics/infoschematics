@@ -8,7 +8,8 @@
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { useState } from 'react'
-import { expect, test } from 'vitest'
+import { afterEach, expect, test } from 'vitest'
+import { commands } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 import { Canvas } from './Canvas.tsx'
 import { elementEmphasisDuration } from './element-emphasis.ts'
@@ -215,4 +216,74 @@ test('sends the mark round the element over time, and never off the line it is t
   expect(`${Math.round(late.left)},${Math.round(late.top)}`).not.toBe(
     `${Math.round(later.left)},${Math.round(later.top)}`
   )
+})
+
+/* One browser context serves this whole file, so an emulated media feature outlives the case that asked for it.
+   Every case below either never touches it or hands it back here, which is what keeps the cases above measuring
+   full motion. */
+afterEach(async () => {
+  await commands.emulateReducedMotion(false)
+})
+
+test('takes the page at its word about reduced motion before anything is asserted under it', async () => {
+  const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // The negative first: without this, a green run below would prove only that the emulation never arrived.
+  expect(reduced()).toBe(false)
+  await commands.emulateReducedMotion(true)
+  expect(reduced()).toBe(true)
+})
+
+test('holds a held emphasis steady under reduced motion rather than animating it', async () => {
+  await commands.emulateReducedMotion(true)
+  const { container } = await render(
+    <Canvas config={config} dynamics={[{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }]} />
+  )
+
+  const held = () => container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="ZONE"]')
+  await expect.poll(held).not.toBeNull()
+  const outline = held()?.firstElementChild as SVGPathElement
+
+  /* The sustained rule carries a class and an attribute and the media query adds no specificity, so this fails
+     the moment the reduced-motion block stops restating the held case — the exact cascade defect TOOL-059 found
+     by hand. Asked of the page rather than of the stylesheet text, so it fails whether the rule was deleted or
+     merely lost. */
+  expect(getComputedStyle(outline).animationName).toBe('none')
+  expect(getComputedStyle(outline).opacity).toBe('0.9')
+
+  // And it is a steady outline rather than a slow one: the same opacity a treatment-length later.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration)
+  })
+  expect(getComputedStyle(outline).animationName).toBe('none')
+  expect(getComputedStyle(outline).opacity).toBe('0.9')
+})
+
+test('removes the travelling mark under reduced motion rather than parking it', async () => {
+  await commands.emulateReducedMotion(true)
+  const { container } = await render(
+    <Canvas config={config} dynamics={[{ dynamicId: 'on-this-stage', occurrenceKey: 'hold-1' }]} />
+  )
+
+  await expect
+    .poll(() => container.querySelector('.infoschematic-element-emphasis[data-artefact-id="ZONE"]'))
+    .not.toBeNull()
+  const mark = container.querySelector<SVGCircleElement>('.infoschematic-element-emphasis-mark')
+  expect(mark).not.toBeNull()
+  const seen = mark as SVGCircleElement
+
+  /* `animation: none` cannot still an `animateMotion` element, because declarative SVG motion is not a CSS
+     animation — TOOL-060's finding, and the reason the mark is switched off by class instead. So the assertion is
+     that it occupies no space at all, not that it stopped moving: a mark stilled by the wrong mechanism would keep
+     going round and pass any test that only sampled one position. */
+  expect(getComputedStyle(seen).display).toBe('none')
+  const at = seen.getBoundingClientRect()
+  expect(at.width).toBe(0)
+  expect(at.height).toBe(0)
+
+  // Nowhere later either, in case a rule elsewhere revives it once the treatment is under way.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration / 2)
+  })
+  expect(seen.getBoundingClientRect().width).toBe(0)
 })
