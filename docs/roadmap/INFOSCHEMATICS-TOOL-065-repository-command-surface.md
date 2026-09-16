@@ -7,7 +7,7 @@ horizon: now
 status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: dbd57e2f
+baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-15T14:05:00Z
 updated_at: 2026-09-16T12:55:00Z
 ---
