@@ -82,6 +82,6 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 
 ## Findings held for a later wave
 
-Captured, not admitted to this batch. Seven records so far: `TOOL-071` and `TOOL-072` from looking at the rasterised output, `TOOL-073` from the lockfile the command rename left stale, and four from the wave-two recheck — `TOOL-074`, `TOOL-075`, `TOOL-076` and `TOOL-077`.
+Captured, not admitted to this batch. Eight records so far: `TOOL-071` and `TOOL-072` from looking at the rasterised output, `TOOL-073` from the lockfile the command rename left stale, and five from the wave-two recheck — `TOOL-074` through `TOOL-078`.
 
 `TOOL-074` deserves the owner's attention before the remaining waves, and it is the one finding here that bears on this batch's own evidence. The dependency-boundary check reports `0 modules, 0 dependencies cruised`: dependency-cruiser cannot parse TypeScript 7, so it passes by examining nothing. `AGENTS.md` claims `bun run self:check` verifies dependency boundaries, and it has not done so since the TypeScript upgrade — which means every green in this run, including the 43/43 gates cited above, asserts a boundary guarantee it did not test. Nothing else in the gate is affected, and no delivered item in this batch is known to cross a boundary; the claim is simply unproven rather than false.
