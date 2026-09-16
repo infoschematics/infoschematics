@@ -4,18 +4,24 @@ import { describe, expect, it } from 'vitest'
 const stylesheet = async (pathname: string) => readFile(new URL(pathname, import.meta.url), 'utf8')
 
 describe('Studio diagram frame', () => {
-  it('centres the contained Canvas frame inside the resizable panel', async () => {
-    const studio = await stylesheet('../styles.css')
+  it('centres the contained Canvas frame inside the resizable panel, from the stylesheet that owns the container', async () => {
+    const canvas = await stylesheet('../../../view-canvas/src/styles.css')
 
-    expect(studio).toContain('place-items: center;')
-    expect(studio).toContain('background: color-mix(in srgb, #081725 72%, #000);')
+    expect(canvas).toContain('place-items: center;')
+    // The token, not the `#081725` it happens to generate today: Studio's copy wrote the literal, which is how a
+    // backdrop change would have reached the diagram everywhere except the editor.
+    expect(canvas).toContain('background: color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 72%, #000);')
   })
 
-  it('takes the frame itself from the Canvas stylesheet it imports, rather than a copy of its own', async () => {
+  it('takes the frame and its container from the Canvas stylesheet it imports, rather than copies of its own', async () => {
     const canvas = await stylesheet('../../../view-canvas/src/styles.css')
     const studio = await stylesheet('../styles.css')
 
     expect(canvas).toContain('.infoschematic-frame {')
     expect(studio).not.toContain('.infoschematic-frame {')
+    // Anchored to the start of a line: Studio does scope its own rules to `.infoschematic-panel > .infoschematic`,
+    // and a bare substring match cannot tell that apart from redeclaring the container itself.
+    expect(canvas).toMatch(/^\.infoschematic \{$/m)
+    expect(studio).not.toMatch(/^\.infoschematic[\s,{]/m)
   })
 })

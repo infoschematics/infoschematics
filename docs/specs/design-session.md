@@ -64,9 +64,9 @@ The editing grid, ports and manipulation handles MUST be available while editing
 
 _Conformance:_ conforming
 
-_Verify:_ inspect editing layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`. against this requirement.
+_Verify:_ inspect the editing layers `edit-grid`, `audit-port` and `artefact-resize-handle` in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`. against this requirement.
 
-_Evidence:_ editing layers in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-studio/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`.
+_Evidence:_ the editing layers `edit-grid`, `audit-port` and `artefact-resize-handle` in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`.
 
 ### DESIGN-007 — Selection does not imply mutation
 
@@ -104,9 +104,9 @@ Every selectable kind SHOULD use one visual treatment family for pointing and se
 
 _Conformance:_ conforming
 
-_Verify:_ inspect selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts` and styles in `packages/view-studio/src/styles.css`. against this requirement.
+_Verify:_ inspect selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts`, and the treatments `pointed` and `selected` in `packages/view-canvas/src/styles.css`. against this requirement.
 
-_Evidence:_ selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts` and styles in `packages/view-studio/src/styles.css`.
+_Evidence:_ selected and hovered state in `packages/view-studio/src/app/editor/use-editor.ts`, and the treatments `pointed` and `selected` in `packages/view-canvas/src/styles.css`.
 
 ### DESIGN-011 — A flow is selectable by its route
 

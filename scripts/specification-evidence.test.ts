@@ -18,6 +18,7 @@ type Requirement = Readonly<{
   conformance: string
   file: string
   id: string
+  named: readonly Readonly<{ paths: readonly string[]; thing: string }>[]
 }>
 
 const pathsUnder = async (directory: string): Promise<string[]> => {
@@ -57,7 +58,8 @@ const requirements = async (): Promise<Requirement[]> => {
         citations: citations(block),
         conformance: block.match(/^_Conformance:_ (.*)$/m)?.[1]?.trim() ?? '',
         file,
-        id: block.match(/^### ([A-Z][A-Z-]*-\d+) — /)?.[1] ?? ''
+        id: block.match(/^### ([A-Z][A-Z-]*-\d+) — /)?.[1] ?? '',
+        named: namedThings(block)
       }))
     })
   )
@@ -71,6 +73,27 @@ const isPath = (cited: string) => cited.includes('/') && /^[\w./@-]+$/.test(cite
 const withoutTrailingSeparator = (cited: string) => (cited.endsWith('/') ? cited.slice(0, -1) : cited)
 
 const isFileName = (cited: string) => new RegExp(`^[\\w.-]+\\.(?:${citedExtensions.join('|')})$`).test(cited)
+
+/**
+ * A resolving path is the weaker half of a citation. `DESIGN-006` and `DESIGN-010` went on citing
+ * `packages/view-studio/src/styles.css` after the rules they named moved to Canvas: the path still opened, and nothing
+ * in the gate read what was inside it. The corpus writes proof as "`thing` … in `path`", so where a citation names the
+ * thing it can be checked against the file — and where it names only prose it cannot, which is the reason to name it.
+ */
+const namedInAFile = /((?:`[^`]+`(?:,? (?:and|or) )?)+) in (`[^`]+`(?: and `[^`]+`)*)/g
+
+/** A placeholder describes a shape rather than naming a thing, so it is not something to look for verbatim. */
+const isPlaceholder = (cited: string) => cited.includes('<')
+
+const namedThings = (block: string) =>
+  [...block.matchAll(/^_(?:Evidence|Verify):_ (.*)$/gm)].flatMap(([, line]) =>
+    [...(line ?? '').matchAll(namedInAFile)].flatMap(([, named, where]) => {
+      const backticked = (text: string) => [...text.matchAll(/`([^`]+)`/g)].map(([, cited]) => cited ?? '')
+      const things = backticked(named ?? '').filter((cited) => !isPath(cited) && !isPlaceholder(cited))
+      const paths = backticked(where ?? '').filter(isPath)
+      return paths.length === 0 ? [] : things.map((thing) => ({ paths, thing }))
+    })
+  )
 
 describe('specification evidence', () => {
   it('declares exactly one recognised conformance state per requirement', async () => {
@@ -98,6 +121,29 @@ describe('specification evidence', () => {
     }
 
     expect(cited).toBeGreaterThan(100)
+  })
+
+  it('cites content that is still in the file named, so a rule that moved package cannot keep its old proof', async () => {
+    const parsed = await requirements()
+    let checked = 0
+
+    for (const requirement of parsed)
+      for (const { paths, thing } of requirement.named) {
+        checked += 1
+        const absent: string[] = []
+        for (const path of paths) {
+          const content = await readFile(path, 'utf8').catch(() => '')
+          if (!content.includes(thing)) absent.push(path)
+        }
+        // Every cited path, not merely one of them: a requirement that cites two files and is supported by one is how
+        // `DESIGN-006` went on naming Studio's stylesheet after its editing layers moved to Canvas.
+        expect(
+          absent,
+          `${requirement.file} ${requirement.id} cites "${thing}" in files that do not contain it`
+        ).toEqual([])
+      }
+
+    expect(checked).toBeGreaterThan(60)
   })
 
   it('cites file names that name a file somewhere, so a moved file is still caught', async () => {

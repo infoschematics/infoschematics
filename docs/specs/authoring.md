@@ -118,9 +118,9 @@ Document validation MUST use a schema that mirrors `InfoschematicConfigInput` an
 
 _Conformance:_ conforming
 
-_Verify:_ inspect `infoschematicConfigSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md). against this requirement.
+_Verify:_ inspect `infoschematicSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md). against this requirement.
 
-_Evidence:_ `infoschematicConfigSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md).
+_Evidence:_ `infoschematicSchema` and `SchemaMirrorsContract` in `packages/domain-core/src/schema.ts`. Decision: [ADR-INFOSCHEMATICS-013](../decisions/ADR-INFOSCHEMATICS-013-validation-mirrors-the-contract.md).
 
 ### AUTHOR-012 — The published JSON Schema comes from the validating schema
 

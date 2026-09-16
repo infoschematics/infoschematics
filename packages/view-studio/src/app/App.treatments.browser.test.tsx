@@ -74,6 +74,30 @@ test('paints a selected Card from the shared tokens, so a Canvas treatment reach
   expect(getComputedStyle(shell).stroke).toBe('rgb(130, 179, 102)')
 })
 
+test('paints the diagram container from the backdrop token, not a literal Studio copy of it', async () => {
+  const container = await designing()
+
+  // Studio carried its own `.infoschematic`, identical but for `#081725` where Canvas writes the token — so a backdrop
+  // change would have reached every surface except the editor. Reading the token and the painted colour together is
+  // what says the container is taking Canvas's rule rather than a copy that happens to agree today.
+  const backdrop = getComputedStyle(document.documentElement)
+    .getPropertyValue('--infoschematic-canvas-surfaces-backdrop')
+    .trim()
+  expect(backdrop).toBe('#081725')
+
+  const surface = container.querySelector('.infoschematic')
+  if (!surface) throw new Error('Studio did not render the diagram container')
+  const probe = document.createElement('div')
+  probe.style.backgroundColor = `color-mix(in srgb, ${backdrop} 72%, #000)`
+  document.body.append(probe)
+  expect(getComputedStyle(surface).backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
+  probe.remove()
+
+  // Studio's panel override is the one thing it does say about the container, and it has to keep saying it.
+  expect(getComputedStyle(surface).aspectRatio).toBe('auto')
+  expect(getComputedStyle(surface).placeItems).toBe('center')
+})
+
 test("keeps a Card's identity chip out of the Card's own selection treatment", async () => {
   const container = await designing()
   const card = await selectCardA(container)

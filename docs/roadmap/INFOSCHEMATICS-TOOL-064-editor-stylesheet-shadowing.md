@@ -4,12 +4,12 @@ area: TOOL
 title: Editor stylesheet shadowing
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: df05c180942ccfb9b0b992745d54a4fbbb918496
+baseline_ref: dbd57e2f5abf88681c0f4a2f68917b32fca38d28
 created_at: 2026-09-15T13:30:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T11:36:04Z
 ---
 
 # Editor stylesheet shadowing
@@ -52,6 +52,9 @@ This item makes one stylesheet read another and removes the duplication that sta
 - `packages/view-studio/src/app/App.treatments.browser.test.tsx` — new, for the Studio-surface treatment cases
 - `packages/view-studio/src/app/viewport-frame.test.ts` — its frame assertion now reads the stylesheet that owns the rule
 - `scripts/stylesheet-shadowing.test.ts` — new, the mechanical guard across the import chain
+- `docs/specs/design-session.md` — `DESIGN-006` and `DESIGN-010` citations, which staled as the rules moved to Canvas
+- `scripts/specification-evidence.test.ts` — its new case reading cited content rather than only a resolving path
+- `docs/specs/authoring.md` — `AUTHOR-011`'s stale symbol, surfaced by that case
 
 ## Verify
 
@@ -83,41 +86,63 @@ None.
 
 ### Delivered
 
-The editor reads the Canvas stylesheet rather than a copy of it. Studio's stylesheet lost 103 of its 469 rules — 81 KB down to 63 KB — and what remains is application chrome with no Canvas counterpart. A treatment written in Canvas now reaches the Studio surface uncopied, and a repository check fails if a copy comes back.
+The editor reads the Canvas stylesheet rather than a copy of it, and the check that says so can now see the rules it is checking. Baseline `dbd57e2f5abf88681c0f4a2f68917b32fca38d28`; the first delivery's baseline was `df05c180942ccfb9b0b992745d54a4fbbb918496`.
+
+Within the boundary: making one stylesheet read another, removing the duplication that stands in for it, and the mechanical guard over the chain. Outside it and untouched: the editor's appearance, the visual tokens, and Studio's own application chrome. `packages/view-canvas/src/styles.css`'s `defs`-id rule is left to Scoped renderer definition identity (`INFOSCHEMATICS-TOOL-058`).
+
+The review's three findings all reproduced, and all three are fixed. The scanner was dropping the first rule of every stylesheet in the chain plus every rule inside a conditional group; `.infoschematic` was a live shadow on the diagram's own container, pinned by a test that asserted the literal; and the `DESIGN-006` and `DESIGN-010` citations had staled. The guard was fixed first, because a guard with a blind spot certifies whatever follows it.
 
 ### Summary of changes
 
-- `packages/view-studio/src/styles.css` — `@import "@infoschematics/view-present/styles.css"` hoisted to the head, and 103 rules removed: 91 token-equivalent duplicates of Canvas selectors, 8 combinator near-misses, a `prefers-reduced-motion` copy, the dead `.edit-grid-line` pair, and the Design grid rule pointing at a pattern that does not exist.
-- `scripts/stylesheet-shadowing.test.ts` — new, in the repository-level suite. Two cases: no selector is declared twice across the Canvas → Present → Studio chain, and each stylesheet actually imports the one it is compared against, at the head of the file where a conforming parser will keep it.
-- `packages/view-studio/src/app/App.treatments.browser.test.tsx` — new. A selected Card on the Studio surface is painted from `--infoschematic-canvas-selection-selected`, and its identity chip keeps its own Scope colour rather than inheriting the Card's selection treatment.
-- `packages/view-studio/src/app/viewport-frame.test.ts` — the `.infoschematic-frame` assertion moved to the Canvas stylesheet that now owns the rule, with a second case asserting Studio does not redeclare it.
+- `scripts/stylesheet-shadowing.test.ts` — `selectorsOf` rewritten. It scans for the next structural character rather than the next `{`, skipping any that is only string or `url()` content; a statement at-rule ending in `;` is consumed without being mistaken for a selector; `@media`, `@container`, `@supports`, `@layer` and `@scope` bodies are descended into; `@keyframes`, `@font-face`, `@page` and `@property` bodies are not. Eight fixtures now hold the scanner to CSS a reader can read off by eye, plus one case asserting it sees `.infoschematic`, the Canvas rule it used to discard. Selector count over the real chain went from 170 to 187 for Canvas, and from 361 to 393 for Studio.
+- `packages/view-studio/src/styles.css` — Studio's copy of `.infoschematic` removed, eleven declarations identical to Canvas's but for `#081725` where Canvas writes `var(--infoschematic-canvas-surfaces-backdrop)`. The narrow-viewport override of the same selector inside `@media (max-width: 1199px)` was rescoped to `.infoschematic-panel > .infoschematic`, matching the panel rule above it: `.infoschematic` is always a direct child of `.infoschematic-panel` in `App.tsx`, so this is behaviour-preserving, and it says what the rule is actually about — Studio's live panel, not the Infoschematic container.
+- `packages/view-studio/src/app/viewport-frame.test.ts` — both assertions now read the Canvas stylesheet that owns the rule, and expect the token rather than the `#081725` it happens to generate today. The second case asserts Studio redeclares neither `.infoschematic` nor `.infoschematic-frame`.
+- `packages/view-studio/src/app/App.treatments.browser.test.tsx` — a third case on the Studio surface: the diagram container's painted colour equals `color-mix(in srgb, <token> 72%, #000)` resolved by the browser from the token it reads at runtime, and Studio's panel override of `aspect-ratio` and `place-items` still holds.
+- `docs/specs/design-session.md` — `DESIGN-006` and `DESIGN-010` repointed from `packages/view-studio/src/styles.css` to `packages/view-canvas/src/styles.css`, and each now names what it is citing: the `edit-grid`, `audit-port` and `artefact-resize-handle` layers, and the `pointed` and `selected` treatments.
+- `scripts/specification-evidence.test.ts` — a fourth case. Where a citation names a thing in backticks and then the file it lives in, every cited file must still contain it. 75 such pairs across the corpus; the rule is `every` cited path rather than `some`, because a requirement citing two files and supported by one is exactly how `DESIGN-006` kept its old proof.
+- `docs/specs/authoring.md` — `AUTHOR-011` cited `infoschematicConfigSchema`; the export is `infoschematicSchema`. Found by the new case, not by reading.
+
+Selector identity is the line the guard defends, and that is now written down in the guard rather than left as an open concern. Two rules with the same selector along an import chain are a shadow whether their declarations agree or not: identical declarations are a copy that will drift, and differing ones are already the drift. A declaration comparison would have passed the case that motivated the guard — Studio's `.infoschematic` wrote a literal where Canvas wrote the token, so comparing declaration text would have called them different rules and said nothing. A difference that is deliberate belongs under a selector that says so, which is what the rescoped media rule now does.
 
 ### Verification
 
-- Removal was established as appearance-neutral before anything was removed, by expanding every generated token and comparing normalised rule bodies: 83 of the 86 overlapping rules were byte-identical once tokens resolved, and each of the 3 that differed had Canvas as the better version.
-- Rendered and compared, because a green suite is not evidence that output looks right. Present mode is byte-identical across every pass. The one pixel movement in the whole change was 1.18% of the Design surface, and the crop showed exactly the intended effect: Card identity chips losing the Card's own selection stroke and drop-shadow, which is what Canvas's `>` scoping exists to prevent. The final two removals moved zero pixels on all four captures, with a Region on screen.
-- The Design grid now paints. Before, `.edit-grid rect` computed `fill: url("#edit-grid-major")`, a reference nothing in the repository defines, so the grid rendered nothing; after, it computes `url("#infoschematic-grid-major-plus-minor")`, which the Canvas renderer emits.
-- Held-group treatment read from the live editor after adding the class by hand: `rgb(130, 179, 102)`, `5px, 4px`, `2px` — Canvas's rule supplying precisely what Studio's deleted copy said.
-- Every new assertion was proved to fail against a deliberate breakage and then restored: the import moved back to the end of the file, a Canvas rule copied back into Studio, the Studio stylesheet removed from the browser fixture, and the identity-chip scoping loosened.
-- `bun run self:check` green, 43 tasks.
+- `bun run self:check` — green, 43 tasks.
+- The guard's new fixtures were run against the previous scanner, unchanged, before being trusted: 5 of 9 failed, including the first rule after `@import` statements, a rule inside `@media`, a rule inside `@container`, a rule after a brace that is only string content, and the real-file case asserting `.infoschematic` is visible in the Canvas stylesheet. `Tests 5 failed | 4 passed (9)`.
+- The fixed guard over the real chain reported exactly one duplicate before any stylesheet was touched — `shadowed: [".infoschematic"], stylesheet: "packages/view-studio/src/styles.css"` — then a second, the bare `.infoschematic` inside Studio's `@media (max-width: 1199px)`, which the previous scanner could not see at all. Both resolved: `Tests 11 passed (11)`.
+- The duplicate was copied back afterwards to confirm the guard still fails on it, and removed again.
+- `Tests 12 passed (12)` for the Studio browser suite. With Studio's `@import` of the Present stylesheet commented out, three of those cases fail — the selection token reads `''`, the backdrop token reads `''`, and the identity chip's stroke reads `none` — so they are observing the chain rather than a fixture that loads Canvas directly.
+- The new evidence case was proved against the defect it was written for: with `DESIGN-006`'s citation reverted to `packages/view-studio/src/styles.css`, it fails with `DESIGN-006 cites "audit-port" in files that do not contain it: ["packages/view-studio/src/styles.css"]`. Restored, the corpus is green.
+- `turbo.json` needed no change. Every path cited anywhere in `docs/specs` already falls inside `//#self:verify:repo`'s `inputs` globs, which was checked rather than assumed, so the new case that reads cited file contents cannot replay stale.
+
+Rendered, because a green suite is not evidence that output looks right and the surviving duplicate proved it. Studio was rendered in Chromium at 1680×1050 with two Cards, identity chips and the major-plus-minor grid, in Design mode with Card A selected — and the same document was rendered through `Canvas` alone at the same size, for comparison.
+
+What the editor looked like: dark application chrome, the Design panel docked right with its tool banks, Create, Library, Selection reading `CARD CARD-A  Box at 80, 120; 200 × 120`, and Changes. The diagram sat in the centre panel as a white grid band — major and minor lines both painted — inset in the dark container, with Card A carrying the green selection stroke, its full ring of port handles, a resize handle at the bottom-right corner and three artefact actions, and Card B carrying its own blue Scope stroke and identity chip. Canvas alone drew the same document identically: same container band above and below, same white grid surface, same Card fill, stroke, identity chip and drop shadow, same grid pattern. Nothing about the diagram surface distinguished the editor from Canvas.
+
+Measured alongside the capture, Studio and Canvas agree on the container to the character: `background=color(srgb 0.0225882 0.0649412 0.104471)` on both, which is what `color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 72%, #000)` resolves to — so removing Studio's literal copy moved nothing. Studio's panel override still reads `aspect=auto maxWidth=none` against Canvas's `aspect=3 / 2 maxWidth=100%`, which is the intended difference and the only one. `.edit-grid rect` computes `url("#infoschematic-grid-major-plus-minor")`, and the surface carried 44 ports, 1 resize handle and 3 artefact actions. The rescoped narrow-viewport rule was checked by resizing the same page to 1100px: `maxHeight` becomes `none`, exactly as the bare selector produced before.
 
 ### Outstanding concerns
 
-`.artefact-action` and `.artefact-resize-handle` were never the defect. The record claimed they rendered as unstyled black shapes; measurement found them painted from Canvas, correctly, before this change. The item's premise was carried forward from a diagnosis nobody had re-checked, and the real defect — the grid painting nothing — was sitting next to it unrecorded.
+The guard still compares selectors after flattening combinators, so two stylesheets can say the same thing under genuinely different selector shapes — `.infoschematic-region path` shadowing `.infoschematic-region-frame` is the known example. That is not the same gap as the one the review found: it is a limit of selector text, not a blind spot in the scanner, and closing it means resolving what each rule matches, which is a CSS engine rather than a check. The scanner-level blind spots are gone and fixtured.
 
-The shadowing check compares selectors, not declarations. Two stylesheets can still say the same thing under different selector shapes, which is how `.infoschematic-region path` shadowed `.infoschematic-region-frame` until it was read by hand. Catching that class mechanically means resolving what each rule matches, which is a CSS engine rather than a check.
+The evidence gate now reads content, but only where a citation names it in backticks. `DESIGN-006`'s own citation said "editing layers" in prose, which no gate can check, so it was rewritten to name `edit-grid`, `audit-port` and `artefact-resize-handle` — the fix and the convention are the same act. Citations that name nothing still rest on a path that resolves and nothing more. Making that the corpus-wide convention is a separate pass over roughly 150 requirements, not this item.
 
-The intended browser case for the Design grid was dropped. `grid={editor.editing}` stayed false in the fixture even with the surface in Design mode and the Design toolbar rendered, because the editor mode is set from an effect that appears to want an authored document. The shadowing check covers that defect class mechanically, which is the stronger guard, but the rendered assertion is missing.
+The browser case for the diagram container cannot, on its own, distinguish a literal copy that agrees with the token today from the token itself; it catches the chain breaking, and the guard catches the copy. The two together are the cover, which is worth knowing when reading either alone.
 
 ### Post-change review
 
-The question the item asked — convert the remaining literals to tokens, or record why not — resolved into neither answer. Every generated token is `--infoschematic-canvas-*`: it is the diagram's vocabulary, and after the removals nothing in Studio's stylesheet is about the diagram. Of 104 remaining literals, five coincide with a token value, and all five are chrome: a focus ring, a pressed toggle border, an eyebrow. Writing `var(--infoschematic-canvas-selection-pointed)` on `.eyebrow` would assert a relationship that is not there. The editor chrome has no token vocabulary, and inventing one is not this item.
+The goal holds and is now actually true: a treatment written in Canvas reaches the Studio surface uncopied, and no selector along the chain is declared twice — verified by a scanner that has been shown to see the rules it claims to compare. The boundary held; nothing in the editor's appearance, the tokens, or Studio's chrome was redesigned.
 
-The stale premise is the part worth keeping. Two of the three defects the record named were fixed or never existed, and the one that was real went unmentioned — so the record was describing the repository as it stood when someone last looked, which is exactly what a `ready` item is at risk of being. Measuring first cost an hour and changed what was delivered.
+Regression risk is low and was measured rather than argued. The one behavioural question was the rescoped media rule, and it was checked in the browser at the width that triggers it. The container's painted colour is identical before and after, on the same page, to the same character.
+
+Two things went beyond the literal steps. Rescoping `.infoschematic` inside Studio's media query was not named in the rework steps, because the previous scanner could not see it to name it; it is the same defect class and the same fix. And the new evidence case found a stale citation in `AUTHOR-011` that belongs to nobody's item — corrected in place, because a gate that cannot be green is not a gate.
+
+The reopened packet's central claim was false, and the lesson generalises past this item: the earlier delivery asserted "no selector is declared twice" while its scanner had discarded the first rule of all three stylesheets. A check's own reading has to be evidenced before its green means anything, which is why the scanner now carries fixtures a reader can verify by eye and why every fixture was run against the old code first.
 
 ### Mini recap
 
-The editor was drawing the diagram from its own 81 KB copy of the Canvas rules, so a treatment written once arrived nowhere and a token change stopped at the editor door. The copies are gone, the chain is loaded from the head of the file, and a check now fails if a selector is declared twice along it.
+The editor was still drawing the diagram's own container from its own copy of the Canvas rule, with a literal where Canvas writes the token, and the check written to prevent exactly that could not see it — it silently dropped the first rule of every stylesheet in the chain, and every rule inside a media or container query. The scanner is rewritten and fixtured, the duplicate is gone, Studio's narrow-viewport override now says it is about the panel, the two stale specification citations name what they cite, and the evidence gate reads the content rather than only the path. Rendered and compared against Canvas: identical diagram surface, identical container colour, the panel override the only difference.
+
+Learning routes, proposed and not promoted: a check that parses a format needs fixtures for its own reading, not only for its subject; and a citation that names prose can only ever be checked as a path, so naming the identifier is what makes evidence verifiable.
 
 ## Discussion
 
@@ -153,8 +178,8 @@ Rules nested inside `@media`, `@container` or `@keyframes` are skipped as well, 
 
 ## Rework steps
 
-- [ ] Rewrite `selectorsOf` so it cannot silently drop a rule: consume at-rule statements ending in `;` separately from blocks, descend into `@media` and `@container` bodies, and skip only `@keyframes` contents. Prove each case with a fixture that fails first.
-- [ ] Re-run the guard over the real chain and fix every duplicate it now reports, including `.infoschematic`. Removing Studio's copy means changing the assertion at `packages/view-studio/src/app/viewport-frame.test.ts:12` to expect the token rather than the literal.
-- [ ] Decide whether the guard should compare declarations rather than selectors, or state in the record why selector identity is the line being defended — the packet's outstanding concerns name this limitation without resolving it.
-- [ ] Repoint `DESIGN-006` and `DESIGN-010` at evidence that exists, and consider whether the evidence gate can be made to notice content that no longer supports a requirement rather than only a path that no longer resolves.
-- [ ] Re-render Studio and look at the diagram surface against Canvas, since the surviving duplicate was invisible to a fully green run.
+- [x] Rewrite `selectorsOf` so it cannot silently drop a rule: consume at-rule statements ending in `;` separately from blocks, descend into `@media` and `@container` bodies, and skip only `@keyframes` contents. Prove each case with a fixture that fails first.
+- [x] Re-run the guard over the real chain and fix every duplicate it now reports, including `.infoschematic`. Removing Studio's copy means changing the assertion at `packages/view-studio/src/app/viewport-frame.test.ts:12` to expect the token rather than the literal.
+- [x] Decide whether the guard should compare declarations rather than selectors, or state in the record why selector identity is the line being defended — the packet's outstanding concerns name this limitation without resolving it.
+- [x] Repoint `DESIGN-006` and `DESIGN-010` at evidence that exists, and consider whether the evidence gate can be made to notice content that no longer supports a requirement rather than only a path that no longer resolves.
+- [x] Re-render Studio and look at the diagram surface against Canvas, since the surviving duplicate was invisible to a fully green run.
