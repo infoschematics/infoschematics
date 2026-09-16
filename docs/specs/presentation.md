@@ -92,11 +92,13 @@ _Evidence:_ `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages
 
 Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable Architectural Scope, Flow Family and Sequence controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
 
+The collapsed layout is a Present affordance. The compact rail MUST NOT be presented as a Producer mode's working surface, and a Producer mode MUST NOT be left on it: `DESIGN-021` states what entering `design` or `direct` does to the panel dock. Reachable means reachable as rendered — a control hidden by the collapsed layout MUST NOT be accepted as evidence for this requirement merely because it remains in the document.
+
 _Conformance:_ conforming
 
-_Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`. against this requirement.
+_Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load Studio's own stylesheet and assert reachability rather than presence.
 
-_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`.
+_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable in Present and no rail at all in a Producer mode; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records why the rail stays Present-only.
 
 ### PRESENT-010 — Zoom follows pointer and resets to fit
 

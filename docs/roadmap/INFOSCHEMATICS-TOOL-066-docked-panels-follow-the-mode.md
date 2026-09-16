@@ -4,12 +4,12 @@ area: TOOL
 title: Panels follow the mode
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-063]
 blocked_by: []
-baseline_ref: null
+baseline_ref: dbd57e2f
 created_at: 2026-09-15T14:05:00Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-16T13:20:00Z
 ---
 
 # Panels follow the mode
@@ -105,6 +105,76 @@ Deferred, per this repository's practice of landing the feature first and captur
 ### Roadmap
 
 One new Triage record for the Guides work above. No change to any existing record beyond this one.
+
+## Review
+
+### Delivered
+
+Entering Design or Direct now opens the panel dock, the dock lands on the entered mode's own panel rather than on whatever tab was last read, the collapsed rail is stated to be the Present affordance it already was, and the rendered suite can now tell a reachable dock control from a hidden one.
+
+All eight steps are delivered. Step 1's answer — recorded in `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` — was the second of the two options the Discussion set out: the rail stays Present-only and the mode opens the dock, with the open held as a transient override beside the persisted preference rather than written into it. That answer made step 5 a deletion (the dead `.panel-rail .rail-restore` rule) rather than a new compact control surface, and made step 4 a no-op on the preference: nothing a mode change does is ever written to `localStorage`.
+
+### Summary of changes
+
+`packages/view-studio/src/app/App.tsx` — `collapsed` is now an effective value, not the stored one. The persisted state is renamed `storedCollapsed`, and a nullable `dockOverride` sits beside it with a `dockMode` witness. When `presentation.mode` changes, the override is set to open for `design` and `direct` and dropped to `null` for `present`, so Present's own preference decides again. The comparison is made during render rather than in an effect, so the mode and its dock arrive in the same paint. `toggleCollapsed` writes the preference in Present and the override in a Producer mode, which is what keeps a hand collapse inside Design standing for that visit. Every downstream consumer of `collapsed` — the title-bar prop, the `control-room`/`collapsed` class, the panel width, the resizer, `PanelRail`, the layout effect — is untouched, because `collapsed` still means what it meant.
+
+`packages/view-studio/src/app/panels/DetailsPanel.tsx` — `sourceOpen` resets when the mode changes, by the same render-time comparison. This is the landing defect the Current state section identified: `sourceOpen` took priority over the mode's own panel and only the tab buttons ever cleared it.
+
+`packages/view-studio/src/styles.css` — the `.panel-rail .rail-restore` rule is removed. No component in the repository used it, and the decision says there will not be one.
+
+`packages/view-studio/src/app/panels/PanelRail.tsx` — comment only, replacing a one-line note with a statement of why there is no Producer-mode branch here and where the transition lives instead.
+
+`packages/view-studio/src/app/App.browser.test.tsx` — `import '../styles.css'` is added, without which every reachability assertion in this file is vacuous. The layer-control case at the old `:488` and the Direct Scene-editor case now assert `offsetParent` rather than presence. Three cases are added: the transition matrix through Present → Design → Direct → Present with a hand collapse in the middle and a direct read of `localStorage`; the mode-landing case that opens Source and then changes mode twice; and the reload case asserting the preference comes back and the mode does not.
+
+`docs/specs/presentation.md` — `PRESENT-009` gains a paragraph scoping the collapsed layout to Present, forbidding a Producer mode being left on the rail, pointing at `DESIGN-021`, and stating that reachable means reachable as rendered.
+
+`docs/specs/design-session.md` — new `DESIGN-021`, owning what entering a Producer mode does to the dock: open and reachable as rendered, transient and not persisted, a hand collapse holding for the occupancy, and the dock landing on the entered mode's own panel with shared transient panel state not surviving the transition.
+
+`docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` and `docs/decisions/README.md` — the record and its index entry.
+
+### Verification
+
+`bun run --cwd packages/view-studio test:browser` — 2 files, 14 tests passed, from a baseline of 2 files and 11 tests.
+
+`bun run self:check` — 43 successful, 43 total, 13.7s. That run includes `self:verify:repo` (the corpus suites under `scripts/`, which is what checks `PRESENT-009` and `DESIGN-021` for evidence lines and the ADR for its index entry), every workspace typecheck, every build including the production site build, and `test:browser` as its last stage.
+
+Three falsifiability probes, each run and then reverted:
+
+- Reverting the mode transition to `setDockOverride(null)` failed three cases — the new dock case, and both of the existing cases whose assertions were changed in step 6. Those two had been green over hidden controls until this change.
+- With the transition still reverted, restoring the old presence-only assertion in the layer-control case made it pass again. That is the false green this item exists to remove, reproduced deliberately.
+- Removing `setSourceOpen(false)` failed the mode-landing case with `expected false to be true`.
+
+### Post-change review
+
+Rendered and looked at, because a green suite is what hid this fault in the first place. `bun run self:dev`, Chromium at 1440×900, `http://localhost:4173/playground/` with the `Format parity` preset, `localStorage` and `sessionStorage` cleared and the page reloaded first so the dock started at its real default. Nine states were walked and screenshotted, each one recording the `control-room` class, `data-production-mode`, the `offsetParent` reachability of `.panel-rail`, `.state-panel`, `.editor-tab` and `.source-panel`, and the whole of `localStorage`.
+
+- **Present, collapsed** (the real default). Infoschematic full width; the 48-pixel rail carries the Flow-family swatch and `ALL` / `CLEAR`. Only one family and no Scopes or Sequences in this preset, so that is the whole of what `PRESENT-009` has to show here. Rail reachable, state panel not.
+- **Design, entered from collapsed Present.** The dock opened, and opened **on the Design tab, not Source**: grid size `10`, the align and distribute row, the six interaction-layer icons, `CREATE`, `LIBRARY`, `SELECTION` and `CHANGES`, all without scrolling. No rail at all.
+- **Design, collapsed by hand.** Diagram full width, rail column honestly empty, the title bar's **Show panels** highlighted as the way back. That is the accepted cost the decision names rather than a defect.
+- **Design, after selecting a Card.** Still collapsed, pixel-identical to the previous state apart from the selection itself. The override is set on the transition, so a re-render does not spring the dock back open.
+- **Direct, entered from collapsed Design.** The dock re-opened, on the Scenes chooser — "Choose a target" with the Scene library below it (`ALL Everything 3`, `NAME`, `DETAIL`, "Lights 3 things.") — not on Source and not empty.
+- **Source read in Direct.** The YAML panel, with Undo, Redo, Copy YAML, Reset and Apply source. This is the state that used to leak.
+- **Present again.** Byte-identical PNG to the cleared-storage Present at the start of the walk, `md5 b5e15882`. The override dropped, the preference decided, and nothing about the two Producer modes survived.
+- **Design again, after Source was left open in Direct.** Byte-identical PNG to the first entry into Design, `md5 fbac1f53`. That is the `sourceOpen` fix proven in pixels rather than in a tab strip.
+- **Reloaded.** Byte-identical to Present again, `md5 b5e15882`: back in `present`, collapsed per the preference, no `.editor-tab` and no `.source-panel` anywhere, as `DESIGN-001` requires.
+
+`FORMAT-PARITY.panels.collapsed` read `"true"` in every one of the nine snapshots, across two mode entries, a hand collapse and a reload. The preference is never rewritten by a mode change, which is the property `DESIGN-021` asserts and the reason the override exists.
+
+One thing seen while looking that is not introduced here: in Design at 1440×900 the `SELECTION` heading is clipped by the split-pane resizer handle. Pre-existing split-pane behaviour, unrelated to dock visibility.
+
+### Outstanding concerns
+
+Direct does not preselect a target when the dock opens, so the Verify bullet asking for "a target chooser with a target selected" is half-met: the chooser is there and lists the document's targets, and the Scene editor is beside it, but nothing is chosen. The cause is that `reconcileDirectTargets`, declared at `packages/view-studio/src/app/hooks/use-presentation.ts:128`, is never called anywhere in the repository. That is the panel's own content rather than the dock's visibility, so it is left alone and recorded in the decision's Consequences; it wants its own item.
+
+The Guides work this item defers — `apps/site/content/studio.md` gaining a sentence about the dock opening with the mode — has no Triage record yet. A `TOOL` number could not be allocated safely from this worktree: the worktree's ledger reserves through `070`, while `main` already carries `TOOL-071` and `TOOL-072`, and other worktrees are capturing follow-ups concurrently. Parked for the lead to number rather than guessed at.
+
+`INFOSCHEMATICS-TOOL-058`, delivered concurrently in another worktree, adds a case to `packages/view-studio/src/app/App.browser.test.tsx`. Any case it adds that reads a dock control inherits the obligation this item introduces — load the stylesheet, assert reachability — and it was written against a file that did not yet have either. Left untouched here; a candidate for a later pass.
+
+`INFOSCHEMATICS-TOOL-063` also edits `App.tsx` and `App.browser.test.tsx`, and its `ADR-INFOSCHEMATICS-0NN` placeholder is not this record's `028`.
+
+### Mini recap
+
+A mode switch now lands a Producer in a dock they can work in, and the rail is honestly Present's. The change is small — a nullable override beside the persisted preference, and one reset — and most of the work was in the two things that let the fault live: nothing in the specification corpus said what the dock does on a mode entry, and the rendered suite could not tell a hidden control from a reachable one. Both are now fixed, and the second was proved by reproducing the false green on purpose.
 
 ## Discussion
 

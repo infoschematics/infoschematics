@@ -1,7 +1,14 @@
 import { type RuntimeStory, useInfoschematic, useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import type { Presentation } from '../hooks/use-presentation.ts'
 
-/* Present controls folded into 48px for a maximised diagram. */
+/*
+ * Present controls folded into 48px for a maximised diagram.
+ *
+ * The rail is a Present affordance and stays one. Scope, Family and Sequence are small, mutually exclusive choices
+ * that fit; Design's properties, tools and layer controls and Direct's target chooser are not, so there is no
+ * Producer-mode branch here and collapsed is not a compact Producer mode. Entering a Producer mode opens the dock
+ * instead - App.tsx holds that transition, and ADR-INFOSCHEMATICS-028 records why it went this way round.
+ */
 export function PanelRail({
   onPlay: _onPlay,
   presentation

@@ -388,6 +388,16 @@ export function DetailsPanel({
     'showing'
   )
   const [sourceOpen, setSourceOpen] = useState(false)
+  /*
+   * Source is the one tab that outlives its mode, and it took priority over the mode's own panel below, so leaving
+   * Present with the YAML open and entering Design showed the YAML instead of the Design tools. A mode change is a
+   * request to work on something, so it lands on that mode's own panel; the tab strip alone never showed this.
+   */
+  const [sourceMode, setSourceMode] = useState(presentation.mode)
+  if (sourceMode !== presentation.mode) {
+    setSourceMode(presentation.mode)
+    setSourceOpen(false)
+  }
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
   const directOptions = useMemo<readonly DirectOption[]>(() => {
     const standaloneScenes = scenes.library.map((scene) => ({

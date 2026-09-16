@@ -3,6 +3,13 @@ import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
+/*
+ * Studio's stylesheet, because the panel dock is a cascade state over a mounted panel rather than a render branch.
+ * Collapsed, `.control-room.collapsed .state-panel` hides everything the dock holds while leaving all of it in the
+ * tree, so `querySelector` answers for a control nobody can reach. Without this import a reachability assertion is
+ * vacuous and this suite passed for months over a surface a person could not touch at all.
+ */
+import '../styles.css'
 
 const config = defineInfoschematic({
   title: 'Studio interaction',
@@ -191,6 +198,9 @@ sequences:
     (input) => input.value === 'Opening'
   )
   if (!label) throw new Error('canonical Overview Scene did not open in Direct mode')
+  // Direct's editor is in the dock, and entering Direct opens it: this case reached the field without pressing
+  // anything, which only holds because the mode brought the dock with it.
+  expect(label.offsetParent).not.toBeNull()
   const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
   if (!setInputValue) throw new Error('browser has no native input value setter')
   setInputValue.call(label, 'Edited opening')
@@ -495,7 +505,12 @@ test('Studio layer controls close a kind to interaction and release whatever it 
 
   // The editor mode follows the production mode through an effect, so the Design tools arrive a render later.
   const control = (label: string) => container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
-  await expect.poll(() => control('Cards interactive')).not.toBeNull()
+  /*
+   * Reachable, not merely present. This case used to read the layer controls straight out of the tree with the dock
+   * collapsed, so it operated buttons that were `display: none` for its whole run and reported a green over a surface
+   * nobody could press. `offsetParent` is null under a hidden ancestor, which is the difference `querySelector` misses.
+   */
+  await expect.poll(() => control('Cards interactive')?.offsetParent ?? null).not.toBeNull()
   const cards = control('Cards interactive')
   const flows = control('Flows interactive')
   const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
@@ -661,4 +676,191 @@ test('arrow keys carry the whole held group, one step for the group rather than 
   window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowRight' }))
   await expect.poll(() => placedAt('CARD-A')).toBe('translate(60 40)')
   expect(placedAt('CARD-B')).toBe('translate(220 120)')
+})
+
+/*
+ * A document with something in each of the collapsed rail's three Present groups, a Card to select in Design, a
+ * Sequence to direct, and an id, so `DOCK.panels.collapsed` can be read back from `localStorage` by name.
+ */
+const dockDocument = `id: DOCK
+title: Docked panels
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  families:
+    - id: request
+      label: Request
+      description: Requests
+      color: "#79c9ff"
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+scopes:
+  - id: core
+    label: Core scope
+    description: The Cards
+    elements:
+      - CARD-A
+sequences:
+  - id: OVERVIEW
+    label: Overview
+    presentation:
+      display: expanded
+      timed: false
+      callouts: false
+    scenes:
+      - id: SCN-01
+        label: Opening
+        description: Opening scene
+`
+
+const hostDock = async () => {
+  const parsed = parseInfoschematicDocument(dockDocument)
+  if (!parsed.ok) throw new Error('dock fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  return {
+    collapsed: () => container.querySelector('.control-room')?.classList.contains('collapsed'),
+    container,
+    mode: () => container.querySelector('main')?.getAttribute('data-production-mode'),
+    press: (label: string) => {
+      const button = container.querySelector<HTMLButtonElement>(`button[aria-label^="${label}"]`)
+      if (!button) throw new Error(`Studio has no control labelled ${label}`)
+      button.click()
+      return button
+    },
+    /* `display: none` leaves a control in the tree; `offsetParent` is what a person's reach looks like as an assertion. */
+    reachable: (selector: string) => Boolean(container.querySelector<HTMLElement>(selector)?.offsetParent),
+    tab: (label: string) => {
+      const button = [...container.querySelectorAll<HTMLButtonElement>('.panel-tabs button')].find(
+        (candidate) => candidate.textContent?.trim() === label
+      )
+      if (!button) throw new Error(`Studio has no ${label} panel tab`)
+      button.click()
+      return button
+    }
+  }
+}
+
+test('the panel dock opens with a Producer mode and keeps a collapse made inside one', async () => {
+  window.localStorage.clear()
+  const studio = await hostDock()
+
+  /*
+   * Present is the collapsed default, and the rail is Present's own affordance: the Scope, Family and Sequence
+   * controls PRESENT-009 requires are reachable in forty-eight pixels while the dock itself is not.
+   */
+  expect(studio.collapsed()).toBe(true)
+  expect(studio.reachable('.panel-rail [aria-label="Architectural scopes"] button')).toBe(true)
+  expect(studio.reachable('.panel-rail [aria-label="Flow families"] button')).toBe(true)
+  expect(studio.reachable('.panel-rail [aria-label="Sequences"] button')).toBe(true)
+  expect(studio.reachable('.state-panel')).toBe(false)
+
+  // Present to Design opens the dock, because the rail carries none of Design's tools and never did.
+  studio.press('Design')
+  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(studio.collapsed).toBe(false)
+  await expect.poll(() => studio.reachable('button[aria-label="Cards interactive"]')).toBe(true)
+  expect(studio.reachable('.editor-tab')).toBe(true)
+  // Honestly empty rather than usefully populated: collapsed is a Present layout, so there is no rail here at all.
+  expect(studio.container.querySelector('.panel-rail')).toBeNull()
+
+  /*
+   * The open is a transition, not a state held across the mode. Collapsing inside Design stands, through a re-render
+   * and through a selection change, because otherwise the dock springs back on the next thing the Producer does.
+   */
+  studio.press('Collapse panels')
+  await expect.poll(studio.collapsed).toBe(true)
+  const card = studio.container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  if (!card) throw new Error('Studio did not render the authored Card')
+  card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 41 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 41 }))
+  await expect.poll(() => card.classList.contains('selected')).toBe(true)
+  expect(studio.collapsed()).toBe(true)
+
+  // Design to Direct is another mode entry, so the dock comes back with Direct's target chooser and a target in it.
+  studio.press('Direct')
+  await expect.poll(studio.mode).toBe('direct')
+  await expect.poll(studio.collapsed).toBe(false)
+  await expect.poll(() => studio.reachable('.editor-tab-header select')).toBe(true)
+  /*
+   * A chooser with this document's targets in it, and the Scene's own fields below it, rather than an empty panel.
+   * Direct does not preselect a target - `reconcileDirectTargets` is declared and never called - and choosing one for
+   * a Producer is the panel's own content, which this item does not touch.
+   */
+  await expect
+    .poll(() =>
+      [...studio.container.querySelectorAll<HTMLOptionElement>('.editor-tab-header select option')]
+        .map((option) => option.value)
+        .filter((value) => value.length > 0)
+    )
+    .toContain('standalone-scene:SCN-01')
+  expect(studio.reachable('.scene-fields input')).toBe(true)
+  expect(studio.container.querySelector('.source-panel')).toBeNull()
+
+  /*
+   * Returning to Present drops the override and the document's own preference decides again. It was never rewritten:
+   * one visit to Design must not change what Present looks like for this document from then on.
+   */
+  studio.press('Present')
+  await expect.poll(studio.mode).toBe('present')
+  await expect.poll(studio.collapsed).toBe(true)
+  expect(window.localStorage.getItem('DOCK.panels.collapsed')).toBe('true')
+})
+
+test('a mode change lands on that mode own panel rather than on whatever tab was last open', async () => {
+  window.localStorage.clear()
+  const studio = await hostDock()
+
+  studio.press('Show panels')
+  await expect.poll(studio.collapsed).toBe(false)
+  studio.tab('Source')
+  await expect.poll(() => studio.reachable('.source-panel textarea')).toBe(true)
+
+  /*
+   * Source outlived its mode and took priority over the mode's own panel, so Present with the YAML open became Design
+   * showing the YAML. The tab strip reads the same either way, which is why no existing case saw this.
+   */
+  studio.press('Design')
+  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(() => studio.reachable('.editor-tab')).toBe(true)
+  expect(studio.container.querySelector('.source-panel')).toBeNull()
+
+  // The same on the way in from Direct, which is where a Producer reading the YAML of a Scene actually is.
+  studio.press('Direct')
+  await expect.poll(studio.mode).toBe('direct')
+  studio.tab('Source')
+  await expect.poll(() => studio.reachable('.source-panel textarea')).toBe(true)
+  studio.press('Present')
+  await expect.poll(studio.mode).toBe('present')
+  expect(studio.container.querySelector('.source-panel')).toBeNull()
+  studio.press('Design')
+  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(() => studio.reachable('.editor-tab')).toBe(true)
+  expect(studio.container.querySelector('.source-panel')).toBeNull()
+})
+
+test('a reload restores the dock preference and none of the Producer mode that opened it', async () => {
+  window.localStorage.clear()
+  // What a Producer who expanded the dock in Present left behind, and all they left behind.
+  window.localStorage.setItem('DOCK.panels.collapsed', 'false')
+  const studio = await hostDock()
+
+  expect(studio.mode()).toBe('present')
+  expect(studio.collapsed()).toBe(false)
+  expect(studio.reachable('.state-panel')).toBe(true)
+  expect(studio.container.querySelector('.panel-rail')).toBeNull()
+  expect(studio.container.querySelector('.editor-tab')).toBeNull()
 })

@@ -192,6 +192,20 @@ _Verify:_ run the group cases in `packages/view-model/src/editable-capabilities.
 
 _Evidence:_ `packages/view-model/src/editable.ts` holds the ordered selection set, reads participation from `artefactCapabilities`, and computes `alignOffsets` and `distributeOffsets` as pure geometry; `packages/view-canvas/src/InfoschematicDiagram.tsx` adds Shift to a press and to Enter, sweeps a range band over the geometry it drew, and marks non-anchor members `group-held`; `packages/view-studio/src/app/editor/use-editor.ts` records every participant's move inside one checkpoint; `packages/view-studio/src/app/editor/EditorTools.tsx` presents the six align and two distribute controls.
 
+### DESIGN-021 — Entering a Producer mode opens the panel dock
+
+Entering `design` or `direct` MUST leave the [Details panel](../reference/vocabulary.md#details-panel) dock open and the entered mode's own controls reachable as rendered. The compact collapsed rail is a Present affordance under `PRESENT-009` and MUST NOT be offered as a Producer mode's working surface, so a Producer mode MUST NOT be entered onto a collapsed dock.
+
+The dock MUST open as a transient consequence of the transition and MUST NOT rewrite the persisted collapse preference. Collapsing the dock while a Producer mode is current MUST hold for the rest of that occupancy, across re-renders and selection changes. Returning to `present` MUST restore the persisted preference unchanged, so a visit to a Producer mode MUST NOT alter how Present opens for that document, and a reload MUST restore that preference and no part of the mode that opened the dock, as `DESIGN-001` requires. Entering the other Producer mode is a further entry and MAY open the dock again. Per-mode memory of a Producer's collapse is not required.
+
+A mode transition MUST leave the dock on the entered mode's own panel. Transient panel state that names a surface shared between modes, such as the authored-source view, MUST NOT survive the transition and take priority over the entered mode's controls.
+
+_Conformance:_ conforming
+
+_Verify:_ run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load `packages/view-studio/src/styles.css` and assert reachability through `offsetParent` rather than presence, because the collapsed dock hides a mounted panel rather than unmounting it.
+
+_Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override on entry to a Producer mode, drops it on entry to `present`, and routes the panel toggle to whichever of the two the current mode owns; `packages/view-studio/src/app/panels/PanelRail.tsx` stays Present-only; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when the mode changes; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records the preference model and the rejected alternative.
+
 ## Quality properties
 
 ### DESIGN-015 — The rendered editor is tested

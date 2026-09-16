@@ -434,10 +434,6 @@ h2 {
   color: #cce1f8;
 }
 
-.panel-rail .rail-restore {
-  writing-mode: horizontal-tb;
-}
-
 .rail-group {
   border-top: 1px solid #ffffff15;
   display: grid;

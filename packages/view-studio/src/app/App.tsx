@@ -269,7 +269,7 @@ function AppContent({
     themeLogos
   } = runtime
   const storage = compatibilityConfig.id
-  const [collapsed, setCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
+  const [storedCollapsed, setStoredCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
   const [shortcuts, setShortcuts] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [hoveredSpecification, setHoveredSpecification] = useState<readonly string[] | null>(null)
@@ -282,6 +282,33 @@ function AppContent({
   const [_connected, _setConnected] = useState(false)
 
   const presentation = usePresentation()
+
+  /*
+   * The dock opens when a Producer mode is entered, and the document's own preference decides Present.
+   *
+   * Present needs nothing from the dock - the Infoschematic is the whole surface - so `panels.collapsed` defaults to
+   * collapsed and is what a Producer will have left it on. Design and Direct keep everything that does the work in
+   * there, and the collapsed rail is a Present affordance carrying Present's filters, so entering either mode
+   * collapsed left a 48-pixel empty column beside a diagram nobody could edit.
+   *
+   * The override is transient and is not written back, because one visit to Design must not change what Present looks
+   * like for that document from then on. It is set on the transition rather than held across the mode, so collapsing
+   * the dock inside Design is respected for the rest of that visit. Returning to Present drops it and the persisted
+   * preference decides again. See ADR-INFOSCHEMATICS-028.
+   */
+  const [dockOverride, setDockOverride] = useState<boolean | null>(null)
+  const [dockMode, setDockMode] = useState(presentation.mode)
+  if (dockMode !== presentation.mode) {
+    // Adjusted during render rather than in an effect, so the mode and its dock arrive in the same paint.
+    setDockMode(presentation.mode)
+    setDockOverride(presentation.mode === 'present' ? null : false)
+  }
+  const collapsed = dockOverride ?? storedCollapsed
+  const toggleCollapsed = () => {
+    if (presentation.mode === 'present') setStoredCollapsed((current) => !current)
+    else setDockOverride(!collapsed)
+  }
+
   // The diagram describes its own handles and constraints; the editor only holds
   // what has been dragged and what that should be written back as.
   const buildEditable = useCallback(
@@ -954,7 +981,7 @@ function AppContent({
         collapsed={collapsed}
         fullscreen={fullscreen}
         onFitDiagram={() => diagramViewport.current?.fit()}
-        onToggleCollapsed={() => setCollapsed((current) => !current)}
+        onToggleCollapsed={toggleCollapsed}
         onToggleFullscreen={toggleFullscreen}
         onZoomIn={() => diagramViewport.current?.zoomIn()}
         onZoomOut={() => diagramViewport.current?.zoomOut()}
