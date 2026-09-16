@@ -41,6 +41,25 @@ jobs:
           package-manager-cache: false
           registry-url: https://registry.npmjs.org
 
+      - name: Verify npm publishing floor
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Trusted publishing with provenance needs this npm line. Assert it here, before the
+          # install and the full repository gate, so a below-floor runner fails in seconds and
+          # says why instead of at the publish step. scripts/release/workflow.test.ts binds this
+          # value to releaseNpmFloor in scripts/release/packages.ts.
+          npm_floor="11.5.1"
+          npm_version="$(npm --version)"
+
+          if [[ "$(printf '%s\n' "$npm_floor" "$npm_version" | sort -V | head -n 1)" != "$npm_floor" ]]; then
+            echo "npm $npm_version is below the $npm_floor floor trusted publishing requires." >&2
+            exit 1
+          fi
+
+          echo "npm $npm_version satisfies the $npm_floor publishing floor."
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -66,11 +85,15 @@ jobs:
           fi
 
           release_version="${RELEASE_TAG#v}"
+          # The published set, dependency-first. scripts/release/workflow.test.ts requires both this
+          # list and the publish list below to equal releasePackages in scripts/release/packages.ts
+          # exactly, in this order, so a package cannot go missing from a release unnoticed again.
           package_manifests=(
             packages/domain-model/package.json
             packages/domain-core/package.json
             packages/view-model/package.json
             packages/render-svg/package.json
+            packages/cli/package.json
             packages/view-canvas/package.json
             packages/view-present/package.json
             packages/view-studio/package.json
@@ -102,6 +125,7 @@ jobs:
             packages/domain-core
             packages/view-model
             packages/render-svg
+            packages/cli
             packages/view-canvas
             packages/view-present
             packages/view-studio

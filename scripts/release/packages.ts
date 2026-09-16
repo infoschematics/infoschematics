@@ -26,6 +26,9 @@ export const releaseRepositoryUrl = 'git+https://github.com/infoschematics/infos
 /** The Node line every published package promises, per GDR-INFOSCHEMATICS-004: the oldest line still in support. */
 export const releaseNodeEngine = '>=22'
 
+/** The npm floor trusted publishing requires; the release workflow asserts it before spending the gate. */
+export const releaseNpmFloor = '11.5.1'
+
 export type PackageManifest = Readonly<{
   bin?: Readonly<Record<string, string>> | string
   dependencies?: Readonly<Record<string, string>>

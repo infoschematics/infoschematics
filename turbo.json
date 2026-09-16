@@ -87,6 +87,7 @@
     },
     "//#self:verify:repo": {
       "inputs": [
+        ".github/workflows/release-npm.yml",
         "scripts/**",
         "vite.config.ts",
         ".dependency-cruiser.ts",

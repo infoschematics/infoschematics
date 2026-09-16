@@ -6,7 +6,7 @@ Infoschematics publishes eight public packages as one coordinated version from o
 
 Before the first publication, confirm the organisation controls the `@infoschematics` npm scope and all eight package names. Configure each package's npm trusted publisher for this GitHub repository, workflow filename `release-npm.yml`, environment `npm`, and allowed action `npm publish`.
 
-Create a GitHub environment named `npm`. Require a reviewer who did not start the deployment where the plan permits, restrict environment administration, and use a repository ruleset to protect `v*` release tags. The environment stores no npm token: the workflow obtains a short-lived credential through its `id-token: write` OIDC permission. npm requires npm 11.5.1 or later and Node 22.14 or later; the workflow uses Node 24 on a GitHub-hosted runner.
+Create a GitHub environment named `npm`. Require a reviewer who did not start the deployment where the plan permits, restrict environment administration, and use a repository ruleset to protect `v*` release tags. The environment stores no npm token: the workflow obtains a short-lived credential through its `id-token: write` OIDC permission. npm requires npm 11.5.1 or later and Node 22.14 or later; the workflow uses Node 24 on a GitHub-hosted runner and asserts that npm floor before it installs or verifies anything, so a below-floor runner fails in seconds rather than at the publish step.
 
 See [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/) and [GitHub deployment environments](https://docs.github.com/en/actions/reference/workflows-and-actions/deployments-and-environments) for provider configuration and protection rules.
 
@@ -41,7 +41,7 @@ Pushing the tag is a release-authority action. Do it only after explicit approva
 
 Open GitHub Actions, select **Release npm packages**, and enter the exact existing `v<version>` tag. The workflow definition remains human-triggered from the default branch but checks out and verifies that tag before release work. Verify the checkout commit, eight package versions, and changelog all match. Approve the protected `npm` environment.
 
-The workflow reruns repository and release verification, checks that the requested version does not already exist, then publishes dependency-first with provenance. It refuses a branch-only, malformed, moved, mismatched, or existing version. There is no automatic publication on a push, pull request, or tag creation.
+The workflow checks its npm floor, reruns repository and release verification, checks that the requested version does not already exist, then publishes dependency-first with provenance. Its package set is stated in the workflow and held to `releasePackages` in `scripts/release/packages.ts` by the repository suite, so the published set cannot silently fall short of the eight. It refuses a branch-only, malformed, moved, mismatched, or existing version. There is no automatic publication on a push, pull request, or tag creation.
 
 ## Verify publication
 
