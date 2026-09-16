@@ -20,7 +20,8 @@ Populate the structural `infoschematic` field:
 
 - `regions` establish background geography as [Regions](/docs/reference/vocabulary/#region);
 - `fabrics` and `cards` establish focusable [Fabric](/docs/reference/vocabulary/#fabric) and [Card](/docs/reference/vocabulary/#standard-card) artefacts;
-- `flows` connect Cards and Fabrics through named [ports](/docs/reference/vocabulary/#port) and [points](/docs/reference/vocabulary/#point);
+- `points` establish [Points](/docs/reference/vocabulary/#point), coordinate artefacts in their own right rather than parts of the Flows that meet them: each has an `id`, a position, and optional ports of its own, and a Point with no Flow attached is valid;
+- `flows` connect Cards, Fabrics, and Points through named [ports](/docs/reference/vocabulary/#port);
 - `graphics` register [Graphics](/docs/reference/vocabulary/#graphic), visual material that Scenes may reveal;
 - `scopes` provide [Scope](/docs/reference/vocabulary/#scope) applicability, `domains` provide [Domain](/docs/reference/vocabulary/#domain) classification, and `flowFamilies` provide [Flow](/docs/reference/vocabulary/#flow) identity;
 - `interfaces` and `specificationGroups` describe technical contracts.
@@ -176,7 +177,9 @@ Open Design when you want the complete authored Infoschematic rather than the Au
 
 The Library provides Card, Fabric and Flow starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
 
-Removing a Card or Fabric also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
+Removing a Card, Fabric, or Point also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
+
+A Point is edited on the Diagram like any other artefact: select it, drag it, nudge it with the arrow keys, or type an exact coordinate. It has no box to resize, because its geometry is a coordinate rather than a rectangle. What a Producer cannot do is make one — the Library seeds Cards, Fabrics, and Flows only — so a new Point is authored in source and then moved or removed on the surface.
 
 An artefact marked for removal stays visible, selectable and visibly pending so you can review or lift the mark before applying it.
 

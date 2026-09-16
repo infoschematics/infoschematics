@@ -24,3 +24,4 @@ policy: safe-local-v1
 | INFOSCHEMATICS-TOOL-073 | awaiting-review | `f4ac2deaefd8ebf38df1e84eba422f9fd5630280` | `fce74a415b13dfe9290c4cb0d9774b99553da00d` | None |
 | INFOSCHEMATICS-TOOL-074 | awaiting-review | `fce74a415b13dfe9290c4cb0d9774b99553da00d` | `81326f6d9514086422dc114ff502ddc590288eff` | None |
 | INFOSCHEMATICS-TOOL-076 | awaiting-review | `81326f6d9514086422dc114ff502ddc590288eff` | `cedded813dccc0927da5d46a8d7a423d507a8ce9` | Step 2's "fully visible" criterion not achievable for a resizable scrolling pane; recorded in the item |
+| INFOSCHEMATICS-SITE-027 | awaiting-review | `cedded813dccc0927da5d46a8d7a423d507a8ce9` | `0d6239b5eef0b397020c9830b312e0551e3624a5` | None |

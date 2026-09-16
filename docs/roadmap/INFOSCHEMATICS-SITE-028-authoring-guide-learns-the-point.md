@@ -4,12 +4,12 @@ area: SITE
 title: Authoring guide learns the Point
 theme: site
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T18:20:00Z
+updated_at: 2026-09-16T22:55:00Z
 ---
 
 # Authoring guide learns the Point
@@ -38,19 +38,20 @@ Site-owned consumer content across the authoring guide, the Studio guide, and th
 
 ## Steps
 
-1. [ ] Give `points` its own bullet in the declaration list, naming it a coordinate artefact a Flow may end on rather than a part of a Flow, and link the vocabulary term.
-2. [ ] Correct the removal-cascade sentence at `:169` to include a Point.
-3. [ ] Say what a Producer can do with a Point on the Diagram — select, move by pointer and by key, type a coordinate, remove with its Flows — and say plainly that creating one means authoring it, so nobody hunts the Library for it.
-4. [ ] Check the surrounding `ports` prose still reads correctly once a Point is no longer introduced as a kind of port.
-5. [ ] Give `apps/site/content/studio.md` its Point section, and correct its Library sentence and its removal-cascade sentence to match the authoring guide's.
-6. [ ] Correct the Points component page prose so it does not promise a drawn label, and say what a Producer can do with a Point on the surface.
-7. [ ] Read every rendered page, not the Markdown.
+1. [x] Give `points` its own bullet in the declaration list, naming it a coordinate artefact a Flow may end on rather than a part of a Flow, and link the vocabulary term.
+2. [x] Correct the removal-cascade sentence at `:169` to include a Point.
+3. [x] Say what a Producer can do with a Point on the Diagram — select, move by pointer and by key, type a coordinate, remove with its Flows — and say plainly that creating one means authoring it, so nobody hunts the Library for it.
+4. [x] Check the surrounding `ports` prose still reads correctly once a Point is no longer introduced as a kind of port.
+5. [x] Give `apps/site/content/studio.md` its Point section, and correct its Library sentence and its removal-cascade sentence to match the authoring guide's.
+6. [x] Correct the Points component page prose so it does not promise a drawn label, and say what a Producer can do with a Point on the surface.
+7. [x] Read every rendered page, not the Markdown.
 
 ## Files touched
 
 - `apps/site/content/authoring.md`
 - `apps/site/content/studio.md`
 - `apps/site/src/VisualGuide.tsx`
+- `apps/site/src/visual-guide/curriculum.ts`
 
 ## Verify
 
@@ -74,6 +75,49 @@ None. `ADR-INFOSCHEMATICS-031` settled the Point's editing surface and its non-c
 ### Guides
 
 This item _is_ the guide change, and it spans three Site-owned surfaces rather than one: `apps/site/content/authoring.md`, `apps/site/content/studio.md`, and the Points page in `apps/site/src/VisualGuide.tsx`. Nothing under `docs/guides/` moves.
+
+## Review
+
+### Delivered
+
+Points are now declared, edited, and described as artefacts across all three Site surfaces the record names, plus a fourth file the sixth step turned out to need.
+
+`apps/site/content/authoring.md` gains a `points` bullet of its own in the declaration list, placed before `flows` so a document author meets the artefact before the thing that connects to it. It names a Point a coordinate artefact in its own right rather than a part of the Flows that meet it, records that each has an `id`, a position, and optional ports of its own, and states that a Point with no Flow attached is valid. The `flows` bullet lost its trailing link to `#point` — a Point is no longer a thing a Flow connects _through_ alongside a port — and now reads "connect Cards, Fabrics, and Points through named ports". The removal-cascade sentence at `:180` includes a Point. A new paragraph at `:182` says what a Producer can do with one (select, drag, nudge, type a coordinate), why there is no resize (its geometry is a coordinate, not a rectangle), and that creating one means authoring it in source, so nobody hunts the Library.
+
+`apps/site/content/studio.md` carries the same two corrections in the document a Producer actually reads: the Library sentence now states there is no Point seed, and the removal cascade names a Point. A new `## Points` section sits between `## The Library` and `## Drafts and the handoff`.
+
+The Points component page (`apps/site/src/VisualGuide.tsx`) no longer claims a Point "can currently be labelled, positioned, and connected through ports". It now says the Point is positioned rather than boxed, carries ports of its own, is editable in Design, is authored in source rather than inserted from the Library, and that its `label` is authored but no renderer draws it yet. The page's lead sentence in `apps/site/src/visual-guide/curriculum.ts:448` changed with it: "A Point is a labelled junction or anchor" became "A Point is a junction or anchor with an identity of its own", because the old wording promised the label the renderer does not draw.
+
+### Summary of changes
+
+| File | Change |
+| --- | --- |
+| `apps/site/content/authoring.md` | `points` bullet added; `flows` bullet loses its `#point` link; removal cascade includes a Point; new Producer-editing paragraph |
+| `apps/site/content/studio.md` | Library sentence states there is no Point seed; removal cascade includes a Point; new `## Points` section |
+| `apps/site/src/VisualGuide.tsx` | Points-page prose replaced: positioned not boxed, own ports, editable in Design, authored in source, `label` undrawn, roles future |
+| `apps/site/src/visual-guide/curriculum.ts` | Points-page lead sentence no longer calls a Point "labelled" |
+
+### Verification
+
+`bun run self:check` — 45 of 45 tasks successful.
+
+All three pages were rendered at 1280×1100 against `bun run self:dev` on `http://localhost:4173` and read, not diffed: `/docs/authoring/` (`reports/site028-a1.png`, `a2`), `/docs/studio/` (`s1`), `/docs/components/points/` (`p1`, `p2`). Reading them caught two defects a green suite did not: the Points-page prose initially wrote `` `label` `` in JSX, which renders as literal backticks rather than code — corrected to `<code>label</code>`, matching `VisualGuide.tsx:179` — and two new sentences used ASCII hyphens where the surrounding prose uses em dashes.
+
+`apps/site/src/VisualGuide.test.tsx:56` then failed. The guard named "does not use internal Point endpoint language" asserts the page contains the exact string `Start, end, junction, anchor`, and the replacement prose had folded the role list mid-sentence into lowercase. The role list now opens its own sentence — "Start, end, junction, anchor, and hidden are future role semantics." — which satisfies the guard without weakening it, and preserves what the sentence was there to say. The guard was not touched.
+
+### Outstanding concerns
+
+The record's sixth step asked for the Points page to stop promising a drawn label and to say what a Producer can do. `INFOSCHEMATICS-TOOL-063`'s original deferral also wanted an interactive specimen on that page; one already exists (`aria-label="Point properties live example"`, with position and per-edge port controls), so nothing was added there. If that deferral meant a _different_ specimen — one demonstrating Design-mode interaction rather than property editing — it remains unaddressed and belongs in its own record.
+
+`INFOSCHEMATICS-TOOL-082` (a Library Point seed) and `INFOSCHEMATICS-TOOL-083` (a renderer for the Point label) stay open. The prose deliberately describes today's behaviour, so both will need a sentence changed here when they land — the authoring guide's "the Library seeds Cards, Fabrics, and Flows only", `studio.md`'s "there is no Point seed", and the component page's "no renderer draws it yet".
+
+### Post-change review
+
+The `flows` bullet's old link to `#point` is worth noting as the root of the confusion this item fixes: the guide's own declaration list taught that a Point was a routing detail of a Flow, in the same breath as a port. That reading survived `ADR-INFOSCHEMATICS-031` by nine months because nothing in the suite asserts what the guide teaches — only that certain phrases do or do not appear. The guard at `VisualGuide.test.tsx:56` is the one exception, and it earned its place this run by catching a real regression in prose the suite otherwise cannot see.
+
+### Mini recap
+
+Three Site surfaces described a Point as part of a Flow; now all three describe it as an artefact a document declares and a Producer moves. A fourth file joined the change because the Points page's lead sentence promised a label nothing draws. One prose guard failed and was satisfied by rephrasing rather than relaxing it.
 
 ## Discussion
 

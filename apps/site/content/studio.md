@@ -17,7 +17,13 @@ Clicking an artefact selects it; clicking the empty canvas or pressing Escape cl
 
 ## The Library
 
-The Library offers reusable Card, Fabric, and Flow starting points — seeds, not linked instances. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, or endpoints. The result carries no template link, so later edits affect only that instance.
+The Library offers reusable Card, Fabric, and Flow starting points — seeds, not linked instances. There is no Point seed: a Point is authored in source, and Studio moves and removes one rather than creating it. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, or endpoints. The result carries no template link, so later edits affect only that instance.
+
+## Points
+
+A [Point](/docs/reference/vocabulary/#point) is an artefact, not a part of the Flow that meets it, so Design treats it as one. Select it on the Diagram, drag it, nudge it with the arrow keys, or type an exact coordinate; several Flows may attach to one Point at distinct ports, and removing it names those Flows exactly as removing a Card does.
+
+Two things differ from a Card. A Point has no box, so there is nothing to resize — its placement is a coordinate. And the Library has no Point to insert, so a Producer who needs a new one authors it in source; everything after that is editable on the surface.
 
 ## Drafts and the handoff
 
@@ -26,7 +32,7 @@ Studio never writes authored source. Edits accumulate into one reviewable change
 - Undo and redo operate on whole gestures — one drag is one step regardless of pointer events.
 - Repeated edits to the same property consolidate into one final change.
 - Changes can be discarded individually or together.
-- Related consequences travel together: removing a Card names the dependent Flows that would lose an endpoint; removing a Region removes only itself.
+- Related consequences travel together: removing a Card, Fabric, or Point names the dependent Flows that would lose an endpoint; removing a Region removes only itself.
 
 Applying the change set is a deliberate handoff, readable in review as model fragments keyed by stable identity. How an approved change set reaches authored configuration — a commit, a pull request, an API — is the host's decision, not Studio's.
 

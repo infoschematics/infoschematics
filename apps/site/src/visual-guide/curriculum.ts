@@ -445,7 +445,7 @@ export const componentSections: readonly ComponentSection[] = [
     title: 'Point',
     layer: 'foreground',
     summary:
-      'A Point is a labelled junction or anchor. It becomes useful when Flows meet, split, or need an explicit waypoint with identity.',
+      'A Point is a junction or anchor with an identity of its own. It becomes useful when Flows meet, split, or need an explicit waypoint the document can name.',
     propertyKeys: [
       'point.x',
       'point.y',
