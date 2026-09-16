@@ -77,3 +77,11 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 | INFOSCHEMATICS-TOOL-070 | 1 | Awaiting review | Guard red with `packages/cli` removed; forced gate 43/43 | Accept, or return |
 | INFOSCHEMATICS-TOOL-064 | 1 | Awaiting review | First-rule duplicate caught; cite gate red when staled | Accept after a look |
 | INFOSCHEMATICS-TOOL-065 | 1 | Awaiting review | Hold check and README check proven red; stale lockfile repaired | Accept; 7 of 8 steps |
+| INFOSCHEMATICS-TOOL-066 | 2 | Awaiting review | Dock open on Design seen in a PNG; sticky-tab case red | Accept; clipping in `076` |
+| INFOSCHEMATICS-TOOL-058 | 2 | Awaiting review | Ids scoped per rendering; gate 43/43 with `064` landed | Accept; arrowheads in `071` |
+
+## Findings held for a later wave
+
+Captured, not admitted to this batch. Six records so far: `TOOL-071` and `TOOL-072` from looking at the rasterised output, `TOOL-073` from the lockfile the command rename left stale, and three from the wave-two recheck — `TOOL-074`, `TOOL-075`, `TOOL-076`.
+
+`TOOL-074` deserves the owner's attention before the remaining waves, and it is the one finding here that bears on this batch's own evidence. The dependency-boundary check reports `0 modules, 0 dependencies cruised`: dependency-cruiser cannot parse TypeScript 7, so it passes by examining nothing. `AGENTS.md` claims `bun run self:check` verifies dependency boundaries, and it has not done so since the TypeScript upgrade — which means every green in this run, including the 43/43 gates cited above, asserts a boundary guarantee it did not test. Nothing else in the gate is affected, and no delivered item in this batch is known to cross a boundary; the claim is simply unproven rather than false.
