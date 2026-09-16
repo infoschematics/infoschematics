@@ -8,6 +8,7 @@ import {
   toggleArtefactSelection,
   toggleInteractionLayer
 } from '@infoschematics/view-model/editable'
+import { emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
@@ -814,4 +815,73 @@ test('a travelling emphasis answers no pointer, so the element under its line st
   const { clientX, clientY } = screenPoint(svg, 186, 195)
   beneath?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX, clientY, pointerId: 60 }))
   await expect.poll(() => container.querySelector('[data-testid="emphasis-events"]')?.textContent).toBe('select:CARD-B')
+})
+
+/*
+ * A Point emphasised by a Dynamic: two features meeting, rather than either one on its own.
+ *
+ * A Point is a coordinate, so it is the one drawn kind with no box to run a perimeter round, and it was the last kind
+ * to become an artefact in its own right. Both the set deciding which occurrences reach a treatment and the map of
+ * emphasis geometry were written before it existed, so naming one in a Dynamic drew nothing here at all while the
+ * static renderer drew it a disc. Each feature's own suite stayed green throughout, which is the point of this case.
+ */
+const emphasisedPointConfig = defineInfoschematicModel({
+  id: 'emphasised-point',
+  title: 'Emphasised Point',
+  diagram: {
+    bounds: { height: 320, width: 640, x: 0, y: 0 },
+    gridSize: 10,
+    points: [{ id: 'EDGE', label: 'Edge', at: { x: 400, y: 100 } }],
+    dynamics: [
+      {
+        id: 'edge-attention',
+        label: 'Edge needs attention',
+        kind: 'emphasise-elements',
+        elements: ['EDGE'],
+        depicts: 'state'
+      }
+    ]
+  }
+})
+
+function EmphasisedPointHarness() {
+  const [selected, setSelected] = useState<ArtefactSelection | null>(null)
+  return (
+    <>
+      <Canvas
+        config={emphasisedPointConfig}
+        dynamics={[{ dynamicId: 'edge-attention', occurrenceKey: 'hold-1' }]}
+        mode="design"
+        onArtefactSelect={setSelected}
+        selectedArtefact={selected}
+      />
+      <output data-testid="point-selection">{selected?.id ?? 'none'}</output>
+    </>
+  )
+}
+
+test('a Dynamic naming a Point marks it, around the mark rather than over it', async () => {
+  const { container } = await render(<EmphasisedPointHarness />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  if (!svg) throw new Error('rendered fixture is incomplete')
+  const emphasis = container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="EDGE"]')
+  const disc = emphasis?.querySelector<SVGCircleElement>('circle')
+  const mark = container.querySelector<SVGCircleElement>('.infoschematic-point .point-mark')
+  if (!emphasis || !disc || !mark) throw new Error('the named Point was left unmarked')
+
+  // Measured off the laid-out geometry rather than the attribute, so this is the size the browser resolved, and read
+  // against the Point's own mark so the emphasis has to sit around the Point rather than on top of it.
+  expect(disc.getBBox().width / 2).toBe(emphasisPointRadius)
+  expect(disc.getBBox().width).toBeGreaterThan(mark.getBBox().width)
+  // A mark travelling round a six-unit disc would be the size of the thing it marks, so this geometry declines it.
+  expect(emphasis.querySelector('animateMotion')).toBeNull()
+
+  // And the composition a Producer feels: the emphasis layer is painted last, over the Point, yet the Point still
+  // takes the press. An emphasis that answered the pointer would make an emphasised element unselectable.
+  expect(getComputedStyle(emphasis).pointerEvents).toBe('none')
+  expect(artefactAt(svg, 400, 100)).toBe('EDGE')
+  const beneath = atPoint(svg, 400, 100)
+  const { clientX, clientY } = screenPoint(svg, 400, 100)
+  beneath?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX, clientY, pointerId: 70 }))
+  await expect.poll(() => container.querySelector('[data-testid="point-selection"]')?.textContent).toBe('EDGE')
 })

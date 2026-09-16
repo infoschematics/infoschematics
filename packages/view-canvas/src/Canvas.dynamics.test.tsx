@@ -252,6 +252,7 @@ describe('Canvas Diagram Dynamics', () => {
     // declines the mark and keeps the disc, at the radius the static renderer draws, because declining a geometry
     // must not quietly mean drawing nothing. This read the other way round while Canvas drew no Points at all.
     const point = emphasisGroup(played('edge-attention'), 'EDGE')
+    if (point === null) throw new Error('the Dynamic named a Point and this render left it unmarked')
     expect(point).toContain(`r="${emphasisPointRadius}"`)
     expect(point).toContain('cx="400"')
     expect(point).not.toContain('infoschematic-element-emphasis-mark')
