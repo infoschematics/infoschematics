@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T14:55:00Z
-updated_at: 2026-09-16T18:20:00Z
+updated_at: 2026-09-16T20:30:00Z
 ---
 
 # Unreachable direct-target reconciliation
@@ -70,6 +70,10 @@ None. Step 1 is a product question and may need the owner.
 ### Guides
 
 None.
+
+## Batch exclusion
+
+Excluded from `INFOSCHEMATICS-BATCH-018` on 2026-09-16. Step 1 is an owner question, and the two answers give the item different shapes: "clear it" adds a dispatch and an application-level assertion, "hold it" deletes an action case, a union member and three reducer tests. An autonomous run cannot pick between those without changing the item's boundary.
 
 ## Discussion
 

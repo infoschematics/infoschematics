@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T18:20:00Z
+updated_at: 2026-09-16T20:30:00Z
 ---
 
 # The Library cannot make a Point
@@ -69,6 +69,10 @@ Required if creation lands, and the corpus names the gap precisely. DESIGN-014 (
 ### Guides
 
 `apps/site/content/authoring.md` and `apps/site/content/studio.md` both tell a Producer that a Point arrives by authoring it. `INFOSCHEMATICS-SITE-028` is about to write that sentence; this item makes it false, which is the sequencing constraint recorded under dependencies.
+
+## Batch exclusion
+
+Excluded from `INFOSCHEMATICS-BATCH-018` on 2026-09-16. Step 1 would reverse `ADR-INFOSCHEMATICS-031:61`, which records non-creatability as an accepted consequence. One answer closes the item as a documented decision; the other makes it a feature with a superseding ADR. That is a boundary-changing answer, so it needs the owner first.
 
 ## Discussion
 

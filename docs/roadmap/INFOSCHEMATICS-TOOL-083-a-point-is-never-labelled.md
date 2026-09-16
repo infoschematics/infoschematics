@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T18:20:00Z
+updated_at: 2026-09-16T20:30:00Z
 ---
 
 # A Point is never labelled
@@ -64,6 +64,10 @@ Likely, and more so for the anonymity answer than the drawn one. Drawing a label
 ### Guides
 
 `apps/site/content/authoring.md` describes what a Point is for. If the label is drawn it gains a sentence; if the field becomes optional it gains a stronger one, because an author currently has no way to know the label they are obliged to write is never shown.
+
+## Batch exclusion
+
+Excluded from `INFOSCHEMATICS-BATCH-018` on 2026-09-16. Step 1's second option — a Point is deliberately anonymous and `label` stops being required — is a public contract change to the document schema, with three unconditional interpolations and a spec evidence line behind it. The drawn-label option is ordinary treatment. An autonomous run must not choose between a treatment change and a schema relaxation.
 
 ## Discussion
 

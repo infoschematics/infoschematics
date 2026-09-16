@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T18:20:00Z
+updated_at: 2026-09-16T20:30:00Z
 ---
 
 # Studio announces nothing
@@ -68,6 +68,10 @@ Likely. Step 1 decides whether a live region is `InfoschematicDiagram`'s to rend
 ### Guides
 
 None. No guide tells a host what it owes; the specification is the right place for it.
+
+## Batch exclusion
+
+Excluded from `INFOSCHEMATICS-BATCH-018` on 2026-09-16. Step 1 decides whether the live region belongs to `InfoschematicDiagram` or stays the host's to compose. Moving it into the Diagram changes what every host gets by mounting it, which is a package-boundary decision needing its own record rather than an autonomous choice. The DYNAMIC-006 conformance regression stands meanwhile and is the reason this should not wait long.
 
 ## Discussion
 
