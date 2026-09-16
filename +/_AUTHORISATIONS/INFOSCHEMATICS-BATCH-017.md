@@ -81,9 +81,10 @@ Each named item at `awaiting-review` with a six-heading review packet, plus an i
 | INFOSCHEMATICS-TOOL-058 | 2 | Awaiting review | Ids scoped per rendering; gate 43/43 with `064` landed | Accept; arrowheads in `071` |
 | INFOSCHEMATICS-TOOL-069 | 3 | Awaiting review | Steering case red 240/240 with the cleanup removed | Accept; 6 of 7 steps |
 | INFOSCHEMATICS-TOOL-059 | 3 | Awaiting review | Reduced-motion restatement proven red; gate 44/44 | Accept; `079`/`080` parked |
+| INFOSCHEMATICS-TOOL-060 | 3 | Awaiting review | Mark's removal proven red; region fold output-identical | Accept; all ten steps |
 
 ## Findings held for a later wave
 
-Captured, not admitted to this batch. Ten records so far: `TOOL-071` and `TOOL-072` from looking at the rasterised output, `TOOL-073` from the lockfile the command rename left stale, five from the wave-two recheck (`TOOL-074` through `TOOL-078`), and two from wave three — `TOOL-079` and `TOOL-080`, both parked by the item that found them rather than absorbed into it.
+Captured, not admitted to this batch. Twelve records so far: `TOOL-071` and `TOOL-072` from looking at the rasterised output, `TOOL-073` from the lockfile the command rename left stale, five from the wave-two recheck (`TOOL-074` through `TOOL-078`), and four from wave three — `TOOL-079`, `TOOL-080`, `TOOL-081` and `SITE-027`, each parked by the item that found it rather than absorbed into it.
 
 `TOOL-074` deserves the owner's attention before the remaining waves, and it is the one finding here that bears on this batch's own evidence. The dependency-boundary check reports `0 modules, 0 dependencies cruised`: dependency-cruiser cannot parse TypeScript 7, so it passes by examining nothing. `AGENTS.md` claims `bun run self:check` verifies dependency boundaries, and it has not done so since the TypeScript upgrade — which means every green in this run, including the 43/43 gates cited above, asserts a boundary guarantee it did not test. Nothing else in the gate is affected, and no delivered item in this batch is known to cross a boundary; the claim is simply unproven rather than false.
