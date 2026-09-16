@@ -294,6 +294,9 @@ const smokeConsumer = async (packed: readonly PackedPackage[], directory: string
   }
 
   // A raster render exercises the packed third-party engine, which the workspace suite never installs from a tarball.
+  // What it proves is agreement, not correctness: it compares the packed render with the workspace render and with
+  // itself, so two identically wrong pictures satisfy it. Every PNG the command line emitted hung an unrotated
+  // arrowhead off its target for as long as this check was green. Fidelity is CLI-007 and is held by looking.
   await run([cli, 'render', 'model.yaml', '--format', 'png', '--output', 'packed.png'], directory)
   await run([cli, 'render', 'model.json', '--format', 'png', '--output', 'repeated.png'], directory)
   await run(

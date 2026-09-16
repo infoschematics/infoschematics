@@ -126,6 +126,10 @@ describe('Canvas Diagram Dynamics', () => {
     expect(markup).toContain('data-artefact-id="ZONE" data-dynamic-id="attention"')
   })
 
+  // Read out of the stylesheet deliberately, and not made redundant by the browser cases that measure the same
+  // promise in a page: this asks whether the rule is present, which catches a deleted one for the price of a file
+  // read, while only a page can say whether the rule applies - a restatement that loses on specificity is present
+  // here and absent there. Both questions are worth asking; neither answers the other.
   it('provides a full-motion treatment and a still reduced-motion treatment from the shared tokens', async () => {
     const styles = await readFile(new URL('./styles.css', import.meta.url), 'utf8')
 

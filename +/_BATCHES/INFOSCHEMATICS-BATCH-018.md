@@ -26,3 +26,6 @@ policy: safe-local-v1
 | INFOSCHEMATICS-TOOL-076 | awaiting-review | `81326f6d9514086422dc114ff502ddc590288eff` | `cedded813dccc0927da5d46a8d7a423d507a8ce9` | Step 2's "fully visible" criterion not achievable for a resizable scrolling pane; recorded in the item |
 | INFOSCHEMATICS-SITE-027 | awaiting-review | `cedded813dccc0927da5d46a8d7a423d507a8ce9` | `0d6239b5eef0b397020c9830b312e0551e3624a5` | None |
 | INFOSCHEMATICS-SITE-028 | awaiting-review | `0d6239b5eef0b397020c9830b312e0551e3624a5` | `c1cc1bba9622034ac3406c1cdbbcaed443c475f0` | None |
+| INFOSCHEMATICS-TOOL-081 | awaiting-review | `c1cc1bba9622034ac3406c1cdbbcaed443c475f0` | `c730a548dc58ad720c0e67eb4d62e0f41c4c3029` | None |
+| INFOSCHEMATICS-TOOL-071 | awaiting-review | `c730a548dc58ad720c0e67eb4d62e0f41c4c3029` | `89577b0aa0bb659a7bf116316d628163041f8212` | Steps 3 and 5 are test work the lead is writing; delivered with TOOL-080 in one commit because the two are one mechanism |
+| INFOSCHEMATICS-TOOL-080 | awaiting-review | `c730a548dc58ad720c0e67eb4d62e0f41c4c3029` | `89577b0aa0bb659a7bf116316d628163041f8212` | Step 3's parity case is test work the lead is writing; DYNAMIC-003 amended rather than the item closing as a deferral |
