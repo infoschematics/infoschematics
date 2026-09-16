@@ -56,7 +56,14 @@
       "inputs": ["scripts/cli.ts", "scripts/release/**", "packages/*/package.json", "package.json"]
     },
     "//#self:scripts:typecheck": {
-      "inputs": ["scripts/**", ".dependency-cruiser.ts", "vite.config.ts", "tsconfig.scripts.json", "package.json"]
+      "inputs": [
+        "scripts/**",
+        ".dependency-cruiser.ts",
+        "packages/*/src/**",
+        "vite.config.ts",
+        "tsconfig.scripts.json",
+        "package.json"
+      ]
     },
     "//#self:schema:verify": {
       "inputs": [
@@ -71,7 +78,14 @@
       "inputs": ["scripts/generate-visual-tokens.ts", "scripts/cli.ts", "packages/view-model/src/**"]
     },
     "//#self:examples:verify": {
-      "inputs": ["scripts/examples.ts", "scripts/cli.ts", "examples/*/src/**", "examples/*/*.yaml"]
+      "inputs": [
+        "scripts/examples.ts",
+        "scripts/cli.ts",
+        "packages/domain-core/src/**",
+        "packages/domain-model/src/**",
+        "examples/*/src/**",
+        "examples/*/*.yaml"
+      ]
     },
     "//#self:boundaries:verify": {
       "inputs": [
