@@ -124,25 +124,39 @@ test('lets the split seam show that a pane continues past it, rather than cuttin
   expect(panes.scrollHeight).toBeGreaterThan(panes.clientHeight)
 
   /*
-   * The divider is drawn on the pane's clip edge, and a presence assertion cannot see the consequence: every label in
-   * the pane is in the tree, displayed, and has a box, and the one the scroll offset leaves on that edge is still
-   * painted half-height under a line that says the pane ends here. Which label that is depends on the scroll offset
-   * and on where the Producer has dragged the divider, so this asserts the property rather than a chosen heading:
-   * something in the pane's own treatment has to distinguish a clipped label from a deleted one.
+   * A label is put across the clip edge rather than found there.
+   *
+   * The first version of this case looked for one already lying on the seam, which is how the defect was seen - but
+   * which label that is depends on the scroll offset, on where the Producer dragged the divider, and on how the panel
+   * text happens to wrap, so a reflow of the library descriptions left the case measuring nothing and passing. Placing
+   * a label on the edge deliberately asserts the same property and does not depend on any of that.
    */
-  const label = [...panes.querySelectorAll('.pane-heading, legend')].find((candidate) => {
-    const box = candidate.getBoundingClientRect()
-    const seam = handle.getBoundingClientRect()
-    return box.top < seam.bottom && box.bottom > seam.top
-  })
-  expect(
-    label,
-    'no label lies across the seam at this size, so this case is no longer measuring anything'
-  ).toBeDefined()
+  const labels = [...panes.querySelectorAll('.pane-heading, legend')]
+  const target = labels.at(-1)
+  if (!target) throw new Error('The editor panes rendered no labels to place on the seam')
+  const within = target.getBoundingClientRect().top - panes.getBoundingClientRect().top + panes.scrollTop
+  panes.scrollTop = Math.min(
+    Math.max(within + target.getBoundingClientRect().height / 2 - panes.clientHeight, 0),
+    panes.scrollHeight - panes.clientHeight
+  )
+  await expect.poll(() => panes.scrollTop).toBeGreaterThan(0)
+
+  const seam = handle.getBoundingClientRect()
+  const box = target.getBoundingClientRect()
+  expect(box.top, 'the label could not be placed across the seam, so this case measures nothing').toBeLessThan(
+    seam.bottom
+  )
+  expect(box.bottom).toBeGreaterThan(seam.top)
+
+  /*
+   * And a presence assertion cannot see what is wrong with that: the label is in the tree, displayed, and has a box,
+   * and it is still painted half-height under a line whose meaning is that the pane ends here. Something in the pane's
+   * own treatment has to distinguish a clipped label from a deleted one.
+   */
   expect(getComputedStyle(panes).maskImage).not.toBe('none')
 
   /*
-   * And the fade has to fall on empty space once there is nothing more to show, or the end of the scroll dims the
+   * The fade also has to fall on empty space once there is nothing more to show, or the end of the scroll dims the
    * pane's real last line instead. The pane keeps at least the faded depth past its final child.
    */
   panes.scrollTop = panes.scrollHeight

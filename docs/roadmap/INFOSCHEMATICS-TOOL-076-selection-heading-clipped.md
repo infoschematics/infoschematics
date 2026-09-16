@@ -87,6 +87,8 @@ Step 3's case fails against today's tree. With the new rule commented out the ca
 
 Studio's browser suite passes whole (19 tests, 2 files). `bun run self:check` passes.
 
+The case was hardened after delivery, within this session, because it went green while measuring nothing. Its first version looked for a label already lying on the seam, which is how the defect was found; a reflow of the library panel's descriptions on a later run left no label there, and the guard that was supposed to catch exactly that fired as a failure rather than as a false pass - which is the only reason it was noticed. It now places the pane's last label across the clip edge deliberately and asserts the same property, so it no longer depends on how the panel text happens to wrap. Verified failing against the fix removed (`expected 'none' not to be 'none'`) and passing three consecutive runs with it.
+
 Step 4, two viewport heights, screenshots kept side by side at `packages/view-studio/src/app/reports/tool076-{before,after}-{900,650}.png` (the directory is gitignored, so they are local evidence rather than committed artefacts). At 1440x900 before, `SERIALISABLE PROPERTIES` is sliced at full contrast with a hard edge on the seam; after, it fades away into the seam. At 1440x650, forcing more of the pane out of view, the before shows "A bounded Fabric for infrastructure or platform detail." cut mid-line; after, the same line fades. `scrollHeight` moved 931 to 943, the twelve units of reserved room.
 
 ### Outstanding concerns
