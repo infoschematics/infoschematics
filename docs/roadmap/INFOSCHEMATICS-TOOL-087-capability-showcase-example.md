@@ -4,12 +4,12 @@ area: TOOL
 title: One authored example shows every capability
 theme: authoring
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8efcf51c4a944b886f25a15e092da9763fee7603
 created_at: 2026-09-17T10:20:00Z
-updated_at: 2026-09-17T11:05:00Z
+updated_at: 2026-09-17T20:18:30Z
 ---
 
 # One authored example shows every capability

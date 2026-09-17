@@ -4,12 +4,12 @@ area: TOOL
 title: The product offers a standard renderer catalogue
 theme: rendering
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8bdd95df60ad61283d78ddc2737ff6c1d06d18c3
 created_at: 2026-09-17T16:40:00Z
-updated_at: 2026-09-17T18:05:00Z
+updated_at: 2026-09-17T20:18:30Z
 ---
 
 # The product offers a standard renderer catalogue
