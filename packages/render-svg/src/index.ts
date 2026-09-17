@@ -14,6 +14,16 @@ import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import {
+  type ArtworkPaint,
+  type ArtworkPrimitive,
+  type ArtworkRequest,
+  type ArtworkResource,
+  type ArtworkStroke,
+  artworkProperties,
+  standardArtworkFor,
+  standardArtworkSchemaVersion
+} from '@infoschematics/view-model/standard-artwork'
 import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
 
 const canvasTokens = visualTokens.canvas
@@ -93,6 +103,171 @@ const container = (depth: number, name: string, values: Attributes, children: re
 
 const group = (depth: number, values: Attributes, children: readonly string[]) =>
   container(depth, 'g', values, children)
+
+/*
+ * The standard renderer catalogue, emitted as strings.
+ *
+ * `standard-artwork.ts` states each piece once as geometry and paint roles; this walks that description into the
+ * attribute-per-element idiom this renderer writes, and Canvas walks the same description into React elements. The
+ * artwork itself is stated in neither renderer, which is the whole point: a named `kind` that drew a satellite link
+ * in Canvas and a plain rectangle here is the defect `INFOSCHEMATICS-TOOL-088` already records once.
+ */
+const artworkTokens = visualTokens.canvas.artwork
+
+type ArtworkPalette = Readonly<Record<ArtworkPaint, string>>
+
+const strokeAttributes = (stroke: ArtworkStroke | undefined, ink: ArtworkPalette): Attributes =>
+  stroke
+    ? [
+        ['stroke', ink[stroke.paint]],
+        ['stroke-dasharray', stroke.dash],
+        ['stroke-linecap', stroke.cap],
+        ['stroke-linejoin', stroke.join],
+        ['stroke-width', stroke.width]
+      ]
+    : []
+
+const artworkFontSize = (role: 'caption' | 'detail' | 'glyph') =>
+  role === 'caption'
+    ? artworkTokens.geometry.captionSize
+    : role === 'detail'
+      ? artworkTokens.geometry.detailSize
+      : artworkTokens.geometry.glyphSize
+
+/** A piece's primitives, resolved against this renderer's palette and this rendering's resource ids. */
+const artworkPrimitives = (
+  primitives: readonly ArtworkPrimitive[],
+  depth: number,
+  ink: ArtworkPalette,
+  resourceId: (name: string) => string
+): readonly string[] =>
+  primitives.flatMap((primitive): readonly string[] => {
+    if (primitive.shape === 'group')
+      return group(
+        depth,
+        [
+          [
+            'transform',
+            `translate(${number(primitive.x)} ${number(primitive.y)})${primitive.scale === undefined ? '' : ` scale(${number(primitive.scale)})`}`
+          ]
+        ],
+        artworkPrimitives(primitive.children, depth + 1, ink, resourceId)
+      )
+    if (primitive.shape === 'rect')
+      return [
+        line(depth, 'rect', [
+          [
+            'fill',
+            primitive.pattern ? `url(#${resourceId(primitive.pattern)})` : primitive.fill ? ink[primitive.fill] : 'none'
+          ],
+          ['height', primitive.height],
+          ['rx', primitive.radius],
+          ...strokeAttributes(primitive.stroke, ink),
+          ['width', primitive.width],
+          ['x', primitive.x],
+          ['y', primitive.y]
+        ])
+      ]
+    if (primitive.shape === 'circle')
+      return [
+        line(depth, 'circle', [
+          ['cx', primitive.cx],
+          ['cy', primitive.cy],
+          ['fill', primitive.fill ? ink[primitive.fill] : 'none'],
+          ['r', primitive.r],
+          ...strokeAttributes(primitive.stroke, ink)
+        ])
+      ]
+    if (primitive.shape === 'path')
+      return [
+        line(depth, 'path', [
+          ['d', primitive.d],
+          [
+            'fill',
+            primitive.pattern ? `url(#${resourceId(primitive.pattern)})` : primitive.fill ? ink[primitive.fill] : 'none'
+          ],
+          ['marker-end', primitive.markerEnd ? `url(#${resourceId(primitive.markerEnd)})` : undefined],
+          ...strokeAttributes(primitive.stroke, ink)
+        ])
+      ]
+    return [
+      line(
+        depth,
+        'text',
+        [
+          ['dominant-baseline', 'middle'],
+          ['fill', ink[primitive.fill]],
+          /* The scale is shared and the family is not, exactly as a Card's already is: this renderer sets its own
+             paper face, and Canvas sets the interactive surface's. */
+          ['font-family', canvasTokens.output.fontFamily],
+          ['font-size', artworkFontSize(primitive.role)],
+          ['font-weight', primitive.role === 'caption' || primitive.role === 'glyph' ? 600 : undefined],
+          ['text-anchor', primitive.anchor],
+          ['x', primitive.x],
+          ['y', primitive.y]
+        ],
+        xmlText(primitive.text)
+      )
+    ]
+  })
+
+/** A piece's `defs`, under ids this rendering owns rather than a name two renderings on one page would share. */
+const artworkResources = (
+  resources: readonly ArtworkResource[],
+  ink: ArtworkPalette,
+  resourceId: (name: string) => string
+): readonly string[] =>
+  resources.flatMap((resource): readonly string[] =>
+    resource.resource === 'pattern'
+      ? container(
+          2,
+          'pattern',
+          [
+            ['height', resource.pitch],
+            ['id', resourceId(resource.name)],
+            ['patternUnits', 'userSpaceOnUse'],
+            ['width', resource.pitch]
+          ],
+          [
+            line(3, 'path', [
+              ['d', `M${number(resource.pitch)} 0 H0 V${number(resource.pitch)}`],
+              ['fill', 'none'],
+              ['stroke', ink[resource.paint]],
+              ['stroke-width', resource.width]
+            ]),
+            line(3, 'circle', [
+              ['cx', resource.dotRadius],
+              ['cy', resource.dotRadius],
+              ['fill', ink[resource.paint]],
+              ['r', resource.dotRadius]
+            ])
+          ]
+        )
+      : container(
+          2,
+          'marker',
+          [
+            ['id', resourceId(resource.name)],
+            ['markerHeight', resource.size],
+            ['markerUnits', 'userSpaceOnUse'],
+            ['markerWidth', resource.size],
+            /* `auto`, never `auto-start-reverse`: the same rasteriser limitation the Flow arrowhead records. */
+            ['orient', 'auto'],
+            ['refX', resource.refX],
+            ['refY', resource.refY],
+            /* A `viewBox` is what makes the head scale with the band it arms. Without one, `markerUnits` only clips
+               and the arrow is drawn at whatever size its own path states, which is how a head sized for one piece
+               arrives wrong on every other. */
+            ['viewBox', resource.viewBox]
+          ],
+          [
+            line(3, 'path', [
+              ['d', resource.d],
+              ['fill', ink[resource.fill]]
+            ])
+          ]
+        )
+  )
 
 const focusOf = (scene: {
   components: readonly string[]
@@ -342,6 +517,58 @@ export const renderInfoschematicSvg = (
         : Boolean(focus?.graphics.has(graphic.id)))
   )
 
+  /*
+   * What the standard catalogue draws for this rendering, resolved before anything is written.
+   *
+   * Resolving up front is what lets every declared resource reach the `defs` block ahead of the element that
+   * references it. It is also why a piece is numbered: two Fabrics of the same kind at different sizes declare the
+   * same resource name with different geometry, so a name shared across pieces would give the second one the first
+   * one's lattice.
+   */
+  const artworkInk: ArtworkPalette = blueprint ? artworkTokens.ink : artworkTokens.output
+  const artworkDefs: string[] = []
+  const artworkContent = new Map<string, readonly string[]>()
+  const drawStandardArtwork = (
+    kind: 'fabric' | 'graphic',
+    reference: { key: string; version: number } | undefined,
+    artefactId: string,
+    request: ArtworkRequest
+  ) => {
+    if (!reference || reference.version !== standardArtworkSchemaVersion) return
+    const piece = standardArtworkFor(kind, reference.key)
+    if (!piece) return
+    const drawn = piece(request)
+    const ordinal = artworkContent.size
+    const resourceId = (name: string) => `${resourceIdPrefix}-artwork-${ordinal}-${name}`
+    artworkDefs.push(...artworkResources(drawn.resources, artworkInk, resourceId))
+    /* The key rides on the group so a rendering says which standard piece it drew. Canvas marks its own the same
+       way, which is what lets the parity check compare one piece against the other rather than two whole pages. */
+    artworkContent.set(
+      artefactId,
+      group(2, [['data-artwork', reference.key]], artworkPrimitives(drawn.primitives, 3, artworkInk, resourceId))
+    )
+  }
+  for (const fabric of fabrics)
+    drawStandardArtwork(
+      'fabric',
+      fabric.renderer === undefined ? undefined : rendererReferenceOf(fabric.renderer),
+      fabric.id,
+      {
+        bounds: fabric.bounds,
+        detail: fabric.detail,
+        label: fabric.label,
+        properties: artworkProperties(fabric.properties)
+      }
+    )
+  for (const graphic of graphics)
+    if (graphic.bounds)
+      drawStandardArtwork('graphic', rendererReferenceOf(graphic.kind), graphic.id, {
+        bounds: graphic.bounds,
+        detail: graphic.description,
+        label: graphic.label,
+        properties: artworkProperties(graphic.properties)
+      })
+
   /* Emphasis needs geometry and nothing else, and only from elements this render actually drew: an occurrence must
      never make hidden or filtered content appear. */
   const emphasisShapes = new Map<string, EmphasisShape>()
@@ -374,6 +601,7 @@ export const renderInfoschematicSvg = (
     .filter(Boolean)
     .join(' — ')
   const body: string[] = []
+  if (artworkDefs.length > 0) body.push(['  <defs>', ...artworkDefs, '  </defs>'].join('\n'))
   body.push(line(1, 'title', [], xmlText(config.title)))
   if (accessibleSummary) body.push(line(1, 'desc', [], xmlText(accessibleSummary)))
   body.push(
@@ -597,30 +825,35 @@ export const renderInfoschematicSvg = (
 
   for (const fabric of fabrics) {
     const box = fabric.bounds
+    /* The accessible name is the document's and stays whichever treatment draws the Fabric; only the drawing is the
+       catalogue's. An unrecognised key still draws the generic plane below, which is the contract working as
+       designed rather than a fault in the document. */
     const content = [
       line(2, 'title', [], xmlText(`${fabric.code}: ${fabric.label} · ${fabric.detail}`)),
-      line(2, 'rect', [
-        ['fill', fabricFill],
-        ['height', box.height],
-        ['rx', canvasTokens.geometry.cornerRadius],
-        ['stroke', fabricStroke],
-        ['width', box.width],
-        ['x', box.x],
-        ['y', box.y]
-      ]),
-      line(
-        2,
-        'text',
-        [
-          ['fill', fabricText],
-          ['font-family', canvasTokens.output.fontFamily],
-          ['font-size', canvasTokens.output.componentFontSize],
-          ['text-anchor', 'middle'],
-          ['x', box.x + box.width / 2],
-          ['y', box.y + box.height / 2 + 4]
-        ],
-        xmlText(fabric.label)
-      )
+      ...(artworkContent.get(fabric.id) ?? [
+        line(2, 'rect', [
+          ['fill', fabricFill],
+          ['height', box.height],
+          ['rx', canvasTokens.geometry.cornerRadius],
+          ['stroke', fabricStroke],
+          ['width', box.width],
+          ['x', box.x],
+          ['y', box.y]
+        ]),
+        line(
+          2,
+          'text',
+          [
+            ['fill', fabricText],
+            ['font-family', canvasTokens.output.fontFamily],
+            ['font-size', canvasTokens.output.componentFontSize],
+            ['text-anchor', 'middle'],
+            ['x', box.x + box.width / 2],
+            ['y', box.y + box.height / 2 + 4]
+          ],
+          xmlText(fabric.label)
+        )
+      ])
     ]
     body.push(
       group(
@@ -982,7 +1215,7 @@ export const renderInfoschematicSvg = (
           ['data-renderer-version', renderer.version],
           ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
         ],
-        [
+        artworkContent.get(graphic.id) ?? [
           line(2, 'rect', [
             ['fill', graphicFill],
             ['height', box.height],

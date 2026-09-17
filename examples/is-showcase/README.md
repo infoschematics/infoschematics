@@ -39,9 +39,9 @@ Every two-port Flow is axis-aligned. A two-point route derived from ports that a
 
 Cards are authored `compact: true`. The static renderer does not draw the Adapter Card clasp: where the interactive Canvas traces a notched socket nothing passes under, `render-svg` emits an ordinary Card rectangle over the Card it holds. Under the centred treatment a held Card's label sits at exactly the height that rectangle begins, so the label is painted over. `INFOSCHEMATICS-TOOL-088` tracks it; `compact: true` is the setting that stays readable until it lands.
 
-The Fabric and the Graphic both name a `kind` no host registers a renderer for, so both draw their fallback treatment. That is the contract working as designed — a document may name a renderer its host has not been given — and not a fault in this document.
+The Fabrics and the Graphic name `kind`s from the product's standard catalogue — `message-bus`, `object-store` and `annotation` — so the product draws them itself, identically in the interactive Diagram and in `infoschematics render`, with no host code. A host with its own house style overrides any of them by registering a renderer under the same key; a `kind` the catalogue does not offer and no host registers still draws the generic treatment, which is the contract working as designed rather than a fault in a document.
 
-The Graphic is drawn in Design but not by `infoschematics render` or in Present: the static renderer shows a Graphic only when a Scene names it, and an authored Scene has no field that can. `INFOSCHEMATICS-TOOL-089` tracks the gap.
+The Graphic is drawn in Design but not by `infoschematics render` or in Present: a Graphic reaches either only when a Scene names it, and an authored Scene has no field that can. `INFOSCHEMATICS-TOOL-089` tracks the gap, and it bounds what the standard `annotation` treatment can show here — the catalogue supplies the drawing, not the route it travels.
 
 ## Edit it
 

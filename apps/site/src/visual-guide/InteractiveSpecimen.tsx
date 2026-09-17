@@ -2,9 +2,19 @@ import { useState } from 'react'
 import type { GuidePropertyKey, SpecimenKind } from './curriculum.ts'
 import { DemoFrame } from './DemoFrame.tsx'
 import { PropertyControl } from './PropertyControl.tsx'
-import { type GuidePropertyValue, guidePropertyValue, specimenFor, withGuideProperty } from './specimens.ts'
+import {
+  type GuidePropertyValue,
+  guidePropertyValue,
+  specimenFor,
+  withGuideProperty,
+  withGuideTreatment
+} from './specimens.ts'
 
-type Comparison = { id: string; label: string; propertyKey: GuidePropertyKey; value: GuidePropertyValue }
+/* A comparison is either one authored property set two ways, or one element drawn under two standard treatments:
+   a treatment is a renderer key rather than a property, so it is applied by key instead of through a control. */
+type Comparison =
+  | { id: string; label: string; propertyKey: GuidePropertyKey; value: GuidePropertyValue }
+  | { id: string; label: string; treatment: string }
 
 export function InteractiveSpecimen({
   kind,
@@ -24,7 +34,9 @@ export function InteractiveSpecimen({
     <fieldset className="interactive-specimen__controls">
       <legend>Properties</legend>
       {propertyKeys
-        .filter((key) => !comparisons?.some((comparison) => comparison.propertyKey === key))
+        .filter(
+          (key) => !comparisons?.some((comparison) => 'propertyKey' in comparison && comparison.propertyKey === key)
+        )
         .map((key) => (
           <PropertyControl
             key={key}
@@ -36,7 +48,10 @@ export function InteractiveSpecimen({
     </fieldset>
   )
   const variants = comparisons?.map((comparison) => ({
-    config: withGuideProperty(config, comparison.propertyKey, comparison.value),
+    config:
+      'treatment' in comparison
+        ? withGuideTreatment(config, kind === 'graphic' ? 'graphic' : 'fabric', comparison.treatment)
+        : withGuideProperty(config, comparison.propertyKey, comparison.value),
     id: comparison.id,
     label: comparison.label
   }))

@@ -34,6 +34,71 @@ export const visualTokens = Object.freeze({
       regionLabelInset: 16,
       regionNotchPadding: 10
     }),
+    /**
+     * What the standard renderer catalogue in `standard-artwork.ts` is painted and drawn in.
+     *
+     * `geometry` is shared: a piece's lattice pitch, line weights and dash rhythms are part of the drawing, and a
+     * piece that tiles one grid in Canvas and another in static output is two pieces. The two ink groups are not
+     * shared, for the same reason a Card's is not — the interactive surface is dark and the static renderer's paper
+     * is light, so one palette per outlet is the agreement, and the geometry above it is what parity compares.
+     *
+     * Every colour carries its own alpha rather than leaning on an `opacity` attribute, so a paint role resolves to
+     * one value a renderer can write straight onto an element and neither renderer has an opacity of its own to get
+     * wrong.
+     */
+    artwork: Object.freeze({
+      geometry: tokenGroup({
+        accentDash: '6 8',
+        accentWidth: 2,
+        beamDash: '5 6',
+        captionSize: 15,
+        detailAdvance: 6.2,
+        detailSize: 12,
+        glyphSize: 46,
+        glyphWidth: 2.5,
+        gridDotRadius: 1.4,
+        gridPitch: 34,
+        gridWidth: 1,
+        markRadius: 5,
+        orbitDash: '4 9',
+        /** The cycle's band, as a fraction of the shorter side of its bounds: one arrow, not a hairline. */
+        sweepRatio: 0.085,
+        warningDash: '7 7',
+        warningWidth: 2.5
+      }),
+      /** The interactive surface's palette, resolved by Canvas. */
+      ink: tokenGroup({
+        accent: '#9cd5f5',
+        detail: '#b9cde0',
+        frame: '#90a8c178',
+        glyph: '#a8cde6',
+        glyphFill: '#17354b',
+        grid: '#8dc7e72e',
+        mark: '#9cd5f58c',
+        shell: '#153349d6',
+        sweep: '#9ed9ff29',
+        title: '#dff3ff',
+        warning: '#d79b00aa',
+        warningFill: '#d79b0016',
+        warningGlyph: '#f0b23a'
+      }),
+      /** The static renderer's light-paper palette, resolved by `render-svg`. */
+      output: tokenGroup({
+        accent: '#4d7ea8',
+        detail: '#46515d',
+        frame: '#687684',
+        glyph: '#3d566b',
+        glyphFill: '#e3ecf2',
+        grid: '#8ba3b52e',
+        mark: '#4d7ea88c',
+        shell: '#e9f0f5',
+        sweep: '#4d7ea829',
+        title: '#27313a',
+        warning: '#b07400aa',
+        warningFill: '#b0740016',
+        warningGlyph: '#8a5a00'
+      })
+    }),
     surfaces: tokenGroup({
       backdrop: '#081725',
       fabricFill: '#102638b8',

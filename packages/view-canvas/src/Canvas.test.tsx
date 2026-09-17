@@ -2,7 +2,12 @@ import { defineInfoschematic } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
-import type { FabricRendererProps, GraphicRendererProps, RendererDiagnostic, RendererProperties } from './renderers.tsx'
+import type {
+  FabricRendererProps,
+  GraphicRendererProps,
+  RendererDiagnostic,
+  RendererProperties
+} from './renderer-contract.ts'
 
 describe('Canvas', () => {
   it('renders a title-only configuration as a safe blank Canvas', () => {

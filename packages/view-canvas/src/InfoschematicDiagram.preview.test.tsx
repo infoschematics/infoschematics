@@ -7,7 +7,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import { Canvas } from './Canvas.tsx'
-import type { FabricRendererProps, GraphicRendererProps } from './renderers.tsx'
+import type { FabricRendererProps, GraphicRendererProps } from './renderer-contract.ts'
 
 const config = (): InfoschematicConfig =>
   defineInfoschematic({

@@ -102,7 +102,7 @@ const authored = (text: string | undefined) => (text && text.trim().length > 0 ?
 const fits = (text: string, width: number, advance: number) => text.length * advance <= width
 
 /** Cut to what the width holds, ending in an ellipsis so the reader knows there is more. */
-const truncate = (text: string, width: number, advance: number) => {
+export const truncateToWidth = (text: string, width: number, advance: number) => {
   if (fits(text, width, advance)) return text
   const room = Math.floor(width / advance) - 1
   return room >= 1 ? `${text.slice(0, room).trimEnd()}${ellipsis}` : ''
@@ -113,7 +113,7 @@ const truncate = (text: string, width: number, advance: number) => {
  * than a character count. Whatever will not fit on the last line is cut there,
  * so a long label ends in an ellipsis instead of running through the border.
  */
-const wrap = (text: string, width: number, advance: number, limit: number): readonly string[] => {
+export const wrapToWidth = (text: string, width: number, advance: number, limit: number): readonly string[] => {
   const words = text.trim().split(/\s+/)
   const lines: string[] = []
   let current = ''
@@ -125,11 +125,11 @@ const wrap = (text: string, width: number, advance: number, limit: number): read
       continue
     }
     if (lines.length + 1 === limit)
-      return [...lines, truncate([current, ...words.slice(index)].join(' '), width, advance)]
+      return [...lines, truncateToWidth([current, ...words.slice(index)].join(' '), width, advance)]
     lines.push(current)
     current = word
   }
-  return [...lines, truncate(current, width, advance)]
+  return [...lines, truncateToWidth(current, width, advance)]
 }
 
 /**
@@ -155,8 +155,8 @@ export const resolveCardLayout = ({
   // A compact Card keeps one line: its stack is a band, a label and a
   // description, and a wrapped label would push the description into the floor.
   const labelLines = compact
-    ? [truncate(authoredLabel.trim(), usable, compactLabelAdvance)]
-    : wrap(
+    ? [truncateToWidth(authoredLabel.trim(), usable, compactLabelAdvance)]
+    : wrapToWidth(
         authoredLabel,
         usable,
         labelAdvance,
@@ -171,7 +171,8 @@ export const resolveCardLayout = ({
 
   // The stereotype fits the box, and the identity chip yields to it where the
   // two would meet: a fitted stereotype never overruns, but it can still reach.
-  const stereotypeFitted = stereotypeText === undefined ? '' : truncate(stereotypeText, usable, stereotypeAdvance)
+  const stereotypeFitted =
+    stereotypeText === undefined ? '' : truncateToWidth(stereotypeText, usable, stereotypeAdvance)
   const stereotypeSpan = stereotypeWidth(stereotypeFitted)
   const stereotypePlaced = stereotypeFitted.length > 0 && banded && stacked
 
@@ -183,7 +184,9 @@ export const resolveCardLayout = ({
     chipWidth + chipGap * 2 <= box.width &&
     (!stereotypePlaced || inset + stereotypeSpan <= chipStart)
 
-  const descriptionText = detail.description ? truncate(authored(description) ?? '', usable, descriptionAdvance) : ''
+  const descriptionText = detail.description
+    ? truncateToWidth(authored(description) ?? '', usable, descriptionAdvance)
+    : ''
   const describing = descriptionText.length > 0
   const compactLabelY = stereotypePlaced ? bandedCompactLabelY : bareCompactLabelY
   const label: CardLabelPlacement = compact

@@ -178,6 +178,16 @@ _Verify:_ render the representative treatment fixture repeatedly with full, redu
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers explicit target dimensions, deterministic optional-row reduction, and retained accessible authored metadata.
 
+### STATIC-017 — Standard catalogue artwork is drawn from the shared description
+
+Static output MUST draw every standard Fabric and Overlay treatment the product offers from View Model's stated artwork description rather than a realisation of its own, and MUST mark each drawn piece with the standard key it drew as `data-artwork`. Paint roles MUST resolve through `visualTokens`: the static renderer's own paper palette by default, and the interactive palette where the document asks for the blueprint surface, as `STATIC-013` requires of every other treatment. Each piece's declared `defs` MUST be emitted under this rendering's resource prefix and the piece's own ordinal, so two Fabrics of one kind at different sizes do not share the first one's resources. A renderer key the catalogue does not offer, or a standard key requested at a schema version it does not state, MUST leave the generic Fabric or Overlay treatment drawn rather than draw nothing; the accessible name stays the document's whichever treatment draws.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg` and `bun run self:scripts:test`, then render one document naming every standard key and read each `data-artwork` group against the Canvas drawing of the same document: shape counts, geometry and drawn strings must agree, because a piece that draws in one renderer only is the defect the catalogue risks. Resolve every `url(#…)` a piece references within its own rendering — a resource named but never defined survives a green run here. Author two Fabrics of one kind at different sizes and confirm each references resources of its own. Render the same document on the default and blueprint surfaces and confirm the paint changes with the outlet. Ask for a standard key at a schema version the catalogue does not state and confirm the generic plane is drawn with the authored accessible name intact.
+
+_Evidence:_ `artworkPrimitives` and `artworkResources` in `packages/render-svg/src/index.ts` walk the shared description into SVG strings under per-piece resource ids; `packages/render-svg/src/index.test.ts` covers per-piece resources, both palettes, and the unstated-version fallback; `scripts/visual-treatment-parity.test.ts` compares each `data-artwork` piece across both renderers and closes the `url(#…)` loop in each.
+
 ## Gaps
 
 - `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-034](../decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.

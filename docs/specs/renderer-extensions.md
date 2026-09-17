@@ -60,7 +60,7 @@ _Conformance:_ conforming
 
 _Verify:_ Read the renderer configuration prop in `packages/view-canvas/src/Canvas.tsx` and its distribution in `packages/view-canvas/src/renderers.tsx`: the registry arrives as a prop, and no exported function lets a caller register a renderer after mount. Mutate the object a host passed in and confirm the mounted application does not see the change. Then read `InfoschematicConfig` and confirm Fabric and Overlay components, property validators, diagnostic callbacks, shared SVG definitions, and Scope icons are all absent from it.
 
-_Evidence:_ the renderer contract and context in `packages/view-canvas/src/renderers.tsx`, and the `renderers` prop in `packages/view-canvas/src/Canvas.tsx`.
+_Evidence:_ the renderer contract in `packages/view-canvas/src/renderer-contract.ts`, the context that distributes it in `packages/view-canvas/src/renderers.tsx`, and the `renderers` prop in `packages/view-canvas/src/Canvas.tsx`.
 
 ### EXTEND-006 — Renderer definitions are versioned and validated
 
@@ -76,10 +76,22 @@ _Evidence:_ `defineInfoschematicRenderers` and `resolveInfoschematicRenderer` in
 
 ### EXTEND-007 — Hosts supply visual implementations
 
-Studio MUST accept host-owned renderer configuration separately from `InfoschematicConfig` and pass it through the lower View contracts. Fabric, Overlay, Callout, shared SVG definition and Scope icon implementations MUST NOT be stored in authored configuration or imported from a particular realisation by the reusable package. Studio MUST NOT create a second renderer registry contract alongside Canvas and Present.
+Studio MUST accept host-owned renderer configuration separately from `InfoschematicConfig` and pass it through the lower View contracts. Fabric, Overlay, Callout, shared SVG definition and Scope icon implementations MUST NOT be stored in authored configuration or imported from a host's particular realisation by the reusable package. The standard catalogue `EXTEND-008` describes is not such an import: it is the product's own, it is reached only where the host collection answers nothing, and a host registration for the same key always beats it. Studio MUST NOT create a second renderer registry contract alongside Canvas and Present.
 
 _Conformance:_ conforming
 
-_Verify:_ Read Studio's public surface in `packages/view-studio/src/index.ts`: renderer configuration is its own prop, separate from `InfoschematicConfig`, and it is passed down to the Canvas and Present contracts rather than re-declared. Falsified by a second registry type in Studio, by a Fabric, Overlay, Callout, shared SVG definition, or Scope icon implementation stored in authored configuration, or by a reusable package importing one particular realisation.
+_Verify:_ Read Studio's public surface in `packages/view-studio/src/index.ts`: renderer configuration is its own prop, separate from `InfoschematicConfig`, and it is passed down to the Canvas and Present contracts rather than re-declared. Falsified by a second registry type in Studio, by a Fabric, Overlay, Callout, shared SVG definition, or Scope icon implementation stored in authored configuration, or by a reusable package importing one host's particular realisation.
 
 _Evidence:_ compatibility exports in `packages/view-studio/src/index.ts`; the owning registry and context are in `packages/view-canvas/src/renderers.tsx`.
+
+### EXTEND-008 — The product offers a standard catalogue it does not impose
+
+The product MUST offer a standard catalogue of named Fabric and Overlay treatments, and MUST publish its keys so consumers enumerate the catalogue rather than restate it. Resolution MUST consult the host collection first: a host definition under a standard key and requested version MUST win, and the catalogue MUST be reached only where the host collection answers nothing. Resolving to the catalogue MUST NOT report a diagnostic, because nothing is wrong.
+
+Every standard key MUST draw in the interactive Canvas and in a static rendering, from one stated description rather than one realisation per renderer. A standard key requested at a version the catalogue does not offer MUST report an unsupported version rather than an unknown key, and MUST fall back as `EXTEND-001` requires.
+
+_Conformance:_ conforming
+
+_Verify:_ Register a Fabric renderer under a standard key, and confirm the host's component is the one that draws; remove that registration and confirm the same document draws the catalogue's treatment with no diagnostic reported. Ask for a standard key at a version the catalogue does not offer and read the diagnostic kind: an author told the key is unknown goes looking for a host registration that was never the problem. Then render one document naming every standard key through both renderers and compare them piece by piece, because a key that draws in one renderer only is the defect this requirement exists for.
+
+_Evidence:_ `standardArtwork` in `packages/view-model/src/standard-artwork.ts` states each piece once as geometry and paint roles; `standardFabricRenderers` in `packages/view-canvas/src/standard-renderers.tsx` and `artworkPrimitives` in `packages/render-svg/src/index.ts` are the two walks of it; `standardFallback` in `packages/view-canvas/src/renderers.tsx` keeps host registrations first; `scripts/visual-treatment-parity.test.ts` compares the two drawings key by key.

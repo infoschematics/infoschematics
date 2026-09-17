@@ -247,7 +247,7 @@ diagram:
   overlays:
     - id: OVL-01
       label: Reading order
-      description: A host-supplied Graphic drawn over the Diagram
+      description: A Graphic drawn over the Diagram from the standard catalogue
       kind: annotation
       bounds: 1180 1060 460 100
       properties:

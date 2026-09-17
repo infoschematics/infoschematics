@@ -58,12 +58,8 @@ import {
 } from '@infoschematics/view-model/runtime'
 import { elementEmphasisKey } from './element-emphasis.ts'
 import { flowSignalDuration, flowSignalKey } from './flow-signals.ts'
-import {
-  type FabricRendererProps,
-  type RendererProperties,
-  resolveInfoschematicRenderer,
-  useInfoschematicRenderers
-} from './renderers.tsx'
+import type { FabricRendererProps, RendererProperties } from './renderer-contract.ts'
+import { resolveInfoschematicRenderer, useInfoschematicRenderers } from './renderers.tsx'
 import { useInfoschematic } from './runtime-context.tsx'
 import {
   centerViewportAt,

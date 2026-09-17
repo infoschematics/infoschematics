@@ -15,6 +15,16 @@ export type {
   RuntimeThemeScene
 } from '@infoschematics/view-model/runtime'
 export type { FlowSignal } from '@infoschematics/view-model/signals'
+/* The catalogue's keys are public so a host can enumerate what it may override, rather than restate a list
+   that would then drift from the one the product draws. */
+export {
+  type StandardArtworkKey,
+  type StandardFabricKey,
+  type StandardGraphicKey,
+  standardArtworkSchemaVersion,
+  standardFabricKeys,
+  standardGraphicKeys
+} from '@infoschematics/view-model/standard-artwork'
 export {
   DiagramAnnouncements,
   type DiagramAnnouncementsProps,
@@ -46,7 +56,7 @@ export type {
   RendererValidationResult,
   ResolvedRenderer,
   ScopeIconRenderer
-} from './renderers.tsx'
+} from './renderer-contract.ts'
 export {
   defineInfoschematicRenderers,
   InfoschematicRenderersContext,

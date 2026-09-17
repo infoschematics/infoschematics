@@ -771,6 +771,51 @@ describe('renderInfoschematicSvg', () => {
     expect(oneScope).not.toContain('data-id="CALL-001"')
   })
 
+  it('draws standard catalogue artwork from the shared description, once per piece', () => {
+    const fabric = (id: string, box: { height: number; width: number; x: number; y: number }, renderer: unknown) => ({
+      appearance: { renderer } as { renderer: string },
+      code: id.toUpperCase(),
+      detail: 'A substrate every stage can reach',
+      id,
+      label: id,
+      placement: { box, ports: {} },
+      scope: 'one',
+      scopes: ['one']
+    })
+    const catalogue = (surface?: 'blueprint'): InfoschematicConfig => ({
+      ...blank('Standard catalogue'),
+      infoschematic: {
+        ...blank('Standard catalogue').infoschematic,
+        appearance: surface ? { surface } : undefined,
+        scopes: [{ color: '#2463eb', description: 'One', fill: '#dbeafe', id: 'one', label: 'One', prefix: 'ONE' }],
+        viewBox: { height: 400, width: 400, x: 0, y: 0 },
+        fabrics: [
+          fabric('wide', { height: 120, width: 300, x: 20, y: 20 }, 'internet-cloud'),
+          fabric('narrow', { height: 80, width: 160, x: 20, y: 170 }, 'internet-cloud'),
+          fabric('future', { height: 80, width: 160, x: 200, y: 170 }, { key: 'internet-cloud', version: 2 })
+        ]
+      }
+    })
+
+    const svg = renderInfoschematicSvg(catalogue())
+    expect([...svg.matchAll(/data-artwork="internet-cloud"/g)]).toHaveLength(2)
+    /* Each piece owns its resources: two Fabrics of one kind at different sizes must not share the first one's
+       lattice, so the ids carry the piece's ordinal and each group references only its own. */
+    expect(svg).toContain('id="infoschematic-artwork-0-grid"')
+    expect(svg).toContain('id="infoschematic-artwork-1-grid"')
+    expect(svg).toContain('url(#infoschematic-artwork-1-grid)')
+    // A version the catalogue does not state leaves the generic plane, which is `EXTEND-001`'s fallback drawn.
+    expect(svg).toContain('>FUTURE: future · A substrate every stage can reach<')
+    expect(svg).toContain(`fill="${visualTokens.canvas.output.surface}" height="80" rx=`)
+
+    // Paint is the outlet's: the paper palette by default, the interactive ink where the document asks for blueprint.
+    expect(svg).toContain(`fill="${visualTokens.canvas.artwork.output.shell}"`)
+    expect(svg).not.toContain(`fill="${visualTokens.canvas.artwork.ink.shell}"`)
+    const blueprint = renderInfoschematicSvg(catalogue('blueprint'))
+    expect(blueprint).toContain(`fill="${visualTokens.canvas.artwork.ink.shell}"`)
+    expect(blueprint).not.toContain(`fill="${visualTokens.canvas.artwork.output.shell}"`)
+  })
+
   it('fails explicitly when a selected Scene does not exist', () => {
     expect(() =>
       renderInfoschematicSvg(representative, {

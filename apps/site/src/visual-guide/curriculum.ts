@@ -352,7 +352,7 @@ export const componentSections: readonly ComponentSection[] = [
       },
       {
         name: 'appearance.renderer',
-        summary: 'The stable renderer key used by the host.'
+        summary: 'A standard treatment the product offers, or a key the host registers its own renderer under.'
       },
       {
         name: 'appearance.caption, detail, properties',
@@ -484,7 +484,7 @@ export const componentSections: readonly ComponentSection[] = [
       },
       {
         name: 'renderer',
-        summary: 'The stable renderer key used by the host.'
+        summary: 'A standard treatment the product offers, or a key the host registers its own renderer under.'
       },
       { name: 'placement', summary: 'An optional x, y, width, and height.' },
       { name: 'scopes', summary: 'Optional scope applicability.' },

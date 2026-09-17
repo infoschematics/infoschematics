@@ -250,11 +250,11 @@ export function specimenFor(kind: SpecimenKind): InfoschematicConfig {
       return withDiagramParts(config, {
         graphics: graphics.map((graphic) => ({
           ...graphic,
-          label: 'Host-rendered Graphic',
+          label: 'Graphic',
           placement: { x: 180, y: 120, width: 360, height: 160 },
           properties: {
-            caption: 'Any serialisable renderer properties',
-            emphasis: true
+            text: 'Any serialisable properties the treatment reads: strings, numbers, and flags.',
+            tone: 'quiet'
           }
         }))
       })
@@ -604,6 +604,38 @@ export const withGuideProperty = (
   return {
     ...config,
     infoschematic: { ...diagram, graphics }
+  } as InfoschematicConfig
+}
+
+/**
+ * The same specimen drawn under one standard treatment.
+ *
+ * The catalogue is the product's own artwork rather than a host's, so the guide shows it by name: each standard key
+ * is the same placed element under a different treatment, which is what an author choosing one needs to compare.
+ */
+export const withGuideTreatment = (
+  config: InfoschematicConfig,
+  kind: 'fabric' | 'graphic',
+  renderer: string
+): InfoschematicConfig => {
+  const diagram = config.infoschematic
+  if (kind === 'fabric')
+    return {
+      ...config,
+      infoschematic: {
+        ...diagram,
+        fabrics: updateFirst(diagram.fabrics, (fabric) => ({
+          ...fabric,
+          appearance: { ...fabric.appearance, renderer }
+        }))
+      }
+    } as InfoschematicConfig
+  return {
+    ...config,
+    infoschematic: {
+      ...diagram,
+      graphics: updateFirst(diagram.graphics, (graphic) => ({ ...graphic, renderer }))
+    }
   } as InfoschematicConfig
 }
 

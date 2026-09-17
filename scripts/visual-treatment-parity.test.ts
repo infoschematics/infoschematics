@@ -5,6 +5,8 @@ import { defineInfoschematic, defineInfoschematicModel } from '../packages/domai
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
 import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
+import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
+import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
 import { visualTokens } from '../packages/view-model/src/tokens.ts'
 
 /**
@@ -530,5 +532,153 @@ describe('visual treatment renderer parity', () => {
     // cuts — and that the still frame states no direction, because the document does not state one either.
     expect(canvas).toContain(`<animateMotion dur="${visualTokens.canvas.emphasis.duration}" path="${outlines.SNK}"`)
     expect(svg).not.toContain('animateMotion')
+  })
+})
+
+/**
+ * One standard piece's own markup, from the group that names it to that group's close.
+ *
+ * A piece nests groups of its own, so the end is found by depth rather than by the next `</g>`. Isolating the piece
+ * is what makes the comparison below about the drawing: the two renderings around it share almost nothing, and a
+ * count taken over a whole page would be dominated by chrome neither renderer draws for the other.
+ */
+const artworkPiece = (markup: string, key: string) => {
+  const opening = markup.indexOf(`data-artwork="${key}"`)
+  if (opening < 0) throw new Error(`Nothing in this rendering drew the \`${key}\` artwork`)
+  const start = markup.indexOf('>', opening) + 1
+  let cursor = start
+  let closed = start
+  let depth = 1
+  while (depth > 0) {
+    const next = /<(\/?)g\b/.exec(markup.slice(cursor))
+    if (!next) throw new Error(`The \`${key}\` artwork group never closes`)
+    depth += next[1] === '/' ? -1 : 1
+    closed = cursor + next.index
+    cursor = closed + next[0].length
+  }
+  return markup.slice(start, closed)
+}
+
+/**
+ * What one piece draws, in the terms both renderers are meant to agree on.
+ *
+ * Shape counts and geometry are the agreement: a piece that draws six arrows in Canvas and five here is the defect
+ * this check exists for. Resource references are reduced to a placeholder because each rendering names its own ids
+ * — `resolvedReferences` is what asserts those resolve — and `font-family` is left out because the two surfaces
+ * deliberately set their own, exactly as a Card's already does.
+ */
+const artworkDrawing = (markup: string, key: string) => {
+  const piece = artworkPiece(markup, key)
+  const attribute = (name: string) =>
+    [...piece.matchAll(new RegExp(`\\b${name}="([^"]*)"`, 'g'))]
+      .map((match) => match[1].replace(/url\(#[^)]*\)/g, 'url(#resource)'))
+      .sort()
+  return {
+    counts: Object.fromEntries(
+      (['circle', 'g', 'path', 'rect', 'text'] as const).map((name) => [
+        name,
+        [...piece.matchAll(new RegExp(`<${name}\\b`, 'g'))].length
+      ])
+    ),
+    d: attribute('d'),
+    fill: attribute('fill'),
+    height: attribute('height'),
+    markerEnd: attribute('marker-end'),
+    r: attribute('r'),
+    stroke: attribute('stroke'),
+    strokeDash: attribute('stroke-dasharray'),
+    strokeWidth: attribute('stroke-width'),
+    text: [...piece.matchAll(/<text\b[^>]*>([^<]*)<\/text>/g)].map((match) => match[1]).sort(),
+    transform: attribute('transform'),
+    width: attribute('width'),
+    x: attribute('x'),
+    y: attribute('y')
+  }
+}
+
+/*
+ * The standard renderer catalogue is nine pieces the product offers rather than a host does, and each one is drawn
+ * twice: once as React elements and once as SVG strings. Nothing but this check says the two walks of the one
+ * description arrive at the same drawing. The documents ask for `blueprint`, because that is the surface on which
+ * the static renderer resolves the interactive palette, so paint is comparable here too rather than only geometry.
+ */
+describe('standard renderer catalogue parity', () => {
+  const box = (index: number) => ({ height: 140, width: 320, x: 40, y: 40 + index * 200 })
+
+  it('draws every standard Fabric treatment the same way in both renderers', () => {
+    const catalogue = defineInfoschematic({
+      title: 'Standard Fabric catalogue',
+      infoschematic: {
+        appearance: { surface: 'blueprint' },
+        scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
+        fabrics: standardFabricKeys.map((key, index) => ({
+          appearance: { renderer: key },
+          code: `FAB-00${index + 1}`,
+          detail: 'A substrate every stage can reach',
+          id: key,
+          label: key,
+          placement: { box: box(index), ports: {} },
+          scope: 'one',
+          scopes: ['one']
+        }))
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: catalogue }))
+    const svg = renderInfoschematicSvg(catalogue)
+
+    for (const key of standardFabricKeys) {
+      const drawn = artworkDrawing(svg, key)
+      expect(artworkDrawing(canvas, key), key).toEqual(drawn)
+      // A catalogue entry that resolved but drew nothing would satisfy the comparison above twice over.
+      expect(drawn.counts.path + drawn.counts.rect, key).toBeGreaterThan(1)
+      /* Every Fabric piece captions itself from the document, fitted to the band it is drawn in rather than to the
+         label's own length — so the caption is a prefix of the label, whole or cut. */
+      const fitted = drawn.text.map((entry) => entry.replace('\u2026', ''))
+      expect(
+        fitted.every((entry) => entry.length > 0) && fitted.some((entry) => key.startsWith(entry)),
+        `${key} captions: ${fitted.join(' | ')}`
+      ).toBe(true)
+    }
+    // The accessible name is the document's whichever treatment draws the Fabric.
+    expect(canvas).toContain('>FAB-001: internet-cloud · A substrate every stage can reach<')
+    expect(svg).toContain('>FAB-001: internet-cloud · A substrate every stage can reach<')
+    for (const markup of [canvas, svg]) expect(resolvedReferences(markup).filter((entry) => !entry.defined)).toEqual([])
+  })
+
+  it('draws every standard Graphic treatment the same way in both renderers', () => {
+    for (const key of standardGraphicKeys) {
+      const drawing = defineInfoschematic({
+        title: `Standard ${key}`,
+        infoschematic: {
+          appearance: { surface: 'blueprint' },
+          graphics: [
+            {
+              id: key,
+              label: 'Adaptation',
+              placement: box(0),
+              properties: { text: 'Observe, decide, act, and observe again' },
+              renderer: key
+            }
+          ]
+        }
+      })
+      /* Canvas draws an authored Overlay outside Design mode only as the scene's own graphic, which
+         `INFOSCHEMATICS-TOOL-089` records — so each key is its own document and the graphic is handed over. */
+      const graphic = createInfoschematicRuntime(drawing).infoschematicOverlays[0]
+      const canvas = renderToStaticMarkup(createElement(Canvas, { config: drawing, graphic }))
+      const svg = renderInfoschematicSvg(drawing, { visibility: { graphics: 'all' } })
+
+      const drawn = artworkDrawing(svg, key)
+      expect(artworkDrawing(canvas, key), key).toEqual(drawn)
+      /* A piece that resolved but drew nothing would satisfy the comparison above twice over. The floor is the
+         whole drawing rather than its outlines, because `annotation` is a panel and its lines of text. */
+      const drew = Object.values(drawn.counts).reduce((total, count) => total + count, 0)
+      expect(drew, key).toBeGreaterThan(1)
+      for (const markup of [canvas, svg])
+        expect(
+          resolvedReferences(markup).filter((entry) => !entry.defined),
+          key
+        ).toEqual([])
+    }
   })
 })

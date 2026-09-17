@@ -49,6 +49,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 37. [ADR-INFOSCHEMATICS-032](ADR-INFOSCHEMATICS-032-a-point-is-created-from-the-library.md) — create a Point from the Library path, alone rather than with a Flow, reversing `ADR-INFOSCHEMATICS-031`'s non-creatability consequence.
 38. [ADR-INFOSCHEMATICS-033](ADR-INFOSCHEMATICS-033-a-diagram-host-mounts-the-announcement-surface.md) — make announcing a Dynamic an obligation of every host that mounts the Diagram, over one shared surface.
 39. [ADR-INFOSCHEMATICS-034](ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) — state each cross-feature composition as its own requirement in its own area, rather than as a clause inside the newer feature.
+40. [ADR-INFOSCHEMATICS-035](ADR-INFOSCHEMATICS-035-the-product-offers-renderer-artwork-as-data.md) — offer a standard catalogue of named treatments as serialisable artwork data every outlet draws, reached only where a host registers nothing.
 
 ## Repository operation
 

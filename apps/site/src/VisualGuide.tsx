@@ -1,3 +1,4 @@
+import { standardFabricKeys, standardGraphicKeys } from '@infoschematics/view-canvas'
 import type { ReactNode } from 'react'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
@@ -6,6 +7,16 @@ import { SiteNav } from './SiteNav.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import './styles.css'
+
+/* The catalogue's own key lists drive this, so a treatment added to the product appears here without an edit. */
+const treatmentComparisons = (id: string) =>
+  id === 'fabric'
+    ? standardFabricKeys.map((key) => ({ id: key, label: treatmentLabel(key), treatment: key }))
+    : id === 'graphic'
+      ? standardGraphicKeys.map((key) => ({ id: key, label: treatmentLabel(key), treatment: key }))
+      : undefined
+
+const treatmentLabel = (key: string) => key.replace(/-/g, ' ').replace(/^./, (first) => first.toUpperCase())
 
 const futureRoute = {
   path: componentPaths.future,
@@ -46,7 +57,7 @@ export function ComponentsHub() {
       <article aria-label="Components" className="document-content">
         <h1>Components</h1>
         <p>
-          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, and host-supplied
+          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, and placed
           Graphics. Explore each component on its own.
         </p>
         <div className="component-catalogue">
@@ -75,7 +86,6 @@ function FuturePage() {
           <li>Orthogonal Canvas grid patterns: Squares or Dots, each with Major or Major + minor intervals.</li>
           <li>Semantic Point roles such as start, end, junction, anchor, and off-page.</li>
           <li>Decision and stacked Card variants, plus richer endpoint markers and cardinality.</li>
-          <li>Named Fabric presets with portable static fallbacks.</li>
           <li>Authored visual themes distinct from Scene and Callout themes.</li>
         </ul>
       </article>
@@ -114,8 +124,10 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
         )}
         {component.id === 'fabric' && (
           <p>
-            Ports are numbered attachment positions. Named Fabric renderers remain host-provided and need static
-            fallback parity before they can be presets.
+            Ports are numbered attachment positions. Naming a <code>renderer</code> picks a treatment: the product
+            offers {standardFabricKeys.length} standard ones, drawn the same way here and by{' '}
+            <code>infoschematics render</code>, and a host registering its own under the same key takes over from the
+            catalogue. A key nothing answers draws the generic plane.
           </p>
         )}
         {component.id === 'card' && (
@@ -132,8 +144,9 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
         )}
         {component.id === 'graphic' && (
           <p>
-            Authored data names a renderer and passes serialisable properties; the host supplies the visual
-            implementation.
+            Authored data names a renderer and passes serialisable properties. The product offers{' '}
+            {standardGraphicKeys.length} standard treatments; a host supplies any other by registering its own under the
+            key the document names.
           </p>
         )}
         <section aria-labelledby={`${component.id}-example`} className="component-page__section">
@@ -145,7 +158,7 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
                     { id: 'standard', label: 'Standard', propertyKey: 'card.variant', value: 'standard' },
                     { id: 'adapter', label: 'Adapter', propertyKey: 'card.variant', value: 'adapter' }
                   ]
-                : undefined
+                : treatmentComparisons(component.id)
             }
             kind={component.id}
             propertyKeys={component.propertyKeys}

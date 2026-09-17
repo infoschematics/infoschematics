@@ -24,11 +24,8 @@ import {
   retireFlowSignals
 } from './flow-signals.ts'
 import { InfoschematicDiagram } from './InfoschematicDiagram.tsx'
-import {
-  defineInfoschematicRenderers,
-  type InfoschematicRenderers,
-  InfoschematicRenderersContext
-} from './renderers.tsx'
+import type { InfoschematicRenderers } from './renderer-contract.ts'
+import { defineInfoschematicRenderers, InfoschematicRenderersContext } from './renderers.tsx'
 import { InfoschematicContext, useInfoschematic } from './runtime-context.tsx'
 
 type DiagramProps = ComponentProps<typeof InfoschematicDiagram>

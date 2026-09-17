@@ -1,109 +1,26 @@
-import type { Callout, Overlay } from '@infoschematics/domain-model'
 import { type RendererReferenceInput, rendererReferenceOf } from '@infoschematics/domain-model/renderer'
-import type { Box } from '@infoschematics/view-model/geometry'
-import type { RuntimeFabric } from '@infoschematics/view-model/runtime'
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType } from 'react'
 import { createContext, useContext } from 'react'
 
-export type RendererKind = 'fabric' | 'graphic' | 'callout'
-
-export type RendererProperties = Readonly<Record<string, boolean | number | string>>
-
-export type RendererValidationResult<Properties extends RendererProperties = RendererProperties> =
-  | Readonly<{ valid: true; properties: Properties }>
-  | Readonly<{ valid: false; reason: string }>
-
-export type RendererDefinition<Props, Properties extends RendererProperties = RendererProperties> = Readonly<{
-  key: string
-  schemaVersion: number
-  validateProperties: (properties: RendererProperties | undefined) => RendererValidationResult<Properties>
-  component: ComponentType<Props & { properties: Properties }>
-}>
-
-export type FabricRendererProps = {
-  fabric: RuntimeFabric
-  bounds: Box
-}
-
-export type GraphicRendererProps = {
-  graphic: Overlay
-  /** Effective Design bounds, including an uncommitted move or resize. */
-  bounds: Box
-  viewBox: Box
-}
-
-export type CalloutRendererProps = {
-  callout: Callout
-  children: ReactNode
-}
-
-export type FabricRendererDefinition<Properties extends RendererProperties = RendererProperties> = RendererDefinition<
-  FabricRendererProps,
-  Properties
->
-
-export type GraphicRendererDefinition<Properties extends RendererProperties = RendererProperties> = RendererDefinition<
-  GraphicRendererProps,
-  Properties
->
-
-export type CalloutRendererDefinition<Properties extends RendererProperties = RendererProperties> = RendererDefinition<
+import type {
   CalloutRendererProps,
-  Properties
->
-
-export type RendererDiagnosticCode = 'unknown-key' | 'unsupported-version' | 'invalid-properties' | 'duplicate-key'
-
-export type RendererDiagnostic = Readonly<{
-  code: RendererDiagnosticCode
-  kind: RendererKind
-  key: string
-  schemaVersion?: number
-  artefactId?: string
-  message: string
-}>
-
-export type RendererDiagnosticHandler = (diagnostic: RendererDiagnostic) => void
-
-export type ScopeIconRenderer = ComponentType<{ 'aria-hidden': true; size: number }>
-
-type RendererDefinitionShape<Props> = Readonly<{
-  key: string
-  schemaVersion: number
-  validateProperties: (properties: RendererProperties | undefined) => RendererValidationResult<RendererProperties>
-  component: ComponentType<Props & { properties: never }>
-}>
-
-type RendererCollection<Props> =
-  | readonly RendererDefinitionShape<Props>[]
-  | Readonly<Record<string, ComponentType<Props>>>
+  FabricRendererProps,
+  GraphicRendererProps,
+  InfoschematicRenderers,
+  RendererCollection,
+  RendererDefinitionShape,
+  RendererDiagnostic,
+  RendererDiagnosticHandler,
+  RendererKind,
+  RendererProperties,
+  RendererValidationResult,
+  ResolvedRenderer
+} from './renderer-contract.ts'
+import { standardFabricRenderers, standardGraphicRenderers } from './standard-renderers.tsx'
 
 const isDefinitionCollection = <Props,>(
   collection: RendererCollection<Props>
 ): collection is readonly RendererDefinitionShape<Props>[] => Array.isArray(collection)
-
-/**
- * Host-owned renderer registrations for one mounted Infoschematic.
- *
- * Arrays are the versioned, validated contract. Component-only records remain
- * a compatibility bridge and are treated as schema version 1 definitions that
- * accept the authored properties unchanged.
- */
-export type InfoschematicRenderers = Readonly<{
-  definitions?: ComponentType
-  fabrics?: RendererCollection<FabricRendererProps>
-  graphics?: RendererCollection<GraphicRendererProps>
-  callouts?: RendererCollection<CalloutRendererProps>
-  scopeIcons?: Readonly<Record<string, ScopeIconRenderer>>
-  onDiagnostic?: RendererDiagnosticHandler
-}>
-
-export type ResolvedRenderer<Props, Properties extends RendererProperties = RendererProperties> = Readonly<{
-  Component: ComponentType<Props & { properties: Properties }>
-  key: string
-  schemaVersion: number
-  properties: Properties
-}>
 
 const componentSchemaVersion = 1
 const emptyProperties: RendererProperties = Object.freeze({})
@@ -168,6 +85,73 @@ const collectionFor = (
   return renderers.callouts as RendererCollection<unknown> | undefined
 }
 
+/* A standard definition, seen only as much of itself as resolution needs. The component's props are left opaque
+   because the overload the caller chose is what fixes them, exactly as it does for a host registration. */
+type StandardDefinition = Readonly<{
+  key: string
+  schemaVersion: number
+  validateProperties: (properties: RendererProperties | undefined) => RendererValidationResult
+  component: unknown
+}>
+
+/**
+ * The standard catalogue, consulted only where a host has registered nothing under the key a document names.
+ *
+ * This is the whole of how the product offers a renderer without imposing one. A host collection is searched first
+ * and answers first, so registering `satellite-link` replaces the standard treatment rather than competing with it;
+ * the catalogue is reached at exactly the points this resolution would otherwise report `unknown-key`, which is why
+ * an unregistered standard key now draws instead of falling back to the generic plane. `EXTEND-008` states the rule.
+ *
+ * A requested version the catalogue does not offer is a version mismatch and not a missing key, so it is reported as
+ * one: resolution still never negotiates a version down.
+ */
+const standardFallback = (
+  kind: RendererKind,
+  key: string,
+  requestedVersion: number,
+  properties: RendererProperties | undefined,
+  artefactId: string | undefined,
+  onDiagnostic: RendererDiagnosticHandler | undefined
+): unknown => {
+  const collection: readonly StandardDefinition[] =
+    kind === 'fabric' ? standardFabricRenderers : kind === 'graphic' ? standardGraphicRenderers : []
+  const definition = collection.find((candidate) => candidate.key === key)
+  if (!definition) {
+    onDiagnostic?.(
+      diagnosticMessage(
+        { artefactId, code: 'unknown-key', key, kind, schemaVersion: requestedVersion },
+        'no matching definition is registered'
+      )
+    )
+    return undefined
+  }
+  if (definition.schemaVersion !== requestedVersion) {
+    onDiagnostic?.(
+      diagnosticMessage(
+        { artefactId, code: 'unsupported-version', key, kind, schemaVersion: requestedVersion },
+        `requested schema version ${requestedVersion} is not registered; available versions: ${definition.schemaVersion}`
+      )
+    )
+    return undefined
+  }
+  const validation = definition.validateProperties(properties)
+  if (!validation.valid) {
+    onDiagnostic?.(
+      diagnosticMessage(
+        { artefactId, code: 'invalid-properties', key, kind, schemaVersion: definition.schemaVersion },
+        validation.reason
+      )
+    )
+    return undefined
+  }
+  return {
+    Component: definition.component as ComponentType<unknown & { properties: RendererProperties }>,
+    key,
+    properties: validation.properties,
+    schemaVersion: definition.schemaVersion
+  }
+}
+
 export function resolveInfoschematicRenderer(
   renderers: InfoschematicRenderers,
   kind: 'fabric',
@@ -200,27 +184,11 @@ export function resolveInfoschematicRenderer(
   const { key, version: requestedVersion } = rendererReferenceOf(authoredReference)
 
   const collection = collectionFor(renderers, kind)
-  if (!collection) {
-    renderers.onDiagnostic?.(
-      diagnosticMessage(
-        { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
-        'no matching definition is registered'
-      )
-    )
-    return undefined
-  }
+  if (!collection) return standardFallback(kind, key, requestedVersion, properties, artefactId, renderers.onDiagnostic)
 
   if (!isDefinitionCollection(collection)) {
     const Component = collection[key]
-    if (!Component) {
-      renderers.onDiagnostic?.(
-        diagnosticMessage(
-          { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
-          'no matching definition is registered'
-        )
-      )
-      return undefined
-    }
+    if (!Component) return standardFallback(kind, key, requestedVersion, properties, artefactId, renderers.onDiagnostic)
     if (requestedVersion !== componentSchemaVersion) {
       renderers.onDiagnostic?.(
         diagnosticMessage(
@@ -239,15 +207,8 @@ export function resolveInfoschematicRenderer(
   }
 
   const matchingKey = collection.filter((candidate) => candidate.key === key)
-  if (matchingKey.length === 0) {
-    renderers.onDiagnostic?.(
-      diagnosticMessage(
-        { artefactId, code: 'unknown-key', kind, key, schemaVersion: requestedVersion },
-        'no matching definition is registered'
-      )
-    )
-    return undefined
-  }
+  if (matchingKey.length === 0)
+    return standardFallback(kind, key, requestedVersion, properties, artefactId, renderers.onDiagnostic)
 
   const definition = matchingKey.find((candidate) => candidate.schemaVersion === requestedVersion)
   if (!definition) {

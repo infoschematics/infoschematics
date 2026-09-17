@@ -78,6 +78,10 @@
       "types": "./dist/signals.d.ts",
       "import": "./dist/signals.js"
     },
+    "./standard-artwork": {
+      "types": "./dist/standard-artwork.d.ts",
+      "import": "./dist/standard-artwork.js"
+    },
     "./tokens": {
       "types": "./dist/tokens.d.ts",
       "import": "./dist/tokens.js"
