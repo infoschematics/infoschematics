@@ -37,7 +37,7 @@ Both commands use [`@infoschematics/cli`](https://www.npmjs.com/package/@infosch
 
 Every two-port Flow is axis-aligned. A two-point route derived from ports that are not aligned is refused by the geometry, which `INFOSCHEMATICS-TOOL-084` tracks, so a diagonal pair here would take a host down rather than draw.
 
-Cards are authored `compact: true`. The static renderer has no Adapter Card notation at all — it draws the clasp as an ordinary Card rectangle over the Card it holds, where the interactive Canvas traces a notched socket nothing passes under — and under the centred treatment a held Card's label sits at exactly the height that rectangle begins, so the label is painted over. `INFOSCHEMATICS-TOOL-088` tracks the missing notation; `compact: true` is the setting that stays readable until it lands.
+Cards are authored `compact: true`. The static renderer does not draw the Adapter Card clasp: where the interactive Canvas traces a notched socket nothing passes under, `render-svg` emits an ordinary Card rectangle over the Card it holds. Under the centred treatment a held Card's label sits at exactly the height that rectangle begins, so the label is painted over. `INFOSCHEMATICS-TOOL-088` tracks it; `compact: true` is the setting that stays readable until it lands.
 
 The Fabric and the Graphic both name a `kind` no host registers a renderer for, so both draw their fallback treatment. That is the contract working as designed — a document may name a renderer its host has not been given — and not a fault in this document.
 

@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: 8efcf51c4a944b886f25a15e092da9763fee7603
 created_at: 2026-09-17T10:20:00Z
-updated_at: 2026-09-17T10:55:00Z
+updated_at: 2026-09-17T11:05:00Z
 ---
 
 # One authored example shows every capability
@@ -100,7 +100,7 @@ Rendered and looked at, in the Playground at the new preset: the Adapter Card an
 
 ### Outstanding concerns
 
-Two product findings the showcase exposed, both recorded rather than fixed: `INFOSCHEMATICS-TOOL-088`, the static renderer has no Adapter Card notation at all, so the clasp Canvas draws as a notched socket is drawn by `render-svg` as a plain Card over the Card it holds; and `INFOSCHEMATICS-TOOL-089`, an authored Overlay cannot be drawn by `infoschematics render` or in Present, so `OVL-01` is in the document and in no picture.
+Two product findings the showcase exposed, both recorded rather than fixed: `INFOSCHEMATICS-TOOL-088`, `render-svg` does not draw the Adapter Card clasp — the `wraps` field, the derived clasp box and the outline primitive are all shared already, and its card loop emits a plain `<rect>` over the Card it holds rather than consuming them, which also leaves the two renderers disagreeing over whether an adapter's authored bounds mean anything; and `INFOSCHEMATICS-TOOL-089`, an authored Overlay cannot be drawn by `infoschematics render` or in Present, so `OVL-01` is in the document and in no picture.
 
 `diagram.appearance.card.compact` is `true` in the showcase, not by preference but because a non-compact Card centres its label at exactly the y the clasp's top sits on, so a held Card's label is unreadable under the static renderer. That is `TOOL-088`'s territory; the showcase takes the setting that reads.
 
