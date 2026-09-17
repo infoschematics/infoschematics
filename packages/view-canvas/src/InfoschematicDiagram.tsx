@@ -23,6 +23,7 @@ import type { Box, Point } from '@infoschematics/view-model/geometry'
 import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
@@ -1871,6 +1872,10 @@ export function InfoschematicDiagram({
     } as const satisfies ArtefactSelection
     const legacyKey = `point:${point.id}`
     const stroke = point.appearance?.color ?? pointTokens.stroke
+    /* The authored label, on the side `resolvePointLabel` picks from the Flows that leave this Point. The draft-aware
+       `flows` are passed rather than the authored ones, so a label moves out of the way of a route while it is dragged
+       instead of after it is committed. */
+    const label = resolvePointLabel(point, flows)
     return (
       // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
       <g
@@ -1906,6 +1911,17 @@ export function InfoschematicDiagram({
           stroke={stroke}
           strokeWidth={2}
         />
+        {label ? (
+          <text
+            className="infoschematic-point-label"
+            dominantBaseline="middle"
+            textAnchor={label.anchor}
+            x={label.at.x}
+            y={label.at.y}
+          >
+            {label.text}
+          </text>
+        ) : null}
       </g>
     )
   })

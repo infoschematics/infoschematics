@@ -20,6 +20,10 @@ export const visualTokens = Object.freeze({
       gridMajorSize: 50,
       gridMinorStrokeWidth: 0.5,
       gridSize: 10,
+      pointLabelGap: 8,
+      /* A Point's label line box, stated here because both renderers place the line and neither measures it: the
+         gap clears the mark and half this height carries the text's own centre off the mark's axis. */
+      pointLabelHeight: 13,
       pointRadius: 6,
       /* What a pointer may press to take a Point, against the six units it paints. A Point is the smallest thing a
          Producer selects, and the paint is smaller than the grid it snaps to, so the target is stated separately

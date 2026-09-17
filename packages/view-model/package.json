@@ -50,6 +50,10 @@
       "types": "./dist/perimeter.d.ts",
       "import": "./dist/perimeter.js"
     },
+    "./point-layout": {
+      "types": "./dist/point-layout.d.ts",
+      "import": "./dist/point-layout.js"
+    },
     "./ports": {
       "types": "./dist/ports.d.ts",
       "import": "./dist/ports.js"

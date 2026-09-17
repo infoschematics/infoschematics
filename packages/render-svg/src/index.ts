@@ -10,6 +10,7 @@ import {
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
@@ -905,6 +906,36 @@ export const renderInfoschematicSvg = (
     )
   }
 
+  /*
+   * A Point's authored label, drawn beside the mark.
+   *
+   * The side comes from the Flows that leave the Point rather than from the author, so the text never lies over the
+   * route it terminates; `resolvePointLabel` decides it once for this renderer and for Canvas. Nothing is drawn where
+   * the label is blank, because a required field left empty has nothing to say.
+   */
+  const pointLabel = (point: (typeof points)[number], routes: typeof flows) => {
+    const placement = resolvePointLabel(point, routes)
+    if (!placement) return []
+    return [
+      line(
+        2,
+        'text',
+        [
+          ['class', 'infoschematic-point-label'],
+          ['dominant-baseline', 'middle'],
+          ['fill', blueprint ? canvasTokens.text.label : canvasTokens.output.text],
+          ['font-family', canvasTokens.text.bodyFamily],
+          ['font-size', canvasTokens.output.metadataFontSize],
+          ['font-weight', 500],
+          ['text-anchor', placement.anchor],
+          ['x', placement.at.x],
+          ['y', placement.at.y]
+        ],
+        xmlText(placement.text)
+      )
+    ]
+  }
+
   for (const point of points) {
     const dimmed = focusClass(point.id, focus?.artefacts, unfocused)
     body.push(
@@ -927,7 +958,8 @@ export const renderInfoschematicSvg = (
             ['r', canvasTokens.geometry.pointRadius],
             ['stroke', point.appearance?.color ?? canvasTokens.output.fallbackFamily],
             ['stroke-width', 2]
-          ])
+          ]),
+          ...pointLabel(point, flows)
         ]
       ).join('\n')
     )

@@ -20,7 +20,7 @@ Populate the structural `infoschematic` field:
 
 - `regions` establish background geography as [Regions](/docs/reference/vocabulary/#region);
 - `fabrics` and `cards` establish focusable [Fabric](/docs/reference/vocabulary/#fabric) and [Card](/docs/reference/vocabulary/#standard-card) artefacts;
-- `points` establish [Points](/docs/reference/vocabulary/#point), coordinate artefacts in their own right rather than parts of the Flows that meet them: each has an `id`, a position, and optional ports of its own, and a Point with no Flow attached is valid;
+- `points` establish [Points](/docs/reference/vocabulary/#point), coordinate artefacts in their own right rather than parts of the Flows that meet them: each has an `id`, a required `label`, a position, and optional ports of its own, and a Point with no Flow attached is valid. The label is drawn beside the mark, on a side no Flow leaves by, so write it for a reader of a still image rather than as a note to yourself;
 - `flows` connect Cards, Fabrics, and Points through named [ports](/docs/reference/vocabulary/#port);
 - `graphics` register [Graphics](/docs/reference/vocabulary/#graphic), visual material that Scenes may reveal;
 - `scopes` provide [Scope](/docs/reference/vocabulary/#scope) applicability, `domains` provide [Domain](/docs/reference/vocabulary/#domain) classification, and `flowFamilies` provide [Flow](/docs/reference/vocabulary/#flow) identity;

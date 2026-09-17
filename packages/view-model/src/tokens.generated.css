@@ -31,6 +31,8 @@
   --infoschematic-canvas-geometry-grid-major-stroke-width: 1;
   --infoschematic-canvas-geometry-grid-minor-stroke-width: 0.5;
   --infoschematic-canvas-geometry-grid-size: 10;
+  --infoschematic-canvas-geometry-point-label-gap: 8;
+  --infoschematic-canvas-geometry-point-label-height: 13;
   --infoschematic-canvas-geometry-point-radius: 6;
   --infoschematic-canvas-geometry-point-target-radius: 14;
   --infoschematic-canvas-geometry-region-label-character-width: 9.4;

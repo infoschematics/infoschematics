@@ -1227,6 +1227,19 @@
   pointer-events: none;
 }
 
+/* The authored label, placed by `resolvePointLabel` and never measured here: the side it lands on is decided from the
+   Flows that leave the Point, so this rule only says how the line reads. It takes no pointer events, because the text
+   sits outside the press target and a drag begun on the label would otherwise never reach the mark. */
+.infoschematic-point-label {
+  fill: var(--infoschematic-canvas-text-label);
+  font: 500 12px var(--infoschematic-canvas-text-body-family);
+  pointer-events: none;
+}
+
+.infoschematic-svg.surface-neutral .infoschematic-point-label {
+  fill: var(--infoschematic-canvas-output-text);
+}
+
 /* Selection, hover and being held are stated on the mark rather than as a ring around it: the Point is the smallest
    thing on the surface, and a second shape appearing beside it reads as another element rather than as this one
    answering. Each of these overrides the authored stroke, which arrives as a presentation attribute. */

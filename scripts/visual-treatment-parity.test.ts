@@ -447,7 +447,7 @@ describe('visual treatment renderer parity', () => {
     })
     const canvas = renderToStaticMarkup(createElement(Canvas, { config: pointed }))
     const svg = renderInfoschematicSvg(pointed)
-    const { pointRadius } = visualTokens.canvas.geometry
+    const { pointLabelGap, pointLabelHeight, pointRadius } = visualTokens.canvas.geometry
 
     for (const markup of [canvas, svg]) {
       expect(markup).toContain('data-artefact-kind="point"')
@@ -455,6 +455,16 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain('cy="90"')
       expect(markup).toContain(`r="${pointRadius}"`)
       expect(markup).toContain('stroke="#79c9ff"')
+    }
+
+    // The authored label is drawn, in both renderings, at the one place `resolvePointLabel` puts it. A Point with no
+    // Flow leaving it takes the first preferred side, so the text is centred below the mark, clear of its radius.
+    const below = 90 + pointRadius + pointLabelGap + pointLabelHeight / 2
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain('class="infoschematic-point-label"')
+      expect(markup).toContain('text-anchor="middle"')
+      expect(markup).toContain(`x="120" y="${below}"`)
+      expect(markup).toContain('>Junction</text>')
     }
   })
 

@@ -178,6 +178,18 @@ _Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run se
 
 _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers untouched short text, a width-aware wrap, a truncated compact label, a single over-long word, and fitted stereotype and description bands; `scripts/visual-treatment-parity.test.ts` compares the drawn strings across both renderers and asserts the authored text survives in the accessible name.
 
+### ROUTE-020 — A Point's label is placed clear of the routes that reach it
+
+View Model MUST resolve where a Point's authored label is drawn from that Point's own position and the Flows that reach it, and both renderers MUST consume that one resolution rather than place the text independently. The label MUST take a side no Flow leaves by, chosen in a stable preference order, so the text is never drawn over the route the Point terminates; where every side is taken a side MUST still be chosen rather than the label withheld, because a Point whose label is dropped is the defect this requirement exists to remove.
+
+The resolved position MUST be the line's visual centre, so a renderer draws it on a middle dominant baseline as ROUTE-016 already requires of Card text, and it MUST carry the anchor it is drawn with: beside the mark the position is the edge the text runs away from, not a centre, and converting one into the other would need a width. No text MUST be measured to place the label, for the reason ROUTE-018 gives. A blank label MUST draw nothing rather than an empty line box.
+
+_Conformance:_ conforming
+
+_Verify:_ author a Point reached by Flows from the left, the right and above, render it through both renderers and look at the result: the label MUST sit on the one remaining side, never across a route, and both renderings MUST put it in the same place. Render `apps/site/src/playground/seeds/media-pipeline.yaml`, whose `CAPTIONS` is left upward by its only Flow, and the label MUST read below the mark. Then blank that label and render again: nothing MUST be drawn where the text was. Falsified by a label crossing the route it terminates, by the two renderings disagreeing, or by an empty line box standing in for a blank label.
+
+_Evidence:_ `resolvePointLabel` and `pointLabelSide` in `packages/view-model/src/point-layout.ts`; `scripts/visual-treatment-parity.test.ts` compares the drawn label's position and anchor across both renderers.
+
 ## Quality properties
 
 ### ROUTE-018 — Region labels use deterministic shared metrics
