@@ -4,12 +4,12 @@ area: TOOL
 title: Unreachable direct-target reconciliation
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 2289978ff11cb88a744a6b5de5c4f69ee2b95da5
 created_at: 2026-09-16T14:55:00Z
-updated_at: 2026-09-17T08:25:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # Unreachable direct-target reconciliation

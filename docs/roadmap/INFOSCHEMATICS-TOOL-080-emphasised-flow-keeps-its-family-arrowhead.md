@@ -4,12 +4,12 @@ area: TOOL
 title: Emphasised Flow keeps its family arrowhead
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-16T23:20:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # Emphasised Flow keeps its family arrowhead

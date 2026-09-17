@@ -4,12 +4,12 @@ area: TOOL
 title: Studio announces nothing
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: ae031c1a73af64537727148ca61b35c0b779ea76
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-17T09:40:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # Studio announces nothing

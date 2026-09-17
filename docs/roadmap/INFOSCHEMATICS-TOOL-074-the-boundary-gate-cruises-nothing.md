@@ -4,12 +4,12 @@ area: TOOL
 title: The boundary gate cruises nothing
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T13:55:00Z
-updated_at: 2026-09-16T21:55:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # The boundary gate cruises nothing

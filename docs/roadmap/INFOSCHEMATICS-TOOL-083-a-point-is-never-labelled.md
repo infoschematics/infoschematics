@@ -4,12 +4,12 @@ area: TOOL
 title: A Point is never labelled
 theme: rendering
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 9176ca615a66de3d70cf72a48037c4bb74941aa3
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-17T07:35:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # A Point is never labelled

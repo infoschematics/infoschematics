@@ -31,3 +31,11 @@ policy: safe-local-v1
 | INFOSCHEMATICS-TOOL-080 | awaiting-review | `c730a548dc58ad720c0e67eb4d62e0f41c4c3029` | `89577b0aa0bb659a7bf116316d628163041f8212` | Step 3's parity case is test work the lead is writing; DYNAMIC-003 amended rather than the item closing as a deferral |
 | INFOSCHEMATICS-TOOL-072 | awaiting-review | `89577b0aa0bb659a7bf116316d628163041f8212` | `d9bec23f70c4630f0f8ab3f5c1e7398e14f506f8` | Step 4 waits on the fix the item's boundary reserves; step 1 overturned the item's recorded cause, so ROUTE-019 is recorded divergent rather than the fix landing |
 | INFOSCHEMATICS-TOOL-077 | awaiting-review | `d9bec23f70c4630f0f8ab3f5c1e7398e14f506f8` | `f87ae291e350d19baff8d76113dbea395e602182` | Step 3 found no requirement needing a `pending` state; the named-content floor moved 60 to 50 because the restatements it counted twice are gone |
+
+## Acceptance
+
+The owner approved every item carried to review on 2026-09-17, en masse and to be read later: "all awaiting review items can be approved, we will review everything en masse later". That is the consolidated closure this authorisation was written without, so each of the eleven items above moves from `awaiting-review` to `done` on the strength of it.
+
+Five items outside this batch were at review in the same sweep and are accepted with them: `INFOSCHEMATICS-TOOL-057`, `-078`, `-079`, `-082` and `-083`. Their acceptance rests on the same instruction, not on this authorisation's item set.
+
+No record is pruned. Pruning is separate authority and the records are what the later review reads.

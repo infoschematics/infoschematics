@@ -4,12 +4,12 @@ area: TOOL
 title: Verify lines restate evidence
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8c2a8c359ec0512820fe5b2bb2f7f0aeec879e4f
 created_at: 2026-09-16T14:40:00Z
-updated_at: 2026-09-17T00:05:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # Verify lines restate evidence

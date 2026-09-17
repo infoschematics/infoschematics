@@ -4,12 +4,12 @@ area: TOOL
 title: The Library cannot make a Point
 theme: design
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b5df2347d6684234664e77f18f24d0b02b29faba
 created_at: 2026-09-16T15:30:00Z
-updated_at: 2026-09-17T09:10:00Z
+updated_at: 2026-09-17T10:00:00Z
 ---
 
 # The Library cannot make a Point
