@@ -4,12 +4,14 @@ import {
   infoschematicDocumentModel
 } from '@infoschematics/domain-core'
 import {
+  DiagramAnnouncements,
   type DiagramViewportController,
   defineInfoschematicRenderers,
   elementEmphasisDuration,
   InfoschematicContext,
   InfoschematicDiagram,
   InfoschematicRenderersContext,
+  useDiagramAnnouncements,
   useInfoschematic
 } from '@infoschematics/view-canvas'
 import {
@@ -621,6 +623,9 @@ function AppContent({
     () => resolveDiagramDynamics(runtime.config.diagram.dynamics, dynamicOccurrence ? [dynamicOccurrence] : []),
     [dynamicOccurrence, runtime.config.diagram.dynamics]
   )
+  /* Studio draws what it resolved, so what it accepted is what is active: `Canvas`'s visibility reconciliation has no
+     counterpart here, and the announcement is the one thing Studio still owed a reader who cannot see the treatment. */
+  const announcements = useDiagramAnnouncements(resolvedDynamics.signals, resolvedDynamics.emphasis)
   useEffect(() => {
     if (!dynamicOccurrence || heldDynamic(dynamicOccurrence.dynamicId)) return
     const timer = window.setTimeout(() => setDynamicOccurrence(undefined), elementEmphasisDuration)
@@ -1124,6 +1129,11 @@ function AppContent({
                 visibleScopes={visibleScopes}
                 viewportControllerRef={diagramViewport}
                 viewportControls="external"
+              />
+              <DiagramAnnouncements
+                emphasis={announcements.emphasis}
+                flows={drawnFlows}
+                signals={announcements.signals}
               />
               {proposed ? (
                 <FamilyChoice

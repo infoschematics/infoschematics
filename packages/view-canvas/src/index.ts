@@ -15,6 +15,11 @@ export type {
   RuntimeThemeScene
 } from '@infoschematics/view-model/runtime'
 export type { FlowSignal } from '@infoschematics/view-model/signals'
+export {
+  DiagramAnnouncements,
+  type DiagramAnnouncementsProps,
+  useDiagramAnnouncements
+} from './announcements.tsx'
 export { Canvas, type CanvasProps } from './Canvas.tsx'
 export { elementEmphasisDuration } from './element-emphasis.ts'
 export { flowSignalDuration } from './flow-signals.ts'

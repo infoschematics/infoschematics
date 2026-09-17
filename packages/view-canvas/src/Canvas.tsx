@@ -8,6 +8,7 @@ import {
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { DiagramAnnouncements } from './announcements.tsx'
 import {
   advanceElementEmphasisAnnouncement,
   type ElementEmphasisAnnouncement,
@@ -200,36 +201,7 @@ function CanvasContent({
         signals={activeSignals}
         visibleScopes={scopes}
       />
-      <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {announcement ? `Signal update ${announcement.revision}. ` : ''}
-        {announcement?.signals
-          .map((signal) => {
-            const flow = shownFlows.find((candidate) => candidate.id === signal.flowId)
-            if (!flow) return null
-            const source = runtime.infoschematicEndpointLabels.get(flow.source) ?? flow.source
-            const target = runtime.infoschematicEndpointLabels.get(flow.target) ?? flow.target
-            return `Flow ${flow.code}, ${source} to ${target}, signalled.`
-          })
-          .filter(Boolean)
-          .join(' ')}
-      </p>
-      {/* The emphasis treatment is decorative; what a reader needs is the Dynamic's own meaning, stated once per
-          occurrence however many elements it touches. */}
-      <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {emphasisAnnouncement ? `Dynamic update ${emphasisAnnouncement.revision}. ` : ''}
-        {emphasisAnnouncement
-          ? [
-              ...new Set(
-                emphasisAnnouncement.emphasis.map(
-                  ({ dynamicId }) => declaredDynamics.find((dynamic) => dynamic.id === dynamicId)?.label
-                )
-              )
-            ]
-              .filter((label): label is string => label !== undefined)
-              .map((label) => `${label}.`)
-              .join(' ')
-          : ''}
-      </p>
+      <DiagramAnnouncements emphasis={emphasisAnnouncement} flows={shownFlows} signals={announcement} />
       {children}
     </section>
   )

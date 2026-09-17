@@ -528,6 +528,61 @@ test('Studio plays an authored Diagram Dynamic, replays it, and lets it retire',
   expect(emphasis()).toBeNull()
 })
 
+test('Studio announces a rehearsed Flow signal and a rehearsed Dynamic to assistive technology', async () => {
+  window.localStorage.clear()
+  const dynamicConfig = defineInfoschematicModel({
+    id: 'studio-announcements',
+    title: 'Studio announcements',
+    diagram: {
+      bounds: { height: 320, width: 640, x: 0, y: 0 },
+      gridSize: 10,
+      families: [{ id: 'request', label: 'Request', description: 'Requests', appearance: { color: '#7c3aed' } }],
+      cards: [
+        { id: 'CARD-A', label: 'Card A', bounds: { height: 50, width: 100, x: 80, y: 170 } },
+        { id: 'CARD-B', label: 'Card B', bounds: { height: 50, width: 100, x: 360, y: 170 } }
+      ],
+      flows: [
+        {
+          id: 'FLOW-A',
+          family: 'request',
+          source: { element: 'CARD-A', port: 'E1' },
+          target: { element: 'CARD-B', port: 'W1' }
+        }
+      ],
+      dynamics: [
+        { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['FLOW-A'] },
+        { id: 'attention', label: 'Card B needs attention', kind: 'emphasise-elements', elements: ['CARD-B'] }
+      ]
+    }
+  })
+
+  const { container } = await render(<Studio config={dynamicConfig} />)
+  const bank = container.querySelector('section[aria-label="Diagram Dynamics"]')
+  if (!bank) throw new Error('Studio did not render the Dynamics controls')
+
+  const play = (label: string) => {
+    const button = [...bank.querySelectorAll<HTMLButtonElement>('button')].find(
+      (candidate) => candidate.textContent === label
+    )
+    if (!button) throw new Error(`Studio has no control for ${label}`)
+    button.click()
+  }
+
+  /* Studio carries live regions of its own for Callout text and the source panel, so the announcement has to be read
+     from the ones beside the Diagram rather than from anything with `role="status"` on the page. */
+  const announcements = () => [...container.querySelectorAll<HTMLParagraphElement>('.infoschematic > p[role="status"]')]
+  const announced = () => announcements().map((region) => region.textContent ?? '')
+
+  expect(announcements()).toHaveLength(2)
+  for (const region of announcements()) expect(region.getAttribute('aria-live')).toBe('polite')
+
+  play('Record delivered')
+  await expect.poll(() => announced().join(' ')).toContain('Card A to Card B, signalled.')
+
+  play('Card B needs attention')
+  await expect.poll(() => announced().join(' ')).toContain('Card B needs attention.')
+})
+
 test('Studio rehearses a state-depicting Dynamic as a hold the Producer ends, not a pulse that ends itself', async () => {
   window.localStorage.clear()
   const heldConfig = defineInfoschematicModel({
