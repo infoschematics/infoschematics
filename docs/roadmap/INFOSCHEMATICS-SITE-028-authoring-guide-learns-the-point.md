@@ -109,7 +109,7 @@ All three pages were rendered at 1280×1100 against `bun run self:dev` on `http:
 
 The record's sixth step asked for the Points page to stop promising a drawn label and to say what a Producer can do. `INFOSCHEMATICS-TOOL-063`'s original deferral also wanted an interactive specimen on that page; one already exists (`aria-label="Point properties live example"`, with position and per-edge port controls), so nothing was added there. If that deferral meant a _different_ specimen — one demonstrating Design-mode interaction rather than property editing — it remains unaddressed and belongs in its own record.
 
-`INFOSCHEMATICS-TOOL-082` (a Library Point seed) and `INFOSCHEMATICS-TOOL-083` (a renderer for the Point label) stay open. The prose deliberately describes today's behaviour, so both will need a sentence changed here when they land — the authoring guide's "the Library seeds Cards, Fabrics, and Flows only", `studio.md`'s "there is no Point seed", and the component page's "no renderer draws it yet".
+`INFOSCHEMATICS-TOOL-082` (a Library Point seed) and `INFOSCHEMATICS-TOOL-083` (a renderer for the Point label) have since landed, and every sentence this record wrote about today's behaviour was corrected with them: the authoring guide's two Library lists and its Point paragraph, `studio.md`'s "there is no Point seed", and the component page's "no renderer draws it yet". The prose describing present behaviour was the right call and the cost was paid where it was predicted.
 
 ### Post-change review
 

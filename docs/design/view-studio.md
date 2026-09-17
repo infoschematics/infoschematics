@@ -100,7 +100,7 @@ Creation starts with a valid minimal artefact and then exposes its editable prop
 
 ## Library
 
-The Library offers reusable Card, Fabric and Flow starting points, not linked instances. Instantiation deep-copies the serialisable seed, allocates a fresh `id` and `code`, applies the current Scope or selected Flow endpoints and produces the same create operation as any other Design creation. Template metadata and provenance never enter `InfoschematicConfig`.
+The Library offers reusable Card, Fabric, Flow and Point starting points, not linked instances. Instantiation deep-copies the serialisable seed, allocates a fresh `id` and `code`, applies the current Scope or selected Flow endpoints and produces the same create operation as any other Design creation. Template metadata and provenance never enter `InfoschematicConfig`.
 
 A Flow template is available only when the Producer has selected two valid, distinct ports and a Flow family. Its copied route begins and ends at those ports and is orthogonal before it enters the draft.
 

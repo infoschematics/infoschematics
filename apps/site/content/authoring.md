@@ -175,7 +175,7 @@ Ensure the Flow's label, direction, endpoints, and surrounding explanation make 
 
 Open Design when you want the complete authored Infoschematic rather than the Audience's current Scope and Flow-family projection. Draft creates, movement, resize, property edits, within-kind ordering and safe removals appear immediately, but remain serialisable operations until the change set is applied to authored source.
 
-The Library provides Card, Fabric and Flow starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
+The Library provides Card, Fabric, Flow and Point starting points. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, Flow family and endpoints. The resulting authored value contains no template link or provenance, so later edits affect only that instance.
 
 Removing a Card, Fabric, or Point also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
 

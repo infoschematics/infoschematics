@@ -130,9 +130,9 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
           <p>
             A Point is a coordinate artefact in its own right. It is positioned rather than boxed, carries ports of its
             own so several Flows may meet it, and is editable in Design: selected, dragged, nudged by key, or given an
-            exact coordinate. A Point is authored in source rather than inserted from the Library. Its{' '}
-            <code>label</code> is authored but no renderer draws it yet. Start, end, junction, anchor, and hidden are
-            future role semantics.
+            exact coordinate. It is authored in source or seeded from the Library like any other artefact. Its{' '}
+            <code>label</code> is required, and both renderers draw it beside the mark on a side no Flow leaves by.
+            Start, end, junction, anchor, and hidden are future role semantics.
           </p>
         )}
         {component.id === 'graphic' && (
