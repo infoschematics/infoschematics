@@ -7,6 +7,7 @@ import {
 } from '@infoschematics/domain-core'
 import { blankInfoschematic } from '@infoschematics/is-blank'
 import { homepageInfoschematic } from '@infoschematics/is-infoschematics'
+import { showcaseExample } from '@infoschematics/is-showcase'
 import { Studio, type StudioDocumentChange, type StudioDocumentReplacement } from '@infoschematics/view-studio'
 import '@infoschematics/view-studio/styles.css'
 import { useState } from 'react'
@@ -15,7 +16,7 @@ import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
-export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'source-to-sink'
+export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'showcase' | 'source-to-sink'
 
 /** A preset replaces the authored document while its route remains Site-owned. */
 export const presets: readonly {
@@ -37,6 +38,11 @@ export const presets: readonly {
     key: 'explained',
     label: 'An Infoschematic explained',
     document: serialiseInfoschematicYaml(homepageInfoschematic)
+  },
+  {
+    key: 'showcase',
+    label: 'Every capability',
+    document: serialiseInfoschematicYaml(showcaseExample)
   },
   {
     key: 'blank',

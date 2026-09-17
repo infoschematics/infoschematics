@@ -143,6 +143,7 @@
         "apps/site/src/**",
         "bun.lock",
         "docs/**",
+        "examples/*/*.yaml",
         "examples/*/package.json",
         "examples/*/src/**",
         "package.json",

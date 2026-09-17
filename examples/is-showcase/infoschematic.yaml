@@ -1,0 +1,411 @@
+id: showcase
+title: Every capability, in one Infoschematic
+subtitle: one document that exercises every authored notation
+description: >-
+  A reference document rather than a real system. Each band shows one concern, so every authored notation the contract
+  offers is visible in one place: Regions and their frames, standard Cards, an Adapter Card and a Wrapper Card, a
+  Fabric, Points, every Flow treatment, a Graphic overlay, Scopes, a Story with Callouts, Diagram Dynamics, and a
+  Specification group.
+diagram:
+  bounds: 0 0 1680 1180
+  gridSize: 20
+  appearance:
+    surface: blueprint
+    grid: major-plus-minor
+    card:
+      compact: true
+      identity: true
+      stereotype: true
+      description: true
+  collections:
+    - id: capture
+      label: Capture
+      description: Where material enters the system
+      appearance:
+        color: "#9673a6"
+        fill: "#0d1b2a"
+    - id: transform
+      label: Transform
+      description: Where material is reshaped
+      color: "#6c8ebf"
+      fill: "#0d1b2a"
+      icon: transform
+    - id: deliver
+      label: Deliver
+      description: Where material leaves for an audience
+      appearance:
+        color: "#82b366"
+        fill: "#0d1b2a"
+  families:
+    - id: stream
+      label: Carries media
+      description: A continuous stream of material
+      color: "#79c9ff"
+      fill: "#0d2436"
+      icon: stream
+      line: solid
+    - id: control
+      label: Controls
+      description: An instruction rather than material
+      appearance:
+        color: "#f5a742"
+        fill: "#2a1f0d"
+        icon: control
+        line: dashed
+  regions:
+    - id: REG-STRUCTURE
+      label: Structure
+      bounds: 40 80 760 280
+      appearance:
+        fill: "#102338"
+        cornerRadius: 12
+        frame:
+          style: solid
+        label:
+          placement: north-west
+          mount: boundary
+          offset: 12
+    - id: REG-ADAPT
+      label: Adaptation
+      bounds: 840 80 800 280
+      appearance:
+        cornerRadius: 24
+        frame:
+          style: dashed
+          opacity: 0.6
+        label:
+          placement: north
+          mount: internal
+    - id: REG-SUBSTRATE
+      label: Substrate
+      bounds: 40 420 1600 280
+      appearance:
+        frame:
+          style: dotted
+          opacity: 0.8
+        label:
+          placement: south-west
+          mount: boundary
+    - id: REG-EDGE
+      label: Edges
+      bounds: 40 760 1600 280
+      appearance:
+        frame:
+          style: solid
+          opacity: 0.4
+        label:
+          placement: south-east
+          mount: internal
+  cards:
+    - id: CARD-01
+      label: Ingest
+      description: Accepts material from outside the system
+      stereotype: Capture
+      collection: capture
+      bounds: 80 140 220 120
+      ports: 1
+    - id: CARD-02
+      label: Transform
+      description: Reshapes material for everything downstream
+      stereotype: Transform
+      collection: transform
+      bounds: 500 140 220 120
+      ports:
+        north: 1
+        east: 1
+        south: 1
+        west: 1
+    - id: CARD-03
+      label: Legacy encoder
+      description: Speaks an older interface than its neighbours
+      stereotype: Encode
+      collection: transform
+      bounds: 880 140 220 160
+      ports: 1 1
+    - id: ADPT-01
+      label: Encoder adapter
+      description: Presents the legacy encoder through the current interface
+      stereotype: Adapter
+      collection: transform
+      adapts: CARD-03
+      bounds: 860 220 260 120
+      ports: 1
+    - id: CARD-04
+      label: Modern sink
+      description: Accepts material on the current interface
+      stereotype: Deliver
+      collection: deliver
+      bounds: 1360 140 220 160
+      ports: 1 1 1 1
+    - id: WRAP-01
+      label: Sink supervision
+      description: Holds the sink and reports on it
+      stereotype: Wrapper
+      collection: deliver
+      wraps: CARD-04
+      bounds: 1340 220 260 120
+      ports: 1
+    - id: CARD-05
+      label: Router
+      description: Chooses where material goes next
+      stereotype: Route
+      collection: deliver
+      bounds: 700 840 280 120
+      ports: 1
+  fabrics:
+    - id: FAB-01
+      label: Message bus
+      description: A shared substrate every stage can reach
+      kind: message-bus
+      bounds: 120 500 1440 120
+      ports:
+        north: 1
+        east: 1
+        south: 1
+        west: 1
+      properties:
+        topics: 12
+        durable: true
+      appearance:
+        color: "#4d7ea8"
+        fill: "#0a1524"
+        icon: bus
+    - id: FAB-02
+      label: Object store
+      description: A second substrate, authored through the unwrapped keys
+      kind: object-store
+      bounds: 120 630 400 60
+      ports: 1
+      properties:
+        retention: 90 days
+      color: "#6c8ebf"
+      fill: "#0a1524"
+      icon: store
+  points:
+    - id: PT-01
+      label: Camera
+      at: 120 900
+      ports: 1
+      color: "#b85450"
+      fill: "#2a1416"
+      icon: source
+    - id: PT-02
+      label: Archive
+      at: 1560 900
+      ports: 1
+      appearance:
+        color: "#82b366"
+        fill: "#16240f"
+        icon: sink
+  flows:
+    - id: FLOW-01
+      family: stream
+      link: CARD-01 E1 -> CARD-02 W1
+      labelAt: 0.5
+    - id: FLOW-02
+      family: control
+      source:
+        element: ADPT-01
+        port: E1
+      target:
+        element: WRAP-01
+        port: W1
+      direction: forward
+      route:
+        labelAt: 0.4
+    - id: FLOW-03
+      family: stream
+      link: CARD-02 S1 -> FAB-01 N1
+      waypoints: 610,380 840,380
+    - id: FLOW-04
+      family: stream
+      source:
+        element: PT-01
+        port: E1
+      target:
+        element: CARD-05
+        port: W1
+    - id: FLOW-05
+      family: stream
+      link: CARD-05 E1 <-> PT-02 W1
+      waypoints:
+        - x: 1200
+          y: 900
+      appearance:
+        line: dashed
+    - id: FLOW-06
+      family: control
+      line: dashed
+      link: FAB-01 S1 -> CARD-05 N1
+  overlays:
+    - id: OVL-01
+      label: Reading order
+      description: A host-supplied Graphic drawn over the Diagram
+      kind: annotation
+      bounds: 1180 1060 460 100
+      properties:
+        text: Structure, then adaptation, then the substrate everything shares.
+        tone: quiet
+  dynamics:
+    - id: DYN-SIGNAL
+      label: Material moves through the pipeline
+      description: A finite signal carried over the authored Flows.
+      kind: signal-flow
+      flows:
+        - FLOW-01
+        - FLOW-03
+    - id: DYN-EVENT
+      label: Transform accepted a revision
+      description: Something happened at one Card, reported once.
+      kind: emphasise-elements
+      elements:
+        - CARD-02
+      depicts: event
+    - id: DYN-STATE
+      label: The bus is degraded
+      description: A state that lasts until the host withdraws it.
+      kind: emphasise-elements
+      elements:
+        - FAB-01
+      depicts: state
+  calloutPositions:
+    - 120 1060
+    - 1180 1060
+scopes:
+  - id: SCOPE-PIPELINE
+    label: Pipeline
+    description: Everything material passes through
+    icon: pipeline
+    elements:
+      - CARD-01
+      - CARD-02
+      - CARD-03
+      - ADPT-01
+      - CARD-04
+      - WRAP-01
+      - CARD-05
+      - FAB-01
+  - id: SCOPE-EDGE
+    label: Edges
+    description: Where the Diagram meets what is outside it
+    appearance:
+      icon: edge
+    elements:
+      - PT-01
+      - PT-02
+      - CARD-05
+      - FAB-01
+sequences:
+  - id: STORY-01
+    label: How this document is arranged
+    description: Three Scenes, each naming what it shows and why.
+    presentation:
+      display: expanded
+      timed: true
+      callouts: true
+    scenes:
+      - id: SCENE-01
+        label: Structure first
+        description: The two Cards every other band refers back to.
+        duration: 6
+        visibility:
+          show:
+            scopes:
+              - SCOPE-PIPELINE
+            elements:
+              - PT-01
+              - PT-02
+        focus:
+          elements:
+            - CARD-01
+            - CARD-02
+        callout:
+          title: Structure
+          body: A Card is a placed component. Its collection carries the colour, and its stereotype says what kind of thing it is.
+          takeaways:
+            - Collections carry identity
+            - Stereotypes carry kind
+          placement:
+            element: CARD-01
+      - id: SCENE-02
+        label: Adaptation
+        description: An Adapter Card and a Wrapper Card, both clasping the Card they hold.
+        duration: 5
+        visibility:
+          hide:
+            elements:
+              - PT-01
+              - PT-02
+            scopes:
+              - SCOPE-EDGE
+        focus:
+          scopes:
+            - SCOPE-PIPELINE
+        callout:
+          body: "An Adapter Card has no box of its own: it is drawn from the Card it adapts."
+          kind: annotation
+          properties:
+            tone: quiet
+          placement:
+            at: 1180 1060
+      - id: SCENE-03
+        label: Edges and substrate
+        description: Points enter and leave, and the Fabric everything shares.
+        duration: 4
+        visibility:
+          show:
+            scopes:
+              - SCOPE-EDGE
+        focus:
+          elements:
+            - FAB-01
+            - PT-01
+            - PT-02
+        callout:
+          title: Edges
+          body: A Point is a lightweight source or sink. A Fabric is a connectable plane rather than a component.
+          takeaways:
+            - Points are where Flows leave the Diagram
+  - id: STORY-02
+    label: Adaptation on its own
+    description: One Scene, presented collapsed and without Callouts, for a reader who only wants the clasp.
+    presentation:
+      display: collapsed
+      timed: false
+      callouts: false
+    scenes:
+      - id: SCENE-04
+        label: The clasp
+        description: The Adapter Card and the Card it holds, with nothing else drawn.
+        focus:
+          elements:
+            - CARD-03
+            - ADPT-01
+specifications:
+  - id: SPEC-GROUP-01
+    label: Interfaces
+    description: What the pipeline promises, and which elements realise it.
+    specifications:
+      - id: SPEC-01
+        label: Media interchange
+        description: The interface the modern sink accepts material on.
+        owner: Platform
+        documents:
+          - code: MI-1
+            href: https://example.invalid/media-interchange
+            version: "2.1"
+        interfaces:
+          - id: IFACE-01
+            label: Accept material
+            description: One operation, realised by the transform stage.
+            operations:
+              - id: OP-01
+                label: Submit segment
+                description: One segment of material, accepted or refused whole.
+                realisedBy:
+                  - FLOW-01
+            realisedBy:
+              - CARD-02
+        realisedBy:
+          - CARD-01
+          - CARD-04

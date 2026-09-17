@@ -97,11 +97,21 @@ describe('Playground', () => {
     expect(documentForPreset('explained')).toContain('What makes an Infoschematic')
   })
 
+  it('reaches the capability showcase, which is the whole reason it is published', () => {
+    const page = renderToStaticMarkup(<Playground preset="showcase" />)
+
+    expect(page).toContain('<option value="showcase" selected="">Every capability</option>')
+    // The notation no other preset carries: the Adapter Card's clasp and the Fabric beneath it.
+    expect(documentForPreset('showcase')).toContain('adapts: CARD-03')
+    expect(documentForPreset('showcase')).toContain('key: message-bus')
+  })
+
   it('selects a preset from the query string and refuses one it does not know', () => {
     expect(presetFromSearch('?preset=source-to-sink')).toBe('source-to-sink')
     expect(presetFromSearch('?preset=media-pipeline')).toBe('media-pipeline')
     expect(presetFromSearch('?preset=explained')).toBe('explained')
     expect(presetFromSearch('?preset=blank')).toBe('blank')
+    expect(presetFromSearch('?preset=showcase')).toBe('showcase')
     expect(presetFromSearch('?preset=system')).toBe('explained')
     expect(presetFromSearch('?preset=format-parity')).toBe('source-to-sink')
     expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()

@@ -174,6 +174,18 @@ _Verify:_ `packages/view-studio/src/app/App.browser.test.tsx` submits invalid an
 
 _Evidence:_ `useDocumentTimeline` in `packages/view-studio/src/app/editor/document-history.ts` parses replacements through Domain Core and invokes the host only for a validated document.
 
+### AUTHOR-017 — Every authored capability is shown by a published example
+
+Every capability the document contract offers MUST be exercised by an authored [Infoschematic](../reference/vocabulary.md#infoschematic) published from this repository. A capability added to the contract MUST NOT be reachable only by hand-editing a document: the contract's surface and the examples that demonstrate it MUST be kept in step mechanically, because the alternative is a notation nobody can see without first inventing a document that carries it.
+
+Measured before this requirement existed, no authored document anywhere in the repository carried a [Fabric](../reference/vocabulary.md#fabric), an [Adapter Card](../reference/vocabulary.md#adapter-card), a Wrapper Card, an [Overlay](../reference/vocabulary.md#overlay), a bidirectional [Flow](../reference/vocabulary.md#flow), a Specification group or an `icon`, so trying any of them out meant editing a real diagram to find out what it drew.
+
+_Conformance:_ conforming
+
+_Verify:_ derive the capability list from the contract rather than a list kept beside the check — every property the authored schema declares, at its own path, and every value its choices admit — then assert the published showcase exercises each. Prove the check is not vacuous in both halves: remove `adapts:` from the showcase and the property half MUST fail; change its one dotted Region frame to dashed and the value half MUST fail. A derivation that resolved nothing would satisfy every assertion after it, so the floors on what it discovered MUST be asserted first.
+
+_Evidence:_ `scripts/example-capability-coverage.test.ts` walks the JSON Schema projected from `infoschematicSchema` in `packages/domain-core/src/schema.ts` and measures `examples/is-showcase/infoschematic.yaml` against it, in both its authored YAML and its canonical model; `examples/is-showcase/src/index.test.ts` covers what that document is for.
+
 ## Gaps
 
 - `AUTHOR-005`'s composition with `ROUTE-001` is stated as `COMPOSE-003` in [Composition](composition.md): a document this area accepts can still hold geometry the renderer refuses, and today that refusal arrives as a thrown error rather than an issue.

@@ -1,0 +1,33 @@
+{
+  "dependencies": {
+    "@infoschematics/domain-core": "0.1.0"
+  },
+  "description": "An authored Infoschematic that exercises every capability the document contract offers.",
+  "devDependencies": {
+    "@infoschematics/cli": "0.1.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "infoschematics": {
+    "examples": [
+      {
+        "export": "showcaseExample",
+        "id": "showcase",
+        "source": "infoschematic.yaml",
+        "title": "Every capability, in one Infoschematic"
+      }
+    ]
+  },
+  "license": "MIT",
+  "name": "@infoschematics/is-showcase",
+  "private": true,
+  "scripts": {
+    "check": "infoschematics render infoschematic.yaml --output /dev/null",
+    "render": "infoschematics render infoschematic.yaml --output infoschematic.svg",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "type": "module",
+  "version": "0.1.0"
+}
