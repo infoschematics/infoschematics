@@ -134,15 +134,15 @@ _Evidence:_ `packages/view-model/src/artefact-draft.test.ts` covers authored, Ad
 
 ### EDIT-013 — Library creation produces independent authored values
 
-The Design Library MUST provide Card, Fabric and Flow templates. Instantiating a template MUST deep-copy its serialisable seed, allocate a fresh stable `id` and `code`, and create one ordinary typed operation. The created value MUST NOT contain Library metadata, template identity or provenance.
+The Design Library MUST provide Card, Fabric, Flow and Point templates. Instantiating a template MUST deep-copy its serialisable seed, allocate a fresh stable `id` and `code`, and create one ordinary typed operation. The created value MUST NOT contain Library metadata, template identity or provenance.
 
-Card and Fabric creation MUST apply the current Scope and requested Canvas placement. Flow creation MUST require two valid, distinct endpoints and a selected Flow family, and MUST create an orthogonal route whose terminal points match the selected ports. Repeated instantiation MUST return independent nested values.
+Card and Fabric creation MUST apply the current Scope and requested Canvas placement. Point creation MUST apply the current Scope and take the requested Canvas placement as its coordinate; the seed MUST carry no extent, and a created Point MUST stand alone rather than requiring a Flow to complete it, as `ADR-INFOSCHEMATICS-032` records. Flow creation MUST require two valid, distinct endpoints and a selected Flow family, and MUST create an orthogonal route whose terminal points match the selected ports. Repeated instantiation MUST return independent nested values.
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-studio test`, whose Library cases cover the seed copy, fresh `id` and `code` allocation, and the operation shape. Then instantiate one template twice and mutate a nested value in the first instance: the second MUST be unaffected, and neither created value MUST carry Library metadata, template identity or provenance. Instantiate a Flow template with fewer than two distinct endpoints, or without a Flow family, and creation MUST refuse.
+_Verify:_ run `bun run --filter=@infoschematics/view-studio test`, whose Library cases cover the seed copy, fresh `id` and `code` allocation, and the operation shape. Then instantiate one template twice and mutate a nested value in the first instance: the second MUST be unaffected, and neither created value MUST carry Library metadata, template identity or provenance. Instantiate a Flow template with fewer than two distinct endpoints, or without a Flow family, and creation MUST refuse. Delete the Point template from `libraryTemplates` in `packages/view-studio/src/app/editor/library.ts` and a Point creation case MUST fail, so a suite that only exercises the other three kinds is not read as covering this one.
 
-_Evidence:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/view-studio/src/app/editor/artefact-factories.test.ts` and `packages/view-studio/src/app/editor/LibraryPanel.test.tsx`.
+_Evidence:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/view-studio/src/app/editor/artefact-factories.test.ts` and `packages/view-studio/src/app/editor/LibraryPanel.test.tsx`. The Point template's own branch is `instantiateLibraryTemplate`'s coordinate case in `packages/view-studio/src/app/editor/library.ts`; the Library cases do not reach it yet, so the fourth kind rests on the implementation rather than on a case.
 
 ### EDIT-014 — Design previews the complete materialised draft
 
@@ -206,7 +206,7 @@ _Evidence:_ coordinate conversion in `packages/view-canvas/src/InfoschematicDiag
 
 ### EDIT-019 — Created artefacts enter the complete editing lifecycle
 
-Once created, a Card, Fabric or Flow MUST support every operation its authored counterpart supports: selection, movement or route editing, property editing, attachment changes, removal, undo, redo, discard and deterministic change consolidation. Dependent geometry MUST resolve created identities and ports without relying on a register built only from authored configuration. Creating and then removing an artefact in one draft MUST leave no orphaned dependent operation.
+Once created, a Card, Fabric, Flow or Point MUST support every operation its authored counterpart supports: selection, movement or route editing, property editing, attachment changes, removal, undo, redo, discard and deterministic change consolidation. Dependent geometry MUST resolve created identities and ports without relying on a register built only from authored configuration. Creating and then removing an artefact in one draft MUST leave no orphaned dependent operation.
 
 _Conformance:_ conforming
 

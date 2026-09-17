@@ -86,11 +86,10 @@ const submitOperation = (
     case 'flow':
       editor.createArtefact('flow', operation.value as ArtefactValueByKind['flow'], operation.at)
       break
+    case 'point':
+      editor.createArtefact('point', operation.value as ArtefactValueByKind['point'], operation.at)
+      break
   }
-  /* No `point` case belongs here: neither the factory nor the library can produce one, so the operation type
-     cannot name a Point and the compiler rejects a branch for it. A Point exists because a Flow needs somewhere
-     to enter or leave, which is a judgement about the Flow rather than a shape dropped on the canvas -
-     `ADR-INFOSCHEMATICS-031` records the choice. */
 }
 
 export function ArtefactControls({ editor, factoryContext, libraryContext }: ArtefactControlsProps) {

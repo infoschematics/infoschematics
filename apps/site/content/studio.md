@@ -17,7 +17,7 @@ Clicking an artefact selects it; clicking the empty canvas or pressing Escape cl
 
 ## The Library
 
-The Library offers reusable Card, Fabric, and Flow starting points — seeds, not linked instances. There is no Point seed: a Point is authored in source, and Studio moves and removes one rather than creating it. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, or endpoints. The result carries no template link, so later edits affect only that instance.
+The Library offers reusable Card, Fabric, Flow, and Point starting points — seeds, not linked instances. The Point seed is the one that drops a bare coordinate: it has no extent to place, and the Point it leaves means nothing until a Flow is drawn to it. Each insertion deep-copies the template, assigns a fresh `id` and `code`, and applies current placement, Scope, or endpoints. The result carries no template link, so later edits affect only that instance.
 
 ## Points
 

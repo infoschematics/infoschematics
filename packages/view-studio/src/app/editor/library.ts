@@ -2,6 +2,7 @@ import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { FabricConfig } from '@infoschematics/domain-model/fabric'
 import type { FlowConfig } from '@infoschematics/domain-model/flow'
 import type { Box, Point } from '@infoschematics/domain-model/geometry'
+import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { PortCounts, PortId } from '@infoschematics/domain-model/ports'
 import {
   type ArtefactKind,
@@ -44,9 +45,21 @@ export type FlowTemplateSeed = Readonly<{
   value: Readonly<Pick<FlowConfig, 'bidirectional' | 'dashed' | 'operation'>>
 }>
 
+/**
+ * A Point seed carries no extent.
+ *
+ * `PointConfig` is a label, a code, a Scope and a coordinate, so a template has nothing to seed but the label and the
+ * ports the Point offers. Where a box seed states a default `width` and `height` for placement to act on, a coordinate
+ * seed *is* its placement: `LibraryContext.box` supplies the position directly.
+ */
+export type PointTemplateSeed = Readonly<{
+  kind: 'point'
+  value: Readonly<Pick<PointConfig, 'label'> & { ports?: PortCounts }>
+}>
+
 export type LibraryTemplate = Readonly<{
   metadata: LibraryTemplateMetadata
-  seed: CardTemplateSeed | FabricTemplateSeed | FlowTemplateSeed
+  seed: CardTemplateSeed | FabricTemplateSeed | FlowTemplateSeed | PointTemplateSeed
 }>
 
 export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
@@ -109,11 +122,24 @@ export const libraryTemplates: readonly LibraryTemplate[] = Object.freeze([
       label: 'Directed flow'
     },
     seed: { kind: 'flow', value: { bidirectional: false, dashed: false } }
+  },
+  {
+    metadata: {
+      description: 'A coordinate a Flow can enter or leave the Diagram by, with one port on each side.',
+      key: 'entry-point',
+      label: 'Entry point'
+    },
+    seed: {
+      kind: 'point',
+      value: { label: 'New point', ports: { east: 1, north: 1, south: 1, west: 1 } }
+    }
   }
 ])
 
 export type LibraryIdentity = Readonly<{ code: string; id: string }>
-export type LibraryIdentityAllocator = (kind: Extract<ArtefactKind, 'card' | 'fabric' | 'flow'>) => LibraryIdentity
+export type LibraryIdentityAllocator = (
+  kind: Extract<ArtefactKind, 'card' | 'fabric' | 'flow' | 'point'>
+) => LibraryIdentity
 
 export type LibraryEndpoint = Readonly<{
   component: string
@@ -140,6 +166,7 @@ export type LibraryCreateOperation =
   | CreateArtefactOperation<'card'>
   | CreateArtefactOperation<'fabric'>
   | CreateArtefactOperation<'flow'>
+  | CreateArtefactOperation<'point'>
 
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 const finitePoint = (point: Point) => Number.isFinite(point.x) && Number.isFinite(point.y)
@@ -196,8 +223,10 @@ export const instantiateLibraryTemplate = (
   if (!Number.isFinite(context.at) || !Number.isFinite(context.box.x) || !Number.isFinite(context.box.y))
     return undefined
   if (template.seed.kind === 'flow' ? !isValidLibraryFlowContext(context.flow) : !context.scope.trim()) return undefined
+  /* Stated over the two box kinds rather than as "not a flow": a Point is not a flow either, and it has no box for
+     this guard to read. Naming them keeps the box path's width and height guarantee exactly as strict as it was. */
   if (
-    template.seed.kind !== 'flow' &&
+    (template.seed.kind === 'card' || template.seed.kind === 'fabric') &&
     (!Number.isFinite(template.seed.value.placement.box.width) ||
       template.seed.value.placement.box.width <= 0 ||
       !Number.isFinite(template.seed.value.placement.box.height) ||
@@ -221,6 +250,13 @@ export const instantiateLibraryTemplate = (
       targetPort: flow.target.port
     }
     const target = defineArtefactSelection({ code: identity.code, geometry: 'route', id: identity.id, kind: 'flow' })
+    return createArtefactOperation(target, value, context.at)
+  }
+
+  if (template.seed.kind === 'point') {
+    const seed = copy(template.seed.value)
+    const value: PointConfig = { ...seed, ...identity, point: copy(context.box), scopes: [context.scope] }
+    const target = defineArtefactSelection({ code: identity.code, geometry: 'point', id: identity.id, kind: 'point' })
     return createArtefactOperation(target, value, context.at)
   }
 
@@ -255,7 +291,7 @@ export const createLibraryIdentityAllocator = (
   const codes = new Set(used.codes)
   const ids = new Set(used.ids)
   let sequence = 0
-  const prefix = { card: 'CRD', fabric: 'FAB', flow: 'FLW' } as const
+  const prefix = { card: 'CRD', fabric: 'FAB', flow: 'FLW', point: 'PNT' } as const
 
   return (kind) => {
     let identity: LibraryIdentity

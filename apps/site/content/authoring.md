@@ -179,7 +179,7 @@ The Library provides Card, Fabric and Flow starting points. Each insertion deep-
 
 Removing a Card, Fabric, or Point also removes Flows that would lose an endpoint; removing a Region removes only itself. Resolve a Sequence Scene's direct Overlay reference before removing that Overlay through Studio.
 
-A Point is edited on the Diagram like any other artefact: select it, drag it, nudge it with the arrow keys, or type an exact coordinate. It has no box to resize, because its geometry is a coordinate rather than a rectangle. What a Producer cannot do is make one — the Library seeds Cards, Fabrics, and Flows only — so a new Point is authored in source and then moved or removed on the surface.
+A Point is edited on the Diagram like any other artefact: select it, drag it, nudge it with the arrow keys, or type an exact coordinate. It has no box to resize, because its geometry is a coordinate rather than a rectangle. A Producer can also make one: the Library seeds a Point beside its Card, Fabric, and Flow templates, and the Point it drops carries no Flow until one is drawn to it.
 
 An artefact marked for removal stays visible, selectable and visibly pending so you can review or lift the mark before applying it.
 
