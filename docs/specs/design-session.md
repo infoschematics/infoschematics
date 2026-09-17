@@ -243,3 +243,7 @@ _Conformance:_ conforming
 _Verify:_ run the Chromium host-fixture suite; it fails when identity, naming, or appearance leaks across instances. Confirm the appearance half by removing the per-mount prefix from `InfoschematicDiagram`: the second instance then reads the first instance's Flow-family colour off the arrowhead it resolves, and the finer-gridded Diagram reads the coarser Diagram's tile pitch.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.host.browser.test.tsx` mounts two deliberately code-colliding documents in one host, exercises per-instance hover and selection, unmounts and remounts one instance while the other stays live, and asserts appearance per instance: the arrowhead each Flow resolves is defined inside its own instance and carries that instance's family colour, and each authored grid resolves to a pattern inside its own instance at its own authored pitch. `packages/view-canvas/src/InfoschematicDiagram.resources.test.tsx` covers disjoint identifiers across two Canvases in one tree, a closed reference loop, and the host-supplied prefix.
+
+## Gaps
+
+- Three compositions this area takes part in are recorded in [Composition](composition.md): `DESIGN-015` with `APPEAR-009` as `COMPOSE-001`, and `DESIGN-017` with `STATIC-015` enumerated but left with the divergence `INFOSCHEMATICS-TOOL-058` tracks. `DESIGN-020`'s clause about a closing interaction layer holds on the rendered surface but still has no case of its own in `DESIGN-015`'s matrix.

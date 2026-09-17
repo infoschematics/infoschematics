@@ -1,0 +1,79 @@
+# Composition — COMPOSE
+
+What two features must still promise when they are used together. Part of the [Specifications corpus](index.md).
+
+Every requirement here names the two owning requirements whose composition it states, and states only the property that emerges between them — never what either feature promises alone. [`ADR-INFOSCHEMATICS-034`](../decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) records why a composition is a requirement of its own rather than a clause in the newer feature, and enumerates the contended resources these pairs are derived from.
+
+## User-observable behaviours
+
+### COMPOSE-001 — A Diagram treatment reaches every host that draws it
+
+A visual treatment declared for an [Infoschematic](../reference/vocabulary.md#infoschematic) element MUST resolve on every host that mounts the interactive Diagram, whatever else that host's stylesheet chain imports. A host stylesheet MUST NOT redeclare a selector its own import chain already gives it, because the second declaration wins silently and only in that host.
+
+`APPEAR-009` promises that shared treatment comes from one generated token set, and `DESIGN-015` promises the editor is tested as rendered. Neither promises that the treatment survives arriving at a second host, which is the composition: a rule written once in Canvas is drawn by Canvas, by Present through Canvas, and by Studio, which mounts the Diagram without mounting Canvas at all.
+
+_Conformance:_ conforming
+
+_Verify:_ assert the treatment through the host's own stylesheet rather than Canvas's, then reintroduce the collision: redeclare one Canvas selector in Studio's stylesheet and both halves MUST fail — the shadowing check on the selector, and the Studio treatment case on the resolved value. A case that reads the treatment from Canvas's stylesheet passes whatever the host does and proves nothing.
+
+_Evidence:_ `scripts/stylesheet-shadowing.test.ts` fails when a stylesheet redeclares a selector its import chain already gives it, comparing one selector at a time with combinators flattened; `packages/view-studio/src/app/App.treatments.browser.test.tsx` asserts Canvas-owned treatments through Studio's own stylesheet, which is the only place the original defect was visible. The treatment rules live in `packages/view-canvas/src/styles.css` and the host chain that could shadow them in `packages/view-studio/src/styles.css`.
+
+### COMPOSE-002 — A committed geometry edit leaves the document renderable
+
+Where a geometry edit moves an artefact a [Flow](../reference/vocabulary.md#flow) is attached to, the [route](../reference/vocabulary.md#route) MUST be carried by the same bend-inserting calculation the draft preview uses, so the committed document cannot hold a route the renderer refuses to draw. No [Producer](../reference/vocabulary.md#producer) action MUST be able to unmount the host it is performed in: a geometry the renderer will not express MUST be prevented or reported, never thrown out of runtime construction.
+
+`EDIT-018` promises pointer, keyboard and numeric placement produce equivalent geometry and dependent Flow projection; `ROUTE-001` promises a diagonal run is rejected rather than approximated. Composed, a legal move of a Card whose Flow is authored by its [ports](../reference/vocabulary.md#port) alone produces exactly the geometry `ROUTE-001` rejects, and the rejection is a thrown error in the render path rather than a refused edit.
+
+_Conformance:_ divergent
+
+Tracked by `INFOSCHEMATICS-TOOL-084`. Observed on the site Playground: in [Design](../reference/vocabulary.md#design), selecting the Player Card and nudging it down once throws `A route may not run diagonally: 960,240 to 1020,250` and the whole page — Diagram, panel dock and site chrome — is replaced by nothing, taking the draft and its undo history with it. `ROUTE-002` already requires a bend where a straight two-point route cannot stay orthogonal, and the draft overlay does insert one; the committed document re-derives the route from the two ports instead, so that calculation is never reached.
+
+_Verify:_ nudge, drag and type a Card off the axis of a Flow attached to it by ports alone, on a rendered surface rather than through the draft overlay alone. The host MUST still be mounted after each, and the route MUST have gained a bend. Prove the case is not vacuous by restoring the naked two-point derivation: it MUST fail, which it does not if the assertion reads the preview's projection instead of the committed document's.
+
+_Evidence:_ `routePath` in `packages/view-model/src/geometry.ts` rejects a diagonal run by throwing, and `createInfoschematicRuntime` in `packages/view-model/src/runtime.ts` derives an unrouted Flow's points from its two ports and calls it directly. `moveRouteEnd` in `packages/view-model/src/routing.ts` is the calculation that inserts the bend, reached from `flowsAfterMoves` for the draft overlay and from `packages/view-model/src/artefact-draft.ts` for a drafted route.
+
+### COMPOSE-003 — A document the contract accepts renders, or is refused as a result
+
+Geometry the renderer cannot express MUST be refused where a caller can act on it: as a parse or validation issue naming the offending Flow and its ports, or by rendering something legible. It MUST NOT reach a caller as a thrown internal geometry error, on any published surface.
+
+`AUTHOR-005` promises rejection is a discriminated result carrying issues rather than an exception; `ROUTE-001` promises a diagonal run is rejected. Composed, the rejection lands outside the shape `AUTHOR-005` defines, because the contract accepts a document whose Flow endpoints are not axis-aligned and the refusal happens later, in geometry, with nothing to attach an issue to.
+
+_Conformance:_ divergent
+
+Tracked by `INFOSCHEMATICS-TOOL-085`. Observed at the command line: a document whose one Flow is authored `LEFT E1 -> RIGHT W1` between two Cards placed at different vertical positions parses without issues, and `infoschematics render` exits non-zero having printed an interpreter stack trace whose innermost frame is the geometry module. The status is right and the stream is right, which is why `CLI-003` stays conforming; what a document author is told is a stack.
+
+_Verify:_ author a document whose two-port Flow is not axis-aligned, validate it, then render it. Either the parse MUST return an issue whose path names that Flow, or the render MUST succeed; a non-zero exit carrying a stack trace satisfies neither. Prove the case is not vacuous by aligning the ports again, which MUST make it pass.
+
+_Evidence:_ `parseInfoschematic` in `packages/domain-core/src/parse.ts` returns the discriminated result this composition has to extend, and its referential checks are covered by `packages/domain-core/src/parse.test.ts`; the unguarded throw is `routePath` in `packages/view-model/src/geometry.ts`, reached from the render path in `packages/cli/src/index.ts`.
+
+### COMPOSE-004 — An announcement channel is silent when nothing was depicted
+
+Where visibility filtering removes every element an accepted occurrence would have been drawn on, the polite live region MUST say nothing at all. A revision prefix with no sentence after it is not an announcement: it tells a reader that something happened and withholds what, which is worse than the silence the filter earned.
+
+`DYNAMIC-006` promises each newly accepted occurrence is announced once, by the [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic)'s own label; `PRESENT-003` promises each filter bank is individually controlled, and `DYNAMIC-003` promises an occurrence reaches only what the renderer drew. Composed, the treatment obeys the filter and the announcement does not.
+
+_Conformance:_ divergent
+
+Tracked by `INFOSCHEMATICS-TOOL-086`. Observed on the site Playground in [Present](../reference/vocabulary.md#present): with the `PACKAGE` [Flow family](../reference/vocabulary.md#flow-family) switched off, rehearsing the Dynamic that signals a packaged segment draws no signal — the Flow is not in the drawn set, so its sentence is dropped — and the live region reads `Signal update 1.` and nothing else. With the family switched on, the same rehearsal reads the Flow's code and its two endpoint labels.
+
+_Verify:_ switch off the filter bank that hides every element one Dynamic names, rehearse it, and read the live region: it MUST be empty. Then switch the bank on and rehearse again, which MUST announce the Dynamic once. Prove the case is not vacuous by restoring the unconditional revision prefix: the first half MUST fail.
+
+_Evidence:_ `DiagramAnnouncements` in `packages/view-canvas/src/announcements.tsx` composes the sentence from the Flows the Diagram drew and prefixes the revision before that filter is applied; the accepted-set reconciliation that the filter feeds is in `packages/view-canvas/src/flow-signals.ts`, and `packages/view-present/src/Present.dynamics.test.tsx` covers the announcement with nothing filtered out.
+
+### COMPOSE-005 — A viewport keyboard control yields to the host's text entry
+
+A window-level viewport control MUST NOT act on a keystroke that is going to a text-entry surface the host mounts, and MUST require the pointer to be over the Diagram it would move. A host that composes editing fields beside a Diagram MUST NOT have to know the Diagram's bindings to keep its own fields typeable.
+
+`PRESENT-010` gives the Diagram keyboard zoom and fit; `EDIT-018` gives Studio numeric placement fields whose values include `-` and `+`. Composed, both claim the same keystroke, and the one that resolves it is whichever listener the event reaches — which is why the Diagram's own listener is the place the composition has to be settled.
+
+_Conformance:_ conforming
+
+_Verify:_ with the pointer resting over the Diagram, type a negative coordinate into a placement field in Design and confirm the `viewBox` is unchanged and the field holds what was typed. Then remove the text-entry guard from the Diagram's window listener: the case MUST fail. A case that types with the pointer away from the Diagram proves nothing, because the control declines on the pointer test alone.
+
+_Evidence:_ the window `keydown` listener in `packages/view-canvas/src/InfoschematicDiagram.tsx` returns early for an event whose target is inside `input, textarea, select, [contenteditable="true"]` and for a pointer that is not over the Diagram; the placement fields it yields to are built in `packages/view-studio/src/app/panels/DetailsPanel.tsx`.
+
+## Gaps
+
+- The screen region a [Callout](../reference/vocabulary.md#callout) is placed in, against the panel dock that `DESIGN-021` opens over the same surface, has not been driven on a rendered surface and has no requirement here.
+- Playback keys and artefact activation both claim `Space` and the arrow keys, but not at once: activation requires editing and the playback listener runs only while a [Sequence](../reference/vocabulary.md#sequence) plays, so the pair has no live claimant to state a requirement about today.
+- `DESIGN-020`'s composition with `DESIGN-018` holds on the rendered surface — a held group of three released exactly as a single selection does when its layer closed — but the clause that states it has no rendered case of its own, and the case belongs to `DESIGN-015`'s matrix rather than here.

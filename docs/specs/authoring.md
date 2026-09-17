@@ -173,3 +173,7 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-studio/src/app/App.browser.test.tsx` submits invalid and valid YAML through the Source tab and observes the rendered model and accessible error state.
 
 _Evidence:_ `useDocumentTimeline` in `packages/view-studio/src/app/editor/document-history.ts` parses replacements through Domain Core and invokes the host only for a validated document.
+
+## Gaps
+
+- `AUTHOR-005`'s composition with `ROUTE-001` is stated as `COMPOSE-003` in [Composition](composition.md): a document this area accepts can still hold geometry the renderer refuses, and today that refusal arrives as a thrown error rather than an issue.

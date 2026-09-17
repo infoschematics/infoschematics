@@ -4,12 +4,12 @@ area: TOOL
 title: Cross-feature interaction coverage
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: fde24e650cf4d7c0d1fb96eaf50f4ca1b31168c9
 created_at: 2026-09-15T05:19:55Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-17T09:45:00Z
 ---
 
 # Cross-feature interaction coverage
@@ -50,25 +50,25 @@ No `turbo.json` change is needed. `//#self:scripts:test` already hashes `scripts
 
 ## Steps
 
-1. [ ] Decide the instrument and record it as a Decision Record. Both candidates are already in the tree: extend a flat `MUST exercise` matrix inside the owning requirement, as `DESIGN-015` does, or give each composition its own requirement with its own conformance state and evidence line. The record must also say where a constraint is sited when neither feature is the newer one. Verifiable: `docs/decisions/ADR-INFOSCHEMATICS-028-<slug>.md` exists, is listed in `docs/decisions/README.md`, and answers both questions.
-2. [ ] Enumerate the contended resources and derive the pairs from them rather than from the feature list — the same pointer gesture, keyboard binding, selection, screen region, document order, or motion channel. Verifiable: the derived table lands in the Decision Record, one row per pair naming the shared resource, the two owning requirement ids, and the surface a case would run on. Restrict it to resources with two live claimants today.
-3. [ ] Retro-fit the composition that already has a check and no requirement: "a treatment written once in Canvas reaches the Studio surface", defended by `scripts/stylesheet-shadowing.test.ts` and `packages/view-studio/src/app/App.treatments.browser.test.tsx`. Doing this first proves the chosen instrument against evidence that already exists and costs nothing to produce. Verifiable: `bun run self:scripts:test` resolves the new requirement's evidence lines.
-4. [ ] Explore the live surfaces by hand and record what is found before writing anything. `bun run self:dev` serves the site with the Studio-backed Playground; drive Design mode with interaction layers closed, a held group of three, a non-default authored grid size, and a Dynamic running. Verifiable: each observation is written into this record's Discussion, so the finding survives whether or not it becomes a requirement.
-5. [ ] Write one requirement per confirmed collision in the home step 1 chose, each carrying `_Conformance:_`, `_Verify:_` and `_Evidence:_` lines, and a vocabulary link on first use of each canonical concept. Verifiable: `bun run self:scripts:test` — `scripts/specification-evidence.test.ts` checks the conformance value and the evidence paths, and `scripts/vocabulary-citations.test.ts` checks every cited vocabulary id resolves.
-6. [ ] Add one browser case per requirement to the suite that owns the surface, and prove each fails when the collision is reintroduced rather than only that it passes today. Verifiable: `bun run test:browser` green, plus a deliberate reintroduction per case with the failure observed.
-7. [ ] Where a collision turns out to be a regression rather than a defect, state the property that was lost as the requirement, so it cannot be traded away silently a second time. Verifiable: the requirement names the property, not the fix that restored it.
-8. [ ] Record what the pass did not reach as an unnumbered candidate in the `## Gaps` section of each touched area file, which is the corpus's existing convention for exactly that. Verifiable: each touched area file's `## Gaps` section names the pairs left unverified.
+1. [x] Decide the instrument and record it as a Decision Record. Both candidates are already in the tree: extend a flat `MUST exercise` matrix inside the owning requirement, as `DESIGN-015` does, or give each composition its own requirement with its own conformance state and evidence line. The record must also say where a constraint is sited when neither feature is the newer one. Verifiable: `docs/decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md` exists, is listed in `docs/decisions/README.md`, and answers both questions.
+2. [x] Enumerate the contended resources and derive the pairs from them rather than from the feature list — the same pointer gesture, keyboard binding, selection, screen region, document order, or motion channel. Verifiable: the derived table lands in the Decision Record, one row per pair naming the shared resource, the two owning requirement ids, and the surface a case would run on. Restrict it to resources with two live claimants today.
+3. [x] Retro-fit the composition that already has a check and no requirement: "a treatment written once in Canvas reaches the Studio surface", defended by `scripts/stylesheet-shadowing.test.ts` and `packages/view-studio/src/app/App.treatments.browser.test.tsx`. Doing this first proves the chosen instrument against evidence that already exists and costs nothing to produce. Verifiable: `bun run self:scripts:test` resolves the new requirement's evidence lines.
+4. [ ] Explore the live surfaces by hand and record what is found before writing anything. `bun run self:dev` serves the site with the Studio-backed Playground; drive Design mode with interaction layers closed, a held group of three, a non-default authored grid size, and a Dynamic running. Verifiable: each observation is written into this record's Discussion, so the finding survives whether or not it becomes a requirement. Driven, and the observations are below; the pass is left open for the lead's own rendered walk, which is what step 6's cases are written against.
+5. [x] Write one requirement per confirmed collision in the home step 1 chose, each carrying `_Conformance:_`, `_Verify:_` and `_Evidence:_` lines, and a vocabulary link on first use of each canonical concept. Verifiable: `bun run self:scripts:test` — `scripts/specification-evidence.test.ts` checks the conformance value and the evidence paths, and `scripts/vocabulary-citations.test.ts` checks every cited vocabulary id resolves.
+6. [ ] Add one browser case per requirement to the suite that owns the surface, and prove each fails when the collision is reintroduced rather than only that it passes today. Verifiable: `bun run test:browser` green, plus a deliberate reintroduction per case with the failure observed. Reserved to the lead's test pass: each requirement's `_Verify:_` line states the case and its reintroduction proof, and the three divergences carry their own items.
+7. [x] Where a collision turns out to be a regression rather than a defect, state the property that was lost as the requirement, so it cannot be traded away silently a second time. Verifiable: the requirement names the property, not the fix that restored it.
+8. [x] Record what the pass did not reach as an unnumbered candidate in the `## Gaps` section of each touched area file, which is the corpus's existing convention for exactly that. Verifiable: each touched area file's `## Gaps` section names the pairs left unverified.
 
 ## Files touched
 
-- `docs/decisions/ADR-INFOSCHEMATICS-028-<slug>.md` — new; `ADR-INFOSCHEMATICS-027` is the current highest
+- `docs/decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md` — new; the instrument, the siting rule, and the contended-resource table. `028` was taken by the time this landed
 - `docs/decisions/README.md` — the index entry for it
-- `docs/specs/design-session.md`, `docs/specs/design-editing.md`, `docs/specs/presentation.md`, `docs/specs/diagram-dynamics.md`, `docs/specs/appearance.md` — the owning area files for the pairs on the Design, Present and Canvas surfaces
-- `docs/specs/index.md` — one new table row, and a new `docs/specs/<area>.md`, only if step 1 chooses a dedicated area with its own prefix
-- `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`, `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, `packages/view-canvas/src/InfoschematicDiagram.host.browser.test.tsx`, `packages/view-studio/src/app/App.browser.test.tsx`, `packages/view-studio/src/app/App.treatments.browser.test.tsx` — the existing suites that own these surfaces
-- One new browser file per surface whose pairs have no existing home, named for the composition rather than the feature, alongside the suites above
-- `docs/reference/vocabulary.md` — only if a composition needs a canonical term that does not exist; it currently declares its terms in the table around line 50
-- Not touched: `turbo.json`. `//#self:scripts:test` already hashes `docs/**`, `scripts/**` and `packages/*/src/**`, and the test tasks declare no `inputs`
+- `docs/specs/composition.md` — new area, prefix `COMPOSE`, five requirements: `COMPOSE-001` conforming, `-002`, `-003` and `-004` divergent, `-005` conforming
+- `docs/specs/index.md` — one new table row for the area
+- `docs/specs/appearance.md`, `docs/specs/design-session.md`, `docs/specs/design-editing.md`, `docs/specs/presentation.md`, `docs/specs/diagram-dynamics.md`, `docs/specs/authoring.md`, `docs/specs/routing-and-placement.md`, `docs/specs/command-line-rendering.md`, `docs/specs/static-rendering.md` — each owning area's `## Gaps` names the compositions it takes part in and where they are recorded
+- `docs/roadmap/INFOSCHEMATICS-TOOL-084-committed-move-unrenderable-route.md`, `-085-accepted-document-throws-geometry-error.md`, `-086-empty-announcement-when-everything-filtered.md` — new; one per divergence found in step 4, each carrying its measured reproduction
+- Not touched: `turbo.json`, as predicted — `//#self:scripts:test` already hashes `docs/**`, and the test tasks declare no `inputs`
+- Not touched: no new browser file, no package source. The three divergences are recorded as requirements and items rather than fixed here, which is this item's boundary
 
 ## Verify
 
@@ -88,7 +88,7 @@ The ready items on the contended surfaces — `INFOSCHEMATICS-TOOL-023`, `-059`,
 
 ### Decision Records
 
-One is needed, and the next free number is `ADR-INFOSCHEMATICS-028`. The corpus already sites composition constraints three slightly different ways — a matrix clause in `DESIGN-015`, an affordance clause in `DESIGN-018`, a selection clause in `DESIGN-020` — so the choice exists implicitly today and the sitings will keep drifting until it is written down.
+One is needed. It landed as `ADR-INFOSCHEMATICS-034`; `028` had been taken by the panel-dock decision by the time this item was delivered. The corpus already sites composition constraints three slightly different ways — a matrix clause in `DESIGN-015`, an affordance clause in `DESIGN-018`, a selection clause in `DESIGN-020` — so the choice exists implicitly today and the sitings will keep drifting until it is written down.
 
 ### Specifications
 
@@ -111,3 +111,43 @@ Two changes. This record absorbs step 4's observations. And the five ready items
 ### What a pair is owned by when neither feature is newer
 
 Each of the three existing constraints sits in the newer of its two features — the layer filter went into the newer `DESIGN-020`, not into `DESIGN-018`. That rule works only while a pair has a clear newer member, and makes ownership an accident of delivery order. It has no answer at all for the case this item has to handle first: the Canvas-treatment-reaches-Studio property belongs to neither Canvas nor Studio, but to the stylesheet chain between them, and its evidence is a `scripts/` check rather than a package. Whether the corpus accepts delivery order as the tie-break, or accepts an area that owns nothing but compositions, is genuinely open.
+
+### What driving the live surfaces found
+
+Step 4 was run against `bun run self:dev` with a headless browser, on the Studio-backed Playground, across all three placement paths, grid sizes 0, 10 and 37, interaction layers open and closed, a held group of three, and a Dynamic rehearsing. Three of the eight enumerated resources turned out to be divergent rather than merely unverified, and none of the three was visible from any feature area.
+
+The first is the worst. In Design, selecting the Player Card and pressing `ArrowDown` once throws `A route may not run diagonally: 960,240 to 1020,250` and replaces the whole page — Diagram, panel dock and site chrome — with nothing, taking the draft and its undo history with it. It reproduces through pointer drag, keyboard nudge and typed coordinate, at every grid size tried, and for more than one Card; horizontal movement of the same Card is fine, because the Flow it carries is horizontal. The draft overlay inserts the bend `ROUTE-002` requires, through `moveRouteEnd`; the committed document re-derives the route from the two ports in `createInfoschematicRuntime` and never reaches that calculation, so `routePath` throws inside a `useMemo` and the tree unmounts. `COMPOSE-002`, `INFOSCHEMATICS-TOOL-084`.
+
+The second is the same root cause on the command line, in a different required shape. A document whose one Flow is authored `LEFT E1 -> RIGHT W1` between two Cards at different vertical positions parses with no issues, and `infoschematics render` exits non-zero having printed an interpreter stack trace whose innermost frame is the geometry module. The status and the stream are both right, which is why `CLI-003` stays conforming; what the author is handed is a stack rather than the issue `AUTHOR-005` promises. `COMPOSE-003`, `INFOSCHEMATICS-TOOL-085`.
+
+The third is quieter and only audible. In Present with the `PACKAGE` Flow family switched off, rehearsing the Dynamic that signals a packaged segment draws no signal — correctly — and the polite live region reads `Signal update 1.` and nothing else. The revision prefix is composed before the drawn-set filter has any say, so it is emitted whether or not a sentence follows it: a reader is told something happened and denied what. With the family switched on, the same rehearsal reads the Flow's code and both endpoint labels. `COMPOSE-004`, `INFOSCHEMATICS-TOOL-086`.
+
+Two enumerated pairs were driven and held. A held group of three released exactly as a single selection does when its interaction layer closed, which is `DESIGN-020`'s clause behaving as written. And with the pointer resting over the Diagram, typing a negative coordinate into a placement field left the `viewBox` untouched and the field holding what was typed, which is `COMPOSE-005` — the Diagram's window listener declines on both the text-entry test and the pointer test.
+
+The exploration is also the answer to a question this record left open. Three divergences in the first pass, none of them findable from a feature area, is the evidence that the instrument had to be individually addressable: a matrix clause would have recorded all three as prose inside requirements that stayed conforming.
+
+## Review packet
+
+### What changed
+
+A new Specifications area, `docs/specs/composition.md`, holding five `COMPOSE` requirements; `ADR-INFOSCHEMATICS-034` recording the instrument, the siting rule and the contended-resource table it derives from; a `## Gaps` line in each of the nine owning area files; and three new roadmap records for the divergences the exploration found.
+
+### Why it is shaped this way
+
+A composition is its own requirement rather than a clause in the newer feature, because delivery order has no answer for a pair whose property belongs to neither member — and because `DESIGN-015` shows what a clause costs: twenty-odd behaviours under one conformance value, where a regression inside the list leaves the requirement conforming and the evidence paths resolving. Pairs are derived from resources with two live claimants rather than from the feature list, which is what keeps the area from multiplying features that never meet.
+
+### What was found
+
+Three divergences, all recorded rather than fixed: a committed Card move that unmounts the host (`TOOL-084`), an accepted document that throws a geometry error at the command line (`TOOL-085`), and a revision prefix announced with no sentence after it (`TOOL-086`). Each is in the corpus as a stated property with an item against it.
+
+### What was deliberately not done
+
+No package source changed and no browser case was added. Fixing the three divergences is outside this item's boundary and belongs to the three new items; the browser cases are step 6, reserved to the lead's test pass, and each requirement's `_Verify:_` line states the case and the reintroduction that must make it fail. `DESIGN-018` and `DESIGN-020` were not re-sited, per the ADR's second rule.
+
+### How to check it
+
+`bunx rumdl check`, `bun run self:scripts:test` — `specification-evidence` resolves every new `_Evidence:_` path and reads each conformance value, `vocabulary-citations` resolves every new vocabulary id — and `bun run self:check` for the whole gate. To see the first divergence by hand: `bun run self:dev`, open the Playground, enter Design, select the Player Card, press `ArrowDown`.
+
+### What is left open
+
+Whether `ROUTE-002`'s bend belongs in the port-derived route or the edit is refused before commit is `TOOL-084` step 1, and `TOOL-085` depends on that answer. The `## Gaps` sections name three pairs with no requirement yet: the Callout region against the panel dock, playback keys against artefact activation, and `DESIGN-020`'s own rendered case.

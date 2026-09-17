@@ -177,3 +177,7 @@ _Conformance:_ conforming
 _Verify:_ render the representative treatment fixture repeatedly with full, reduced, and label-only target sizes and inspect its root dimensions, optional rows, label, and accessible summary.
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers explicit target dimensions, deterministic optional-row reduction, and retained accessible authored metadata.
+
+## Gaps
+
+- `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-034](../decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.

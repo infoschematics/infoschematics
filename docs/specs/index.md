@@ -37,3 +37,4 @@ IDs are append-only within their registered prefix and are never reused. The one
 | design-editing.md             | `EDIT`    | Geometry, route, attachment, creation, removal, appearance, and complete preview behaviour in Design mode.      |
 | change-management.md          | `CHANGE`  | Atomic drafts, undo, reviewable change sets, consolidation, and selective dropping of pending changes.          |
 | runtime-model.md              | `RUNTIME` | Framework-neutral derivation and immutable materialisation of typed selection and draft operations.             |
+| composition.md                | `COMPOSE` | What two features must still promise when they are used together, one requirement per contended resource.      |

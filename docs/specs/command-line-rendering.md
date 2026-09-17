@@ -115,3 +115,7 @@ _Conformance:_ conforming
 _Verify:_ build, typecheck, dependency-cruise, pack, install, and execute its binary from a clean consumer.
 
 _Evidence:_ `packages/cli/package.json`, `.dependency-cruiser.ts`, `scripts/release/packages.ts`, and `scripts/release/pack-smoke.ts`.
+
+## Gaps
+
+- The command line is the surface `COMPOSE-003` in [Composition](composition.md) is verified on. `CLI-003` stays conforming there — the status and the stream are right — while what a document author is told about unrenderable geometry is a stack trace.

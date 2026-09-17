@@ -48,6 +48,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 36. [ADR-INFOSCHEMATICS-031](ADR-INFOSCHEMATICS-031-a-point-is-its-own-artefact-kind.md) — make a Point a sixth artefact kind with a coordinate geometry role rather than a part of the Flow that owns it.
 37. [ADR-INFOSCHEMATICS-032](ADR-INFOSCHEMATICS-032-a-point-is-created-from-the-library.md) — create a Point from the Library path, alone rather than with a Flow, reversing `ADR-INFOSCHEMATICS-031`'s non-creatability consequence.
 38. [ADR-INFOSCHEMATICS-033](ADR-INFOSCHEMATICS-033-a-diagram-host-mounts-the-announcement-surface.md) — make announcing a Dynamic an obligation of every host that mounts the Diagram, over one shared surface.
+39. [ADR-INFOSCHEMATICS-034](ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) — state each cross-feature composition as its own requirement in its own area, rather than as a clause inside the newer feature.
 
 ## Repository operation
 

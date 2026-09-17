@@ -213,3 +213,7 @@ _Conformance:_ divergent
 _Verify:_ Render a document that routes a Flow through a Region label's band through both renderers and read the label. `examples/is-infoschematics/infoschematic.yaml` is one: two routes cross its "View and renderer packages" band.
 
 _Evidence:_ Divergent in both renderers as of 2026-09-16. `infoschematic-region-label` in `packages/render-svg/src/index.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx` carries no backing, and the static renderer emits every Region before every Flow, so a crossing route erases glyphs; the same label loses the same glyphs in Chromium. Both engines place it within a pixel of each other, so this is paint order rather than measurement.
+
+## Gaps
+
+- `ROUTE-001`'s compositions are recorded in [Composition](composition.md): with `EDIT-018` as `COMPOSE-002`, and with `AUTHOR-005` as `COMPOSE-003`, where geometry this area rejects is refused outside the result shape authoring promises. `ROUTE-002`'s bend insertion is the calculation both of them need reached.

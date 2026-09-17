@@ -243,3 +243,7 @@ _Conformance:_ conforming
 _Verify:_ `packages/view-studio/src/app/editor/document-history.test.ts` covers timeline branching and acknowledgement; `packages/view-studio/src/app/App.browser.test.tsx` covers source replacement, undo and redo through a host-controlled document.
 
 _Evidence:_ `useDocumentTimeline` records structured document results from `AppContent`, records validated Source-tab replacements, and emits prior or later validated documents through `onDocumentReplace`.
+
+## Gaps
+
+- `EDIT-018`'s compositions are recorded in [Composition](composition.md): with `ROUTE-001` as `COMPOSE-002`, where a committed move of a Card can leave a route the renderer refuses, and with `PRESENT-010` as `COMPOSE-005`, over the keystrokes a placement field and the Diagram's zoom control both claim.

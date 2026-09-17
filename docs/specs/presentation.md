@@ -134,3 +134,4 @@ _Evidence:_ `packages/view-canvas/src/viewport.test.ts` covers minimap clamping 
 
 - End-to-end keyboard operation and focus management do not yet have dedicated interaction coverage.
 - Focusing a Flow does not yet include both endpoint elements automatically.
+- Three compositions this area takes part in are recorded in [Composition](composition.md): `PRESENT-003` with `DYNAMIC-006` as `COMPOSE-004`, `PRESENT-010` with `EDIT-018` as `COMPOSE-005`, and `PRESENT-003` with `DYNAMIC-003`, which that requirement's own clause already owns.

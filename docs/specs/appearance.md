@@ -197,3 +197,7 @@ _Conformance:_ conforming
 _Verify:_ inspect `resolveResponsiveCardTreatment` and compare Canvas and static SVG fixtures at equivalent dimensions.
 
 _Evidence:_ `packages/view-model/src/appearance.ts` is a pure dimension-driven resolver consumed by both `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/render-svg/src/index.ts`.
+
+## Gaps
+
+- `APPEAR-009`'s composition with `DESIGN-015` — a shared treatment surviving arrival at a second Diagram host — is stated and verified as `COMPOSE-001` in [Composition](composition.md) rather than here.
