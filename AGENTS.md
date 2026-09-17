@@ -12,7 +12,7 @@ The consumer user guide is Site-owned content under `apps/site/content/`; reposi
 
 A passing suite is not evidence that output looks right. When changing visual treatment, render the result and look at it: a Flow arrowhead that was referenced but never defined, and a light slab painted onto the blueprint backdrop, both survived a fully green run. Some of what output promises is only visible under a preference no default page expresses: the browser suites ask the runner for `prefers-reduced-motion` through a browser command, because a reduced-motion rule read out of the stylesheet is not the rule the browser resolved.
 
-Run `bun run self:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, and the production website build.
+Run `bun run self:check` before committing. It verifies tests, every TypeScript workspace, dependency boundaries, unused code and exports, and the production website build.
 
 A check that measures nothing reports success. The dependency-boundary gate cruised `0 modules, 0 dependencies` for as long as the repository was on TypeScript 7, because dependency-cruiser supports `typescript@<7` and every ownership rule matches on resolved paths, so a cruise that resolves nothing satisfies all of them. The checker therefore has its own install root at `tooling/boundaries`, outside the workspace graph, holding a TypeScript it can drive, and `scripts/boundaries.ts` asserts a module floor and a cross-package type-only edge before it will call a clean cruise a pass. Give any new check an assertion about its own coverage; a check whose failure mode is silence is read as evidence.
 

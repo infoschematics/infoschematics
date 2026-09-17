@@ -315,10 +315,6 @@ export function isDocsIndexPath(pathname: string) {
   return pathname === docsIndexPath || pathname === docsIndexPath.slice(0, -1)
 }
 
-export function isComponentsPath(pathname: string) {
-  return pathname === componentsPath || pathname === componentsPath.slice(0, -1)
-}
-
 export function getComponentRoute(pathname: string): ComponentRoute | undefined {
   const canonicalPath = canonicalSitePath(pathname)
   return componentRoutes.find((route) => canonicalPath === route.path || canonicalPath === route.path.slice(0, -1))

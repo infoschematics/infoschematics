@@ -2306,59 +2306,6 @@ button:focus-visible,
   margin: 0;
 }
 
-/* Thematic and standalone Scene controls remain visually distinct. */
-/* A theme reads as a mark rather than as a word, so its button is shaped for
-   one: a pill that a wordmark sits inside without being cropped. */
-.theme-button {
-  align-items: center;
-  background: #10263b;
-  border: 1px solid #ffffff1e;
-  border-radius: 999px;
-  color: #cde8fb;
-  cursor: pointer;
-  display: inline-flex;
-  font:
-    500 10px "DM Mono",
-    monospace;
-  gap: 5px;
-  padding: 5px 12px;
-  white-space: nowrap;
-}
-
-.theme-button img {
-  display: block;
-  height: 15px;
-  max-width: 92px;
-  object-fit: contain;
-}
-
-.theme-button:hover,
-.panel-rail .rail-pathway.rail-theme:hover {
-  border-color: #c39bff;
-  color: white;
-}
-
-.theme-button[aria-pressed="true"] {
-  box-shadow: 0 0 0 1px #c39bff55;
-}
-
-.theme-button[aria-pressed="true"],
-.panel-rail .rail-pathway.rail-theme[aria-pressed="true"] {
-  background: #2a1f3d;
-  border-color: #c39bff;
-  color: white;
-}
-
-/* In the rail there is no room for a name beside it, so the mark is the
-   button. */
-.panel-rail .rail-pathway img {
-  display: block;
-  height: 12px;
-  margin: 0 auto;
-  max-width: 26px;
-  object-fit: contain;
-}
-
 .legend-swatch {
   border-radius: 3px;
   display: inline-block;

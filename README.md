@@ -113,7 +113,7 @@ The `self:` commands, by subject:
 | `scripts/` | `self:scripts:test`, `self:scripts:typecheck` | The cross-workspace checks that live under `scripts/`, and their own typecheck. |
 | visual tokens | `self:tokens:generate`, `self:tokens:verify` | The generated visual token module shared by the renderers. |
 | types | `self:typecheck` | Every workspace typecheck plus the one for `scripts/`. |
-| unused code | `self:unused:verify` | knip over the workspaces, against `knip.json`. |
+| unused code | `self:unused:verify` | knip over the workspaces, against `knip.json`, with its configuration hints treated as errors so a pattern that has stopped matching fails rather than narrowing the analysis in silence. |
 
 Two rules keep the surface honest, and `scripts/command-surface.test.ts` enforces them.
 

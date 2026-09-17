@@ -112,6 +112,24 @@
         "tooling/boundaries/bun.lock"
       ]
     },
+    "//#self:unused:verify": {
+      "inputs": [
+        ".husky/**",
+        "apps/*/package.json",
+        "apps/site/src/**",
+        "biome.json",
+        "examples/*/package.json",
+        "examples/*/src/**",
+        "knip.json",
+        "package.json",
+        "packages/*/package.json",
+        "packages/*/src/**",
+        "scripts/**",
+        "tsconfig.json",
+        "turbo.json",
+        "vite.config.ts"
+      ]
+    },
     "//#self:scripts:test": {
       "inputs": [
         ".dependency-cruiser.ts",

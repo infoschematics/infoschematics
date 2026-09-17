@@ -36,6 +36,7 @@ import {
 } from '@infoschematics/view-model/runtime'
 import type { PresentProps } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { directOptionsFor } from './direct-targets.ts'
 import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
 import {
   isStudioDocumentAcknowledgement,
@@ -445,6 +446,22 @@ function AppContent({
     themeComposition.edited,
     themeComposition.revert
   ])
+  /*
+   * A Direct target that has left the document cannot be presented, so holding it would leave Direct pointing at a
+   * Scene, Theme or Story no Producer can reach. The production reducer has always cleared it; nothing told it the
+   * available targets had changed. The list is derived here rather than in the panel that chooses from it, because a
+   * panel can be closed and a target can be deleted from the Design tools while it is.
+   */
+  const directTargets = useMemo(
+    () =>
+      directOptionsFor(sceneLibrary.library, themeComposition.themes, sceneList.stories).map(({ target }) => target),
+    [sceneLibrary.library, sceneList.stories, themeComposition.themes]
+  )
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the available targets own this reconciliation; the presentation facade is rebuilt every render.
+  useEffect(() => {
+    presentation.reconcileDirectTargets(directTargets)
+  }, [directTargets])
+
   // Lifted here because two things read it: the panel that edits a scene, and
   // the Infoschematic that marks what the selected one lights.
   const directTarget = presentation.directTarget

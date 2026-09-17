@@ -70,7 +70,7 @@
     "prepare": "husky",
     "self:boundaries:verify": "bun scripts/boundaries.ts",
     "self:cf:build": "bun run build",
-    "self:check": "turbo run self:lockfile:verify self:packages:check-versions build typecheck self:scripts:typecheck self:schema:verify self:tokens:verify self:examples:verify test self:boundaries:verify self:scripts:test test:browser",
+    "self:check": "turbo run self:lockfile:verify self:packages:check-versions build typecheck self:scripts:typecheck self:schema:verify self:tokens:verify self:examples:verify test self:boundaries:verify self:unused:verify self:scripts:test test:browser",
     "self:dev": "turbo run build --filter=./packages/* && bun run ki:site:dev",
     "self:examples:generate": "bun scripts/examples.ts",
     "self:examples:render": "bun scripts/render-example.ts",
@@ -88,7 +88,7 @@
     "self:tokens:generate": "bun scripts/generate-visual-tokens.ts",
     "self:tokens:verify": "bun scripts/generate-visual-tokens.ts --check",
     "self:typecheck": "turbo run typecheck self:scripts:typecheck",
-    "self:unused:verify": "bunx knip",
+    "self:unused:verify": "bunx knip --no-progress --treat-config-hints-as-errors",
     "test": "turbo run test",
     "test:browser": "turbo run test:browser"
   },

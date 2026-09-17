@@ -17,6 +17,7 @@ import { type PortCounts, portsForBox, type Side } from '@infoschematics/view-mo
 import type { RuntimeInterface } from '@infoschematics/view-model/runtime'
 import type { DirectTarget } from '@infoschematics/view-present'
 import { type SetStateAction, useEffect, useMemo, useState } from 'react'
+import { type DirectOption, directOptionsFor, directTargetKey } from '../direct-targets.ts'
 import { ArtefactControls, type ArtefactControlsEditor } from '../editor/ArtefactControls.tsx'
 import { type ArtefactFactoryContext, createFactoryIdentityAllocator } from '../editor/artefact-factories.ts'
 import type { ArtefactPropertiesPatch } from '../editor/artefact-operations.ts'
@@ -56,11 +57,6 @@ import { SplitPane } from './SplitPane.tsx'
 
 type DirectKind = DirectTarget['kind']
 
-type DirectOption = Readonly<{
-  label: string
-  target: DirectTarget
-}>
-
 const directKinds = [
   ['standalone-scene', 'Scenes'],
   ['theme', 'Themes'],
@@ -68,20 +64,6 @@ const directKinds = [
   ['callout', 'Callouts'],
   ['storyboard', 'Storyboard']
 ] as const satisfies readonly (readonly [DirectKind, string])[]
-
-const directTargetKey = (target: DirectTarget): string => {
-  switch (target.kind) {
-    case 'standalone-scene':
-      return `${target.kind}:${target.sceneId}`
-    case 'theme':
-      return `${target.kind}:${target.themeId}`
-    case 'story':
-    case 'storyboard':
-      return `${target.kind}:${target.storyId}`
-    case 'callout':
-      return `${target.kind}:${target.owner}:${target.ownerId}:${target.sceneId}`
-  }
-}
 
 const resolveStateAction = <Value,>(action: SetStateAction<Value>, current: Value): Value =>
   typeof action === 'function' ? (action as (value: Value) => Value)(current) : action
@@ -406,48 +388,10 @@ export function DetailsPanel({
     setSourceOpen(false)
   }
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
-  const directOptions = useMemo<readonly DirectOption[]>(() => {
-    const standaloneScenes = scenes.library.map((scene) => ({
-      label: scene.label,
-      target: { kind: 'standalone-scene', sceneId: scene.id } as const
-    }))
-    const themeTargets = themes.themes.map((theme) => ({
-      label: theme.title,
-      target: { kind: 'theme', themeId: theme.id } as const
-    }))
-    const storyTargets = stories.stories.map((story) => ({
-      label: story.label,
-      target: { kind: 'story', storyId: story.id } as const
-    }))
-    const themeCallouts = themes.themes.flatMap((theme) =>
-      theme.scenes.map((scene) => ({
-        label: `${theme.title} — ${scene.label}`,
-        target: {
-          kind: 'callout',
-          owner: 'theme',
-          ownerId: theme.id,
-          sceneId: scene.id
-        } as const
-      }))
-    )
-    const storyCallouts = stories.stories.flatMap((story) =>
-      story.steps.map((scene, index) => ({
-        label: `${story.label} — ${scene.title || `Scene ${index + 1}`}`,
-        target: {
-          kind: 'callout',
-          owner: 'story',
-          ownerId: story.id,
-          sceneId: scene.authored.id ?? scene.scene ?? `${story.id}-scene-${index + 1}`
-        } as const
-      }))
-    )
-    const storyboards = stories.stories.map((story) => ({
-      label: story.label,
-      target: { kind: 'storyboard', storyId: story.id } as const
-    }))
-
-    return [...standaloneScenes, ...themeTargets, ...storyTargets, ...themeCallouts, ...storyCallouts, ...storyboards]
-  }, [scenes.library, stories.stories, themes.themes])
+  const directOptions = useMemo<readonly DirectOption[]>(
+    () => directOptionsFor(scenes.library, themes.themes, stories.stories),
+    [scenes.library, stories.stories, themes.themes]
+  )
   const directOptionsForKind = directOptions.filter((option) => option.target.kind === directKind)
   const selectedDirectTarget = presentation.directTarget
   const activeDirectOption = selectedDirectTarget
@@ -662,11 +606,15 @@ export function DetailsPanel({
     if (wanted !== mode) setMode(wanted)
   }, [directUsesStories, mode, presentation.mode, setMode])
 
+  /*
+   * Which kind tab a target belongs to, and no more. Clearing a target that has left the document is the production
+   * reducer's, dispatched by `App` from the same option list this panel reads: a panel is one place a target can be
+   * chosen and not the only place the document can change under it.
+   */
   useEffect(() => {
-    if (presentation.mode !== 'direct' || !selectedDirectTarget) return
-    if (!activeDirectOption) presentation.setDirectTarget(null)
-    else if (selectedDirectTarget.kind !== directKind) setDirectKind(selectedDirectTarget.kind)
-  }, [activeDirectOption, directKind, presentation, selectedDirectTarget])
+    if (presentation.mode !== 'direct' || !selectedDirectTarget || !activeDirectOption) return
+    if (selectedDirectTarget.kind !== directKind) setDirectKind(selectedDirectTarget.kind)
+  }, [activeDirectOption, directKind, presentation.mode, selectedDirectTarget])
 
   useEffect(() => {
     if (!reading) return

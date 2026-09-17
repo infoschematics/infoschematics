@@ -1,32 +1,10 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
-    "packages/*": {
-      "entry": ["src/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"],
-      "project": ["src/**/*.{ts,tsx}"]
-    },
-    "apps/site": {
-      "project": ["src/**/*.{ts,tsx}"],
-      "entry": ["src/**/*.test.{ts,tsx}"]
-    },
-    "examples/*": {
-      "project": ["src/**/*.ts"],
-      "entry": ["src/*.ts", "src/**/*.test.ts"]
-    },
-    ".": {
-      "entry": [
-        "scripts/**/*.test.ts",
-        "scripts/boundaries.ts",
-        "scripts/examples.ts",
-        "scripts/generate-schema.ts",
-        "scripts/generate-visual-tokens.ts",
-        "scripts/ibc-visual-compatibility.ts",
-        "scripts/release/check-versions.ts",
-        "scripts/release/pack-smoke.ts",
-        "scripts/render-example.ts"
-      ],
-      "project": ["scripts/**/*.ts"]
-    }
+    "packages/*": { "entry": ["src/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"], "project": ["src/**/*.{ts,tsx}"] },
+    "apps/site": { "project": ["src/**/*.{ts,tsx}"], "entry": ["src/**/*.test.{ts,tsx}"] },
+    "examples/*": { "project": ["src/**/*.ts"], "entry": ["src/*.ts", "src/**/*.test.ts"] },
+    ".": { "entry": ["scripts/**/*.test.ts", "scripts/ibc-visual-compatibility.ts"], "project": ["scripts/**/*.ts"] }
   },
   "ignoreBinaries": ["rsvg-convert"],
   "ignoreExportsUsedInFile": true,

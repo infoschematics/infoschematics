@@ -1117,8 +1117,7 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
   await expect.poll(() => studio.reachable('.editor-tab-header select')).toBe(true)
   /*
    * A chooser with this document's targets in it, and the Scene's own fields below it, rather than an empty panel.
-   * Direct does not preselect a target - `reconcileDirectTargets` is declared and never called - and choosing one for
-   * a Producer is the panel's own content, which this item does not touch.
+   * Direct does not preselect a target, and choosing one for a Producer is the panel's own content.
    */
   await expect
     .poll(() =>
@@ -1183,4 +1182,98 @@ test('a reload restores the dock preference and none of the Producer mode that o
   expect(studio.reachable('.state-panel')).toBe(true)
   expect(studio.container.querySelector('.panel-rail')).toBeNull()
   expect(studio.container.querySelector('.editor-tab')).toBeNull()
+})
+
+/*
+ * A Direct target that leaves the Scene library. Two Scenes so one can be directed and the other removed first, which
+ * is what separates a reconciliation that clears a live target from one that clears only a target that has gone.
+ */
+const directDocument = (scenes: readonly string[]) => `id: DIRECT
+title: Directed scenes
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  cards:
+    - id: CARD-A
+      label: Card A
+      bounds: 20 40 80 50
+      ports: 0
+sequences:
+  - id: OVERVIEW
+    label: Overview
+    presentation:
+      display: expanded
+      timed: false
+      callouts: false
+    scenes:
+${scenes.map((id) => `      - id: ${id}\n        label: Scene ${id}\n        description: Scene ${id}`).join('\n')}
+`
+
+test('a Direct target clears when its Scene leaves the library, and holds while it is still there', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(directDocument(['SCN-01', 'SCN-02']))
+  if (!parsed.ok) throw new Error('direct fixture should parse')
+
+  const { container } = await render(<Studio document={parsed.document} />)
+  const press = (label: string) => {
+    const button = container.querySelector<HTMLButtonElement>(`button[aria-label^="${label}"]`)
+    if (!button) throw new Error(`Studio has no control labelled ${label}`)
+    button.click()
+  }
+  /* The held target is not the chooser's value: a chooser matches its options, so a target pointing at a Scene that
+     has gone reads as no selection either way. What the Diagram does is the difference — a standalone-Scene target
+     puts the Diagram in its focusing mode, and nothing else a Producer can reach from here does. */
+  const focusing = () => Boolean(container.querySelector('.infoschematic-svg')?.classList.contains('focusing'))
+
+  press('Show panels')
+  press('Direct')
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
+  await expect.poll(() => container.querySelector('.editor-tab-header select')).not.toBeNull()
+
+  const chooser = container.querySelector<HTMLSelectElement>('.editor-tab-header select')
+  if (!chooser) throw new Error('Direct rendered no target chooser')
+  const setSelectValue = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set
+  if (!setSelectValue) throw new Error('browser has no native select value setter')
+  setSelectValue.call(chooser, 'standalone-scene:SCN-02')
+  chooser.dispatchEvent(new Event('change', { bubbles: true }))
+  await expect.poll(focusing).toBe(true)
+
+  /* The Scene library the panel edits is the list the chooser offers, so removing a Scene here is how a directed
+     Scene leaves the document from inside Direct. Choosing a Scene by its row chooses the target too, but making one
+     and removing it do not, which is how a Scene can leave while the target points elsewhere. */
+  const chooseRow = (label: string) => {
+    const row = [...container.querySelectorAll<HTMLButtonElement>('.scene-row')].find((candidate) =>
+      candidate.textContent?.includes(label)
+    )
+    if (!row) throw new Error(`the Scene library has no row for ${label}`)
+    row.click()
+  }
+  const naming = container.querySelector<HTMLInputElement>('.scene-tools input')
+  if (!naming) throw new Error('the Scene library has no naming field')
+  const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  if (!setInputValue) throw new Error('browser has no native input value setter')
+  setInputValue.call(naming, 'Extra')
+  naming.dispatchEvent(new Event('input', { bubbles: true }))
+  press('Add a scene')
+  await expect.poll(() => container.querySelectorAll('.scene-row').length).toBe(3)
+
+  // A Scene leaving that is not the directed one does not touch the target, which is the reducer's same-state half.
+  press('Remove this scene')
+  await expect
+    .poll(() => [...container.querySelectorAll('.scene-row span')].map((row) => row.textContent).join('|'))
+    .toBe('Scene SCN-01|Scene SCN-02')
+  expect(focusing()).toBe(true)
+
+  // The directed Scene itself going does: a target pointing at nothing cannot be presented.
+  chooseRow('Scene SCN-02')
+  // The removal reads whichever Scene the panel holds, so the choice has to have landed before it is pressed.
+  await expect
+    .poll(() => container.querySelector('.scene-row[aria-current="true"] span')?.textContent)
+    .toBe('Scene SCN-02')
+  press('Remove this scene')
+  await expect
+    .poll(() => [...container.querySelectorAll('.scene-row span')].map((row) => row.textContent).join('|'))
+    .toBe('Scene SCN-01')
+  await expect.poll(focusing).toBe(false)
+  expect(container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
 })

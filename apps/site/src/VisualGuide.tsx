@@ -7,11 +7,6 @@ import { componentSections } from './visual-guide/curriculum.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import './styles.css'
 
-export const componentsGuideContents = componentSections.map(({ id, title }) => ({
-  depth: 2 as const,
-  slug: id,
-  label: title
-}))
 const futureRoute = {
   path: componentPaths.future,
   title: 'Future',
