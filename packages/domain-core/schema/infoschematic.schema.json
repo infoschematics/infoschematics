@@ -1470,6 +1470,29 @@
                   ],
                   "additionalProperties": false
                 },
+                "cues": {
+                  "readOnly": true,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dynamic": {
+                        "type": "string"
+                      },
+                      "playback": {
+                        "type": "string",
+                        "enum": [
+                          "once",
+                          "repeat"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "dynamic"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
                 "duration": {
                   "type": "number"
                 }

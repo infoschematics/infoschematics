@@ -21,8 +21,13 @@ export function ProducerControls({
   const { scopeIcons } = useInfoschematicRenderers()
   const validElements = new Set(infoschematicRegister.all.map(({ id }) => id))
   const validFlows = new Set(infoschematicFlows.map(({ id }) => id))
+  /* A Scene is worth activating if it changes what the Diagram shows, and a cue does that: a Scene that focuses
+     nothing but asks for a Dynamic is a Scene, not an empty step. */
+  const validDynamics = new Set(config.diagram.dynamics.map(({ id }) => id))
   const sceneCanActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
-    scene.components.some((id) => validElements.has(id)) || scene.flows.some((id) => validFlows.has(id))
+    scene.components.some((id) => validElements.has(id)) ||
+    scene.flows.some((id) => validFlows.has(id)) ||
+    scene.cues.some((cue) => validDynamics.has(cue.dynamic))
 
   if (presentation.mode !== 'present') return null
 

@@ -313,8 +313,16 @@ const validateScene = (
   scene: Scene,
   elementIds: ReadonlySet<string>,
   scopeIds: ReadonlySet<string>,
+  dynamicIds: ReadonlySet<string>,
   context: string
 ) => {
+  const cued = new Set<string>()
+  for (const cue of scene.cues ?? []) {
+    // Two cues for one Dynamic in one Scene would ask the same question twice with no way to say which answer wins.
+    if (cued.has(cue.dynamic)) throw new Error(`${context} cues Diagram Dynamic ${cue.dynamic} twice`)
+    cued.add(cue.dynamic)
+    requireReference(dynamicIds, cue.dynamic, `${context} cue`)
+  }
   validateSelection(scene.focus, elementIds, scopeIds, `${context} focus`)
   validateSelection(scene.visibility?.show, elementIds, scopeIds, `${context} show`)
   validateSelection(scene.visibility?.hide, elementIds, scopeIds, `${context} hide`)
@@ -491,7 +499,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
     for (const scene of sequence.scenes) {
       if (sceneIds.has(scene.id)) throw new Error(`Duplicate Scene id in Sequence ${sequence.id}: ${scene.id}`)
       sceneIds.add(scene.id)
-      validateScene(scene, elementIds, scopeIds, `Sequence ${sequence.id} Scene ${scene.id}`)
+      validateScene(scene, elementIds, scopeIds, dynamicIds, `Sequence ${sequence.id} Scene ${scene.id}`)
     }
   }
 

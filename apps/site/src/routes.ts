@@ -12,6 +12,7 @@ export const componentPaths = {
   flow: '/docs/components/flows/',
   point: '/docs/components/points/',
   graphic: '/docs/components/graphics/',
+  dynamics: '/docs/components/dynamics/',
   future: '/docs/components/future/'
 } as const
 export const installationPath = '/docs/installation/'
@@ -207,6 +208,13 @@ export const componentRoutes: readonly ComponentRoute[] = [
     summary: 'Named visual renderers supplied by a host.',
     section: 'components',
     componentId: 'graphic'
+  },
+  {
+    path: componentPaths.dynamics,
+    title: 'Dynamics',
+    summary: 'Named changes a Scene cues or a host records.',
+    section: 'components',
+    componentId: 'dynamics'
   },
   {
     path: componentPaths.future,

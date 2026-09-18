@@ -2,6 +2,7 @@ import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { Canvas, type CanvasProps } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCueCadence } from './cues.ts'
 import { PresentationControls } from './PresentationControls.tsx'
 import { PresentationDetails } from './PresentationDetails.tsx'
 import type { SceneSignalPolicy } from './presentation.ts'
@@ -12,10 +13,10 @@ export type PresentProps = Readonly<{
   className?: string
   config: InfoschematicInput
   /**
-   * Host-owned occurrences of authored Diagram Dynamics, passed straight through to the Canvas.
+   * Host-owned occurrences of authored Diagram Dynamics, merged with the ones a Scene's cues ask for.
    *
-   * Presentation drives Scene signalling itself; a Dynamic is the other direction — something outside the
-   * presentation happened, and the document already says what it means.
+   * A host occurrence says something outside the presentation happened; a cue is the document asking for a Dynamic
+   * while a Scene is on screen. Neither suppresses the other, and a renderer sees both as occurrences it may play.
    */
   dynamics?: CanvasProps['dynamics']
   renderers?: CanvasProps['renderers']
@@ -40,6 +41,14 @@ export function Present({
   const [detailsVisible, setDetailsVisible] = useState(true)
   const [fullscreen, setFullscreen] = useState(false)
   const root = useRef<HTMLElement>(null)
+
+  const replayCues = useCallback(() => dispatch({ type: 'replay-cues' }), [dispatch])
+  useCueCadence(derived.repeatingCues, replayCues, state.sceneOccurrence)
+
+  const occurrences = useMemo(
+    () => (dynamics ? [...dynamics, ...derived.dynamics] : derived.dynamics),
+    [derived.dynamics, dynamics]
+  )
 
   const stepSequence = useCallback(
     (delta: number) => dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta }),
@@ -153,7 +162,7 @@ export function Present({
             annotated={state.annotated}
             className="isp-canvas"
             config={config}
-            dynamics={dynamics}
+            dynamics={occurrences}
             flows={derived.visibleFlows}
             graphic={derived.activeSequenceScene?.graphic}
             highlight={derived.highlight}

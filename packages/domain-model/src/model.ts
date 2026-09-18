@@ -121,6 +121,18 @@ export type Callout = {
   properties?: Readonly<Record<string, JsonValue>>
 }
 
+/**
+ * A Scene asking for a named Diagram Dynamic to play while it is the Scene an audience is looking at.
+ *
+ * The cue names the Dynamic and how often it plays, and nothing else: no duration, no easing, no timer. `once` plays
+ * it on entry to the Scene, `repeat` plays it again while the Scene holds, and absence means `once`. A statement that
+ * lasts is authored as `depicts: state` on the Dynamic itself, so it is not a playback policy here.
+ */
+export type SceneCue = {
+  dynamic: string
+  playback?: 'once' | 'repeat'
+}
+
 export type Scene = {
   id: string
   label: string
@@ -128,6 +140,7 @@ export type Scene = {
   visibility?: { show?: ElementSelection; hide?: ElementSelection }
   focus?: ElementSelection
   callout?: Callout
+  cues?: readonly SceneCue[]
 }
 
 export type SequencePresentation = {

@@ -5,6 +5,7 @@ import { createProductionState, type DirectTarget, type ProductionMode, reducePr
 const presentation = (): PresentationState => ({
   annotated: true,
   autoAdvance: false,
+  cueCycle: 0,
   playing: { id: 'story-one', step: 2 },
   sceneOccurrence: 3,
   standaloneSceneId: null,

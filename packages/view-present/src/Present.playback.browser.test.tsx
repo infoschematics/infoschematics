@@ -18,6 +18,7 @@ import { defineInfoschematicModel } from '@infoschematics/domain-core'
 import { useEffect, useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { cueRepeatInterval } from './cues.ts'
 import { Present } from './Present.tsx'
 
 const hold = 1000
@@ -207,6 +208,141 @@ test('steering a timed Sequence mid-hold leaves no timeout behind', async () => 
       drifted: drifted.slice(0, 8),
       driftedCycles: drifted.length
     }).toEqual({ started: steadyPlayback, keysSeen: cycles, drifted: [], driftedCycles: 0 })
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+/**
+ * A repeating Scene cue, measured on the same terms.
+ *
+ * `ADR-INFOSCHEMATICS-038` puts the cadence of a `repeat` cue in the View, which brings it under `SCENE-006`: a
+ * repeat runs cycles, and cycles must not accumulate. The shape is one interval advancing one occurrence key, so the
+ * count to hold flat is the interval plus whatever the Canvas holds for the occurrence currently playing.
+ */
+const cuedConfig = defineInfoschematicModel({
+  id: 'sustained-cues',
+  title: 'Sustained cues',
+  diagram: {
+    bounds: { height: 240, width: 480, x: 0, y: 0 },
+    gridSize: 10,
+    families: [{ id: 'request', label: 'Request', description: 'Requests', appearance: { color: '#7c3aed' } }],
+    cards: [
+      { id: 'SRC', label: 'Source', bounds: { height: 60, width: 120, x: 40, y: 60 } },
+      { id: 'SNK', label: 'Sink', bounds: { height: 60, width: 120, x: 300, y: 60 } }
+    ],
+    flows: [
+      { id: 'LOAD', family: 'request', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }
+    ],
+    dynamics: [{ id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] }]
+  },
+  sequences: [
+    {
+      id: 'cued',
+      label: 'Cued',
+      presentation: { callouts: false, display: 'expanded', timed: false },
+      scenes: [
+        { id: 'beat', label: 'Beat', cues: [{ dynamic: 'delivery', playback: 'repeat' }] },
+        { id: 'after', label: 'After', cues: [{ dynamic: 'delivery', playback: 'repeat' }] }
+      ]
+    }
+  ]
+})
+
+/** One live signal occurrence, and one pending Canvas retirement for it. The cadence itself is an interval. */
+const steadyCue = '1/2'
+
+/*
+ * The same quiescence rule, held to three consecutive agreements rather than two.
+ *
+ * A cue's replay is a state dispatch from inside the faked clock, and the beat is longer than the signal it plays:
+ * between the occurrence retiring and the next one committing there is a real, briefly stable reading with nothing
+ * playing, and two agreeing observations can land inside it. Three cannot, and an accumulation is persistent rather
+ * than transient, so the stricter rule hides nothing it is asked to measure.
+ */
+const settleCue = async (observe: () => string) => {
+  let agreed = 0
+  let previous = observe()
+  for (let attempt = 0; attempt < 30; attempt += 1) {
+    await macrotask()
+    const next = observe()
+    agreed = next === previous ? agreed + 1 : 0
+    previous = next
+    if (agreed === 2) return next
+  }
+  throw new Error(`a cue did not settle within 30 macrotasks, last observation ${previous}`)
+}
+
+/*
+ * When the Audience steers, measured from the start of the beat.
+ *
+ * Past the 900ms a Flow signal lasts, so the Scene it arrives on plays its own occurrence rather than being held off
+ * by the one still running, and short of the 1400ms beat, so the cadence it retires was genuinely mid-cycle.
+ */
+const steerAt = 1000
+
+test('a repeating cue holds its cadence over many cycles without accumulating timers or occurrences', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] })
+  try {
+    const screen = await render(<Present config={cuedConfig} />)
+    const { keys, observe, recordKeys } = await playback(screen.container)
+
+    await screen.getByRole('button', { name: 'Beat' }).click()
+    const started = await settle(observe)
+
+    const observations: string[] = []
+    for (let cycle = 1; cycle <= cycles; cycle += 1) {
+      await vi.advanceTimersByTimeAsync(cueRepeatInterval)
+      observations.push(await settleCue(observe))
+      recordKeys()
+    }
+
+    const drifted = observations.filter((observation) => observation !== steadyCue)
+    expect({
+      started,
+      // A repeat is a new occurrence key per cycle, so the keys the page actually showed prove it replayed rather
+      // than sat on its first occurrence with a timer quietly piling up behind it.
+      keysSeen: keys.size,
+      drifted: drifted.slice(0, 8),
+      driftedCycles: drifted.length
+    }).toEqual({ started: steadyCue, keysSeen: cycles, drifted: [], driftedCycles: 0 })
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+/**
+ * The steering case `SCENE-006`'s caveat asks for, now that a repeat exists to interrupt.
+ *
+ * An uninterrupted repeat never exercises the cadence's cleanup: the interval is still the same interval. A Scene
+ * change mid-cycle is what retires one cadence and starts another, which is the only path on which a missing
+ * `clearInterval` shows up as a second beat rather than as nothing at all.
+ */
+test('a Scene change mid-cycle retires the cadence it interrupted', async () => {
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval'] })
+  try {
+    const screen = await render(<Present config={cuedConfig} />)
+    const { keys, observe, recordKeys } = await playback(screen.container)
+
+    await screen.getByRole('button', { name: 'Beat' }).click()
+    const started = await settle(observe)
+
+    const observations: string[] = []
+    for (let cycle = 1; cycle <= cycles; cycle += 1) {
+      // Inside the beat: the next repeat is pending and has not fired when the Scene changes under it.
+      await vi.advanceTimersByTimeAsync(steerAt)
+      steerForward()
+      observations.push(await settleCue(observe))
+      recordKeys()
+    }
+
+    const drifted = observations.filter((observation) => observation !== steadyCue)
+    expect({
+      started,
+      keysSeen: keys.size,
+      drifted: drifted.slice(0, 8),
+      driftedCycles: drifted.length
+    }).toEqual({ started: steadyCue, keysSeen: cycles, drifted: [], driftedCycles: 0 })
   } finally {
     vi.useRealTimers()
   }

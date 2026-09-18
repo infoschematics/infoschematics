@@ -1,3 +1,4 @@
+import type { DynamicOccurrence } from '@infoschematics/view-model/dynamics'
 import type {
   InfoschematicRuntime,
   RuntimeSequence,
@@ -10,11 +11,20 @@ export type PlayingSequence = Readonly<{ id: string; step: number }>
 /** @deprecated Use PlayingSequence. */
 export type PlayingStory = PlayingSequence
 
+/**
+ * Whether Presentation originates occurrences of its own on Scene entry.
+ *
+ * `focused-flows` signals the focused Scene's Flows and plays the Dynamics that Scene cues; `none` originates
+ * nothing, leaving every occurrence to the host. A cue is an authored request, so it is suppressed by the same
+ * policy that suppresses automatic signalling rather than by one of its own.
+ */
 export type SceneSignalPolicy = 'focused-flows' | 'none'
 
 export type PresentationState = Readonly<{
   annotated: boolean
   autoAdvance: boolean
+  /** Advances while a Scene holds, so a repeating cue plays again under a key a renderer reads as a new occurrence. */
+  cueCycle: number
   playing: PlayingSequence | null
   sceneOccurrence: number
   standaloneSceneId: string | null
@@ -26,6 +36,7 @@ export type PresentationState = Readonly<{
 
 export type PresentationAction =
   | Readonly<{ type: 'clear-focus' }>
+  | Readonly<{ type: 'replay-cues' }>
   | Readonly<{ type: 'set-annotated'; value: boolean }>
   | Readonly<{ type: 'set-auto-advance'; value: boolean }>
   | Readonly<{ type: 'set-takeaways'; value: boolean }>
@@ -47,6 +58,7 @@ export type PresentationAction =
 export const initialPresentationState = (runtime: InfoschematicRuntime): PresentationState => ({
   annotated: false,
   autoAdvance: true,
+  cueCycle: 0,
   playing: null,
   sceneOccurrence: 0,
   standaloneSceneId: null,
@@ -67,6 +79,9 @@ export const presentationReducer = (state: PresentationState, action: Presentati
   switch (action.type) {
     case 'clear-focus':
       return { ...state, playing: null, standaloneSceneId: null, thematicSceneId: null }
+    case 'replay-cues':
+      // Every Scene change already changes `sceneOccurrence`, which is part of the key, so the cycle needs no reset.
+      return { ...state, cueCycle: state.cueCycle + 1 }
     case 'stop-story':
     case 'stop-sequence':
       return { ...state, playing: null }
@@ -188,6 +203,22 @@ export const derivePresentation = (
           occurrenceKey: `present-scene-${state.sceneOccurrence}`
         }))
       : []
+  const cues = signalPolicy === 'focused-flows' ? (focusedScene?.cues ?? []) : []
+  /*
+   * A cue becomes an occurrence, and nothing here becomes a timer.
+   *
+   * `once` is keyed by the Scene occurrence alone, so a re-render of the same Scene is the same occurrence and a
+   * return to it is a new one. `repeat` adds the cycle the View advances while the Scene holds, which is what lets a
+   * renderer replay it — the key is the only thing that says so, per `DYNAMIC-002`.
+   */
+  const dynamics: readonly DynamicOccurrence[] = cues.map((cue) => ({
+    dynamicId: cue.dynamic,
+    occurrenceKey:
+      cue.playback === 'repeat'
+        ? `present-cue-${state.sceneOccurrence}-${state.cueCycle}`
+        : `present-cue-${state.sceneOccurrence}`
+  }))
+  const repeatingCues = cues.some((cue) => cue.playback === 'repeat')
   const highlight =
     focusedScene && (focusedScene.components.length > 0 || focusedScene.flows.length > 0)
       ? {
@@ -199,8 +230,10 @@ export const derivePresentation = (
   return {
     activeSequence,
     activeSequenceScene,
+    dynamics,
     focusedScene,
     highlight,
+    repeatingCues,
     signals,
     runningStory,
     runningStoryScene,

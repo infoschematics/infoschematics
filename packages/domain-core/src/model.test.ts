@@ -405,3 +405,50 @@ describe('Diagram Dynamics', () => {
     ).toThrow('Diagram Dynamic sustained is a signal-flow Dynamic and cannot declare depicts')
   })
 })
+
+describe('Scene cues', () => {
+  const cuedModel = (cues: unknown) =>
+    defineInfoschematicModel({
+      id: 'CUED',
+      title: 'Cued',
+      diagram: {
+        bounds: { x: 0, y: 0, width: 400, height: 300 },
+        gridSize: 10,
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 100, height: 60 } },
+          { id: 'SNK', label: 'Sink', bounds: { x: 260, y: 20, width: 100, height: 60 } }
+        ],
+        flows: [{ id: 'LOAD', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }],
+        dynamics: [
+          { id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
+          { id: 'attention', label: 'Needs attention', kind: 'emphasise-elements', elements: ['SNK'] }
+        ]
+      },
+      sequences: [
+        {
+          id: 'walkthrough',
+          label: 'Walkthrough',
+          presentation: { display: 'expanded', timed: true, callouts: true },
+          scenes: [{ id: 'arrival', label: 'Arrival', cues: cues as never }]
+        }
+      ]
+    })
+
+  it('carries a cue as authored, and defaults a Scene to none', () => {
+    expect(
+      cuedModel([{ dynamic: 'delivery' }, { dynamic: 'attention', playback: 'repeat' }]).sequences[0]?.scenes[0]?.cues
+    ).toEqual([{ dynamic: 'delivery' }, { dynamic: 'attention', playback: 'repeat' }])
+
+    expect(cuedModel(undefined).sequences[0]?.scenes[0]?.cues).toBeUndefined()
+  })
+
+  it('rejects a cue naming no declared Dynamic, and the same Dynamic cued twice in one Scene', () => {
+    expect(() => cuedModel([{ dynamic: 'absent' }])).toThrow(
+      'Sequence walkthrough Scene arrival cue references unknown id: absent'
+    )
+
+    expect(() => cuedModel([{ dynamic: 'delivery' }, { dynamic: 'delivery', playback: 'repeat' }])).toThrow(
+      'Sequence walkthrough Scene arrival cues Diagram Dynamic delivery twice'
+    )
+  })
+})

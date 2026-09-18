@@ -81,6 +81,12 @@ export type RuntimeIdentity = {
   wraps?: string
 }
 
+/** A Scene's request that a named Dynamic play, projected as the authored ids and policy with no timing attached. */
+export type RuntimeSceneCue = {
+  dynamic: string
+  playback: 'once' | 'repeat'
+}
+
 export type RuntimeSequenceScene = {
   id: string
   code: string
@@ -89,6 +95,8 @@ export type RuntimeSequenceScene = {
   caption: string
   headline: string
   hold: number
+  /** Dynamics this Scene asks for, in authored order. A View owns every timer; this says only which and how often. */
+  cues: readonly RuntimeSceneCue[]
   components: readonly string[]
   flows: readonly string[]
   graphic?: Overlay
@@ -404,6 +412,9 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
         caption: scene.callout?.body ?? '',
         headline: scene.callout?.title ?? scene.label,
         hold: scene.duration ?? defaultSceneDuration,
+        // Absence of a policy is `once`: the cue plays on entry, which is what a Scene naming a Dynamic asks for
+        // without saying more. Nothing here carries a duration, per `DYNAMIC-001`.
+        cues: (scene.cues ?? []).map((cue) => ({ dynamic: cue.dynamic, playback: cue.playback ?? 'once' })),
         components: elements.filter((id) => !flowIds.has(id) && !overlayIds.has(id)),
         flows: elements.filter((id) => flowIds.has(id)),
         graphic: overlay ? overlayById.get(overlay) : undefined,

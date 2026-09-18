@@ -1,3 +1,4 @@
+export { cueRepeatInterval, useCueCadence } from './cues.ts'
 export type { PresentProps } from './Present.tsx'
 export { Present } from './Present.tsx'
 export type {

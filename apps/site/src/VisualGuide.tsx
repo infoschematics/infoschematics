@@ -5,6 +5,7 @@ import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { type ComponentRoute, componentPaths, componentRoutes, componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
+import { DynamicsSpecimen } from './visual-guide/DynamicsSpecimen.tsx'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
 import './styles.css'
 
@@ -57,8 +58,8 @@ export function ComponentsHub() {
       <article aria-label="Components" className="document-content">
         <h1>Components</h1>
         <p>
-          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, and placed
-          Graphics. Explore each component on its own.
+          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, placed Graphics,
+          and named Dynamics. Explore each component on its own.
         </p>
         <div className="component-catalogue">
           {componentRoutes.slice(1).map((route) => {
@@ -107,7 +108,7 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
       ]}
     >
       <article aria-label={component.title} className="document-content">
-        <p className="visual-guide__layer">{component.layer}</p>
+        {component.layer ? <p className="visual-guide__layer">{component.layer}</p> : null}
         <h1>{component.title}</h1>
         <p>{component.summary}</p>
         {component.id === 'canvas' && (
@@ -142,6 +143,14 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
             Start, end, junction, anchor, and hidden are future role semantics.
           </p>
         )}
+        {component.id === 'dynamics' && (
+          <p>
+            A Dynamic is the only part of a document that describes change, and it still carries no timing: no duration,
+            no easing, no timer, and no occurrence key. A Scene cues it by name, <code>once</code> or on a{' '}
+            <code>repeat</code>, and the View owns the beat. A change that lasts is authored as{' '}
+            <code>depicts: state</code> on the Dynamic itself and is held until the occurrence is withdrawn.
+          </p>
+        )}
         {component.id === 'graphic' && (
           <p>
             Authored data names a renderer and passes serialisable properties. The product offers{' '}
@@ -151,19 +160,23 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
         )}
         <section aria-labelledby={`${component.id}-example`} className="component-page__section">
           <h2 id={`${component.id}-example`}>Example</h2>
-          <InteractiveSpecimen
-            comparisons={
-              component.id === 'card'
-                ? [
-                    { id: 'standard', label: 'Standard', propertyKey: 'card.variant', value: 'standard' },
-                    { id: 'adapter', label: 'Adapter', propertyKey: 'card.variant', value: 'adapter' }
-                  ]
-                : treatmentComparisons(component.id)
-            }
-            kind={component.id}
-            propertyKeys={component.propertyKeys}
-            title={`${component.title} properties`}
-          />
+          {component.id === 'dynamics' ? (
+            <DynamicsSpecimen />
+          ) : (
+            <InteractiveSpecimen
+              comparisons={
+                component.id === 'card'
+                  ? [
+                      { id: 'standard', label: 'Standard', propertyKey: 'card.variant', value: 'standard' },
+                      { id: 'adapter', label: 'Adapter', propertyKey: 'card.variant', value: 'adapter' }
+                    ]
+                  : treatmentComparisons(component.id)
+              }
+              kind={component.id}
+              propertyKeys={component.propertyKeys}
+              title={`${component.title} properties`}
+            />
+          )}
         </section>
         <section aria-labelledby={`${component.id}-properties`} className="component-page__section">
           <h2 id={`${component.id}-properties`}>Properties</h2>

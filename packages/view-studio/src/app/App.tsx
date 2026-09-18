@@ -35,7 +35,7 @@ import {
   type InfoschematicRuntime,
   type RuntimeStory
 } from '@infoschematics/view-model/runtime'
-import type { PresentProps } from '@infoschematics/view-present'
+import { type PresentProps, useCueCadence } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { directOptionsFor } from './direct-targets.ts'
 import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
@@ -637,9 +637,17 @@ function AppContent({
     },
     [dynamicOccurrence, heldDynamic]
   )
+  /* A Scene's cues reach the same occurrence path as the rehearsal bank, so rehearsal and presentation agree and
+     neither suppresses the other: a Producer can press a Dynamic while the Scene on screen is playing its own. */
+  const cueReplay = useCallback(() => presentation.replayCues(), [presentation])
+  useCueCadence(presentation.repeatingCues, cueReplay, presentation.sceneOccurrence)
   const resolvedDynamics = useMemo(
-    () => resolveDiagramDynamics(runtime.config.diagram.dynamics, dynamicOccurrence ? [dynamicOccurrence] : []),
-    [dynamicOccurrence, runtime.config.diagram.dynamics]
+    () =>
+      resolveDiagramDynamics(runtime.config.diagram.dynamics, [
+        ...presentation.cueOccurrences,
+        ...(dynamicOccurrence ? [dynamicOccurrence] : [])
+      ]),
+    [dynamicOccurrence, presentation.cueOccurrences, runtime.config.diagram.dynamics]
   )
   /* Studio draws what it resolved, so what it accepted is what is active: `Canvas`'s visibility reconciliation has no
      counterpart here, and the announcement is the one thing Studio still owed a reader who cannot see the treatment. */

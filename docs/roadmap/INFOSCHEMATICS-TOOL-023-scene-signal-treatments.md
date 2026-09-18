@@ -4,12 +4,12 @@ area: TOOL
 title: Scene signal treatments
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-08T02:09:11Z
-updated_at: 2026-09-18T02:40:00Z
+updated_at: 2026-09-18T06:00:00Z
 ---
 
 # Scene signal treatments
@@ -64,18 +64,18 @@ The reading below was taken on 2026-09-16 and still holds except where the three
 
 ## Steps
 
-1. [ ] Record the taken decision as an amendment to `ADR-INFOSCHEMATICS-026` or a companion record: a Scene may name Dynamics and a bounded `once` or `repeat` policy; a statement that lasts is `depicts: state` on the Dynamic and not a Scene policy; an ordered cascade is out of scope. Verifiable by the record existing, naming its consequence for `DYNAMIC-001` and `SIGNAL-003`, and being linked from `docs/decisions/README.md`.
-2. [ ] Add the Scene cue field to `packages/domain-model/src/model.ts:124-131`: a list of stable Diagram Dynamic ids, each with an optional playback of `once` (the default) or `repeat`. No duration, easing or timer, as `DYNAMIC-001` requires. Verifiable by `bun run --cwd packages/domain-model typecheck` and by a document that declares a cue typechecking.
-3. [ ] Mirror the field in `packages/domain-core/src/schema.ts:462-469`, validate it in `packages/domain-core/src/model.ts` beside the Dynamic checks at `:439-456`, and add its key to the serialisation order in `packages/domain-core/src/serialise.ts`. Verifiable by `bun run self:schema:verify` regenerating `packages/domain-core/schema/infoschematic.schema.json` with no diff, and by new cases in `packages/domain-core/src/model.test.ts` rejecting an unknown Dynamic id, a duplicate cue for one Dynamic in one Scene, and an unrecognised playback value.
-4. [ ] Prove a document that declares no cue is byte-identical through the whole pipeline, as `DYNAMIC-001` requires of the Dynamics collection. Verifiable by `bun run self:examples:verify` and by `bun run self:examples:render --all` producing unchanged SVG bytes.
-5. [ ] Project the cue onto the runtime Scene in `packages/view-model/src/runtime.ts` beside `hold` at `:381`, carrying the ids and the policy and no timing at all. Verifiable by pure tests in `packages/view-model/src/runtime.test.ts` asserting the projection for a cue with each policy, at an authored and a defaulted `duration`.
-6. [ ] Extend `SceneSignalPolicy` at `packages/view-present/src/presentation.ts:13` and originate `DynamicOccurrence` values in `derivePresentation` at `:184-189`, keyed off `sceneOccurrence` so a re-render does not replay and a Scene change cancels. Verifiable by pure reducer tests in `packages/view-present/src/presentation.test.ts` covering initial play, replay on re-entry, cancellation on Scene change and on clear, and the `none` policy deriving nothing.
-7. [ ] Merge the Scene-originated occurrences with the existing host `dynamics` prop in `packages/view-present/src/Present.tsx:156` without letting either suppress the other, and correct the prop comment at `:14-20`, which currently states that a Dynamic is the opposite direction from Scene signalling. Verifiable by a rendered case in `packages/view-present/src/Present.dynamics.test.tsx` where a host occurrence and a Scene cue are live together and both reach the Canvas.
-8. [ ] Route the same Scene state through Studio, reusing the occurrence path at `packages/view-studio/src/app/App.tsx:554-570` rather than adding a second scheduler, so rehearsal and presentation agree. Verifiable by a case in `packages/view-studio/src/app/App.browser.test.tsx` showing a Scene cue playing in Studio's Present surface while the rehearsal bank still replays on demand.
-9. [ ] Hold `repeat` to `SCENE-006`'s measured bound rather than assuming it: drive a repeated cue through many cycles under fake timers and assert the retained-occurrence and pending-timeout counts stay flat, following `packages/view-present/src/Present.playback.browser.test.tsx`. Add the steering case that `SCENE-006`'s own caveat says uninterrupted playback never reaches — a repeat interrupted mid-cycle by a Scene change. Verifiable by each case failing when the matching cleanup is removed.
-10. [ ] Author the first combined example: give `examples/is-infoschematics/infoschematic.yaml` Dynamics beside its Sequence at `:294`, or give `examples/is-system/infoschematic.yaml` a Sequence beside its Dynamics at `:103-114`. Verifiable by `bun run self:examples:generate` and the example package's own suite.
-11. [ ] Add a Dynamics specimen kind to `apps/site/src/visual-guide/specimens.ts` and `curriculum.ts` covering `once`, `repeat` and a `depicts: state` Dynamic, so each treatment can be watched side by side in full and reduced motion. Verifiable by `bun run --cwd apps/site test` and by the specimen appearing in the built guide.
-12. [ ] Update the contracts: the requirements listed under Current state, and the authoring guidance under `docs/guides/`. Verifiable by `bun run self:scripts:test`, which fails on an unrecognised conformance state or an unresolvable evidence path.
+1. [x] Record the taken decision as an amendment to `ADR-INFOSCHEMATICS-026` or a companion record: a Scene may name Dynamics and a bounded `once` or `repeat` policy; a statement that lasts is `depicts: state` on the Dynamic and not a Scene policy; an ordered cascade is out of scope. Verifiable by the record existing, naming its consequence for `DYNAMIC-001` and `SIGNAL-003`, and being linked from `docs/decisions/README.md`.
+2. [x] Add the Scene cue field to `packages/domain-model/src/model.ts:124-131`: a list of stable Diagram Dynamic ids, each with an optional playback of `once` (the default) or `repeat`. No duration, easing or timer, as `DYNAMIC-001` requires. Verifiable by `bun run --cwd packages/domain-model typecheck` and by a document that declares a cue typechecking.
+3. [x] Mirror the field in `packages/domain-core/src/schema.ts:462-469`, validate it in `packages/domain-core/src/model.ts` beside the Dynamic checks at `:439-456`, and add its key to the serialisation order in `packages/domain-core/src/serialise.ts`. Verifiable by `bun run self:schema:verify` regenerating `packages/domain-core/schema/infoschematic.schema.json` with no diff, and by new cases in `packages/domain-core/src/model.test.ts` rejecting an unknown Dynamic id, a duplicate cue for one Dynamic in one Scene, and an unrecognised playback value.
+4. [x] Prove a document that declares no cue is byte-identical through the whole pipeline, as `DYNAMIC-001` requires of the Dynamics collection. Verifiable by `bun run self:examples:verify` and by `bun run self:examples:render --all` producing unchanged SVG bytes.
+5. [x] Project the cue onto the runtime Scene in `packages/view-model/src/runtime.ts` beside `hold` at `:381`, carrying the ids and the policy and no timing at all. Verifiable by pure tests in `packages/view-model/src/runtime.test.ts` asserting the projection for a cue with each policy, at an authored and a defaulted `duration`.
+6. [x] Extend `SceneSignalPolicy` at `packages/view-present/src/presentation.ts:13` and originate `DynamicOccurrence` values in `derivePresentation` at `:184-189`, keyed off `sceneOccurrence` so a re-render does not replay and a Scene change cancels. Verifiable by pure reducer tests in `packages/view-present/src/presentation.test.ts` covering initial play, replay on re-entry, cancellation on Scene change and on clear, and the `none` policy deriving nothing.
+7. [x] Merge the Scene-originated occurrences with the existing host `dynamics` prop in `packages/view-present/src/Present.tsx:156` without letting either suppress the other, and correct the prop comment at `:14-20`, which currently states that a Dynamic is the opposite direction from Scene signalling. Verifiable by a rendered case in `packages/view-present/src/Present.dynamics.test.tsx` where a host occurrence and a Scene cue are live together and both reach the Canvas.
+8. [x] Route the same Scene state through Studio, reusing the occurrence path at `packages/view-studio/src/app/App.tsx:554-570` rather than adding a second scheduler, so rehearsal and presentation agree. Verifiable by a case in `packages/view-studio/src/app/App.browser.test.tsx` showing a Scene cue playing in Studio's Present surface while the rehearsal bank still replays on demand.
+9. [x] Hold `repeat` to `SCENE-006`'s measured bound rather than assuming it: drive a repeated cue through many cycles under fake timers and assert the retained-occurrence and pending-timeout counts stay flat, following `packages/view-present/src/Present.playback.browser.test.tsx`. Add the steering case that `SCENE-006`'s own caveat says uninterrupted playback never reaches — a repeat interrupted mid-cycle by a Scene change. Verifiable by each case failing when the matching cleanup is removed.
+10. [x] Author the first combined example: give `examples/is-infoschematics/infoschematic.yaml` Dynamics beside its Sequence at `:294`, or give `examples/is-system/infoschematic.yaml` a Sequence beside its Dynamics at `:103-114`. Verifiable by `bun run self:examples:generate` and the example package's own suite.
+11. [x] Add a Dynamics specimen kind to `apps/site/src/visual-guide/specimens.ts` and `curriculum.ts` covering `once`, `repeat` and a `depicts: state` Dynamic, so each treatment can be watched side by side in full and reduced motion. Verifiable by `bun run --cwd apps/site test` and by the specimen appearing in the built guide.
+12. [x] Update the contracts: the requirements listed under Current state, and the authoring guidance under `docs/guides/`. Verifiable by `bun run self:scripts:test`, which fails on an unrecognised conformance state or an unresolvable evidence path.
 
 ## Files touched
 
@@ -147,6 +147,60 @@ Expected: `docs/guides/editing-authored-yaml.md` gains the authored cue and a st
 ### Roadmap
 
 Expected: three captures, none in this record's scope. An ordered cascade is deferred and needs its own record once the untimed-Sequence question under Discussion has an answer. Site-owned consumer prose under `apps/site/content/` is a follow-up record once the feature lands, and applying these treatments to the 5G-EMERGE walkthrough is an authoring pass of its own. No sequencing edit is needed: `INFOSCHEMATICS-TOOL-059` is delivered.
+
+## Review
+
+### Delivered
+
+A Scene now cues the named Diagram Dynamics its own Diagram declares, each `once` on entry or on a `repeat` while the Scene holds, and nothing authored carries timing to do it: the cue names the Dynamic and at most how often, while the View that plays the Scene owns the beat. Present derives the occurrences, Studio's Present surface plays them on the same single cadence rather than a second scheduler, and the components guide has a Dynamics page that plays all three policies — `once`, `repeat`, and a held `depicts: state` — side by side under the reader's own hand.
+
+### Summary of changes
+
+`SceneCue` joins `Scene` in `packages/domain-model/src/model.ts`, mirrored in `packages/domain-core/src/schema.ts`, validated beside the Dynamics checks in `packages/domain-core/src/model.ts` (a cue naming an undeclared Dynamic and the same Dynamic cued twice in one Scene both fail integrity), given its place in the fixed field order in `serialise.ts`, and projected into the regenerated `packages/domain-core/schema/infoschematic.schema.json`. `packages/view-model/src/runtime.ts` projects the cue onto the runtime Scene with an absent policy read as `once`, carrying ids and policy and no timing at all.
+
+Present holds a `cueCycle` counter and a `replay-cues` action in `packages/view-present/src/presentation.ts`, turning each cue into a `DynamicOccurrence` keyed `present-cue-{sceneOccurrence}` or, for a repeat, `present-cue-{sceneOccurrence}-{cueCycle}`: a retained key holds, a new key replays, and leaving the Scene withdraws both. The one interval that advances the cycle is `useCueCadence` in the new `packages/view-present/src/cues.ts`, exported from the package index so Studio calls the same hook; `Present.tsx` merges cued occurrences with the host-supplied `dynamics` prop, neither suppressing the other, and the prop comment that said a Dynamic travels only the other direction is corrected.
+
+Site gains `apps/site/src/visual-guide/dynamics.ts` (a canonical-model specimen, because the legacy specimen shape cannot express `diagram.dynamics` or a Scene cue at all), `DynamicsSpecimen.tsx` rendering three Canvases with occurrences supplied the way a Scene cue supplies them, a `dynamics` guide section and route, and two real-browser cases. `GuideSectionId` records honestly that Dynamics is a guide section without being a specimen kind. Two authored documents now carry cues: `examples/is-infoschematics/` declares Dynamics and cues its Scenes, and `examples/is-showcase/` cues `DYN-EVENT` `once` and `DYN-SIGNAL` on a `repeat`.
+
+Contracts moved with the behaviour: `SIGNAL-003` now says where the cadence lives while keeping derivation pure and clock-free, `DYNAMIC-002` recognises a Scene-originated occurrence alongside a host one, `SCENE-007` states what a cue may declare and how it is validated, `SCENE-006`'s bound is extended over the cue cadence, `docs/guides/editing-authored-yaml.md` gains the authored cue and says focus and Dynamics stay separate concepts, and `ADR-INFOSCHEMATICS-038` records the decision.
+
+### Verification
+
+| Gate | Outcome |
+| --- | --- |
+| `bun run self:check` | 48 tasks successful, 48 total |
+| `bun run self:scripts:test` | 16 files, 95 tests passed |
+| `bunx turbo run test --force` over domain-core, view-model, view-present, view-studio | 9 successful; 8, 16, 6 and 22 test files passed |
+| `bun run --cwd apps/site test` | 10 files, 150 tests passed |
+| `bun run --cwd apps/site test:browser` | 5 files, 6 tests passed, including the two new Dynamics cases |
+| `bun run self:boundaries:verify` | cruised 344 modules, 171 cross-package type-only |
+| `bun run self:examples:verify` | generated example exports current: 5 |
+| `bun run self:schema:verify` | JSON Schema current |
+| `bun run self:examples:render showcase --png --width 1600` | rendered, and looked at |
+
+Looked at: the showcase still rendering, whole. The blueprint backdrop, both Region frames, the Adapter and Wrapper clasps, every Flow treatment and both arrowheads are as they were, and no cue paints anything into a still output — which is `DYNAMIC-004` holding rather than an omission. The byte comparison says the same thing across all five example documents: rendered before and after this change under a stash of exactly these paths, `blank`, `infoschematics`, `homepage`, `showcase` and `system` are byte-identical, including the two documents that now declare cues.
+
+Non-vacuity was proved rather than assumed. Removing `playback: 'repeat'` from the guide specimen and starting the state pane withdrawn fails the new site case on its state-emphasis assertion; the browser cases distinguish a playing cadence from a paused one by counting distinct occurrence keys over two and a half intervals, so a pane that never moves and a pane that never stops both fail.
+
+### Post-change review
+
+`scripts/example-capability-coverage.test.ts` was red until the showcase authored cues, and that is the check working: it derives its capability list from the Zod schema, so `sequences.scenes.cues`, `.dynamic` and `.playback` became required the moment the field landed, and both enum values had to appear in a published document. The showcase now shows them and its README says so. `turbo.json` already listed `examples/*/*.yaml` under `//#self:scripts:test`, so no inputs edit was owed here.
+
+The site build needed `turbo run build` for `@infoschematics/view-present` before it could see `useCueCadence`, because `vite build` resolves the package's `dist` while suites and typechecks resolve source. Nothing in the change works around that; it is the known cost recorded elsewhere.
+
+`apps/site/package.json` now declares `@infoschematics/view-present`, which the `site-does-not-own-product-model` boundary permits and `not-to-dev-dep` requires to be explicit.
+
+### Outstanding concerns
+
+A React 19 warning — `g: 'key' is not a prop` — appears in the new site browser run. It reproduces identically on HEAD in `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, so it is pre-existing in view-canvas's dynamics rendering and outside this item; it belongs in a later wave rather than here.
+
+`apps/site/content/authoring.md` still frames Dynamics as something only a host plays ("Name the Dynamics a host can play") and does not mention cues. That is site-owned consumer prose, deferred to its own record as this repository's convention has it, and it is the one place a reader could still be told the old story.
+
+The ordered cascade stays deferred for the reason under Discussion: it would have to invent authored timing to divide, and an untimed Sequence has no duration to divide. The 5G-EMERGE walkthrough authoring pass is its own work. Within the guide, the property-specimen machinery still cannot express Dynamics; the page works because it bypasses it.
+
+### Mini recap
+
+Three things are worth looking at by eye before this is accepted: the Dynamics guide page at `/docs/components/dynamics/`, where the three panes should show a pulse that travels once, a pulse that keeps arriving on one steady beat, and an emphasis that simply stays until withdrawn; the same page with the operating system set to reduce motion, where the travelling pulse should become a still outline over the same span rather than a slower journey; and a Sequence in the Playground over `examples/is-infoschematics/` or `examples/is-showcase/`, watching that a repeat stays inside its Scene's hold and leaves nothing painted behind when the Scene changes.
 
 ## Discussion
 

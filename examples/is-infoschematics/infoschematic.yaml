@@ -256,6 +256,21 @@ diagram:
     - id: DEP-017
       family: dependency
       link: HOST-SITE W1 -> EX-IS E1
+  dynamics:
+    - id: contract-change-travels
+      label: A contract change travels upward
+      description: The Domain Model changed, and each package above it takes the change in one direction only.
+      kind: signal-flow
+      flows:
+        - DEP-001
+        - DEP-003
+    - id: host-is-the-outlet
+      label: The public host is the outlet in view
+      description: Publication is what this part of the story is about, so the host stays lit while it is.
+      kind: emphasise-elements
+      elements:
+        - HOST-SITE
+      depicts: state
   gridSize: 10
 scopes:
   - id: domain-contract
@@ -316,6 +331,9 @@ sequences:
             - The Domain Model imports no package.
           placement:
             element: PKG-DM
+        cues:
+          - dynamic: contract-change-travels
+            playback: repeat
         duration: 5
       - id: story-scene-views
         label: Choose the narrowest View
@@ -366,6 +384,8 @@ sequences:
             - The same definition can drive Studio and deterministic SVG.
           placement:
             element: HOST-SITE
+        cues:
+          - dynamic: host-is-the-outlet
         duration: 6
   - id: OVERVIEW
     label: Overview

@@ -319,6 +319,9 @@ sequences:
           elements:
             - CARD-01
             - CARD-02
+        cues:
+          - dynamic: DYN-EVENT
+            playback: once
         callout:
           title: Structure
           body: A Card is a placed component. Its collection carries the colour, and its stereotype says what kind of thing it is.
@@ -361,6 +364,9 @@ sequences:
             - FAB-01
             - PT-01
             - PT-02
+        cues:
+          - dynamic: DYN-SIGNAL
+            playback: repeat
         callout:
           title: Edges
           body: A Point is a lightweight source or sink. A Fabric is a connectable plane rather than a component.

@@ -1335,3 +1335,83 @@ test('a Direct target clears when its Scene leaves the library, and holds while 
   await expect.poll(focusing).toBe(false)
   expect(container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
 })
+
+test("Studio plays a Scene's cue in its Present surface while the rehearsal bank still replays on demand", async () => {
+  window.localStorage.clear()
+  const cuedConfig = defineInfoschematicModel({
+    id: 'studio-cues',
+    title: 'Studio cues',
+    diagram: {
+      bounds: { height: 320, width: 640, x: 0, y: 0 },
+      gridSize: 10,
+      families: [{ id: 'request', label: 'Request', description: 'Requests', appearance: { color: '#7c3aed' } }],
+      cards: [
+        { id: 'CARD-A', label: 'Card A', bounds: { height: 50, width: 100, x: 80, y: 170 } },
+        { id: 'CARD-B', label: 'Card B', bounds: { height: 50, width: 100, x: 360, y: 170 } }
+      ],
+      flows: [
+        {
+          id: 'FLOW-A',
+          family: 'request',
+          source: { element: 'CARD-A', port: 'E1' },
+          target: { element: 'CARD-B', port: 'W1' }
+        }
+      ],
+      dynamics: [
+        { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['FLOW-A'] },
+        {
+          id: 'on-stage',
+          label: 'We are here',
+          kind: 'emphasise-elements',
+          elements: ['CARD-B'],
+          depicts: 'state'
+        }
+      ]
+    },
+    sequences: [
+      {
+        id: 'WALK',
+        label: 'Walkthrough',
+        presentation: { display: 'expanded', timed: false, callouts: false },
+        scenes: [
+          { id: 'SCN-01', label: 'Arrival', description: 'Arrival', cues: [{ dynamic: 'on-stage' }] },
+          { id: 'SCN-02', label: 'Quiet', description: 'Quiet', focus: { elements: ['CARD-A'] } }
+        ]
+      }
+    ]
+  })
+
+  const { container } = await render(<Studio config={cuedConfig} />)
+  const press = (bankLabel: string, label: string) => {
+    const bank = container.querySelector(`section[aria-label="${bankLabel}"]`)
+    if (!bank) throw new Error(`Studio did not render the ${bankLabel} controls`)
+    const button = [...bank.querySelectorAll<HTMLButtonElement>('button')].find(
+      (candidate) => candidate.textContent === label
+    )
+    if (!button) throw new Error(`${bankLabel} has no control for ${label}`)
+    button.click()
+    return button
+  }
+  const emphasis = () =>
+    container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="CARD-B"]')
+  const signal = () => container.querySelector('[data-artefact-id="FLOW-A"] .infoschematic-flow-signal')
+
+  // Entering the Scene is what plays the cue: the document asked for it, and no Producer pressed anything.
+  press('Sequences', 'Arrival')
+  await expect.poll(() => emphasis()?.dataset.occurrenceKey).toBe('present-cue-1')
+  expect(emphasis()?.dataset.depicts).toBe('state')
+
+  // The rehearsal bank is the Producer's own occurrence and reaches the same Diagram without displacing the cue.
+  press('Diagram Dynamics', 'Record delivered')
+  await expect.poll(signal).not.toBeNull()
+  expect(emphasis()?.dataset.occurrenceKey).toBe('present-cue-1')
+
+  // Pressing it again replays it, so the bank is still the Producer's own on-demand occurrence while the cue holds.
+  press('Diagram Dynamics', 'Record delivered')
+  await expect.poll(() => signal()?.getAttribute('data-occurrence-key')).toBe('studio-2')
+  expect(emphasis()?.dataset.occurrenceKey).toBe('present-cue-1')
+
+  // Stepping to a Scene that cues nothing cancels the cue, so the Scene on screen is what the Diagram shows.
+  press('Sequences', 'Quiet')
+  await expect.poll(emphasis).toBeNull()
+})

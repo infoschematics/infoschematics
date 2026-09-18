@@ -40,11 +40,13 @@ Clearing a Scene MUST cancel its active occurrences. Replacing the active Standa
 
 Unknown Flow identifiers MUST be ignored by focused-Flow resolution. Scene signal derivation MUST remain pure, framework-neutral, and independent of timers; Canvas owns finite rendering and accessible announcement.
 
+A cue asking for `repeat` is a request for repeated occurrences, not a schedule. Present MUST express it as an occurrence key that changes only when the cue cycle advances, and the cadence that advances that cycle MUST be View state rather than anything derivation reads: deriving twice from one presentation state MUST yield identical occurrence keys, and leaving or clearing the Scene MUST end the repetition rather than leave a cadence running. `SCENE-007` states what the document may declare, and `DYNAMIC-002` where the occurrence lives.
+
 _Conformance:_ conforming
 
-_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then clear the active Scene and confirm its occurrences cancel; replace it and confirm occurrences the new entry does not own cancel before new ones derive; re-render with the same Scene active and confirm a completed occurrence stays completed; put an unknown Flow identifier in a Scene's focus and confirm resolution ignores it. Derive twice from the same inputs without advancing any clock: the occurrences must match, because nothing here may read a timer.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then clear the active Scene and confirm its occurrences cancel; replace it and confirm occurrences the new entry does not own cancel before new ones derive; re-render with the same Scene active and confirm a completed occurrence stays completed; put an unknown Flow identifier in a Scene's focus and confirm resolution ignores it. Derive twice from the same inputs without advancing any clock: the occurrences must match, because nothing here may read a timer. Then cue a Dynamic with `playback: repeat`, derive twice from the same presentation state and confirm the occurrence keys are identical, advance the cue cycle once and confirm only the repeating key moves, and confirm the sole interval in play is `cueRepeatInterval` in `packages/view-present/src/cues.ts`. Falsified by derivation that reads a clock, or by a repetition that outlives its Scene.
 
-_Evidence:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Sequence stepping, cancellation, and filtering without signalling.
+_Evidence:_ presentation reducer and rendered Present tests cover one-shot entry, opt-out, replay after a new entry, Sequence stepping, cancellation, and filtering without signalling. Cue derivation and its cycle counter sit in `packages/view-present/src/presentation.ts` and the cadence alone in `packages/view-present/src/cues.ts`, covered by `packages/view-present/src/presentation.test.ts` and `packages/view-present/src/Present.dynamics.test.tsx`.
 
 ## Quality properties
 

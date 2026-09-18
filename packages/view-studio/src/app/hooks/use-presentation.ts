@@ -115,6 +115,12 @@ export function usePresentation() {
 
   return {
     annotated: production.presentation.annotated,
+    /* The Scene's own cues, derived rather than scheduled here: Studio plays what the document asks for while a
+       Scene is on screen, and the rehearsal bank beside it stays the Producer's own occurrence. */
+    cueOccurrences: derived.dynamics,
+    repeatingCues: derived.repeatingCues,
+    replayCues: () => dispatchPresentation({ type: 'replay-cues' }),
+    sceneOccurrence: production.presentation.sceneOccurrence,
     activeSequence: derived.activeSequence,
     activeSequenceScene: derived.activeSequenceScene,
     autoAdvance: production.presentation.autoAdvance,

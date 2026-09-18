@@ -366,4 +366,44 @@ diagram:
       if (!parsed.ok) expect(parsed.issues[0]?.path).toBe('diagram.overlays.0.kind.version')
     }
   })
+
+  it('round-trips an authored Scene cue and rejects a playback value the contract does not offer', () => {
+    const cued = (playback: string) =>
+      `${compact.replace(
+        '\nscopes:',
+        `
+  dynamics:
+    - id: record-delivered
+      label: Record delivered
+      kind: signal-flow
+      flows: [LOAD]
+scopes:`
+      )}
+sequences:
+  - id: WALK
+    label: Walkthrough
+    presentation: { display: expanded, timed: true, callouts: true }
+    scenes:
+      - id: WALK-1
+        label: Arrival
+        cues:
+          - dynamic: record-delivered
+            playback: ${playback}
+`
+    const model = modelOf(cued('repeat'))
+
+    expect(model.sequences[0]?.scenes[0]?.cues).toEqual([{ dynamic: 'record-delivered', playback: 'repeat' }])
+
+    // The cue is authored data, so it survives a round trip and nothing timing-shaped joins it on the way.
+    const yaml = serialiseInfoschematicYaml(model)
+    expect(yaml).toContain('cues:')
+    expect(yaml).toContain('dynamic: record-delivered')
+    expect(yaml).not.toContain('duration:')
+    expect(serialiseInfoschematicYaml(modelOf(yaml))).toBe(yaml)
+    expect(modelOf(yaml)).toEqual(model)
+
+    const invalid = parseInfoschematic(cued('continuous'))
+    expect(invalid.ok).toBe(false)
+    if (!invalid.ok) expect(invalid.issues[0]?.path).toBe('sequences.0.scenes.0.cues.0.playback')
+  })
 })

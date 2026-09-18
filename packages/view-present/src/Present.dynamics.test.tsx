@@ -1,6 +1,20 @@
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { createPresentationState, derivePresentation, reducePresentation } from './presentation.ts'
+
+/*
+ * The cue case needs a Scene on screen, which is a presentation interaction rather than an initial render, so
+ * `usePresentation` is replaced for that one case alone. Every other case here runs the real hook.
+ */
+const mockUsePresentation = vi.hoisted(() => vi.fn())
+
+vi.mock('./use-presentation.ts', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./use-presentation.ts')>()
+  mockUsePresentation.mockImplementation(actual.usePresentation)
+  return { usePresentation: (...args: Parameters<typeof actual.usePresentation>) => mockUsePresentation(...args) }
+})
+
 import { Present } from './Present.tsx'
 
 const config = defineInfoschematicModel({
@@ -73,5 +87,45 @@ describe('Present Diagram Dynamics', () => {
     expect(
       renderToStaticMarkup(<Present config={config} dynamics={[{ dynamicId: 'absent', occurrenceKey: 'x' }]} />)
     ).toBe(renderToStaticMarkup(<Present config={config} />))
+  })
+
+  it('lets a host occurrence and a Scene cue play together, with neither suppressing the other', () => {
+    const cued = defineInfoschematicModel({
+      ...config,
+      sequences: [
+        {
+          id: 'walk',
+          label: 'Walkthrough',
+          presentation: { display: 'expanded', timed: false, callouts: true },
+          scenes: [{ id: 'arrival', label: 'Arrival', cues: [{ dynamic: 'delivered' }] }]
+        }
+      ]
+    })
+    const enter = () => {
+      mockUsePresentation.mockImplementationOnce((source, signalPolicy) => {
+        const entered = reducePresentation(createPresentationState(source), {
+          type: 'start-sequence',
+          sequence: source.sequences[0]!
+        })
+
+        return { derived: derivePresentation(source, entered, signalPolicy), dispatch: vi.fn(), state: entered }
+      })
+    }
+
+    enter()
+    const cueAlone = renderToStaticMarkup(<Present config={cued} />)
+    enter()
+    const both = renderToStaticMarkup(
+      <Present config={cued} dynamics={[{ dynamicId: 'attention', occurrenceKey: 'run-1' }]} />
+    )
+
+    // The Scene's cue reaches the Canvas as the document asked, with a key the presentation owns.
+    expect(cueAlone).toContain('class="infoschematic-flow-signal"')
+    expect(cueAlone).toContain('data-occurrence-key="present-cue-1"')
+
+    // The host's own occurrence is still there beside it, under its own key and its own treatment.
+    expect(both).toContain('data-occurrence-key="present-cue-1"')
+    expect(both).toContain('data-artefact-id="SNK" data-dynamic-id="attention" data-emphasised="true"')
+    expect(both).toContain('data-occurrence-key="run-1"')
   })
 })

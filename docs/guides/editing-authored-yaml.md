@@ -91,6 +91,10 @@ Studio derives structural and presentation selections from the canonical runtime
 
 Direct mode adapts canonical expanded and collapsed Sequences to its focused editor panels. Sequence and Scene changes return through field and stable-ID document paths, so changing one Scene label or focus does not replace the containing Sequence or the top-level presentation collection. Unexposed fields such as presentation switches, Scene visibility and Callout properties survive the edit.
 
+A Scene's `cues` are authored data of exactly that kind. Each cue names a [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) the same document declares under `diagram.dynamics` and, at most, `playback: repeat`; it carries no duration, no easing, no timer, and no occurrence key, because the View playing the Scene owns the beat. An edit that adds or removes a cue addresses it by the Scene's stable ID like any other field, and validation rejects a cue naming a Dynamic the Diagram does not declare or the same Dynamic cued twice in one Scene, leaving the document unchanged.
+
+Focus and Dynamics remain separate concepts. A Scene's `focus` says what the audience should be looking at, and the Scene's `cues` say which named change should play while they look; editing one leaves the other as authored, and neither is a way of expressing the other.
+
 When the host supplies the emitted document as the new input, Studio discards only drafts represented by that accepted edit. YAML syntax trees remain inside Domain Core; View packages receive only the validated canonical model and document-edit results.
 
 To enable direct source replacement, also handle `onDocumentReplace`. Studio calls it only with a fully validated document:

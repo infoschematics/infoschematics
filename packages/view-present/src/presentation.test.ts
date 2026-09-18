@@ -372,4 +372,86 @@ describe('presentation state', () => {
       { flowId: 'DEL-002', occurrenceKey: 'present-scene-3' }
     ])
   })
+
+  it('originates a cued Dynamic on Scene entry, replays a repeat, and cancels with the Scene', () => {
+    const source = createInfoschematicRuntime(
+      defineInfoschematicModel({
+        id: 'CUES',
+        title: 'Cued Scenes',
+        diagram: {
+          bounds: { x: 0, y: 0, width: 400, height: 200 },
+          gridSize: 10,
+          cards: [
+            { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 100, height: 60 } },
+            { id: 'SNK', label: 'Sink', bounds: { x: 260, y: 20, width: 100, height: 60 } }
+          ],
+          flows: [{ id: 'LOAD', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }],
+          dynamics: [
+            { id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
+            { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] }
+          ]
+        },
+        sequences: [
+          {
+            id: 'walk',
+            label: 'Walkthrough',
+            presentation: { display: 'expanded', timed: true, callouts: true },
+            scenes: [
+              {
+                id: 'arrival',
+                label: 'Arrival',
+                duration: 4000,
+                cues: [{ dynamic: 'delivery' }, { dynamic: 'attention', playback: 'repeat' }]
+              },
+              { id: 'quiet', label: 'Quiet' }
+            ]
+          }
+        ]
+      })
+    )
+    const sequence = source.sequences[0]
+    if (!sequence) throw new Error('The fixture declares one Sequence')
+
+    // The projection carries the authored policy and no timing: `once` is defaulted in, nothing else is added.
+    expect(sequence.scenes[0]?.cues).toEqual([
+      { dynamic: 'delivery', playback: 'once' },
+      { dynamic: 'attention', playback: 'repeat' }
+    ])
+    expect(sequence.scenes[1]?.cues).toEqual([])
+
+    const entered = reducePresentation(createPresentationState(source), { type: 'start-sequence', sequence })
+    const onEntry = derivePresentation(source, entered)
+    expect(onEntry.dynamics).toEqual([
+      { dynamicId: 'delivery', occurrenceKey: 'present-cue-1' },
+      { dynamicId: 'attention', occurrenceKey: 'present-cue-1-0' }
+    ])
+    expect(onEntry.repeatingCues).toBe(true)
+
+    // A re-derivation of the same state is the same occurrence, so a re-render cannot replay anything.
+    expect(derivePresentation(source, entered).dynamics).toEqual(onEntry.dynamics)
+
+    // Advancing the cycle replays the repeating cue alone: the single-shot key is untouched.
+    const cycled = reducePresentation(entered, { type: 'replay-cues' })
+    expect(derivePresentation(source, cycled).dynamics).toEqual([
+      { dynamicId: 'delivery', occurrenceKey: 'present-cue-1' },
+      { dynamicId: 'attention', occurrenceKey: 'present-cue-1-1' }
+    ])
+
+    // Stepping to a Scene that cues nothing cancels both, and leaves nothing for a View to keep playing.
+    const stepped = reducePresentation(cycled, { type: 'step-sequence', sequences: source.sequences, delta: 1 })
+    expect(derivePresentation(source, stepped).dynamics).toEqual([])
+    expect(derivePresentation(source, stepped).repeatingCues).toBe(false)
+
+    // Returning to the Scene is a new occurrence rather than the retained one.
+    const returned = reducePresentation(stepped, { type: 'step-sequence', sequences: source.sequences, delta: -1 })
+    expect(derivePresentation(source, returned).dynamics[0]?.occurrenceKey).toBe('present-cue-3')
+
+    // Leaving the Sequence altogether clears the focus, so no cue survives it.
+    const cleared = reducePresentation(returned, { type: 'clear-focus' })
+    expect(derivePresentation(source, cleared).dynamics).toEqual([])
+
+    // `none` originates nothing at all: a host that wants to own every occurrence gets no cue either.
+    expect(derivePresentation(source, entered, 'none').dynamics).toEqual([])
+    expect(derivePresentation(source, entered, 'none').repeatingCues).toBe(false)
+  })
 })

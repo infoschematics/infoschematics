@@ -466,13 +466,20 @@ const visibility = z.strictObject({
   hide: selection.optional()
 })
 
+/** A Scene's request that a named Dynamic play: which one, and how often. Never how long or how. */
+const sceneCue = z.strictObject({
+  dynamic: z.string(),
+  playback: z.enum(['once', 'repeat']).optional()
+})
+
 const sceneShape = {
   id: z.string(),
   label: z.string(),
   description: z.string().optional(),
   visibility: visibility.optional(),
   focus: selection.optional(),
-  callout: callout.optional()
+  callout: callout.optional(),
+  cues: z.array(sceneCue).readonly().optional()
 }
 
 const sequence = z.strictObject({

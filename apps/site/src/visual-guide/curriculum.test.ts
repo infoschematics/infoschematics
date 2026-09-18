@@ -10,7 +10,8 @@ describe('components guide curriculum', () => {
       'card',
       'flow',
       'point',
-      'graphic'
+      'graphic',
+      'dynamics'
     ])
     expect(new Set(componentSections.map(({ id }) => id))).toHaveLength(componentSections.length)
   })

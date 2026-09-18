@@ -52,6 +52,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 40. [ADR-INFOSCHEMATICS-035](ADR-INFOSCHEMATICS-035-the-product-offers-renderer-artwork-as-data.md) — offer a standard catalogue of named treatments as serialisable artwork data every outlet draws, reached only where a host registers nothing.
 41. [ADR-INFOSCHEMATICS-036](ADR-INFOSCHEMATICS-036-an-adapter-is-positioned-by-what-it-holds.md) — derive an Adapter Card’s position from the Card it holds in every renderer, so its authored bounds do not position it.
 42. [ADR-INFOSCHEMATICS-037](ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) — draw an authored Overlay wherever the Diagram is drawn, making a Scene’s Graphic an addition to that set and scene scoping an option rather than the default.
+43. [ADR-INFOSCHEMATICS-038](ADR-INFOSCHEMATICS-038-a-scene-cues-a-dynamic-and-a-view-owns-the-cadence.md) — let a Scene cue named Dynamics with a bounded `once` or `repeat` policy, keeping every timer in the View that plays it.
 
 ## Repository operation
 

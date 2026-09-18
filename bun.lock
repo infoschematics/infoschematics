@@ -38,6 +38,7 @@
         "@infoschematics/is-showcase": "0.1.0",
         "@infoschematics/render-svg": "0.1.0",
         "@infoschematics/view-canvas": "0.1.0",
+        "@infoschematics/view-present": "0.1.0",
         "@infoschematics/view-studio": "0.1.0",
         "marked": "^18.0.11",
         "react": "^19.2.0",

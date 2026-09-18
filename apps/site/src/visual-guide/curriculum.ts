@@ -1,5 +1,14 @@
 export type SpecimenKind = 'canvas' | 'region' | 'fabric' | 'card' | 'flow' | 'point' | 'graphic'
 
+/**
+ * A guide section is a specimen kind, or Dynamics.
+ *
+ * Every other section teaches one placed artefact by letting a reader change its authored properties. Dynamics is
+ * not placed and has no properties to drag: it is a named change the document declares and a Scene cues, so it is a
+ * section of the guide without being a specimen kind.
+ */
+export type GuideSectionId = SpecimenKind | 'dynamics'
+
 // This author-facing projection stays byte-for-byte aligned with Domain Model's
 // appearance catalogue. The broader guideProperties collection below adds
 // geometry controls used only to teach the surrounding component records.
@@ -244,9 +253,10 @@ export type PropertyReference = Readonly<{
 }>
 
 export type ComponentSection = Readonly<{
-  id: SpecimenKind
+  id: GuideSectionId
   title: string
-  layer: 'background' | 'midground' | 'foreground'
+  /** Where the component sits in the drawing order; absent for a section that draws nothing of its own. */
+  layer?: 'background' | 'midground' | 'foreground'
   summary: string
   propertyKeys: readonly GuidePropertyKey[]
   properties: readonly PropertyReference[]
@@ -491,6 +501,32 @@ export const componentSections: readonly ComponentSection[] = [
       {
         name: 'properties',
         summary: 'Portable string, number, or boolean values for the renderer.'
+      }
+    ]
+  },
+  {
+    id: 'dynamics',
+    title: 'Dynamics',
+    summary:
+      'A Diagram Dynamic names a change an audience should perceive. The document says what changed and what it touches; a Scene cues it, a host records it, and each renderer chooses how to depict it.',
+    propertyKeys: [],
+    properties: [
+      { name: 'id, label, description', summary: 'Stable identity and the reader-facing name of the change.' },
+      {
+        name: 'kind',
+        summary: 'signal-flow carries a finite signal over named Flows; emphasise-elements emphasises named elements.'
+      },
+      {
+        name: 'flows, elements',
+        summary: 'The authored targets the change touches, by id.'
+      },
+      {
+        name: 'depicts',
+        summary: 'state describes something that lasts and is held until withdrawn; absent or event retires itself.'
+      },
+      {
+        name: 'scene cues',
+        summary: 'A Scene names Dynamics to play while it is on screen, each once by default or on a repeat.'
       }
     ]
   }

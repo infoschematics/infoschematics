@@ -33,3 +33,7 @@ An integration binds `dynamicId`, which is the vocabulary the document's author 
 The finite vocabulary is the cost. Persistent reveal and conceal, movement, and arbitrary timelines are not expressible, and a host that wants them cannot smuggle them in through a Dynamic; a third kind is a decision with its own static and accessible obligations rather than a configuration value. Scene-authored choreography (`INFOSCHEMATICS-TOOL-023`) binds this vocabulary instead of defining a parallel animation contract.
 
 Static output stays deterministic and quiet unless a caller asks for a named occurrence explicitly, so publishing a document never depends on whether a Dynamic happened to fire.
+
+## Amendments
+
+`ADR-INFOSCHEMATICS-038` adds a second origin for an occurrence: a Scene may cue a named Dynamic with a bounded `once` or `repeat` policy. The vocabulary, the occurrence shape, and the refusal to carry timing in the document are all unchanged — the cue names which Dynamic and how often, and the View that plays it owns every timer. Scene-authored choreography is therefore the binding this record anticipated rather than the parallel animation contract it refused.
