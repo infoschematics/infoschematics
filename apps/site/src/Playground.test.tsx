@@ -2,7 +2,6 @@ import { infoschematicDocumentSource, parseInfoschematic } from '@infoschematics
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { authoredDocumentForPreset, documentForPreset, Playground, presetFromSearch, presets } from './Playground.tsx'
-import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 
 describe('Playground', () => {
@@ -13,7 +12,7 @@ describe('Playground', () => {
     expect(page).toContain('class="playground-studio"')
     expect(page).toContain('data-production-mode="present"')
     expect(page).toContain('aria-label="Design mode')
-    expect(page).toContain('aria-label="Format parity Infoschematic"')
+    expect(page).toContain('aria-label="Every capability, in one Infoschematic Infoschematic"')
     expect(page).not.toContain('playground-editor-pane')
     expect(page).not.toContain('aria-label="Infoschematic document"')
     expect(page).not.toContain('data:image/svg+xml')
@@ -30,17 +29,15 @@ describe('Playground', () => {
     expect(page).toContain('Use Design to shape it and Source to edit, validate, undo, or copy YAML.')
   })
 
-  it('starts with a visible Flow from Source to Sink', () => {
-    const parsed = parseInfoschematic(yamlSeed)
-    expect(parsed.ok).toBe(true)
-    if (!parsed.ok) return
+  it('opens on the Benchmark, and offers the presets in the order they are listed', () => {
+    const page = renderToStaticMarkup(<Playground />)
 
-    expect(parsed.model.diagram.flows).toEqual([
-      expect.objectContaining({
-        source: { element: 'SRC', port: 'E1' },
-        target: { element: 'SNK', port: 'W1' }
-      })
-    ])
+    expect(page).toContain('<option value="showcase" selected="">Benchmark</option>')
+    expect(presets.map(({ key }) => key)).toEqual(['showcase', 'blank', 'explained', 'media-pipeline'])
+    // The rendered order is the listed order rather than whatever the markup happens to emit.
+    expect(presets.map(({ label }) => page.indexOf(`>${label}</option>`))).toEqual(
+      [...presets.map(({ label }) => page.indexOf(`>${label}</option>`))].sort((first, second) => first - second)
+    )
   })
 
   it('offers an architectural media pipeline whose Flow Families say what moves', () => {
@@ -93,27 +90,28 @@ describe('Playground', () => {
     const page = renderToStaticMarkup(<Playground preset="explained" />)
 
     expect(page).toContain('aria-label="What makes an Infoschematic Infoschematic"')
-    expect(page).toContain('<option value="explained" selected="">An Infoschematic explained</option>')
+    expect(page).toContain('<option value="explained" selected="">Explained</option>')
     expect(documentForPreset('explained')).toContain('What makes an Infoschematic')
   })
 
   it('reaches the capability showcase, which is the whole reason it is published', () => {
     const page = renderToStaticMarkup(<Playground preset="showcase" />)
 
-    expect(page).toContain('<option value="showcase" selected="">Every capability</option>')
+    expect(page).toContain('<option value="showcase" selected="">Benchmark</option>')
     // The notation no other preset carries: the Adapter Card's clasp and the Fabric beneath it.
     expect(documentForPreset('showcase')).toContain('adapts: CARD-03')
     expect(documentForPreset('showcase')).toContain('key: message-bus')
   })
 
   it('selects a preset from the query string and refuses one it does not know', () => {
-    expect(presetFromSearch('?preset=source-to-sink')).toBe('source-to-sink')
+    // The retired preset's own key, and the key before that, both land on the Benchmark.
+    expect(presetFromSearch('?preset=source-to-sink')).toBe('showcase')
     expect(presetFromSearch('?preset=media-pipeline')).toBe('media-pipeline')
     expect(presetFromSearch('?preset=explained')).toBe('explained')
     expect(presetFromSearch('?preset=blank')).toBe('blank')
     expect(presetFromSearch('?preset=showcase')).toBe('showcase')
     expect(presetFromSearch('?preset=system')).toBe('explained')
-    expect(presetFromSearch('?preset=format-parity')).toBe('source-to-sink')
+    expect(presetFromSearch('?preset=format-parity')).toBe('showcase')
     expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()
     expect(presetFromSearch('')).toBeUndefined()
   })

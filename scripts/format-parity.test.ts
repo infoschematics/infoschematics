@@ -7,7 +7,6 @@ import { formatParityDefinition } from './fixtures/format-parity.ts'
 import { isDocumentSubject, loadRenderable } from './render-example.ts'
 
 const fixture = (name: string) => fileURLToPath(new URL(`fixtures/${name}`, import.meta.url))
-const siteSeed = fileURLToPath(new URL('../apps/site/src/playground/seeds/format-parity.yaml', import.meta.url))
 
 const loadDocument = async (pathname: string) => {
   const parsed = parseInfoschematic(await readFile(pathname, 'utf8'), { pathname })
@@ -22,10 +21,6 @@ describe('document format parity', () => {
     expect(renderInfoschematicSvg(await loadDocument(fixture('format-parity.yaml')), { annotations: true })).toBe(typed)
     expect(renderInfoschematicSvg(await loadDocument(fixture('format-parity.json')), { annotations: true })).toBe(typed)
     expect(typed).toContain('Source')
-  })
-
-  it('keeps the Playground YAML seed aligned with the canonical fixture', async () => {
-    expect(await loadDocument(siteSeed)).toEqual(defineInfoschematicModel(formatParityDefinition))
   })
 })
 

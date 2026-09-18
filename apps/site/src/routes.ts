@@ -271,7 +271,7 @@ const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
   },
   [examplesIndexPath]: {
     pathname: playgroundPath,
-    search: '?preset=source-to-sink'
+    search: '?preset=showcase'
   },
   [blankExamplePath]: { pathname: playgroundPath, search: '?preset=blank' },
   [infoschematicsExamplePath]: {
@@ -290,7 +290,7 @@ export function canonicalSiteLocation(pathname: string, search = ''): SiteLocati
   const alias = legacyLocationAliases[normalised]
   if (alias) return alias
   if (normalised.startsWith(examplesIndexPath)) {
-    return { pathname: playgroundPath, search: '?preset=source-to-sink' }
+    return { pathname: playgroundPath, search: '?preset=showcase' }
   }
   return { pathname, search }
 }

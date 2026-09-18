@@ -183,7 +183,7 @@ The host owns:
 
 Studio View owns generic rendering, Producer controls, and runtime state derived from the configuration. It must not import a particular authored Infoschematic or its visual implementations.
 
-The public website demonstrates this boundary with independently authored definitions in the Playground. The [Blank preset](/playground/?preset=blank) loads the minimum title-only contract, while [An Infoschematic explained](/playground/?preset=explained) uses the same concise [`@infoschematics/is-infoschematics`](https://github.com/infoschematics/infoschematics/tree/main/examples/is-infoschematics/) overview rendered on the homepage. The authored package imports neither a React View nor Site code.
+The public website demonstrates this boundary with independently authored definitions in the Playground. The [Blank preset](/playground/?preset=blank) loads the minimum title-only contract, while [the Explained preset](/playground/?preset=explained) uses the same concise [`@infoschematics/is-infoschematics`](https://github.com/infoschematics/infoschematics/tree/main/examples/is-infoschematics/) overview rendered on the homepage. The authored package imports neither a React View nor Site code.
 
 ## Beyond the host
 

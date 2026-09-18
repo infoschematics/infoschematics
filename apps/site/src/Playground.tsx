@@ -11,48 +11,47 @@ import { showcaseExample } from '@infoschematics/is-showcase'
 import { Studio, type StudioDocumentChange, type StudioDocumentReplacement } from '@infoschematics/view-studio'
 import '@infoschematics/view-studio/styles.css'
 import { useState } from 'react'
-import yamlSeed from './playground/seeds/format-parity.yaml?raw'
 import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
 import './styles.css'
 
-export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'showcase' | 'source-to-sink'
+export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'showcase'
 
-/** A preset replaces the authored document while its route remains Site-owned. */
+/*
+ * A preset replaces the authored document while its route remains Site-owned. They are listed in the order they are
+ * offered: the Benchmark first, because the document that carries every capability is the one worth opening first.
+ */
 export const presets: readonly {
   key: PlaygroundPreset
   label: string
   document: string
 }[] = [
   {
-    key: 'source-to-sink',
-    label: 'Source to sink',
-    document: yamlSeed
-  },
-  {
-    key: 'media-pipeline',
-    label: 'Live media pipeline',
-    document: mediaPipelineSeed
-  },
-  {
-    key: 'explained',
-    label: 'An Infoschematic explained',
-    document: serialiseInfoschematicYaml(homepageInfoschematic)
-  },
-  {
     key: 'showcase',
-    label: 'Every capability',
+    label: 'Benchmark',
     document: serialiseInfoschematicYaml(showcaseExample)
   },
   {
     key: 'blank',
-    label: 'Blank Infoschematic',
+    label: 'Blank',
     document: serialiseInfoschematicYaml(blankInfoschematic)
+  },
+  {
+    key: 'explained',
+    label: 'Explained',
+    document: serialiseInfoschematicYaml(homepageInfoschematic)
+  },
+  {
+    key: 'media-pipeline',
+    label: 'Pipeline',
+    document: mediaPipelineSeed
   }
 ]
 
+/* Retired preset keys land on the Benchmark rather than on nothing, so a link written before this still opens a document. */
 const legacyPresetAliases: Readonly<Record<string, PlaygroundPreset>> = {
-  'format-parity': 'source-to-sink',
+  'format-parity': 'showcase',
+  'source-to-sink': 'showcase',
   infoschematics: 'explained',
   system: 'explained'
 }
@@ -64,7 +63,7 @@ export const presetFromSearch = (search: string): PlaygroundPreset | undefined =
 }
 
 export const documentForPreset = (key: PlaygroundPreset) =>
-  presets.find((entry) => entry.key === key)?.document ?? yamlSeed
+  presets.find((entry) => entry.key === key)?.document ?? presets[0].document
 
 /** Curated preset sources cross into Studio as validated, source-retaining documents. */
 export function authoredDocumentForPreset(key: PlaygroundPreset): InfoschematicDocument {
@@ -77,7 +76,7 @@ export function authoredDocumentForPreset(key: PlaygroundPreset): InfoschematicD
 }
 
 const initialPreset = (): PlaygroundPreset =>
-  (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'source-to-sink'
+  (typeof window === 'undefined' ? undefined : presetFromSearch(window.location.search)) ?? 'showcase'
 
 /** Site owns preset routing and reset; Studio owns every authoring interaction. */
 export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPreset }) {

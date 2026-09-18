@@ -112,7 +112,7 @@ describe('website routes', () => {
   it('maps legacy example pages to curated Playground presets', () => {
     expect(canonicalSiteLocation('/examples/')).toEqual({
       pathname: '/playground/',
-      search: '?preset=source-to-sink'
+      search: '?preset=showcase'
     })
     expect(canonicalSiteLocation('/examples/blank')).toEqual({ pathname: '/playground/', search: '?preset=blank' })
     expect(canonicalSiteLocation('/examples/infoschematics/')).toEqual({
@@ -125,7 +125,7 @@ describe('website routes', () => {
     })
     expect(canonicalSiteLocation('/examples/retired-example/')).toEqual({
       pathname: '/playground/',
-      search: '?preset=source-to-sink'
+      search: '?preset=showcase'
     })
   })
 

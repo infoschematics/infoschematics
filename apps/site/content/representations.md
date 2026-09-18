@@ -41,7 +41,7 @@ It is not yet a complete entity-relationship notation: cardinality, optionality,
 
 [Flow Families](/docs/reference/vocabulary/#flow-family) describe what a Flow carries and give related Flows a shared identity. That makes pipelines a natural fit: a connection can carry records, events, control messages, audio, video, manifests, or other named material without turning the diagram into an executable workflow.
 
-The [live media pipeline preset](/playground/?preset=media-pipeline) shows a camera, encoder, packager, distribution service, and player connected by different kinds of media Flow. Open it in the Playground to inspect or change the authored YAML.
+The [Pipeline preset](/playground/?preset=media-pipeline) shows a camera, encoder, packager, distribution service, and player connected by different kinds of media Flow. Open it in the Playground to inspect or change the authored YAML.
 
 ## Translating existing models
 
