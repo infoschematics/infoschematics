@@ -7,6 +7,7 @@ import {
   DiagramAnnouncements,
   type DiagramViewportController,
   defineInfoschematicRenderers,
+  drawnElementIds,
   elementEmphasisDuration,
   InfoschematicContext,
   InfoschematicDiagram,
@@ -715,6 +716,13 @@ function AppContent({
     portAt
   )
 
+  /* What Studio drew, for the announcement rather than for the treatment: Studio's accepted set is its resolved set,
+     so a Dynamic whose elements a Scope filter has hidden would otherwise be read out as though it had played. */
+  const drawnElements = useMemo(
+    () => drawnElementIds(runtime, new Set(drawnFlows.map(({ id }) => id)), visibleScopes),
+    [drawnFlows, runtime, visibleScopes]
+  )
+
   /*
    * The two things the toolbar can do to a route.
    *
@@ -1148,6 +1156,7 @@ function AppContent({
                 viewportControls="external"
               />
               <DiagramAnnouncements
+                drawnElements={drawnElements}
                 emphasis={announcements.emphasis}
                 flows={drawnFlows}
                 signals={announcements.signals}

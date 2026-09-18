@@ -31,6 +31,7 @@ export {
   useDiagramAnnouncements
 } from './announcements.tsx'
 export { Canvas, type CanvasProps } from './Canvas.tsx'
+export { drawnElementIds } from './drawn-elements.ts'
 export { elementEmphasisDuration } from './element-emphasis.ts'
 export { flowSignalDuration } from './flow-signals.ts'
 export {

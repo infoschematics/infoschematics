@@ -52,13 +52,11 @@ Where visibility filtering removes every element an accepted occurrence would ha
 
 `DYNAMIC-006` promises each newly accepted occurrence is announced once, by the [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic)'s own label; `PRESENT-003` promises each filter bank is individually controlled, and `DYNAMIC-003` promises an occurrence reaches only what the renderer drew. Composed, the treatment obeys the filter and the announcement does not.
 
-_Conformance:_ divergent
-
-Tracked by `INFOSCHEMATICS-TOOL-086`. Observed on the site Playground in [Present](../reference/vocabulary.md#present): with the `PACKAGE` [Flow family](../reference/vocabulary.md#flow-family) switched off, rehearsing the Dynamic that signals a packaged segment draws no signal — the Flow is not in the drawn set, so its sentence is dropped — and the live region reads `Signal update 1.` and nothing else. With the family switched on, the same rehearsal reads the Flow's code and its two endpoint labels.
+_Conformance:_ conforming
 
 _Verify:_ switch off the filter bank that hides every element one Dynamic names, rehearse it, and read the live region: it MUST be empty. Then switch the bank on and rehearse again, which MUST announce the Dynamic once. Prove the case is not vacuous by restoring the unconditional revision prefix: the first half MUST fail.
 
-_Evidence:_ `DiagramAnnouncements` in `packages/view-canvas/src/announcements.tsx` composes the sentence from the Flows the Diagram drew and prefixes the revision before that filter is applied; the accepted-set reconciliation that the filter feeds is in `packages/view-canvas/src/flow-signals.ts`, and `packages/view-present/src/Present.dynamics.test.tsx` covers the announcement with nothing filtered out.
+_Evidence:_ `DiagramAnnouncements` in `packages/view-canvas/src/announcements.tsx` composes each sentence first and reads the revision counter only when a sentence follows it, for the signal half and the emphasis half alike; the drawn set both halves filter against is derived once by `drawnElementIds` in `packages/view-canvas/src/drawn-elements.ts`, which the Canvas passes from what it drew and Studio passes from what its own filters left. The cases are `packages/view-canvas/src/announcements.test.tsx`: a drawn set holding none of what the occurrence touches leaves both regions empty, one holding all of it announces the Flow and the Dynamic once each, one holding part of it announces only the half that was drawn, and a host that supplies no drawn set at all — its accepted set being its drawn set — announces both.
 
 ### COMPOSE-005 — A viewport keyboard control yields to the host's text entry
 

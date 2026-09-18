@@ -18,6 +18,14 @@ import { useInfoschematic } from './runtime-context.tsx'
 export type DiagramAnnouncementFlow = Readonly<{ code: string; id: string; source: string; target: string }>
 
 export type DiagramAnnouncementsProps = Readonly<{
+  /**
+   * The element ids this Diagram drew, which is what an emphasis announcement is filtered against.
+   *
+   * Omit it and every accepted occurrence is announced, which is right only for a host whose accepted set is its
+   * drawn set. A host that filters anything supplies it, or `COMPOSE-004` fails the other way about: a reader is
+   * told a Dynamic played over elements that were never painted.
+   */
+  drawnElements?: ReadonlySet<string>
   /** The accepted emphasis to read, as the host's own lifecycle advanced it. */
   emphasis?: ElementEmphasisAnnouncement
   /** The Flows this Diagram drew, which is what a Flow signal's text is read from. */
@@ -49,39 +57,40 @@ export const useDiagramAnnouncements = (
   return { emphasis: emphasisAnnouncement, signals: signalAnnouncement }
 }
 
-export function DiagramAnnouncements({ emphasis, flows, signals }: DiagramAnnouncementsProps) {
+export function DiagramAnnouncements({ drawnElements, emphasis, flows, signals }: DiagramAnnouncementsProps) {
   const runtime = useInfoschematic()
+  /* `COMPOSE-004`: the revision prefix distinguishes two otherwise identical announcements, so it is announced only
+     with the sentence it distinguishes. Composing the sentence first is what makes the announcement obey the same
+     filter the treatment obeys: an occurrence whose every target was hidden draws nothing and now says nothing. */
+  const signalSentence = (signals?.signals ?? [])
+    .map((signal) => {
+      const flow = flows.find((candidate) => candidate.id === signal.flowId)
+      if (!flow) return null
+      const source = runtime.infoschematicEndpointLabels.get(flow.source) ?? flow.source
+      const target = runtime.infoschematicEndpointLabels.get(flow.target) ?? flow.target
+      return `Flow ${flow.code}, ${source} to ${target}, signalled.`
+    })
+    .filter((sentence): sentence is string => sentence !== null)
+    .join(' ')
+  const emphasisSentence = [
+    ...new Set(
+      (emphasis?.emphasis ?? [])
+        .filter(({ elementId }) => !drawnElements || drawnElements.has(elementId))
+        .map(({ dynamicId }) => runtime.config.diagram.dynamics.find((dynamic) => dynamic.id === dynamicId)?.label)
+    )
+  ]
+    .filter((label): label is string => label !== undefined)
+    .map((label) => `${label}.`)
+    .join(' ')
   return (
     <>
       <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {signals ? `Signal update ${signals.revision}. ` : ''}
-        {signals?.signals
-          .map((signal) => {
-            const flow = flows.find((candidate) => candidate.id === signal.flowId)
-            if (!flow) return null
-            const source = runtime.infoschematicEndpointLabels.get(flow.source) ?? flow.source
-            const target = runtime.infoschematicEndpointLabels.get(flow.target) ?? flow.target
-            return `Flow ${flow.code}, ${source} to ${target}, signalled.`
-          })
-          .filter(Boolean)
-          .join(' ')}
+        {signals && signalSentence ? `Signal update ${signals.revision}. ${signalSentence}` : ''}
       </p>
       {/* The emphasis treatment is decorative; what a reader needs is the Dynamic's own meaning, stated once per
           occurrence however many elements it touches. */}
       <p aria-live="polite" className="infoschematic-signal-announcement" role="status">
-        {emphasis ? `Dynamic update ${emphasis.revision}. ` : ''}
-        {emphasis
-          ? [
-              ...new Set(
-                emphasis.emphasis.map(
-                  ({ dynamicId }) => runtime.config.diagram.dynamics.find((dynamic) => dynamic.id === dynamicId)?.label
-                )
-              )
-            ]
-              .filter((label): label is string => label !== undefined)
-              .map((label) => `${label}.`)
-              .join(' ')
-          : ''}
+        {emphasis && emphasisSentence ? `Dynamic update ${emphasis.revision}. ${emphasisSentence}` : ''}
       </p>
     </>
   )

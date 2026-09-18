@@ -9,6 +9,7 @@ import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
 import { type ComponentProps, type ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { DiagramAnnouncements } from './announcements.tsx'
+import { drawnElementIds } from './drawn-elements.ts'
 import {
   advanceElementEmphasisAnnouncement,
   type ElementEmphasisAnnouncement,
@@ -84,17 +85,7 @@ function CanvasContent({
     [resolvedDynamics, signals]
   )
   /* Emphasis may only reach what this Canvas drew, which is the same rule the static renderer applies. */
-  const shownElementIds = useMemo(() => {
-    const shown = new Set<string>(shownFlowIds)
-    for (const region of runtime.infoschematicRegions) shown.add(region.id)
-    for (const card of runtime.infoschematicCards) {
-      if (runtime.infoschematicCardIsVisible(card, scopes)) shown.add(card.id)
-    }
-    for (const fabric of runtime.infoschematicFabrics) {
-      if (runtime.infoschematicFabricIsVisible(fabric, scopes)) shown.add(fabric.id)
-    }
-    return shown
-  }, [runtime, scopes, shownFlowIds])
+  const shownElementIds = useMemo(() => drawnElementIds(runtime, shownFlowIds, scopes), [runtime, scopes, shownFlowIds])
   const initialSignals = useRef<{
     acceptedSignals: readonly FlowSignal[]
     activeSignals: readonly FlowSignal[]
@@ -198,7 +189,12 @@ function CanvasContent({
         signals={activeSignals}
         visibleScopes={scopes}
       />
-      <DiagramAnnouncements emphasis={emphasisAnnouncement} flows={shownFlows} signals={announcement} />
+      <DiagramAnnouncements
+        drawnElements={shownElementIds}
+        emphasis={emphasisAnnouncement}
+        flows={shownFlows}
+        signals={announcement}
+      />
       {children}
     </section>
   )
