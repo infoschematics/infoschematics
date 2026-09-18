@@ -38,13 +38,13 @@ Geometry the renderer cannot express MUST be refused where a caller can act on i
 
 `AUTHOR-005` promises rejection is a discriminated result carrying issues rather than an exception; `ROUTE-001` promises a diagonal run is rejected. Composed, the rejection lands outside the shape `AUTHOR-005` defines, because the contract accepts a document whose Flow endpoints are not axis-aligned and the refusal happens later, in geometry, with nothing to attach an issue to.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-Tracked by `INFOSCHEMATICS-TOOL-085`. Observed at the command line: a document whose one Flow is authored `LEFT E1 -> RIGHT W1` between two Cards placed at different vertical positions parses without issues, and `infoschematics render` exits non-zero having printed an interpreter stack trace whose innermost frame is the geometry module. The status is right and the stream is right, which is why `CLI-003` stays conforming; what a document author is told is a stack.
+Unaligned ports stay legal and the route bends: the derivation `COMPOSE-002` now shares means the document renders, and a geometry error that does survive — a diagonal an author wrote as waypoints — reaches the caller as one sentence naming the document and the run, with the validation status, rather than as a thrown internal error.
 
 _Verify:_ author a document whose two-port Flow is not axis-aligned, validate it, then render it. Either the parse MUST return an issue whose path names that Flow, or the render MUST succeed; a non-zero exit carrying a stack trace satisfies neither. Prove the case is not vacuous by aligning the ports again, which MUST make it pass.
 
-_Evidence:_ `parseInfoschematic` in `packages/domain-core/src/parse.ts` returns the discriminated result this composition has to extend, and its referential checks are covered by `packages/domain-core/src/parse.test.ts`; the unguarded throw is `routePath` in `packages/view-model/src/geometry.ts`, reached from the render path in `packages/cli/src/index.ts`.
+_Evidence:_ `packages/cli/src/index.test.ts` renders a document whose two-port Flow is not axis-aligned on the published surface and asserts the drawn route is orthogonal with a bend, and renders an authored diagonal to assert the command prints `Cannot render <document>: …` and no stack frame. The guard is in `renderDocument` in `packages/cli/src/index.ts`; the derivation that removes the common case is `createInfoschematicRuntime` in `packages/view-model/src/runtime.ts`.
 
 ### COMPOSE-004 — An announcement channel is silent when nothing was depicted
 

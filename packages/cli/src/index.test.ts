@@ -10,6 +10,37 @@ diagram:
   bounds: 0 0 100 100
   gridSize: 10
 `
+/** Two Cards on different axes joined by their ports alone: what the contract accepts and geometry used to refuse. */
+const unaligned = `id: CLI
+title: Unaligned
+diagram:
+  bounds: 0 0 400 300
+  gridSize: 10
+  families:
+    - id: link
+      label: Link
+      color: "#79c9ff"
+  cards:
+    - id: LEFT
+      label: Left
+      bounds: 40 20 100 60
+      ports: 1
+    - id: RIGHT
+      label: Right
+      bounds: 240 200 100 60
+      ports: 1
+  flows:
+    - id: FLOW-01
+      family: link
+      link: LEFT E1 -> RIGHT W1
+`
+
+/** The same document with a diagonal run authored by hand: a geometry error no derivation can route away. */
+const diagonal = unaligned.replace(
+  'link: LEFT E1 -> RIGHT W1',
+  'link: LEFT E1 -> RIGHT W1\n      waypoints: 180,90 220,160'
+)
+
 const json = JSON.stringify({ id: 'CLI', title: 'CLI smoke', diagram: { bounds: '0 0 100 100', gridSize: 10 } })
 
 type Harness = Readonly<{
@@ -89,6 +120,26 @@ describe('renderer CLI', () => {
     expect(yamlRun.output().stdout).toBe(jsonRun.output().stdout)
     expect(yamlRun.output().stdout).toMatch(/^<svg/)
     expect(yamlRun.output().stderr).toBe('')
+  })
+
+  it('renders a document the contract accepts rather than refusing its geometry', async () => {
+    const run = harness({ 'model.yaml': unaligned })
+    expect(await runRendererCli(['render', 'model.yaml'], run.io)).toBe(rendererCliExit.success)
+    expect(run.output().stderr).toBe('')
+
+    // The route the command drew is the bend, so the document renders instead of throwing from inside geometry.
+    const flow = run.output().stdout.split('data-artefact-kind="flow"')[1] ?? ''
+    const drawn = /<path d="([^"]+)"/.exec(flow)?.[1]
+    expect(drawn).toMatch(/^M-?\d+ -?\d+( [HV]-?\d+)+$/)
+    expect(drawn?.split(' ').length).toBeGreaterThan(3)
+  })
+
+  it('hands a geometry error to the author as a sentence rather than a stack', async () => {
+    const run = harness({ 'model.yaml': diagonal })
+    expect(await runRendererCli(['render', 'model.yaml'], run.io)).toBe(rendererCliExit.validation)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).toBe('Cannot render model.yaml: A route may not run diagonally: 140,50 to 180,90\n')
+    expect(run.output().stderr).not.toContain(' at ')
   })
 
   it('reads standard input and writes an explicit output without contaminating stdout', async () => {

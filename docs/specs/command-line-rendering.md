@@ -26,13 +26,13 @@ _Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`
 
 ### CLI-003 — Clean diagnostic streams
 
-Input, validation, usage, and output failures MUST return their documented non-zero status and write diagnostics only to standard error.
+Input, validation, usage, and output failures MUST return their documented non-zero status and write diagnostics only to standard error. A failure raised while constructing or rendering a document MUST be reported in that same shape — the document named, the reason in one sentence — and MUST NOT reach a caller as an interpreter stack trace.
 
 _Conformance:_ conforming
 
-_Verify:_ provoke every failure class and assert status plus empty standard output.
+_Verify:_ provoke every failure class and assert status plus empty standard output, including a document whose geometry the renderer refuses: its diagnostic MUST name the document and carry no stack frame.
 
-_Evidence:_ `packages/cli/src/index.test.ts`; packed malformed, missing, and unsupported-input checks in `scripts/release/pack-smoke.ts`.
+_Evidence:_ `packages/cli/src/index.test.ts`, whose cases include an authored diagonal reported as one sentence with the validation status; packed malformed, missing, and unsupported-input checks in `scripts/release/pack-smoke.ts`.
 
 ### CLI-004 — Inert authoring boundary
 
@@ -115,7 +115,3 @@ _Conformance:_ conforming
 _Verify:_ build, typecheck, dependency-cruise, pack, install, and execute its binary from a clean consumer.
 
 _Evidence:_ `packages/cli/package.json`, `.dependency-cruiser.ts`, `scripts/release/packages.ts`, and `scripts/release/pack-smoke.ts`.
-
-## Gaps
-
-- The command line is the surface `COMPOSE-003` in [Composition](composition.md) is verified on. `CLI-003` stays conforming there — the status and the stream are right — while what a document author is told about unrenderable geometry is a stack trace.

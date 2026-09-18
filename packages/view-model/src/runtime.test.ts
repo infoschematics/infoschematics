@@ -160,16 +160,32 @@ describe('createInfoschematicRuntime', () => {
      * A Producer may move either end of a Flow off the other's axis, which is what `COMPOSE-002` records: the
      * naked two-point run the runtime used to derive then failed `ROUTE-001` inside the host's own `useMemo`.
      */
-    const document = (dy: number, sourcePort: string, sourceSide: 'east' | 'north' | 'south' | 'west') =>
+    const document = (
+      dy: number,
+      sourcePort: 'E1' | 'N1' | 'S1' | 'W1',
+      sourceSide: 'east' | 'north' | 'south' | 'west'
+    ) =>
       defineInfoschematic({
         title: 'Routed from ports',
         infoschematic: {
+          scopes: [
+            {
+              id: 'inside',
+              prefix: 'IN',
+              label: 'Inside',
+              description: 'Inside the system',
+              color: '#6699cc',
+              fill: '#112233'
+            }
+          ],
           cards: [
             {
               id: 'a',
               code: 'A',
               label: 'A',
               detail: 'Source',
+              scope: 'inside',
+              scopes: ['inside'],
               placement: { box: { x: 100, y: 100, width: 120, height: 60 }, ports: { [sourceSide]: 1 } }
             },
             {
@@ -177,16 +193,19 @@ describe('createInfoschematicRuntime', () => {
               code: 'B',
               label: 'B',
               detail: 'Target',
+              scope: 'inside',
+              scopes: ['inside'],
               placement: { box: { x: 400, y: 100 + dy, width: 120, height: 60 }, ports: { west: 1 } }
             }
           ],
-          flowFamilies: [{ id: 'f', label: 'F', description: 'One family', color: '#88aacc' }],
+          flowFamilies: [{ id: 'f', prefix: 'F', label: 'F', description: 'One family', color: '#88aacc' }],
           flows: [
             {
+              id: 'f-001',
               code: 'F-001',
               family: 'f',
               source: 'a',
-              sourcePort: sourcePort,
+              sourcePort,
               target: 'b',
               targetPort: 'W1',
               points: [
@@ -220,12 +239,24 @@ describe('createInfoschematicRuntime', () => {
       defineInfoschematic({
         title: 'Draft and commit agree',
         infoschematic: {
+          scopes: [
+            {
+              id: 'inside',
+              prefix: 'IN',
+              label: 'Inside',
+              description: 'Inside the system',
+              color: '#6699cc',
+              fill: '#112233'
+            }
+          ],
           cards: [
             {
               id: 'a',
               code: 'A',
               label: 'A',
               detail: 'Source',
+              scope: 'inside',
+              scopes: ['inside'],
               placement: { box: { x: 100, y: 100, width: 120, height: 60 }, ports: { east: 1 } }
             },
             {
@@ -233,12 +264,15 @@ describe('createInfoschematicRuntime', () => {
               code: 'B',
               label: 'B',
               detail: 'Target',
+              scope: 'inside',
+              scopes: ['inside'],
               placement: { box: { x: 400, y: 100 + dy, width: 120, height: 60 }, ports: { west: 1 } }
             }
           ],
-          flowFamilies: [{ id: 'f', label: 'F', description: 'One family', color: '#88aacc' }],
+          flowFamilies: [{ id: 'f', prefix: 'F', label: 'F', description: 'One family', color: '#88aacc' }],
           flows: [
             {
+              id: 'f-001',
               code: 'F-001',
               family: 'f',
               source: 'a',

@@ -101,7 +101,14 @@ const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promi
     }
   }
 
-  const svg = renderInfoschematicSvg(result.model)
+  // Geometry the renderer cannot express is refused after parsing, so a construction error is about the document
+  // rather than the process. Hand the author that sentence, never the interpreter's stack.
+  let svg: string
+  try {
+    svg = renderInfoschematicSvg(result.model)
+  } catch (error) {
+    return { diagnostic: `Cannot render ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.validation }
+  }
 
   // A raster image is bytes, so it never gains the trailing newline that keeps SVG pleasant in a shell.
   if (parsed.format === 'svg') return { rendered: line(svg), status: rendererCliExit.success }
