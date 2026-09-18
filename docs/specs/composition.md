@@ -24,13 +24,13 @@ Where a geometry edit moves an artefact a [Flow](../reference/vocabulary.md#flow
 
 `EDIT-018` promises pointer, keyboard and numeric placement produce equivalent geometry and dependent Flow projection; `ROUTE-001` promises a diagonal run is rejected rather than approximated. Composed, a legal move of a Card whose Flow is authored by its [ports](../reference/vocabulary.md#port) alone produces exactly the geometry `ROUTE-001` rejects, and the rejection is a thrown error in the render path rather than a refused edit.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-Tracked by `INFOSCHEMATICS-TOOL-084`. Observed on the site Playground: in [Design](../reference/vocabulary.md#design), selecting the Player Card and nudging it down once throws `A route may not run diagonally: 960,240 to 1020,250` and the whole page — Diagram, panel dock and site chrome — is replaced by nothing, taking the draft and its undo history with it. `ROUTE-002` already requires a bend where a straight two-point route cannot stay orthogonal, and the draft overlay does insert one; the committed document re-derives the route from the two ports instead, so that calculation is never reached.
+Both derivations now reach that calculation: a Flow with no authored waypoints is routed between its two [ports](../reference/vocabulary.md#port) through the shared construction in the document itself, not joined by a naked pair of points, and a committed two-point move re-derives the run rather than bending it.
 
 _Verify:_ nudge, drag and type a Card off the axis of a Flow attached to it by ports alone, on a rendered surface rather than through the draft overlay alone. The host MUST still be mounted after each, and the route MUST have gained a bend. Prove the case is not vacuous by restoring the naked two-point derivation: it MUST fail, which it does not if the assertion reads the preview's projection instead of the committed document's.
 
-_Evidence:_ `routePath` in `packages/view-model/src/geometry.ts` rejects a diagonal run by throwing, and `createInfoschematicRuntime` in `packages/view-model/src/runtime.ts` derives an unrouted Flow's points from its two ports and calls it directly. `moveRouteEnd` in `packages/view-model/src/routing.ts` is the calculation that inserts the bend, reached from `flowsAfterMoves` for the draft overlay and from `packages/view-model/src/artefact-draft.ts` for a drafted route.
+_Evidence:_ `createInfoschematicRuntime` in `packages/view-model/src/runtime.ts` routes every waypoint-free Flow through `routeBetweenPorts`, and `flowsAfterMoves` re-derives a two-point run from the moved ports rather than bending it; `packages/view-model/src/runtime.test.ts` asserts the derived route stays orthogonal for each side pairing and that draft and commit agree, and `packages/view-studio/src/app/App.browser.test.tsx` nudges, types and drags a Card on a rendered surface and asserts the host is still mounted with an orthogonal path.
 
 ### COMPOSE-003 — A document the contract accepts renders, or is refused as a result
 

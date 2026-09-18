@@ -18,6 +18,8 @@ _Evidence:_ `packages/view-model/src/routing.test.ts` and `packages/view-model/s
 
 Moving one end of a route MUST carry the endpoint to its requested position while preserving the far endpoint. Where a straight two-point route cannot remain orthogonal, the calculation MUST introduce a bend rather than move the far endpoint.
 
+Every derivation of a route MUST reach that construction, not only the editor's. A Flow with no waypoints has no shape anyone drew — its two [ports](../reference/vocabulary.md#port) are all the document says — so both the draft overlay and the document itself MUST route between those ports through the one shared construction rather than joining them with a naked pair of points. A document that renders as a straight run MUST keep it, because the construction collapses to the straight run wherever the ports line up.
+
 _Conformance:_ conforming
 
 _Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose route cases cover end movement, bend insertion and orthogonality. Then drag one end of a straight two-point route off its axis: the far endpoint MUST stay where it is and a bend MUST appear, so a route that stays straight by dragging the other end with it fails the requirement.

@@ -128,6 +128,9 @@ export type RuntimeStory = {
 export type RuntimeStoryScene = RuntimeSequenceScene & { scene?: string; short?: string; title?: string }
 
 /** Safe readable fallback for timed Scenes without an authored duration. */
+/** A point moved by an offset, for a draft that re-derives a run rather than bending it. */
+const shiftedPoint = (point: Point, delta: Offset): Point => ({ x: point.x + delta.dx, y: point.y + delta.dy })
+
 export const defaultSceneDuration = 3100
 
 export type RuntimeDrafts = {
@@ -286,12 +289,34 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     if (!found) throw new Error(`Unknown Port ${port} on ${element}`)
     return found.at
   }
+  /*
+   * A Flow with no waypoints is routed rather than read.
+   *
+   * Its two ports are all the document says, and joining them with a naked pair of points asserts that they happen
+   * to line up. Nothing makes that true: a Producer may move either end off the other's axis, which `EDIT-018`
+   * allows through three placement paths, and the naked run then fails `ROUTE-001` and takes the host down with it
+   * — `COMPOSE-002`. `routeBetweenPorts` is the construction the editor already uses to draw a first route, and it
+   * collapses to the straight run wherever the ports do line up, so a document that renders today renders the same.
+   *
+   * A route that carries waypoints is a shape someone drew, and it is taken as it stands — deriving over it would
+   * be re-routing an authored route, which this does not do.
+   */
   const flows: RuntimeFlow[] = definition.flows.map((flow) => {
-    const points = establishedFlowPoints?.get(flow.id) ?? [
-      portAt(flow.source.element, flow.source.port),
-      ...(flow.route?.waypoints ?? []),
-      portAt(flow.target.element, flow.target.port)
-    ]
+    const established = establishedFlowPoints?.get(flow.id)
+    const waypoints = established ? established.slice(1, -1) : (flow.route?.waypoints ?? [])
+    const points =
+      waypoints.length > 0
+        ? (established ?? [
+            portAt(flow.source.element, flow.source.port),
+            ...waypoints,
+            portAt(flow.target.element, flow.target.port)
+          ])
+        : routeBetweenPorts(
+            portAt(flow.source.element, flow.source.port),
+            flow.source.port,
+            portAt(flow.target.element, flow.target.port),
+            flow.target.port
+          )
     const realisedSpecifications = specificationNodes.filter((entry) => entry.realisedBy?.includes(flow.id))
     return {
       id: flow.id,
@@ -473,8 +498,19 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       const targetOffset = offsets.get(endpointCodes.get(flow.target) ?? flow.target)
       if (!sourceOffset && !targetOffset) return flow
       let points = flow.points
-      if (sourceOffset) points = moveRouteEnd(points, 'start', sourceOffset)
-      if (targetOffset) points = moveRouteEnd(points, 'end', targetOffset)
+      if (points.length === 2) {
+        /*
+         * A straight run carries no shape anyone drew, so the draft derives it the way the document does rather
+         * than bending it. `moveRouteEnd` would insert its corner against the anchored far end, which leaves the
+         * port sideways and puts the draft somewhere the committed route is not.
+         */
+        const from = sourceOffset ? shiftedPoint(points[0], sourceOffset) : points[0]
+        const to = targetOffset ? shiftedPoint(points[1], targetOffset) : points[1]
+        points = routeBetweenPorts(from, flow.sourcePort, to, flow.targetPort)
+      } else {
+        if (sourceOffset) points = moveRouteEnd(points, 'start', sourceOffset)
+        if (targetOffset) points = moveRouteEnd(points, 'end', targetOffset)
+      }
       points = normaliseRoute(points)
       return { ...flow, d: routePath(points), points }
     })

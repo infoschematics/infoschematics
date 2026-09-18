@@ -156,6 +156,64 @@ test('Studio keyboard edits render one reviewable change with undo, redo and rev
   expect(container.querySelector('.change-list')).toBeNull()
 })
 
+test('a Card moved off its Flow axis stays rendered, by key, by drag and by typed coordinate', async () => {
+  /*
+   * `COMPOSE-002`: `EDIT-018` allows all three placement paths and `ROUTE-001` refuses a diagonal run, so a legal
+   * move of a Card whose Flow is authored by its ports alone used to produce exactly the geometry that is refused —
+   * thrown out of runtime construction inside the host's own `useMemo`, which unmounted the whole page. The
+   * assertion is on the rendered surface after the edit commits, not on the draft overlay, because the draft
+   * inserted a bend all along and the committed document was what could not be drawn.
+   */
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={config} />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const pipeOf = (code: string) =>
+    container.querySelector<SVGPathElement>(`[data-artefact-id="${code}"] .infoschematic-pipe`)?.getAttribute('d') ?? ''
+  /* At the ports, not at the authored pair: this fixture's `points` say `y: 195` and both ports sit at `200`, and a
+     route with no waypoints is routed from its ports rather than read from coordinates that drifted off them. */
+  expect(pipeOf('FLOW-A')).toBe('M180 200 H360')
+
+  const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  if (!card) throw new Error('Studio did not render Card A')
+  card.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, pointerId: 41 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0, pointerId: 41 }))
+  await expect.poll(() => card.classList.contains('selected')).toBe(true)
+
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowDown' }))
+  await expect.poll(() => card.getAttribute('transform')).toBe('translate(80 180)')
+  // Still mounted, and the route gained a corner rather than running diagonally to the moved port.
+  expect(container.querySelector('main')).not.toBeNull()
+  await expect.poll(() => pipeOf('FLOW-A')).toContain('V')
+  expect(pipeOf('FLOW-A')).toMatch(/^M-?\d+ -?\d+( [HV]-?\d+)+$/)
+
+  window.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'ArrowDown' }))
+  await expect.poll(() => card.getAttribute('transform')).toBe('translate(80 190)')
+  expect(container.querySelector('main')).not.toBeNull()
+
+  const y = container.querySelector<HTMLInputElement>('input[aria-label="CARD-A y"]')
+  if (!y) throw new Error('Studio did not render numeric placement for Card A')
+  const setInputValue = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  setInputValue?.call(y, '260')
+  y.dispatchEvent(new Event('input', { bubbles: true }))
+  await expect.poll(() => card.getAttribute('transform')).toBe('translate(80 260)')
+  expect(container.querySelector('main')).not.toBeNull()
+  expect(pipeOf('FLOW-A')).toMatch(/^M-?\d+ -?\d+( [HV]-?\d+)+$/)
+
+  card.dispatchEvent(
+    new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: 0, clientY: 0, pointerId: 42 })
+  )
+  window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 0, clientY: 40, pointerId: 42 }))
+  window.dispatchEvent(
+    new PointerEvent('pointerup', { bubbles: true, button: 0, clientX: 0, clientY: 40, pointerId: 42 })
+  )
+  await expect.poll(() => container.querySelector('main')).not.toBeNull()
+  expect(pipeOf('FLOW-A')).toMatch(/^M-?\d+ -?\d+( [HV]-?\d+)+$/)
+})
+
 test('Studio creation and property clearing stay rendered and reviewable until discard', async () => {
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)

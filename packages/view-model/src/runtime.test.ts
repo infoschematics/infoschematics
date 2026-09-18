@@ -155,4 +155,111 @@ describe('createInfoschematicRuntime', () => {
     })
     expect(runtime.stories[0]?.steps[1]?.graphic).toBeUndefined()
   })
+  it('routes a Flow with no waypoints from its ports, so no placement can leave it undrawable', () => {
+    /*
+     * A Producer may move either end of a Flow off the other's axis, which is what `COMPOSE-002` records: the
+     * naked two-point run the runtime used to derive then failed `ROUTE-001` inside the host's own `useMemo`.
+     */
+    const document = (dy: number, sourcePort: string, sourceSide: 'east' | 'north' | 'south' | 'west') =>
+      defineInfoschematic({
+        title: 'Routed from ports',
+        infoschematic: {
+          cards: [
+            {
+              id: 'a',
+              code: 'A',
+              label: 'A',
+              detail: 'Source',
+              placement: { box: { x: 100, y: 100, width: 120, height: 60 }, ports: { [sourceSide]: 1 } }
+            },
+            {
+              id: 'b',
+              code: 'B',
+              label: 'B',
+              detail: 'Target',
+              placement: { box: { x: 400, y: 100 + dy, width: 120, height: 60 }, ports: { west: 1 } }
+            }
+          ],
+          flowFamilies: [{ id: 'f', label: 'F', description: 'One family', color: '#88aacc' }],
+          flows: [
+            {
+              code: 'F-001',
+              family: 'f',
+              source: 'a',
+              sourcePort: sourcePort,
+              target: 'b',
+              targetPort: 'W1',
+              points: [
+                { x: 220, y: 130 },
+                { x: 400, y: 130 + dy }
+              ]
+            }
+          ]
+        }
+      })
+
+    // Aligned ports keep the straight run they have today: the construction collapses to it.
+    expect(createInfoschematicRuntime(document(0, 'E1', 'east')).infoschematicFlows[0]?.d).toBe('M220 130 H400')
+
+    // Off the axis, every side pairing draws rather than throwing.
+    for (const [port, side] of [
+      ['E1', 'east'],
+      ['N1', 'north'],
+      ['S1', 'south'],
+      ['W1', 'west']
+    ] as const)
+      for (const dy of [-90, 10, 240]) {
+        const flow = createInfoschematicRuntime(document(dy, port, side)).infoschematicFlows[0]
+        expect(flow?.d, `${port} ${dy}`).toMatch(/^M[\d-]+ [\d-]+( [HV][\d-]+)+$/)
+        expect(flow?.points.length, `${port} ${dy}`).toBeGreaterThan(2)
+      }
+  })
+
+  it('draws a committed move exactly where the draft showed it', () => {
+    const document = (dy: number) =>
+      defineInfoschematic({
+        title: 'Draft and commit agree',
+        infoschematic: {
+          cards: [
+            {
+              id: 'a',
+              code: 'A',
+              label: 'A',
+              detail: 'Source',
+              placement: { box: { x: 100, y: 100, width: 120, height: 60 }, ports: { east: 1 } }
+            },
+            {
+              id: 'b',
+              code: 'B',
+              label: 'B',
+              detail: 'Target',
+              placement: { box: { x: 400, y: 100 + dy, width: 120, height: 60 }, ports: { west: 1 } }
+            }
+          ],
+          flowFamilies: [{ id: 'f', label: 'F', description: 'One family', color: '#88aacc' }],
+          flows: [
+            {
+              code: 'F-001',
+              family: 'f',
+              source: 'a',
+              sourcePort: 'E1',
+              target: 'b',
+              targetPort: 'W1',
+              points: [
+                { x: 220, y: 130 },
+                { x: 400, y: 130 + dy }
+              ]
+            }
+          ]
+        }
+      })
+
+    for (const dy of [10, -40, 120]) {
+      const before = createInfoschematicRuntime(document(0))
+      const draft = before.editableModel.flowsAfterMoves(before.infoschematicFlows, new Map([['B', { dx: 0, dy }]]))
+      const committed = createInfoschematicRuntime(document(dy))
+
+      expect(draft[0]?.d, String(dy)).toBe(committed.infoschematicFlows[0]?.d)
+    }
+  })
 })

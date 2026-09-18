@@ -121,6 +121,8 @@ View Model normalises either supported input once, then derives lookup tables, r
 
 Canonical `id` values are persistence keys. Established configurations preserve the earlier optional-id behaviour: when their id is absent, Studio does not create a shared persistence key, so a title-only established definition remains a safe blank canvas.
 
+Runtime construction is not allowed to throw for a document the contract accepted: any geometry a renderer refuses to express is refused or reported at the edit, which is why every route derivation reaches the one orthogonal construction (`COMPOSE-002` in [the composition specification](../specs/composition.md)). That is the product's obligation, not the host's, and no host containment substitutes for it. A host still holds the second half: both interactive Views build the runtime inside a render-time memo, so a throw from construction unmounts the tree that contains it — the Diagram, the surrounding chrome and the draft's undo history alike. A host mounting a View in a page that carries anything else should wrap it in an error boundary, so a defect in construction costs one failed surface rather than the page. This is a recommendation to hosts rather than a requirement on them, because a host cannot be asked to compensate for a contract the product owns.
+
 ## Additive views
 
 [ADR-INFOSCHEMATICS-006](../decisions/ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) governs the delivered interactive chain:
