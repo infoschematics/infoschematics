@@ -99,6 +99,9 @@ const record = (value: JsonValue | undefined): Readonly<Record<string, JsonValue
 
 const same = (left: unknown, right: unknown): boolean => JSON.stringify(left) === JSON.stringify(right)
 
+/** Reads a member as the document authored it, so a projection can keep the shorthand the Producer wrote. */
+type DocumentMemberSource = (path: InfoschematicDocumentPath) => Readonly<Record<string, JsonValue>> | undefined
+
 const memberPath = (target: ArtefactSelection) => [
   field('diagram'),
   field(collectionName[target.kind]),
@@ -229,16 +232,55 @@ const scopeDiff = (
     ]
   })
 
+/*
+ * Every Flow the operation moved without naming it.
+ *
+ * A Card carries the ends of the Flows attached to it, and the draft repairs each of those routes as the Card
+ * moves: `moveRouteEnd` gives the run beside a moved port the corner that keeps it orthogonal. Projecting only the
+ * member the Producer named leaves that repair in the draft, so the document keeps the Card's new box beside the
+ * route's old waypoints, the first run arrives diagonally, and `ROUTE-001` refuses the document the edit just
+ * wrote - `COMPOSE-002`, thrown out of runtime construction rather than refused at the edit.
+ *
+ * The Flow the operation names is excluded because `memberDiff` has already written it.
+ */
+const dependentFlowDiff = (
+  before: DefinedInfoschematic,
+  after: DefinedInfoschematic,
+  named: string | undefined,
+  sourceFor: DocumentMemberSource
+): readonly InfoschematicDocumentOperation[] => {
+  const beforeById = new Map(before.diagram.flows.map((flow) => [flow.id, flow]))
+  return after.diagram.flows.flatMap((flow) => {
+    const previous = beforeById.get(flow.id)
+    if (flow.id === named || !previous || same(previous, flow)) return []
+    /*
+     * Only a route that carries waypoints is written. A Flow authored by its ports alone has no shape of its own to
+     * keep: the runtime derives it through `routeBetweenPorts` every time, so it already follows a port that moved,
+     * and writing the bend the draft derived would freeze a derived route into the document as though someone had
+     * drawn it - the re-routing `INFOSCHEMATICS-TOOL-084` deliberately did not introduce.
+     */
+    if ((previous.route?.waypoints?.length ?? 0) === 0) return []
+    const target = { code: null, geometry: 'route', id: flow.id, kind: 'flow' } as const
+    return memberDiff(
+      target,
+      previous as unknown as Readonly<Record<string, unknown>>,
+      flow as unknown as Readonly<Record<string, unknown>>,
+      sourceFor(memberPath(target))
+    )
+  })
+}
+
 const projectOperation = (
   before: DefinedInfoschematic,
   after: DefinedInfoschematic,
   operation: ArtefactDraftOperation,
-  sourceMember: Readonly<Record<string, JsonValue>> | undefined
+  sourceFor: DocumentMemberSource
 ): readonly InfoschematicDocumentOperation[] => {
   const targetId = stableId(operation.target)
   const beforeValues = collection(before, operation.target.kind)
   const afterValues = collection(after, operation.target.kind)
   const path = memberPath(operation.target)
+  const sourceMember = sourceFor(path)
   const changedScopes = scopeDiff(before, after)
 
   switch (operation.operation) {
@@ -265,6 +307,7 @@ const projectOperation = (
               value as Readonly<Record<string, unknown>>,
               sourceMember
             ),
+            ...dependentFlowDiff(before, after, operation.target.kind === 'flow' ? targetId : undefined, sourceFor),
             ...changedScopes
           ]
         : []
@@ -381,11 +424,8 @@ export const projectStudioDocumentOperations = (
     const rejection = applied.rejected[0]
     if (rejection) return { ok: false, reason: rejection.reason }
     const after = defineInfoschematicModel(infoschematicModelOf(applied.config))
-    const projected = projectOperation(
-      before,
-      after,
-      operation,
-      record(infoschematicDocumentValue(currentDocument, memberPath(operation.target)))
+    const projected = projectOperation(before, after, operation, (path) =>
+      record(infoschematicDocumentValue(currentDocument, path))
     )
     const interim = applyInfoschematicDocumentEdit(currentDocument, { operations: projected, version: 1 })
     if (!interim.ok) return { ok: false, reason: interim.issues.map((entry) => entry.message).join('; ') }

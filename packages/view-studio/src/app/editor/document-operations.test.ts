@@ -1,5 +1,6 @@
 import {
   defineInfoschematic,
+  infoschematicDocumentModel,
   infoschematicModelOf,
   parseInfoschematicDocument,
   serialiseInfoschematicYaml
@@ -12,6 +13,7 @@ import {
   createArtefactOperation,
   defineArtefactSelection
 } from '@infoschematics/view-model/editable'
+import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { describe, expect, it } from 'vitest'
 import { replaceArtefactPropertiesOperation } from './artefact-operations.ts'
 import {
@@ -129,6 +131,7 @@ const config = defineInfoschematic({
 
 const selections = {
   card: defineArtefactSelection({ code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' }),
+  cardTwo: defineArtefactSelection({ code: 'CARD-02', geometry: 'box', id: 'card-two', kind: 'card' }),
   fabric: defineArtefactSelection({ code: 'FABRIC-01', geometry: 'box', id: 'fabric-one', kind: 'fabric' }),
   flow: defineArtefactSelection({ code: 'FLOW-01', geometry: 'route', id: 'flow-one', kind: 'flow' }),
   graphic: defineArtefactSelection({ code: null, geometry: 'box', id: 'graphic-one', kind: 'graphic' }),
@@ -248,15 +251,21 @@ describe('Studio document operations', () => {
     expect(projection.ok).toBe(true)
     if (!projection.ok) return
     /*
-     * One row, against the authored `points:` entry, carrying the compact pair the document was written with.
-     * The Flow that anchors on the Point reprojects from the coordinate rather than being rewritten, so nothing
-     * names `flows:` here.
+     * The authored `points:` entry carries the compact pair the document was written with, and the Flow anchored on
+     * the Point is written too. A route with a waypoint cannot reproject from the coordinate the way a port-only
+     * route does: leaving its waypoint where it was puts a diagonal run in the document - `COMPOSE-002` - so the
+     * repair the draft already made has to reach `flows:` as well.
      */
     expect(projection.edit.operations).toEqual([
       {
         op: 'replace',
         path: [{ field: 'diagram' }, { field: 'points' }, { id: 'POINT-01' }, { field: 'at' }],
         value: '300 160'
+      },
+      {
+        op: 'replace',
+        path: [{ field: 'diagram' }, { field: 'flows' }, { id: 'FLOW-02' }, { field: 'waypoints' }],
+        value: '200,160'
       }
     ])
 
@@ -264,7 +273,8 @@ describe('Studio document operations', () => {
     expect(movedResult.ok).toBe(true)
     if (!movedResult.ok) return
     expect(movedResult.model.diagram.points[0]?.at).toEqual({ x: 300, y: 160 })
-    expect(movedResult.changedElements).toEqual(['POINT-01'])
+    // The Flow is listed because the move genuinely rewrote its route, not only the Point's coordinate.
+    expect(movedResult.changedElements).toEqual(['FLOW-02', 'POINT-01'])
     // The authored form survives: a coordinate goes back as the compact pair a Producer wrote, not as a mapping.
     expect(movedResult.source).toContain('at: 300 160')
 
@@ -309,6 +319,50 @@ describe('Studio document operations', () => {
     if (!result.ok) return
     expect(result.source).toContain('link: CARD-01 E1 -> FABRIC-01 W1 # retained link comment')
     expect(result.source).toContain('waypoints: 120,60 # retained waypoint comment')
+  })
+
+  it('carries the routes a move repaired into the document, not only the member it named', () => {
+    /*
+     * `COMPOSE-002`: a Card carries the ends of every Flow attached to it, and the draft repairs those routes as it
+     * moves. Projecting only the named member wrote the Card's new box beside the route's old waypoints, so the
+     * document the edit emitted held a diagonal run and `ROUTE-001` threw out of runtime construction - inside the
+     * host's own `useMemo`, taking the page with it. `FLOW-02` arrives at `CARD-02`'s south port through a waypoint,
+     * which is the shape the port-only construction never sees.
+     */
+    const moved: ArtefactDraftOperation = {
+      geometry: { box: { height: 40, width: 80, x: 220, y: 10 }, role: 'box' },
+      operation: 'move',
+      target: selections.cardTwo
+    }
+
+    const projection = projectStudioDocumentOperations(documentFor(), config, [moved])
+    expect(projection.ok).toBe(true)
+    if (!projection.ok) return
+    /*
+     * `FLOW-01` is absent deliberately. It is authored by its ports alone, so the runtime derives it through
+     * `routeBetweenPorts` on every build and already follows the port that moved; writing the bend the draft
+     * derived would freeze a derived route into the document as though it had been drawn by hand.
+     */
+    expect(projection.edit.operations.map((edit) => edit.path.slice(1))).toEqual([
+      [{ field: 'cards' }, { id: 'CARD-02' }, { field: 'bounds' }],
+      [{ field: 'flows' }, { id: 'FLOW-02' }, { field: 'waypoints' }]
+    ])
+
+    const changed = applyStudioDocumentOperations(documentFor(), config, [moved])
+    expect(changed.ok).toBe(true)
+    if (!changed.ok) return
+
+    const accepted = parseInfoschematicDocument(changed.source)
+    if (!accepted.ok) throw new Error('emitted source should parse')
+    const runtime = createInfoschematicRuntime(infoschematicDocumentModel(accepted.document))
+    const route = runtime.infoschematicFlows.find((flow) => flow.code === 'FLOW-02')
+    expect(route?.d).toMatch(/^M-?\d+ -?\d+( [HV]-?\d+)+$/)
+    // The waypoint moved with the port rather than being left behind at the Card's old edge.
+    expect(route?.points).toEqual([
+      { x: 280, y: 150 },
+      { x: 260, y: 150 },
+      { x: 260, y: 50 }
+    ])
   })
 
   it('treats the exact emitted document as host acknowledgement', () => {
