@@ -13,6 +13,25 @@ describe('guide journey navigation', () => {
     expect(navigation).toContain('<strong>Components</strong>')
   })
 
+  it('walks the component pages in order rather than stepping over them', () => {
+    const hub = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/components/" />)
+    const canvas = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/components/canvas/" />)
+    const future = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/components/future/" />)
+
+    expect(hub).toContain('href="/docs/components/canvas/" rel="next"')
+    expect(canvas).toContain('href="/docs/components/" rel="prev"')
+    expect(canvas).toContain('href="/docs/components/regions/" rel="next"')
+    // The last component is where the guide rejoins the practical steps, so Authoring follows Future rather than the hub.
+    expect(future).toContain('href="/docs/components/dynamics/" rel="prev"')
+    expect(future).toContain('href="/docs/authoring/" rel="next"')
+  })
+
+  it('offers the arrow-key accelerators beside the links', () => {
+    const navigation = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/components/canvas/" />)
+
+    expect(navigation).toContain('<kbd>←</kbd> <kbd>→</kbd>')
+  })
+
   it('starts and finishes without linking outside the practical journey', () => {
     const start = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/" />)
     const finish = renderToStaticMarkup(<GuideJourneyNav currentPath="/docs/react-integration/" />)

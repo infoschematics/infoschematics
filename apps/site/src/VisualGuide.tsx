@@ -1,12 +1,15 @@
+import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { standardFabricKeys, standardGraphicKeys } from '@infoschematics/view-canvas'
 import type { ReactNode } from 'react'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { type ComponentRoute, componentPaths, componentRoutes, componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
-import { componentSections } from './visual-guide/curriculum.ts'
+import { componentSections, type SpecimenKind } from './visual-guide/curriculum.ts'
 import { DynamicsSpecimen } from './visual-guide/DynamicsSpecimen.tsx'
+import { dynamicsSpecimen } from './visual-guide/dynamics.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
+import { specimenFor } from './visual-guide/specimens.ts'
 import './styles.css'
 
 /* The catalogue's own key lists drive this, so a treatment added to the product appears here without an edit. */
@@ -18,6 +21,23 @@ const treatmentComparisons = (id: string) =>
       : undefined
 
 const treatmentLabel = (key: string) => key.replace(/-/g, ' ').replace(/^./, (first) => first.toUpperCase())
+
+/*
+ * A tour aside is the product's own static rendering of the same specimen the component's page opens with, drawn once
+ * per component and reused, so the hub shows each component rather than a picture kept in step by hand.
+ */
+const previewSources = new Map<string, string>()
+
+const previewSource = (componentId: SpecimenKind | 'dynamics') => {
+  const cached = previewSources.get(componentId)
+  if (cached) return cached
+  const specimen = componentId === 'dynamics' ? dynamicsSpecimen : specimenFor(componentId)
+  const source = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+    renderInfoschematicSvg(specimen, { annotations: true, visibility: { graphics: 'all' } })
+  )}`
+  previewSources.set(componentId, source)
+  return source
+}
 
 const futureRoute = {
   path: componentPaths.future,
@@ -58,20 +78,32 @@ export function ComponentsHub() {
       <article aria-label="Components" className="document-content">
         <h1>Components</h1>
         <p>
-          Infoschematics combine a Canvas, named Regions, connectable Fabrics, Cards, Flows, Points, placed Graphics,
-          and named Dynamics. Explore each component on its own.
+          An Infoschematic is drawn back to front. The Canvas and its Regions set the ground, Fabrics lay connectable
+          planes across it, and Cards, Flows, Points, and Graphics sit on top of both. Dynamics name a change to any of
+          them rather than drawing anything of their own.
         </p>
-        <div className="component-catalogue">
+        <p>
+          Each component below has its own page with a live example and its property reference. Read them in order from
+          the Canvas, or go straight to the one you need.
+        </p>
+        <ol className="component-tour">
           {componentRoutes.slice(1).map((route) => {
             const component = componentSections.find(({ id }) => id === route.componentId)
             return (
-              <a className="component-catalogue__item" href={route.path} key={route.path}>
-                <strong>{route.title}</strong>
-                <span>{component?.summary ?? route.summary}</span>
-              </a>
+              <li key={route.path}>
+                <a className="component-tour__item" href={route.path}>
+                  <span className="component-tour__text">
+                    <strong>{route.title}</strong>
+                    <span>{component?.summary ?? route.summary}</span>
+                  </span>
+                  {component ? (
+                    <img alt="" className="component-tour__preview" src={previewSource(component.id)} />
+                  ) : null}
+                </a>
+              </li>
             )
           })}
-        </div>
+        </ol>
       </article>
     </Shell>
   )
@@ -108,7 +140,6 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
       ]}
     >
       <article aria-label={component.title} className="document-content">
-        {component.layer ? <p className="visual-guide__layer">{component.layer}</p> : null}
         <h1>{component.title}</h1>
         <p>{component.summary}</p>
         {component.id === 'canvas' && (

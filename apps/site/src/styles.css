@@ -522,6 +522,22 @@ a:focus-visible {
   text-transform: uppercase;
 }
 
+.guide-journey__accelerators {
+  margin-left: 0.6em;
+  color: #9db4c9;
+}
+
+.guide-journey__accelerators kbd {
+  padding: 1px 5px;
+  border: 1px solid #ffffff2e;
+  border-radius: 4px;
+  background: #0d2031;
+  color: #f5f8ff;
+  font:
+    600 11px/1.45 "DM Mono",
+    monospace;
+}
+
 .guide-journey__links {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -632,16 +648,6 @@ a:focus-visible {
     monospace;
   letter-spacing: 0.07em;
   text-align: center;
-  text-transform: uppercase;
-}
-
-.visual-guide__layer {
-  margin-bottom: 10px;
-  color: #79c9ff;
-  font:
-    650 10px/1.4 "DM Mono",
-    monospace;
-  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
@@ -1507,34 +1513,52 @@ a:focus-visible {
     scroll-behavior: auto !important;
   }
 }
-.component-catalogue {
+.component-tour {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  list-style: none;
   margin: 1.5rem 0;
+  padding: 0;
 }
 
-.component-catalogue__item {
+.component-tour__item {
+  align-items: center;
   border: 1px solid #ffffff1c;
   border-radius: 0.75rem;
   background: #0d2031;
   display: grid;
-  gap: 0.3rem;
-  padding: 1rem;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  padding: 1rem 1.25rem;
   text-decoration: none;
 }
 
-.component-catalogue__item:hover,
-.component-catalogue__item:focus-visible {
+.component-tour__item:hover,
+.component-tour__item:focus-visible {
   border-color: #79c9ff;
 }
 
-.component-catalogue__item strong {
+.component-tour__text {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.component-tour__text strong {
   color: #f5f8ff;
 }
 
-.component-catalogue__item span {
+.component-tour__text span {
   color: #9db4c9;
+}
+
+/* The aside is a glance rather than a specimen: small enough that the blurb stays the reason to open the page, and
+   framed so a component whose whole business is backdrop still reads as a picture rather than as empty space. */
+.component-tour__preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #ffffff14;
+  border-radius: 0.4rem;
 }
 
 .component-page__section {
@@ -1543,7 +1567,11 @@ a:focus-visible {
 }
 
 @media (max-width: 640px) {
-  .component-catalogue {
-    grid-template-columns: 1fr;
+  .component-tour__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .component-tour__preview {
+    max-width: 240px;
   }
 }

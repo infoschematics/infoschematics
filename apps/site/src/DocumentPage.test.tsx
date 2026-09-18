@@ -61,7 +61,8 @@ describe('documentation pages', () => {
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
 
     expect(page).toContain('aria-label="Guide journey"')
-    expect(page).toContain('href="/docs/components/" rel="prev"')
+    // The practical steps resume where the component tour ends, so Authoring follows the last component page.
+    expect(page).toContain('href="/docs/components/future/" rel="prev"')
     expect(page).toContain('href="/docs/representations/" rel="next"')
   })
 

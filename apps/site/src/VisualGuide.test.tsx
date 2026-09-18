@@ -4,12 +4,15 @@ import { componentPaths } from './routes.ts'
 import { ComponentsHub, VisualGuide } from './VisualGuide.tsx'
 
 describe('components guide', () => {
-  it('keeps the hub concise and links each focused page', () => {
+  it('explains the components in prose and gives each one a small still of itself', () => {
     const page = renderToStaticMarkup(<ComponentsHub />)
     expect(page).toContain('<h1>Components</h1>')
+    expect(page).toContain('drawn back to front')
     expect(page).toContain('href="/docs/components/canvas/"')
     expect(page).toContain('href="/docs/components/regions/"')
     expect(page).toContain('href="/docs/components/future/"')
+    // Every component with a specimen carries one; Future has none to show, and no entry carries a live example.
+    expect(page.match(/class="component-tour__preview"/g)).toHaveLength(8)
     expect(page).not.toContain('Live example')
     expect(page).not.toContain('A labelled Infoschematic')
   })
@@ -27,6 +30,8 @@ describe('components guide', () => {
       />
     )
     expect(page).toContain('<h1>Canvas</h1>')
+    // The drawing order is explained on the hub; an unexplained layer word above the title is not a title's business.
+    expect(page).not.toContain('background')
     expect(page).toContain('View box width')
     expect(page).toContain('id="canvas-example"')
     expect(page).toContain('id="canvas-properties"')

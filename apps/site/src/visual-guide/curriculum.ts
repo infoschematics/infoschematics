@@ -255,8 +255,6 @@ export type PropertyReference = Readonly<{
 export type ComponentSection = Readonly<{
   id: GuideSectionId
   title: string
-  /** Where the component sits in the drawing order; absent for a section that draws nothing of its own. */
-  layer?: 'background' | 'midground' | 'foreground'
   summary: string
   propertyKeys: readonly GuidePropertyKey[]
   properties: readonly PropertyReference[]
@@ -266,7 +264,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'canvas',
     title: 'Canvas',
-    layer: 'background',
     summary:
       'The Canvas is the drawing area behind every element. Its view box sets the coordinate space; its surface and grid set the backdrop.',
     propertyKeys: ['canvas.surface', 'canvas.grid', 'canvas.viewBox.width', 'canvas.viewBox.height'],
@@ -288,7 +285,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'region',
     title: 'Region',
-    layer: 'background',
     summary:
       'A Region gives part of the Canvas a named boundary. It establishes geography; it is not a connectable component.',
     propertyKeys: [
@@ -331,7 +327,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'fabric',
     title: 'Fabric',
-    layer: 'midground',
     summary:
       'A Fabric is a connectable plane or shared substrate. Unlike a Region, it can be the source or target of a Flow.',
     propertyKeys: [
@@ -373,7 +368,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'card',
     title: 'Card',
-    layer: 'foreground',
     summary:
       'A Card is a placed component. It carries identity and meaning, and its ports make it connectable to Flows.',
     propertyKeys: [
@@ -419,7 +413,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'flow',
     title: 'Flow',
-    layer: 'foreground',
     summary:
       'A Flow is a meaningful connection between ports. Its authored points preserve the route instead of asking a renderer to invent one.',
     propertyKeys: ['flow.dashed', 'flow.bidirectional', 'flow.labelAlong'],
@@ -453,7 +446,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'point',
     title: 'Point',
-    layer: 'foreground',
     summary:
       'A Point is a junction or anchor with an identity of its own. It becomes useful when Flows meet, split, or need an explicit waypoint the document can name.',
     propertyKeys: [
@@ -483,7 +475,6 @@ export const componentSections: readonly ComponentSection[] = [
   {
     id: 'graphic',
     title: 'Graphic',
-    layer: 'foreground',
     summary:
       'A Graphic reserves a placed visual supplied by a renderer. Scenes can reveal it when an explanation needs more than the structural diagram.',
     propertyKeys: ['graphic.width', 'graphic.height'],

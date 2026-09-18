@@ -235,15 +235,13 @@ export interface GuideJourneyEntry {
   summary: string
 }
 
-const componentsJourneyEntry: GuideJourneyEntry = {
-  path: componentsPath,
-  title: 'Components',
-  summary: 'See how the Canvas, Regions, Fabrics, Cards, Flows, Points, and Graphics fit together.'
-}
-
+/*
+ * One reading order through the whole guide. The component pages are part of it rather than a detour from it, so the
+ * hub's next step is the Canvas and the last component leads on to Authoring.
+ */
 export const guideJourney: readonly GuideJourneyEntry[] = [
   ...publishedDocuments.filter((route) => route.section === 'guide'),
-  componentsJourneyEntry,
+  ...componentRoutes,
   ...publishedDocuments.filter((route) => route.section === 'usage')
 ]
 
