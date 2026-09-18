@@ -13,6 +13,7 @@ import '@infoschematics/view-studio/styles.css'
 import { useState } from 'react'
 import mediaPipelineSeed from './playground/seeds/media-pipeline.yaml?raw'
 import { SiteNav } from './SiteNav.tsx'
+import { ViewBoundary } from './ViewBoundary.tsx'
 import './styles.css'
 
 export type PlaygroundPreset = 'blank' | 'explained' | 'media-pipeline' | 'showcase'
@@ -128,13 +129,20 @@ export function Playground({ preset = initialPreset() }: { preset?: PlaygroundPr
           </div>
         </fieldset>
         <div className="playground-studio">
-          <Studio
-            document={document}
+          {/* Reset is the way back: the document that could not be drawn is the one held in state, so clearing the
+              notice without replacing it would fail again on the next render. */}
+          <ViewBoundary
             key={`${selectedPreset}-${studioSession}`}
-            onDocumentChange={acceptDocument}
-            onDocumentReplace={acceptDocument}
-            responsiveCardDetails
-          />
+            onRecover={{ label: 'Reset preset', recover: resetDocument }}
+            surface="The Playground"
+          >
+            <Studio
+              document={document}
+              onDocumentChange={acceptDocument}
+              onDocumentReplace={acceptDocument}
+              responsiveCardDetails
+            />
+          </ViewBoundary>
         </div>
       </div>
     </div>

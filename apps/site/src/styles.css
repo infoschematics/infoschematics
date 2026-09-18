@@ -1355,6 +1355,34 @@ a:focus-visible {
   padding: 12px;
 }
 
+/* The notice a View leaves behind when its runtime could not be built. It fills the surface it replaced so the
+   page keeps its shape, and reads as a failure rather than as empty content. */
+.view-boundary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: center;
+  height: 100%;
+  padding: 24px;
+  color: #d8e4ee;
+}
+
+.view-boundary-title {
+  margin: 0;
+  color: #ff9d9d;
+  font-size: 15px;
+}
+
+.view-boundary-detail {
+  margin: 0;
+  max-width: 60ch;
+  color: #8fa9bf;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 @media (max-width: 900px) {
   .playground-shell {
     height: auto;

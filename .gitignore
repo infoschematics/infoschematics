@@ -56,3 +56,6 @@ dist/
 
 # Rendered example previews — each example package regenerates its own with `bun run render`.
 examples/*/*.svg
+
+# Scratch working area — frames, dumps, throwaway repro output. Never committed.
+tmp/
