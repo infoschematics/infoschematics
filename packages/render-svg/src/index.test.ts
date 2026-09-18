@@ -751,8 +751,6 @@ describe('renderInfoschematicSvg', () => {
   })
 
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
-    expect(renderInfoschematicSvg(representative)).not.toContain('data-renderer=')
-
     const focused = renderInfoschematicSvg(representative, {
       scene: { kind: 'standalone', sceneId: 'source-only' },
       visibility: { scopes: ['one', 'two'], unfocused: 'hide' }
@@ -769,6 +767,28 @@ describe('renderInfoschematicSvg', () => {
     expect(oneScope).toContain('data-id="ONE-001"')
     expect(oneScope).not.toContain('data-id="TWO-001"')
     expect(oneScope).not.toContain('data-id="CALL-001"')
+  })
+
+  it('draws every authored Overlay by default and narrows to a Scene only when asked', () => {
+    /*
+     * The default was `scene`, and no authored Scene can name a Graphic, so every authored Overlay was filtered
+     * out of every still rendering — `ADR-INFOSCHEMATICS-037`. A caller that wants the scene-scoped set asks for it.
+     */
+    const everything = renderInfoschematicSvg(representative)
+    expect(everything).toContain('data-artefact-kind="overlay"')
+    expect(everything).toContain('data-id="note"')
+
+    const sceneScoped = renderInfoschematicSvg(representative, {
+      scene: { kind: 'standalone', sceneId: 'source-only' },
+      visibility: { graphics: 'scene' }
+    })
+    expect(sceneScoped).toContain('data-id="note"')
+
+    const unscened = renderInfoschematicSvg(representative, { visibility: { graphics: 'scene' } })
+    expect(unscened).not.toContain('data-artefact-kind="overlay"')
+
+    const suppressed = renderInfoschematicSvg(representative, { visibility: { graphics: 'none' } })
+    expect(suppressed).not.toContain('data-artefact-kind="overlay"')
   })
 
   it('draws standard catalogue artwork from the shared description, once per piece', () => {

@@ -109,3 +109,15 @@ _Conformance:_ conforming
 _Verify:_ parse a Diagram omitting `gridSize` and assert rejection; parse `0`, `1`, and a custom value and assert editing and rendered geometry follow the authored value; resolve an `InfoschematicConfig` and assert it yields `10`.
 
 _Evidence:_ `packages/domain-model/src/model.ts` declares the required field and `packages/domain-core/src/schema.ts` validates it as a non-negative integer; `packages/domain-core/src/schema.test.ts` asserts rejection of an omitted and a negative value and acceptance of `0` and `1`; `packages/view-model/src/tokens.ts` supplies the compatibility default; `packages/view-studio/src/app/App.browser.test.tsx` exercises the rendered Design grid control.
+
+### DIAGRAM-011 — An authored Overlay is drawn wherever the Diagram is
+
+An authored [Overlay](../reference/vocabulary.md#overlay) MUST be drawn wherever the Diagram is drawn, not only in a Producer editing mode. A [Scene](../reference/vocabulary.md#scene)'s own Graphic MUST add to the authored set rather than replace it, and the union MUST be deduplicated by identifier so a Scene naming an authored Overlay draws it once. A Scene's focus MUST express itself as dimming or hiding rather than as absence from the drawn set.
+
+[`ADR-INFOSCHEMATICS-037`](../decisions/ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records the reversal. [Present](../reference/vocabulary.md#present) needs nothing of its own: it keeps supplying the active Sequence Scene's Graphic, and the authored declaration reaches an audience because the Diagram draws it.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present` and `bun run self:scripts:test`, then author a document with one Overlay and no Scene at all, open it outside Design, and see it. Hand the same Overlay over as a Scene's Graphic as well and confirm the drawing is unchanged rather than doubled. Restore the `editing ?` gate and the parity case MUST fail.
+
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.tsx` unions `config.diagram.overlays` with the Scene's Graphic, deduplicated by id; `packages/view-present/src/Present.test.tsx` shows an authored Overlay to an audience; `scripts/visual-treatment-parity.test.ts` draws each standard Overlay treatment in both renderers from the document alone and asserts a Scene's Graphic adds nothing.

@@ -36,7 +36,13 @@ export type SvgSceneSelection =
   | { kind: 'story'; sceneIndex: number; storyId: string }
 
 export type SvgVisibilityOptions = {
-  /** Which authored Graphic overlays to include. Defaults to selected-Scene Graphics. */
+  /**
+   * Which authored Graphic overlays to include. Defaults to every authored one.
+   *
+   * `scene` narrows the set to the Graphics the selected Scene names, which is what this defaulted to until an
+   * authored document proved the default unreachable: no authored Scene can name a Graphic, so every authored
+   * Overlay was filtered out of every still rendering — `ADR-INFOSCHEMATICS-037`.
+   */
   graphics?: 'all' | 'none' | 'scene'
   /** Scope ids to show. Omit this field to show every declared Scope. */
   scopes?: readonly string[]
@@ -455,7 +461,7 @@ export const renderInfoschematicSvg = (
   const regionStroke = blueprint ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
   const visibleScopes = new Set(options.visibility?.scopes ?? config.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
-  const graphicVisibility = options.visibility?.graphics ?? 'scene'
+  const graphicVisibility = options.visibility?.graphics ?? 'all'
   const resourceIdPrefix = svgResourcePrefix(options.resourceIdPrefix)
   const focus = resolveFocus(runtime, options.scene)
   const collections = new Map(runtime.infoschematicCollections.map((collection) => [collection.id, collection]))

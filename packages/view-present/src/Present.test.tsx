@@ -21,6 +21,33 @@ describe('Present', () => {
     expect(markup).not.toContain('Design')
   })
 
+  it('shows an authored Overlay to an audience', () => {
+    /*
+     * Present supplies a Scene's own Graphic and nothing else, so before `ADR-INFOSCHEMATICS-037` an authored
+     * Overlay reached Studio's Design mode and no audience. Present is unchanged: Canvas draws the declaration.
+     */
+    const markup = renderToStaticMarkup(
+      <Present
+        config={defineInfoschematic({
+          title: 'Annotated view',
+          infoschematic: {
+            graphics: [
+              {
+                id: 'OVL-01',
+                label: 'Reading order',
+                placement: { x: 40, y: 40, width: 200, height: 80 },
+                renderer: 'annotation'
+              }
+            ]
+          }
+        })}
+      />
+    )
+
+    expect(markup).toContain('data-artefact-id="OVL-01"')
+    expect(markup).toContain('infoschematic-graphic')
+  })
+
   it('offers visibility, Scene, Theme and Story presentation controls', () => {
     const config = defineInfoschematic({
       title: 'Narrative view',

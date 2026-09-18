@@ -707,11 +707,10 @@ describe('standard renderer catalogue parity', () => {
           ]
         }
       })
-      /* Canvas draws an authored Overlay outside Design mode only as the scene's own graphic, which
-         `INFOSCHEMATICS-TOOL-089` records — so each key is its own document and the graphic is handed over. */
-      const graphic = createInfoschematicRuntime(drawing).infoschematicOverlays[0]
-      const canvas = renderToStaticMarkup(createElement(Canvas, { config: drawing, graphic }))
-      const svg = renderInfoschematicSvg(drawing, { visibility: { graphics: 'all' } })
+      /* Both renderers are handed the document and nothing else: an authored Overlay is drawn wherever the Diagram
+         is drawn, so neither a Scene's graphic nor a visibility option is needed to reach the treatment. */
+      const canvas = renderToStaticMarkup(createElement(Canvas, { config: drawing }))
+      const svg = renderInfoschematicSvg(drawing)
 
       const drawn = artworkDrawing(svg, key)
       expect(artworkDrawing(canvas, key), key).toEqual(drawn)
@@ -719,6 +718,14 @@ describe('standard renderer catalogue parity', () => {
          whole drawing rather than its outlines, because `annotation` is a panel and its lines of text. */
       const drew = Object.values(drawn.counts).reduce((total, count) => total + count, 0)
       expect(drew, key).toBeGreaterThan(1)
+      /* A Scene naming the same Overlay adds nothing: the union is deduplicated by id, so the piece is drawn once. */
+      const scened = renderToStaticMarkup(
+        createElement(Canvas, {
+          config: drawing,
+          graphic: createInfoschematicRuntime(drawing).infoschematicOverlays[0]
+        })
+      )
+      expect(artworkDrawing(scened, key), key).toEqual(drawn)
       for (const markup of [canvas, svg])
         expect(
           resolvedReferences(markup).filter((entry) => !entry.defined),

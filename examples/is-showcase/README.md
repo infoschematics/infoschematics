@@ -41,7 +41,7 @@ Cards are authored `compact: false`, carrying their full detail. They were `comp
 
 The Fabrics and the Graphic name `kind`s from the product's standard catalogue — `message-bus`, `object-store` and `annotation` — so the product draws them itself, identically in the interactive Diagram and in `infoschematics render`, with no host code. A host with its own house style overrides any of them by registering a renderer under the same key; a `kind` the catalogue does not offer and no host registers still draws the generic treatment, which is the contract working as designed rather than a fault in a document.
 
-The Graphic is drawn in Design but not by `infoschematics render` or in Present: a Graphic reaches either only when a Scene names it, and an authored Scene has no field that can. `INFOSCHEMATICS-TOOL-089` tracks the gap, and it bounds what the standard `annotation` treatment can show here — the catalogue supplies the drawing, not the route it travels.
+The Graphic is drawn wherever this Diagram is drawn — in Design, in Present, and by `infoschematics render` — because an authored Overlay is diagram-scoped, and a Scene naming a Graphic adds to that set rather than replacing it ([`ADR-INFOSCHEMATICS-037`](../../docs/decisions/ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md)). Until that landed it appeared in Design alone, so the standard `annotation` treatment had a drawing and no route to travel.
 
 ## Edit it
 

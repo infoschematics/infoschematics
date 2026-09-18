@@ -660,7 +660,20 @@ export function InfoschematicDiagram({
    * and waypoint controls simply are not rendered.
    */
   const editing = mode === 'design'
-  const graphics = editing ? config.diagram.overlays : graphic ? [graphic] : []
+  /*
+   * Every authored Graphic, wherever the Diagram is drawn, with a Scene's own Graphic added to them.
+   *
+   * This was `editing ? config.diagram.overlays : graphic ? [graphic] : []`, so an authored Overlay appeared in
+   * Design and nowhere else, and the only Graphic a reader ever saw was one a Scene named. An authored Scene has no
+   * field that can name one, so for an authored document that set was always empty and the declaration drew nothing
+   * at all — `ADR-INFOSCHEMATICS-037`. A Scene now adds to what is drawn rather than replacing it, deduplicated by id
+   * because a Scene naming an authored Overlay means the same Overlay.
+   */
+  const graphics = useMemo(() => {
+    const authored = config.diagram.overlays
+    if (!graphic || authored.some((overlay) => overlay.id === graphic.id)) return authored
+    return [...authored, graphic]
+  }, [config.diagram.overlays, graphic])
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
   const focusing = mode === 'scenes' || mode === 'stories'

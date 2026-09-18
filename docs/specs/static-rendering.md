@@ -126,6 +126,18 @@ _Verify:_ Run `bun run self:scripts:test`, then render a document composing an A
 
 _Evidence:_ `adapterClaspOutline` and `adapterLabelBaseline` in `packages/view-model/src/assembly.ts` state the shape and the label band once; `scripts/visual-treatment-parity.test.ts` asserts the same outline string and the same label position in both renderings from an adapter authored at the origin, so a renderer reading the authored box fails. `examples/is-showcase/infoschematic.yaml` composes one with non-compact Cards.
 
+### STATIC-019 — An authored Overlay is drawn by default
+
+Static output MUST draw every authored [Overlay](../reference/vocabulary.md#overlay) when the caller passes no visibility options, so a document rendered through `infoschematics render` shows the Overlays it declares. `visibility.graphics` MUST keep `scene`, which narrows the drawn set to the Graphics the selected Scene names, and `none`, which draws no Overlay at all; neither MUST be the default. A Scene's focus MUST continue to dim or hide an unfocused Overlay through `unfocused` rather than remove it from the default set.
+
+[`ADR-INFOSCHEMATICS-037`](../decisions/ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records why the default reversed: an authored Scene has no field that can name a Graphic, so the scene-scoped default was unreachable from every authored document and no document depended on it.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg` and `bun run self:scripts:test`, then render `examples/is-showcase/infoschematic.yaml` through `infoschematics render` and find `OVL-01` in the output — the command passes no options, so a scene-scoped default emits nothing here. Ask for `graphics: 'scene'` without selecting a Scene and confirm no Overlay is drawn, which is what the old default did to every authored document. Restore the `'scene'` default and the parity case MUST fail.
+
+_Evidence:_ `packages/render-svg/src/index.ts` defaults `graphicVisibility` to `'all'`; `packages/render-svg/src/index.test.ts` draws every authored Overlay by default and narrows to a Scene only when asked; `scripts/visual-treatment-parity.test.ts` draws each standard Overlay treatment from a document alone, with no Scene and no options.
+
 ## Quality properties
 
 ### STATIC-011 — Output is deterministic

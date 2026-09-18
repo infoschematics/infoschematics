@@ -471,6 +471,13 @@ describe('InfoschematicDiagram draft preview', () => {
     expect(rejectedMarkup).toBe(baseMarkup)
     expect(presentMarkup).toContain('Present Graphic')
     expect(presentMarkup).toContain(':present')
-    expect(presentMarkup).not.toContain('Graphic A:')
+    /*
+     * The authored Overlays are drawn alongside it, because an authored Overlay is drawn wherever the Diagram is
+     * and a Scene's Graphic adds to that set — `ADR-INFOSCHEMATICS-037`. A pending removal is still a review state,
+     * so `graphic-a` keeps its `going` treatment rather than disappearing before the host applies the change.
+     */
+    expect(presentMarkup).toContain('Graphic A:')
+    expect(presentMarkup).toContain('Graphic B:')
+    expect(presentMarkup).toContain('infoschematic-graphic going')
   })
 })

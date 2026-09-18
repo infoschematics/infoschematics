@@ -22,7 +22,7 @@ Populate the structural `infoschematic` field:
 - `fabrics` and `cards` establish focusable [Fabric](/docs/reference/vocabulary/#fabric) and [Card](/docs/reference/vocabulary/#standard-card) artefacts;
 - `points` establish [Points](/docs/reference/vocabulary/#point), coordinate artefacts in their own right rather than parts of the Flows that meet them: each has an `id`, a required `label`, a position, and optional ports of its own, and a Point with no Flow attached is valid. The label is drawn beside the mark, on a side no Flow leaves by, so write it for a reader of a still image rather than as a note to yourself;
 - `flows` connect Cards, Fabrics, and Points through named [ports](/docs/reference/vocabulary/#port);
-- `graphics` register [Graphics](/docs/reference/vocabulary/#graphic), visual material that Scenes may reveal;
+- `graphics` register [Graphics](/docs/reference/vocabulary/#graphic), visual material drawn as [Overlays](/docs/reference/vocabulary/#overlay) wherever the Diagram is drawn — in Present and in a still rendering as well as while editing. A Scene may name one to keep it in focus, which adds to what is drawn rather than deciding it, so write a Graphic for a reader who will always see it;
 - `scopes` provide [Scope](/docs/reference/vocabulary/#scope) applicability, `domains` provide [Domain](/docs/reference/vocabulary/#domain) classification, and `flowFamilies` provide [Flow](/docs/reference/vocabulary/#flow) identity;
 - `interfaces` and `specificationGroups` describe technical contracts.
 
