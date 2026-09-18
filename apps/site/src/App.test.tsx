@@ -4,8 +4,6 @@ import { describe, expect, it } from 'vitest'
 import { App } from './App.tsx'
 import { homepageGuideActions } from './HomepageGuideDiagram.tsx'
 import {
-  canonicalSiteLocation,
-  canonicalSitePath,
   componentRoutes,
   docsIndexPath,
   documentationRoutes,
@@ -99,34 +97,12 @@ describe('website routes', () => {
     expect(documentationRoutes.filter((route) => route.section === 'reference')).toHaveLength(1)
   })
 
-  it('canonicalises retired Capabilities, Visual guide and Design paths', () => {
-    expect(canonicalSitePath('/docs/capabilities/')).toBe('/docs/components/')
-    expect(canonicalSitePath('/docs/capabilities')).toBe('/docs/components/')
-    expect(canonicalSitePath('/docs/visual-guide/')).toBe('/docs/components/')
-    expect(canonicalSitePath('/docs/visual-guide')).toBe('/docs/components/')
-    expect(canonicalSitePath('/docs/design/architecture/')).toBe('/docs/approach/architecture/')
-    expect(getDocumentationRoute('/docs/design/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
-    expect(canonicalSitePath('/docs/authoring/')).toBe('/docs/authoring/')
-  })
-
-  it('maps legacy example pages to curated Playground presets', () => {
-    expect(canonicalSiteLocation('/examples/')).toEqual({
-      pathname: '/playground/',
-      search: '?preset=showcase'
-    })
-    expect(canonicalSiteLocation('/examples/blank')).toEqual({ pathname: '/playground/', search: '?preset=blank' })
-    expect(canonicalSiteLocation('/examples/infoschematics/')).toEqual({
-      pathname: '/playground/',
-      search: '?preset=explained'
-    })
-    expect(canonicalSiteLocation('/examples/system')).toEqual({
-      pathname: '/playground/',
-      search: '?preset=explained'
-    })
-    expect(canonicalSiteLocation('/examples/retired-example/')).toEqual({
-      pathname: '/playground/',
-      search: '?preset=showcase'
-    })
+  it('answers a published route with or without its trailing slash', () => {
+    expect(getDocumentationRoute('/docs/authoring')?.title).toBe('Authoring')
+    expect(getComponentRoute('/docs/components/canvas')?.title).toBe('Canvas')
+    // Nothing else is answered: a path the site does not publish falls through to the homepage.
+    expect(getDocumentationRoute('/docs/capabilities/')).toBeUndefined()
+    expect(getComponentRoute('/examples/blank/')).toBeUndefined()
   })
 
   it('publishes guidance while specifications stay in the repository', () => {

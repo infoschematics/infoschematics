@@ -1,8 +1,4 @@
-const blankExamplePath = '/examples/blank/'
-const infoschematicsExamplePath = '/examples/infoschematics/'
-const systemExamplePath = '/examples/system/'
 export const docsIndexPath = '/docs/'
-export const examplesIndexPath = '/examples/'
 export const componentsPath = '/docs/components/'
 export const componentPaths = {
   canvas: '/docs/components/canvas/',
@@ -245,69 +241,14 @@ export const guideJourney: readonly GuideJourneyEntry[] = [
   ...publishedDocuments.filter((route) => route.section === 'usage')
 ]
 
-interface SiteLocation {
-  pathname: string
-  search: string
-}
-
-const legacyLocationAliases: Readonly<Record<string, SiteLocation>> = {
-  '/docs/capabilities/': { pathname: componentsPath, search: '' },
-  '/docs/visual-guide/': { pathname: componentsPath, search: '' },
-  '/docs/design/architecture/': {
-    pathname: '/docs/approach/architecture/',
-    search: ''
-  },
-  '/docs/design/visual-language/': {
-    pathname: '/docs/approach/visual-language/',
-    search: ''
-  },
-  '/docs/design/view-present/': {
-    pathname: '/docs/approach/view-present/',
-    search: ''
-  },
-  '/docs/design/view-studio/': {
-    pathname: '/docs/approach/view-studio/',
-    search: ''
-  },
-  [examplesIndexPath]: {
-    pathname: playgroundPath,
-    search: '?preset=showcase'
-  },
-  [blankExamplePath]: { pathname: playgroundPath, search: '?preset=blank' },
-  [infoschematicsExamplePath]: {
-    pathname: playgroundPath,
-    search: '?preset=explained'
-  },
-  [systemExamplePath]: {
-    pathname: playgroundPath,
-    search: '?preset=explained'
-  }
-}
-
-/** Return the canonical browser location for a retired public route. */
-export function canonicalSiteLocation(pathname: string, search = ''): SiteLocation {
-  const normalised = pathname.endsWith('/') ? pathname : `${pathname}/`
-  const alias = legacyLocationAliases[normalised]
-  if (alias) return alias
-  if (normalised.startsWith(examplesIndexPath)) {
-    return { pathname: playgroundPath, search: '?preset=showcase' }
-  }
-  return { pathname, search }
-}
-
-/** Return only the canonical path when query selection is not needed by the caller. */
-export function canonicalSitePath(pathname: string) {
-  return canonicalSiteLocation(pathname).pathname
-}
+/** Routes are published with a trailing slash; a browser that drops it still asks for the same page. */
+const matchesRoute = (pathname: string, path: string) => pathname === path || pathname === path.slice(0, -1)
 
 export function getGuideJourneyNeighbours(pathname: string): {
   previous?: GuideJourneyEntry
   next?: GuideJourneyEntry
 } {
-  const canonicalPath = canonicalSitePath(pathname)
-  const currentIndex = guideJourney.findIndex(
-    (entry) => canonicalPath === entry.path || canonicalPath === entry.path.slice(0, -1)
-  )
+  const currentIndex = guideJourney.findIndex((entry) => matchesRoute(pathname, entry.path))
 
   if (currentIndex === -1) return {}
 
@@ -322,8 +263,7 @@ export function isDocsIndexPath(pathname: string) {
 }
 
 export function getComponentRoute(pathname: string): ComponentRoute | undefined {
-  const canonicalPath = canonicalSitePath(pathname)
-  return componentRoutes.find((route) => canonicalPath === route.path || canonicalPath === route.path.slice(0, -1))
+  return componentRoutes.find((route) => matchesRoute(pathname, route.path))
 }
 
 export function isPlaygroundPath(pathname: string) {
@@ -331,6 +271,5 @@ export function isPlaygroundPath(pathname: string) {
 }
 
 export function getDocumentationRoute(pathname: string): DocumentationRoute | undefined {
-  const canonicalPath = canonicalSitePath(pathname)
-  return documentationRoutes.find((route) => canonicalPath === route.path || canonicalPath === route.path.slice(0, -1))
+  return documentationRoutes.find((route) => matchesRoute(pathname, route.path))
 }

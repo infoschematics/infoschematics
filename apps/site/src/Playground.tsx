@@ -48,18 +48,10 @@ export const presets: readonly {
   }
 ]
 
-/* Retired preset keys land on the Benchmark rather than on nothing, so a link written before this still opens a document. */
-const legacyPresetAliases: Readonly<Record<string, PlaygroundPreset>> = {
-  'format-parity': 'showcase',
-  'source-to-sink': 'showcase',
-  infoschematics: 'explained',
-  system: 'explained'
-}
-
 /** The preset a `?preset=` query names, or `undefined` for anything it does not. */
 export const presetFromSearch = (search: string): PlaygroundPreset | undefined => {
   const wanted = new URLSearchParams(search).get('preset')
-  return presets.find(({ key }) => key === wanted)?.key ?? (wanted ? legacyPresetAliases[wanted] : undefined)
+  return presets.find(({ key }) => key === wanted)?.key
 }
 
 export const documentForPreset = (key: PlaygroundPreset) =>

@@ -104,14 +104,11 @@ describe('Playground', () => {
   })
 
   it('selects a preset from the query string and refuses one it does not know', () => {
-    // The retired preset's own key, and the key before that, both land on the Benchmark.
-    expect(presetFromSearch('?preset=source-to-sink')).toBe('showcase')
     expect(presetFromSearch('?preset=media-pipeline')).toBe('media-pipeline')
     expect(presetFromSearch('?preset=explained')).toBe('explained')
     expect(presetFromSearch('?preset=blank')).toBe('blank')
     expect(presetFromSearch('?preset=showcase')).toBe('showcase')
-    expect(presetFromSearch('?preset=system')).toBe('explained')
-    expect(presetFromSearch('?preset=format-parity')).toBe('showcase')
+    expect(presetFromSearch('?preset=source-to-sink')).toBeUndefined()
     expect(presetFromSearch('?preset=nonesuch')).toBeUndefined()
     expect(presetFromSearch('')).toBeUndefined()
   })
