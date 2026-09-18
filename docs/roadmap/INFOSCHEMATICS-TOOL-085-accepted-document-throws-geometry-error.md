@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-085
 area: TOOL
 title: An accepted document throws a geometry error at the command line
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
-blocked_by: []
-baseline_ref: null
+blocked_by: [INFOSCHEMATICS-TOOL-084]
+baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T09:41:00Z
-updated_at: 2026-09-17T09:41:00Z
+updated_at: 2026-09-18T02:40:00Z
 ---
 
 # An accepted document throws a geometry error at the command line
@@ -30,29 +30,57 @@ Same root cause as `INFOSCHEMATICS-TOOL-084` — geometry refuses a route the co
 
 This item does not decide that unaligned ports become legal. It adds the refusal where a caller can read it, or renders something legible, and it does not silently repair authored geometry.
 
+## Current state
+
+Read against `b8325a18` on 2026-09-18, and reproduced from a document written for the purpose: two Cards at different vertical positions, one Flow authored `link: LEFT E1 -> RIGHT W1`, nothing else.
+
+`parseInfoschematic` accepts it with no issues. `infoschematics render` on the same document then prints an interpreter stack trace and exits non-zero:
+
+```text
+error: A route may not run diagonally: 140,50 to 240,230
+      at routePath (packages/view-model/src/geometry.ts:45:17)
+      at <anonymous> (packages/view-model/src/runtime.ts:310:10)
+      at createInfoschematicRuntime (packages/view-model/src/runtime.ts:289:49)
+      at renderInfoschematicSvg (packages/render-svg/src/index.ts:417:19)
+      at <anonymous> (packages/cli/src/index.ts:104:15)
+```
+
+Every frame in that trace is current at this baseline. `scripts/render-example.ts` catches the same throw and prints one clean line, which is why the defect is invisible from the repository's own render script and visible only on the published command.
+
+`INFOSCHEMATICS-TOOL-084` has now settled the shared root cause in favour of deriving the bend, so this item is that fix seen from the command line plus the case that holds it there.
+
 ## Steps
 
-1. [ ] Decide whether the constraint belongs in the contract's validation (an issue whose path names the Flow) or in the renderer (a derivation that produces a drawable route). If `INFOSCHEMATICS-TOOL-084` picks the derivation, this becomes the same fix seen from the command line and mostly needs the case.
-2. [ ] If validation: add the check beside the referential checks in `packages/domain-core/src/parse.ts`, carrying the Flow's id and both port references in the issue path.
-3. [ ] Add the command-line case `COMPOSE-003` names, on the published surface rather than the parser alone, proving it fails when the check is removed.
-4. [ ] Confirm no authored Infoschematic in `examples/` relies on an unaligned two-port Flow before any validation tightening lands.
+1. [x] Decide whether the constraint belongs in validation or in the derivation. **The derivation**, following `INFOSCHEMATICS-TOOL-084`: unaligned ports stay legal and the route bends. Tightening validation instead would reject documents the contract has always accepted, and would still leave the interactive hosts unmounting.
+2. [ ] Land `INFOSCHEMATICS-TOOL-084`'s derivation first, then confirm this document renders rather than throws.
+3. [ ] Add the command-line case `COMPOSE-003` names, on the published surface rather than the parser alone, proving it fails when the naked two-point derivation is restored.
+4. [ ] Give the command a legible failure for a geometry error that does survive, so no future construction throw reaches an author as a stack trace: `packages/cli/src/index.ts:104` calls `renderInfoschematicSvg` outside any handling of its own.
 5. [ ] Move `COMPOSE-003` to `conforming` and repoint its evidence at the case.
 
 ## Files touched
 
-- `packages/domain-core/src/parse.ts` — the discriminated result this has to extend, if the answer is validation
-- `packages/domain-core/src/parse.test.ts` — the issue's shape and path
-- `packages/cli/src/index.test.ts` — the published-surface case
+- `packages/cli/src/index.ts:104` — the unguarded `renderInfoschematicSvg` call whose throw reaches the author
+- `packages/cli/src/index.test.ts` — the published-surface case, and the legible failure
 - `docs/specs/composition.md` — `COMPOSE-003`'s conformance and evidence
 
-## Verify
+`bun run test --filter=@infoschematics/cli`, and by hand: render a document with an unaligned two-port Flow and read what the command prints.
 
-`bun run test --filter=@infoschematics/domain-core`, `bun run test --filter=@infoschematics/cli`, and by hand: render a document with an unaligned two-port Flow and read what the command prints.
-
-## Dependencies / blocks
-
-Nothing blocks it. Shares a root cause with `INFOSCHEMATICS-TOOL-084`; deciding that item's step 1 first avoids fixing the same thing twice in two shapes.
+`INFOSCHEMATICS-TOOL-084` carries the derivation this item's step 2 depends on; land it first. The command's own failure shape — step 4 — is independent of it.
 
 ## Documentation impact
 
-`docs/specs/composition.md` changes conformance state. If validation tightens, `AUTHOR-005`'s issue vocabulary and `docs/specs/authoring.md` gain the new issue.
+### Specifications
+
+`docs/specs/composition.md` changes `COMPOSE-003`'s conformance state. `AUTHOR-005`'s issue vocabulary is untouched, because the answer is derivation rather than a new validation issue. `docs/specs/command-line.md` may gain a sentence requiring a legible failure for a construction error, which is what step 4 delivers.
+
+### Decision Records
+
+None. The decision that mattered belongs to `INFOSCHEMATICS-TOOL-084` and does not change what a document may say.
+
+### Guides
+
+None.
+
+## Discussion
+
+Shaped on 2026-09-18 against `b8325a18`. The record's own step 1 anticipated this outcome: with `INFOSCHEMATICS-TOOL-084` deriving the bend, what is left here is the published-surface case and the command's behaviour when a construction does throw. The second is worth keeping even after the first is fixed — a stack trace is the wrong answer for any geometry error, not just this one.

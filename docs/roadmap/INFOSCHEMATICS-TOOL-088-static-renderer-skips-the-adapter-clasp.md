@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-088
 area: TOOL
 title: The static renderer does not draw the Adapter Card clasp
 theme: rendering
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T10:55:00Z
-updated_at: 2026-09-17T11:05:00Z
+updated_at: 2026-09-18T02:40:00Z
 ---
 
 # The static renderer does not draw the Adapter Card clasp
@@ -38,12 +38,21 @@ A second divergence is in the same place and should be settled with it: the two 
 
 `packages/render-svg` treatment, and whatever it needs from `packages/view-model` to resolve the notched outline once for both renderers rather than twice. Visual treatment parity is a root check, so the shape both renderers draw has to be the same shape. This does not change `adapterBoundsFor`, the composition semantics, or which Card a Flow attaches to.
 
+## Current state
+
+Read against `b8325a18` on 2026-09-18. Every claim holds; the line numbers moved when `INFOSCHEMATICS-TOOL-090` landed and are restated here.
+
+- The data is all resolved already: `wraps` at `packages/view-model/src/runtime.ts:262` (`card.adapts ?? card.wraps`), `adapterBoundsFor` at `packages/view-model/src/assembly.ts:8` with `adapterFloor = 40` at `:4`, and `roundedOutline` a shared View Model geometry primitive.
+- Canvas assembles the eight-corner clasp inline at `packages/view-canvas/src/InfoschematicDiagram.tsx:2394` and puts the adapter's label in the footer band at `:2454`.
+- `render-svg` consumes none of it. The strings `adapt` and `wraps` do not appear anywhere in `packages/render-svg/src/index.ts`; its card loop at `:981` opens with `const box = card.bounds` and paints a rectangle, so an Adapter Card is an opaque box over the Card it holds.
+- The position divergence is confirmed: `runtime.ts:250-262` carries the authored `bounds` through untouched, which is what `render-svg` reads, while Canvas derives the box from the held Card and ignores it.
+
 ## Steps
 
 1. [ ] Move Canvas's eight-corner clasp outline into View Model beside `adapterBoundsFor`, and have Canvas consume it, so the shape is stated once.
 2. [ ] Branch on `card.wraps` in `packages/render-svg/src/index.ts:748` and emit that outline as a `<path>` instead of a `<rect>`.
 3. [ ] Place the adapter's label in the footer band below the notch, as Canvas does, rather than centred in the clasp box.
-4. [ ] Settle which box an Adapter Card actually has — derived in both renderers, or authored in both — and make the losing reader agree.
+4. [x] Settle which box an Adapter Card actually has. **Derived in both**: the clasp box comes from the held Card, and the contract states that an Adapter Card's authored `bounds` do not position it. This keeps Canvas's delivered treatment, and the only authored adapter in the repository — `ADPT-01` in the showcase — is already authored at exactly `adapterBoundsFor(CARD-03)`, so no document changes. Make `render-svg` the reader that agrees, and say so in the contract.
 5. [ ] Extend `scripts/visual-treatment-parity.test.ts` to hold both renderers to the clasp, as it does for a Point's label.
 6. [ ] Render a document with a held non-compact Card and read its label, then drop `card.compact` from the showcase if it is only there for this.
 
@@ -71,7 +80,7 @@ None. Independent of `INFOSCHEMATICS-TOOL-089`.
 
 ### Decision Records
 
-Only for step 4. Tracing one shared outline in both renderers is treatment parity with a settled Canvas treatment. Deciding that an Adapter Card's authored `bounds` are ignored — or that they are honoured and the clasp stops being derived — changes what a document's field means.
+One, for step 4's settled answer: an Adapter Card's position is derived from the Card it holds, and its authored `bounds` do not position it. That changes what a field means on one kind of Card, so it is recorded rather than implied. Tracing one shared outline in both renderers needs no record — it is treatment parity with a settled Canvas treatment.
 
 ### Guides
 
@@ -80,5 +89,7 @@ Only for step 4. Tracing one shared outline in both renderers is treatment parit
 ## Discussion
 
 The showcase was authored to make capabilities visible, and the first thing it made visible was a capability one renderer does not draw — which is the argument for `AUTHOR-017` rather than against it.
+
+Shaped on 2026-09-18 against `b8325a18`. Step 4 was the owner's call and was taken: derived in both. Honouring the authored box instead would have made `bounds` mean one thing everywhere, but it changes the delivered interactive treatment and asks an author to keep an adapter's box in step with the Card it holds by hand — a coordinate that is already derivable.
 
 Reviewed on 2026-09-17 against the expectation that `render-svg` would simply use the same data. It nearly does: the field, the derived box and the outline primitive are all shared already, and this is the static renderer failing to consume them rather than a notation needing to be designed twice. The record was reworded to say so, and the authored-versus-derived position divergence was found while checking it.
