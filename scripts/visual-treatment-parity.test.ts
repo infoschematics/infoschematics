@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { defineInfoschematic, defineInfoschematicModel } from '../packages/domain-core/src/index.ts'
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
+import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '../packages/view-model/src/assembly.ts'
 import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
 import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
@@ -467,6 +468,50 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain('text-anchor="middle"')
       expect(markup).toContain(`x="120" y="${below}"`)
       expect(markup).toContain('>Junction</text>')
+    }
+  })
+
+  it('claps an Adapter Card round the Card it holds, identically in both renderers', () => {
+    const composed = defineInfoschematicModel({
+      id: 'adapter-parity',
+      title: 'Adapter parity reference',
+      diagram: {
+        appearance: { surface: 'blueprint' },
+        bounds: { height: 240, width: 420, x: 0, y: 0 },
+        gridSize: 10,
+        cards: [
+          { id: 'LEG', label: 'Legacy encoder', bounds: { height: 160, width: 220, x: 100, y: 40 } },
+          // Authored away from the Card it holds on purpose: an Adapter Card's box is derived from that Card, so
+          // both renderers must ignore this one. One renderer reading it was how the same adapter came to be drawn
+          // in two places.
+          { id: 'ADPT', label: 'Encoder adapter', adapts: 'LEG', bounds: { height: 10, width: 10, x: 0, y: 0 } }
+        ]
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: composed }))
+    const svg = renderInfoschematicSvg(composed)
+    const held = { height: 160, width: 220, x: 100, y: 40 }
+    const clasp = adapterBoundsFor(held)
+    const outline = adapterClaspOutline(held, visualTokens.canvas.geometry.cornerRadius)
+
+    // One notched outline, not a rectangle: the still renderer painted a `<rect>` over the lower half of the Card
+    // the adapter holds until it drew this shape, and a suite comparing treatment flags could not see it.
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain('class="infoschematic-adapter"')
+      expect(markup).toContain(`<path class="adapter-socket" d="${outline}"`)
+    }
+
+    // The adapter's own label goes in the footer band below the notch. Centred in the clasp box it lands on the held
+    // Card's label, which is why the showcase authored `compact: true` before this.
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain(`x="${clasp.x + clasp.width / 2}" y="${adapterLabelBaseline(held)}"`)
+      expect(markup).toContain('>Encoder adapter</text>')
+    }
+
+    // The derived box, in both: the authored 10×10 at the origin positions nothing.
+    for (const markup of [canvas, svg]) {
+      expect(markup).not.toContain('d="M0 0')
+      expect(outline).toContain(`${clasp.x + clasp.width}`)
     }
   })
 

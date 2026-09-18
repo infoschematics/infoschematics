@@ -20,7 +20,7 @@ diagram:
     surface: blueprint
     grid: major-plus-minor
     card:
-      compact: true
+      compact: false
       identity: true
       stereotype: true
       description: true

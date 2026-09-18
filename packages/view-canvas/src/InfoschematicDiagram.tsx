@@ -8,6 +8,7 @@ import {
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
+import { adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import {
@@ -20,7 +21,6 @@ import {
   type ResizeMinimum
 } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
-import { roundedOutline } from '@infoschematics/view-model/geometry'
 import type { Guide } from '@infoschematics/view-model/guides'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
@@ -2387,23 +2387,9 @@ export function InfoschematicDiagram({
               id: holds.id,
               kind: 'card'
             } as const satisfies ArtefactSelection
-            // Traced as one outline so the clasp is a single shape: out along the
-            // left arm, down into the notch the card sits in, up the right arm and
-            // round the bottom. Every corner takes the card's own radius, the
-            // notch curving inward where the outside curves away.
-            const socket = roundedOutline(
-              [
-                { x: box.x, y: box.y },
-                { x: held.x, y: box.y },
-                { x: held.x, y: held.y + held.height },
-                { x: held.x + held.width, y: held.y + held.height },
-                { x: held.x + held.width, y: box.y },
-                { x: box.x + box.width, y: box.y },
-                { x: box.x + box.width, y: box.y + box.height },
-                { x: box.x, y: box.y + box.height }
-              ],
-              cornerRadius
-            )
+            // One shape, traced in View Model so the still renderer draws the
+            // same clasp rather than a rectangle over the card it holds.
+            const socket = adapterClaspOutline(held, cornerRadius)
 
             return (
               // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
@@ -2448,11 +2434,7 @@ export function InfoschematicDiagram({
                 <title>{`${adapter.code}: ${adapter.label} · ${adapter.detail}`}</title>
                 <path className="adapter-socket" d={socket} />
                 {/* The whole label is rendered exactly as authored. */}
-                <text
-                  className="adapter-label"
-                  x={box.x + box.width / 2}
-                  y={held.y + held.height + adapterFloor / 2 + 5}
-                >
+                <text className="adapter-label" x={box.x + box.width / 2} y={adapterLabelBaseline(held)}>
                   {adapter.label}
                 </text>
               </g>

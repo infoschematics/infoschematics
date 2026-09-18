@@ -18,6 +18,10 @@
       "types": "./dist/artefact-draft.d.ts",
       "import": "./dist/artefact-draft.js"
     },
+    "./assembly": {
+      "types": "./dist/assembly.d.ts",
+      "import": "./dist/assembly.js"
+    },
     "./card-layout": {
       "types": "./dist/card-layout.d.ts",
       "import": "./dist/card-layout.js"

@@ -4,12 +4,12 @@ area: TOOL
 title: The static renderer does not draw the Adapter Card clasp
 theme: rendering
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T10:55:00Z
-updated_at: 2026-09-18T02:40:00Z
+updated_at: 2026-09-18T05:00:00Z
 ---
 
 # The static renderer does not draw the Adapter Card clasp
@@ -49,20 +49,24 @@ Read against `b8325a18` on 2026-09-18. Every claim holds; the line numbers moved
 
 ## Steps
 
-1. [ ] Move Canvas's eight-corner clasp outline into View Model beside `adapterBoundsFor`, and have Canvas consume it, so the shape is stated once.
-2. [ ] Branch on `card.wraps` in `packages/render-svg/src/index.ts:748` and emit that outline as a `<path>` instead of a `<rect>`.
-3. [ ] Place the adapter's label in the footer band below the notch, as Canvas does, rather than centred in the clasp box.
+1. [x] Move Canvas's eight-corner clasp outline into View Model beside `adapterBoundsFor`, and have Canvas consume it, so the shape is stated once.
+2. [x] Branch on `card.wraps` in `packages/render-svg/src/index.ts:748` and emit that outline as a `<path>` instead of a `<rect>`.
+3. [x] Place the adapter's label in the footer band below the notch, as Canvas does, rather than centred in the clasp box.
 4. [x] Settle which box an Adapter Card actually has. **Derived in both**: the clasp box comes from the held Card, and the contract states that an Adapter Card's authored `bounds` do not position it. This keeps Canvas's delivered treatment, and the only authored adapter in the repository — `ADPT-01` in the showcase — is already authored at exactly `adapterBoundsFor(CARD-03)`, so no document changes. Make `render-svg` the reader that agrees, and say so in the contract.
-5. [ ] Extend `scripts/visual-treatment-parity.test.ts` to hold both renderers to the clasp, as it does for a Point's label.
-6. [ ] Render a document with a held non-compact Card and read its label, then drop `card.compact` from the showcase if it is only there for this.
+5. [x] Extend `scripts/visual-treatment-parity.test.ts` to hold both renderers to the clasp, as it does for a Point's label.
+6. [x] Render a document with a held non-compact Card and read its label, then drop `card.compact` from the showcase if it is only there for this.
 
 ## Files touched
 
-- `packages/render-svg/src/index.ts:748` — the card loop, which emits a `<rect>` with no branch on `wraps`
-- `packages/view-model/src/assembly.ts` — where the shared clasp outline belongs, beside `adapterBoundsFor`
-- `packages/view-canvas/src/InfoschematicDiagram.tsx:2398` — the reference treatment, consuming the shared outline instead of assembling it
-- `scripts/visual-treatment-parity.test.ts` — parity for the clasp
-- `examples/is-showcase/infoschematic.yaml`, `examples/is-showcase/README.md` — if the `compact` workaround can be dropped
+- `packages/view-model/src/assembly.ts` — `adapterClaspOutline` and `adapterLabelBaseline` beside `adapterBoundsFor`, so the shape and the label band are stated once
+- `packages/view-model/package.json` — an `./assembly` subpath, which both renderers now import
+- `packages/view-canvas/src/InfoschematicDiagram.tsx` — consumes the shared outline and label baseline instead of assembling them inline
+- `packages/render-svg/src/index.ts` — an adapter pass before the card loop, the card loop narrowed to Cards that hold nothing, and emphasis geometry taken from the box each Card is drawn at
+- `scripts/visual-treatment-parity.test.ts` — the clasp parity case, from an adapter authored at the origin
+- `examples/is-showcase/infoschematic.yaml`, `examples/is-showcase/src/infoschematic.ts`, `examples/is-showcase/README.md` — `compact: false`, the workaround paragraph replaced
+- `docs/specs/static-rendering.md` — `STATIC-018`
+- `docs/decisions/ADR-INFOSCHEMATICS-036-an-adapter-is-positioned-by-what-it-holds.md`, `docs/decisions/README.md` — the settled position question
+- `apps/site/content/authoring.md` — what an author sees and what `bounds` does not do
 
 ## Verify
 
@@ -85,6 +89,53 @@ One, for step 4's settled answer: an Adapter Card's position is derived from the
 ### Guides
 
 `apps/site/content/authoring.md` describes composing an Adapter Card; it may be worth saying that a held Card's detail is drawn above the clasp.
+
+## Review
+
+### Delivered
+
+`infoschematics render` draws an Adapter Card as the notched clasp the interactive Diagram draws, from one outline stated in View Model, with the adapter's own label in the footer band below the notch. The showcase no longer sets `card.compact: true` to keep a held Card's label out from under an opaque rectangle, and the two renderers now agree on where an Adapter Card is.
+
+### Summary of changes
+
+`adapterClaspOutline` and `adapterLabelBaseline` join `adapterBoundsFor` in `packages/view-model/src/assembly.ts`, reached through a new `./assembly` subpath. Canvas consumes them in place of the eight-corner list it assembled inline, so its delivered treatment is unchanged by construction rather than by comparison.
+
+`render-svg` derives its adapter set beside its card set: a Card with `wraps` whose held Card this render drew becomes a clasp, the card loop narrowed to Cards that hold nothing, and the clasp is emitted before them so the held Card stacks above it. The adapter group carries the same identity attributes as a Card and the socket takes the graphic-fallback paint Canvas gives it, resolved for whichever surface is being drawn.
+
+Element emphasis over an Adapter Card now takes the derived box too. It was taking `card.bounds` — the same authored box the drawing was taking — which is the same divergence in the other half of the file.
+
+`ADR-INFOSCHEMATICS-036` records step 4's settled answer, and `STATIC-018` states it as an obligation: the clasp is derived from the held Card, an adapter's authored `bounds` do not position it, and an adapter whose held Card was not drawn is not drawn.
+
+### Verification
+
+| Gate | Outcome |
+| --- | --- |
+| `bunx vitest run --root .` | 16 files, 95 tests passed (baseline 15 files, 94) |
+| `bunx turbo run test typecheck` over render-svg, view-canvas, view-model, view-studio, view-present | 12 successful |
+| `bun run self:boundaries:verify` | cruised 340 modules, 171 cross-package type-only |
+| `bun run self:unused:verify` | clean |
+| `bun run self:examples:verify` | clean, after regenerating the showcase export |
+| `bun run self:examples:render examples/is-showcase/infoschematic.yaml --png` | rendered, and looked at |
+
+Looked at: the still rendering of the showcase around `ADPT-01`, cropped and enlarged. The clasp's arms come up either side of `CARD-03`, the notch curves inward where the outer corners curve away, the held Card's label and description are both legible above the rim, and `Encoder adapter` sits in the footer band — which is the treatment `compact: true` was hiding the absence of.
+
+The parity case is not vacuous: emptying the adapter pass in `render-svg` fails it with `expected '<svg …' to contain 'class="infoschematic-adapter"'`. It also authors the adapter's `bounds` as a 10×10 box at the origin, so a renderer that reads the authored box rather than deriving it fails on the outline string.
+
+### Post-change review
+
+The `./assembly` subpath is the only new public surface, and it exports geometry that was already public through the runtime's `adapterFloor`. `roundedOutline` is no longer imported by `InfoschematicDiagram.tsx` at all, which is the whole of what moved.
+
+One thing changed shape during delivery: the showcase now authors `compact: false` rather than omitting the property, because `scripts/example-capability-coverage.test.ts` requires every contract property to appear in that document and dropping the line failed it. Authoring the value explicitly is the honest reading — the document shows the property and shows the full treatment — and it is what the README now says.
+
+### Outstanding concerns
+
+Neither renderer draws anything for an adapter whose held Card is filtered out, which is right, but no case asserts it; it follows from the derivation having no box to work from. Worth a case if an adapter ever gains a treatment of its own.
+
+`bounds` is now inert on one kind of Card. That is stated in `STATIC-018` and in the ADR, and it is a wart: a field the schema requires and the renderers ignore. Removing it would need the domain model to make placement conditional on `wraps`, which is a larger change than this item.
+
+### Mini recap
+
+The data was all shared already — `wraps`, `adapterBoundsFor`, `roundedOutline` — and this was one renderer failing to consume it. The part worth keeping is that the authored-versus-derived question had to be answered before the drawing could be, and that it was found by checking the record rather than by the suite: both renderers passed every treatment-parity assertion while placing the same adapter in two different places.
 
 ## Discussion
 

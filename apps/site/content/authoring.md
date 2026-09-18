@@ -253,6 +253,8 @@ diagram:
 
 Omit `direction: forward`, empty `waypoints`, and empty Card `provides`; Domain Core supplies those defaults. It also supplies the generic three-by-five callout lattice unless `calloutPositions` overrides it. A single appearance value may be unwrapped, such as `color` on a Family or `line` on a Flow. An Adapter Card declares `adapts: <card-id>`; a Wrapper Card declares `wraps: <card-id>`. Neither composition requires a diagram-level Assembly or a separately authored Assembly id.
 
+An Adapter Card is drawn as a clasp derived from the Card it holds: the held Card sits down into the notch with all of its own detail above the rim, and the adapter's name goes in the footer band below. Its own `bounds` do not position it, so move the Card it adapts and the clasp follows — there is no second coordinate to keep in step.
+
 `serialiseInfoschematicYaml` emits this order and notation. Parsing that output and emitting it again is stable; structured object forms remain accepted and normalize to the same internal values.
 
 ## Keep configuration portable

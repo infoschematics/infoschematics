@@ -7,6 +7,7 @@ import {
   resolveResponsiveCardTreatment,
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
+import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
@@ -464,6 +465,20 @@ export const renderInfoschematicSvg = (
     (card) =>
       runtime.infoschematicCardIsVisible(card, visibleScopes) && includedByFocus(card.id, focus?.artefacts, unfocused)
   )
+  /*
+   * An Adapter Card is drawn as a clasp derived from the Card it holds, and its own authored `bounds` do not position
+   * it — `ADR-INFOSCHEMATICS-036`. This renderer read those bounds and painted an opaque rectangle, so a still
+   * rendering covered the lower half of the held Card and the two renderers placed the same adapter in two places
+   * wherever the authored box was not already the derived one. An adapter whose held Card this render did not draw is
+   * not drawn either: a clasp with nothing in it is a notch around empty space.
+   */
+  const heldCards = new Map(cards.map((card) => [card.id, card]))
+  const adapters = cards.flatMap((card) => {
+    if (!card.wraps) return []
+    const held = heldCards.get(card.wraps)
+    return held ? [{ card, clasp: adapterBoundsFor(held.bounds), held: held.bounds }] : []
+  })
+  const plainCards = cards.filter((card) => !card.wraps)
   const fabrics = runtime.infoschematicFabrics.filter(
     (fabric) =>
       runtime.infoschematicFabricIsVisible(fabric, visibleScopes) &&
@@ -573,7 +588,8 @@ export const renderInfoschematicSvg = (
      never make hidden or filtered content appear. */
   const emphasisShapes = new Map<string, EmphasisShape>()
   for (const region of runtime.infoschematicRegions) emphasisShapes.set(region.id, boxEmphasis(region.box))
-  for (const card of cards) emphasisShapes.set(card.id, boxEmphasis(card.bounds))
+  for (const card of plainCards) emphasisShapes.set(card.id, boxEmphasis(card.bounds))
+  for (const { card, clasp } of adapters) emphasisShapes.set(card.id, boxEmphasis(clasp))
   for (const fabric of fabrics) emphasisShapes.set(fabric.id, boxEmphasis(fabric.bounds))
   for (const graphic of graphics) if (graphic.bounds) emphasisShapes.set(graphic.id, boxEmphasis(graphic.bounds))
   for (const point of points) emphasisShapes.set(point.id, pointEmphasis(point.at))
@@ -978,7 +994,56 @@ export const renderInfoschematicSvg = (
     }
   }
 
-  for (const card of cards) {
+  /*
+   * The clasp, traced as one outline by `adapterClaspOutline` so both renderers draw the same shape, and its label in
+   * the footer band below the notch rather than centred in the box — where a non-compact held Card's own label is.
+   * Drawn before the cards so the Card it holds sits above it, as the Canvas stacks them.
+   */
+  for (const { card, clasp, held } of adapters) {
+    const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
+    body.push(
+      group(
+        1,
+        [
+          ['aria-label', `${card.label}, holding ${card.wraps}`],
+          ['class', `infoschematic-adapter${dimmed}`],
+          ['data-artefact-id', card.id],
+          ['data-artefact-kind', 'card'],
+          ['data-code', card.code],
+          ['data-id', card.id],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+        ],
+        [
+          line(2, 'title', [], xmlText([card.code, card.label, card.detail].filter(Boolean).join(' \u00b7 '))),
+          line(2, 'path', [
+            ['class', 'adapter-socket'],
+            ['d', adapterClaspOutline(held, canvasTokens.geometry.cornerRadius)],
+            ['fill', graphicFill],
+            ['stroke', graphicStroke],
+            ['stroke-width', 2]
+          ]),
+          line(
+            2,
+            'text',
+            [
+              ['class', 'adapter-label'],
+              ['dominant-baseline', 'middle'],
+              ['fill', blueprint ? canvasTokens.text.label : canvasTokens.output.text],
+              ['font-family', canvasTokens.text.bodyFamily],
+              ['font-size', 14],
+              ['font-weight', 700],
+              ['text-anchor', 'middle'],
+              ['x', clasp.x + clasp.width / 2],
+              ['y', adapterLabelBaseline(held)]
+            ],
+            xmlText(card.label)
+          )
+        ]
+      ).join('\n')
+    )
+  }
+
+  for (const card of plainCards) {
     const box = card.bounds
     const appearance = card.collection ? collections.get(card.collection) : undefined
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)

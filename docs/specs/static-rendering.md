@@ -114,6 +114,18 @@ _Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render a 
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compatibility attributes and collision-safe identifiers.
 
+### STATIC-018 — An Adapter Card is drawn as the clasp it is
+
+Static output MUST draw an [Adapter Card](../reference/vocabulary.md#adapter-card) as the notched clasp the interactive Diagram draws, traced from View Model's one outline rather than assembled here, so nothing the adapter paints passes under the Card it holds. It MUST place the adapter's own label in the footer band below the notch rather than centred in the clasp box, and MUST NOT draw an adapter whose held Card this rendering did not draw.
+
+The clasp box MUST be derived from the held Card in both renderers, and an Adapter Card's authored `bounds` MUST NOT position it, as [`ADR-INFOSCHEMATICS-036`](../decisions/ADR-INFOSCHEMATICS-036-an-adapter-is-positioned-by-what-it-holds.md) records. An element emphasis over an Adapter Card MUST take the same derived box.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run self:scripts:test`, then render a document composing an Adapter Card over a Card whose own label is not compact, and read that label: it MUST be legible, which it is not when a rectangle is painted over the lower half of the Card. Author the adapter's `bounds` somewhere else entirely and confirm both renderings are unchanged. Then draw the adapter as a `<rect>` again and the parity case MUST fail — the treatment flags both renderers already agreed on could not see this, so a suite comparing those alone is not evidence.
+
+_Evidence:_ `adapterClaspOutline` and `adapterLabelBaseline` in `packages/view-model/src/assembly.ts` state the shape and the label band once; `scripts/visual-treatment-parity.test.ts` asserts the same outline string and the same label position in both renderings from an adapter authored at the origin, so a renderer reading the authored box fails. `examples/is-showcase/infoschematic.yaml` composes one with non-compact Cards.
+
 ## Quality properties
 
 ### STATIC-011 — Output is deterministic
