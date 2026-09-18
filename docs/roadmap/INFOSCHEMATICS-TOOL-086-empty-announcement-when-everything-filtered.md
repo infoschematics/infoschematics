@@ -4,12 +4,12 @@ area: TOOL
 title: An announcement with no sentence when filtering hid everything
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T09:42:00Z
-updated_at: 2026-09-18T04:45:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # An announcement with no sentence when filtering hid everything
@@ -104,19 +104,23 @@ The emphasis half needed the drawn set itself. Reading `COMPOSE-004` in full cha
 
 The cases are not vacuous, and the first attempt at them was. Two browser cases in `Canvas.dynamics.browser.test.tsx` passed with and without the fix, because `reconcileOccurrences` gates acceptance on `isShown`, so Canvas can never announce a hidden occurrence and the browser suite cannot reach the defect. The cases were rewritten against `DiagramAnnouncements` itself, where a host supplies the accepted set and the drawn set independently, and then proven by restoring both unconditional counters: the filtered case failed with `expected [ 'Signal update 1. ', … ] to deeply equal [ '', '' ]`, and the partly filtered case failed too.
 
+### Outstanding concerns
+
+The by-hand check named in Verify — switch off `PACKAGE` on the site Playground, rehearse, read the region — has not been repeated since the fix; the cases stand in for it, and the site's Present path is the one the original observation came from. Worth a look during the manual review pass.
+
 ### Post-change review
 
 The aggregate gate is deferred to the batch's final pass; the focused gates above are the item's own evidence.
 
 `drawnElementIds` is now the single answer to "what did this rendering draw", asked by `DYNAMIC-003` for the treatment and by `COMPOSE-004` for the announcement. Before this, Canvas answered it inline for the treatment and nothing answered it for the announcement, which is exactly how a live region came to report something no reader could see.
 
-### Outstanding concerns
-
-The by-hand check named in Verify — switch off `PACKAGE` on the site Playground, rehearse, read the region — has not been repeated since the fix; the cases stand in for it, and the site's Present path is the one the original observation came from. Worth a look during the manual review pass.
-
 ### Mini recap
 
 One defect of one shape in two places, and the shape was worth naming in the specification rather than patching twice. The lesson worth keeping: a case that passes before the fix is not a case. Locating the real defect path — Studio's `useDiagramAnnouncements`, not Canvas's reconciliation — is what made the fix the right size.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

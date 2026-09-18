@@ -4,12 +4,12 @@ area: TOOL
 title: The static renderer does not draw the Adapter Card clasp
 theme: rendering
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T10:55:00Z
-updated_at: 2026-09-18T05:00:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # The static renderer does not draw the Adapter Card clasp
@@ -121,21 +121,25 @@ Looked at: the still rendering of the showcase around `ADPT-01`, cropped and enl
 
 The parity case is not vacuous: emptying the adapter pass in `render-svg` fails it with `expected '<svg …' to contain 'class="infoschematic-adapter"'`. It also authors the adapter's `bounds` as a 10×10 box at the origin, so a renderer that reads the authored box rather than deriving it fails on the outline string.
 
-### Post-change review
-
-The `./assembly` subpath is the only new public surface, and it exports geometry that was already public through the runtime's `adapterFloor`. `roundedOutline` is no longer imported by `InfoschematicDiagram.tsx` at all, which is the whole of what moved.
-
-One thing changed shape during delivery: the showcase now authors `compact: false` rather than omitting the property, because `scripts/example-capability-coverage.test.ts` requires every contract property to appear in that document and dropping the line failed it. Authoring the value explicitly is the honest reading — the document shows the property and shows the full treatment — and it is what the README now says.
-
 ### Outstanding concerns
 
 Neither renderer draws anything for an adapter whose held Card is filtered out, which is right, but no case asserts it; it follows from the derivation having no box to work from. Worth a case if an adapter ever gains a treatment of its own.
 
 `bounds` is now inert on one kind of Card. That is stated in `STATIC-018` and in the ADR, and it is a wart: a field the schema requires and the renderers ignore. Removing it would need the domain model to make placement conditional on `wraps`, which is a larger change than this item.
 
+### Post-change review
+
+The `./assembly` subpath is the only new public surface, and it exports geometry that was already public through the runtime's `adapterFloor`. `roundedOutline` is no longer imported by `InfoschematicDiagram.tsx` at all, which is the whole of what moved.
+
+One thing changed shape during delivery: the showcase now authors `compact: false` rather than omitting the property, because `scripts/example-capability-coverage.test.ts` requires every contract property to appear in that document and dropping the line failed it. Authoring the value explicitly is the honest reading — the document shows the property and shows the full treatment — and it is what the README now says.
+
 ### Mini recap
 
 The data was all shared already — `wraps`, `adapterBoundsFor`, `roundedOutline` — and this was one renderer failing to consume it. The part worth keeping is that the authored-versus-derived question had to be answered before the drawing could be, and that it was found by checking the record rather than by the suite: both renderers passed every treatment-parity assertion while placing the same adapter in two different places.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: An accepted document throws a geometry error at the command line
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: [INFOSCHEMATICS-TOOL-084]
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T09:41:00Z
-updated_at: 2026-09-18T11:55:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # An accepted document throws a geometry error at the command line
@@ -108,19 +108,23 @@ None.
 | Hand check, `render` on an unaligned document | Exit 0, route `M140 50 H220 V230 H240` |
 | Hand check, `render` on an authored diagonal | Exit 4, one sentence, no frames |
 
+### Outstanding concerns
+
+The validation status now covers two different causes — a parse issue and a construction error — and a caller matching on status alone cannot tell them apart. The diagnostics differ, and `CLI-003` promises only the status and the stream, so this is a naming judgement rather than a defect; a distinct status would be a public-contract change and is not taken here.
+
 ### Post-change review
 
 The guard matters beyond this defect: `scripts/render-example.ts` already caught the same throw and printed one clean line, which is precisely why the repository's own tooling never showed the problem and the published command did. A surface that is only exercised through a wrapper hides its own failure shape.
 
 The typecheck miss on `runtime.test.ts` is the useful finding: `bunx turbo run test typecheck --filter=…` reported green for `INFOSCHEMATICS-TOOL-084` because the typecheck task was replayed from cache against inputs that predated the test file's last edit, so a suite that ran and a compiler that did not both read as one pass. `--force` is what distinguishes them.
 
-### Outstanding concerns
-
-The validation status now covers two different causes — a parse issue and a construction error — and a caller matching on status alone cannot tell them apart. The diagnostics differ, and `CLI-003` promises only the status and the stream, so this is a naming judgement rather than a defect; a distinct status would be a public-contract change and is not taken here.
-
 ### Mini recap
 
 One derivation shared with `INFOSCHEMATICS-TOOL-084` removes the common case; a guard at the published surface keeps every remaining geometry error legible.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: An authored Overlay is never drawn outside Design mode
 theme: rendering
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T10:55:00Z
-updated_at: 2026-09-18T05:40:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # An authored Overlay is never drawn outside Design mode
@@ -115,21 +115,25 @@ Two existing assertions encoded the old behaviour and were changed rather than w
 
 Non-vacuity was proved by reverting each half in turn: restoring `editing ? config.diagram.overlays : []` fails the parity case, and so does restoring the `'scene'` default. `grep -c OVL-01 reports/infoschematic.svg` returns `1`, from a command that passes no options at all.
 
-### Post-change review
-
-The visual check is the one that matters here, and the crop shows the `annotation` panel drawn as intended: dashed quiet-tone frame, bold title, body line, at the authored box. A green suite would have been satisfied by a panel drawn at the wrong size or in the wrong paint, which is what the enlargement was for.
-
-One consequence is worth a reviewer's eye rather than a test: a document that authors a decorative Overlay now carries it into every outlet, including a still rendering. That is the intended reading of an authored declaration and it is stated in `ADR-INFOSCHEMATICS-037`, but it is a behaviour change visible to anyone who had an Overlay they only expected to see while editing. No document in the repository is in that position.
-
 ### Outstanding concerns
 
 `sceneShape` still has no `graphic` key, so `SequenceScene.graphic` remains reachable only by a host constructing a model in code. This record does not close that — it makes it irrelevant to whether an authored Overlay is drawn, rather than the reason it is not. Whether an authored Scene should be able to name a Graphic at all is a separate question and no requirement now depends on the answer.
 
 `unfocused` still governs what a Scene's focus does to an Overlay outside it, and `DIAGRAM-011` says focus must dim or hide rather than remove. That is asserted in the static renderer and read in Canvas rather than asserted there.
 
+### Post-change review
+
+The visual check is the one that matters here, and the crop shows the `annotation` panel drawn as intended: dashed quiet-tone frame, bold title, body line, at the authored box. A green suite would have been satisfied by a panel drawn at the wrong size or in the wrong paint, which is what the enlargement was for.
+
+One consequence is worth a reviewer's eye rather than a test: a document that authors a decorative Overlay now carries it into every outlet, including a still rendering. That is the intended reading of an authored declaration and it is stated in `ADR-INFOSCHEMATICS-037`, but it is a behaviour change visible to anyone who had an Overlay they only expected to see while editing. No document in the repository is in that position.
+
 ### Mini recap
 
 The declaration was authorable, validated, counted by the coverage check, and in no picture, because the only route to a drawn Graphic was a Scene field no authored document can set. The fix is a default reversal in one renderer and a union in the other; the work was proving it from an authored document rather than a hand-built model, and holding both outlets to it.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

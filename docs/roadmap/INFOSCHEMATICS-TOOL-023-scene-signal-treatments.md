@@ -4,12 +4,12 @@ area: TOOL
 title: Scene signal treatments
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-08T02:09:11Z
-updated_at: 2026-09-18T06:00:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # Scene signal treatments
@@ -182,14 +182,6 @@ Looked at: the showcase still rendering, whole. The blueprint backdrop, both Reg
 
 Non-vacuity was proved rather than assumed. Removing `playback: 'repeat'` from the guide specimen and starting the state pane withdrawn fails the new site case on its state-emphasis assertion; the browser cases distinguish a playing cadence from a paused one by counting distinct occurrence keys over two and a half intervals, so a pane that never moves and a pane that never stops both fail.
 
-### Post-change review
-
-`scripts/example-capability-coverage.test.ts` was red until the showcase authored cues, and that is the check working: it derives its capability list from the Zod schema, so `sequences.scenes.cues`, `.dynamic` and `.playback` became required the moment the field landed, and both enum values had to appear in a published document. The showcase now shows them and its README says so. `turbo.json` already listed `examples/*/*.yaml` under `//#self:scripts:test`, so no inputs edit was owed here.
-
-The site build needed `turbo run build` for `@infoschematics/view-present` before it could see `useCueCadence`, because `vite build` resolves the package's `dist` while suites and typechecks resolve source. Nothing in the change works around that; it is the known cost recorded elsewhere.
-
-`apps/site/package.json` now declares `@infoschematics/view-present`, which the `site-does-not-own-product-model` boundary permits and `not-to-dev-dep` requires to be explicit.
-
 ### Outstanding concerns
 
 A React 19 warning — `g: 'key' is not a prop` — appears in the new site browser run. It reproduces identically on HEAD in `packages/view-canvas/src/Canvas.dynamics.browser.test.tsx`, so it is pre-existing in view-canvas's dynamics rendering and outside this item; it belongs in a later wave rather than here.
@@ -198,9 +190,21 @@ A React 19 warning — `g: 'key' is not a prop` — appears in the new site brow
 
 The ordered cascade stays deferred for the reason under Discussion: it would have to invent authored timing to divide, and an untimed Sequence has no duration to divide. The 5G-EMERGE walkthrough authoring pass is its own work. Within the guide, the property-specimen machinery still cannot express Dynamics; the page works because it bypasses it.
 
+### Post-change review
+
+`scripts/example-capability-coverage.test.ts` was red until the showcase authored cues, and that is the check working: it derives its capability list from the Zod schema, so `sequences.scenes.cues`, `.dynamic` and `.playback` became required the moment the field landed, and both enum values had to appear in a published document. The showcase now shows them and its README says so. `turbo.json` already listed `examples/*/*.yaml` under `//#self:scripts:test`, so no inputs edit was owed here.
+
+The site build needed `turbo run build` for `@infoschematics/view-present` before it could see `useCueCadence`, because `vite build` resolves the package's `dist` while suites and typechecks resolve source. Nothing in the change works around that; it is the known cost recorded elsewhere.
+
+`apps/site/package.json` now declares `@infoschematics/view-present`, which the `site-does-not-own-product-model` boundary permits and `not-to-dev-dep` requires to be explicit.
+
 ### Mini recap
 
 Three things are worth looking at by eye before this is accepted: the Dynamics guide page at `/docs/components/dynamics/`, where the three panes should show a pulse that travels once, a pulse that keeps arriving on one steady beat, and an emphasis that simply stays until withdrawn; the same page with the operating system set to reduce motion, where the travelling pulse should become a still outline over the same span rather than a slower journey; and a Sequence in the Playground over `examples/is-infoschematics/` or `examples/is-showcase/`, watching that a repeat stays inside its Scene's hold and leaves nothing painted behind when the Scene changes.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

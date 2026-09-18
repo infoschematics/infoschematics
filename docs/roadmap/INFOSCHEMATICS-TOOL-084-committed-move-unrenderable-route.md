@@ -4,12 +4,12 @@ area: TOOL
 title: A committed Card move leaves an unrenderable route
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-085]
 blocked_by: []
 baseline_ref: b8325a18298dfc8967da31de7c22cc22a58d53d7
 created_at: 2026-09-17T09:40:00Z
-updated_at: 2026-09-18T11:20:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # A committed Card move leaves an unrenderable route
@@ -107,17 +107,21 @@ A Flow with no authored waypoints is now routed between its two ports by the sam
 | Non-vacuity, `flowsAfterMoves`' two-point branch disabled | Fails as required |
 | Hand check, Playground nudge | Page still mounted, route gains a bend |
 
-### Post-change review
-
-The fix is a derivation reaching an existing rule, not a new rule: `routeBetweenPorts` was already exported and already imported by `runtime.ts` for another path, and a port's side is the first letter of its id, so nothing new had to be invented or stored. The two-point branch in `flowsAfterMoves` was the second half and less obvious — bending a preview's run while the commit re-derives it is how draft and commit disagreed in the first place, so both now re-derive.
-
 ### Outstanding concerns
 
 `INFOSCHEMATICS-TOOL-085` records the same root cause on the command-line surface and is unclaimed by this item. The host error boundary is recommended in the architecture guide and not implemented anywhere, including the site Playground; that stays a host's choice. A Flow whose authored waypoints themselves describe a diagonal is still rejected by `ROUTE-001`, unchanged and intentionally.
 
+### Post-change review
+
+The fix is a derivation reaching an existing rule, not a new rule: `routeBetweenPorts` was already exported and already imported by `runtime.ts` for another path, and a port's side is the first letter of its id, so nothing new had to be invented or stored. The two-point branch in `flowsAfterMoves` was the second half and less obvious — bending a preview's run while the commit re-derives it is how draft and commit disagreed in the first place, so both now re-derive.
+
 ### Mini recap
 
 Two derivations, one construction. The editor's path had the bend; the document's did not, so committing a move handed `routePath` a diagonal and the page went with it.
+
+## Done
+
+Accepted 2026-09-18 by Kris Brown on the review packet above.
 
 ## Discussion
 

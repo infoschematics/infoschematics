@@ -6,10 +6,10 @@ theme: tool
 horizon: triage
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-023]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-18T03:50:00Z
+updated_at: 2026-09-18T12:40:00Z
 ---
 
 # What paces an ordered cascade in an untimed Sequence
@@ -20,7 +20,7 @@ Settle whether an ordered cascade — one Dynamic playing after another in an au
 
 ## Context
 
-Split out of `INFOSCHEMATICS-TOOL-023` on 2026-09-18 rather than shaped into it. That record's Goal originally named four playback statements; the owner's decision gave it two, `once` and `repeat`, and left a cascade out of scope because nothing in the tree answers what a cascade divides.
+Split out of the Scene signal treatments item on 2026-09-18 rather than shaped into it; that item has since been accepted and pruned, so this one is blocked by nothing. That record's Goal originally named four playback statements; the owner's decision gave it two, `once` and `repeat`, and left a cascade out of scope because nothing in the tree answers what a cascade divides.
 
 The difficulty is specific, not a gap in effort. `packages/view-model/src/runtime.ts:381` gives every runtime Scene a `hold`, defaulting to `defaultSceneDuration` at `:131`, so a number always exists. In an untimed Sequence (`presentation.timed: false`, `docs/specs/scenes-and-callouts.md:55-63`) that number is fiction: the Scene stays on screen until the presenter steps, which may be one second or ten minutes. Dividing a nominal hold across stages in a manually driven Scene either finishes before the presenter has finished speaking or waits for a step that may never come.
 
@@ -28,7 +28,7 @@ The difficulty is specific, not a gap in effort. `packages/view-model/src/runtim
 
 ## Boundary
 
-This is a decision item, not an implementation. It does not add a cue field, change `once` or `repeat` as `INFOSCHEMATICS-TOOL-023` delivers them, or introduce authored timing anywhere.
+This is a decision item, not an implementation. It does not add a cue field, change `once` or `repeat` as delivered, or introduce authored timing anywhere.
 
 ## Steps
 
