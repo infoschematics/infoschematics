@@ -86,3 +86,68 @@ test('a copy notice clears itself, while one a reader must act on stays', async 
   await new Promise((resolve) => setTimeout(resolve, 3200))
   expect(notice.textContent).toContain('Select the snippet to copy it manually')
 })
+
+/* Where a contain-fit centres a short drawing in a tall box, the slack splits evenly and a caption ends up almost
+   as far from the drawing it names as from the next one down. Proximity has to answer the reader's question. */
+const verticalAnchor = (image: HTMLImageElement) => {
+  /* The resolved value is a percentage pair, not the keyword the stylesheet was written with. */
+  const keyword = { bottom: 1, center: 0.5, top: 0 } as Record<string, number>
+  const stated = getComputedStyle(image).objectPosition.split(' ')[1] ?? 'center'
+  return stated in keyword ? keyword[stated] : Number.parseFloat(stated) / 100
+}
+
+const paintedRect = (image: HTMLImageElement) => {
+  const box = image.getBoundingClientRect()
+  const scale = Math.min(box.width / image.naturalWidth, box.height / image.naturalHeight)
+  const height = image.naturalHeight * scale
+  const top = box.top + (box.height - height) * verticalAnchor(image)
+  return { bottom: top + height, top }
+}
+
+test('a caption sits decisively with the drawing it names', async () => {
+  const config = specimenFor('fabric')
+  const { container } = await render(
+    <div style={{ width: '280px' }}>
+      <DemoFrame
+        config={config}
+        kind="fabric"
+        propertyControls={null}
+        reset={() => undefined}
+        title="Fabric variants"
+        variants={[
+          { config, id: 'first', label: 'Internet cloud' },
+          { config, id: 'second', label: 'Message bus' }
+        ]}
+      />
+    </div>
+  )
+
+  const figures = [...container.querySelectorAll('figure')]
+  expect(figures).toHaveLength(2)
+
+  const images = figures.map((figure) => {
+    const image = figure.querySelector('img')
+    if (!image) throw new Error('Missing rendered preview')
+    return image
+  })
+  for (const image of images) await expect.poll(() => image.naturalHeight).toBeGreaterThan(0)
+
+  const caption = figures[0].querySelector('figcaption')
+  if (!caption) throw new Error('Missing caption')
+
+  // The grid is narrow enough to have reflowed to one column, so the neighbour is the drawing below.
+  expect(figures[1].getBoundingClientRect().top).toBeGreaterThan(figures[0].getBoundingClientRect().top)
+
+  const box = caption.getBoundingClientRect()
+  const toOwn = box.top - paintedRect(images[0]).bottom
+  const toNeighbour = paintedRect(images[1]).top - box.bottom
+
+  /* A centred fit leaves these within about a quarter of each other, which is the reported symptom: the reader
+     cannot tell from spacing which drawing the caption belongs to. */
+  expect(toOwn).toBeLessThan(toNeighbour / 3)
+
+  /* A box taller than the drawing it holds puts that difference between the drawing and its caption, so the
+     variant's height follows its own aspect rather than a figure the stylesheet picked. */
+  const drawing = images[0].getBoundingClientRect()
+  expect(drawing.height).toBeCloseTo((drawing.width * images[0].naturalHeight) / images[0].naturalWidth, 0)
+})

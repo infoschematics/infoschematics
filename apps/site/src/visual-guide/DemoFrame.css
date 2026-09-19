@@ -9,11 +9,18 @@
 .demo-frame__preview { min-height: 180px; overflow: hidden; background: #071624; }
 .demo-frame__preview figure { min-width: 0; margin: 0; }
 .demo-frame__preview img, .demo-frame__preview figure > section { display: block; width: 100%; height: clamp(180px, 32vw, 360px); }
-.demo-frame__preview img { object-fit: contain; }
+/* The drawing sits at the foot of its box, so the slack a contain-fit leaves falls above it rather than between
+   it and the caption that names it. */
+.demo-frame__preview img { object-fit: contain; object-position: center bottom; }
 .demo-frame__preview figure > .infoschematic { aspect-ratio: auto; }
-.demo-frame__preview figcaption { padding: 8px 12px; border-top: 1px solid #ffffff16; color: #9db4c9; font: 600 11px/1.4 'DM Mono', monospace; }
-.demo-frame__preview--variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); }
-.demo-frame__preview--variants figure + figure { border-left: 1px solid #ffffff16; }
+.demo-frame__preview figcaption { padding: 6px 12px 10px; color: #9db4c9; font: 600 11px/1.4 'DM Mono', monospace; }
+/* Each variant is drawn as its own enclosure rather than as a cell in a continuous field: a caption inside the
+   same box as its drawing is bound to it by containment, which survives the slack a specimen's own canvas leaves. */
+.demo-frame__preview--variants { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 10px; padding: 10px; background: #071624; }
+.demo-frame__preview--variants figure { display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; border: 1px solid #ffffff1c; border-radius: 8px; background: #071624; }
+/* A variant's drawing keeps its own height, so a grid of short specimens does not put a screenful of empty
+   blueprint between each caption and the figure above it. */
+.demo-frame__preview--variants img, .demo-frame__preview--variants figure > .infoschematic { height: auto; max-height: clamp(180px, 32vw, 360px); }
 .demo-frame__controls { padding: 14px 16px; border-top: 1px solid #ffffff16; }
 .demo-frame__icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 .demo-frame__controls .interactive-specimen__controls { margin: 0; padding: 0; border: 0; }
