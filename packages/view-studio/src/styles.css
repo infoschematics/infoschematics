@@ -471,6 +471,12 @@ h2 {
   writing-mode: horizontal-tb;
 }
 
+/* The button stays upright so a registered icon is drawn the way it was designed; only a name falls back to the
+   rail's own vertical setting, where every other entry in the column already reads. */
+.panel-rail .rail-scope__name {
+  writing-mode: vertical-rl;
+}
+
 .panel-rail .rail-scope[aria-pressed="true"] {
   background: #10263b;
   border-color: #ffffff1e;

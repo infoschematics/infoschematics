@@ -196,6 +196,28 @@ describe('production controls', () => {
     expect(compact).toContain('aria-label="Flow families"')
   })
 
+  it('draws a scope and a family by the name its author gave it', () => {
+    const expanded = renderToStaticMarkup(
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
+    )
+    const compact = renderToStaticMarkup(
+      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
+    )
+
+    // The fixture's id, code prefix and label all differ, so a control that reached for the wrong one cannot
+    // pass by coincidence the way the showcase's word-shaped family ids let it.
+    expect(expanded).toContain('>Scope one</button>')
+    expect(expanded).toContain('>Family one</button>')
+    expect(compact).toContain('<span class="rail-scope__name">Scope one</span>')
+
+    for (const markup of [expanded, compact]) {
+      // `ONE` and `FLOW` are what the next card and the next flow are numbered from, not what a reader is shown.
+      expect(markup).not.toContain('>ONE<')
+      expect(markup).not.toContain('>FLOW<')
+      expect(markup).not.toContain('>scope-one<')
+    }
+  })
+
   it('disables empty and stale activation while retaining ready work', () => {
     const markup = renderToStaticMarkup(
       withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)

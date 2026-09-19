@@ -46,7 +46,14 @@ export function PanelRail({
               title={`Architectural scope: ${scope.label} — ${scope.description}`}
               type="button"
             >
-              {ScopeIcon ? <ScopeIcon aria-hidden={true} size={16} /> : scope.prefix}
+              {ScopeIcon ? (
+                <ScopeIcon aria-hidden={true} size={16} />
+              ) : (
+                /* A scope's authored name, not the code prefix derived from its id: the rail is 48px wide and
+                   `SCOPE-PIPELINE` neither fits it nor tells a reader anything the label does not. With no icon
+                   registered it sets down the rail like the Scene and Story entries beneath it. */
+                <span className="rail-scope__name">{scope.label}</span>
+              )}
             </button>
           )
         })}

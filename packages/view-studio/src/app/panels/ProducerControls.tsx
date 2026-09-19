@@ -49,7 +49,7 @@ export function ProducerControls({
               type="button"
             >
               {ScopeIcon ? <ScopeIcon aria-hidden={true} size={13} /> : null}
-              {scope.prefix}
+              {scope.label}
             </button>
           )
         })}
@@ -69,7 +69,7 @@ export function ProducerControls({
             type="button"
           >
             <i aria-hidden="true" style={{ background: family.color }} />
-            {family.prefix}
+            {family.label}
           </button>
         ))}
       </section>
