@@ -19,7 +19,7 @@ import type { Box, Offset, Point } from './geometry.ts'
 import { routeEndpoints, routePath } from './geometry.ts'
 import { placeLabels } from './placement.ts'
 import { auditPorts, minimumPortGap, type PortCounts, portsForBox } from './ports.ts'
-import { moveRouteEnd, normaliseRoute, routeBetweenPorts } from './routing.ts'
+import { joinedToPort, moveRouteEnd, normaliseRoute, routeBetweenPorts } from './routing.ts'
 import { annotationLabelWidth, visualTokens } from './tokens.ts'
 
 export type RuntimeCard = Card & {
@@ -284,8 +284,19 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     scope: scopesOf(fabric.id)[0] ?? '',
     scopes: scopesOf(fabric.id)
   }))
+  /*
+   * An Adapter is anchored to the Card it holds, never to its own authored `bounds` — `ADR-INFOSCHEMATICS-036`, and
+   * the rule every drawn adapter already follows through `adapterBoundsFor`. This lookup read the authored box, so a
+   * Flow leaving an adapter stayed where the adapter had been authored while the adapter itself went with the Card a
+   * Producer moved, and the two came apart on screen.
+   */
+  const cardBoundsById = new Map(cards.map((card) => [card.id, card.bounds]))
+  const drawnBounds = (card: RuntimeCard) => {
+    const held = card.wraps ? cardBoundsById.get(card.wraps) : undefined
+    return held ? adapterBoundsFor(held) : card.bounds
+  }
   const endpointById = new Map<string, { box?: Box; at?: Point; ports?: PortCounts }>([
-    ...cards.map((entry) => [entry.id, { box: entry.bounds, ports: entry.ports }] as const),
+    ...cards.map((entry) => [entry.id, { box: drawnBounds(entry), ports: entry.ports }] as const),
     ...fabrics.map((entry) => [entry.id, { box: entry.bounds, ports: entry.ports }] as const),
     ...definition.points.map((entry) => [entry.id, { at: entry.at, ports: entry.ports }] as const)
   ])
@@ -306,19 +317,25 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
    * — `COMPOSE-002`. `routeBetweenPorts` is the construction the editor already uses to draw a first route, and it
    * collapses to the straight run wherever the ports do line up, so a document that renders today renders the same.
    *
-   * A route that carries waypoints is a shape someone drew, and it is taken as it stands — deriving over it would
-   * be re-routing an authored route, which this does not do.
+   * A route that carries waypoints is a shape someone drew, and every waypoint is kept exactly where it was
+   * authored — deriving over it would be re-routing an authored route, which this does not do. Only the run that
+   * reaches a port is repaired, by `joinedToPort` below, because that run is the one a move can invalidate.
    */
   const flows: RuntimeFlow[] = definition.flows.map((flow) => {
     const established = establishedFlowPoints?.get(flow.id)
     const waypoints = established ? established.slice(1, -1) : (flow.route?.waypoints ?? [])
     const points =
       waypoints.length > 0
-        ? (established ?? [
-            portAt(flow.source.element, flow.source.port),
-            ...waypoints,
-            portAt(flow.target.element, flow.target.port)
-          ])
+        ? (established ??
+          joinedToPort(
+            'end',
+            flow.target.port,
+            joinedToPort('start', flow.source.port, [
+              portAt(flow.source.element, flow.source.port),
+              ...waypoints,
+              portAt(flow.target.element, flow.target.port)
+            ])
+          ))
         : routeBetweenPorts(
             portAt(flow.source.element, flow.source.port),
             flow.source.port,

@@ -138,7 +138,10 @@ describe('renderer CLI', () => {
     const run = harness({ 'model.yaml': diagonal })
     expect(await runRendererCli(['render', 'model.yaml'], run.io)).toBe(rendererCliExit.validation)
     expect(run.output().stdout).toBe('')
-    expect(run.output().stderr).toBe('Cannot render model.yaml: A route may not run diagonally: 140,50 to 180,90\n')
+    /* The pair named is the one between two authored waypoints. The run out of the port is diagonal here too, but
+       the model repairs that itself - a port moves with its component and a waypoint does not - so reporting it
+       would send the author to the one stretch of this route they did not draw. */
+    expect(run.output().stderr).toBe('Cannot render model.yaml: A route may not run diagonally: 180,90 to 220,160\n')
     expect(run.output().stderr).not.toContain(' at ')
   })
 

@@ -46,6 +46,44 @@ export const moveRouteEnd = (points: readonly Point[], end: 'end' | 'start', del
     : [...result.slice(0, -1), bend, result.at(-1) as Point]
 }
 
+/**
+ * Reconnect the run that reaches a port, leaving every point its author placed where they placed it.
+ *
+ * A route with waypoints is read back from the document as the ports it joins with that shape between them, and a
+ * Producer may move either component afterwards. The port goes with its card; the waypoints do not, because they are
+ * the shape someone drew. So the one run that can stop being orthogonal is the run between a port and the point
+ * beside it, and that is the only run this repairs.
+ *
+ * An interior neighbour leans onto the axis the port leaves by — horizontal for a port on an east or west edge —
+ * which keeps that run pointing the way it did and leaves the run beyond it merely longer or shorter. Where leaning
+ * would break that next run, or where the neighbour is the far port and so has nothing to give, the run gains a
+ * corner instead. This is the repair `moveRouteEnd` already makes while the drag is still in hand; reading the
+ * document back made the same route a second time and made it without it, which is how a committed move could leave
+ * behind a route no renderer would draw.
+ */
+export const joinedToPort = (end: 'end' | 'start', port: string, points: readonly Point[]): Point[] => {
+  if (points.length < 2) return [...points]
+
+  const at = end === 'start' ? 0 : points.length - 1
+  const next = end === 'start' ? 1 : points.length - 2
+  const terminal = points[at]
+  const neighbour = points[next]
+  if (terminal.x === neighbour.x || terminal.y === neighbour.y) return [...points]
+
+  const horizontal = port.startsWith('E') || port.startsWith('W')
+  const leaned = horizontal ? { ...neighbour, y: terminal.y } : { ...neighbour, x: terminal.x }
+  const beyond = points[end === 'start' ? next + 1 : next - 1]
+  const leanable = next !== 0 && next !== points.length - 1 && (leaned.x === beyond.x || leaned.y === beyond.y)
+
+  if (leanable) return points.map((point, index) => (index === next ? leaned : { ...point }))
+
+  const result = points.map((point) => ({ ...point }))
+  const bend = horizontal ? { x: neighbour.x, y: terminal.y } : { x: terminal.x, y: neighbour.y }
+  return end === 'start'
+    ? [result[0], bend, ...result.slice(1)]
+    : [...result.slice(0, -1), bend, result.at(-1) as Point]
+}
+
 /** How far a run leaves a port before it may turn, so it clears its card. */
 const portClearance = 20
 

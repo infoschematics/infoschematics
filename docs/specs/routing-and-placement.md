@@ -20,11 +20,13 @@ Moving one end of a route MUST carry the endpoint to its requested position whil
 
 Every derivation of a route MUST reach that construction, not only the editor's. A Flow with no waypoints has no shape anyone drew — its two [ports](../reference/vocabulary.md#port) are all the document says — so both the draft overlay and the document itself MUST route between those ports through the one shared construction rather than joining them with a naked pair of points. A document that renders as a straight run MUST keep it, because the construction collapses to the straight run wherever the ports line up.
 
+A route that carries waypoints is a shape someone drew, so every waypoint MUST be left where it was authored when a component at either end moves. The run that reaches a port is the one a move can invalidate — the port travels with the component while the waypoint beside it stays put — and reading the document back MUST repair that run the same way the draft overlay repairs it, by leaning the neighbouring point onto the port's axis or inserting a bend. A committed move MUST therefore draw the route the draft showed, rather than a second answer that is diagonal and that no renderer will accept.
+
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose route cases cover end movement, bend insertion and orthogonality. Then drag one end of a straight two-point route off its axis: the far endpoint MUST stay where it is and a bend MUST appear, so a route that stays straight by dragging the other end with it fails the requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose route cases cover end movement, bend insertion and orthogonality. Then drag one end of a straight two-point route off its axis: the far endpoint MUST stay where it is and a bend MUST appear, so a route that stays straight by dragging the other end with it fails the requirement. Then give a Flow an interior waypoint, move a component at one end of it, and accept the change: the accepted document MUST draw the route the draft drew, with the interior waypoint still where it was authored, rather than failing to draw at all.
 
-_Evidence:_ `packages/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality.
+_Evidence:_ `packages/view-model/src/routing.test.ts` covers end movement, bend insertion and orthogonality. `joinedToPort` in `packages/view-model/src/routing.ts` repairs the run reaching a port, and `packages/view-model/src/runtime.test.ts` covers a waypointed Flow whose attached component has moved.
 
 ### ROUTE-003 — Waypoint edits preserve route validity
 
