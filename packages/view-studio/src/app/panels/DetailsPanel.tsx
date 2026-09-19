@@ -149,6 +149,23 @@ const effectivePlaceable = (
     : config.infoschematic.fabrics.find((candidate) => candidate.id === selection.id)
 }
 
+/*
+ * Which group a new element belongs to, and which sittings show it. They are two questions, and a creation that
+ * answered the first with the second named a Collection the document had never declared - a document that cannot be
+ * read back, so the projection refused the whole batch and nothing was written at all.
+ */
+const collectionBeside = (
+  definition: InfoschematicConfig['infoschematic'],
+  beside: EditablePlaceable | undefined
+): string | undefined =>
+  // Absent where the document declares none: a Collection is a thing the document names.
+  beside && 'domain' in beside && beside.domain ? beside.domain : definition.domains?.[0]?.id
+
+const scopeBeside = (
+  definition: InfoschematicConfig['infoschematic'],
+  beside: EditablePlaceable | undefined
+): string => (beside && 'scope' in beside ? beside.scope : (definition.scopes[0]?.id ?? ''))
+
 const flowContextFor = (
   config: InfoschematicConfig,
   selection: ArtefactSelection | null,
@@ -236,17 +253,12 @@ export const detailsArtefactContexts = (
     library: {
       allocate: createLibraryIdentityAllocator({ codes: usedCodes, ids: usedIds }),
       at,
-      box,
-      /* The Collection of whatever is selected, so a new element joins the group it was made beside, and the first
-         declared one otherwise. Left absent where the document declares none: a Collection is a thing the document
-         names, and writing one it has not named produces a document that cannot be read back. */
-      collection:
-        selectedPlaceable && 'domain' in selectedPlaceable && selectedPlaceable.domain
-          ? selectedPlaceable.domain
-          : definition.domains?.[0]?.id,
+      // Beside what is selected, so a new element joins the group it was made next to.
+      collection: collectionBeside(definition, selectedPlaceable),
       flow: flowContextFor(config, editor.selectedArtefact, editor.artefactValue, editor.selectedCounts),
-      scope:
-        selectedPlaceable && 'scope' in selectedPlaceable ? selectedPlaceable.scope : (definition.scopes[0]?.id ?? '')
+      // Only where it goes: a template brings its own size, and handing over the whole rectangle is what took it away.
+      origin: { x: box.x, y: box.y },
+      scope: scopeBeside(definition, selectedPlaceable)
     }
   }
 }

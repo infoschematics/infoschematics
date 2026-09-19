@@ -19,7 +19,7 @@ const template = (kind: LibraryTemplate['seed']['kind']) => {
 const context = (allocate = createLibraryIdentityAllocator()): LibraryContext => ({
   allocate,
   at: 2,
-  box: { x: 320, y: 180 },
+  origin: { x: 320, y: 180 },
   flow: {
     family: 'request',
     source: { component: 'source-card', point: { x: 100, y: 120 }, port: 'E1' },
@@ -88,13 +88,13 @@ describe('Library templates', () => {
     expect(JSON.stringify(first)).not.toContain('bounded Fabric')
   })
 
-  it('keeps the template’s own size where the context carries a box of its own', () => {
-    // The panel hands over the rectangle it placed the element in, width and height included. Only its position is
-    // the context's to say: a Square card spread from that box came out 240 by 120, which is the panel's size.
+  it('keeps the template’s own size wherever the position it is given came from', () => {
+    /* The panel works out a placement rectangle and takes the corner of it. A whole rectangle satisfies a position
+       structurally, which is how a Square card once came out 240 by 120 - the panel's size, not the template's. */
     const placed: Box = { height: 120, width: 240, x: 320, y: 180 }
     const square = libraryTemplates.find((entry) => entry.metadata.key === 'square-card')
     if (!square) throw new Error('Missing square-card template')
-    const operation = instantiateLibraryTemplate(square, { ...context(), box: placed })
+    const operation = instantiateLibraryTemplate(square, { ...context(), origin: placed })
     if (!operation || !('placement' in operation.value)) throw new Error('Expected a Card operation')
 
     expect(operation.value.placement.box).toEqual({ height: 120, width: 120, x: 320, y: 180 })

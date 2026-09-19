@@ -230,12 +230,7 @@ const createdArtefactDetailsFor = (
 ): EditableArtefact | undefined => {
   const created = [...operations]
     .reverse()
-    .find(
-      (operation) =>
-        operation.operation === 'create' &&
-        operation.target.kind === selection.kind &&
-        operation.target.id === selection.id
-    )
+    .find((operation) => operation.operation === 'create' && sameArtefact(operation.target, selection))
   if (created?.operation !== 'create') return undefined
   const value = effectiveArtefactValue(config, operations, selection)
   return value ? createdArtefactDetails({ ...created, value } as typeof created) : undefined
@@ -1081,12 +1076,7 @@ export function useEditor(
     const target = selectedArtefactDetails.selection
     const previous = [...artefactOperations]
       .reverse()
-      .find(
-        (operation) =>
-          operation.operation === 'reorder' &&
-          operation.target.kind === target.kind &&
-          operation.target.id === target.id
-      )
+      .find((operation) => operation.operation === 'reorder' && sameArtefact(operation.target, target))
     const from = previous?.operation === 'reorder' ? previous.to : artefactIndex(config, target)
     if (from === undefined) return
     const createdCount = artefactOperations.filter(
@@ -1106,8 +1096,7 @@ export function useEditor(
     if (!selectedArtefactDetails?.capabilities.remove) return undefined
     const target = selectedArtefactDetails.selection
     const existingRemoval = artefactOperations.some(
-      (operation) =>
-        operation.operation === 'remove' && operation.target.kind === target.kind && operation.target.id === target.id
+      (operation) => operation.operation === 'remove' && sameArtefact(operation.target, target)
     )
     const plan = planArtefactRemoval(
       config,

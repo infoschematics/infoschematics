@@ -6,7 +6,7 @@ import { createLibraryIdentityAllocator, type LibraryContext } from './library.t
 const context = (flow: LibraryContext['flow']): LibraryContext => ({
   allocate: createLibraryIdentityAllocator(),
   at: 0,
-  box: { x: 40, y: 60 },
+  origin: { x: 40, y: 60 },
   flow,
   scope: 'inside'
 })

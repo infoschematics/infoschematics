@@ -9,7 +9,8 @@ import {
   defineArtefactSelection,
   type EditableArtefact,
   orderArtefactOperations,
-  removeArtefactOperation
+  removeArtefactOperation,
+  sameArtefact
 } from '@infoschematics/view-model/editable'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
@@ -35,9 +36,6 @@ type AnyReplaceArtefactPropertiesOperation = Extract<ArtefactDraftOperation, { o
 
 export const artefactOperationKey = (operation: ArtefactDraftOperation): string =>
   `${operation.target.kind}:${operation.target.id}:${operation.operation}`
-
-const sameTarget = (left: ArtefactSelection, right: ArtefactSelection) =>
-  left.kind === right.kind && left.id === right.id
 
 const matchesTarget = (value: { readonly code?: string; readonly id: string }, target: ArtefactSelection): boolean =>
   value.id === target.id || (target.code !== null && value.code === target.code)
@@ -84,26 +82,26 @@ export function recordArtefactOperation(
   next: ArtefactDraftOperation
 ): readonly ArtefactDraftOperation[] {
   const created = current.some(
-    (operation) => operation.operation === 'create' && sameTarget(operation.target, next.target)
+    (operation) => operation.operation === 'create' && sameArtefact(operation.target, next.target)
   )
   if (next.operation === 'remove' && created) {
-    return orderDraftOperations(current.filter((operation) => !sameTarget(operation.target, next.target)))
+    return orderDraftOperations(current.filter((operation) => !sameArtefact(operation.target, next.target)))
   }
 
   const priorReorder = current.find(
-    (operation) => operation.operation === 'reorder' && sameTarget(operation.target, next.target)
+    (operation) => operation.operation === 'reorder' && sameArtefact(operation.target, next.target)
   )
   if (next.operation === 'reorder' && priorReorder?.operation === 'reorder') {
     if (priorReorder.from === next.to) {
       return orderDraftOperations(
-        current.filter((operation) => operation.operation !== 'reorder' || !sameTarget(operation.target, next.target))
+        current.filter((operation) => operation.operation !== 'reorder' || !sameArtefact(operation.target, next.target))
       )
     }
     next = { ...next, from: priorReorder.from }
   }
 
   const withoutSuperseded = current.filter((operation) => {
-    if (!sameTarget(operation.target, next.target)) return true
+    if (!sameArtefact(operation.target, next.target)) return true
     if (next.operation === 'remove' || next.operation === 'create') return false
     if (operation.operation === 'remove') return false
     return operation.operation !== next.operation
@@ -165,14 +163,14 @@ export const effectiveArtefactOperation = (
   operations: readonly ArtefactDraftOperation[],
   target: ArtefactSelection
 ): ArtefactDraftOperation | undefined =>
-  operations.some((operation) => operation.operation === 'remove' && sameTarget(operation.target, target))
+  operations.some((operation) => operation.operation === 'remove' && sameArtefact(operation.target, target))
     ? undefined
     : [...operations]
         .reverse()
         .find(
           (operation) =>
             (operation.operation === 'create' || operation.operation === 'replace-properties') &&
-            sameTarget(operation.target, target)
+            sameArtefact(operation.target, target)
         )
 
 const isRecord = (value: unknown): value is Readonly<Record<string, unknown>> =>

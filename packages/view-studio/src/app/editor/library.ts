@@ -10,6 +10,7 @@ import {
   createArtefactOperation,
   defineArtefactSelection
 } from '@infoschematics/view-model/editable'
+import { finitePoint, positiveExtent } from './placement-guards.ts'
 
 export type LibraryTemplateMetadata = Readonly<{
   description: string
@@ -157,7 +158,6 @@ export type LibraryFlowContext = Readonly<{
 export type LibraryContext = Readonly<{
   allocate: LibraryIdentityAllocator
   at: number
-  box: Readonly<Pick<Box, 'x' | 'y'>>
   /*
    * The Collection the new element joins, where the document declares one.
    *
@@ -167,6 +167,13 @@ export type LibraryContext = Readonly<{
    */
   collection?: string
   flow?: LibraryFlowContext
+  /*
+   * Where the new element goes, and nothing about how big it is.
+   *
+   * It was called `box` and typed as a position, which a whole rectangle satisfies structurally - so the panel's
+   * placement rectangle flowed in and a Square card came out at the panel's size. A position is all this is.
+   */
+  origin: Point
   scope: string
 }>
 
@@ -177,7 +184,6 @@ export type LibraryCreateOperation =
   | CreateArtefactOperation<'point'>
 
 const copy = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
-const finitePoint = (point: Point) => Number.isFinite(point.x) && Number.isFinite(point.y)
 const samePoint = (left: Point, right: Point) => left.x === right.x && left.y === right.y
 const validPort = (port: string): port is PortId => /^[NESW][1-9]\d*$/.test(port)
 
@@ -192,15 +198,10 @@ export const isOrthogonalRoute = (points: readonly Point[]): boolean =>
 /*
  * The template's own size, at the context's position.
  *
- * The position is all the context has to say about the box: it arrives as a placement rectangle whose width and
- * height are the panel's own, and spreading the whole of it drew a Square card 240 wide and 120 high - the size the
- * panel would have used, under the name of the template that promised a square.
+ * Spreading the context over the seed box instead drew a Square card 240 wide and 120 high - the size of the
+ * rectangle the panel had worked out, under the name of a template that promises a square.
  */
-const placedBox = (size: Readonly<Pick<Box, 'height' | 'width'>>, at: Readonly<Pick<Box, 'x' | 'y'>>): Box => ({
-  ...size,
-  x: at.x,
-  y: at.y
-})
+const placedBox = (size: Readonly<Pick<Box, 'height' | 'width'>>, at: Point): Box => ({ ...size, x: at.x, y: at.y })
 
 const routeFor = (context: LibraryFlowContext): readonly Point[] => {
   if (context.points) return copy(context.points)
@@ -241,17 +242,13 @@ export const instantiateLibraryTemplate = (
   template: LibraryTemplate,
   context: LibraryContext
 ): LibraryCreateOperation | undefined => {
-  if (!Number.isFinite(context.at) || !Number.isFinite(context.box.x) || !Number.isFinite(context.box.y))
-    return undefined
+  if (!Number.isFinite(context.at) || !finitePoint(context.origin)) return undefined
   if (template.seed.kind === 'flow' ? !isValidLibraryFlowContext(context.flow) : !context.scope.trim()) return undefined
   /* Stated over the two box kinds rather than as "not a flow": a Point is not a flow either, and it has no box for
      this guard to read. Naming them keeps the box path's width and height guarantee exactly as strict as it was. */
   if (
     (template.seed.kind === 'card' || template.seed.kind === 'fabric') &&
-    (!Number.isFinite(template.seed.value.placement.box.width) ||
-      template.seed.value.placement.box.width <= 0 ||
-      !Number.isFinite(template.seed.value.placement.box.height) ||
-      template.seed.value.placement.box.height <= 0)
+    !positiveExtent(template.seed.value.placement.box)
   ) {
     return undefined
   }
@@ -279,7 +276,7 @@ export const instantiateLibraryTemplate = (
     const value: PointConfig = {
       ...seed,
       ...identity,
-      point: { x: context.box.x, y: context.box.y },
+      point: { ...context.origin },
       scopes: [context.scope]
     }
     const target = defineArtefactSelection({ code: identity.code, geometry: 'point', id: identity.id, kind: 'point' })
@@ -292,7 +289,7 @@ export const instantiateLibraryTemplate = (
       ...seed,
       ...identity,
       ...(context.collection ? { domain: context.collection } : {}),
-      placement: { ...seed.placement, box: placedBox(seed.placement.box, context.box) },
+      placement: { ...seed.placement, box: placedBox(seed.placement.box, context.origin) },
       scope: context.scope,
       scopes: [context.scope]
     }
@@ -304,7 +301,7 @@ export const instantiateLibraryTemplate = (
   const value: FabricConfig = {
     ...seed,
     ...identity,
-    placement: { ...seed.placement, box: placedBox(seed.placement.box, context.box) },
+    placement: { ...seed.placement, box: placedBox(seed.placement.box, context.origin) },
     scope: context.scope,
     scopes: [context.scope]
   }

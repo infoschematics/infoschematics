@@ -7,6 +7,7 @@ import {
   defineArtefactSelection
 } from '@infoschematics/view-model/editable'
 import type { Box } from '@infoschematics/view-model/geometry'
+import { placeableBox } from './placement-guards.ts'
 
 export type FactoryKind = Extract<ArtefactKind, 'graphic' | 'region'>
 
@@ -20,10 +21,6 @@ export type ArtefactFactoryContext = Readonly<{
 }>
 
 export type FactoryCreateOperation = CreateArtefactOperation<'graphic'> | CreateArtefactOperation<'region'>
-
-const finite = (value: number) => Number.isFinite(value)
-const validBox = (box: Box) =>
-  finite(box.x) && finite(box.y) && finite(box.width) && finite(box.height) && box.width > 0 && box.height > 0
 
 export const createFactoryIdentityAllocator = (used: Iterable<string> = []): FactoryIdentityAllocator => {
   const ids = new Set(used)
@@ -46,7 +43,7 @@ const identityFor = (kind: FactoryKind, context: ArtefactFactoryContext) => {
 }
 
 export const createDefaultRegion = (context: ArtefactFactoryContext): CreateArtefactOperation<'region'> | undefined => {
-  if (!validBox(context.box) || !finite(context.at)) return undefined
+  if (!placeableBox(context.box) || !Number.isFinite(context.at)) return undefined
   const identity = identityFor('region', context)
   if (!identity) return undefined
   const value: RegionConfig = {
@@ -62,7 +59,7 @@ export const createDefaultRegion = (context: ArtefactFactoryContext): CreateArte
 export const createDefaultGraphic = (
   context: ArtefactFactoryContext
 ): CreateArtefactOperation<'graphic'> | undefined => {
-  if (!validBox(context.box) || !finite(context.at)) return undefined
+  if (!placeableBox(context.box) || !Number.isFinite(context.at)) return undefined
   const identity = identityFor('graphic', context)
   if (!identity) return undefined
   const value: GraphicConfig = {
