@@ -430,16 +430,28 @@ export function useEditor(
   // A drag is one entry however many pointer events it spans, so the checkpoint
   // is taken once when the gesture opens and not again until it closes.
   const gestureOpen = useRef(false)
+  /*
+   * The same fact as state, for the host rather than for the hook.
+   *
+   * A ref changing does not re-run an effect, and the projection into the authored document is an effect: reading
+   * the ref there would hold every write of a drag and then never let the last one go. So the host asks `gesturing`,
+   * and the pointer lifting is what makes the effect run again.
+   */
+  const [gesturing, setGesturing] = useState(false)
 
   const checkpoint = useCallback(() => {
     if (gestureOpen.current) return
     gestureOpen.current = true
+    setGesturing(true)
     setPast((current) => [...current, draft])
     setFuture([])
   }, [draft])
 
+  // A discrete edit checkpoints and closes in the same handler, so the two updates batch and the host never sees a
+  // gesture open at all: only a drag leaves it open across events.
   const closeGesture = () => {
     gestureOpen.current = false
+    setGesturing(false)
   }
 
   /*
@@ -943,7 +955,10 @@ export function useEditor(
     })()
     if (!offset) return
     const operation = moveArtefactOperation(target, geometry, offset)
-    if (operation) recordOperation(operation, false)
+    /* A keyboard step is a whole gesture: it arrives already finished, with no pointer to lift afterwards. Leaving
+       the gesture open would collapse a run of presses into one undo and, worse, hold the document write for a
+       release that never comes. A drag is the other case, and stays open until `releaseDrag`. */
+    if (operation) recordOperation(operation, exact)
   }
 
   /*
@@ -1194,6 +1209,8 @@ export function useEditor(
       restore(emptyEditorDraft())
     },
     editing,
+    /** Whether a pointer gesture is still running, so a host can wait for where it ends rather than watch it travel. */
+    gesturing,
     // A drop lands on the grid, then is described. The diagram decides what it
     // means, so a move it forbids records nothing.
     moveTo: (key: string, point: Point) => {

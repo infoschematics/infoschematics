@@ -105,3 +105,13 @@ _Conformance:_ conforming
 _Verify:_ Run `bun run test:browser --filter=@infoschematics/view-studio`, then in Design make a typed artefact edit and watch the change list: the line appears and then leaves it as the document takes the change. Read the pane afterwards — it MUST still say that change was written, and MUST NOT be showing the prompt it shows a Producer who has done nothing. Falsified by a pane that empties on success, which is the state a Producer cannot tell from a lost edit.
 
 _Evidence:_ the written record in `packages/view-studio/src/app/editor/ChangePane.tsx`, fed from the document acknowledgement in `packages/view-studio/src/app/App.tsx`.
+
+### CHANGE-011 — A gesture writes the document once, where it ended
+
+A pointer gesture that edits authored geometry MUST write the authored document once, carrying the position the gesture ended at. The positions it passed through MUST NOT be written, and MUST NOT appear in the record of written changes. A discrete command — a keyboard step, a numeric placement, an action from a control — MUST write immediately, because it arrives already finished and has no end to wait for.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test:browser --filter=@infoschematics/view-studio`, then in Design drag one Card across the canvas in a single press and read the written record: it MUST hold one line, naming where the Card was dropped. Falsified by a record holding one line per pointer event, each naming a position the Producer travelled through rather than chose.
+
+_Evidence:_ the gesture guard on the document projection in `packages/view-studio/src/app/App.tsx`, `gesturing` in `packages/view-studio/src/app/editor/use-editor.ts`, and the drag case in `packages/view-studio/src/app/App.browser.test.tsx`.

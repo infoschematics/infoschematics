@@ -1310,6 +1310,8 @@ export function InfoschematicDiagram({
           if (size.height === undefined && size.width === undefined) return
           event.preventDefault()
           onArtefactResize(selection, size)
+          // One press is one complete resize, so it is released here: there is no pointer coming up to do it later.
+          onArtefactRelease?.()
         }}
         onPointerDown={(event) => {
           event.preventDefault()

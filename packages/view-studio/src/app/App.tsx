@@ -412,6 +412,15 @@ function AppContent({
       return
     }
     if (!onDocumentChange || (editor.artefactOperations.length === 0 && !presentationEdited)) return
+    /*
+     * Where a drag ends is the change; where it passed through is not.
+     *
+     * Every pointer event supersedes the last inside the draft, so the pending list stays one line however far the
+     * hand travels - but projecting on each of them wrote the document once per step, and the pane accounted for
+     * every write. One move of one Card left nine lines in the record, each naming a position the Producer did not
+     * choose. So the projection waits for the pointer to lift, which is when the position means something.
+     */
+    if (editor.gesturing) return
     const projection = projectStudioDocumentOperations(
       authoredDocument,
       compatibilityConfig,
@@ -443,6 +452,7 @@ function AppContent({
     editedSequences,
     editor.artefactOperations,
     editor.discardOne,
+    editor.gesturing,
     editor.pending,
     editor.recordWritten,
     documentTimeline.record,

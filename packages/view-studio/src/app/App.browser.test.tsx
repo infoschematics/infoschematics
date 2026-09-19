@@ -1503,6 +1503,8 @@ diagram:
   expect(container.querySelector('.change-panel .contract-empty')).not.toBeNull()
 
   await expect.poll(() => container.querySelector('button[aria-label="Create Region"]')).not.toBeNull()
+  // The editing grid is drawn only while the editor will accept an edit, so it is the signal that a press will drag.
+  await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
   const createRegion = container.querySelector<HTMLButtonElement>('button[aria-label="Create Region"]')
   if (!createRegion) throw new Error('Studio did not render the Region creation control')
   createRegion.click()
@@ -1518,4 +1520,89 @@ diagram:
   createRegion.click()
   await expect.poll(() => writtenLines().length).toBe(2)
   expect(container.querySelector('.change-panel .change-written-count')?.textContent).toBe('2 written to the document')
+})
+
+/*
+ * One drag is one change, not one per pointer event.
+ *
+ * The draft supersedes its own move on every step, so the pending list stayed at one line - but the document was
+ * written on each of those steps and the pane accounted for every write. The reporter moved one Card once and read
+ * back nine entries, eight of them naming a position they had merely passed through.
+ */
+test('Studio records one written change for a drag, naming where it was dropped rather than where it passed', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: DRAGGED
+title: Dragged once
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+`)
+  if (!parsed.ok) throw new Error('drag fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  /* The diagram turns selectable with the production mode, a beat before the editor session behind it opens, and a
+     press in that gap selects without dragging. The editing grid is drawn from the session itself, so waiting for it
+     is waiting for a press to mean a drag. */
+  await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
+
+  const writtenLines = () =>
+    [...container.querySelectorAll('.change-panel .change-written code')].map((line) => line.textContent ?? '')
+  const card = () => container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  const held = card()
+  if (!held) throw new Error('Studio did not render Card A')
+
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const matrix = svg?.getScreenCTM()
+  if (!svg || !matrix) throw new Error('rendered Studio diagram has no screen transform')
+  const at = (x: number, y: number) => {
+    const point = svg.createSVGPoint()
+    point.x = x
+    point.y = y
+    const screen = point.matrixTransform(matrix)
+    return { clientX: screen.x, clientY: screen.y }
+  }
+
+  held.dispatchEvent(new PointerEvent('pointerdown', { ...at(60, 65), bubbles: true, button: 0, pointerId: 61 }))
+  // The press selects and the selection is what the drag moves, so the drag starts once that has landed - which in a
+  // hand's drag is the frame between pressing and moving, and here is a poll.
+  await expect.poll(() => held.classList.contains('selected')).toBe(true)
+  // Eight steps, each far enough past the last to land on a different grid line: eight chances to write a document.
+  for (const step of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    window.dispatchEvent(new PointerEvent('pointermove', { ...at(60, 65 + step * 12), bubbles: true, pointerId: 61 }))
+  }
+  await expect.poll(() => card()?.getAttribute('transform')).not.toBe('translate(20 40)')
+  // Nothing is written while the hand is still moving: the Card has travelled and the record is still empty.
+  expect(writtenLines()).toEqual([])
+
+  window.dispatchEvent(new PointerEvent('pointerup', { ...at(60, 161), bubbles: true, button: 0, pointerId: 61 }))
+  await expect.poll(() => writtenLines().length).toBe(1)
+  expect(container.querySelector('.change-panel .change-written-count')?.textContent).toBe('1 written to the document')
+  // The one line says where the Card came to rest, which is the position the diagram is now drawing it at.
+  const dropped = card()?.getAttribute('transform')
+  expect(writtenLines()[0]).toContain('CARD-A')
+  expect(dropped).not.toBe('translate(20 40)')
 })
