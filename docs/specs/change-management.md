@@ -95,3 +95,13 @@ _Conformance:_ conforming
 _Verify:_ Run `bun run test --filter=@infoschematics/view-studio`, then draft the same property of the same thing twice with different values: the change set must hold one effective entry, the later one. Draft changes to several things in a scattered order and read the entry order — it must follow authored code and property, so the same set of edits made in a different sequence lists identically. Falsified by an order that reflects when each edit arrived.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.test.ts` covers natural code ordering and property grouping.
+
+### CHANGE-010 — A change that leaves the pending set is accounted for
+
+A pending change removed because the authored document now carries it MUST remain visible to the Producer as a record of what was written, distinct from what is still pending. An empty pending set MUST NOT be presented as an untouched session while changes have been written in it. The record MAY be read-only: a written change is no longer the editor's to select, drop or discard.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test:browser --filter=@infoschematics/view-studio`, then in Design make a typed artefact edit and watch the change list: the line appears and then leaves it as the document takes the change. Read the pane afterwards — it MUST still say that change was written, and MUST NOT be showing the prompt it shows a Producer who has done nothing. Falsified by a pane that empties on success, which is the state a Producer cannot tell from a lost edit.
+
+_Evidence:_ the written record in `packages/view-studio/src/app/editor/ChangePane.tsx`, fed from the document acknowledgement in `packages/view-studio/src/app/App.tsx`.

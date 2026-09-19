@@ -133,6 +133,7 @@ const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor
   source: '',
   text: {},
   toggleLayer: vi.fn(),
+  written: [],
   undo: vi.fn(),
   ...overrides
 })

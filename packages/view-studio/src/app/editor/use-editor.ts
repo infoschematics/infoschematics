@@ -151,6 +151,17 @@ export type PendingChange = {
   source: string
 }
 
+/**
+ * A change line the host has already taken into the authored document.
+ *
+ * It carries its own identity because it is a log entry rather than a draft: there is no origin to drop it by, and
+ * the same line can honestly appear twice when a Producer makes the same edit twice.
+ */
+export type WrittenChange = {
+  id: string
+  source: string
+}
+
 /** Which property of a component or flow a change line sets. */
 type PendingField =
   | 'artefact-operation'
@@ -403,6 +414,19 @@ export function useEditor(
   // survive a reload, how far back you can step does not.
   const [past, setPast] = useState<readonly EditorDraft[]>([])
   const [future, setFuture] = useState<readonly EditorDraft[]>([])
+  /*
+   * What the host has already taken into the authored document, most recent first.
+   *
+   * A typed artefact operation is projected as soon as it is made, so it leaves the pending set the moment it
+   * succeeds - which from the outside is a change appearing and then vanishing. This is the other half of that
+   * account: the pending set says what has not landed yet, and this says what has. It is a session log rather than
+   * state, so nothing clears it: discarding drops what is still pending, and undoing a written change writes the
+   * undo, which appears here as its own line.
+   */
+  const [written, setWritten] = useState<readonly WrittenChange[]>([])
+  // Its own counter rather than a list index: entries are prepended, so an index identifies a different line on
+  // every render and React would rebuild the whole record each time one arrived.
+  const writtenSequence = useRef(0)
   // A drag is one entry however many pointer events it spans, so the checkpoint
   // is taken once when the gesture opens and not again until it closes.
   const gestureOpen = useRef(false)
@@ -1561,6 +1585,16 @@ export function useEditor(
       })
     },
     removals,
+    written,
+    // Called by the host wiring once the authored document comes back carrying the change, not when it is offered.
+    recordWritten: (sources: readonly string[]) => {
+      if (sources.length === 0) return
+      const taken = sources.map((source) => {
+        writtenSequence.current += 1
+        return { id: `written-${writtenSequence.current}`, source }
+      })
+      setWritten((current) => [...taken, ...current])
+    },
     releaseDrag: () => {
       closeGesture()
       groupDrag.current = null

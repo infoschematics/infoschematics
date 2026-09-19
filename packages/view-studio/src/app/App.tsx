@@ -391,12 +391,17 @@ function AppContent({
     origins: readonly PendingOrigin[]
     presentation?: Readonly<{ library: boolean; source: string; stories: boolean; themes: boolean }>
     source: string
+    /** The change lines going with this document, so the pane can account for them once the host takes it. */
+    written: readonly string[]
   }> | null>(null)
 
   useEffect(() => {
     if (!authoredDocument) return
     const emitted = emittedDocument.current
     if (emitted && isStudioDocumentAcknowledgement(authoredDocument, emitted.source)) {
+      // Recorded before the drop, not after: these lines leave the pending set here, and a Producer who saw one
+      // appear needs somewhere it went rather than a list that is simply shorter than it was.
+      editor.recordWritten(emitted.written)
       for (const origin of emitted.origins) editor.discardOne(origin)
       if (emitted.presentation?.source === JSON.stringify(editedSequences)) {
         if (emitted.presentation.library) sceneLibrary.revert()
@@ -416,8 +421,9 @@ function AppContent({
     if (!projection.ok) return
     const applied = applyInfoschematicDocumentEdit(authoredDocument, projection.edit)
     if (!applied.ok || emitted?.source === applied.source) return
+    const carried = editor.pending.filter((change) => change.origin?.map === 'artefactOperations')
     emittedDocument.current = {
-      origins: editor.pending.flatMap((change) => (change.origin?.map === 'artefactOperations' ? [change.origin] : [])),
+      origins: carried.flatMap((change) => (change.origin ? [change.origin] : [])),
       presentation: presentationEdited
         ? {
             library: sceneLibrary.edited,
@@ -426,7 +432,8 @@ function AppContent({
             themes: themeComposition.edited
           }
         : undefined,
-      source: applied.source
+      source: applied.source,
+      written: carried.map((change) => change.source)
     }
     documentTimeline.record(applied.document)
     onDocumentChange({ ...applied, edit: projection.edit })
@@ -437,6 +444,7 @@ function AppContent({
     editor.artefactOperations,
     editor.discardOne,
     editor.pending,
+    editor.recordWritten,
     documentTimeline.record,
     onDocumentChange,
     presentationEdited,

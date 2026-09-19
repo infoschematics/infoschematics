@@ -1449,3 +1449,73 @@ test("Studio plays a Scene's cue in its Present surface while the rehearsal bank
   press('Sequences', 'Quiet')
   await expect.poll(emphasis).toBeNull()
 })
+
+/*
+ * A typed artefact operation is projected into the authored document as soon as it succeeds, so it leaves the pending
+ * list the moment it works. The reporter saw exactly that and read it as a lost edit: "we still see it briefly on the
+ * change list and it disappears". The pane has to account for where it went, or success is indistinguishable from
+ * loss - which is why this asserts both halves of the move, not just that the pending list empties.
+ */
+test('Studio accounts for a change the document has taken, rather than letting it vanish from the list', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: WRITTEN
+title: Written changes
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+`)
+  if (!parsed.ok) throw new Error('written-change fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const changeLines = () =>
+    [...container.querySelectorAll('.change-panel .change-list:not(.change-written) code')].map(
+      (line) => line.textContent ?? ''
+    )
+  const writtenLines = () =>
+    [...container.querySelectorAll('.change-panel .change-written code')].map((line) => line.textContent ?? '')
+
+  expect(changeLines()).toEqual([])
+  expect(writtenLines()).toEqual([])
+  expect(container.querySelector('.change-panel .contract-empty')).not.toBeNull()
+
+  await expect.poll(() => container.querySelector('button[aria-label="Create Region"]')).not.toBeNull()
+  const createRegion = container.querySelector<HTMLButtonElement>('button[aria-label="Create Region"]')
+  if (!createRegion) throw new Error('Studio did not render the Region creation control')
+  createRegion.click()
+
+  // The line the reporter saw appear is the one that must still be accounted for after it goes.
+  await expect.poll(() => writtenLines().length).toBe(1)
+  expect(writtenLines()[0]).toContain('region')
+  expect(changeLines()).toEqual([])
+  expect(container.querySelector('.change-panel .change-written-count')?.textContent).toBe('1 written to the document')
+  // The emptiness now means something, so the prompt that treats an empty pane as a fresh session is withheld.
+  expect(container.querySelector('.change-panel .contract-empty')).toBeNull()
+
+  createRegion.click()
+  await expect.poll(() => writtenLines().length).toBe(2)
+  expect(container.querySelector('.change-panel .change-written-count')?.textContent).toBe('2 written to the document')
+})

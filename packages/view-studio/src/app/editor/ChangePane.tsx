@@ -1,5 +1,5 @@
 import { Copy, Redo2, Trash2, Undo2, X } from 'lucide-react'
-import type { PendingChange, PendingOrigin } from './use-editor.ts'
+import type { PendingChange, PendingOrigin, WrittenChange } from './use-editor.ts'
 // What the editor has to say back, in the panel's lower half where live evidence
 // sits otherwise. Applying a change stays a deliberate step: the model is
 // authored TypeScript under review, not a store the editor writes.
@@ -15,7 +15,8 @@ export function ChangePane({
   onSelect,
   onUndo,
   pending,
-  source
+  source,
+  written
 }: {
   count: number
   canRedo: boolean
@@ -30,6 +31,8 @@ export function ChangePane({
   onUndo: () => void
   pending: readonly PendingChange[]
   source: string
+  /** Change lines the host has already taken into the authored document this session, most recent first. */
+  written: readonly WrittenChange[]
 }) {
   return (
     <section className="change-panel">
@@ -136,9 +139,24 @@ export function ChangePane({
             ))}
           </ul>
         </>
-      ) : (
+      ) : written.length === 0 ? (
         <p className="contract-empty">Drag a flow label to place it, or select a component to change its ports.</p>
-      )}
+      ) : null}
+      {/* Where a change goes when it stops being pending. A typed artefact operation is written into the document as
+          soon as it succeeds, so it leaves the list above the moment it works: without this, a Producer who watched
+          one appear and vanish has no account of it at all, and success reads exactly like a lost edit. */}
+      {written.length > 0 ? (
+        <>
+          <p className="contract-meta change-written-count">{written.length} written to the document</p>
+          <ul className="change-list change-written">
+            {written.map((line) => (
+              <li key={line.id}>
+                <code>{line.source}</code>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
     </section>
   )
 }

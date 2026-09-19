@@ -1001,6 +1001,24 @@ h2 {
   text-align: center;
 }
 
+/* What has already gone into the document, set back from what has not. It is a
+   record rather than a handle: nothing here can be selected, hovered onto the
+   Infoschematic or dropped, because it is no longer the editor's to take back. */
+.change-written-count {
+  border-top: 1px solid #ffffff14;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.change-written li {
+  grid-template-columns: minmax(0, 1fr);
+  padding: 2px 4px;
+}
+
+.change-written code {
+  color: #7892ad;
+}
+
 .change-panel pre {
   background: #08151f;
   border: 1px solid #ffffff14;

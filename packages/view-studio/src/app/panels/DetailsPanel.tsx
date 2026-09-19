@@ -34,7 +34,14 @@ import {
 import { SceneLibraryPanel } from '../editor/SceneLibraryPanel.tsx'
 import { SceneListPanel } from '../editor/SceneListPanel.tsx'
 import { ThemeCompositionPanel } from '../editor/ThemeCompositionPanel.tsx'
-import type { EditorMode, PendingChange, PendingOrigin, TextDraft, TextField } from '../editor/use-editor.ts'
+import type {
+  EditorMode,
+  PendingChange,
+  PendingOrigin,
+  TextDraft,
+  TextField,
+  WrittenChange
+} from '../editor/use-editor.ts'
 import type { SceneLibraryEditor } from '../editor/use-scene-library.ts'
 import type { SceneList } from '../editor/use-scene-list.ts'
 import type { ThemeComposition } from '../editor/use-theme-composition.ts'
@@ -116,6 +123,8 @@ export type DetailsPanelEditor = {
   setPortCount: (code: string, side: Side, count: number) => void
   source: string
   text: Readonly<Record<string, TextDraft>>
+  /** Change lines the host has already taken into the authored document this session. */
+  written: readonly WrittenChange[]
   /** Which kinds a Design session lets the Producer reach. */
   layers?: InteractionLayers
   toggleLayer: (kind: ArtefactKind) => void
@@ -337,6 +346,7 @@ export function DetailsPanel({
     setPortCount: (code: string, side: Side, count: number) => void
     source: string
     text: Readonly<Record<string, TextDraft>>
+    written: readonly WrittenChange[]
     layers?: InteractionLayers
     toggleLayer: (kind: ArtefactKind) => void
   }
@@ -786,6 +796,7 @@ export function DetailsPanel({
               onRedo={editor.redo}
               onUndo={editor.undo}
               source={layerSource}
+              written={presentation.mode === 'design' ? editor.written : []}
             />
           </SplitPane>
         </div>

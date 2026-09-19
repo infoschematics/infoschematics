@@ -33,6 +33,7 @@ Studio never writes authored source. Edits accumulate into one reviewable change
 - Repeated edits to the same property consolidate into one final change.
 - Changes can be discarded individually or together.
 - Related consequences travel together: removing a Card, Fabric, or Point names the dependent Flows that would lose an endpoint; removing a Region removes only itself.
+- A change the host has taken into the document leaves the pending set and is listed beneath it as written, so an empty set after a successful edit reads differently from an untouched session.
 
 Applying the change set is a deliberate handoff, readable in review as model fragments keyed by stable identity. How an approved change set reaches authored configuration — a commit, a pull request, an API — is the host's decision, not Studio's.
 
