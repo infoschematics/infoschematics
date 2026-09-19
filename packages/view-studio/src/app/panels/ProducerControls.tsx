@@ -29,7 +29,12 @@ export function ProducerControls({
     scene.flows.some((id) => validFlows.has(id)) ||
     scene.cues.some((cue) => validDynamics.has(cue.dynamic))
 
-  if (presentation.mode !== 'present') return null
+  /*
+   * Which scopes and which Flow families are drawn is a question about the Diagram, not about presenting it, so the
+   * bank that answers it stays wherever the Diagram is. Playback does belong to presenting: a Sequence or a Dynamic
+   * runs the view through states a Producer is in the middle of authoring, so those banks are withheld elsewhere.
+   */
+  const presenting = presentation.mode === 'present'
 
   return (
     <section aria-label="Infoschematic controls" className="producer-controls legend" ref={ref}>
@@ -74,7 +79,7 @@ export function ProducerControls({
         ))}
       </section>
 
-      {onPlayDynamic && config.diagram.dynamics.length ? (
+      {presenting && onPlayDynamic && config.diagram.dynamics.length ? (
         <section className="producer-bank" aria-label="Diagram Dynamics">
           <span className="producer-label">Dynamics</span>
           {config.diagram.dynamics.map((dynamic) => (
@@ -92,7 +97,7 @@ export function ProducerControls({
         </section>
       ) : null}
 
-      {sequences.length ? (
+      {presenting && sequences.length ? (
         <section className="producer-bank" aria-label="Sequences">
           <span className="producer-label">Sequences</span>
           {sequences.flatMap((sequence) => {

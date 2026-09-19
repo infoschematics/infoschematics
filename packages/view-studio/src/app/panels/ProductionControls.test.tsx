@@ -166,12 +166,15 @@ describe('production controls', () => {
     expect(direct).not.toContain('aria-label="Show overlays"')
   })
 
-  it('removes Present controls in Producer modes', () => {
+  it('keeps the visibility banks in a Producer mode', () => {
     const markup = renderToStaticMarkup(
       withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('design')} ref={null} />)
     )
 
-    expect(markup).toBe('')
+    /* What the Diagram draws is a Diagram question, so these stay. That playback leaves is asserted in
+       `App.browser.test.tsx`, against a document that has a Sequence to withhold - this fixture has none. */
+    expect(markup).toContain('aria-label="Architectural scopes"')
+    expect(markup).toContain('aria-label="Flow families"')
   })
 
   it('names architectural scopes and flow families without bulk vocabulary controls', () => {

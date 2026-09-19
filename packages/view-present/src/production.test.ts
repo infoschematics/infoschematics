@@ -71,7 +71,11 @@ describe('production mode', () => {
     expect(presenting.presentation.thematicSceneId).toBeNull()
   })
 
-  it('routes presentation actions only while Present is active', () => {
+  /*
+   * What the Diagram draws is asked in any mode; how it is presented is asked only while presenting. A Producer
+   * laying out a Diagram still wants to see one scope at a time, and still does not want a Scene running under them.
+   */
+  it('routes visibility actions in any mode and the rest only while Present is active', () => {
     const initial = createProductionState(presentation())
     const updated = reduceProduction(initial, {
       action: { type: 'toggle-scope', id: 'scope-two' },
@@ -83,9 +87,17 @@ describe('production mode', () => {
     })
 
     expect(updated.presentation.visibleScopes).toEqual(new Set(['scope-one', 'scope-two']))
+
+    const filtered = reduceProduction(designing, {
+      action: { type: 'toggle-scope', id: 'scope-one' },
+      type: 'presentation'
+    })
+    expect(filtered.mode).toBe('design')
+    expect(filtered.presentation.visibleScopes).toEqual(new Set(['scope-two']))
+
     expect(
       reduceProduction(designing, {
-        action: { type: 'toggle-scope', id: 'scope-one' },
+        action: { type: 'set-takeaways', value: true },
         type: 'presentation'
       })
     ).toBe(designing)

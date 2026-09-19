@@ -1197,6 +1197,40 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
   expect(window.localStorage.getItem('DOCK.panels.collapsed')).toBe('true')
 })
 
+/*
+ * Which scopes and which families are drawn is a Diagram question, and a Producer laying a Diagram out is exactly
+ * who wants to ask it. The whole bank used to leave with Present, so entering Design took the filters with it.
+ */
+test('the scope and family banks stay with the Diagram in Design, and playback leaves with Present', async () => {
+  window.localStorage.clear()
+  const studio = await hostDock()
+
+  studio.press('Design')
+  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(() => studio.reachable('.producer-controls [aria-label="Architectural scopes"] button')).toBe(true)
+  expect(studio.reachable('.producer-controls [aria-label="Flow families"] button')).toBe(true)
+  // Withheld, not merely hidden: a Sequence runs the view through states this Producer is in the middle of authoring.
+  expect(studio.container.querySelector('.producer-controls [aria-label="Sequences"]')).toBeNull()
+
+  // Live rather than merely drawn: the control answers a press here, which is what a filter left behind cannot do.
+  const scope = studio.container.querySelector<HTMLButtonElement>(
+    '.producer-controls [aria-label="Architectural scopes"] button'
+  )
+  if (!scope) throw new Error('Design has no Architectural scope control')
+  expect(scope.getAttribute('aria-pressed')).toBe('true')
+  scope.click()
+  await expect.poll(() => scope.getAttribute('aria-pressed')).toBe('false')
+  scope.click()
+  await expect.poll(() => scope.getAttribute('aria-pressed')).toBe('true')
+
+  // And the document does have a Sequence, so the absence above was a decision rather than an empty fixture.
+  studio.press('Present')
+  await expect.poll(studio.mode).toBe('present')
+  await expect
+    .poll(() => studio.container.querySelector('.producer-controls [aria-label="Sequences"] button'))
+    .not.toBeNull()
+})
+
 test('a mode change lands on that mode own panel rather than on whatever tab was last open', async () => {
   window.localStorage.clear()
   const studio = await hostDock()

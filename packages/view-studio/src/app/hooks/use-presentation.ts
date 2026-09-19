@@ -28,8 +28,6 @@ const presentationAction = (action: PresentationAction): ProductionAction => ({
 
 export function usePresentation() {
   const runtime = useInfoschematic()
-  const allFamilyIds = runtime.infoschematicFamilies.map((family) => family.id)
-  const allScopeIds = runtime.infoschematicScopes.map((scope) => scope.id)
   const storage = runtime.compatibilityConfig.id
 
   // Audience preferences persist. Production mode, focus and playback do not.
@@ -104,14 +102,22 @@ export function usePresentation() {
     })
   }
 
-  // Producer modes render complete authored content. Audience filters remain in
-  // presentation state and become visible again when Present resumes.
-  const producerMode = production.mode !== 'present'
-  const visibleFamilies = producerMode ? new Set(allFamilyIds) : production.presentation.visibleFamilies
-  const visibleScopes = producerMode ? new Set(allScopeIds) : production.presentation.visibleScopes
-  const visibleCards = producerMode ? runtime.infoschematicCards : derived.visibleCards
-  const visibleFabrics = producerMode ? runtime.infoschematicFabrics : derived.visibleFabrics
-  const visibleFlows = producerMode ? runtime.infoschematicFlows : derived.visibleFlows
+  /*
+   * Which scopes and which families are drawn holds in every mode.
+   *
+   * A Producer laying a Diagram out asks "what is on the surface" as often as a presenter does, and the bank that
+   * answers it sits beside the Diagram wherever the Diagram is. Producer modes used to substitute the complete
+   * authored content here, which is why the bank left with Present: a filter nothing honours is worse company for
+   * an editing surface than no filter at all.
+   *
+   * Scene focus is the part that is Present's own, and it is not in here: `derived` narrows by scope and family
+   * membership and nothing else, and entering a Producer mode clears the focus besides.
+   */
+  const visibleFamilies = production.presentation.visibleFamilies
+  const visibleScopes = production.presentation.visibleScopes
+  const visibleCards = derived.visibleCards
+  const visibleFabrics = derived.visibleFabrics
+  const visibleFlows = derived.visibleFlows
 
   return {
     annotated: production.presentation.annotated,

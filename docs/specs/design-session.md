@@ -48,15 +48,17 @@ _Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose transi
 
 _Evidence:_ `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Studio application.
 
-### DESIGN-005 — Producer modes use complete authored content
+### DESIGN-005 — Producer modes control what they draw
 
-Design and Direct MUST derive their working Canvas from complete authored content rather than the Audience's Scope and Flow-family filters. Design MUST keep every editable artefact and Flow reachable. Direct MUST preview the focus of its own draft target without mutating active presentation focus.
+Which [Architectural Scopes](../reference/vocabulary.md#scope) and which [Flow families](../reference/vocabulary.md#flow-family) are drawn is a question about the Diagram rather than about presenting it, so the bank that answers it MUST be offered in every Production mode and its state MUST carry across a mode change unchanged. A Producer mode MUST NOT filter its working Canvas by a control it withholds: a filter nothing on screen can change is worse company for an editing surface than no filter at all. Design MUST therefore keep every editable artefact and Flow reachable from the Design Canvas itself, by showing which Scopes and families are currently hidden and letting a [Producer](../reference/vocabulary.md#producer) restore them there.
+
+Playback is Present's own. A Producer mode MUST NOT run the view through [Scene](../reference/vocabulary.md#scene) focus, and MUST NOT offer [Sequence](../reference/vocabulary.md#sequence) or [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) playback, because those states belong to a presentation the Producer is in the middle of authoring. Direct MUST preview the focus of its own draft target without mutating active presentation focus.
 
 _Conformance:_ conforming
 
-_Verify:_ filter the Audience view so a Scope or a Flow family is hidden, then enter Design. Every hidden artefact and Flow MUST be reachable and editable on the Design Canvas; a Design Canvas that inherits the Audience filter fails the requirement. In Direct, draft a Scene focus and confirm the presented focus behind it does not move.
+_Verify:_ hide a Scope in the Audience view, then enter Design: the Scope bank MUST be present with that Scope reading as off, and turning it back on MUST return every artefact in it to the Design Canvas as editable. A Design Canvas that filters by a bank it does not offer fails the requirement, and so does one that silently draws everything while the bank still reads as off. In the same mode the Sequence and Dynamic banks MUST be absent. In Direct, draft a Scene focus and confirm the presented focus behind it does not move.
 
-_Evidence:_ active-mode composition in `packages/view-studio/src/app/App.tsx` and its Canvas derivation.
+_Evidence:_ `reduceProduction` in `packages/view-present/src/production.ts` admits visibility actions in any mode and holds the rest to Present; `packages/view-studio/src/app/hooks/use-presentation.ts` derives visible content from presentation state without substituting complete content for a Producer; `packages/view-studio/src/app/panels/ProducerControls.tsx` gates only the playback banks on Present; `packages/view-studio/src/app/App.browser.test.tsx` covers the banks operating in Design and the Sequence bank returning with Present.
 
 ### DESIGN-006 — Editing aids appear only while editing
 

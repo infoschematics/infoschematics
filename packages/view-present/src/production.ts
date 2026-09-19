@@ -98,6 +98,19 @@ const directTargetsEqual = (left: DirectTarget, right: DirectTarget) => {
   }
 }
 
+/**
+ * Which presentation actions are about what the Diagram draws rather than about presenting it.
+ *
+ * Scope and family visibility answer "what is on the surface", which a Producer laying a Diagram out asks as often
+ * as a presenter does. Everything else here moves through Scenes, Stories and Sequences, and running the view
+ * through those states while someone is authoring it would fight the work rather than serve it.
+ */
+const changesWhatIsDrawn = (action: PresentationAction): boolean =>
+  action.type === 'toggle-scope' ||
+  action.type === 'toggle-family' ||
+  action.type === 'show-all-scopes' ||
+  action.type === 'show-all-families'
+
 const setMode = (state: ProductionState, mode: ProductionMode): ProductionState => {
   if (state.mode === mode) return state
 
@@ -127,7 +140,7 @@ const setMode = (state: ProductionState, mode: ProductionMode): ProductionState 
 export const reduceProduction = (state: ProductionState, action: ProductionAction): ProductionState => {
   switch (action.type) {
     case 'presentation':
-      if (state.mode !== 'present') return state
+      if (state.mode !== 'present' && !changesWhatIsDrawn(action.action)) return state
       return {
         ...state,
         presentation: reducePresentation(state.presentation, action.action)
