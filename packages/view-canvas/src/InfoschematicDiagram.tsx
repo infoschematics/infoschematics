@@ -767,6 +767,45 @@ export function InfoschematicDiagram({
         : requestedVisualTreatment.card
   }
 
+  /*
+   * Each drawn Card's own internals, resolved once, with the identity chip asked
+   * for whether or not it was authored. Nothing else in the layout depends on
+   * that flag, so the extra answer costs nothing and tells the annotation layer
+   * where this Card's code belongs - which is the point: a code turned on by an
+   * author and a code turned on by a reader are the same code and had no reason
+   * to land in two different places. The Card itself still draws the chip only
+   * when its author asked for one.
+   */
+  const cardText = new Map(
+    placeables.flatMap((placeable) => {
+      const card = register.cardAt(placeable.code)
+      if (!card || card.wraps) return []
+      const authored = cardById.get(placeable.id)
+      return [
+        [
+          placeable.code,
+          resolveCardLayout({
+            box: placeable.box,
+            code: placeable.code,
+            compact: visualTreatment.card.compact,
+            description: card.detail,
+            detail: {
+              description: visualTreatment.card.description,
+              identity: true,
+              stereotype: visualTreatment.card.stereotype
+            },
+            label: card.label,
+            stereotype: authored?.stereotype
+          })
+        ] as const
+      ]
+    })
+  )
+  /* The codes already on the surface, which the annotation layer must not draw a second time. */
+  const selfCoded = new Set(
+    visualTreatment.card.identity ? [...cardText].flatMap(([code, text]) => (text.identity ? [code] : [])) : []
+  )
+
   useLayoutEffect(() => {
     const surface = diagramFrame.current?.parentElement
     if (!surface) return
@@ -2501,20 +2540,11 @@ export function InfoschematicDiagram({
               }
             // Card internals are placed and fitted from the Card's own box by View
             // Model, so the Canvas and the static SVG draw the same Card the same
-            // way, saying the same thing, at any shape.
-            const text = resolveCardLayout({
-              box: layout,
-              code: card.code,
-              compact: visualTreatment.card.compact,
-              description: card.name,
-              detail: {
-                description: visualTreatment.card.description,
-                identity: visualTreatment.card.identity,
-                stereotype: visualTreatment.card.stereotype
-              },
-              label: card.label,
-              stereotype: card.stereotype
-            })
+            // way, saying the same thing, at any shape. Resolved above so the
+            // annotation layer knows which Cards already carry their code.
+            const resolved = cardText.get(card.code)
+            if (!resolved) return null
+            const text = { ...resolved, identity: visualTreatment.card.identity ? resolved.identity : null }
             const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
 
             return (
@@ -2669,7 +2699,9 @@ export function InfoschematicDiagram({
              * they are not.
              */}
             {(annotated
-              ? placeables.filter((placeable) => !highlight || highlight.endpoints.has(placeable.id))
+              ? placeables.filter(
+                  (placeable) => !selfCoded.has(placeable.code) && (!highlight || highlight.endpoints.has(placeable.id))
+                )
               : []
             ).map((placeable) => {
               /*
@@ -2681,13 +2713,22 @@ export function InfoschematicDiagram({
               const layout = placeable.box
               // An adapter's top corners are beside the card it clasps, so its code
               // goes in the rim along the bottom where its name already is. On
-              // everything else the top right is clear and is where a reader looks.
+              // everything else the top right is clear and is where a reader looks
+              // - clear because an element already drawing its code is filtered out
+              // above rather than annotated on top of the chip it drew.
               const clasped = register.byCode(placeable.code)?.wraps
               const held = clasped ? infoschematicLayout[clasped as keyof typeof infoschematicLayout] : undefined
+              // A Card's own identity chip is the one place its code has ever been drawn
+              // deliberately, so a code a reader turns on takes that same slot rather than
+              // landing a few pixels off it. Everything without such a slot keeps the inset.
+              const slot = held ? null : cardText.get(placeable.code)?.identity
+              const badgeWidth = slot ? slot.width : annotationLabelWidth(placeable.code, 56)
+              const badgeX = slot ? layout.x + slot.x : layout.x + layout.width - badgeWidth - 4
               const badge = held
                 ? movedBox(held, placeable.code).y + held.height + (adapterFloor - 20) / 2
-                : layout.y + 5
-              const badgeWidth = annotationLabelWidth(placeable.code, 56)
+                : slot
+                  ? layout.y + slot.y
+                  : layout.y + 5
               return (
                 <g key={placeable.id}>
                   <rect
@@ -2695,14 +2736,10 @@ export function InfoschematicDiagram({
                     height="20"
                     rx="5"
                     width={badgeWidth}
-                    x={layout.x + layout.width - badgeWidth - 4}
+                    x={badgeX}
                     y={badge}
                   />
-                  <text
-                    className="audit-component-code"
-                    x={layout.x + layout.width - badgeWidth / 2 - 4}
-                    y={badge + 14}
-                  >
+                  <text className="audit-component-code" x={badgeX + badgeWidth / 2} y={badge + 14}>
                     {placeable.code}
                   </text>
                 </g>

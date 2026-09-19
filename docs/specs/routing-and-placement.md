@@ -192,6 +192,18 @@ _Verify:_ author a Point reached by Flows from the left, the right and above, re
 
 _Evidence:_ `resolvePointLabel` and `pointLabelSide` in `packages/view-model/src/point-layout.ts`; `scripts/visual-treatment-parity.test.ts` compares the drawn label's position and anchor across both renderers.
 
+### ROUTE-021 — A reader's tag takes the place the code is already drawn
+
+A viewer control that reveals element codes MUST draw an element's code where that element already draws it, and MUST NOT add a second copy of a code the element is already carrying. Where an element draws no code of its own the annotation MUST keep its own placement, so the control still reveals what was missing.
+
+A Card that resolves an identity chip is the case this exists for: the chip and the annotation are two renderings of one string, placed by two rules, and a reader switching the control on saw the code shift by a few pixels and double. The drawn position MUST come from the same Card resolution ROUTE-016 requires rather than from a second calculation, and an element whose chip is withheld — because its box is too small, or because the rendered scale reduced the treatment away — MUST be annotated as any uncoded element is.
+
+_Conformance:_ conforming
+
+_Verify:_ run `bun run --filter=@infoschematics/view-canvas test`, whose editing cases render one document with and without an authored `card.identity` and compare the annotated codes against the chips. Then open a Diagram that authors `card.identity`, zoom until the chips are drawn, and turn the tag control on and off: each Card MUST carry its code exactly once in both states and in the same place in both, while a Fabric that draws no code of its own MUST gain a tag. Falsified by a code appearing twice, by the code moving as the control is switched, or by an element that draws nothing losing its tag.
+
+_Evidence:_ `cardText` and `selfCoded` in `packages/view-canvas/src/InfoschematicDiagram.tsx` resolve each Card's own layout once and withhold the annotation for a code already drawn; `packages/view-canvas/src/InfoschematicDiagram.editing.test.tsx` covers the annotated codes with and without an authored chip and the position the tag takes.
+
 ## Quality properties
 
 ### ROUTE-018 — Region labels use deterministic shared metrics

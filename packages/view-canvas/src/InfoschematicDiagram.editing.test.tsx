@@ -135,6 +135,64 @@ describe('InfoschematicDiagram Design editing', () => {
     expect(markup).toContain(`width="${annotationLabelWidth(`${longCode}-FLOW`)}"`)
   })
 
+  it('puts a code a reader turns on where the authored chip would have drawn it', () => {
+    /* A code turned on by an author and a code turned on by a reader are the same code. They were placed by two
+       different rules - the chip 8px in from the right at y=8, the badge 4px in at y=5, on different widths - so
+       switching between them shifted the code by a few pixels for no reason a reader could see. */
+    const roomy = {
+      ...config,
+      infoschematic: {
+        ...config.infoschematic,
+        cards: config.infoschematic.cards.map((card) => ({
+          ...card,
+          placement: { ...card.placement, box: { ...card.placement.box, width: 220 } }
+        }))
+      }
+    }
+    const authoredChip = {
+      ...roomy,
+      infoschematic: { ...roomy.infoschematic, appearance: { card: { identity: true } } }
+    }
+
+    const chip =
+      /class="infoschematic-card-identity"[\s\S]*?<rect[^>]*width="([\d.]+)"[^>]*x="([\d.]+)" y="([\d.]+)"/.exec(
+        renderToStaticMarkup(<Canvas config={authoredChip} />)
+      )
+    const badge = /class="audit-component-code-bg"[^>]*width="([\d.]+)" x="([\d.]+)" y="([\d.]+)"/.exec(
+      renderToStaticMarkup(<Canvas annotated config={roomy} />)
+    )
+
+    expect(chip).not.toBeNull()
+    expect(badge).not.toBeNull()
+    // The chip is drawn inside the Card's own translated group; the badge is drawn in absolute diagram space.
+    const card = roomy.infoschematic.cards[0].placement.box
+    expect(Number(badge?.[1])).toBe(Number(chip?.[1]))
+    expect(Number(badge?.[2])).toBe(card.x + Number(chip?.[2]))
+    expect(Number(badge?.[3])).toBe(card.y + Number(chip?.[3]))
+  })
+
+  it('leaves a code alone when the element it names already draws it', () => {
+    /* The audit badge and the Card identity chip are two independent renderings of the same string. With
+       identity authored they landed within a few pixels of each other, so a reader who turned tags on saw the
+       code twice with the lower chip peeking out behind the badge. */
+    const auditedCodes = (markup: string) =>
+      [...markup.matchAll(/class="audit-component-code"[^>]*>([^<]+)</g)].map(([, code]) => code)
+
+    const carrying = {
+      ...config,
+      infoschematic: { ...config.infoschematic, appearance: { card: { identity: true } } }
+    }
+    const withIdentity = renderToStaticMarkup(<Canvas annotated config={carrying} />)
+    const withoutIdentity = renderToStaticMarkup(<Canvas annotated config={config} />)
+
+    expect(withIdentity).toContain('class="infoschematic-card-identity"')
+    // Both Cards draw their own code, so the annotation layer leaves them. The Fabric draws none and still gets one.
+    expect(auditedCodes(withIdentity)).toEqual(['SYS-001'])
+    // Without the authored chip there is nothing to duplicate and every element is annotated as before.
+    expect(withoutIdentity).not.toContain('class="infoschematic-card-identity"')
+    expect(auditedCodes(withoutIdentity).toSorted()).toEqual(['SYS-001', 'SYS-002', 'SYS-003'])
+  })
+
   it('renders every artefact kind as a labelled keyboard-selectable SVG target', () => {
     const markup = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
 

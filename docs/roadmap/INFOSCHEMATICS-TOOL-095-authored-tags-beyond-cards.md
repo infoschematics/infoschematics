@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-19T12:14:00Z
-updated_at: 2026-09-19T12:14:00Z
+updated_at: 2026-09-19T12:42:00Z
 ---
 
 # Authored tags beyond Cards
@@ -20,7 +20,7 @@ Let an author say that any element carries its code permanently, not only a Card
 
 ## Context
 
-Raised by the same user-acceptance pass on 2026-09-19 that produced `INFOSCHEMATICS-TOOL-094`, as the forward-looking half of one report: _"any component can have label or tag turned on all the time… and obviously if there's already one, we don't need to add another one either."_ The second clause is the defect and is `094`. This is the first clause.
+Raised by the same user-acceptance pass on 2026-09-19 that produced `INFOSCHEMATICS-TOOL-094`, as the forward-looking half of one report: _"any component can have label or tag turned on all the time… and obviously if it already has one, we don't need to add another one either."_ The second clause is the defect and is `094`, which has landed: a reader's tag now takes the place the element already draws its code, and is withheld where the element already carries it. This item is the first clause.
 
 Today a permanent code is a Card-only privilege. `appearance.card.identity` is a `CardDetailDefaults` field, resolved by `resolveVisualTreatment` into `ResolvedCardTreatment` and placed by `card-layout.ts` into a Card's top band. An Adapter, a Fabric, a Point and a Region have no equivalent: the only way to see their codes is the viewer's Show tags toggle, which is transient and belongs to the reader rather than the author.
 
@@ -30,7 +30,7 @@ This is a feature with a design question in it, which is why it is separate from
 
 ## Boundary
 
-This is about who can author a permanent code and whether the outlets agree. It does not change the Show tags toggle's behaviour, the deduplication rule, or the per-kind placement — those are `INFOSCHEMATICS-TOOL-094` and this item consumes their result. It does not introduce free-text labels distinct from codes, per-element overrides of what a code says, or a second annotation vocabulary.
+This is about who can author a permanent code and whether the outlets agree. It does not change the Show tags toggle's behaviour or the rule ROUTE-021 states about where a revealed code is drawn — that is `INFOSCHEMATICS-TOOL-094` and this item consumes its result. It does not introduce free-text labels distinct from codes, per-element overrides of what a code says, or a second annotation vocabulary.
 
 ## Shaping
 
@@ -40,7 +40,7 @@ Two decisions come first, and they are the reason this is `draft`.
 
 **What `annotations` means in `render-svg`.** Either it widens to mean every visible element's code, matching the live view, and the option's documentation and every existing caller change meaning under them; or it stays Flows-only and a second, separate concept carries authored permanent codes into the static output. The first makes the outlets agree at the cost of changing an existing option's behaviour; the second keeps the option honest at the cost of two concepts that look alike. The visual-treatment-parity check will need to hold whichever is chosen, and that check is the reason this cannot be settled in one renderer alone.
 
-Known dependency: none in build order. `INFOSCHEMATICS-TOOL-094` introduces a per-placeable resolution of "is this element already drawing its code", which this item would extend rather than invent; taking `094` first is a sequencing preference worth honouring.
+Known dependency: none in build order. `INFOSCHEMATICS-TOOL-094` has landed a per-placeable resolution of "is this element already drawing its code" — `cardText` and `selfCoded` in `InfoschematicDiagram.tsx` — which this item extends to kinds other than a Card rather than invents. ROUTE-021 states the rule that resolution serves, so the shape of "an element draws its own code" is already written down and does not need deciding here.
 
 Promotion condition: both decisions above answered. They do not share an implementation, and the schema one in particular changes how much of `domain-core`, `view-model` and both renderers this touches.
 
