@@ -21,7 +21,6 @@ import {
   type ResizeMinimum
 } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
-import type { Guide } from '@infoschematics/view-model/guides'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
@@ -265,7 +264,6 @@ export function InfoschematicDiagram({
   artefactOperations = [],
   componentOffsets,
   removals = {},
-  guides,
   highlight,
   labelAlong,
   onAddWaypoint,
@@ -321,7 +319,6 @@ export function InfoschematicDiagram({
   removals?: Record<string, unknown>
   /** Component positions dragged in the editor but not yet written into the model. */
   componentOffsets?: LabelOffsets
-  guides?: readonly Guide[]
   highlight?: Highlight
   labelAlong?: ReadonlyMap<string, number>
   /** Click on a selected flow's line, away from any waypoint, to insert one there. */
@@ -2861,20 +2858,6 @@ export function InfoschematicDiagram({
                 </g>
               )
             })}
-          </g>
-        ) : null}
-
-        {guides?.length ? (
-          <g className="infoschematic-guides">
-            {guides.map((guide) => (
-              <line
-                key={`${guide.axis}-${guide.at}-${guide.from}`}
-                x1={guide.axis === 'x' ? guide.at : infoschematicViewBox.x}
-                x2={guide.axis === 'x' ? guide.at : infoschematicViewBox.x + infoschematicViewBox.width}
-                y1={guide.axis === 'y' ? guide.at : infoschematicViewBox.y}
-                y2={guide.axis === 'y' ? guide.at : infoschematicViewBox.y + infoschematicViewBox.height}
-              />
-            ))}
           </g>
         ) : null}
 

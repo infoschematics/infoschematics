@@ -5,7 +5,6 @@ import type { GraphicConfig } from '@infoschematics/domain-model/graphic'
 import type { PointConfig } from '@infoschematics/domain-model/point'
 import type { RegionConfig } from '@infoschematics/domain-model/region'
 import type { Box, Offset, Point } from './geometry.ts'
-import type { Guide } from './guides.ts'
 import type { PortCounts } from './ports.ts'
 
 // What a diagram must provide to become editable. Nothing here knows what the
@@ -612,8 +611,6 @@ export type EditableDiagram = {
   /** Resolves a legacy Canvas key once, before downstream structured editing. */
   selectionFor: (key: string) => EditableArtefact | undefined
   handles: () => readonly Handle[]
-  /** What this diagram offers to align against while a handle is being dragged. */
-  guidesFor: (key: string) => readonly Guide[]
   /**
    * What dropping a handle at a point means, or undefined where the diagram
    * forbids the move. A diagram enforces its own constraints here rather than
@@ -628,8 +625,8 @@ export type EditableDiagram = {
   /**
    * Where on a route a loose point falls, and which way that run travels. A
    * label lives on its line, so a drag is pulled onto the line before it is
-   * snapped - snapping in free space and projecting afterwards lands it
-   * somewhere neither the grid nor the line agreed with.
+   * rounded - rounding in free space and projecting afterwards lands it
+   * somewhere the line does not agree with.
    */
   onRoute: (key: string, point: Point) => { at: Point; vertical: boolean } | undefined
   /**

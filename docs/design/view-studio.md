@@ -51,7 +51,7 @@ Reordering changes authored array order only within the selected kind. The opera
 
 Design uses one presentation grid for Cards, Flow waypoints, ports and labels. A finer rule and a stronger major rule make alignment readable by eye without competing with the Infoschematic.
 
-The grid fills the Canvas coordinate system exactly and sits above geographic fills but below the artefacts it helps align. Alignment guides remain separate: the grid establishes rhythm, while guides align the edited item with a particular edge, centre, boundary or label.
+The grid fills the Canvas coordinate system exactly and sits above geographic fills but below the artefacts it helps align. It is the only alignment aid: a placement rounds to the grid, so every artefact shares one rhythm rather than each one being drawn towards whatever happens to be beside it.
 
 The Canvas has an explicit boundary distinct from any Region. Moving an artefact towards that edge should make the available extent clear.
 

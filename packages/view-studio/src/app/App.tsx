@@ -1084,7 +1084,6 @@ function AppContent({
                 componentOffsets={movedComponents}
                 removals={pendingRemovals}
                 highlight={diagramHighlight}
-                guides={editor.guides}
                 labelAlong={editor.labelPositions}
                 onAddWaypoint={editor.editing ? editor.addWaypoint : undefined}
                 onAttach={editor.editing ? editor.attachTo : undefined}
@@ -1103,13 +1102,13 @@ function AppContent({
                 onCreateLine={editor.editing ? proposeLine : undefined}
                 onFreeEnd={editor.editing ? editor.moveFreeEnd : undefined}
                 onComponentMove={editor.editing ? editor.moveTo : undefined}
-                onComponentRelease={editor.releaseGuides}
+                onComponentRelease={editor.releaseDrag}
                 onDeleteWaypoint={editor.editing ? editor.deleteWaypoint : undefined}
                 onLabelMove={editor.editing ? editor.moveTo : undefined}
-                onLabelRelease={editor.releaseGuides}
+                onLabelRelease={editor.releaseDrag}
                 onMoveSegment={editor.editing ? editor.moveSegment : undefined}
                 onMoveWaypoint={editor.editing ? editor.moveWaypoint : undefined}
-                onRouteRelease={editor.releaseGuides}
+                onRouteRelease={editor.releaseDrag}
                 onHover={editor.hover}
                 hovered={editor.hovered}
                 onSelect={editor.select}
@@ -1123,7 +1122,7 @@ function AppContent({
                 onArtefactRange={
                   editor.editing ? (selections) => editorRef.current.addToSelection(selections) : undefined
                 }
-                onArtefactRelease={() => editorRef.current.releaseGuides()}
+                onArtefactRelease={() => editorRef.current.releaseDrag()}
                 onArtefactRemove={
                   editor.editing
                     ? (selection) => {

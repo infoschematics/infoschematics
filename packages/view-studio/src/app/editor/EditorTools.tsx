@@ -19,7 +19,7 @@ import {
   Eraser,
   Frame,
   Grid3x3,
-  Magnet,
+  type Magnet,
   Network,
   RectangleHorizontal,
   Shapes,
@@ -29,11 +29,7 @@ import {
   Workflow
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import type { EditorMode, EditorView } from './use-editor.ts'
-
-const toggles: [keyof EditorView, string, string, typeof Magnet][] = [
-  ['snapping', 'Snap to guides', 'Pull a drop onto the nearest edge, centre, or label', Magnet]
-]
+import type { EditorMode } from './use-editor.ts'
 
 /*
  * One control per kind the Design session can reach, in the order the diagram stacks them.
@@ -139,9 +135,7 @@ export function EditorTools({
   onResetRoute,
   mode,
   layers,
-  onToggle,
-  onToggleLayer,
-  view
+  onToggleLayer
 }: {
   /** A flow is selected, so its route can be worked on. */
   canRoute?: boolean
@@ -158,9 +152,7 @@ export function EditorTools({
   onResetRoute?: () => void
   /** Which kinds answer interaction. Absent leaves every kind interactive, which is how a session opens. */
   layers?: InteractionLayers
-  onToggle: (key: keyof EditorView) => void
   onToggleLayer?: (kind: ArtefactKind) => void
-  view: EditorView
   /** Which editor is open. The tab decides it; this only reads it. */
   mode?: EditorMode
 }) {
@@ -219,20 +211,6 @@ export function EditorTools({
           <span className="tool-divider" />
         </>
       ) : null}
-
-      {toggles.map(([key, label, hint, Icon]) => (
-        <button
-          aria-label={label}
-          aria-pressed={view[key]}
-          className="tool-button"
-          key={key}
-          onClick={() => onToggle(key)}
-          title={`${label} — ${hint}`}
-          type="button"
-        >
-          <Icon aria-hidden="true" size={15} />
-        </button>
-      ))}
 
       {mode === 'design' ? (
         <>

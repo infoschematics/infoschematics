@@ -34,7 +34,6 @@ import {
   toggleInteractionLayer
 } from '@infoschematics/view-model/editable'
 import type { Box, Offset, Point } from '@infoschematics/view-model/geometry'
-import { type Guide, snapBoxToGuides, snapToGuides } from '@infoschematics/view-model/guides'
 import type { Side } from '@infoschematics/view-model/ports'
 import { moveRouteEnd, normaliseRoute } from '@infoschematics/view-model/routing'
 import * as waypoints from '@infoschematics/view-model/waypoints'
@@ -73,7 +72,6 @@ export type { Attachment, CardCreation, Creation, TextDraft, TextField } from '.
 
 // Editing state is held apart from the Infoschematic and its host. Drafts
 // persist because they represent unsaved work; the active editor does not.
-export type EditorView = { snapping: boolean }
 
 /**
  * Which editor is open.
@@ -87,9 +85,6 @@ export type EditorView = { snapping: boolean }
  * absent. `null` is none of them, which is what a visitor sees.
  */
 export type EditorMode = 'scenes' | 'design' | 'stories' | null
-
-const openView: EditorView = { snapping: true }
-const closedView: EditorView = { snapping: false }
 
 const toGrid = (point: Point, gridSize: number): Point => ({
   x: Math.round(point.x / gridSize) * gridSize,
@@ -300,7 +295,6 @@ export function useEditor(
    */
   const [mode, setMode] = useState<EditorMode>(null)
   const editing = mode !== null
-  const [view, setView] = useState<EditorView>(closedView)
   /*
    * Which kinds answer interaction, for this session only.
    *
@@ -309,7 +303,6 @@ export function useEditor(
    * filter carried silently into the next sitting is indistinguishable from an element that has stopped working.
    */
   const [layers, setLayers] = useState<InteractionLayers>(everyInteractionLayer)
-  const [guides, setGuides] = useState<readonly Guide[]>([])
   // What a nudge acts on. Set by dragging, because the last thing touched is
   // what a presenter means by "this one" - there is no separate selection to make.
   const [selected, setSelected] = useState<string | null>(null)
@@ -883,36 +876,23 @@ export function useEditor(
     return { geometry, target }
   }
 
-  // Snapping works on the box, not the pointer: the pointer sits somewhere
-  // inside the box, so pulling it onto the grid or a guide would leave the
-  // box's own edges off both. `exact` is for keyboard steps, where a unit is a
-  // unit and neither the grid nor a guide may pull the move somewhere else.
+  // The grid rounds the box, not the pointer: the pointer sits somewhere inside
+  // the box, so rounding it would leave the box's own edges off the grid.
+  // `exact` is for keyboard steps, where a unit is a unit and the grid may not
+  // pull the move somewhere else.
   const moveSelectedArtefact = (point: Point, exact = false) => {
     if (!selectedArtefactDetails?.capabilities.move) return
     const movement = movementFor(selectedArtefactDetails)
     if (!movement) return
     const { geometry, target } = movement
     /*
-     * Where the wanted position actually lands, once the grid and the guides have had their say. It is shared
-     * between the roles because a Point must snap to exactly the lines everything else snaps to: a Point is an
-     * anchor for Flows, and one that came to rest half a unit off the grid would take its Flows off it too.
+     * Where the wanted position actually lands, once the grid has had its say. It is shared between the roles
+     * because a Point must land on exactly the lines everything else lands on: a Point is an anchor for Flows, and
+     * one that came to rest half a unit off the grid would take its Flows off it too.
      */
     const place = (wanted: Box) => {
-      const placed = (() => {
-        if (exact) return { box: wanted, guides: [] as readonly Guide[] }
-        if (view.snapping)
-          return snapBoxToGuides(
-            wanted,
-            diagram.guidesFor(selectionKey(target)),
-            gridSize > 0 ? { grid: gridSize } : {}
-          )
-        return {
-          box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted,
-          guides: [] as readonly Guide[]
-        }
-      })()
-      setGuides(placed.guides)
-      return placed.box
+      if (exact || gridSize <= 0) return wanted
+      return { ...wanted, ...toGrid(wanted, gridSize) }
     }
     const offset = (() => {
       switch (geometry.role) {
@@ -927,7 +907,7 @@ export function useEditor(
         /*
          * A Point has no extent to centre the pointer inside, so the wanted coordinate is the pointer itself,
          * measured as the zero-extent box `ADR-INFOSCHEMATICS-031` licenses. Every edge of that box is the
-         * Point's own coordinate, so a guide that catches an edge and one that catches the centre agree.
+         * Point's own coordinate, so rounding the box is rounding the Point.
          */
         case 'point': {
           const placed = place({ height: 0, width: 0, x: point.x, y: point.y })
@@ -966,8 +946,8 @@ export function useEditor(
    * are recorded inside a single checkpoint, which is what lets a Producer try an alignment and take it back with one
    * step instead of one per element.
    *
-   * Neither the grid nor the snapping guides apply. The Producer has asked for one exact relationship between these
-   * elements, and rounding each result independently is how you get a group that is nearly aligned.
+   * The grid does not apply. The Producer has asked for one exact relationship between these elements, and rounding
+   * each result independently is how you get a group that is nearly aligned.
    */
   const recordGroupMove = (
     movements: readonly ReturnType<typeof groupMovements>[number][],
@@ -994,8 +974,7 @@ export function useEditor(
    * moved by most of it. A keyboard step is discrete, so it takes its own boxes and gives them back immediately.
    *
    * The grid rounds the anchor and the rest are carried by that same result, which is what keeps the group's own
-   * relative geometry exactly as the Producer arranged it. Snapping guides are left out for the reason alignment
-   * leaves them out: they pull one element's edges onto another element's, which is the group's shape changing.
+   * relative geometry exactly as the Producer arranged it.
    */
   const groupDrag = useRef<readonly ReturnType<typeof groupMovements>[number][] | null>(null)
 
@@ -1191,27 +1170,20 @@ export function useEditor(
       restore(emptyEditorDraft())
     },
     editing,
-    guides,
-    // A drop is pulled onto the nearest guide first, then described. The diagram
-    // decides what it means, so a move it forbids records nothing.
+    // A drop lands on the grid, then is described. The diagram decides what it
+    // means, so a move it forbids records nothing.
     moveTo: (key: string, point: Point) => {
       /*
        * A label travels along its line and nowhere else, so it is pulled onto
-       * the line first and only then snapped - and only on the axis the run it
-       * landed on actually travels. Snapping the loose pointer to the grid and
-       * to the guides before projecting moved the label somewhere neither the
-       * grid nor the line agreed with, which is what made a drop feel like it
-       * slid off on its own.
+       * the line first and only then rounded - and only on the axis the run it
+       * landed on actually travels. Rounding the loose pointer before
+       * projecting moved the label somewhere the line did not agree with,
+       * which is what made a drop feel like it slid off on its own.
        */
       const onLine = diagram.onRoute(key, point)
       if (onLine) {
         const axis = onLine.vertical ? 'y' : 'x'
-        let at = gridSize > 0 ? { ...onLine.at, [axis]: toGrid(onLine.at, gridSize)[axis] } : onLine.at
-        if (view.snapping) {
-          const pulled = snapToGuides(at, diagram.guidesFor(key))
-          setGuides(pulled.guides)
-          at = { ...at, [axis]: pulled.point[axis] }
-        } else setGuides([])
+        const at = gridSize > 0 ? { ...onLine.at, [axis]: toGrid(onLine.at, gridSize)[axis] } : onLine.at
 
         const along = diagram.alongFor(key, at)
         if (along !== undefined) {
@@ -1224,24 +1196,16 @@ export function useEditor(
         return
       }
 
-      // The pointer is the wanted centre, but what has to land on the grid and
-      // the guides is the box - so the box is placed first and the centre of
-      // wherever it settled is what the offset is worked out from.
+      // The pointer is the wanted centre, but what has to land on the grid is
+      // the box - so the box is placed first and the centre of wherever it
+      // settled is what the offset is worked out from.
       const placement = diagram.placementFor(key)
       const box = placement?.kind === 'box' ? placement.box : undefined
       const centre = (() => {
-        if (!box) {
-          const wanted = gridSize > 0 ? toGrid(point, gridSize) : point
-          const snapped = view.snapping ? snapToGuides(wanted, diagram.guidesFor(key)) : { guides: [], point: wanted }
-          setGuides(snapped.guides)
-          return snapped.point
-        }
+        if (!box) return gridSize > 0 ? toGrid(point, gridSize) : point
         const wanted = { ...box, x: point.x - box.width / 2, y: point.y - box.height / 2 }
-        const snapped = view.snapping
-          ? snapBoxToGuides(wanted, diagram.guidesFor(key), gridSize > 0 ? { grid: gridSize } : {})
-          : { box: gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted, guides: [] }
-        setGuides(snapped.guides)
-        return { x: snapped.box.x + box.width / 2, y: snapped.box.y + box.height / 2 }
+        const placed = gridSize > 0 ? { ...wanted, ...toGrid(wanted, gridSize) } : wanted
+        return { x: placed.x + box.width / 2, y: placed.y + box.height / 2 }
       })()
       const offset = diagram.offsetFor(key, centre)
       if (offset) {
@@ -1254,7 +1218,7 @@ export function useEditor(
     },
     moveArtefact: moveSelectedArtefact,
     // Nudging works on the offset directly rather than through a point, so it is
-    // exact: a unit is a unit, with no guide pulling it somewhere near instead.
+    // exact: a unit is a unit, with nothing pulling it somewhere near instead.
     nudge: (dx: number, dy: number) => {
       if (!selected) return
       const at = drafts[selected] ?? diagram.describe(selected, { dx: 0, dy: 0 })?.offset
@@ -1396,7 +1360,7 @@ export function useEditor(
       closeGesture()
       setRoutes((current) => ({ ...current, [code]: points }))
     },
-    // A drag, like moveTo: checkpointed on every move, closed by releaseGuides
+    // A drag, like moveTo: checkpointed on every move, closed by releaseDrag
     // once the pointer lifts rather than here.
     moveWaypoint: (code: string, points: readonly Point[], index: number, to: Point) => {
       const wanted = gridSize > 0 ? toGrid(to, gridSize) : to
@@ -1597,10 +1561,9 @@ export function useEditor(
       })
     },
     removals,
-    releaseGuides: () => {
+    releaseDrag: () => {
       closeGesture()
       groupDrag.current = null
-      setGuides([])
     },
     undo: () => {
       const previous = past.at(-1)
@@ -1674,12 +1637,11 @@ export function useEditor(
     // Editing is a panel tab, so it is set rather than toggled: the tab is the
     // single place the mode is chosen from.
     setEditing: (next: boolean) => {
-      // Entering and leaving decide the view; staying does not. The panel sets
-      // this from an effect that re-runs on every render, so resetting the view
-      // unconditionally undid a grid turned off before it could be seen.
+      // Entering and leaving reset the interaction layers; staying does not. The
+      // panel sets this from an effect that re-runs on every render, so resetting
+      // unconditionally undid a layer closed before it could be seen.
       if (next === editing) return
       setMode(next ? 'design' : null)
-      setView(next ? openView : closedView)
       setLayers(everyInteractionLayer())
       if (!next) {
         selectKey(null)
@@ -1695,7 +1657,6 @@ export function useEditor(
       if (next === mode) return
       closeGesture()
       setMode(next)
-      setView(next === 'design' ? openView : closedView)
       setLayers(everyInteractionLayer())
       selectKey(null)
     },
@@ -1707,8 +1668,6 @@ export function useEditor(
      * Read from the set rather than the argument, so two controls pressed inside one tick both take effect instead
      * of the later one deciding on a set that predates the earlier.
      */
-    toggleLayer: (kind: ArtefactKind) => setLayers((current) => toggleInteractionLayer(current, kind)),
-    toggleView: (key: keyof EditorView) => setView((current) => ({ ...current, [key]: !current[key] })),
-    view
+    toggleLayer: (kind: ArtefactKind) => setLayers((current) => toggleInteractionLayer(current, kind))
   }
 }

@@ -133,9 +133,7 @@ const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor
   source: '',
   text: {},
   toggleLayer: vi.fn(),
-  toggleView: vi.fn(),
   undo: vi.fn(),
-  view: { snapping: true },
   ...overrides
 })
 

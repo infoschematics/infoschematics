@@ -71,7 +71,7 @@ describe('App', () => {
     expect(source).toContain('editorRef.current.selectArtefact(selection)')
     expect(source).toContain('editorRef.current.moveArtefact(point)')
     expect(source).toContain('editorRef.current.resizeArtefact(size)')
-    expect(source).toContain('editorRef.current.releaseGuides()')
+    expect(source).toContain('editorRef.current.releaseDrag()')
     expect(source).toContain('sameArtefact(current.selectedArtefact, selection)')
     expect(source).toContain('current.removeArtefact()')
     expect(source).toContain('current.reorderArtefact(direction)')

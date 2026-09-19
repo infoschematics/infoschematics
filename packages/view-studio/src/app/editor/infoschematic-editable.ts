@@ -16,7 +16,6 @@ import {
 } from '@infoschematics/view-model/editable'
 import type { Box } from '@infoschematics/view-model/geometry'
 import { alongRoute, type Offset, type Point, projectOntoRoute, routeLength } from '@infoschematics/view-model/geometry'
-import { guidesFrom } from '@infoschematics/view-model/guides'
 import { type PortCounts, type PortId, portsForBox } from '@infoschematics/view-model/ports'
 import type { RuntimeFabric } from '@infoschematics/view-model/runtime'
 
@@ -135,8 +134,8 @@ export const infoschematicEditable = (
   const byCode = new Map<string, InfoschematicFlow>(flows.map((flow) => [flow.code, flow]))
 
   // A dragged component reports where the drag has put it, not where the model
-  // still says it is - so the panel, the guides and the handles all agree with
-  // what is on screen mid-drag.
+  // still says it is - so the panel and the handles agree with what is on
+  // screen mid-drag.
   const boxFor = (code: string, box: Box): Box => {
     const offset = drafts.get(code)
     return offset ? { ...box, x: box.x + offset.dx, y: box.y + offset.dy } : box
@@ -145,14 +144,6 @@ export const infoschematicEditable = (
   const usedPorts = new Set(
     flows.flatMap((flow) => [`${flow.source}:${flow.sourcePort}`, `${flow.target}:${flow.targetPort}`])
   )
-
-  // Geometry from the placeables and kind from the register, which is the whole
-  // point of the pair: this used to read the box out of the layout table by an
-  // id it got from the service list, making three sources agree by hand.
-  // Fabrics are left out because a guide is something a card aligns to.
-  const cards = placeables(visibleScopes)
-    .filter((placeable) => register.cardAt(placeable.code))
-    .map((placeable) => boxFor(placeable.code, placeable.box))
 
   const cardSelection = (card: { code: string; id: string }) =>
     defineArtefactSelection({
@@ -311,30 +302,6 @@ export const infoschematicEditable = (
 
   return {
     selectionFor,
-    // A label aligns to the cards and to every label but itself, which is what
-    // makes rows and columns of codes line up rather than nearly line up.
-    // A label can only travel along the run it sits on, so only guides on that
-    // axis can do anything - offering the other kind would show a line the drop
-    // could never reach. A component travels both ways and gets both.
-    guidesFor: (key: string) => {
-      const flow = byCode.get(key)
-      const at = flow && positions.get(flow.id)
-      const along = flow && at ? projectOntoRoute(flow.d, at).vertical : undefined
-      const all = guidesFrom(
-        // A component does not align against itself; its own edges would pin it
-        // where it already is.
-        flow ? cards : cards.filter((card) => card !== boxFor(key, card)),
-        flows.flatMap((other) => {
-          const at = positions.get(other.id)
-          return at && other.code !== key ? [at] : []
-        })
-      )
-
-      // Along a horizontal run only x can move, and the reverse on a vertical
-      // one, so the guides that could never be reached are dropped.
-      if (along === undefined) return all
-      return all.filter((guide) => guide.axis === (along ? 'y' : 'x'))
-    },
 
     handles: (): readonly Handle[] => [
       ...flows.flatMap((flow) => {
@@ -382,11 +349,11 @@ export const infoschematicEditable = (
      * Reported to four places, which is what it takes for the share to give
      * back the point it was measured from.
      *
-     * Two places sounded tidy and quietly undid the snapping: a hundredth of
+     * Two places sounded tidy and quietly undid the rounding: a hundredth of
      * the longest line here is nine units, so a label pulled exactly onto a
-     * grid line or a guide was stored as the nearest hundredth and drawn up to
-     * four and a half units away from it. Four places puts that under a tenth
-     * of a unit, which no one can see and nothing has to work around.
+     * grid line was stored as the nearest hundredth and drawn up to four and a
+     * half units away from it. Four places puts that under a tenth of a unit,
+     * which no one can see and nothing has to work around.
      */
     alongFor: (key: string, point: Point): number | undefined => {
       const flow = byCode.get(key)

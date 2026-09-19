@@ -846,14 +846,8 @@
   cursor: grabbing;
 }
 
-/* Shown only while a handle is being dragged, and only for the guides it
-   actually snapped to, so the Infoschematic never fills with lines that mean nothing. */
-.infoschematic-guides line {
-  stroke: var(--infoschematic-canvas-selection-pointed);
-  stroke-dasharray: 6 6;
-  stroke-width: 1;
-}
-
+/* Shown only while a handle is being dragged, so the Infoschematic never fills
+   with outlines that mean nothing. */
 .infoschematic-svg.editing .audit-flow.editable rect {
   stroke: #79c9ff88;
   stroke-width: 1px;

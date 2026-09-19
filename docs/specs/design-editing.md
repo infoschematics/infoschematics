@@ -6,21 +6,21 @@ Geometry, route, attachment, creation, removal, appearance, and complete preview
 
 ### EDIT-001 — A diagram supplies its editing rules
 
-Studio MUST ask the current diagram for handles, guides, placement constraints, authored values and descriptions of changes. It MUST NOT infer domain-specific movement rules from rendered React elements.
+Studio MUST ask the current diagram for handles, placement constraints, authored values and descriptions of changes. It MUST NOT infer domain-specific movement rules from rendered React elements.
 
 _Conformance:_ conforming
 
-_Verify:_ in Design, read where a handle, a guide and a placement constraint come from: each MUST arrive from the diagram's own editing description. Give one artefact kind a movement rule Studio infers from the rendered React element instead, and the rule survives a change to the diagram that should have withdrawn it — which is the failure this requirement forbids.
+_Verify:_ in Design, read where a handle and a placement constraint come from: each MUST arrive from the diagram's own editing description. Give one artefact kind a movement rule Studio infers from the rendered React element instead, and the rule survives a change to the diagram that should have withdrawn it — which is the failure this requirement forbids.
 
 _Evidence:_ `EditableDiagram` in `packages/view-model/src/editable.ts` and its use by `packages/view-studio/src/app/editor/use-editor.ts`.
 
 ### EDIT-002 — Keyboard nudging is exact
 
-Keyboard nudging MUST move the current movable selection by the exact requested increment rather than passing the result through guide snapping. A larger modified increment MAY be offered.
+Keyboard nudging MUST move the current movable selection by the exact requested increment rather than rounding the result to the authored grid. A larger modified increment MAY be offered.
 
 _Conformance:_ conforming
 
-_Verify:_ select a movable artefact, note its coordinate, and nudge it once by key. The coordinate MUST change by exactly the requested increment, with no guide snapping applied on top; a nudge that lands on a guide instead of the increment fails the requirement.
+_Verify:_ select a movable artefact, note its coordinate, and nudge it once by key. The coordinate MUST change by exactly the requested increment, with no grid rounding applied on top; a nudge that lands on a grid line instead of the increment fails the requirement.
 
 _Evidence:_ `nudge` in `packages/view-studio/src/app/editor/use-editor.ts`.
 
@@ -40,9 +40,9 @@ Studio MUST allow each side's port count to be edited independently. Changing on
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases layer a side-specific port count over the counts in force. Then change one side's count in Design and read the other three: a count edit that rewrites an untouched side fails the requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose attachment-point cases layer a side-specific port count over the counts in force. Then change one side's count in Design and read the other three: a count edit that rewrites an untouched side fails the requirement.
 
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers layering a side-specific count over the counts in force.
+_Evidence:_ `packages/view-model/src/ports.test.ts` covers layering a side-specific count over the counts in force.
 
 ### EDIT-005 — A port shows whether it is used
 
@@ -194,7 +194,7 @@ _Evidence:_ port reseating in `packages/view-studio/src/app/editor/infoschematic
 
 ### EDIT-018 — Placement inputs have equivalent semantics
 
-Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY use guides, keyboard movement MAY step by one unit of the authored `gridSize` when that size is non-zero, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
+Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY round to the authored `gridSize` when that size is non-zero, keyboard movement MAY step by one unit of it, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
 
 Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the authored Canvas coordinate resulting from a pointer placement. A drag begun before a viewport change MUST either finish against one stable coordinate transform or cancel without recording a partial edit. A pointer drag MUST translate the artefact by the distance the pointer travelled, carrying the offset at which the press landed inside it; placing the artefact's origin at the pointer instead MUST NOT be accepted, because the jump it causes is the size of the artefact rather than the size of the gesture.
 

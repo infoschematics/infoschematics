@@ -24,7 +24,7 @@ IDs are append-only within their registered prefix and are never reused. The one
 | diagram-elements.md           | `DIAGRAM` | The authored visual elements, geography, ports, containment, Scopes, and safe removal relationships.            |
 | specification-realisations.md | `REALISE` | Additive specification claims and the user-visible tree used to inspect and highlight their realising elements. |
 | appearance.md                 | `APPEAR`  | Authored semantic identity, output-detail policy, shared visual tokens, and accessible renderer parity.         |
-| routing-and-placement.md      | `ROUTE`   | Flow routes, ports, snapping, labels, overlays, and Card-internal layout in diagram coordinates.                |
+| routing-and-placement.md      | `ROUTE`   | Flow routes, ports, grid rounding, labels, overlays, and Card-internal layout in diagram coordinates.           |
 | static-rendering.md           | `STATIC`  | Deterministic, accessible, framework-neutral SVG output from the canonical model and View Model.                |
 | command-line-rendering.md     | `CLI`     | Portable YAML and JSON input, SVG streams, diagnostics, exit status, and publishable command boundaries.        |
 | renderer-extensions.md        | `EXTEND`  | Host-provided visual implementations, compatibility, validation, and accessible generic fallbacks.              |

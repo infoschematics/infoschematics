@@ -1,6 +1,6 @@
 {
   "name": "@infoschematics/view-model",
-  "description": "The framework-agnostic Infoschematic view model: geometry, ports, routing, guides, placement, editing primitives and shared tokens.",
+  "description": "The framework-agnostic Infoschematic view model: geometry, ports, routing, placement, editing primitives and shared tokens.",
   "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0",
@@ -41,10 +41,6 @@
     "./geometry": {
       "types": "./dist/geometry.d.ts",
       "import": "./dist/geometry.js"
-    },
-    "./guides": {
-      "types": "./dist/guides.d.ts",
-      "import": "./dist/guides.js"
     },
     "./placement": {
       "types": "./dist/placement.d.ts",

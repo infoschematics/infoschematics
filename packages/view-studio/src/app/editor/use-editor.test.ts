@@ -227,9 +227,9 @@ describe('ordering the change list', () => {
 
 /*
  * A label is placed as a share of its line, and the share has to be able to
- * give back the point the snap chose. Two places could not: a hundredth of the
+ * give back the point the grid chose. Two places could not: a hundredth of the
  * longest route here is nine units, so pulling a label onto a grid line stored
- * something several units away from it and the snapping looked broken.
+ * something several units away from it and the rounding looked broken.
  */
 describe('the precision a label share is kept to', () => {
   const longest = 920
@@ -240,7 +240,7 @@ describe('the precision a label share is kept to', () => {
     for (const distance of [10, 137, 619, 913]) expect(away(4, distance), String(distance)).toBeLessThan(0.1)
   })
 
-  it('would miss by units at two, which is what undid the snapping', () => {
+  it('would miss by units at two, which is what undid the rounding', () => {
     expect(away(2, 619)).toBeGreaterThan(1)
   })
 })

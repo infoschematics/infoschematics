@@ -1,6 +1,6 @@
 # Routing and placement — ROUTE
 
-Flow routes, ports, snapping, labels, overlays, and Card-internal layout in diagram coordinates. Part of the [Specifications corpus](index.md).
+Flow routes, ports, grid rounding, labels, overlays, and Card-internal layout in diagram coordinates. Part of the [Specifications corpus](index.md).
 
 ## User-observable behaviours
 
@@ -54,9 +54,9 @@ Every calculated port MUST lie on the edge named by its compass-side identifier.
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover edge placement and per-side counts. Then take a port identity such as `N2` and check its coordinate against the artefact box: a port whose coordinate leaves the edge its compass side names, or which was derived from anything but the box and the counts in force, fails the requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose attachment-point cases cover edge placement and per-side counts. Then take a port identity such as `N2` and check its coordinate against the artefact box: a port whose coordinate leaves the edge its compass side names, or which was derived from anything but the box and the counts in force, fails the requirement.
 
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers edge placement and per-side counts.
+_Evidence:_ `packages/view-model/src/ports.test.ts` covers edge placement and per-side counts.
 
 ### ROUTE-006 — A side is subdivided rather than filled from one end
 
@@ -64,9 +64,9 @@ Ports on one side MUST be spread across the usable side length. Numbering MUST p
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover subdivision, centre-outward numbering and the position of port one. Then ask a side for three ports and read their coordinates: they MUST be spread across the usable side length with port one nearest the centre, so a run of ports packed from one end fails the requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose attachment-point cases cover subdivision, centre-outward numbering and the position of port one. Then ask a side for three ports and read their coordinates: they MUST be spread across the usable side length with port one nearest the centre, so a run of ports packed from one end fails the requirement.
 
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers subdivision, centre-outward numbering and the position of port one.
+_Evidence:_ `packages/view-model/src/ports.test.ts` covers subdivision, centre-outward numbering and the position of port one.
 
 ### ROUTE-007 — A side offers every count it can place safely
 
@@ -74,9 +74,9 @@ A side MUST accept every port count for which its ports can occupy distinct inte
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover the allowed counts, even distribution, saturation and the maximum safe count. Then ask a short side for zero ports and for far more than it can hold: zero MUST be accepted, and the excess MUST come back as the greatest count that side can place on distinct interior grid lines rather than as colliding ports.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose attachment-point cases cover the allowed counts, even distribution, saturation and the maximum safe count. Then ask a short side for zero ports and for far more than it can hold: zero MUST be accepted, and the excess MUST come back as the greatest count that side can place on distinct interior grid lines rather than as colliding ports.
 
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count.
+_Evidence:_ `packages/view-model/src/ports.test.ts` covers allowed counts, even distribution and saturation at the maximum safe count.
 
 ### ROUTE-008 — Unspecified port counts use one declared default
 
@@ -84,9 +84,9 @@ When an artefact side has no authored count, port calculation MUST use the View 
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover the default count. Then grep the consumers for a numeric port-count fallback of their own: every one MUST read `defaultPortCount`, because a second implicit count is what this requirement forbids and a side with no authored count would still place ports without anything going red.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose attachment-point cases cover the default count. Then grep the consumers for a numeric port-count fallback of their own: every one MUST read `defaultPortCount`, because a second implicit count is what this requirement forbids and a side with no authored count would still place ports without anything going red.
 
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers the default count; `defaultPortCount` is exported by `packages/view-model/src/ports.ts`.
+_Evidence:_ `packages/view-model/src/ports.test.ts` covers the default count; `defaultPortCount` is exported by `packages/view-model/src/ports.ts`.
 
 ### ROUTE-009 — Port audits expose collisions and mismatches
 
@@ -107,26 +107,6 @@ _Conformance:_ conforming
 _Verify:_ nudge an artefact once with the grid active and read the authored coordinate, not the screen one: the step MUST be ten diagram units, matching `minimumPortGap`. Repeat while zoomed and panned — a step that changes size with the zoom is snapping in screen space, which is what this requirement forbids.
 
 _Evidence:_ grid projection in `packages/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `packages/view-model/src/ports.ts`.
-
-### ROUTE-011 — Alignment guides come from the scene
-
-Alignment guides MUST be derived from visible box edges, box centres and other handles rather than from a hard-coded list of coordinates.
-
-_Conformance:_ conforming
-
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover box edges, centres, handles and duplicate suppression. Then move an artefact and confirm the guides that appear correspond to the visible boxes and handles around it; add an artefact and confirm new guides come with it, since a hard-coded coordinate list would not change.
-
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers box edges, centres, handles and duplicate suppression.
-
-### ROUTE-012 — Each axis snaps independently
-
-Snapping MUST choose the nearest guide within threshold on each axis independently. An axis with no guide in range MUST retain the requested coordinate.
-
-_Conformance:_ conforming
-
-_Verify:_ run `bun run --filter=@infoschematics/view-model test`, whose guide cases cover independent axes, nearest-guide preference and no-guide behaviour. Then drag an artefact so one axis has a guide in range and the other has none: the first MUST snap to the nearest guide and the second MUST keep the coordinate requested, so an axis dragged along by its neighbour's snap fails the requirement.
-
-_Evidence:_ `packages/view-model/src/guides.test.ts` covers independent axes, nearest-guide preference and no-guide behaviour.
 
 ### ROUTE-013 — A flow label belongs to its route
 

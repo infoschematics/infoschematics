@@ -34,14 +34,7 @@ import {
 import { SceneLibraryPanel } from '../editor/SceneLibraryPanel.tsx'
 import { SceneListPanel } from '../editor/SceneListPanel.tsx'
 import { ThemeCompositionPanel } from '../editor/ThemeCompositionPanel.tsx'
-import type {
-  EditorMode,
-  EditorView,
-  PendingChange,
-  PendingOrigin,
-  TextDraft,
-  TextField
-} from '../editor/use-editor.ts'
+import type { EditorMode, PendingChange, PendingOrigin, TextDraft, TextField } from '../editor/use-editor.ts'
 import type { SceneLibraryEditor } from '../editor/use-scene-library.ts'
 import type { SceneList } from '../editor/use-scene-list.ts'
 import type { ThemeComposition } from '../editor/use-theme-composition.ts'
@@ -126,9 +119,7 @@ export type DetailsPanelEditor = {
   /** Which kinds a Design session lets the Producer reach. */
   layers?: InteractionLayers
   toggleLayer: (kind: ArtefactKind) => void
-  toggleView: (key: keyof EditorView) => void
   undo: () => void
-  view: EditorView
 }
 
 type ArtefactContexts = Readonly<{
@@ -348,8 +339,6 @@ export function DetailsPanel({
     text: Readonly<Record<string, TextDraft>>
     layers?: InteractionLayers
     toggleLayer: (kind: ArtefactKind) => void
-    toggleView: (key: keyof EditorView) => void
-    view: EditorView
   }
   presentation: Presentation
 }) {
@@ -737,9 +726,7 @@ export function DetailsPanel({
               onGridSizeChange={onGridSizeChange}
               onResetRoute={onResetRoute}
               layers={editor.layers}
-              onToggle={editor.toggleView}
               onToggleLayer={editor.toggleLayer}
-              view={editor.view}
             />
           </div>
           <SplitPane>

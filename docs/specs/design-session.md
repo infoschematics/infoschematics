@@ -62,11 +62,11 @@ _Evidence:_ `reduceProduction` in `packages/view-present/src/production.ts` admi
 
 ### DESIGN-006 — Editing aids appear only while editing
 
-The editing grid, ports and manipulation handles MUST be available while editing and MUST NOT appear in the ordinary presented view. The grid MUST be drawn beneath routes and artefacts so it cannot obscure the content it aligns. Its spacing MUST follow the Diagram's authored `gridSize`, and an authored size of `0` MUST suppress both the overlay and grid rounding while leaving alignment-guide snapping independently controllable.
+The editing grid, ports and manipulation handles MUST be available while editing and MUST NOT appear in the ordinary presented view. The grid MUST be drawn beneath routes and artefacts so it cannot obscure the content it aligns. Its spacing MUST follow the Diagram's authored `gridSize`, and an authored size of `0` MUST suppress both the overlay and grid rounding, leaving placement exact.
 
 _Conformance:_ conforming
 
-_Verify:_ compare one document presented and in Design. Grid, ports and handles MUST be absent in `present` and available in Design, and the grid MUST paint beneath routes and artefacts rather than over them. Author `gridSize: 0` and both the overlay and grid rounding MUST stop while alignment-guide snapping stays independently available.
+_Verify:_ compare one document presented and in Design. Grid, ports and handles MUST be absent in `present` and available in Design, and the grid MUST paint beneath routes and artefacts rather than over them. Author `gridSize: 0` and both the overlay and grid rounding MUST stop, leaving a dragged artefact where the pointer left it.
 
 _Evidence:_ the editing layers `edit-grid`, `audit-port` and `artefact-resize-handle` in `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/view-canvas/src/styles.css`, and the grid control in `packages/view-studio/src/app/editor/EditorTools.tsx`.
 
