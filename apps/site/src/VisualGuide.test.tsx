@@ -13,6 +13,10 @@ describe('components guide', () => {
     expect(page).toContain('href="/docs/components/future/"')
     // Every component with a specimen carries one; Future has none to show, and no entry carries a live example.
     expect(page.match(/class="component-tour__preview"/g)).toHaveLength(8)
+    /* Each still is the drawing itself, in the page and measurable, rather than a reference the browser resamples
+       into whatever box the tour gives it. */
+    expect(page).not.toContain('data:image/svg+xml')
+    expect(page.match(/class="component-tour__preview"><svg/g)).toHaveLength(8)
     expect(page).not.toContain('Live example')
     expect(page).not.toContain('A labelled Infoschematic')
   })

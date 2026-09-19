@@ -1,11 +1,13 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-core'
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { Canvas } from '@infoschematics/view-canvas'
 import '@infoschematics/view-canvas/styles.css'
-import { type ReactNode, useMemo, useState } from 'react'
+import { type ReactNode, useId, useState } from 'react'
+import { StaticInfoschematic } from '../StaticInfoschematic.tsx'
 import type { SpecimenKind } from './curriculum.ts'
 import { SpecimenSnippet } from './SpecimenSnippet.tsx'
 import './DemoFrame.css'
+
+const previewOptions = { annotations: true, visibility: { graphics: 'all' } } as const
 
 export interface DemoVariant {
   config: InfoschematicConfig
@@ -32,11 +34,10 @@ export function DemoFrame({
 }) {
   const [mode, setMode] = useState<'rendered' | 'design'>('rendered')
   const [expanded, setExpanded] = useState(false)
-  const renderedSource = useMemo(
-    () =>
-      `data:image/svg+xml;charset=utf-8,${encodeURIComponent(renderInfoschematicSvg(config, { annotations: true, visibility: { graphics: 'all' } }))}`,
-    [config]
-  )
+  // Every rendering inlined into the page owns its markers and patterns by name, and SVG resolves a reference to the
+  // first match in document order rather than the nearest. One frame can hold several drawings and a page several
+  // frames, so the prefix has to be unique per mount as well as per variant.
+  const frameId = useId()
   const resetFrame = () => {
     reset()
     setMode('rendered')
@@ -61,28 +62,22 @@ export function DemoFrame({
         </fieldset>
       </header>
       <div className={`demo-frame__preview${previews.length > 1 ? ' demo-frame__preview--variants' : ''}`}>
-        {previews.map((variant) => {
-          const source =
-            variant.config === config
-              ? renderedSource
-              : `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-                  renderInfoschematicSvg(variant.config, {
-                    annotations: true,
-                    visibility: { graphics: 'all' }
-                  })
-                )}`
-
-          return (
-            <figure key={variant.id}>
-              {mode === 'design' ? (
-                <Canvas config={variant.config} mode="design" />
-              ) : (
-                <img alt={`${variant.label || title} rendered preview`} src={source} />
-              )}
-              {variant.label ? <figcaption>{variant.label}</figcaption> : null}
-            </figure>
-          )
-        })}
+        {previews.map((variant) => (
+          <figure key={variant.id}>
+            {mode === 'design' ? (
+              <Canvas config={variant.config} mode="design" />
+            ) : (
+              <StaticInfoschematic
+                className="demo-frame__rendered"
+                input={variant.config}
+                label={`${variant.label || title} rendered preview`}
+                options={previewOptions}
+                resourceIdPrefix={`${frameId}-${variant.id}`}
+              />
+            )}
+            {variant.label ? <figcaption>{variant.label}</figcaption> : null}
+          </figure>
+        ))}
       </div>
       <div className="demo-frame__controls">{propertyControls}</div>
       <SpecimenSnippet

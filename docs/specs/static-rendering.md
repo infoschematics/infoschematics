@@ -188,9 +188,9 @@ When static SVG is inserted into a host document, the renderer MUST accept a det
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/render-svg/src/index.test.ts` renders the same definition with two prefixes and checks isolated marker identifiers and references; `apps/site/src/InlineSvgReference.test.tsx` scopes repeated authored identifiers to separate host SVGs.
+_Verify:_ `packages/render-svg/src/index.test.ts` renders the same definition with two prefixes and checks isolated marker identifiers and references; `apps/site/src/InlineSvgReference.test.tsx` scopes repeated authored identifiers to separate host SVGs; `apps/site/src/StaticInfoschematic.test.tsx` places two drawings in one document and checks every definition is unique and every reference resolves within the drawing that made it.
 
-_Evidence:_ `packages/render-svg/src/index.test.ts` and `apps/site/src/InlineSvgReference.test.tsx` cover distinct renderer-resource namespaces and host-scoped authored identity resolution.
+_Evidence:_ `packages/render-svg/src/index.test.ts`, `apps/site/src/InlineSvgReference.test.tsx` and `apps/site/src/StaticInfoschematic.test.tsx` cover distinct renderer-resource namespaces and host-scoped authored identity resolution.
 
 ### STATIC-016 — Responsive output uses an explicit target size
 

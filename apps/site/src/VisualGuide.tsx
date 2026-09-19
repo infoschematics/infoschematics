@@ -1,10 +1,10 @@
-import { renderInfoschematicSvg } from '@infoschematics/render-svg'
 import { standardFabricKeys, standardGraphicKeys } from '@infoschematics/view-canvas'
 import type { ReactNode } from 'react'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { type ComponentRoute, componentPaths, componentRoutes, componentsPath } from './routes.ts'
 import { SiteNav } from './SiteNav.tsx'
+import { StaticInfoschematic } from './StaticInfoschematic.tsx'
 import { componentSections, type SpecimenKind } from './visual-guide/curriculum.ts'
 import { DynamicsSpecimen } from './visual-guide/DynamicsSpecimen.tsx'
 import { dynamicsSpecimen } from './visual-guide/dynamics.ts'
@@ -26,18 +26,10 @@ const treatmentLabel = (key: string) => key.replace(/-/g, ' ').replace(/^./, (fi
  * A tour aside is the product's own static rendering of the same specimen the component's page opens with, drawn once
  * per component and reused, so the hub shows each component rather than a picture kept in step by hand.
  */
-const previewSources = new Map<string, string>()
+const previewOptions = { annotations: true, visibility: { graphics: 'all' } } as const
 
-const previewSource = (componentId: SpecimenKind | 'dynamics') => {
-  const cached = previewSources.get(componentId)
-  if (cached) return cached
-  const specimen = componentId === 'dynamics' ? dynamicsSpecimen : specimenFor(componentId)
-  const source = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-    renderInfoschematicSvg(specimen, { annotations: true, visibility: { graphics: 'all' } })
-  )}`
-  previewSources.set(componentId, source)
-  return source
-}
+const previewSpecimen = (componentId: SpecimenKind | 'dynamics') =>
+  componentId === 'dynamics' ? dynamicsSpecimen : specimenFor(componentId)
 
 const futureRoute = {
   path: componentPaths.future,
@@ -97,7 +89,13 @@ export function ComponentsHub() {
                     <span>{component?.summary ?? route.summary}</span>
                   </span>
                   {component ? (
-                    <img alt="" className="component-tour__preview" src={previewSource(component.id)} />
+                    <StaticInfoschematic
+                      className="component-tour__preview"
+                      input={previewSpecimen(component.id)}
+                      label={null}
+                      options={previewOptions}
+                      resourceIdPrefix={`tour-${component.id}`}
+                    />
                   ) : null}
                 </a>
               </li>

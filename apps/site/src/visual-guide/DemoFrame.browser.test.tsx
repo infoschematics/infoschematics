@@ -88,20 +88,14 @@ test('a copy notice clears itself, while one a reader must act on stays', async 
 })
 
 /* Where a contain-fit centres a short drawing in a tall box, the slack splits evenly and a caption ends up almost
-   as far from the drawing it names as from the next one down. Proximity has to answer the reader's question. */
-const verticalAnchor = (image: HTMLImageElement) => {
-  /* The resolved value is a percentage pair, not the keyword the stylesheet was written with. */
-  const keyword = { bottom: 1, center: 0.5, top: 0 } as Record<string, number>
-  const stated = getComputedStyle(image).objectPosition.split(' ')[1] ?? 'center'
-  return stated in keyword ? keyword[stated] : Number.parseFloat(stated) / 100
-}
+   as far from the drawing it names as from the next one down. Proximity has to answer the reader's question.
 
-const paintedRect = (image: HTMLImageElement) => {
-  const box = image.getBoundingClientRect()
-  const scale = Math.min(box.width / image.naturalWidth, box.height / image.naturalHeight)
-  const height = image.naturalHeight * scale
-  const top = box.top + (box.height - height) * verticalAnchor(image)
-  return { bottom: top + height, top }
+   An inline drawing keeps its own proportions in its own box, so the painted area is the element's box and there is
+   no fit to reconstruct — which is the second half of what inlining bought. */
+const drawingIn = (figure: Element) => {
+  const svg = figure.querySelector('svg')
+  if (!svg) throw new Error('Missing rendered preview')
+  return svg
 }
 
 test('a caption sits decisively with the drawing it names', async () => {
@@ -125,12 +119,10 @@ test('a caption sits decisively with the drawing it names', async () => {
   const figures = [...container.querySelectorAll('figure')]
   expect(figures).toHaveLength(2)
 
-  const images = figures.map((figure) => {
-    const image = figure.querySelector('img')
-    if (!image) throw new Error('Missing rendered preview')
-    return image
-  })
-  for (const image of images) await expect.poll(() => image.naturalHeight).toBeGreaterThan(0)
+  const drawings = figures.map(drawingIn)
+  for (const drawing of drawings) {
+    await expect.poll(() => drawing.getBoundingClientRect().height).toBeGreaterThan(0)
+  }
 
   const caption = figures[0].querySelector('figcaption')
   if (!caption) throw new Error('Missing caption')
@@ -139,8 +131,8 @@ test('a caption sits decisively with the drawing it names', async () => {
   expect(figures[1].getBoundingClientRect().top).toBeGreaterThan(figures[0].getBoundingClientRect().top)
 
   const box = caption.getBoundingClientRect()
-  const toOwn = box.top - paintedRect(images[0]).bottom
-  const toNeighbour = paintedRect(images[1]).top - box.bottom
+  const toOwn = box.top - drawings[0].getBoundingClientRect().bottom
+  const toNeighbour = drawings[1].getBoundingClientRect().top - box.bottom
 
   /* A centred fit leaves these within about a quarter of each other, which is the reported symptom: the reader
      cannot tell from spacing which drawing the caption belongs to. */
@@ -148,6 +140,54 @@ test('a caption sits decisively with the drawing it names', async () => {
 
   /* A box taller than the drawing it holds puts that difference between the drawing and its caption, so the
      variant's height follows its own aspect rather than a figure the stylesheet picked. */
-  const drawing = images[0].getBoundingClientRect()
-  expect(drawing.height).toBeCloseTo((drawing.width * images[0].naturalHeight) / images[0].naturalWidth, 0)
+  const drawn = drawings[0].getBoundingClientRect()
+  const authored = drawings[0].viewBox.baseVal
+  expect(drawn.height).toBeCloseTo((drawn.width * authored.height) / authored.width, 0)
+})
+
+/* The report: a specimen met in Rendered read as the weaker drawing than the same specimen in Design. Both modes
+   draw the same geometry into the same box, so if they are the same drawing they resolve to the same scale — which
+   is measurable, where "crisper" is not. A drawing handed to an `img` cannot be measured this way at all, because
+   there is no element in the page whose transform to the screen can be read. */
+const screenScale = (svg: SVGSVGElement) => {
+  const matrix = svg.getScreenCTM()
+  if (!matrix) throw new Error('Drawing is not laid out')
+  return matrix.a
+}
+
+test('a specimen is drawn at the same scale in Rendered as in Design', async () => {
+  const { container } = await render(
+    <div style={{ width: '520px' }}>
+      <DemoFrame
+        config={specimenFor('card')}
+        kind="card"
+        propertyControls={null}
+        reset={() => undefined}
+        title="Card properties"
+      />
+    </div>
+  )
+
+  const rendered = container.querySelector<SVGSVGElement>('.demo-frame__rendered > svg')
+  if (!rendered) throw new Error('Missing inline rendered drawing')
+  await expect.poll(() => rendered.getBoundingClientRect().width).toBeGreaterThan(0)
+
+  const renderedScale = screenScale(rendered)
+  /* Below one, a drawing whose thinnest stroke is a single unit lands under a CSS pixel, which is the resampling
+     the reporter saw. Asserting the two modes agree is the claim; asserting the scale is sane keeps a future box
+     that collapsed to nothing from satisfying the comparison trivially. */
+  expect(renderedScale).toBeGreaterThan(0)
+
+  const design = [...container.querySelectorAll<HTMLButtonElement>('button')].find(
+    (button) => button.textContent === 'Design'
+  )
+  if (!design) throw new Error('Missing Design button')
+  design.click()
+  await expect.poll(() => container.querySelector('svg.infoschematic-svg.editing')).not.toBeNull()
+
+  const live = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  if (!live) throw new Error('Missing live drawing')
+  await expect.poll(() => live.getBoundingClientRect().width).toBeGreaterThan(0)
+
+  expect(screenScale(live)).toBeCloseTo(renderedScale, 2)
 })

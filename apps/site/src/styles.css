@@ -674,7 +674,7 @@ a:focus-visible {
   background: #071624;
 }
 
-.visual-guide__anatomy img,
+.visual-guide__anatomy-drawing > svg,
 .interactive-specimen__output img {
   display: block;
   width: 100%;
@@ -1573,8 +1573,15 @@ a:focus-visible {
   display: block;
   width: 100%;
   height: auto;
+  overflow: hidden;
   border: 1px solid #ffffff14;
   border-radius: 0.4rem;
+}
+
+.component-tour__preview > svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .component-page__section {

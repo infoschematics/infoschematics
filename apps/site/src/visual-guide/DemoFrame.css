@@ -8,10 +8,12 @@
 .demo-frame__modes button[aria-pressed='true'] { border-color: #79c9ff55; color: #071624; background: #79c9ff; }
 .demo-frame__preview { min-height: 180px; overflow: hidden; background: #071624; }
 .demo-frame__preview figure { min-width: 0; margin: 0; }
-.demo-frame__preview img, .demo-frame__preview figure > section { display: block; width: 100%; height: clamp(180px, 32vw, 360px); }
-/* The drawing sits at the foot of its box, so the slack a contain-fit leaves falls above it rather than between
-   it and the caption that names it. */
-.demo-frame__preview img { object-fit: contain; object-position: center bottom; }
+.demo-frame__preview .demo-frame__rendered, .demo-frame__preview figure > section { display: block; width: 100%; height: clamp(180px, 32vw, 360px); }
+/* The drawing sits at the foot of its box, so the slack its own proportions leave falls above it rather than
+   between it and the caption that names it. An inline drawing keeps its aspect in its own box, so this aligns the
+   box rather than positioning a painted area inside a larger one, as the `img` it replaced had to. */
+.demo-frame__rendered { display: flex; align-items: flex-end; justify-content: center; min-width: 0; }
+.demo-frame__rendered > svg { display: block; width: 100%; height: auto; max-height: 100%; }
 .demo-frame__preview figure > .infoschematic { aspect-ratio: auto; }
 .demo-frame__preview figcaption { padding: 6px 12px 10px; color: #9db4c9; font: 600 11px/1.4 'DM Mono', monospace; }
 /* Each variant is drawn as its own enclosure rather than as a cell in a continuous field: a caption inside the
@@ -20,7 +22,7 @@
 .demo-frame__preview--variants figure { display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; border: 1px solid #ffffff1c; border-radius: 8px; background: #071624; }
 /* A variant's drawing keeps its own height, so a grid of short specimens does not put a screenful of empty
    blueprint between each caption and the figure above it. */
-.demo-frame__preview--variants img, .demo-frame__preview--variants figure > .infoschematic { height: auto; max-height: clamp(180px, 32vw, 360px); }
+.demo-frame__preview--variants .demo-frame__rendered, .demo-frame__preview--variants figure > .infoschematic { height: auto; max-height: clamp(180px, 32vw, 360px); }
 .demo-frame__controls { padding: 14px 16px; border-top: 1px solid #ffffff16; }
 .demo-frame__icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.5; }
 .demo-frame__controls .interactive-specimen__controls { margin: 0; padding: 0; border: 0; }
