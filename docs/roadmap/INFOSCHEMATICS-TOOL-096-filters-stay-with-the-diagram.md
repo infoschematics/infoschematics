@@ -4,12 +4,12 @@ area: TOOL
 title: Filters stay with the Diagram
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 70f9474c35a5419b4edef88147ab78a2658bd592
 created_at: 2026-09-19T13:06:00Z
-updated_at: 2026-09-19T13:06:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Filters stay with the Diagram
@@ -115,6 +115,10 @@ Acceptance needs the live check in Verify, not only the suite: the browser case 
 ### Mini recap
 
 The bottom bar vanished in Design because `ProducerControls` returned null outside Present. Restoring it needed two more changes — the production reducer dropped visibility actions outside Present, and the Studio substituted complete authored content for a Producer — so the first fix was cosmetic and a browser test caught it. The bank now holds in every mode; playback banks stay with Present. `DESIGN-005` required the old behaviour and has been rewritten.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

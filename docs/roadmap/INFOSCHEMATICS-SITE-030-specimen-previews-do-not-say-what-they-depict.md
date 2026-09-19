@@ -4,12 +4,12 @@ area: SITE
 title: Specimen previews do not say what they depict
 theme: site
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: c4acb5452e6ddeeeb1f549b34a3270e39d80571d
 created_at: 2026-09-19T11:30:00Z
-updated_at: 2026-09-19T11:55:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Specimen previews do not say what they depict
@@ -104,6 +104,10 @@ Both assertions were proved to bite by removing the rule each one guards and wat
 ### Mini recap
 
 Proximity alone could not bind the caption, because the empty margin belongs to the specimen's authored canvas rather than to Site's box. Containment does, and content-sizing removes most of the distance anyway.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

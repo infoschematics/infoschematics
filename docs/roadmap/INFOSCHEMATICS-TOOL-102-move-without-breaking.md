@@ -4,12 +4,12 @@ area: TOOL
 title: Move without breaking
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 70f9474c35a5419b4edef88147ab78a2658bd592
 created_at: 2026-09-19T13:06:00Z
-updated_at: 2026-09-19T13:06:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Move without breaking
@@ -118,6 +118,10 @@ The wider risk is the asymmetry this exposes rather than the one it fixes: the d
 ### Mini recap
 
 Moving a component attached to a waypointed Flow rewrote the component and left the waypoints, producing a diagonal run into the port; `routePath` threw inside the host's `useMemo` and took the whole view down. The draft overlay had always repaired that run; the committed path had not. `joinedToPort` now makes the same repair when a document is read back, leaving every authored waypoint where it was. `ROUTE-002` states the rule, and a CLI diagnostic now names the diagonal the author actually drew.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

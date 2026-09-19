@@ -4,12 +4,12 @@ area: SITE
 title: Specimen chrome crowds the property grid
 theme: site
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: fed0588b2a4bab1a7491c5377b605108553315ac
 created_at: 2026-09-19T11:30:00Z
-updated_at: 2026-09-19T11:40:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Specimen chrome crowds the property grid
@@ -104,6 +104,10 @@ The copy notice was exercised through a stubbed clipboard rather than the runner
 ### Mini recap
 
 Three snags from one acceptance session, landed as one pass over the specimen frame. Nothing about what the controls do changed — only where they are and how long a notice lives.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

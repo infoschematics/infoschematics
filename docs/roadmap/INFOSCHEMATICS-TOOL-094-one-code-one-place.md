@@ -4,12 +4,12 @@ area: TOOL
 title: One code, one place
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: dd49faa45de805b112c01e39b264532ea6fb12b1
 created_at: 2026-09-19T12:12:00Z
-updated_at: 2026-09-19T12:40:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # One code, one place
@@ -120,6 +120,10 @@ The responsive reduction remains the reason this is easy to miss: at a fitted vi
 ### Mini recap
 
 A code an author turned on and a code a reader turned on were placed by two different rules, a few pixels apart, so on a zoomed Card they overlapped and the code appeared to move when the control was switched. The Card's own layout is now resolved once and the annotation layer uses it: the tag takes the chip's slot, and is withheld where the Card already drew the chip. The record itself was rewritten first — the original framing was duplication, and the reporter's words put placement first.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

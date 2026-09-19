@@ -4,12 +4,12 @@ area: TOOL
 title: Flows follow the Adapter
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 70f9474c35a5419b4edef88147ab78a2658bd592
 created_at: 2026-09-19T13:06:00Z
-updated_at: 2026-09-19T13:06:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Flows follow the Adapter
@@ -104,6 +104,10 @@ The wider risk this exposes is that an ADR-stated geometry rule was implemented 
 ### Mini recap
 
 A Flow attached to an Adapter resolved its port against the Adapter's authored box while the Adapter itself was drawn from the Card it holds, so moving the held Card left the Flows behind. The runtime now resolves a wrapping Card's drawn bounds through `adapterBoundsFor`, as every other consumer already did. Proved by a runtime case that moves the held Card and measures the Adapter's east edge.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

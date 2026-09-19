@@ -4,12 +4,12 @@ area: TOOL
 title: Scopes read as ids
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 364ce600cd25fb9c1eb596487ff7b8862b4d8064
 created_at: 2026-09-19T12:10:00Z
-updated_at: 2026-09-19T12:22:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # Scopes read as ids
@@ -109,6 +109,10 @@ The Goal is met on both surfaces and nothing outside the Present panels moved. R
 ### Mini recap
 
 Two Present controls were showing a code prefix where a name belongs, because the runtime derives that prefix from the scope's id. They now show the authored label, and the collapsed rail runs it down the strip instead of wrapping and clipping. No schema or code-minting behaviour changed. What this surfaced and did not take on: `scopeIcons` is an extension point nothing in this repository registers, so the fallback branch is the only branch a reader ever meets.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 

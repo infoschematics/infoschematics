@@ -4,12 +4,12 @@ area: TOOL
 title: A press before a move
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 70f9474c35a5419b4edef88147ab78a2658bd592
 created_at: 2026-09-19T13:06:00Z
-updated_at: 2026-09-19T13:06:00Z
+updated_at: 2026-09-19T13:40:00Z
 ---
 
 # A press before a move
@@ -108,6 +108,10 @@ The remaining asymmetry worth noting is that grid rounding and guide snapping ap
 ### Mini recap
 
 A single-artefact drag placed the artefact's origin at the pointer, so pressing a Region near its edge moved it by half its width the moment the drag began. The gesture now carries the grab offset for its length, as the group drag beside it already did. Proved in a browser test that reports rather than applies the move, and stated in `EDIT-018`.
+
+## Done
+
+Accepted 2026-09-19 by Kris Brown on the review packet above.
 
 ## Discussion
 
