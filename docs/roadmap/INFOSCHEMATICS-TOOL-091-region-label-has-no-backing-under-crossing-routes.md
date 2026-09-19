@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-091
 area: TOOL
 title: A Region label has no backing under a crossing route
 theme: tool
-horizon: triage
+horizon: waiting-for
 status: draft
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-18T03:50:00Z
+updated_at: 2026-09-19T00:00:00Z
 ---
 
 # A Region label has no backing under a crossing route
@@ -49,3 +49,25 @@ This does not move a Region label, change `ROUTE-018`'s metrics, reserve the ban
 - `packages/view-canvas/src/InfoschematicDiagram.tsx` — the Region label element at `:2221`
 - `packages/view-model/src/region-geometry.test.ts`, `scripts/visual-treatment-parity.test.ts`
 - `docs/specs/routing-and-placement.md` — `ROUTE-019`'s conformance and evidence
+
+## Waiting condition
+
+Move this item to Next only when the current user-acceptance pass over the rendered outlets has concluded, and nothing it found supersedes or reshapes the backing this item would draw.
+
+## Current state
+
+The waiting condition is **not met**. The acceptance pass is live and is the channel currently finding defects, so the renderer surfaces this item paints into are the ones under active change. The code gap itself is unchanged and confirmed: neither renderer emits a backing.
+
+## Discussion
+
+### Why it waits rather than proceeds
+
+The owner adopted this item out of Triage on 2026-09-19 and placed it here in the same decision, in preference to taking it before the acceptance pass. The reasoning was about yield rather than difficulty: the specification run-through that produced this record swept every requirement and did not find the defect that took the whole Playground down, while two screen recordings found it in an afternoon. The label backing is real and will keep.
+
+### What the wait does not excuse
+
+The condition is about sequencing, not evidence. Nothing here is contingent on an external party, a credential, or a decision that has not been taken — the shape of the work was settled when `ROUTE-019` was written. If the acceptance pass concludes and this item is still unowned, it is ready to shape with no new input.
+
+### The example no longer demonstrates it
+
+Noted in Context and repeated here because it survives the wait: `ROUTE-019`'s `_Verify:_` points at a document whose crossing routes now pass to the left of the glyphs. Whoever takes this must author a case that puts a route through them deliberately. A pass against the current example proves nothing, and that is exactly the failure mode the repository guidance warns about — a check that measures nothing reports success.
