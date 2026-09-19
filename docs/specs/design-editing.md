@@ -196,13 +196,13 @@ _Evidence:_ port reseating in `packages/view-studio/src/app/editor/infoschematic
 
 Pointer dragging, keyboard nudging and numeric placement MUST express the same movement of the same selected artefact and MUST produce equivalent effective geometry and dependent Flow projection. Their declared interaction policies MAY differ: pointer placement MAY use guides, keyboard movement MAY step by one unit of the authored `gridSize` when that size is non-zero, and numeric placement MAY be exact. Those policies MUST NOT select a different draft representation or omit dependent changes.
 
-Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the authored Canvas coordinate resulting from a pointer placement. A drag begun before a viewport change MUST either finish against one stable coordinate transform or cancel without recording a partial edit.
+Zoom, pan, fit mode, panel layout and device-pixel ratio MUST NOT change the authored Canvas coordinate resulting from a pointer placement. A drag begun before a viewport change MUST either finish against one stable coordinate transform or cancel without recording a partial edit. A pointer drag MUST translate the artefact by the distance the pointer travelled, carrying the offset at which the press landed inside it; placing the artefact's origin at the pointer instead MUST NOT be accepted, because the jump it causes is the size of the artefact rather than the size of the gesture.
 
 _Conformance:_ conforming
 
-_Verify:_ move one artefact the same distance three ways — pointer drag, keyboard nudge, typed coordinate — and compare the effective geometry and the dependent Flow projection after each: they MUST agree, and each MUST record the dependent changes. Then zoom, pan and change fit mode and panel layout, and repeat the pointer placement: the authored coordinate MUST be the same one. Change the viewport mid-drag and the drag MUST either complete against one transform or cancel without recording a partial edit.
+_Verify:_ move one artefact the same distance three ways — pointer drag, keyboard nudge, typed coordinate — and compare the effective geometry and the dependent Flow projection after each: they MUST agree, and each MUST record the dependent changes. Then zoom, pan and change fit mode and panel layout, and repeat the pointer placement: the authored coordinate MUST be the same one. Change the viewport mid-drag and the drag MUST either complete against one transform or cancel without recording a partial edit. Press a wide artefact near one edge and drag it a short distance: it MUST move by that distance and MUST NOT recentre itself under the pointer.
 
-_Evidence:_ coordinate conversion in `packages/view-canvas/src/InfoschematicDiagram.tsx`, placement commands in `packages/view-studio/src/app/App.tsx`, and draft construction in `packages/view-studio/src/app/editor/use-editor.ts`.
+_Evidence:_ coordinate conversion in `packages/view-canvas/src/InfoschematicDiagram.tsx`, placement commands in `packages/view-studio/src/app/App.tsx`, and draft construction in `packages/view-studio/src/app/editor/use-editor.ts`; the grab offset held for the length of a drag in `packages/view-canvas/src/InfoschematicDiagram.browser.test.tsx`.
 
 ### EDIT-019 — Created artefacts enter the complete editing lifecycle
 

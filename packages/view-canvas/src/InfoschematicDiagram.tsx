@@ -1166,6 +1166,17 @@ export function InfoschematicDiagram({
       event.stopPropagation()
       const element = event.currentTarget
       const from = { x: event.clientX, y: event.clientY }
+      /*
+       * Where the press landed inside the element, kept for the length of the drag.
+       *
+       * The host places the element's origin - a box's centre - at the point this gesture reports, so reporting the
+       * pointer itself would put the centre under the finger the moment the press travelled far enough to count.
+       * On a Card that is a nudge; on a Region it is half the Region's width, and a Producer who meant to select one
+       * sees it jump. Carrying the grab means the element travels exactly as far as the hand does, which is what
+       * `dragGroup` above already does for several of them at once.
+       */
+      const start = eventPoint(element, event.clientX, event.clientY)
+      const grab = start ? { dx: origin.x - start.x, dy: origin.y - start.y } : { dx: 0, dy: 0 }
       let dragging = false
       const move = (moved: PointerEvent) => {
         if (!dragging) {
@@ -1175,8 +1186,8 @@ export function InfoschematicDiagram({
         const point = eventPoint(element, moved.clientX, moved.clientY)
         if (!point) return
         onArtefactMove(selection, {
-          x: axes.x ? point.x : origin.x,
-          y: axes.y ? point.y : origin.y
+          x: axes.x ? point.x + grab.dx : origin.x,
+          y: axes.y ? point.y + grab.dy : origin.y
         })
       }
       const release = () => {

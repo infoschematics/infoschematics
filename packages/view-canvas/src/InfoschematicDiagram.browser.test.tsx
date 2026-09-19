@@ -106,6 +106,9 @@ const config = defineInfoschematic({
       { code: 'POINT-X', id: 'point-x', label: 'Point X', point: { x: 280, y: 100 }, scopes: ['scope'] },
       { code: 'POINT-Y', id: 'point-y', label: 'Point Y', point: { x: 420, y: 100 }, scopes: ['scope'] }
     ],
+    /* One Region, wide enough that a press anywhere near its edge is a long way from its centre - which is the
+       arrangement a press-to-select becomes a jump under, and the one every Card case above happens to avoid. */
+    regions: [{ box: { height: 60, width: 200, x: 380, y: 250 }, id: 'region-a', label: 'Region A' }],
     scopes: [{ color: '#2463eb', description: 'Cards', fill: '#dbeafe', id: 'scope', label: 'Scope', prefix: 'CARD' }],
     viewBox: { height: 320, width: 640, x: 0, y: 0 }
   }
@@ -157,6 +160,27 @@ function EditingHarness({ onMove, onRelease }: { onMove?: () => void; onRelease?
       onArtefactSelect={() => undefined}
       selectedArtefact={cardA}
     />
+  )
+}
+
+/*
+ * Where a drag asks the host to put an element, recorded rather than applied.
+ *
+ * What the gesture reports is the contract; placing the element from it would fold the offset under test into
+ * whatever the harness chose to do with it, which is how every Card case above reads as correct either way.
+ */
+function MoveReportHarness() {
+  const [reported, setReported] = useState('')
+  return (
+    <>
+      <Canvas
+        config={config}
+        mode="design"
+        onArtefactMove={(selection, point) => setReported(`${selection.id}:${point.x},${point.y}`)}
+        onArtefactSelect={() => undefined}
+      />
+      <output data-testid="reported">{reported}</output>
+    </>
   )
 }
 
@@ -312,6 +336,26 @@ test('dragging an Adapter moves its held Card and the Flow attached to the Adapt
   await expect
     .poll(() => container.querySelector('[data-artefact-id="FLOW-ADAPTER"] .infoschematic-route')?.getAttribute('d'))
     .toBe('M240 237.5 H280 V195 H360')
+})
+
+/*
+ * Every drag case above presses exactly on the element's centre, so a gesture that reports the pointer and one that
+ * reports the travel agree, and the difference between them only shows on a press held somewhere else. A Region is
+ * where it shows worst: it is the widest thing on the surface, so a press meant to select one threw it half its own
+ * width the moment the hand twitched past the drag threshold.
+ */
+test('a press held away from the centre travels as far as the hand, not onto the pointer', async () => {
+  const { container } = await render(<MoveReportHarness />)
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const region = container.querySelector<SVGGElement>('[data-artefact-id="region-a"]')
+  if (!svg || !region) throw new Error('rendered Region fixture is incomplete')
+
+  // Pressed at the Region's top-left corner, 100 left of and 30 above its centre, then moved forty right and ten down.
+  region.dispatchEvent(new PointerEvent('pointerdown', { ...screenPoint(svg, 380, 250), bubbles: true, pointerId: 21 }))
+  window.dispatchEvent(new PointerEvent('pointermove', { ...screenPoint(svg, 420, 260), bubbles: true, pointerId: 21 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { ...screenPoint(svg, 420, 260), bubbles: true, pointerId: 21 }))
+
+  await expect.poll(() => container.querySelector('[data-testid="reported"]')?.textContent).toBe('region-a:520,290')
 })
 
 test('pointer cancellation and unmount remove active drag listeners', async () => {
