@@ -28,6 +28,13 @@ export type InfoschematicAppearanceConfig = {
   surface?: SurfaceTreatment
   grid?: GridTreatment
   card?: CardDetailDefaults
+  /**
+   * Whether every element draws its own code, as the Diagram's default.
+   *
+   * `card.identity` says the same thing for Cards alone and was the only way to say it; this is the same statement
+   * made once for every kind, and an element that states its own `identity` is the more specific answer.
+   */
+  identity?: boolean
 }
 
 const surfaceTreatmentMembers: Record<SurfaceTreatment, true> = {

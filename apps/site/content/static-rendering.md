@@ -71,7 +71,7 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
   scene: { kind: 'standalone', sceneId: 'checkout' },
   visibility: { scopes: ['core'], unfocused: 'dim', graphics: 'scene' },
   cardDetails: { identity: false, stereotype: true, description: false },
-  annotations: true,
+  annotations: { components: true, flows: true },
   signals: ['flow-payment'],
   dynamics: [{ dynamicId: 'payment-taken', occurrenceKey: 'export-1' }],
   resourceIdPrefix: 'checkout-export'
@@ -81,7 +81,7 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
 - **`scene`** selects a Standalone, Thematic, or Story [Scene](/docs/reference/vocabulary/#scene) and applies its focus deterministically.
 - **`visibility`** selects visible [Scopes](/docs/reference/vocabulary/#scope) (all when omitted), chooses whether unfocused content is dimmed, hidden, or shown, and controls which [Graphics](/docs/reference/vocabulary/#graphic) render.
 - **`cardDetails`** overrides identity, stereotype, and description visibility without touching the authored definition — never compactness, which is authored because it changes a Card's composition.
-- **`annotations`** draws each visible [Flow](/docs/reference/vocabulary/#flow)'s code chip at the shared placement Canvas uses; a Flow can pin its chip with an authored `label: { along: 0.5 }`.
+- **`annotations`** draws the code chips a live view's tag control draws, at the shared placement Canvas uses. `true` tags every kind that control covers — Cards, Adapter Cards, [Fabrics](/docs/reference/vocabulary/#fabric), and [Flows](/docs/reference/vocabulary/#flow) — and `{ components: true }` or `{ flows: true }` asks for one half, which is what a still placed beside a live view usually wants. A Flow can pin its chip with an authored `label: { along: 0.5 }`. A code the document pinned with `identity: true` is drawn either way, and never twice.
 - **`signals`** names Flows to emphasise in a deterministic, non-animated still output; unknown identifiers are ignored, and the renderer never infers signals from Scene focus or authored data.
 - **`dynamics`** names occurrences of authored [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic) to draw in the same still language: a `signal-flow` Dynamic emphasises the Flows it names, and an `emphasise-elements` Dynamic outlines the elements it names. An occurrence of a Dynamic the document does not declare is ignored, output never varies with the occurrence key, and the accessible description states each occurred Dynamic's label. Omit the option and the output is byte-identical to the quiet document.
 - **`resourceIdPrefix`** namespaces renderer-owned marker and pattern IDs. Its default preserves standalone output; use a unique letter-or-underscore-prefixed value for every SVG inserted into the same document.

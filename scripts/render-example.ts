@@ -49,7 +49,7 @@ export async function loadRenderable(subject: string): Promise<InfoschematicInpu
 }
 
 export type RenderExampleOptions = Readonly<{
-  /** Emit each visible Flow's code chip. Defaults to off. */
+  /** Draw the code of every visible Card, Adapter, Fabric and Flow, as a reader turning tags on does. Defaults off. */
   annotations?: boolean
   /** Output SVG pathname. Defaults to `reports/<example>.svg`. */
   out?: string
@@ -102,7 +102,7 @@ export const spec: CliSpec = {
   describe: 'Render an authored Infoschematic to a standalone SVG, so a diagram can be reviewed without a browser.',
   flags: {
     all: { describe: 'Render every example.', kind: 'boolean' },
-    annotations: { describe: "Emit each visible Flow's code chip.", kind: 'boolean' },
+    annotations: { describe: 'Draw the code of every visible element.', kind: 'boolean' },
     json: { describe: 'Report results as JSON.', kind: 'boolean' },
     out: { describe: 'Output SVG pathname. Defaults to reports/<subject>.svg.', kind: 'string', value: 'path' },
     png: { describe: 'Also rasterise beside the SVG (needs rsvg-convert).', kind: 'boolean' },

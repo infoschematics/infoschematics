@@ -23,6 +23,7 @@ describe('appearance option catalogue', () => {
       'card.identity',
       'card.stereotype',
       'grid',
+      'identity',
       'region.fill',
       'region.frame.opacity',
       'region.frame.style',

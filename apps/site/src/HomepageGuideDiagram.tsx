@@ -27,7 +27,7 @@ export function HomepageGuideDiagram() {
       actions={homepageGuideActions}
       input={homepageInfoschematic}
       onActivate={handleActivate}
-      options={{ annotations: true }}
+      options={{ annotations: { flows: true } }}
       resourceIdPrefix="homepage"
     />
   )

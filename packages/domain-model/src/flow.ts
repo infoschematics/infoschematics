@@ -16,4 +16,6 @@ export type FlowConfig = {
   dashed?: boolean
   label?: { along: number }
   points: readonly Point[]
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }

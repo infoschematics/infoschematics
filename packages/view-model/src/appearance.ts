@@ -25,6 +25,8 @@ export type RenderedSize = Readonly<{ height: number; width: number }>
 export type ResolvedVisualTreatment = Readonly<{
   card: ResolvedCardTreatment
   grid: GridTreatment
+  /** Whether an element that states nothing draws its own code. */
+  identity: boolean
   surface: SurfaceTreatment
 }>
 
@@ -52,12 +54,26 @@ export const resolveVisualTreatment = (
   card: {
     compact: appearance?.card?.compact ?? defaultCardTreatment.compact,
     description: output?.description ?? appearance?.card?.description ?? defaultCardTreatment.description,
-    identity: output?.identity ?? appearance?.card?.identity ?? defaultCardTreatment.identity,
+    /* `card.identity` is the older and narrower statement, so it answers first where both are authored; the
+       diagram-wide default is what a document that never mentioned Cards specifically is saying about them. */
+    identity: output?.identity ?? appearance?.card?.identity ?? appearance?.identity ?? defaultCardTreatment.identity,
     stereotype: output?.stereotype ?? appearance?.card?.stereotype ?? defaultCardTreatment.stereotype
   },
   grid: appearance?.grid ?? 'none',
+  identity: appearance?.identity ?? false,
   surface: appearance?.surface ?? 'neutral'
 })
+
+/**
+ * Whether one element draws its own code, permanently, in every rendering of the Diagram.
+ *
+ * The element's own answer is the specific one and wins; the Diagram's default for its kind answers for everything
+ * that said nothing. An output-only override and the responsive reduction both act on that default rather than on
+ * this: a caller narrowing Card detail for a small rendering is describing the rendering, while an element saying
+ * it carries its code is describing the element, and the second survives being drawn small.
+ */
+export const drawsOwnCode = (element: Readonly<{ identity?: boolean }> | undefined, byDefault: boolean): boolean =>
+  element?.identity ?? byDefault
 
 /**
  * Reduce optional Card rows when an authored view box is rendered too small

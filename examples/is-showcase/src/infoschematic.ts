@@ -19,6 +19,7 @@ diagram:
   appearance:
     surface: blueprint
     grid: major-plus-minor
+    identity: false
     card:
       compact: false
       identity: true
@@ -75,6 +76,7 @@ diagram:
     - id: REG-ADAPT
       label: Adaptation
       bounds: 840 80 800 280
+      identity: true
       appearance:
         cornerRadius: 24
         frame:
@@ -107,6 +109,7 @@ diagram:
     - id: CARD-01
       label: Ingest
       description: Accepts material from outside the system
+      identity: true
       stereotype: Capture
       collection: capture
       bounds: 80 140 220 120
@@ -180,6 +183,7 @@ diagram:
     - id: FAB-02
       label: Object store
       description: A second substrate, authored through the unwrapped keys
+      identity: true
       kind: object-store
       bounds: 120 630 400 60
       ports: 1
@@ -192,6 +196,7 @@ diagram:
     - id: PT-01
       label: Camera
       at: 120 900
+      identity: true
       ports: 1
       color: "#b85450"
       fill: "#2a1416"
@@ -208,6 +213,7 @@ diagram:
     - id: FLOW-01
       family: stream
       link: CARD-01 E1 -> CARD-02 W1
+      identity: true
       labelAt: 0.5
     - id: FLOW-02
       family: control

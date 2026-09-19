@@ -200,6 +200,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       appearance: diagram.appearance,
       cards: diagram.cards.map((card) => ({
         code: card.id,
+        identity: card.identity,
         conformsTo: specificationPathsByElement.get(card.id),
         detail: card.description ?? '',
         domain: card.collection,
@@ -233,6 +234,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
             : undefined,
           code: fabric.id,
           detail: fabric.description ?? '',
+          identity: fabric.identity,
           id: fabric.id,
           label: fabric.label,
           placement: { box: fabric.bounds, ports: fabric.ports },
@@ -256,6 +258,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
             'dashed' || undefined,
         family: flow.family ?? '',
         id: flow.id,
+        identity: flow.identity,
         label: flow.route?.labelAt === undefined ? undefined : { along: flow.route.labelAt },
         operation: operationByElement.get(flow.id),
         points: [
@@ -280,6 +283,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
       points: diagram.points.map((point) => ({
         code: point.id,
         id: point.id,
+        identity: point.identity,
         label: point.label,
         point: point.at,
         ports: point.ports,
@@ -290,6 +294,7 @@ export const establishedInfoschematicOf = (input: InfoschematicInput): Infoschem
         fill: region.appearance?.fill,
         frame: region.appearance?.frame,
         id: region.id,
+        identity: region.identity,
         label: region.label,
         labelMount: region.appearance?.label?.mount,
         labelOffset: region.appearance?.label?.offset,

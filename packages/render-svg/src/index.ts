@@ -1,6 +1,7 @@
 import { type InfoschematicInput, rendererReferenceOf } from '@infoschematics/domain-model'
 import {
   type CardDetailOverrides,
+  drawsOwnCode,
   type RenderedSize,
   resolveReadableInk,
   resolveRegionTreatment,
@@ -9,6 +10,7 @@ import {
 } from '@infoschematics/view-model/appearance'
 import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
+import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
@@ -25,7 +27,7 @@ import {
   standardArtworkFor,
   standardArtworkSchemaVersion
 } from '@infoschematics/view-model/standard-artwork'
-import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 
 const canvasTokens = visualTokens.canvas
 
@@ -50,9 +52,24 @@ export type SvgVisibilityOptions = {
   unfocused?: 'dim' | 'hide' | 'show'
 }
 
+/** Which kinds of visible element draw their code because the caller asked, rather than because an author did. */
+export type SvgCodeAnnotations = {
+  /** Every visible Card, Adapter and Fabric draws its code, as the Canvas's tags do. Defaults to off. */
+  components?: boolean
+  /** Every visible Flow draws its code. Defaults to off. */
+  flows?: boolean
+}
+
 export type RenderInfoschematicSvgOptions = {
-  /** Emit each visible Flow's code chip at the shared annotation placement. Defaults to off. */
-  annotations?: boolean
+  /**
+   * Which visible elements draw their code, which is the caller asking rather than the author. Defaults to none.
+   *
+   * `true` means every kind the live view's tags cover — Cards, Adapters, Fabrics and Flows — so a still and a live
+   * view asked the same question answer it the same way. A caller that wants only some of them names those instead,
+   * which is how a page showing a still beside an unannotated live view keeps the two saying the same thing. An
+   * element whose author said it carries its code draws it whatever this option says.
+   */
+  annotations?: boolean | SvgCodeAnnotations
   /** Override authored Card metadata visibility without removing authored data. */
   cardDetails?: CardDetailOverrides
   /** Opt into responsive Card detail for this explicit rendered output size. */
@@ -110,6 +127,42 @@ const container = (depth: number, name: string, values: Attributes, children: re
 
 const group = (depth: number, values: Attributes, children: readonly string[]) =>
   container(depth, 'g', values, children)
+
+/*
+ * One drawn code, wherever it is drawn and whoever asked for it.
+ *
+ * An author saying an element carries its code permanently and a caller asking for every code produce the same chip
+ * in the same place — `ROUTE-021` — so both come through here, and `resolveCodeBadge` rather than this file decides
+ * where that place is for each kind of element.
+ */
+const codeBadge = (depth: number, values: Attributes, anchor: CodeBadgeAnchor, code: string) => {
+  const placement = resolveCodeBadge(anchor, code)
+  return group(depth, values, [
+    line(depth + 1, 'rect', [
+      ['fill', canvasTokens.output.annotationFill],
+      ['height', placement.height],
+      ['rx', codeBadgeRadius],
+      ['stroke', canvasTokens.output.annotationStroke],
+      ['width', placement.width],
+      ['x', placement.x],
+      ['y', placement.y]
+    ]),
+    line(
+      depth + 1,
+      'text',
+      [
+        ['fill', canvasTokens.text.strong],
+        ['font-family', canvasTokens.output.codeFontFamily],
+        ['font-size', canvasTokens.output.annotationFontSize],
+        ['font-weight', 700],
+        ['text-anchor', 'middle'],
+        ['x', placement.textX],
+        ['y', placement.textY]
+      ],
+      xmlText(code)
+    )
+  ]).join('\n')
+}
 
 /*
  * The standard renderer catalogue, emitted as strings.
@@ -436,6 +489,15 @@ export const renderInfoschematicSvg = (
       ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
       : requestedVisualTreatment.card
   }
+  /* What the caller asked to see, kept apart from what an author said: an element draws its code if either says so,
+     and neither answer is derived from the other. */
+  const revealed =
+    options.annotations === true
+      ? { components: true, flows: true }
+      : {
+          components: options.annotations !== false && options.annotations?.components === true,
+          flows: options.annotations !== false && options.annotations?.flows === true
+        }
   const legacyFlowIds = new Map(runtime.compatibilityConfig.infoschematic.flows.map((flow) => [flow.id, flow.code]))
   const declaredDynamics = new Map(definition.dynamics.map((dynamic) => [dynamic.id, dynamic]))
   const resolvedDynamics = resolveDiagramDynamics(definition.dynamics, options.dynamics ?? [])
@@ -623,6 +685,9 @@ export const renderInfoschematicSvg = (
     .filter(Boolean)
     .join(' — ')
   const body: string[] = []
+  /* Every code drawn on something other than a Card's own detail row, collected as each element is drawn and laid
+     over the diagram at the end, because a code is read against the drawing rather than buried in it. */
+  const codeLayer: string[] = []
   if (artworkDefs.length > 0) body.push(['  <defs>', ...artworkDefs, '  </defs>'].join('\n'))
   body.push(line(1, 'title', [], xmlText(config.title)))
   if (accessibleSummary) body.push(line(1, 'desc', [], xmlText(accessibleSummary)))
@@ -827,6 +892,21 @@ export const renderInfoschematicSvg = (
         )
       )
     }
+    if (drawsOwnCode(region, visualTreatment.identity)) {
+      codeLayer.push(
+        codeBadge(
+          1,
+          [
+            ['class', 'infoschematic-code'],
+            ['data-artefact-id', region.id],
+            ['data-artefact-kind', 'region'],
+            ['data-code', region.id]
+          ],
+          { box: region.box, kind: 'box' },
+          region.id
+        )
+      )
+    }
     body.push(
       group(
         1,
@@ -877,6 +957,23 @@ export const renderInfoschematicSvg = (
         )
       ])
     ]
+    if (revealed.components || drawsOwnCode(fabric, visualTreatment.identity)) {
+      const dimmed = focusClass(fabric.id, focus?.artefacts, unfocused)
+      codeLayer.push(
+        codeBadge(
+          1,
+          [
+            ['class', `infoschematic-code${dimmed}`],
+            ['data-artefact-id', fabric.id],
+            ['data-artefact-kind', 'fabric'],
+            ['data-code', fabric.code],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ],
+          { box, kind: 'box' },
+          fabric.code
+        )
+      )
+    }
     body.push(
       group(
         1,
@@ -955,49 +1052,29 @@ export const renderInfoschematicSvg = (
     )
   }
 
-  if (options.annotations && flows.length > 0) {
-    const positions = runtime.infoschematicAnnotationLabelPositions(flows, visibleScopes)
-    for (const flow of flows) {
-      const at = positions.get(flow.id)
-      if (!at) continue
-      const dimmed = focusClass(flow.id, focus?.flows, unfocused)
-      const badgeWidth = annotationLabelWidth(flow.code)
-      body.push(
-        group(
-          1,
-          [
-            ['class', `infoschematic-flow-annotation${dimmed}`],
-            ['data-code', flow.code],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
-          ],
-          [
-            line(2, 'rect', [
-              ['fill', canvasTokens.output.annotationFill],
-              ['height', canvasTokens.output.annotationHeight],
-              ['rx', canvasTokens.output.annotationRadius],
-              ['stroke', canvasTokens.output.annotationStroke],
-              ['width', badgeWidth],
-              ['x', at.x - badgeWidth / 2],
-              ['y', at.y - canvasTokens.output.annotationHeight / 2]
-            ]),
-            line(
-              2,
-              'text',
-              [
-                ['fill', canvasTokens.text.strong],
-                ['font-family', canvasTokens.output.codeFontFamily],
-                ['font-size', canvasTokens.output.annotationFontSize],
-                ['font-weight', 700],
-                ['text-anchor', 'middle'],
-                ['x', at.x],
-                ['y', at.y + 4]
-              ],
-              xmlText(flow.code)
-            )
-          ]
-        ).join('\n')
+  /* Every visible Flow is placed, not only the coded ones: the placement avoids the other labels on the surface, so
+     asking it about a subset would move a chip because a Flow beside it happens to be drawing nothing. */
+  const flowCodePositions =
+    flows.length > 0 ? runtime.infoschematicAnnotationLabelPositions(flows, visibleScopes) : undefined
+  for (const flow of flows) {
+    if (!revealed.flows && !drawsOwnCode(flow, visualTreatment.identity)) continue
+    const at = flowCodePositions?.get(flow.id)
+    if (!at) continue
+    const dimmed = focusClass(flow.id, focus?.flows, unfocused)
+    codeLayer.push(
+      codeBadge(
+        1,
+        [
+          ['class', `infoschematic-flow-annotation${dimmed}`],
+          ['data-artefact-id', flow.id],
+          ['data-artefact-kind', 'flow'],
+          ['data-code', flow.code],
+          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+        ],
+        { at, kind: 'route' },
+        flow.code
       )
-    }
+    )
   }
 
   /*
@@ -1007,6 +1084,22 @@ export const renderInfoschematicSvg = (
    */
   for (const { card, clasp, held } of adapters) {
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
+    if (revealed.components || drawsOwnCode(card, visualTreatment.identity)) {
+      codeLayer.push(
+        codeBadge(
+          1,
+          [
+            ['class', `infoschematic-code${dimmed}`],
+            ['data-artefact-id', card.id],
+            ['data-artefact-kind', 'card'],
+            ['data-code', card.code],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ],
+          { box: clasp, held, kind: 'clasp' },
+          card.code
+        )
+      )
+    }
     body.push(
       group(
         1,
@@ -1057,6 +1150,10 @@ export const renderInfoschematicSvg = (
     const ink = resolveReadableInk(fill)
     const metadataColor = ink === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
+    /* The chip is resolved whether or not this Card draws one, because its slot is also where a code the caller
+       asked for goes, and nothing else in the layout depends on the flag. The Card draws it only where its author
+       asked: the Card's own statement first, then the Diagram's default for Cards. */
+    const carriesCode = drawsOwnCode(card, visualTreatment.card.identity)
     const layout = resolveCardLayout({
       box,
       code: card.code,
@@ -1064,7 +1161,7 @@ export const renderInfoschematicSvg = (
       description: card.detail,
       detail: {
         description: visualTreatment.card.description,
-        identity: visualTreatment.card.identity,
+        identity: true,
         stereotype: visualTreatment.card.stereotype
       },
       label: card.label,
@@ -1102,7 +1199,7 @@ export const renderInfoschematicSvg = (
         )
       )
     }
-    if (layout.identity) {
+    if (layout.identity && carriesCode) {
       content.push(
         group(
           2,
@@ -1139,6 +1236,22 @@ export const renderInfoschematicSvg = (
             )
           ]
         ).join('\n')
+      )
+    }
+    if (revealed.components && !(carriesCode && layout.identity)) {
+      codeLayer.push(
+        codeBadge(
+          1,
+          [
+            ['class', `infoschematic-code${dimmed}`],
+            ['data-artefact-id', card.id],
+            ['data-artefact-kind', 'card'],
+            ['data-code', card.code],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ],
+          layout.identity ? { box, kind: 'chip', slot: layout.identity } : { box, kind: 'box' },
+          card.code
+        )
       )
     }
     content.push(
@@ -1242,6 +1355,22 @@ export const renderInfoschematicSvg = (
 
   for (const point of points) {
     const dimmed = focusClass(point.id, focus?.artefacts, unfocused)
+    if (drawsOwnCode(point, visualTreatment.identity)) {
+      codeLayer.push(
+        codeBadge(
+          1,
+          [
+            ['class', `infoschematic-code${dimmed}`],
+            ['data-artefact-id', point.id],
+            ['data-artefact-kind', 'point'],
+            ['data-code', point.id],
+            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ],
+          { at: point.at, kind: 'mark', labelSide: resolvePointLabel(point, flows)?.side },
+          point.id
+        )
+      )
+    }
     body.push(
       group(
         1,
@@ -1314,6 +1443,8 @@ export const renderInfoschematicSvg = (
       ).join('\n')
     )
   }
+
+  body.push(...codeLayer)
 
   /* Emphasis is drawn last so it reads as a layer over the diagram: no authored element's own output, ordering, or
      geometry changes because a host asked for a Dynamic. */

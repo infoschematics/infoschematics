@@ -8,4 +8,6 @@ export type PointConfig = {
   scopes: readonly string[]
   point: Point
   ports?: PortCounts
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }

@@ -1,6 +1,7 @@
 import type { Overlay } from '@infoschematics/domain-model'
 import {
   type CardDetailOverrides,
+  drawsOwnCode,
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
@@ -10,6 +11,7 @@ import {
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import { adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
+import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
 import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import {
   type ArtefactKind,
@@ -27,7 +29,7 @@ import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-mo
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
-import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
+import { visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 import {
   type CSSProperties,
@@ -470,7 +472,6 @@ export function InfoschematicDiagram({
     }
   }, [hostRuntime, previewing, previewOperations])
   const {
-    adapterFloor,
     config,
     infoschematicAnnotationLabelPositions,
     infoschematicCardIsVisible,
@@ -798,10 +799,91 @@ export function InfoschematicDiagram({
       ]
     })
   )
-  /* The codes already on the surface, which the annotation layer must not draw a second time. */
+  const fabricById = new Map(infoschematicFabrics.map((fabric) => [fabric.id, fabric]))
+  /*
+   * Where one element's code is drawn, which is one answer whoever asked the question.
+   *
+   * An author saying the element carries its code and a reader turning tags on both land here, because `ROUTE-021`
+   * requires the revealed code to take the place the element would have drawn its own.
+   */
+  const codeAnchorFor = (placeable: { box: Box; code: string }): CodeBadgeAnchor => {
+    const clasped = register.byCode(placeable.code)?.wraps
+    const held = clasped ? infoschematicLayout[clasped as keyof typeof infoschematicLayout] : undefined
+    if (held) return { box: placeable.box, held: movedBox(held, placeable.code), kind: 'clasp' }
+    const slot = cardText.get(placeable.code)?.identity
+    return slot ? { box: placeable.box, kind: 'chip', slot } : { box: placeable.box, kind: 'box' }
+  }
+  /*
+   * The codes already on the surface, which the annotation layer must not draw a second time.
+   *
+   * A Card states it in its own detail row and everything else in the shared placement, but the question is one: did
+   * this element's author ask for its code, and did the drawing have room for it. `card.identity` is the Card detail
+   * row and keeps answering for Cards alone; an Adapter, which has no such row, takes the Diagram's default.
+   */
   const selfCoded = new Set(
-    visualTreatment.card.identity ? [...cardText].flatMap(([code, text]) => (text.identity ? [code] : [])) : []
+    placeables.flatMap((placeable) => {
+      const plainCard = cardText.has(placeable.code)
+      const authored = cardById.get(placeable.id) ?? fabricById.get(placeable.id)
+      const draws = drawsOwnCode(authored, plainCard ? visualTreatment.card.identity : visualTreatment.identity)
+      if (!draws) return []
+      return plainCard && !cardText.get(placeable.code)?.identity ? [] : [placeable.code]
+    })
   )
+  /* The Flow chips the annotation layer draws. That chip is also where a Producer drags a Flow's label from, so it
+     stays that layer's to draw and the authored codes below are only the ones it is not already drawing. */
+  const annotatedFlows =
+    annotated || editing ? flows.filter((flow) => editing || !highlight || highlight.flows.has(flow.id)) : []
+  /*
+   * Every code drawn because its author asked for it rather than because a reader did.
+   *
+   * A Card says it in its own detail row, which the Card draws; nothing else has such a row, so its code is drawn
+   * here - in the placement a revealed code would have taken, which is the whole of `ROUTE-021`. A Point and a
+   * Region are here and nowhere else, because the reader's tags have never covered them and this item does not
+   * change what that toggle does.
+   */
+  const authoredCodes: readonly { anchor: CodeBadgeAnchor; code: string; id: string; kind: string }[] = [
+    ...placeables.flatMap((placeable) =>
+      selfCoded.has(placeable.code) && !cardText.has(placeable.code)
+        ? [
+            {
+              anchor: codeAnchorFor(placeable),
+              code: placeable.code,
+              id: placeable.id,
+              kind: fabricById.has(placeable.id) ? 'fabric' : 'card'
+            }
+          ]
+        : []
+    ),
+    ...infoschematicPoints.flatMap((point) =>
+      drawsOwnCode(point, visualTreatment.identity)
+        ? [
+            {
+              anchor: { at: point.at, kind: 'mark', labelSide: resolvePointLabel(point, flows)?.side } as const,
+              code: point.id,
+              id: point.id,
+              kind: 'point'
+            }
+          ]
+        : []
+    ),
+    ...infoschematicRegions.flatMap((region) =>
+      drawsOwnCode(region, visualTreatment.identity)
+        ? [{ anchor: { box: region.box, kind: 'box' } as const, code: region.id, id: region.id, kind: 'region' }]
+        : []
+    ),
+    ...flows.flatMap((flow) =>
+      drawsOwnCode(flow, visualTreatment.identity) && !annotatedFlows.some((drawn) => drawn.id === flow.id)
+        ? [
+            {
+              anchor: { at: labelPositions.get(flow.id) ?? { x: 0, y: 0 }, kind: 'route' } as const,
+              code: flow.code,
+              id: flow.id,
+              kind: 'flow'
+            }
+          ]
+        : []
+    )
+  ]
 
   useLayoutEffect(() => {
     const surface = diagramFrame.current?.parentElement
@@ -2552,7 +2634,7 @@ export function InfoschematicDiagram({
             // annotation layer knows which Cards already carry their code.
             const resolved = cardText.get(card.code)
             if (!resolved) return null
-            const text = { ...resolved, identity: visualTreatment.card.identity ? resolved.identity : null }
+            const text = { ...resolved, identity: selfCoded.has(card.code) ? resolved.identity : null }
             const accessibleDetail = [card.code, card.label, card.stereotype, card.name].filter(Boolean).join(' · ')
 
             return (
@@ -2695,6 +2777,31 @@ export function InfoschematicDiagram({
           <rect className="infoschematic-range-band" {...rangeBand(rangeGesture)} pointerEvents="none" />
         ) : null}
 
+        {/* Codes their authors asked for, drawn whether or not a reader turned tags on and in the same places the
+          tags take. Drawn before the annotation layer because that layer is also an editing surface. */}
+        {authoredCodes.length > 0 ? (
+          <g aria-label="Infoschematic codes" className="infoschematic-codes">
+            {authoredCodes.map((drawn) => {
+              const badge = resolveCodeBadge(drawn.anchor, drawn.code)
+              return (
+                <g data-artefact-id={drawn.id} data-artefact-kind={drawn.kind} key={`${drawn.kind}:${drawn.id}`}>
+                  <rect
+                    className="audit-component-code-bg"
+                    height={badge.height}
+                    rx={codeBadgeRadius}
+                    width={badge.width}
+                    x={badge.x}
+                    y={badge.y}
+                  />
+                  <text className="audit-component-code" x={badge.textX} y={badge.textY}>
+                    {drawn.code}
+                  </text>
+                </g>
+              )
+            })}
+          </g>
+        ) : null}
+
         {annotated || editing ? (
           <g aria-label="Infoschematic annotations" className="infoschematic-audit">
             {/*
@@ -2717,37 +2824,23 @@ export function InfoschematicDiagram({
                * in again moved the code badge at twice the speed of the card it
                * names. The ports a few lines below always read the box straight,
                * which is why a dragged card's badge and its ports came apart.
+               *
+               * Where the badge lands is not decided here. A code a reader turns on takes the place the element
+               * draws its own code in - an adapter's rim, a Card's identity chip, the clear top right corner of
+               * everything else - and `resolveCodeBadge` is the one answer both renderers ask for it.
                */
-              const layout = placeable.box
-              // An adapter's top corners are beside the card it clasps, so its code
-              // goes in the rim along the bottom where its name already is. On
-              // everything else the top right is clear and is where a reader looks
-              // - clear because an element already drawing its code is filtered out
-              // above rather than annotated on top of the chip it drew.
-              const clasped = register.byCode(placeable.code)?.wraps
-              const held = clasped ? infoschematicLayout[clasped as keyof typeof infoschematicLayout] : undefined
-              // A Card's own identity chip is the one place its code has ever been drawn
-              // deliberately, so a code a reader turns on takes that same slot rather than
-              // landing a few pixels off it. Everything without such a slot keeps the inset.
-              const slot = held ? null : cardText.get(placeable.code)?.identity
-              const badgeWidth = slot ? slot.width : annotationLabelWidth(placeable.code, 56)
-              const badgeX = slot ? layout.x + slot.x : layout.x + layout.width - badgeWidth - 4
-              const badge = held
-                ? movedBox(held, placeable.code).y + held.height + (adapterFloor - 20) / 2
-                : slot
-                  ? layout.y + slot.y
-                  : layout.y + 5
+              const badge = resolveCodeBadge(codeAnchorFor(placeable), placeable.code)
               return (
                 <g key={placeable.id}>
                   <rect
                     className="audit-component-code-bg"
-                    height="20"
-                    rx="5"
-                    width={badgeWidth}
-                    x={badgeX}
-                    y={badge}
+                    height={badge.height}
+                    rx={codeBadgeRadius}
+                    width={badge.width}
+                    x={badge.x}
+                    y={badge.y}
                   />
-                  <text className="audit-component-code" x={badgeX + badgeWidth / 2} y={badge + 14}>
+                  <text className="audit-component-code" x={badge.textX} y={badge.textY}>
                     {placeable.code}
                   </text>
                 </g>
@@ -2818,12 +2911,11 @@ export function InfoschematicDiagram({
                 d={`M ${drawing.from.x} ${drawing.from.y} L ${drawing.to.x} ${drawing.to.y}`}
               />
             ) : null}
-            {(annotated || editing
-              ? flows.filter((flow) => editing || !highlight || highlight.flows.has(flow.id))
-              : []
-            ).map((flow) => {
-              const { x, y } = labelPositions.get(flow.id) ?? { x: 0, y: 0 }
-              const badgeWidth = annotationLabelWidth(flow.code)
+            {annotatedFlows.map((flow) => {
+              const badge = resolveCodeBadge(
+                { at: labelPositions.get(flow.id) ?? { x: 0, y: 0 }, kind: 'route' },
+                flow.code
+              )
               const selection = {
                 code: flow.code,
                 geometry: 'route',
@@ -2851,8 +2943,8 @@ export function InfoschematicDiagram({
                   onPointerLeave={onHover ? () => onHover(null) : undefined}
                 >
                   {editing ? <title>{`${flow.code} — drag to place`}</title> : null}
-                  <rect height="20" rx="4" width={badgeWidth} x={x - badgeWidth / 2} y={y - 10} />
-                  <text x={x} y={y + 4}>
+                  <rect height={badge.height} rx={codeBadgeRadius} width={badge.width} x={badge.x} y={badge.y} />
+                  <text x={badge.textX} y={badge.textY}>
                     {flow.code}
                   </text>
                 </g>

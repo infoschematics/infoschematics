@@ -89,6 +89,7 @@ export const appearanceOptions: Readonly<Record<AppearanceOptionKey, AppearanceO
   'card.identity': { control: 'flag', default: false, term: 'standard-card', values: noValues },
   'card.stereotype': { control: 'flag', default: false, term: 'standard-card', values: noValues },
   grid: { control: 'choice', default: 'none', term: 'infoschematic', values: gridTreatments },
+  identity: { control: 'flag', default: false, term: 'infoschematic-artefact', values: noValues },
   'region.fill': { control: 'colour', term: 'region', values: noValues },
   'region.frame.opacity': { control: 'number', range: { max: 1, min: 0 }, term: 'region', values: noValues },
   'region.frame.style': { control: 'choice', term: 'region', values: regionFrameStyles },

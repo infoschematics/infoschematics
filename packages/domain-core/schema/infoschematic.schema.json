@@ -74,6 +74,9 @@
                 "dots"
               ]
             },
+            "identity": {
+              "type": "boolean"
+            },
             "card": {
               "type": "object",
               "properties": {
@@ -261,6 +264,9 @@
                   }
                 ]
               },
+              "identity": {
+                "type": "boolean"
+              },
               "ports": {
                 "anyOf": [
                   {
@@ -371,6 +377,9 @@
                   }
                 ]
               },
+              "identity": {
+                "type": "boolean"
+              },
               "ports": {
                 "anyOf": [
                   {
@@ -477,6 +486,9 @@
                   }
                 ]
               },
+              "identity": {
+                "type": "boolean"
+              },
               "ports": {
                 "anyOf": [
                   {
@@ -581,6 +593,9 @@
                   }
                 ]
               },
+              "identity": {
+                "type": "boolean"
+              },
               "appearance": {
                 "type": "object",
                 "properties": {
@@ -667,6 +682,9 @@
                   "family": {
                     "type": "string"
                   },
+                  "identity": {
+                    "type": "boolean"
+                  },
                   "appearance": {
                     "type": "object",
                     "properties": {
@@ -743,6 +761,9 @@
                   },
                   "family": {
                     "type": "string"
+                  },
+                  "identity": {
+                    "type": "boolean"
                   },
                   "appearance": {
                     "type": "object",

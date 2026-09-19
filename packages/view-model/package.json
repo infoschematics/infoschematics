@@ -26,6 +26,10 @@
       "types": "./dist/card-layout.d.ts",
       "import": "./dist/card-layout.js"
     },
+    "./code-badge": {
+      "types": "./dist/code-badge.d.ts",
+      "import": "./dist/code-badge.js"
+    },
     "./compatibility": {
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"

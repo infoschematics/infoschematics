@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { StaticInfoschematic } from './StaticInfoschematic.tsx'
 import { specimenFor } from './visual-guide/specimens.ts'
 
-const options = { annotations: true, visibility: { graphics: 'all' } } as const
+const options = { annotations: { flows: true }, visibility: { graphics: 'all' } } as const
 
 describe('a static drawing placed in the page', () => {
   it('puts the renderer output in the document rather than behind an image reference', () => {

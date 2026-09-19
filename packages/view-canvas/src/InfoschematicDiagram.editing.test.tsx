@@ -118,6 +118,16 @@ const selections = [
   { code: null, geometry: 'box', id: 'annotation', kind: 'graphic' }
 ] as const satisfies readonly ArtefactSelection[]
 
+/** Codes the diagram draws because the document says the element carries one, keyed by the kind that carries it. */
+const pinnedCodes = (markup: string) =>
+  [
+    ...markup.matchAll(
+      /data-artefact-kind="([^"]+)"><rect class="audit-component-code-bg"[\s\S]*?class="audit-component-code"[^>]*>([^<]+)</g
+    )
+  ]
+    .map(([, kind, code]) => `${kind}:${code}`)
+    .toSorted()
+
 describe('InfoschematicDiagram Design editing', () => {
   it('sizes annotation badges to contain long element and Flow codes', () => {
     const longCode = 'MSF-SC-TM-ASSEMBLY'
@@ -191,6 +201,50 @@ describe('InfoschematicDiagram Design editing', () => {
     // Without the authored chip there is nothing to duplicate and every element is annotated as before.
     expect(withoutIdentity).not.toContain('class="infoschematic-card-identity"')
     expect(auditedCodes(withoutIdentity).toSorted()).toEqual(['SYS-001', 'SYS-002', 'SYS-003'])
+  })
+
+  it('draws a code the author pinned to an element whether or not a reader asked for tags', () => {
+    /* `ROUTE-021` gave the Card a permanent chip; an author who says a Fabric, Point, Region or Flow carries its
+       code is saying the same thing about elements that never had a detail row to say it in. */
+    const pinned = {
+      ...config,
+      infoschematic: {
+        ...config.infoschematic,
+        fabrics: config.infoschematic.fabrics.map((fabric) => ({ ...fabric, identity: true })),
+        flows: config.infoschematic.flows.map((flow) => ({ ...flow, identity: true })),
+        points: config.infoschematic.points.map((point) => ({ ...point, identity: true })),
+        regions: config.infoschematic.regions.map((region) =>
+          region.id === 'live' ? { ...region, identity: true } : region
+        )
+      }
+    }
+    const quiet = renderToStaticMarkup(<Canvas config={pinned} />)
+
+    expect(pinnedCodes(quiet)).toEqual(['fabric:SYS-001', 'flow:REQ-001', 'point:PT-001', 'region:live'])
+    // Nothing else came with them: the annotation layer is still the reader's, and it is still off.
+    expect(quiet).not.toContain('class="infoschematic-audit"')
+    expect(pinnedCodes(renderToStaticMarkup(<Canvas config={config} />))).toEqual([])
+  })
+
+  it('withholds a reader tag from every element already carrying its own code, not only from a Card', () => {
+    const pinned = {
+      ...config,
+      infoschematic: {
+        ...config.infoschematic,
+        appearance: { identity: true },
+        cards: config.infoschematic.cards.map((card) => ({ ...card, identity: true }))
+      }
+    }
+    const annotatedMarkup = renderToStaticMarkup(<Canvas annotated config={pinned} />)
+    const drawn = [...annotatedMarkup.matchAll(/class="audit-component-code"[^>]*>([^<]+)</g)].map(([, code]) => code)
+
+    // Every code here came from the pinned layer: the reader's layer found nothing left to name.
+    expect(drawn.toSorted()).toEqual(['PT-001', 'SYS-001', 'delivery', 'live'])
+    // The Cards draw theirs in their own chips, the Fabric in the pinned layer, and the Flow keeps the one chip
+    // the annotation layer already draws rather than gaining a second beside it.
+    expect(annotatedMarkup).toContain('class="infoschematic-card-identity"')
+    expect(pinnedCodes(annotatedMarkup)).toEqual(['fabric:SYS-001', 'point:PT-001', 'region:delivery', 'region:live'])
+    expect([...annotatedMarkup.matchAll(/>REQ-001</g)]).toHaveLength(1)
   })
 
   it('renders every artefact kind as a labelled keyboard-selectable SVG target', () => {

@@ -17,6 +17,7 @@ export const guideAppearanceOptions = {
   'card.description': { control: 'flag', values: [] },
   'card.identity': { control: 'flag', values: [] },
   'card.stereotype': { control: 'flag', values: [] },
+  identity: { control: 'flag', values: [] },
   grid: {
     control: 'choice',
     values: ['none', 'major', 'major-plus-minor', 'dots']

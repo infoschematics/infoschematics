@@ -1,6 +1,7 @@
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
 import { describe, expect, it } from 'vitest'
 import {
+  drawsOwnCode,
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
@@ -13,6 +14,7 @@ describe('visual treatment resolution', () => {
     expect(resolveVisualTreatment()).toEqual({
       card: { compact: false, description: false, identity: false, stereotype: false },
       grid: 'none',
+      identity: false,
       surface: 'neutral'
     })
   })
@@ -30,6 +32,7 @@ describe('visual treatment resolution', () => {
     ).toEqual({
       card: { compact: true, description: false, identity: false, stereotype: true },
       grid: 'major-plus-minor',
+      identity: false,
       surface: 'blueprint'
     })
   })
@@ -78,6 +81,40 @@ describe('visual treatment resolution', () => {
         { compact: false, description: true, identity: true, stereotype: true }
       )
     ).toThrow('finite positive numbers')
+  })
+
+  it('answers for Cards from the narrower statement first and for every kind from the Diagram default', () => {
+    expect(resolveVisualTreatment({ identity: true })).toEqual({
+      card: { compact: false, description: false, identity: true, stereotype: false },
+      grid: 'none',
+      identity: true,
+      surface: 'neutral'
+    })
+    // `card.identity` is the older and narrower statement, so it decides for Cards where both are authored.
+    expect(resolveVisualTreatment({ card: { identity: false }, identity: true }).card.identity).toBe(false)
+    expect(resolveVisualTreatment({ card: { identity: true } }).identity).toBe(false)
+  })
+})
+
+describe('permanent code resolution', () => {
+  it("lets an element's own statement outrank the Diagram's default in both directions", () => {
+    expect(drawsOwnCode({ identity: true }, false)).toBe(true)
+    expect(drawsOwnCode({ identity: false }, true)).toBe(false)
+    expect(drawsOwnCode({}, true)).toBe(true)
+    expect(drawsOwnCode(undefined, false)).toBe(false)
+  })
+
+  it('leaves an element that carries its code carrying it at a reduced rendered size', () => {
+    // The responsive reduction describes the rendering; an element saying it carries its code describes the element,
+    // and the second survives being drawn small because the first never reaches it.
+    const reduced = resolveResponsiveCardTreatment(
+      { height: 800, width: 1200 },
+      { height: 240, width: 360 },
+      { compact: true, description: true, identity: true, stereotype: true }
+    )
+
+    expect(reduced.identity).toBe(false)
+    expect(drawsOwnCode({ identity: true }, reduced.identity)).toBe(true)
   })
 })
 

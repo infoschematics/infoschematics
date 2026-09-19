@@ -2,7 +2,7 @@ import { StaticInfoschematic } from './StaticInfoschematic.tsx'
 import { componentSections } from './visual-guide/curriculum.ts'
 import { anatomySpecimen } from './visual-guide/specimens.ts'
 
-const anatomyOptions = { annotations: true, visibility: { graphics: 'all' } } as const
+const anatomyOptions = { annotations: { flows: true }, visibility: { graphics: 'all' } } as const
 
 export function OverviewAnatomy() {
   return (

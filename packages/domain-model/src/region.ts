@@ -26,6 +26,8 @@ export type RegionConfig = {
   labelPlacement?: RegionLabelTreatment
   labelMount?: RegionLabelMount
   labelOffset?: number
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }
 
 // The unions above are erased at runtime, but a control surface and a visual

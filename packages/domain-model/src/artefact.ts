@@ -7,4 +7,6 @@ export type ArtefactIdentity = {
   scopeRule?: 'all' | 'any'
   conformsTo?: readonly string[]
   services?: readonly string[]
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }

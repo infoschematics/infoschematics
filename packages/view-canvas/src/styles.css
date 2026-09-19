@@ -777,7 +777,9 @@
   fill: var(--infoschematic-canvas-output-text-muted-inverse);
 }
 
-.infoschematic-audit {
+.infoschematic-audit,
+/* Codes an author asked for are read, never pressed: the element under them is what a Producer reaches for. */
+.infoschematic-codes {
   pointer-events: none;
 }
 

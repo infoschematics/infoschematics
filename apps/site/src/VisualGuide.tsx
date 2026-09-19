@@ -26,7 +26,7 @@ const treatmentLabel = (key: string) => key.replace(/-/g, ' ').replace(/^./, (fi
  * A tour aside is the product's own static rendering of the same specimen the component's page opens with, drawn once
  * per component and reused, so the hub shows each component rather than a picture kept in step by hand.
  */
-const previewOptions = { annotations: true, visibility: { graphics: 'all' } } as const
+const previewOptions = { annotations: { flows: true }, visibility: { graphics: 'all' } } as const
 
 const previewSpecimen = (componentId: SpecimenKind | 'dynamics') =>
   componentId === 'dynamics' ? dynamicsSpecimen : specimenFor(componentId)

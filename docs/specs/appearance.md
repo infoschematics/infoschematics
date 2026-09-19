@@ -52,6 +52,18 @@ _Verify:_ Run `bun run test --filter=@infoschematics/view-canvas`, then render a
 
 _Evidence:_ `packages/view-canvas/src/Canvas.tsx`, `packages/view-canvas/src/InfoschematicDiagram.tsx`, and `packages/view-model/src/appearance.ts`.
 
+### APPEAR-018 — An element may carry its code permanently
+
+A document MAY say that an element draws its own code in every rendering of the Diagram: element by element through an `identity` field on a Card, Fabric, Adapter, Point, Region, or Flow, and Diagram-wide through `appearance.identity` for every element that says nothing. The element's own statement MUST answer first. `appearance.card.identity` is the narrower statement about Cards and MUST answer for a plain Card ahead of the Diagram-wide default, so a document that already authors Card identity does not silently gain codes on the other kinds.
+
+A code the document pinned MUST be drawn wherever that element's own drawing puts it, as `ROUTE-021` in [Routing and placement](routing-and-placement.md) requires, and MUST NOT depend on a viewer control, a renderer option, or a host. It describes the element rather than the rendering, so neither the `cardDetails` output override nor responsive reduction MUST remove it; both act on the Diagram-wide default instead.
+
+_Conformance:_ conforming
+
+_Verify:_ Read `resolveVisualTreatment` and `drawsOwnCode` in `packages/view-model/src/appearance.ts`, then author a document that pins a code to a Fabric, a Point, a Region, and a Flow and render it through both renderers with every viewer control off: each MUST draw its code, in the same place in both. Author `appearance.card.identity` alone and confirm no Fabric gained one. Author `appearance.identity` and confirm every element that said nothing drew its code and an element that said `identity: false` did not. Then reduce a Card's rendered scale until responsive reduction withholds the identity row and confirm a Card that says it carries its code still draws it. Falsified by a pinned code needing a control turned on, by a Card-only statement reaching another kind, or by an output override silencing an element's own statement.
+
+_Evidence:_ `packages/view-model/src/appearance.test.ts` covers precedence and responsive survival, `packages/view-model/src/code-badge.test.ts` covers the placement each kind resolves, and `scripts/visual-treatment-parity.test.ts` renders a pinned document through both renderers.
+
 ## Quality properties
 
 ### APPEAR-005 — Renderer invariants are not authored options

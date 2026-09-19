@@ -53,6 +53,8 @@ export type RuntimeFlow = {
   id: string
   code: string
   family: string
+  /** Whether this Flow draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
   source: string
   target: string
   sourcePort: PortId
@@ -354,6 +356,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       bidirectional: flow.direction === 'bidirectional' || undefined,
       conformsTo: realisedSpecifications.map((entry) => entry.id),
       dashed: flow.appearance?.line === 'dashed' || undefined,
+      identity: flow.identity,
       label: flow.route?.labelAt === undefined ? undefined : { along: flow.route.labelAt },
       operation: realisedSpecifications.find((entry) => entry.kind === 'operation')?.prefix,
       points,
@@ -723,6 +726,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     fill: region.appearance?.fill,
     frame: region.appearance?.frame,
     id: region.id,
+    identity: region.identity,
     label: region.label,
     labelMount: region.appearance?.label?.mount,
     labelOffset: region.appearance?.label?.offset,

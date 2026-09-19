@@ -7,7 +7,9 @@ import type { SpecimenKind } from './curriculum.ts'
 import { SpecimenSnippet } from './SpecimenSnippet.tsx'
 import './DemoFrame.css'
 
-const previewOptions = { annotations: true, visibility: { graphics: 'all' } } as const
+/* Flow codes only, because the Design half of this frame is a live view with its tags off: a still that named
+   every component beside a live view that named none would be the two halves disagreeing again. */
+const previewOptions = { annotations: { flows: true }, visibility: { graphics: 'all' } } as const
 
 export interface DemoVariant {
   config: InfoschematicConfig

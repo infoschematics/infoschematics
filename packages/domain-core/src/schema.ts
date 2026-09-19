@@ -147,6 +147,7 @@ const waypoints = z.union([pointsText, z.array(coordinate).readonly()])
 const appearance = z.strictObject({
   surface: z.enum(['neutral', 'blueprint']).optional(),
   grid: z.enum(['none', 'major', 'major-plus-minor', 'dots']).optional(),
+  identity: z.boolean().optional(),
   card: z
     .strictObject({
       compact: z.boolean().optional(),
@@ -257,6 +258,7 @@ const region = z.strictObject({
   id: z.string(),
   label: z.string(),
   bounds: box,
+  identity: z.boolean().optional(),
   appearance: z
     .strictObject({
       fill: z.string().optional(),
@@ -301,6 +303,7 @@ const card = z
     adapts: z.string().optional(),
     wraps: z.string().optional(),
     bounds: box,
+    identity: z.boolean().optional(),
     ports: portCounts.optional()
   })
   .superRefine((value, context) => {
@@ -319,6 +322,7 @@ const fabric = z
     description: z.string().optional(),
     kind: rendererReference.optional(),
     bounds: box,
+    identity: z.boolean().optional(),
     ports: portCounts.optional(),
     properties: properties.optional(),
     appearance: visualIdentity.optional(),
@@ -335,6 +339,7 @@ const point = z
     id: z.string(),
     label: z.string(),
     at: coordinate,
+    identity: z.boolean().optional(),
     ports: portCounts.optional(),
     appearance: visualIdentity.optional(),
     ...identityFields
@@ -351,6 +356,7 @@ const flowAppearance = z.strictObject({
 const flowBase = {
   id: z.string(),
   family: z.string().optional(),
+  identity: z.boolean().optional(),
   appearance: flowAppearance.optional(),
   line: z.enum(['solid', 'dashed']).optional()
 }

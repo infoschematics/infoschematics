@@ -62,15 +62,17 @@ _Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render wi
 
 _Evidence:_ `packages/render-svg/src/index.test.ts` covers deterministic signalled output, unknown identifiers, duplicate identifiers, and unchanged default output.
 
-### STATIC-006 — Flow annotations are opt-in and deterministic
+### STATIC-006 — Code annotations are opt-in, selective, and deterministic
 
-The `annotations` render option MAY request a code chip for each visible Flow. When enabled, each chip MUST render the authored Flow code verbatim at the shared annotation placement from View Model, so static output and Canvas agree on position without a second placement algorithm. An authored `label.along` fraction MUST be honoured. Chips MUST use the shared annotation output tokens, MUST dim with Scene focus alongside their Flow, and MUST NOT change output for hidden Flows. Omitting the option MUST leave output free of annotation markup.
+The `annotations` render option MAY request the code chips a live view's tag control draws. It MUST accept both a single answer for every kind and a per-kind selection of components and Flows, so a still placed beside a live view can say exactly what that view is saying rather than more. `true` MUST mean every kind the tag control covers — Cards, Adapters, Fabrics, and Flows — and omitting the option MUST leave output free of annotation markup.
+
+When enabled, each chip MUST render the authored code verbatim at the shared placement from View Model, so static output and Canvas agree on position without a second placement algorithm. An authored `label.along` fraction MUST be honoured. Chips MUST use the shared annotation output tokens, MUST dim with Scene focus alongside the element they name, and MUST NOT change output for hidden Flows. A code the document pinned to an element under `APPEAR-018` in [Appearance](appearance.md) MUST be drawn whether or not this option was given, and MUST NOT be drawn twice when it was.
 
 _Conformance:_ conforming
 
-_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render with `annotations` omitted and confirm the output carries no annotation markup at all. Enable it and confirm each visible Flow's chip holds the authored code verbatim at the placement View Model resolved — compare the position against Canvas for the same document rather than against a second calculation here. Author a `label.along` fraction and confirm the chip moved to it. Focus a Scene and confirm a chip dims with its Flow; hide a Flow and confirm its absence changes nothing.
+_Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, then render with `annotations` omitted and confirm the output carries no annotation markup at all. Enable it and confirm each visible Flow's chip holds the authored code verbatim at the placement View Model resolved — compare the position against Canvas for the same document rather than against a second calculation here. Ask for `{ flows: true }` and confirm no component was tagged; ask for `{ components: true }` and confirm every visible Card, Adapter, and Fabric was and no Flow was; ask for `true` and confirm both. Author a `label.along` fraction and confirm the chip moved to it. Focus a Scene and confirm a chip dims with its Flow; hide a Flow and confirm its absence changes nothing. Then pin a code to one element, render with the option omitted and with it given, and confirm the code is drawn exactly once either way.
 
-_Evidence:_ `packages/render-svg/src/index.test.ts` covers default-off output, opt-in chips, deterministic repetition, authored `label.along`, and focus dimming.
+_Evidence:_ `packages/render-svg/src/index.test.ts` covers default-off output, the per-kind selection, opt-in chips, deterministic repetition, authored `label.along`, focus dimming, and the pinned codes drawn with no option given.
 
 ### STATIC-007 — Ink resolves from the fill it sits on
 

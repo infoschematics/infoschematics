@@ -127,6 +127,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         collection: card.domain ?? card.scope,
         description: card.detail,
         id: card.code,
+        identity: card.identity,
         label: card.label,
         ports: legacyPortsOf(card.placement.ports),
         stereotype: card.stereotype
@@ -158,6 +159,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           bounds: fabric.placement.box,
           description: fabric.detail,
           id: fabric.code,
+          identity: fabric.identity,
           kind: fabric.appearance?.renderer ? rendererReferenceOf(fabric.appearance.renderer) : undefined,
           label: fabric.label,
           ports: legacyPortsOf(fabric.placement.ports),
@@ -179,6 +181,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
         direction: flow.bidirectional ? ('bidirectional' as const) : ('forward' as const),
         family: flow.family,
         id: flow.code,
+        identity: flow.identity,
         route: {
           labelAt: flow.label?.along,
           waypoints: flow.points.slice(1, -1)
@@ -199,6 +202,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           appearance: scope ? { color: scope.color, fill: scope.fill, icon: scope.icon } : undefined,
           at: point.point,
           id: point.code,
+          identity: point.identity,
           label: point.label,
           ports: legacyPortsOf(point.ports)
         }
@@ -221,6 +225,7 @@ export const infoschematicModelOf = (config: InfoschematicConfig): Infoschematic
           y: region.box.y
         },
         id: region.id,
+        identity: region.identity,
         label: region.label
       }))
     },

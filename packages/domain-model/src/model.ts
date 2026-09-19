@@ -39,6 +39,8 @@ export type Region = {
   id: string
   label: string
   bounds: Box
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
   appearance?: {
     fill?: string
     cornerRadius?: number
@@ -63,6 +65,8 @@ export type Card = {
   wraps?: string
   bounds: Box
   ports?: PortCounts
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }
 
 export type Fabric = {
@@ -74,6 +78,8 @@ export type Fabric = {
   kind?: RendererReference
   properties?: Readonly<Record<string, JsonValue>>
   appearance?: VisualIdentity
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }
 
 /** A lightweight visible source or sink where Flows enter or leave a Diagram. */
@@ -83,6 +89,8 @@ export type Point = {
   at: Coordinate
   ports?: PortCounts
   appearance?: VisualIdentity
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }
 
 export type FlowEndpoint = { element: string; port: PortId }
@@ -96,6 +104,8 @@ export type Flow = {
   target: FlowEndpoint
   direction?: 'forward' | 'bidirectional'
   route?: { waypoints?: readonly Coordinate[]; labelAt?: number }
+  /** Whether this element draws its own code permanently, overriding the Diagram's default. */
+  identity?: boolean
 }
 
 export type Overlay = {

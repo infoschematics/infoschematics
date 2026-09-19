@@ -675,9 +675,9 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(representative)).not.toContain('infoschematic-flow-annotation')
 
     const annotated = renderInfoschematicSvg(representative, {
-      annotations: true
+      annotations: { flows: true }
     })
-    expect(renderInfoschematicSvg(representative, { annotations: true })).toBe(annotated)
+    expect(renderInfoschematicSvg(representative, { annotations: { flows: true } })).toBe(annotated)
     expect(annotated).toContain('class="infoschematic-flow-annotation"')
     expect(annotated).toContain('>CALL-001</text>')
     expect(annotated).toContain(`fill="${visualTokens.canvas.output.annotationFill}"`)
@@ -696,15 +696,71 @@ describe('renderInfoschematicSvg', () => {
           }))
         }
       },
-      { annotations: true }
+      { annotations: { flows: true } }
     )
     expect(placed).toContain('x="180" y="114"')
 
     const dimmed = renderInfoschematicSvg(representative, {
-      annotations: true,
+      annotations: { flows: true },
       scene: { kind: 'standalone', sceneId: 'source-only' }
     })
     expect(dimmed).toContain('class="infoschematic-flow-annotation is-unfocused"')
+  })
+
+  it('covers every kind the live view tags when asked for all of them, and only the named kinds otherwise', () => {
+    const every = renderInfoschematicSvg(representative, { annotations: true })
+    // A Card takes its code in the slot its own chip would occupy rather than a second rectangle beside it.
+    expect(every).toContain('data-artefact-kind="card" data-code="ONE-001"')
+    expect(every).toContain('data-artefact-kind="card" data-code="TWO-001"')
+    expect(every).toContain('class="infoschematic-flow-annotation"')
+
+    const flowsOnly = renderInfoschematicSvg(representative, { annotations: { flows: true } })
+    expect(flowsOnly).not.toContain('class="infoschematic-code"')
+    expect(flowsOnly).toContain('class="infoschematic-flow-annotation"')
+
+    const componentsOnly = renderInfoschematicSvg(representative, { annotations: { components: true } })
+    expect(componentsOnly).toContain('class="infoschematic-code"')
+    expect(componentsOnly).not.toContain('infoschematic-flow-annotation')
+
+    // A Point and a Region are not what the live view's tags cover, so asking for every tag does not reach them.
+    expect(every).not.toContain('data-artefact-kind="region" data-code=')
+    expect(renderInfoschematicSvg(representative, { annotations: false })).toBe(renderInfoschematicSvg(representative))
+  })
+
+  it('draws the code of every element whose author said it carries one, with nothing asked for', () => {
+    const authored: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        cards: representative.infoschematic.cards.map((card) => ({ ...card, identity: card.id === 'target' })),
+        flows: representative.infoschematic.flows.map((flow) => ({ ...flow, identity: true })),
+        points: [
+          { code: 'PNT-001', id: 'sink', identity: true, label: 'Sink', point: { x: 360, y: 200 }, scopes: ['two'] }
+        ],
+        regions: representative.infoschematic.regions.map((region) => ({
+          ...region,
+          identity: region.id === 'runtime'
+        }))
+      }
+    }
+    const drawn = renderInfoschematicSvg(authored)
+
+    expect(drawn).toContain('data-artefact-kind="region" data-code="runtime"')
+    expect(drawn).toContain('data-artefact-kind="point" data-code="PNT-001"')
+    expect(drawn).toContain('class="infoschematic-flow-annotation"')
+    // The Card that says it carries its code draws it in its own detail row; the one that says nothing draws none.
+    expect(drawn).toContain('class="infoschematic-card-identity"')
+    expect(drawn.match(/class="infoschematic-card-identity"/g)).toHaveLength(1)
+    expect(drawn).toContain('>TWO-001</text>')
+    expect(drawn).not.toContain('>ONE-001</text>')
+
+    // The Diagram's own default says the same thing for everything that stated nothing.
+    const wholeDiagram = renderInfoschematicSvg({
+      ...representative,
+      infoschematic: { ...representative.infoschematic, appearance: { identity: true } }
+    })
+    expect(wholeDiagram.match(/class="infoschematic-card-identity"/g)).toHaveLength(2)
+    expect(wholeDiagram).toContain('data-artefact-kind="region" data-code="runtime"')
   })
 
   it('resolves readable ink from each fill and marks it for treatment parity', () => {

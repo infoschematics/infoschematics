@@ -133,6 +133,24 @@ const emphasisOutlines = (output: string) =>
     ].map((match) => [match[1] as string, match[2] as string])
   )
 
+/**
+ * Every code a rendering draws because the document pinned it to the element, keyed by the element that carries it.
+ *
+ * The two renderers name the drawing differently - Canvas reuses the annotation layer's classes, the static one
+ * names the code layer - so the comparable thing is the element, its kind, and the rectangle its code was given.
+ */
+const pinnedCodes = (output: string) =>
+  Object.fromEntries(
+    [
+      ...output.matchAll(
+        /data-artefact-id="([^"]+)" data-artefact-kind="([^"]+)"><rect class="audit-component-code-bg"[^>]*?width="([\d.]+)" x="([\d.-]+)" y="([\d.-]+)"|<g class="infoschematic-(?:code|flow-annotation)" data-artefact-id="([^"]+)" data-artefact-kind="([^"]+)"[^>]*>\s*<rect[^>]*?width="([\d.]+)" x="([\d.-]+)" y="([\d.-]+)"/g
+      )
+    ].map((match) => {
+      const [id, kind, width, x, y] = match[1] ? match.slice(1, 6) : match.slice(6, 11)
+      return [`${kind}:${id}`, `${width}@${x},${y}`]
+    })
+  )
+
 const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data-compact') => ({
   compact: output.includes(`${compactAttribute}="true"`),
   dataInks: values(output, 'data-ink'),
@@ -469,6 +487,91 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain(`x="120" y="${below}"`)
       expect(markup).toContain('>Junction</text>')
     }
+  })
+
+  it('draws a code the author pinned to an element in the same place in both renderers', () => {
+    const pinned = defineInfoschematic({
+      title: 'Pinned code reference',
+      infoschematic: {
+        scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
+        flowFamilies: [{ color: '#79c9ff', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
+        regions: [{ box: { height: 200, width: 400, x: 10, y: 10 }, id: 'runtime', identity: true, label: 'Runtime' }],
+        fabrics: [
+          {
+            code: 'FAB-001',
+            detail: 'Fabric detail',
+            id: 'fabric',
+            identity: true,
+            label: 'Fabric',
+            placement: { box: { height: 60, width: 180, x: 30, y: 30 } },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        cards: [
+          {
+            code: 'ONE-001',
+            detail: 'Source node',
+            id: 'source',
+            identity: true,
+            label: 'Source',
+            placement: { box: { height: 60, width: 160, x: 30, y: 120 }, ports: { east: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          },
+          {
+            code: 'ONE-002',
+            detail: 'Target node',
+            id: 'target',
+            label: 'Target',
+            placement: { box: { height: 60, width: 160, x: 250, y: 120 }, ports: { west: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        points: [
+          {
+            code: 'PT-001',
+            id: 'junction',
+            identity: true,
+            label: 'Junction',
+            point: { x: 200, y: 220 },
+            scopes: ['one']
+          }
+        ],
+        flows: [
+          {
+            code: 'CALL-001',
+            family: 'calls',
+            id: 'call',
+            identity: true,
+            points: [],
+            source: 'source',
+            sourcePort: 'E1',
+            target: 'target',
+            targetPort: 'W1'
+          }
+        ]
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: pinned }))
+    const svg = renderInfoschematicSvg(pinned)
+
+    // `ROUTE-021` requires one rectangle wherever a code came from, and a pinned code is drawn with no reader
+    // request at all, so the two renderers have no shared toggle to agree through: they agree or they differ.
+    expect(pinnedCodes(canvas)).toEqual(pinnedCodes(svg))
+    expect(pinnedCodes(svg)).toEqual({
+      'fabric:FAB-001': '56@150,35',
+      'flow:CALL-001': '61@189.5,140',
+      'point:PT-001': '56@172,186',
+      'region:runtime': '56@350,15'
+    })
+    // The Card that carries its code draws it in its own identity chip, in the same slot in both, and the Card
+    // that says nothing draws none: a diagram that never mentioned Cards is not making them all speak.
+    expect(cardText(canvas)).toEqual(cardText(svg))
+    expect(cardText(svg).identity).toEqual(['92.5,8'])
+    for (const markup of [canvas, svg]) expect(markup).toContain('>ONE-001</text>')
+    for (const markup of [canvas, svg]) expect(markup).not.toContain('>ONE-002</text>')
   })
 
   it('claps an Adapter Card round the Card it holds, identically in both renderers', () => {
