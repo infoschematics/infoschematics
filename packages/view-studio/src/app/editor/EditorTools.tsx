@@ -24,8 +24,6 @@ import {
   RectangleHorizontal,
   Shapes,
   Spline,
-  SquarePlus,
-  SquareStack,
   Workflow
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -124,12 +122,10 @@ function GridSizeControl({ onChange, value }: Readonly<{ onChange?: (gridSize: n
  */
 export function EditorTools({
   canRoute,
-  canWrap,
   gridSize,
   groupCount = 0,
   onAddWaypoint,
   onAlign,
-  onCreateCard,
   onDistribute,
   onGridSizeChange,
   onResetRoute,
@@ -139,14 +135,11 @@ export function EditorTools({
 }: {
   /** A flow is selected, so its route can be worked on. */
   canRoute?: boolean
-  /** A card is selected that could take an adapter, and has not got one. */
-  canWrap?: boolean
   gridSize: number
   /** How many held elements a group operation would move. Two can be aligned; three is the least that can be spaced. */
   groupCount?: number
   onAddWaypoint?: () => void
   onAlign?: (edge: AlignEdge) => void
-  onCreateCard?: (kind: 'adapter' | 'card') => void
   onDistribute?: (axis: DistributeAxis) => void
   onGridSizeChange?: (gridSize: number) => void
   onResetRoute?: () => void
@@ -254,33 +247,8 @@ export function EditorTools({
 
       <span className="tool-divider" />
 
-      <button
-        aria-label="Add a Card"
-        className="tool-button"
-        disabled={!onCreateCard}
-        onClick={() => onCreateCard?.('card')}
-        title="Add a standard card — a default card to name in the properties below"
-        type="button"
-      >
-        <SquarePlus aria-hidden="true" size={15} />
-      </button>
-
-      <span className="tool-divider" />
-
-      <button
-        aria-label="Add an adapter around the selected card"
-        className="tool-button"
-        disabled={!canWrap}
-        onClick={() => onCreateCard?.('adapter')}
-        title={
-          canWrap
-            ? 'Add an adapter around the selected card'
-            : 'Select a card without an adapter — an adapter is drawn around the card it holds, and a card holds one'
-        }
-        type="button"
-      >
-        <SquareStack aria-hidden="true" size={15} />
-      </button>
+      {/* Creation lives in the Design controls below, all of it together: this toolbar is for working on what is
+          already drawn. `INFOSCHEMATICS-TOOL-097` moved the Card and Adapter buttons out of here. */}
       <button
         aria-label="Add a waypoint to the selected flow"
         className="tool-button"

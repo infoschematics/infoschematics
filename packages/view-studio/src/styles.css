@@ -2872,6 +2872,14 @@ button:focus-visible,
   margin-bottom: 10px;
 }
 
+/* Says what the list is, because it sits immediately under the kind buttons and
+   would otherwise read as one more of them. */
+.library-note {
+  color: #7892ad;
+  font-size: 10px;
+  margin: -2px 0 0;
+}
+
 .library-list {
   display: grid;
   gap: 2px;

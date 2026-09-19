@@ -22,6 +22,9 @@ export function LibraryPanel({ context, onInstantiate, templates = libraryTempla
   return (
     <section aria-label="Library" className="library-panel">
       <p className="eyebrow pane-heading">LIBRARY</p>
+      {/* A library entry is not a fifth kind. It is a starting point that produces one of the kinds above, and
+          sitting directly beneath those buttons is exactly where that would be misread. */}
+      <p className="library-note">Starting points that create one of the elements above.</p>
       <ul className="library-list">
         {available.map((template) => (
           <li key={template.metadata.key}>

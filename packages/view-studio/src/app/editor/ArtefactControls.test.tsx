@@ -24,6 +24,7 @@ const editor = (
   artefactCapabilities: selectedArtefact ? artefactCapabilities[selectedArtefact.kind] : undefined,
   artefactGeometry,
   artefactIssue: null,
+  canWrap: false,
   createArtefact: vi.fn() as unknown as ArtefactControlsEditor['createArtefact'],
   removeArtefact: vi.fn(),
   reorderArtefact: vi.fn(),
@@ -77,6 +78,23 @@ const matrix: readonly [ArtefactSelection, ArtefactGeometry, string][] = [
   ]
 ]
 
+/** The one group every creation is offered from, so a test can prove what is in it rather than what is on the page. */
+const creationGroup = (html: string): string => {
+  const opened = html.indexOf('aria-label="Create an element"')
+  expect(opened).toBeGreaterThan(-1)
+  const closed = html.indexOf('</div>', opened)
+  return html.slice(opened, closed)
+}
+
+const buttonLabelled = (html: string, label: string): string => {
+  const opened = html.indexOf(`<button aria-label="${label}"`)
+  expect(opened).toBeGreaterThan(-1)
+  return html.slice(opened, html.indexOf('</button>', opened))
+}
+
+const adapterButton = (html: string): string => buttonLabelled(html, 'Create Adapter')
+const cardButton = (html: string): string => buttonLabelled(html, 'Create Card')
+
 describe('ArtefactControls', () => {
   it.each(matrix)(
     'renders capability controls and type-appropriate geometry for $0.kind',
@@ -126,6 +144,57 @@ describe('ArtefactControls', () => {
     expect(html).toContain('aria-label="Create Region"')
     expect(html).toContain('aria-label="Create Graphic"')
     expect(html).toContain('Select a Region, Fabric, Card, Point, Flow, or Graphic')
+  })
+
+  // The point of the item: a Producer looking for "how do I add something" finds every kind in one group, rather
+  // than two of them here and two on a toolbar that names neither.
+  it('offers every kind from the one create group, in a fixed order', () => {
+    const html = renderToStaticMarkup(
+      <ArtefactControls editor={editor(null, undefined, { createCard: vi.fn() })} factoryContext={factoryContext} />
+    )
+
+    const group = creationGroup(html)
+    expect(group.match(/aria-label="Create (\w+)"/g)).toEqual([
+      'aria-label="Create Card"',
+      'aria-label="Create Adapter"',
+      'aria-label="Create Region"',
+      'aria-label="Create Graphic"'
+    ])
+  })
+
+  // An Adapter is drawn around the Card it holds, so it is the one creation with a precondition. It stays present
+  // and disabled with its reason in the title: a control that vanishes teaches a Producer nothing about why.
+  it('disables Adapter creation with nothing selected and says what would enable it', () => {
+    const html = renderToStaticMarkup(
+      <ArtefactControls editor={editor(null, undefined, { createCard: vi.fn() })} factoryContext={factoryContext} />
+    )
+
+    expect(adapterButton(html)).toContain('disabled')
+    expect(adapterButton(html)).toContain('Select a Card without an Adapter')
+    expect(cardButton(html)).not.toContain('disabled')
+  })
+
+  it('enables Adapter creation for a Card that can take one', () => {
+    const [selection, geometry] = matrix[2]!
+    const html = renderToStaticMarkup(
+      <ArtefactControls
+        editor={editor(selection, geometry, { canWrap: true, createCard: vi.fn() })}
+        factoryContext={factoryContext}
+      />
+    )
+
+    expect(adapterButton(html)).not.toContain('disabled')
+    expect(adapterButton(html)).toContain('An Adapter around the selected Card')
+  })
+
+  // Card and Adapter need identity and a Scope that the Infoschematic supplies, not Studio. A host that does not
+  // offer them leaves the buttons visible and inert rather than presenting a differently shaped panel.
+  it('disables Card and Adapter when the host offers no creation', () => {
+    const html = renderToStaticMarkup(<ArtefactControls editor={editor(null)} factoryContext={factoryContext} />)
+
+    expect(cardButton(html)).toContain('disabled')
+    expect(adapterButton(html)).toContain('disabled')
+    expect(html).toContain('aria-label="Create Region"')
   })
 })
 

@@ -4,6 +4,7 @@ import { artefactCapabilities, defineArtefactSelection } from '@infoschematics/v
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
+import { EditorTools } from '../editor/EditorTools.tsx'
 import { regionTreatmentPatch } from '../editor/region-treatments.ts'
 import {
   artefactControlsEditorFor,
@@ -201,6 +202,47 @@ describe('DetailsPanel typed Design controls', () => {
     expect(html).not.toContain('aria-label="Add Directed flow"')
     expect(html).toContain('Graphic graphic-one is referenced by a Story')
     expect(html).toContain('PROPERTIES')
+  })
+
+  // The other half of `EDIT-023`: "one place" is only true if the place it used to also be has stopped offering it.
+  // The Canvas toolbar acts on what is already drawn, and a creation control there is what this asserts is gone.
+  it('keeps every creation in the Design controls and none on the Canvas toolbar', () => {
+    const selected = editor({
+      artefactCapabilities: artefactCapabilities.card,
+      canWrap: true,
+      selectedArtefact: defineArtefactSelection({ code: 'CARD-01', geometry: 'box', id: 'card-one', kind: 'card' })
+    })
+    const contexts = detailsArtefactContexts(config, selected)
+    const onCreateCard = vi.fn()
+    const panel = renderToStaticMarkup(
+      <InfoschematicContext.Provider value={createInfoschematicRuntime(config)}>
+        <DesignDetails contexts={contexts} editor={selected} onCreateCard={onCreateCard} />
+      </InfoschematicContext.Provider>
+    )
+    const toolbar = renderToStaticMarkup(
+      <EditorTools
+        canRoute={selected.canRoute}
+        gridSize={8}
+        groupCount={selected.groupCount}
+        layers={selected.layers}
+        mode="design"
+        onAlign={selected.alignArtefacts}
+        onDistribute={selected.distributeArtefacts}
+        onToggleLayer={selected.toggleLayer}
+      />
+    )
+
+    for (const label of ['Create Card', 'Create Adapter', 'Create Region', 'Create Graphic']) {
+      expect(panel).toContain(`aria-label="${label}"`)
+    }
+    for (const gone of ['Create', 'aria-label="Add a Card"', 'aria-label="Add an adapter around the selected card"']) {
+      expect(toolbar).not.toContain(gone)
+    }
+    // Not a toolbar emptied of everything: the tools that work on a drawn element are still there.
+    expect(toolbar).toContain('aria-label="Add a waypoint to the selected flow"')
+
+    artefactControlsEditorFor(selected, onCreateCard).createCard?.('adapter')
+    expect(onCreateCard).toHaveBeenCalledWith('adapter')
   })
 
   it('adapts property patches to the selected Region', () => {

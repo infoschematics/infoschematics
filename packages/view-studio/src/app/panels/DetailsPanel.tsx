@@ -244,12 +244,17 @@ export const detailsArtefactContexts = (
   }
 }
 
-export const artefactControlsEditorFor = (editor: DetailsPanelEditor): ArtefactControlsEditor => ({
+export const artefactControlsEditorFor = (
+  editor: DetailsPanelEditor,
+  onCreateCard?: (kind: 'adapter' | 'card') => void
+): ArtefactControlsEditor => ({
   artefactCapabilities: editor.artefactCapabilities,
   artefactGeometry: editor.artefactGeometry,
   artefactIssue: editor.artefactIssue,
   artefactValue: editor.artefactValue,
+  canWrap: editor.canWrap,
   createArtefact: editor.createArtefact,
+  createCard: onCreateCard,
   removeArtefact: editor.removeArtefact,
   reorderArtefact: editor.reorderArtefact,
   replaceArtefactProperties: (properties) => {
@@ -265,12 +270,17 @@ export const artefactControlsEditorFor = (editor: DetailsPanelEditor): ArtefactC
 
 export function DesignDetails({
   contexts,
-  editor
-}: Readonly<{ contexts: ArtefactContexts; editor: DetailsPanelEditor }>) {
+  editor,
+  onCreateCard
+}: Readonly<{
+  contexts: ArtefactContexts
+  editor: DetailsPanelEditor
+  onCreateCard?: (kind: 'adapter' | 'card') => void
+}>) {
   return (
     <>
       <ArtefactControls
-        editor={artefactControlsEditorFor(editor)}
+        editor={artefactControlsEditorFor(editor, onCreateCard)}
         factoryContext={contexts.factory}
         libraryContext={contexts.library}
       />
@@ -726,13 +736,11 @@ export function DetailsPanel({
             <EditorTools
               mode={mode}
               canRoute={editor.canRoute}
-              canWrap={editor.canWrap}
               gridSize={canonicalConfig.diagram.gridSize}
               groupCount={editor.groupCount}
               onAlign={editor.alignArtefacts}
               onDistribute={editor.distributeArtefacts}
               onAddWaypoint={onAddWaypoint}
-              onCreateCard={onCreateCard}
               onGridSizeChange={onGridSizeChange}
               onResetRoute={onResetRoute}
               layers={editor.layers}
@@ -750,7 +758,7 @@ export function DetailsPanel({
                 editing showed a story. */}
             <div className="editor-panes">
               {presentation.mode === 'design' ? (
-                <DesignDetails contexts={artefactContexts} editor={editor} />
+                <DesignDetails contexts={artefactContexts} editor={editor} onCreateCard={onCreateCard} />
               ) : directUsesThemes ? (
                 <>
                   <p className="eyebrow pane-heading">THEMES</p>

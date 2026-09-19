@@ -244,6 +244,16 @@ _Verify:_ `packages/view-studio/src/app/editor/document-history.test.ts` covers 
 
 _Evidence:_ `useDocumentTimeline` records structured document results from `AppContent`, records validated Source-tab replacements, and emits prior or later validated documents through `onDocumentReplace`.
 
+### EDIT-023 — Creation is offered from one place
+
+In Design, Studio MUST offer the creation of every directly creatable element kind from a single labelled group, and MUST keep a creation whose precondition is unmet present and disabled with the precondition stated rather than withdrawing it.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/ArtefactControls.test.tsx` asserts the four creations appear in the one `Create an element` group in a fixed order, and that Adapter is disabled with its precondition in the title while Card is not; `packages/view-studio/src/app/panels/DetailsPanel.artefacts.test.tsx` asserts the Canvas toolbar carries no creation control.
+
+_Evidence:_ `packages/view-studio/src/app/editor/ArtefactControls.tsx` renders Card, Adapter, Region and Graphic in one `role="group"` under `CREATE`, taking Card and Adapter from the host's `createCard` and Region and Graphic from the local factories; `packages/view-studio/src/app/editor/EditorTools.tsx` carries selection and route tools only; `packages/view-studio/src/app/editor/LibraryPanel.tsx` names its entries as starting points that produce one of those kinds.
+
 ## Gaps
 
 - `EDIT-018`'s compositions are recorded in [Composition](composition.md): with `ROUTE-001` as `COMPOSE-002`, where a committed move of a Card can leave a route the renderer refuses, and with `PRESENT-010` as `COMPOSE-005`, over the keystrokes a placement field and the Diagram's zoom control both claim.

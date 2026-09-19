@@ -39,6 +39,10 @@ export type ArtefactControlsEditor = Readonly<{
     value: ArtefactValueByKind[K],
     index: number
   ) => ArtefactSelection | undefined
+  /** Whether the selection is a Card that could take an Adapter, which is the one creation that needs one. */
+  canWrap: boolean
+  /** Card and Adapter creation, which the Infoschematic supplies identity and Scope for rather than Studio. */
+  createCard?: (kind: 'adapter' | 'card') => void
   removeArtefact: () => string | undefined
   reorderArtefact: (direction: -1 | 1) => void
   replaceArtefactProperties: (properties: ArtefactPropertyPatch) => void
@@ -121,8 +125,37 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
   return (
     <section aria-label="Design controls" className="artefact-controls">
       <p className="eyebrow pane-heading">CREATE</p>
+      {/* Every kind in one group, in the order a Producer reaches for them. A Card used to be added from the Canvas
+          toolbar and a Region from here, which is a split nobody could infer - and the toolbar's own Card button
+          sent the Producer straight back to this panel to name what it made. */}
       {/* biome-ignore lint/a11y/useSemanticElements: a toolbar-style button group, not a form control group; fieldset default chrome does not fit. */}
-      <div aria-label="Create structural artefact" className="artefact-actions" role="group">
+      <div aria-label="Create an element" className="artefact-actions" role="group">
+        <button
+          aria-label="Create Card"
+          className="action-button"
+          disabled={!editor.createCard}
+          onClick={() => editor.createCard?.('card')}
+          title="A default Card to name in the properties below"
+          type="button"
+        >
+          Card
+        </button>
+        {/* The one creation that cannot stand alone: an Adapter is drawn around the Card it holds, so with nothing
+            held there is nothing to draw it around. It stays visible and says why rather than disappearing. */}
+        <button
+          aria-label="Create Adapter"
+          className="action-button"
+          disabled={!editor.createCard || !editor.canWrap}
+          onClick={() => editor.createCard?.('adapter')}
+          title={
+            editor.canWrap
+              ? 'An Adapter around the selected Card'
+              : 'Select a Card without an Adapter — an Adapter is drawn around the Card it holds, and a Card holds one'
+          }
+          type="button"
+        >
+          Adapter
+        </button>
         <button aria-label="Create Region" className="action-button" onClick={() => create('region')} type="button">
           Region
         </button>
