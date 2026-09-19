@@ -1,35 +1,49 @@
 import type { InfoschematicConfig } from '@infoschematics/domain-core'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { SpecimenKind } from './curriculum.ts'
+import { Icon } from './Icon.tsx'
 import { type SpecimenSnippetFormat, specimenSnippet } from './specimens.ts'
+
+/* A copy that worked has said all it has to say; one that failed carries an instruction the reader still needs. */
+const successNoticeDuration = 2400
 
 export function SpecimenSnippet({
   config,
   kind,
-  expanded = false
+  expanded = false,
+  onReset,
+  onToggleExpand
 }: {
   config: InfoschematicConfig
   kind: SpecimenKind
   expanded?: boolean
+  onReset?: () => void
+  onToggleExpand?: () => void
 }) {
   const [format, setFormat] = useState<SpecimenSnippetFormat>('yaml')
-  const [feedback, setFeedback] = useState('')
+  const [notice, setNotice] = useState<{ message: string; transient: boolean } | null>(null)
   const source = specimenSnippet(config, kind, format)
   const panelId = `${kind}-snippet`
+
+  useEffect(() => {
+    if (!notice?.transient) return
+    const timer = setTimeout(() => setNotice(null), successNoticeDuration)
+    return () => clearTimeout(timer)
+  }, [notice])
 
   const copySnippet = async () => {
     try {
       if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable')
       await navigator.clipboard.writeText(source)
-      setFeedback(`${format === 'yaml' ? 'YAML' : 'TypeScript'} copied.`)
+      setNotice({ message: `${format === 'yaml' ? 'YAML' : 'TypeScript'} copied.`, transient: true })
     } catch {
-      setFeedback('Could not copy. Select the snippet and copy it manually.')
+      setNotice({ message: 'Could not copy. Select the snippet to copy it manually.', transient: false })
     }
   }
 
   const selectFormat = (next: SpecimenSnippetFormat) => {
     setFormat(next)
-    setFeedback('')
+    setNotice(null)
   }
 
   return (
@@ -49,18 +63,39 @@ export function SpecimenSnippet({
             </button>
           ))}
         </div>
-        <button
-          aria-label="Copy snippet"
-          className="specimen-snippet__copy"
-          onClick={copySnippet}
-          title="Copy snippet"
-          type="button"
-        >
-          <svg aria-hidden="true" className="demo-frame__icon" viewBox="0 0 16 16">
-            <rect height="10" rx="1" width="9" x="6" y="6" />
-            <path d="M4 4h9v2M4 4v9h2" />
-          </svg>
-        </button>
+        <div className="specimen-snippet__actions">
+          {/* The region is mounted whether or not it holds anything, so the first copy is an update to announce
+              rather than a new region to discover. It reports its own emptiness rather than leaving that to
+              `:empty`, which an empty text node quietly defeats. */}
+          <p aria-live="polite" className="specimen-snippet__notice" data-empty={notice === null}>
+            {notice?.message ?? null}
+          </p>
+          <button
+            aria-label="Copy snippet"
+            className="specimen-snippet__copy"
+            onClick={copySnippet}
+            title="Copy snippet"
+            type="button"
+          >
+            <Icon name="copy" />
+          </button>
+          {onReset ? (
+            <button aria-label="Reset example" onClick={onReset} title="Reset example" type="button">
+              <Icon name="reset" />
+            </button>
+          ) : null}
+          {onToggleExpand ? (
+            <button
+              aria-expanded={expanded}
+              aria-label={expanded ? 'Collapse source' : 'Expand source'}
+              onClick={onToggleExpand}
+              title={expanded ? 'Collapse source' : 'Expand source'}
+              type="button"
+            >
+              <Icon name="expand" />
+            </button>
+          ) : null}
+        </div>
       </header>
       <pre
         aria-label={`${format} source`}
@@ -72,9 +107,6 @@ export function SpecimenSnippet({
       >
         <code>{source}</code>
       </pre>
-      <p aria-live="polite" className="specimen-snippet__feedback">
-        {feedback}
-      </p>
     </section>
   )
 }

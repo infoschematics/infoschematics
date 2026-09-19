@@ -965,10 +965,6 @@ a:focus-visible {
   background: #79c9ff;
 }
 
-.specimen-snippet__copy {
-  margin-left: auto;
-}
-
 .specimen-snippet pre {
   max-height: 340px;
   margin: 0;
@@ -981,13 +977,26 @@ a:focus-visible {
   tab-size: 2;
 }
 
-.specimen-snippet__feedback {
-  min-height: 20px;
-  margin: 0;
-  padding: 0 12px 7px;
+.specimen-snippet__actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.specimen-snippet__notice {
+  margin: 0 4px 0 0;
   color: #8fa8bc;
   font-size: 11px;
   text-align: right;
+}
+
+.specimen-snippet__actions button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  padding: 6px;
+  place-items: center;
 }
 
 .visual-guide__property-reference {
@@ -998,29 +1007,8 @@ a:focus-visible {
   background: #0d2031;
 }
 
-.visual-guide__property-reference summary {
-  display: flex;
-  gap: 16px;
-  align-items: baseline;
-  justify-content: space-between;
-  padding: 13px 16px;
-  color: #f5f8ff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 650;
-  list-style-position: inside;
-}
-
-.visual-guide__property-reference summary span {
-  color: #8fa8bc;
-  font:
-    500 11px/1.4 "DM Mono",
-    monospace;
-}
-
 .visual-guide__property-table {
   overflow-x: auto;
-  border-top: 1px solid #ffffff16;
 }
 
 .visual-guide__property-table table {

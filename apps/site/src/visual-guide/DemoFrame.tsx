@@ -7,39 +7,10 @@ import type { SpecimenKind } from './curriculum.ts'
 import { SpecimenSnippet } from './SpecimenSnippet.tsx'
 import './DemoFrame.css'
 
-type IconName = 'copy' | 'expand' | 'reset'
-
 export interface DemoVariant {
   config: InfoschematicConfig
   id: string
   label: string
-}
-
-function Icon({ name }: { name: IconName }) {
-  const paths = {
-    copy: (
-      <>
-        <rect height="10" rx="1" width="9" x="6" y="6" />
-        <path d="M4 4h9v2M4 4v9h2" />
-      </>
-    ),
-    expand: (
-      <>
-        <path d="M3 8V3h5M3 3l5 5M13 8v5H8M13 13l-5-5" />
-      </>
-    ),
-    reset: (
-      <>
-        <path d="M3 7a5 5 0 1 1 1 5" />
-        <path d="M3 3v4h4" />
-      </>
-    )
-  } as const
-  return (
-    <svg aria-hidden="true" className="demo-frame__icon" viewBox="0 0 16 16">
-      {paths[name]}
-    </svg>
-  )
 }
 
 export function DemoFrame({
@@ -113,24 +84,14 @@ export function DemoFrame({
           )
         })}
       </div>
-      <div className="demo-frame__controls">
-        {propertyControls}
-        <div className="demo-frame__actions">
-          <button aria-label="Reset example" onClick={resetFrame} title="Reset example" type="button">
-            <Icon name="reset" />
-          </button>
-          <button
-            aria-expanded={expanded}
-            aria-label={expanded ? 'Collapse source' : 'Expand source'}
-            onClick={() => setExpanded((value) => !value)}
-            title={expanded ? 'Collapse source' : 'Expand source'}
-            type="button"
-          >
-            <Icon name="expand" />
-          </button>
-        </div>
-      </div>
-      <SpecimenSnippet config={config} kind={kind} expanded={expanded} />
+      <div className="demo-frame__controls">{propertyControls}</div>
+      <SpecimenSnippet
+        config={config}
+        expanded={expanded}
+        kind={kind}
+        onReset={resetFrame}
+        onToggleExpand={() => setExpanded((value) => !value)}
+      />
     </section>
   )
 }

@@ -37,7 +37,14 @@ describe('components guide', () => {
     expect(page).toContain('id="canvas-properties"')
     expect(page).toContain('major dots')
     expect(page).toContain('Pattern × Intervals')
-    expect(page).toContain('Property reference')
+    /* The reference is the section's whole point: it is read, not opened. Other disclosures on the page are
+       their own business, so this reads the properties section rather than the whole document. */
+    const properties = page.slice(page.indexOf('id="canvas-properties"'))
+    expect(properties).toContain('visual-guide__property-table')
+    expect(properties).toContain('<th scope="col">What it controls</th>')
+    expect(properties).not.toContain('<details')
+    expect(properties).not.toContain('<summary>')
+    expect(properties).not.toContain('groups</span>')
   })
 
   it('shows supported Card variants side by side in one demo', () => {

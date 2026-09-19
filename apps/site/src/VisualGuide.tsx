@@ -211,11 +211,8 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
         </section>
         <section aria-labelledby={`${component.id}-properties`} className="component-page__section">
           <h2 id={`${component.id}-properties`}>Properties</h2>
-          <p>Open the reference for the portable fields represented by this component.</p>
-          <details className="visual-guide__property-reference">
-            <summary>
-              Property reference <span>{component.properties.length} groups</span>
-            </summary>
+          <p>The portable fields this component represents.</p>
+          <div className="visual-guide__property-reference">
             <div className="visual-guide__property-table">
               <table>
                 <thead>
@@ -236,7 +233,7 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
                 </tbody>
               </table>
             </div>
-          </details>
+          </div>
         </section>
       </article>
     </Shell>
