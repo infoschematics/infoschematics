@@ -1,3 +1,4 @@
+import type { Box } from '@infoschematics/domain-model/geometry'
 import { describe, expect, it } from 'vitest'
 import {
   createLibraryIdentityAllocator,
@@ -39,8 +40,10 @@ describe('Library templates', () => {
   it('allocates fresh stable identities while avoiding those already authored', () => {
     const allocate = createLibraryIdentityAllocator({ codes: ['CRD-001'], ids: ['card-1'] })
 
-    expect(allocate('card')).toEqual({ code: 'CRD-002', id: 'card-2' })
-    expect(allocate('card')).toEqual({ code: 'CRD-003', id: 'card-3' })
+    // The id is the code: that is the identity the model publishes, and an element that answers to two names
+    // answers to neither once it is drawn.
+    expect(allocate('card')).toEqual({ code: 'CRD-002', id: 'CRD-002' })
+    expect(allocate('card')).toEqual({ code: 'CRD-003', id: 'CRD-003' })
   })
 
   it('instantiates a domain-shaped Card at the contextual box as one create operation', () => {
@@ -83,6 +86,28 @@ describe('Library templates', () => {
     expect(first.value).not.toHaveProperty('provenance')
     expect(JSON.stringify(first)).not.toContain('platform-fabric')
     expect(JSON.stringify(first)).not.toContain('bounded Fabric')
+  })
+
+  it('keeps the template’s own size where the context carries a box of its own', () => {
+    // The panel hands over the rectangle it placed the element in, width and height included. Only its position is
+    // the context's to say: a Square card spread from that box came out 240 by 120, which is the panel's size.
+    const placed: Box = { height: 120, width: 240, x: 320, y: 180 }
+    const square = libraryTemplates.find((entry) => entry.metadata.key === 'square-card')
+    if (!square) throw new Error('Missing square-card template')
+    const operation = instantiateLibraryTemplate(square, { ...context(), box: placed })
+    if (!operation || !('placement' in operation.value)) throw new Error('Expected a Card operation')
+
+    expect(operation.value.placement.box).toEqual({ height: 120, width: 120, x: 320, y: 180 })
+  })
+
+  it('names the Collection it was given, and none where the document declares none', () => {
+    const joined = instantiateLibraryTemplate(template('card'), { ...context(), collection: 'core' })
+    const alone = instantiateLibraryTemplate(template('card'), context())
+    if (!joined || !alone) throw new Error('Expected Card operations')
+
+    expect(joined.value).toMatchObject({ domain: 'core' })
+    // Not `undefined` but absent: a Collection the document never declared cannot be read back.
+    expect(alone.value).not.toHaveProperty('domain')
   })
 
   it('creates a valid orthogonal Flow from contextual endpoints and ports', () => {

@@ -1606,3 +1606,159 @@ diagram:
   expect(writtenLines()[0]).toContain('CARD-A')
   expect(dropped).not.toBe('translate(20 40)')
 })
+
+/*
+ * An element made this session can be dragged, like every other element.
+ *
+ * Found by user-acceptance testing, verbatim: "When a new node is created, you can't click and drag to move it."
+ * A created Card exists only in the create operation until the host applies the change set, so a drag against the
+ * diagram alone found nothing to move and the Card sat where the Library had put it.
+ */
+test('a Card added from the Library moves when it is dragged, as an authored Card does', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: MADE
+title: Made then moved
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+scopes:
+  - id: SCOPE
+    label: Scope
+    elements: [CARD-A]
+`)
+  if (!parsed.ok) throw new Error('creation fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
+
+  const drawnCards = () =>
+    [...container.querySelectorAll<SVGGElement>('[data-artefact-kind="card"]')].flatMap((element) => {
+      const id = element.getAttribute('data-artefact-id')
+      return id && id !== 'CARD-A' ? [id] : []
+    })
+  const addSquare = container.querySelector<HTMLButtonElement>('button[aria-label="Add Square card"]')
+  if (!addSquare) throw new Error('Studio did not render the Library')
+  addSquare.click()
+
+  await expect.poll(() => drawnCards().length).toBe(1)
+  const madeId = drawnCards()[0]
+  const made = () => container.querySelector<SVGGElement>(`[data-artefact-id="${madeId}"]`)
+  const placedAt = made()?.getAttribute('transform')
+  if (!placedAt) throw new Error('created Card was drawn without a placement')
+  const [, left, top] = /translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(placedAt) ?? []
+  const shape = made()?.querySelector('rect')
+  const centre = {
+    x: Number(left) + Number(shape?.getAttribute('width')) / 2,
+    y: Number(top) + Number(shape?.getAttribute('height')) / 2
+  }
+
+  /* Read afresh each time rather than held: writing the creation to the host fills the change pane, which lays the
+     diagram out again, and a transform taken before that maps the same diagram coordinate somewhere else. */
+  const at = (x: number, y: number) => {
+    const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+    const matrix = svg?.getScreenCTM()
+    if (!svg || !matrix) throw new Error('rendered Studio diagram has no screen transform')
+    const point = svg.createSVGPoint()
+    point.x = x
+    point.y = y
+    const screen = point.matrixTransform(matrix)
+    return { clientX: screen.x, clientY: screen.y }
+  }
+
+  const held = made()
+  if (!held) throw new Error('created Card left the diagram')
+  held.dispatchEvent(
+    new PointerEvent('pointerdown', { ...at(centre.x, centre.y), bubbles: true, button: 0, pointerId: 71 })
+  )
+  await expect.poll(() => made()?.classList.contains('selected')).toBe(true)
+  for (const step of [1, 2, 3, 4]) {
+    window.dispatchEvent(
+      new PointerEvent('pointermove', { ...at(centre.x, centre.y + step * 12), bubbles: true, pointerId: 71 })
+    )
+  }
+  // It follows the hand while the hand is still moving, exactly as an authored Card does.
+  await expect.poll(() => made()?.getAttribute('transform')).not.toBe(placedAt)
+
+  window.dispatchEvent(
+    new PointerEvent('pointerup', { ...at(centre.x, centre.y + 48), bubbles: true, button: 0, pointerId: 71 })
+  )
+  // Dropped 48 past a grid of 10, so the Card comes to rest 50 below where the Library left it.
+  await expect.poll(() => made()?.getAttribute('transform')).toBe(`translate(${left} ${Number(top) + 50})`)
+
+  /* The host has the Card where it was dropped rather than where it was made, and it stays there once the written
+     document comes back round - which is the whole of what the reporter could not do. */
+  const writtenLines = () =>
+    [...container.querySelectorAll('.change-panel .change-written code')].map((line) => line.textContent ?? '')
+  await expect.poll(() => writtenLines().some((line) => line.includes(madeId))).toBe(true)
+  expect(made()?.getAttribute('transform')).toBe(`translate(${left} ${Number(top) + 50})`)
+})
+test('withholds Card creation where the document declares no Scope', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: SCOPELESS
+title: No Scope declared
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+`)
+  if (!parsed.ok) throw new Error('scope-less fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  const createCard = () => container.querySelector<HTMLButtonElement>('button[aria-label="Create Card"]')
+  await expect.poll(() => createCard()).not.toBeNull()
+  // Offered and disabled rather than missing, and saying why: the control belongs to Design either way.
+  expect(createCard()?.disabled).toBe(true)
+  expect(createCard()?.title).toContain('declares no Scope')
+
+  /* Pressing it anyway must leave the app standing. Before this, the handler read the first declared Scope without
+     asking whether there was one, and the click tore the tree down mid-render. */
+  createCard()?.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  expect(container.querySelectorAll('[data-artefact-kind="card"]').length).toBe(1)
+})

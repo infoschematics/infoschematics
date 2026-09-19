@@ -254,6 +254,26 @@ _Verify:_ `packages/view-studio/src/app/editor/ArtefactControls.test.tsx` assert
 
 _Evidence:_ `packages/view-studio/src/app/editor/ArtefactControls.tsx` renders Card, Adapter, Region and Graphic in one `role="group"` under `CREATE`, taking Card and Adapter from the host's `createCard` and Region and Graphic from the local factories; `packages/view-studio/src/app/editor/EditorTools.tsx` carries selection and route tools only; `packages/view-studio/src/app/editor/LibraryPanel.tsx` names its entries as starting points that produce one of those kinds.
 
+### EDIT-024 — A created element answers to one name
+
+A coded element Studio creates MUST carry a single identity, and that identity MUST be its code: the `id` the creating operation names MUST be the code the element is drawn under, so every selection, move, resize and property edit made against what is drawn reaches the operation that made it.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/library.test.ts` asserts the allocator issues `id` equal to `code` while avoiding both authored sets; `packages/view-studio/src/app/App.browser.test.tsx` drags a Card added from the Library and asserts it follows the pointer, comes to rest where it was dropped, and is named in the written record.
+
+_Evidence:_ `createLibraryIdentityAllocator` in `packages/view-studio/src/app/editor/library.ts` issues one string as both fields; `infoschematicModelOf` in `packages/domain-core/src/model.ts` publishes an element's code as its `id`, which is why a second name was never visible to anything that matched against what was drawn.
+
+### EDIT-025 — A creation names only what the document declares
+
+An element Studio creates MUST take its Collection from the document — the Collection of what is selected, or the first the document declares — and MUST omit it where the document declares none; a template MUST be placed at the position it is given while keeping its own size.
+
+_Conformance:_ conforming
+
+_Verify:_ `packages/view-studio/src/app/editor/library.test.ts` asserts the given Collection is named, that none is written where none is given, and that a Square card placed in a wider rectangle keeps its 120 by 120; `packages/view-studio/src/app/App.browser.test.tsx` asserts a Card added from the Library reaches the written record, which only a projection the document accepts can do.
+
+_Evidence:_ `detailsArtefactContexts` in `packages/view-studio/src/app/panels/DetailsPanel.tsx` supplies `collection`, and `instantiateLibraryTemplate` in `packages/view-studio/src/app/editor/library.ts` writes `domain` only when it has one and places through `placedBox`. Naming a Scope as though it were a Collection made a document `projectStudioDocumentOperations` rejected whole, so nothing was written at all.
+
 ## Gaps
 
 - `EDIT-018`'s compositions are recorded in [Composition](composition.md): with `ROUTE-001` as `COMPOSE-002`, where a committed move of a Card can leave a route the renderer refuses, and with `PRESENT-010` as `COMPOSE-005`, over the keystrokes a placement field and the Diagram's zoom control both claim.

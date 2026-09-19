@@ -701,15 +701,19 @@ function AppContent({
   /*
    * A new Card starts in the first configured Scope. An adapter inherits the
    * Scope of the Card it wraps because it has no independent ownership.
+   *
+   * A document that declares no Scope has nowhere for a Card to start and no
+   * prefix to issue its code from, so the control is withheld rather than
+   * offered and then reaching past the end of the list.
    */
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const createCard = useCallback(
     (kind: 'adapter' | 'card') => {
       const held = kind === 'adapter' ? wrappable : undefined
       if (kind === 'adapter' && !held) return
-      const scope = held?.group ?? infoschematicScopes[0].id
-      const prefix = infoschematicScopes.find((entry) => entry.id === scope)?.prefix
-      if (!prefix) return
+      const scope = held?.group ?? infoschematicScopes[0]?.id
+      const prefix = scope ? infoschematicScopes.find((entry) => entry.id === scope)?.prefix : undefined
+      if (!scope || !prefix) return
 
       const label = held ? `${held.label} adapter` : 'New card'
       const taken = [...infoschematicRegister.all.map((entry) => entry.code), ...Object.keys(editor.cards)]
@@ -1294,7 +1298,7 @@ function AppContent({
               selectedIsFlow: Boolean(selectedRoute)
             }}
             onAddWaypoint={addWaypoint}
-            onCreateCard={createCard}
+            onCreateCard={infoschematicScopes.length > 0 ? createCard : undefined}
             onGridSizeChange={authoredDocument && onDocumentChange ? changeGridSize : undefined}
             onSpecificationHover={setHoveredSpecification}
             onResetRoute={resetRoute}

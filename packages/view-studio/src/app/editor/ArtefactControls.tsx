@@ -135,7 +135,11 @@ export function ArtefactControls({ editor, factoryContext, libraryContext }: Art
           className="action-button"
           disabled={!editor.createCard}
           onClick={() => editor.createCard?.('card')}
-          title="A default Card to name in the properties below"
+          title={
+            editor.createCard
+              ? 'A default Card to name in the properties below'
+              : 'The document declares no Scope — a Card starts in one, and takes its code from the Scope prefix'
+          }
           type="button"
         >
           Card

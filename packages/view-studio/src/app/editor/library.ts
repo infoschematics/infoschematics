@@ -158,6 +158,14 @@ export type LibraryContext = Readonly<{
   allocate: LibraryIdentityAllocator
   at: number
   box: Readonly<Pick<Box, 'x' | 'y'>>
+  /*
+   * The Collection the new element joins, where the document declares one.
+   *
+   * A Scope and a Collection are different questions - which sittings show an element, and which group it belongs
+   * to - and a Card that answered the first for both named a Collection the document had never declared, which is
+   * a document that cannot be read back. Absent where there is nothing to join.
+   */
+  collection?: string
   flow?: LibraryFlowContext
   scope: string
 }>
@@ -180,6 +188,19 @@ export const isOrthogonalRoute = (points: readonly Point[]): boolean =>
     const previous = points[index] as Point
     return !samePoint(point, previous) && (point.x === previous.x || point.y === previous.y)
   })
+
+/*
+ * The template's own size, at the context's position.
+ *
+ * The position is all the context has to say about the box: it arrives as a placement rectangle whose width and
+ * height are the panel's own, and spreading the whole of it drew a Square card 240 wide and 120 high - the size the
+ * panel would have used, under the name of the template that promised a square.
+ */
+const placedBox = (size: Readonly<Pick<Box, 'height' | 'width'>>, at: Readonly<Pick<Box, 'x' | 'y'>>): Box => ({
+  ...size,
+  x: at.x,
+  y: at.y
+})
 
 const routeFor = (context: LibraryFlowContext): readonly Point[] => {
   if (context.points) return copy(context.points)
@@ -255,7 +276,12 @@ export const instantiateLibraryTemplate = (
 
   if (template.seed.kind === 'point') {
     const seed = copy(template.seed.value)
-    const value: PointConfig = { ...seed, ...identity, point: copy(context.box), scopes: [context.scope] }
+    const value: PointConfig = {
+      ...seed,
+      ...identity,
+      point: { x: context.box.x, y: context.box.y },
+      scopes: [context.scope]
+    }
     const target = defineArtefactSelection({ code: identity.code, geometry: 'point', id: identity.id, kind: 'point' })
     return createArtefactOperation(target, value, context.at)
   }
@@ -265,7 +291,8 @@ export const instantiateLibraryTemplate = (
     const value: CardConfig = {
       ...seed,
       ...identity,
-      placement: { ...seed.placement, box: { ...seed.placement.box, ...copy(context.box) } },
+      ...(context.collection ? { domain: context.collection } : {}),
+      placement: { ...seed.placement, box: placedBox(seed.placement.box, context.box) },
       scope: context.scope,
       scopes: [context.scope]
     }
@@ -277,7 +304,7 @@ export const instantiateLibraryTemplate = (
   const value: FabricConfig = {
     ...seed,
     ...identity,
-    placement: { ...seed.placement, box: { ...seed.placement.box, ...copy(context.box) } },
+    placement: { ...seed.placement, box: placedBox(seed.placement.box, context.box) },
     scope: context.scope,
     scopes: [context.scope]
   }
@@ -297,7 +324,17 @@ export const createLibraryIdentityAllocator = (
     let identity: LibraryIdentity
     do {
       sequence += 1
-      identity = { code: `${prefix[kind]}-${String(sequence).padStart(3, '0')}`, id: `${kind}-${sequence}` }
+      /*
+       * One identity rather than two.
+       *
+       * Past the authored document a coded element is known by its code: the model reads the established `id` as
+       * an alias and publishes the code in its place, so an element given an `id` of its own is drawn under one
+       * name while the operation that made it still names another. Nothing that matches a selection against that
+       * operation could then find it, which is why a Card added from the Library could be selected and not moved,
+       * resized, or read in the properties.
+       */
+      const code = `${prefix[kind]}-${String(sequence).padStart(3, '0')}`
+      identity = { code, id: code }
     } while (codes.has(identity.code) || ids.has(identity.id))
     codes.add(identity.code)
     ids.add(identity.id)

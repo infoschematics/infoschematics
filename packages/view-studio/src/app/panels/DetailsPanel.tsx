@@ -237,6 +237,13 @@ export const detailsArtefactContexts = (
       allocate: createLibraryIdentityAllocator({ codes: usedCodes, ids: usedIds }),
       at,
       box,
+      /* The Collection of whatever is selected, so a new element joins the group it was made beside, and the first
+         declared one otherwise. Left absent where the document declares none: a Collection is a thing the document
+         names, and writing one it has not named produces a document that cannot be read back. */
+      collection:
+        selectedPlaceable && 'domain' in selectedPlaceable && selectedPlaceable.domain
+          ? selectedPlaceable.domain
+          : definition.domains?.[0]?.id,
       flow: flowContextFor(config, editor.selectedArtefact, editor.artefactValue, editor.selectedCounts),
       scope:
         selectedPlaceable && 'scope' in selectedPlaceable ? selectedPlaceable.scope : (definition.scopes[0]?.id ?? '')
@@ -313,8 +320,9 @@ export function DetailsPanel({
   presentation,
   sourcePanel
 }: {
-  /** Supplied by the app, which is the only place that can issue a code and find room for a card. */
-  onCreateCard: (kind: 'adapter' | 'card') => void
+  /** Supplied by the app, which is the only place that can issue a code and find room for a card. Absent where the
+      document declares no Scope, which is a Card's starting place and the source of its code. */
+  onCreateCard?: (kind: 'adapter' | 'card') => void
   onGridSizeChange?: (gridSize: number) => void
   /** Lifted to the app, because the Infoschematic marks what the selected scene lights. */
   /** The scene library, lifted for the same reason the stories are. */
