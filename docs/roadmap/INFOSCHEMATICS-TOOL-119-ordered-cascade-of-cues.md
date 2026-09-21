@@ -6,10 +6,10 @@ theme: tool
 horizon: next
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-092]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T21:15:00Z
-updated_at: 2026-09-21T21:15:00Z
+updated_at: 2026-09-21T23:59:00Z
 ---
 
 # Ordered cascade of cues
