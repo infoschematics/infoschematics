@@ -126,3 +126,27 @@ describe('layering a port count over the counts in force', () => {
     expect(sides({ north: 3 })).not.toEqual([3, 1, 5, 3])
   })
 })
+
+describe('answering the same side twice', () => {
+  /* A Design render asks about every port of every box, for every frame of a drag. Nothing about the answer depends
+     on where the box is, so the same two numbers get the same answer back rather than a fresh calculation. */
+  it('hands back the answer it already worked out', () => {
+    expect(portOffsetsForSide(160, 7)).toBe(portOffsetsForSide(160, 7))
+    expect(portCountsForSide(160)).toBe(portCountsForSide(160))
+  })
+
+  // Handed back rather than copied, so it must be beyond altering by whoever receives it.
+  it('hands back an answer no caller can alter', () => {
+    expect(Object.isFrozen(portOffsetsForSide(160, 7))).toBe(true)
+    expect(Object.isFrozen(portCountsForSide(160))).toBe(true)
+  })
+
+  /* A resize drag asks about a new length every few pixels, so what is remembered is dropped whole once it grows
+     past a size no diagram reaches. Every answer stays right either side of that. */
+  it('keeps answering correctly past the point it stops remembering', () => {
+    const before = [...portOffsetsForSide(160, 7)]
+    for (let length = 20; length <= 2000; length += 10) portOffsetsForSide(length, 3)
+    expect(portOffsetsForSide(160, 7)).toEqual(before)
+    expect(portCountsForSide(160)).toEqual(Array.from({ length: 16 }, (_, index) => index))
+  })
+})

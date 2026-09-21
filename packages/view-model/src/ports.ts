@@ -78,17 +78,48 @@ export type Port = { id: PortId; at: Point }
  * produces, so it is stable for a given count rather than assuming a midpoint
  * that only an odd count has.
  */
-const subdivide = (length: number, count: number): number[] | undefined => {
+/*
+ * A side is asked the same two questions over and over.
+ *
+ * Nothing here depends on where the box is, only on how long the side is and how many ports are wanted, and a Design
+ * render asks for both hundreds of times per pointer move - every port of every box, for every frame of a drag. The
+ * answers are remembered against exactly those two numbers.
+ *
+ * A remembered answer is handed back as it is rather than copied, so no caller may alter one; every caller reads it
+ * through `map`, `filter`, `find` or `at`. The store is dropped whole once it grows past a size no real diagram
+ * reaches, which keeps a resize drag - which asks about a new length every few pixels - from growing it for ever.
+ */
+const rememberedLimit = 1024
+const rememberedOffsets = new Map<string, readonly number[] | undefined>()
+const rememberedCounts = new Map<number, readonly number[]>()
+
+const remember = <K, V>(store: Map<K, V>, key: K, answer: V): V => {
+  if (store.size >= rememberedLimit) store.clear()
+  store.set(key, answer)
+  return answer
+}
+
+const subdivide = (length: number, count: number): readonly number[] | undefined => {
+  const key = `${length}:${count}`
+  const remembered = rememberedOffsets.get(key)
+  if (remembered !== undefined || rememberedOffsets.has(key)) return remembered
+
   const spread = Array.from({ length: count }, (_, index) => ((index + 1) * length) / (count + 1))
   const snapped = spread.map((offset) => Math.round(offset / minimumPortGap) * minimumPortGap)
 
   // A count that crowds two ports onto one grid line, or pushes one onto a
-  // corner, is a count this side has no room for.
-  const usable = snapped.every((offset, index) => offset > 0 && offset < length && snapped.indexOf(offset) === index)
-  if (!usable) return undefined
+  // corner, is a count this side has no room for. The spread rises with the
+  // index and rounding keeps that order, so a repeat can only be of the offset
+  // immediately before it - asking the whole list each time made answering a
+  // wide side cost more the wider it was.
+  const usable = snapped.every(
+    (offset, index) => offset > 0 && offset < length && (index === 0 || offset !== snapped[index - 1])
+  )
+  if (!usable) return remember(rememberedOffsets, key, undefined)
 
   const centre = length / 2
-  return [...snapped].sort((left, right) => Math.abs(left - centre) - Math.abs(right - centre) || left - right)
+  const ordered = [...snapped].sort((left, right) => Math.abs(left - centre) - Math.abs(right - centre) || left - right)
+  return remember(rememberedOffsets, key, Object.freeze(ordered))
 }
 
 /**
@@ -96,10 +127,13 @@ const subdivide = (length: number, count: number): number[] | undefined => {
  * on each interior grid line. None is always a choice - a side with no ports is
  * a side nothing may meet, which is a thing worth being able to say.
  */
-export const portCountsForSide = (length: number): number[] => {
+export const portCountsForSide = (length: number): readonly number[] => {
+  const remembered = rememberedCounts.get(length)
+  if (remembered) return remembered
+
   const counts = [0]
   for (let count = 1; subdivide(length, count); count += 1) counts.push(count)
-  return counts
+  return remember(rememberedCounts, length, Object.freeze(counts))
 }
 
 /** What a side offers when it does not say, and the first count above what any card uses. */
@@ -109,7 +143,7 @@ export const defaultPortCount = 7
  * A request the side has no room for takes the largest count it does have, so a
  * side never silently offers more ports than were asked for.
  */
-export const portOffsetsForSide = (length: number, requested?: number) => {
+export const portOffsetsForSide = (length: number, requested?: number): readonly number[] => {
   const wanted = requested ?? defaultPortCount
   if (wanted <= 0) return []
   const allowed = portCountsForSide(length)
