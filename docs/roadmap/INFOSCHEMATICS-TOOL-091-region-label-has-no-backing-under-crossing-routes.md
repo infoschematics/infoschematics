@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-091
 area: TOOL
-title: A Region label has no backing under a crossing route
+title: A label without backing
 theme: tool
 horizon: now
 status: done
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: 1fad183b359db5db2e7d79af77b40f775b15ee2f
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-21T19:40:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# A Region label has no backing under a crossing route
+# A label without backing
 
 ## Goal
 
@@ -34,13 +34,17 @@ One thing the shaping has to solve: `RegionLabelGeometry` (`packages/view-model/
 
 This does not move a Region label, change `ROUTE-018`'s metrics, reserve the band by refusing or rerouting a Flow, or introduce a per-renderer measurement. It does not extend a backing to Card, Point, Fabric or Graphic labels.
 
+## Current state
+
+Done. Returned from Parked on 2026-09-21 when the owner released the queue, and delivered against baseline `1fad183b359db5db2e7d79af77b40f775b15ee2f`.
+
 ## Steps
 
-1. [x] Decide where the backing band is resolved, and resolve it once in View Model so both renderers consume the same rectangle.
-2. [x] Emit it in both renderers immediately beneath the label glyphs, in the Region's resolved surface colour, so the static renderer's Region-before-Flow paint order stops mattering.
-3. [x] Add an authored case that routes a Flow through a Region label's glyphs, and assert the backing's geometry in `scripts/visual-treatment-parity.test.ts` rather than only in one renderer.
-4. [x] Render it and read the label, in both outlets, under a blueprint and a paper surface — a passing geometry comparison is not evidence the glyphs survived.
-5. [x] Move `ROUTE-019` to `conforming` and repoint its `_Verify:_` at the new case rather than at a document that no longer crosses the glyphs.
+- [x] Decide where the backing band is resolved, and resolve it once in View Model so both renderers consume the same rectangle.
+- [x] Emit it in both renderers immediately beneath the label glyphs, in the Region's resolved surface colour, so the static renderer's Region-before-Flow paint order stops mattering.
+- [x] Add an authored case that routes a Flow through a Region label's glyphs, and assert the backing's geometry in `scripts/visual-treatment-parity.test.ts` rather than only in one renderer.
+- [x] Render it and read the label, in both outlets, under a blueprint and a paper surface — a passing geometry comparison is not evidence the glyphs survived.
+- [x] Move `ROUTE-019` to `conforming` and repoint its `_Verify:_` at the new case rather than at a document that no longer crosses the glyphs.
 
 ## Files touched
 
@@ -53,10 +57,6 @@ This does not move a Region label, change `ROUTE-018`'s metrics, reserve the ban
 ## Return trigger
 
 Return this item to Next when the current user-acceptance pass over the rendered outlets has concluded, and nothing it found supersedes or reshapes the backing this item would draw.
-
-## Current state
-
-Done. Returned from Parked on 2026-09-21 when the owner released the queue, and delivered against baseline `1fad183b359db5db2e7d79af77b40f775b15ee2f`.
 
 ## Verify
 

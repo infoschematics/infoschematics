@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-112
 area: TOOL
-title: Two ways to create, one of them unwritten
+title: One creation path unwritten
 theme: tool
 horizon: triage
 status: draft
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-21T18:15:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# Two ways to create, one of them unwritten
+# One creation path unwritten
 
 ## Goal
 
@@ -71,3 +71,7 @@ None until the answer is known.
 ### Roadmap
 
 `docs/roadmap/_ISSUES.md` reserves `TOOL` through `112`.
+
+## Discussion
+
+Captured on 2026-09-21 while closing `INFOSCHEMATICS-TOOL-104` and `-105`, each a defect in one of the two creation paths where neither touched the other. The question is deliberately left open: a draft Card the host has not been told about may be a coherent thing for an editor to hold, so the item exists to decide that rather than to assume the paths should converge. Until it is decided, a defect in one path says nothing about the other, which is how those two arrived separately.

@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-111
 area: TOOL
-title: A route that runs back across the Card it leaves
+title: A route doubling back
 theme: tool
 horizon: now
 status: done
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: 2bb93074089bda6dbbca0c3d6707ad99c7e68074
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-21T18:15:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# A route that runs back across the Card it leaves
+# A route doubling back
 
 ## Goal
 
@@ -104,3 +104,7 @@ A route derived between two ports always turned once, which sent it backwards ac
 ## Done
 
 Closed 2026-09-21 under the standing instruction to progress every record that is not `waiting-for` or `parked`. Awaiting the reporter's own testing pass.
+
+## Discussion
+
+Raised with `INFOSCHEMATICS-TOOL-108`, `-109` and `-110` from the same dragging session, and made visible by `-110`. The defect predates the drag work — the first line of a route nobody had drawn by hand was simply never looked at — which is why it is its own item rather than a regression in `-110`.

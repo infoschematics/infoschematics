@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-109
 area: TOOL
-title: One drag, one written change, held by a test
+title: One drag, one change
 theme: tool
 horizon: now
 status: done
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: 2bb93074089bda6dbbca0c3d6707ad99c7e68074
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-21T18:15:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# One drag, one written change, held by a test
+# One drag, one change
 
 ## Goal
 
@@ -101,3 +101,7 @@ The guard that keeps a drag from being written on every pointer step already exi
 ## Done
 
 Closed 2026-09-21 under the standing instruction to progress every record that is not `waiting-for` or `parked`. Awaiting the reporter's own testing pass.
+
+## Discussion
+
+Raised with `INFOSCHEMATICS-TOOL-108`, `-110` and `-111` from the same dragging session. The flag it asked for turned out to exist already: `INFOSCHEMATICS-TOOL-102` landed it in `62292ab4` under the name `gesturing`. So the item became coverage rather than behaviour, which is worth keeping rather than closing as invalid — the guard was load-bearing and nothing but a record count would have noticed it being removed.

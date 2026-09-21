@@ -6,10 +6,10 @@ theme: tool
 horizon: waiting-for
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-070]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-13T15:39:09Z
-updated_at: 2026-09-16T10:45:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
 # Initial package publication
@@ -32,7 +32,7 @@ Move this item to Next only when npm scope ownership and trusted-publishing conf
 
 ## Current state
 
-The waiting condition is **not met**. The repository-side preparation is in good shape; the registry-side confirmations do not exist, and one repository-side defect would make the first run publish an incomplete set.
+The waiting condition is **not met**. The repository-side preparation is in good shape and the defect that would have made a first run publish an incomplete set has been fixed; the registry-side confirmations still do not exist.
 
 What is in place:
 
@@ -44,13 +44,13 @@ What is in place:
 
 ## Outstanding
 
-1. **The workflow publishes seven of the eight packages.** `.github/workflows/release-npm.yml:69-77` (version check) and `:100-108` (publish loop) both omit `packages/cli`. `@infoschematics/cli` is in the canonical set at `scripts/release/packages.ts:17`, is named as one of the eight by `docs/guides/releasing-packages.md:3`, and is the only package with a Node runtime and a `bin` of its own (`GDR-INFOSCHEMATICS-004:17`). Nothing ties the workflow's two hardcoded lists back to `releasePackages`, so `bun run self:check` is green while the first release would allocate `0.1.0` for seven names and leave the CLI unpublished — a gap only a new coordinated patch across all eight can close. This should be fixed, and covered by an assertion that the workflow lists agree with `releasePackages`, before any authorisation is sought.
+1. **The workflow's package list is fixed.** It published seven of the eight packages, because `.github/workflows/release-npm.yml` carried the set twice as hand-written shell arrays and both copies omitted `packages/cli`. `INFOSCHEMATICS-TOOL-070` corrected it in `f4720a00`: the CLI is in both the version check and the publish loop, and `scripts/release/workflow.test.ts` now asserts the workflow's lists agree with `releasePackages`, so the arrays cannot drift back. That record was delivered, accepted, and pruned, which is why it no longer appears in this item's `blocked_by`.
 2. **No registry- or GitHub-side confirmation is recorded anywhere.** The guide requires the organisation to control the `@infoschematics` scope and all eight names, a trusted publisher bound per package to this repository with workflow `release-npm.yml`, environment `npm`, and allowed action `npm publish`, a GitHub environment named `npm` with reviewer protection, and a ruleset protecting `v*` tags (`docs/guides/releasing-packages.md:7-9`). None of that is observable from the tree, and none of it has been evidenced. Until each is confirmed, the first leg of the waiting condition is simply unanswered.
 3. **The npm version floor is not enforced.** Trusted publishing needs npm 11.5.1 or later (`docs/guides/releasing-packages.md:9`), but `actions/setup-node` at `.github/workflows/release-npm.yml:37-42` pins only the Node line and the workflow never asserts the npm version it got. A runner whose bundled npm is below the floor fails at the publish step, after `self:check` and `self:release:verify` have already run.
 4. **There is no release commit or tag to name.** `git tag -l` is empty, so nothing yet satisfies "the release commit is clean and verified"; the workflow accepts only an existing tag whose commit matches the checkout (`.github/workflows/release-npm.yml:57-66`). The intended version set is implicitly `0.1.0` because that is what the manifests read, but it has not been named as a decision, and the changelog text the guide requires as Release notes (`docs/guides/releasing-packages.md:17`) does not exist in any form.
 5. **No authorisation exists.** The repository owner has not authorised a publication run, and nothing in this assessment constitutes one.
 
-Items 1, 3, and 4 are repository work that can proceed without any registry credential. Items 2 and 5 are the owner's to answer and cannot be discharged from inside the tree.
+Items 3 and 4 are repository work that can proceed without any registry credential. Items 2 and 5 are the owner's to answer and cannot be discharged from inside the tree.
 
 ## Release shape
 
@@ -58,7 +58,7 @@ When unblocked, shape one execution plan from the release guide that runs local 
 
 ## Dependencies / blocks
 
-Blocked by the workflow's incomplete package list and by the unrecorded registry configuration, both described under Outstanding. The workflow gap is ordinary repository work with its own verification and does not need release authority; it is a candidate for a separate item so that fixing it is not mistaken for progress towards publishing.
+Blocked by the unrecorded registry configuration and the absent authorisation, both described under Outstanding. Neither is a roadmap dependency, because neither can be discharged from inside this repository. The workflow gap that once blocked it became `INFOSCHEMATICS-TOOL-070` and was delivered on its own verification, which is exactly what keeping it separate was for: fixing it was ordinary repository work rather than progress towards publishing.
 
 ## Discussion
 

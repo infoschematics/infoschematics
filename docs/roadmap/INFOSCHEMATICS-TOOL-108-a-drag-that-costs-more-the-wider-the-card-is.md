@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-108
 area: TOOL
-title: A drag that costs more the wider the Card is
+title: Wide Cards drag slowly
 theme: tool
 horizon: now
 status: done
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: 2bb93074089bda6dbbca0c3d6707ad99c7e68074
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-21T18:15:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# A drag that costs more the wider the Card is
+# Wide Cards drag slowly
 
 ## Goal
 
@@ -104,3 +104,7 @@ The port maths was recalculated hundreds of times per pointer move and cost more
 ## Done
 
 Closed 2026-09-21 under the standing instruction to progress every record that is not `waiting-for` or `parked`. Awaiting the reporter's own testing pass.
+
+## Discussion
+
+Raised with `INFOSCHEMATICS-TOOL-109`, `-110` and `-111` from one session of dragging nodes in the Studio playground on 2026-09-21. The four were kept as separate items because they fail differently — this one costs frames, `-109` was missing coverage, and `-110` and `-111` were wrong geometry — and a single item would have hidden three of them behind whichever was fixed first.

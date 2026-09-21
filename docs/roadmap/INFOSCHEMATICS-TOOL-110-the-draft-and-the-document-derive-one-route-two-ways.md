@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-110
 area: TOOL
-title: The draft and the document derive one route two ways
+title: One route derived twice
 theme: tool
 horizon: now
 status: done
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: 2bb93074089bda6dbbca0c3d6707ad99c7e68074
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-21T18:15:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# The draft and the document derive one route two ways
+# One route derived twice
 
 ## Goal
 
@@ -108,3 +108,7 @@ The draft document bent a derived route where the runtime re-derived it, so a dr
 ## Done
 
 Closed 2026-09-21 under the standing instruction to progress every record that is not `waiting-for` or `parked`. Awaiting the reporter's own testing pass.
+
+## Discussion
+
+Raised with `INFOSCHEMATICS-TOOL-108`, `-109` and `-111` from the same dragging session. This is where the draft document's derivation and the written document's stopped agreeing: `ROUTE-002` requires one construction for every derivation, and the runtime overlay was brought to it while the draft was not. It also exposed `-111`, because deriving a waypointless Flow whenever a port moves makes the shape `routeBetweenPorts` produces visible throughout a drag rather than only at creation.

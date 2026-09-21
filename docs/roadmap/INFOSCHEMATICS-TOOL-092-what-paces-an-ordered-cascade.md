@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-092
 area: TOOL
-title: What paces an ordered cascade in an untimed Sequence
+title: What paces a cascade
 theme: tool
 horizon: waiting-for
 status: draft
@@ -9,10 +9,10 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-21T00:00:00Z
+updated_at: 2026-09-21T23:55:00Z
 ---
 
-# What paces an ordered cascade in an untimed Sequence
+# What paces a cascade
 
 ## Goal
 
