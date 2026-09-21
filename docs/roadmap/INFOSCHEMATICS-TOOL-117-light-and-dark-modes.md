@@ -5,11 +5,11 @@ title: Light and dark modes
 theme: tool
 horizon: now
 status: draft
-blocks: []
+blocks: [INFOSCHEMATICS-TOOL-118]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T20:15:00Z
-updated_at: 2026-09-21T20:15:00Z
+updated_at: 2026-09-21T23:20:00Z
 ---
 
 # Light and dark modes
@@ -75,7 +75,7 @@ The resolved scheme is proved in a browser, not read out of a stylesheet: the br
 
 Nothing blocks it. It is independent of [INFOSCHEMATICS-TOOL-113](INFOSCHEMATICS-TOOL-113-where-a-drawing-fails.md) and [INFOSCHEMATICS-TOOL-107](INFOSCHEMATICS-TOOL-107-an-agent-written-first-document.md), though a scheme-aware palette is one more thing a diagnostic surface could check contrast against later.
 
-The chrome recolouring named in the Boundary needs its own record, and the two should not be delivered as one change.
+It blocks [INFOSCHEMATICS-TOOL-118](INFOSCHEMATICS-TOOL-118-chrome-in-both-schemes.md), which extends the same schemes to Studio, Present, and the website and adds the reader's switch; the two are delivered in that order rather than as one change.
 
 ## Documentation impact
 
@@ -93,7 +93,7 @@ The consumer guide says how to embed an Infoschematic that follows the reader's 
 
 ### Roadmap
 
-The chrome recolouring of Studio, Present, and the website is captured as its own record rather than absorbed here, once this establishes the paint roles both schemes resolve.
+[INFOSCHEMATICS-TOOL-118](INFOSCHEMATICS-TOOL-118-chrome-in-both-schemes.md) carries the chrome recolouring of Studio, Present, and the website, and the reader-facing scheme switch, once this establishes the paint roles both schemes resolve.
 
 ## Review
 
