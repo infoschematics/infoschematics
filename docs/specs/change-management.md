@@ -114,4 +114,4 @@ _Conformance:_ conforming
 
 _Verify:_ Run `bun run test:browser --filter=@infoschematics/view-studio`, then in Design drag one Card across the canvas in a single press and read the written record: it MUST hold one line, naming where the Card was dropped. Falsified by a record holding one line per pointer event, each naming a position the Producer travelled through rather than chose.
 
-_Evidence:_ the gesture guard on the document projection in `packages/view-studio/src/app/App.tsx`, `gesturing` in `packages/view-studio/src/app/editor/use-editor.ts`, and the drag case in `packages/view-studio/src/app/App.browser.test.tsx`.
+_Evidence:_ the gesture guard on the document projection in `packages/view-studio/src/app/App.tsx`, `gesturing` in `packages/view-studio/src/app/editor/use-editor.ts`, and the two drag cases in `packages/view-studio/src/app/App.browser.test.tsx` — one reading the written record after a drag, one reading every position the Card is drawn at during it.
