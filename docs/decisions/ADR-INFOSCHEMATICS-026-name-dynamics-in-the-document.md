@@ -37,3 +37,5 @@ Static output stays deterministic and quiet unless a caller asks for a named occ
 ## Amendments
 
 `ADR-INFOSCHEMATICS-038` adds a second origin for an occurrence: a Scene may cue a named Dynamic with a bounded `once` or `repeat` policy. The vocabulary, the occurrence shape, and the refusal to carry timing in the document are all unchanged — the cue names which Dynamic and how often, and the View that plays it owns every timer. Scene-authored choreography is therefore the binding this record anticipated rather than the parallel animation contract it refused.
+
+`ADR-INFOSCHEMATICS-039` settles the ordered cascade `ADR-INFOSCHEMATICS-038` left out of scope: a Scene may cue several Dynamics in an authored order, and the Sequence paces them — stages divide a timed Scene's hold, and each stage is one presenter step in an untimed one. The refusal to carry timing in the document is untouched, because an order is not a duration.

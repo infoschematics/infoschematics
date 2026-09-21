@@ -104,7 +104,7 @@ The band takes the surface its label sits on, which is the same reading the labe
 
 The band is a rectangle around the whole run of glyphs rather than the glyphs themselves, so a route crossing it is cut over the label's full width and padding, not only where a stroke would actually touch a letter. That is what `ROUTE-019` asks for and it reads well, but it is a wider interruption than the defect strictly required.
 
-A Card is drawn after the label layer, so a Region label under a Card is still covered by it. That is deliberate — a Card is content, a Region label is geography — and unchanged by this item.
+A Card is drawn after the label layer, so a Region label under a Card is still covered by it. That is deliberate — a Card is content, a Region label is geography — and unchanged by this item. Put to the owner on 2026-09-21 with three options — leave it, lift the label layer past the Cards too, or detect the overlap in the authoring checks — the ruling was to leave it: a Card placed over a Region's label is the author's placement to fix, not the renderer's paint order. This concern is therefore closed as answered rather than carried.
 
 ### Post-change review
 

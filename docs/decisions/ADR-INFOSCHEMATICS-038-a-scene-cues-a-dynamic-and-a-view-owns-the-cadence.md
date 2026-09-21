@@ -39,3 +39,7 @@ A cue is an id and a policy. No duration, no easing, no delay, no ordering field
 `SCENE-006`'s bound now covers a repeat as well as a Sequence's own stepping. A repeating cue is one interval and one advancing key rather than a timer per cue, and the cleanup that a Scene change performs is the same cleanup an interrupted repeat needs, so the previously unexercised half of that requirement has a case.
 
 A document that declares no cue is unchanged, byte for byte, through canonicalisation and both renderers. The static renderer is untouched: it emits only the occurrences a caller supplies explicitly, so a cue does not make a still picture depend on whether a Dynamic happened to fire.
+
+## Amendments
+
+`ADR-INFOSCHEMATICS-039` admits the ordered cascade this record placed out of scope, on the ground that resolved the objection: a cascade divides a Sequence's stepping rather than a Scene's declared duration, so it needs no measurement in the document. Everything else here stands, including the reasoning that keeps `continuous` out of the policy vocabulary.

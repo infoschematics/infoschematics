@@ -102,6 +102,8 @@ That shape language holds across proportions rather than only at the landscape d
 
 Glow is a focused state cue. It should not become a general surface treatment, and a decorative status dot should not be added where it communicates no state.
 
+A stylesheet rule beats a presentation attribute, whatever the selector. An element whose colour is both defaulted by a class and stated per-instance must state the instance colour as an inline `style`, or the class default silently wins — a Region label's backing drew in the backdrop colour over a Region that had declared its own fill. The same asymmetry governs lifting an element into a later paint layer: the treatment it carried must travel at the weight it had, so carrying it as a `data-` attribute on the new wrapper put it above the surface rules that set the label's colour and painted a neutral-surface label in the blueprint's blue.
+
 ## Typography
 
 Use a clear sans-serif face for human-readable labels and a mono face for identifiers, measurements and compact system information.
