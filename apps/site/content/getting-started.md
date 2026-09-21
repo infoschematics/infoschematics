@@ -31,6 +31,12 @@ Start with only the parts you need. You can use the same definition to:
 
 Changing the way you use an Infoschematic does not require you to rewrite its underlying information.
 
+## What this is, and what it isn't
+
+The definition is the artefact. An [Infoschematic](/docs/reference/vocabulary/#infoschematic) is written to live inside something else — a document, a website, a build pipeline, a presentation — and each rendering is an outlet for the definition rather than the thing itself. That is why changing the way a system is shown does not mean drawing it again.
+
+It is worth writing one when the same system has to be explained more than once: to a new engineer, to a customer, in a design review, and in the documentation, from one source that stays true as the system moves. When a single finished picture is the deliverable and nothing will be built on it, a tool that simply produces that image is the better fit.
+
 ## A simple workflow
 
 1. **Describe the system** — add the places, components, connections, and supporting graphics that make up the diagram.
