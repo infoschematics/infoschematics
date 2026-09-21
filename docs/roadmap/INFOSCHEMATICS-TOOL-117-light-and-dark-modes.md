@@ -4,12 +4,12 @@ area: TOOL
 title: Light and dark modes
 theme: tool
 horizon: now
-status: draft
+status: ready
 blocks: [INFOSCHEMATICS-TOOL-118]
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T20:15:00Z
-updated_at: 2026-09-21T23:20:00Z
+updated_at: 2026-09-22T00:15:00Z
 ---
 
 # Light and dark modes
