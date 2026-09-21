@@ -104,11 +104,21 @@ _Verify:_ subscribe to the refresh stream and change the document; invalidate th
 
 _Evidence:_ `packages/cli/src/index.test.ts`.
 
+### CLI-012 — Checking the drawing a document describes
+
+The `infoschematics check` command MUST accept the same inputs as `render` and report what is wrong with the drawing the document describes, per [the drawing diagnostics specification](diagnostics.md). It MUST write the findings to standard output, MUST offer `--json` for a caller that parses rather than reads, and MUST change nothing: no file is written and no repair is applied. It MUST exit `0` when the drawing reads and `1` when a finding says it cannot be read as authored, so a pipeline can gate on the status alone. A document that does not parse MUST fail with the validation status, exactly as rendering does, rather than being reported as a drawing fault.
+
+_Conformance:_ conforming
+
+_Verify:_ check a well-drawn document, a document with an error, and a document whose only finding is an observation, and read the status and the streams of each; then check an invalid document and confirm it fails as a validation failure.
+
+_Evidence:_ `packages/cli/src/index.test.ts`, whose `drawing check` cases cover the clean, error, observation, `--json`, rejected-option and invalid-document paths.
+
 ## Quality properties
 
 ### CLI-005 — Publishable package boundary
 
-The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core and the static SVG renderer. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.
+The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core, the static SVG renderer, and View Model, whose drawing review CLI-012 reports. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.
 
 _Conformance:_ conforming
 

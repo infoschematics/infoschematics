@@ -116,12 +116,13 @@ const config: IConfiguration = {
     },
     {
       name: 'renderer-command-stays-thin',
-      comment: 'The Node command may parse canonical documents and render SVG, but owns no model or view behaviour.',
+      comment:
+        "The Node command may parse canonical documents, render SVG, and read View Model's drawing review, but owns no model or view behaviour of its own: the checker's geometry lives in View Model per ADR-INFOSCHEMATICS-018.",
       severity: 'error',
       from: { path: '^packages/cli/' },
       to: {
         path: workspace,
-        pathNot: owners('cli', 'domain-core', 'render-svg')
+        pathNot: owners('cli', 'domain-core', 'render-svg', 'view-model')
       }
     },
     {

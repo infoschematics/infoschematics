@@ -34,6 +34,10 @@
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"
     },
+    "./diagnostics": {
+      "types": "./dist/diagnostics.d.ts",
+      "import": "./dist/diagnostics.js"
+    },
     "./dynamics": {
       "types": "./dist/dynamics.d.ts",
       "import": "./dist/dynamics.js"
@@ -46,13 +50,13 @@
       "types": "./dist/geometry.d.ts",
       "import": "./dist/geometry.js"
     },
-    "./placement": {
-      "types": "./dist/placement.d.ts",
-      "import": "./dist/placement.js"
-    },
     "./perimeter": {
       "types": "./dist/perimeter.d.ts",
       "import": "./dist/perimeter.js"
+    },
+    "./placement": {
+      "types": "./dist/placement.d.ts",
+      "import": "./dist/placement.js"
     },
     "./point-layout": {
       "types": "./dist/point-layout.d.ts",
@@ -90,11 +94,11 @@
       "types": "./dist/tokens.d.ts",
       "import": "./dist/tokens.js"
     },
+    "./tokens.css": "./dist/tokens.generated.css",
     "./waypoints": {
       "types": "./dist/waypoints.d.ts",
       "import": "./dist/waypoints.js"
-    },
-    "./tokens.css": "./dist/tokens.generated.css"
+    }
   },
   "files": [
     "dist"

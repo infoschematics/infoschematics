@@ -1,9 +1,13 @@
 /**
- * One declarative option table for the render command, shared by parsing and by the usage text.
+ * One declarative option table per command, shared by parsing and by the usage text.
  *
  * The command started with a single hand-rolled `--output` loop. Raster output adds four more options and watch mode
  * will add its own, so the table is the extension point: adding a row is what adds an option, and the usage text a user
  * reads cannot fall behind the options the command accepts because both are derived from the same declaration.
+ *
+ * A second verb made the table plural rather than longer. `check` accepts almost nothing `render` does, and one shared
+ * table would have accepted `--scale` on a checker and printed it in the usage text: each command declares its own
+ * options, and parsing is the same code reading whichever table the verb names.
  */
 
 /** Loopback only: a preview is for the person at the keyboard, and anything wider has to be asked for. */
@@ -44,7 +48,14 @@ export const renderOptionSpecs = {
   watch: { alias: 'w', describe: 'Re-render whenever the input document changes. Requires --output.', kind: 'flag' }
 } as const satisfies Readonly<Record<string, OptionSpec>>
 
+export const checkOptionSpecs = {
+  help: { alias: 'h', describe: 'Show this message.', kind: 'flag' },
+  json: { describe: 'Write the findings as JSON for a tool to read instead of a person.', kind: 'flag' }
+} as const satisfies Readonly<Record<string, OptionSpec>>
+
 export type RenderOptionName = keyof typeof renderOptionSpecs
+
+export type CheckOptionName = keyof typeof checkOptionSpecs
 
 export type RenderFormat = 'png' | 'svg'
 
@@ -64,44 +75,66 @@ export type RenderArguments = Readonly<{
   watch: boolean
 }>
 
-export type ParsedArguments = Readonly<{ help: true }> | RenderArguments
+/** What `check` was asked to review, and who is going to read the answer. */
+export type CheckArguments = Readonly<{
+  check: true
+  input: string
+  /** Machine-readable findings, for a repair loop or a pipeline rather than a terminal. */
+  json: boolean
+}>
 
-const named = (token: string): RenderOptionName | undefined => {
-  const name = Object.keys(renderOptionSpecs).find((option) => {
-    const spec = renderOptionSpecs[option as RenderOptionName]
-    return token === `--${option}` || ('alias' in spec && token === `-${spec.alias}`)
+export type ParsedArguments = Readonly<{ help: true }> | CheckArguments | RenderArguments
+
+type OptionTable = Readonly<Record<string, OptionSpec>>
+
+const named = (table: OptionTable, token: string): string | undefined =>
+  Object.keys(table).find((option) => {
+    const spec = table[option] as OptionSpec
+    return token === `--${option}` || (spec.alias !== undefined && token === `-${spec.alias}`)
   })
-  return name as RenderOptionName | undefined
-}
 
-const optionLine = (name: RenderOptionName) => {
-  const spec: OptionSpec = renderOptionSpecs[name]
+const optionLine = (table: OptionTable, name: string) => {
+  const spec = table[name] as OptionSpec
   const alias = spec.alias ? `-${spec.alias}, ` : '    '
   const invocation = `${alias}--${name}${spec.kind === 'flag' ? '' : ` ${spec.placeholder}`}`
   return `  ${invocation.padEnd(24)}${spec.describe}`
 }
 
-export const usage = `Render a canonical YAML or JSON Infoschematic to SVG or PNG.
+const optionLines = (table: OptionTable) =>
+  Object.keys(table)
+    .map((name) => optionLine(table, name))
+    .join('\n')
+
+export const usage = `Render a canonical YAML or JSON Infoschematic to SVG or PNG, or check the drawing one describes.
 
 Usage: infoschematics render <input> [options]
+       infoschematics check <input> [options]
 
   input                   A .yaml, .yml, or .json document; use - for standard input.
-${(Object.keys(renderOptionSpecs) as RenderOptionName[]).map(optionLine).join('\n')}
+
+render options
+${optionLines(renderOptionSpecs)}
+
+check options
+${optionLines(checkOptionSpecs)}
 
 Rendering the same document twice on one machine produces identical bytes. Pass --font to pin text across machines.
 Watch mode keeps the last good output while a document does not parse, and recovers when it parses again.
 
+Checking reports what is wrong with the drawing a valid document describes, and changes nothing. It exits 0 when the
+drawing reads, and 1 when a finding says it cannot be read as authored, so a pipeline can gate on it.
+
 TypeScript modules are not executable input. Use the programmatic libraries instead.`
 
-const collected = (argv: readonly string[]) => {
-  const values = new Map<RenderOptionName, string[]>()
-  const flags = new Set<RenderOptionName>()
+const collected = (table: OptionTable, argv: readonly string[]) => {
+  const values = new Map<string, string[]>()
+  const flags = new Set<string>()
 
   for (let index = 1; index < argv.length; index += 1) {
     const token = argv[index] ?? ''
-    const name = named(token)
+    const name = named(table, token)
     if (!name) throw new Error(`Unknown option ${token}.`)
-    const spec: OptionSpec = renderOptionSpecs[name]
+    const spec = table[name] as OptionSpec
 
     if (spec.kind === 'flag') {
       flags.add(name)
@@ -118,7 +151,7 @@ const collected = (argv: readonly string[]) => {
     index += 1
   }
 
-  return { flags, single: (name: RenderOptionName) => values.get(name)?.[0], values }
+  return { flags, single: (name: string) => values.get(name)?.[0], values }
 }
 
 const formatOf = (value: string | undefined): RenderFormat => {
@@ -144,16 +177,22 @@ const portOf = (value: string | undefined) => {
   return port
 }
 
-/** Read one `render` invocation, or report that the caller asked for help. */
+/** Read one `render` or `check` invocation, or report that the caller asked for help. */
 export function parseArguments(argv: readonly string[]): ParsedArguments {
   if (argv.length === 0 || argv[0] === '--help' || argv[0] === '-h') return { help: true }
-  if (argv[0] !== 'render') throw new Error(`Unknown command ${argv[0]}.`)
+  if (argv[0] !== 'render' && argv[0] !== 'check') throw new Error(`Unknown command ${argv[0]}.`)
   if (argv.length === 1 || argv[1] === '--help' || argv[1] === '-h') return { help: true }
 
   const input = argv[1] ?? ''
   if (input.startsWith('-') && input !== '-') throw new Error('The input document must be named before any option.')
 
-  const parsed = collected(argv.slice(1))
+  if (argv[0] === 'check') {
+    const asked = collected(checkOptionSpecs, argv.slice(1))
+    if (asked.flags.has('help')) return { help: true }
+    return { check: true, input, json: asked.flags.has('json') }
+  }
+
+  const parsed = collected(renderOptionSpecs, argv.slice(1))
   if (parsed.flags.has('help')) return { help: true }
 
   const format = formatOf(parsed.single('format'))

@@ -54,6 +54,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 42. [ADR-INFOSCHEMATICS-037](ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) — draw an authored Overlay wherever the Diagram is drawn, making a Scene’s Graphic an addition to that set and scene scoping an option rather than the default.
 43. [ADR-INFOSCHEMATICS-038](ADR-INFOSCHEMATICS-038-a-scene-cues-a-dynamic-and-a-view-owns-the-cadence.md) — let a Scene cue named Dynamics with a bounded `once` or `repeat` policy, keeping every timer in the View that plays it.
 44. [ADR-INFOSCHEMATICS-039](ADR-INFOSCHEMATICS-039-a-sequence-paces-a-cascade-and-a-declaration-never-does.md) — let a Scene cue an ordered cascade in either kind of Sequence, paced by the Sequence's own stepping rather than by anything the document counts.
+45. [ADR-INFOSCHEMATICS-040](ADR-INFOSCHEMATICS-040-a-checker-measures-a-drawing-and-never-repairs-it.md) — review a drawing by measuring it and reporting findings a reader can act on, never by moving anything or choosing a repair.
 
 ## Repository operation
 

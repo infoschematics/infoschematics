@@ -3,12 +3,26 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 import { formatInfoschematicIssue, infoschematicFormatOf, parseInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
-import { loopbackHost, type ParsedArguments, parseArguments, type RenderArguments, usage } from './options.ts'
+import {
+  type DrawingFinding,
+  drawingIsUnreadable,
+  reviewInfoschematicDrawing
+} from '@infoschematics/view-model/diagnostics'
+import {
+  type CheckArguments,
+  loopbackHost,
+  type ParsedArguments,
+  parseArguments,
+  type RenderArguments,
+  usage
+} from './options.ts'
 import { rasteriseInfoschematicSvg } from './raster.ts'
 import { type PreviewServer, type PreviewServerOptions, type PreviewState, startPreviewServer } from './serve.ts'
 
 export const rendererCliExit = {
   success: 0,
+  /** `check` found something that says the drawing cannot be read as authored. The document itself is valid. */
+  drawing: 1,
   usage: 2,
   input: 3,
   validation: 4,
@@ -81,31 +95,48 @@ const line = (contents: string) => (contents.endsWith('\n') ? contents : `${cont
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error))
 
-/** One conversion attempt: the bytes it produced, or the diagnostic and status explaining why it produced none. */
-type RenderOutcome = Readonly<{ diagnostic?: string; rendered?: string | Uint8Array; status: number }>
+/** The model a document parsed to, or the diagnostic and status explaining why it produced none. */
+type ParsedDocument = Extract<ReturnType<typeof parseInfoschematic>, { ok: true }>['model']
 
-/** Convert one document once, without deciding where the result or the diagnostic goes. */
-const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promise<RenderOutcome> => {
+/**
+ * Read one document and parse it, in the one shape `CLI-003` requires of every failure: the document named, the
+ * reason in one sentence, on standard error, under a documented status. Both verbs start here, so a checker cannot
+ * report an unreadable file differently from a renderer.
+ */
+const readDocument = async (
+  input: string,
+  io: RendererCliIo
+): Promise<Readonly<{ diagnostic: string; status: number }> | Readonly<{ model: ParsedDocument }>> => {
   let authored: string
   try {
-    authored = parsed.input === '-' ? await io.readStdin() : await io.readFile(parsed.input)
+    authored = input === '-' ? await io.readStdin() : await io.readFile(input)
   } catch (error) {
-    return { diagnostic: `Cannot read ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.input }
+    return { diagnostic: `Cannot read ${input}: ${message(error)}\n`, status: rendererCliExit.input }
   }
 
-  const result = parseInfoschematic(authored, parsed.input === '-' ? {} : { pathname: parsed.input })
+  const result = parseInfoschematic(authored, input === '-' ? {} : { pathname: input })
   if (!result.ok) {
     return {
       diagnostic: line(result.issues.map(formatInfoschematicIssue).join('\n')),
       status: rendererCliExit.validation
     }
   }
+  return { model: result.model }
+}
+
+/** One conversion attempt: the bytes it produced, or the diagnostic and status explaining why it produced none. */
+type RenderOutcome = Readonly<{ diagnostic?: string; rendered?: string | Uint8Array; status: number }>
+
+/** Convert one document once, without deciding where the result or the diagnostic goes. */
+const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promise<RenderOutcome> => {
+  const document = await readDocument(parsed.input, io)
+  if ('diagnostic' in document) return document
 
   // Geometry the renderer cannot express is refused after parsing, so a construction error is about the document
   // rather than the process. Hand the author that sentence, never the interpreter's stack.
   let svg: string
   try {
-    svg = renderInfoschematicSvg(result.model)
+    svg = renderInfoschematicSvg(document.model)
   } catch (error) {
     return { diagnostic: `Cannot render ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.validation }
   }
@@ -274,6 +305,65 @@ const runServe = async (parsed: RenderArguments, io: RendererCliIo): Promise<num
   return status
 }
 
+/** Findings as a person reads them: what is wrong, where, and what would clear it. */
+const readable = (input: string, findings: readonly DrawingFinding[]) => {
+  if (findings.length === 0) return `${input}: the drawing reads.\n`
+  const errors = findings.filter((finding) => finding.severity === 'error').length
+  const counted = [
+    `${errors} ${errors === 1 ? 'error' : 'errors'}`,
+    `${findings.length - errors} ${findings.length - errors === 1 ? 'observation' : 'observations'}`
+  ].join(', ')
+  return [
+    `${input}: ${findings.length} ${findings.length === 1 ? 'finding' : 'findings'} (${counted})`,
+    ...findings.flatMap((finding) => [
+      '',
+      `${finding.severity} ${finding.rule}: ${finding.concerns.join(', ')}`,
+      `  ${finding.reads}`,
+      ...finding.repairs.map((repair) => `  - ${repair}`)
+    ]),
+    ''
+  ].join('\n')
+}
+
+/** One diagnostic on standard error under one status, which is the only way this command reports a failure. */
+const report = (io: RendererCliIo, diagnostic: string, status: number) => {
+  io.writeStderr(diagnostic)
+  return status
+}
+
+/**
+ * Review the drawing one document describes and report the findings, changing nothing.
+ *
+ * The geometry is View Model's, per `ADR-INFOSCHEMATICS-018`: this decides who reads the answer and what the exit
+ * status says about it, and nothing else. `--json` exists because the two readers want different things - a person
+ * wants the sentence and what to try, a repair loop wants the rule code and the measurement - and a checker that
+ * offers only prose forces an agent to parse English.
+ */
+const runCheck = async (parsed: CheckArguments, io: RendererCliIo): Promise<number> => {
+  const document = await readDocument(parsed.input, io)
+  if ('diagnostic' in document) {
+    io.writeStderr(document.diagnostic)
+    return document.status
+  }
+
+  let findings: readonly DrawingFinding[]
+  try {
+    findings = reviewInfoschematicDrawing(document.model)
+  } catch (error) {
+    return report(io, `Cannot check ${parsed.input}: ${message(error)}\n`, rendererCliExit.validation)
+  }
+
+  if (parsed.json) {
+    io.writeStdout(
+      `${JSON.stringify({ document: parsed.input, findings, unreadable: drawingIsUnreadable(findings) }, undefined, 2)}\n`
+    )
+  } else {
+    io.writeStdout(readable(parsed.input, findings))
+  }
+
+  return drawingIsUnreadable(findings) ? rendererCliExit.drawing : rendererCliExit.success
+}
+
 /** Execute the renderer command against injectable streams and filesystem operations. */
 export async function runRendererCli(
   argv: readonly string[],
@@ -296,6 +386,8 @@ export async function runRendererCli(
     io.writeStderr(`Unsupported input ${parsed.input}. Expected .yaml, .yml, .json, or - for standard input.\n`)
     return rendererCliExit.usage
   }
+
+  if ('check' in parsed) return runCheck(parsed, io)
 
   if (parsed.serve) return runServe(parsed, io)
   return parsed.watch ? runWatch(parsed, io) : renderOnce(parsed, io)

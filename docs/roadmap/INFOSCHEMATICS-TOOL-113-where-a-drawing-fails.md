@@ -4,19 +4,19 @@ area: TOOL
 title: Where a drawing fails
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-107]
 blocked_by: []
-baseline_ref: null
+baseline_ref: f93c162c6dfcd8e93c6c52a6110601d60a7bcd30
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-22T00:15:00Z
+updated_at: 2026-09-22T11:30:00Z
 ---
 
 # Where a drawing fails
 
 ## Goal
 
-The product gives a machine-readable account of what is wrong with an [Infoschematic](../reference/vocabulary.md#infoschematic) definition: not only whether it parses, but whether the drawing it describes is readable — boxes that overlap, a route that crosses the Card it leaves, a label with nothing behind it, a Region that does not contain what it claims.
+The product gives a machine-readable account of what is wrong with an [Infoschematic](../reference/vocabulary.md#infoschematic) definition: not only whether it parses, but whether the drawing it describes is readable — boxes that overlap, an artefact drawn outside the view, a route that crosses the Card it leaves or one it never touches, a label pinned onto something, two Flows meeting one port.
 
 ## Context
 
@@ -46,12 +46,12 @@ The measurements exist; the report does not.
 
 ## Steps
 
-- [ ] Take the decision and record it: the geometry knowledge is a View Model export and the command is a thin caller over it, as `ADR-INFOSCHEMATICS-018` already does for rendering.
-- [ ] Define the finding shape in View Model — stable rule code, severity, the subject's authored identity, the measured evidence, and the repairs that are legal for that rule — and export a function that takes an assembled document and returns findings in a deterministic order.
-- [ ] Implement a first rule set over the geometry already resolved: overlapping artefacts, an artefact outside the authored bounds, a Region that does not contain what it claims, a route that crosses the Card it leaves, and a label with no clear backing.
-- [ ] Separate errors from observations, so a drawing that is merely tight does not fail a pipeline that a drawing nobody can read should fail.
-- [ ] Add the `check` verb per `GDR-INFOSCHEMATICS-005`, over a generalised option table, with human-readable output by default, `--json` for a machine, and an exit code that a build can act on.
-- [ ] State the rules and the finding shape in a specification, with a requirement id per rule so a later change to a rule code is a visible contract change.
+- [x] Take the decision and record it: the geometry knowledge is a View Model export and the command is a thin caller over it, as `ADR-INFOSCHEMATICS-018` already does for rendering.
+- [x] Define the finding shape in View Model — stable rule code, severity, the subject's authored identity, the measured evidence, and the repairs that are legal for that rule — and export a function that takes an assembled document and returns findings in a deterministic order.
+- [x] Implement a first rule set over the geometry already resolved: overlapping artefacts, an artefact outside the authored bounds, a route that runs back across an endpoint, a route through an artefact it never touches, an obstructed Flow label, and two Flows meeting one port.
+- [x] Separate errors from observations, so a drawing that is merely tight does not fail a pipeline that a drawing nobody can read should fail.
+- [x] Add the `check` verb per `GDR-INFOSCHEMATICS-005`, over a generalised option table, with human-readable output by default, `--json` for a machine, and an exit code that a build can act on.
+- [x] State the rules and the finding shape in a specification, with a requirement id per rule so a later change to a rule code is a visible contract change.
 
 ## Files touched
 
@@ -86,6 +86,42 @@ The consumer guide gains a short section on checking a document before committin
 ### Roadmap
 
 Discharges the blocker on TOOL-107 and the reporting half of TOOL-116.
+
+## Review
+
+### Delivered
+
+Every Step, within the stated Boundary, with one rule fewer than the Goal first named and two named rules deliberately not admitted.
+
+Region containment is not in the delivered set. `region-geometry.ts` derives a Region's box from the artefacts it claims, so a Region always contains them and the rule could not fire — the case the Goal was reaching for is an artefact drawn outside the view, which `artefact-outside-view` reports. The port audit's `crowded` and `misassigned` severities are left where they are for the same reason, argued in `DRAW-010` and in `ADR-INFOSCHEMATICS-040`: they describe an endpoint moved away from the port it names, which only an editing host produces.
+
+### Summary of changes
+
+`reviewInfoschematicDrawing` in the new `packages/view-model/src/diagnostics.ts` assembles a document once and reports six rules over the geometry the renderers already resolve: `artefact-outside-view`, `artefacts-overlap`, `flow-label-obstructed`, `port-collision`, `route-crosses-artefact` and `route-re-enters-endpoint`. Each finding carries the rule code, the authored identities in the order the rule names them, the measurement in diagram units, one sentence for a person, the legal repairs, and a severity; the list is sorted by rule and subject so a repair loop sees a repaired finding leave it. `drawingIsUnreadable` is the gate, and only an error closes it. The module is its own `exports` subpath, since View Model has no barrel index.
+
+The command gained its second verb. `packages/cli/src/options.ts` now holds one option table per command rather than one shared list, so `check` accepts `--json` and `--help` and nothing else, and the usage text is still derived from the tables it parses. `render` and `check` share `readDocument`, so a parse failure reads the same way through both. `infoschematics check` prints subject, measurement and repairs, `--json` emits the same review as data, and it exits `1` only when a finding says the drawing cannot be read as authored.
+
+`docs/specs/diagnostics.md` states the contract as `DRAW-001` to `DRAW-012`, one requirement per rule, with the append-only rule-code promise written down before anything depends on it; `docs/specs/command-line-rendering.md` gained `CLI-012` and `CLI-005` was amended to name the View Model dependency the checker needs. `ADR-INFOSCHEMATICS-040` records why a checker measures and never repairs.
+
+### Verification
+
+`bun run self:check` — green, including the dependency-boundary gate, whose `renderer-command-stays-thin` rule now permits the CLI to reach View Model as `CLI-005` says it may.
+
+Beyond the suites, two assertions exist because a green run proves nothing on its own. `scripts/example-drawings.test.ts` reviews every published Infoschematic and requires no finding, then re-breaks one on purpose and requires the same walk to report it — without the second case the first passes just as well against a checker that has stopped measuring. And every unit case asserts the rule code, the identities and the measurement rather than a count, because a checker that fires the right number of times for the wrong reasons is the check this repository's own guidance warns about.
+
+### Outstanding concerns
+
+The checker cannot see the defect that made the label rule worth having. `labelAt` is a distance in diagram units, and `is-system` and `is-showcase` author `0.5` and `0.4` as though it were a fraction, pinning those labels half a unit from their source port. The drawing still reads, no finding fires, and the published documents therefore pass — captured separately rather than folded in here.
+
+`DRAW-010` measures a collision only. Port spacing beyond that is unreachable from a document and stays Studio's live audit, which is a deliberate gap rather than an unfinished one.
+
+### Post-change review
+
+The rule set shrank while it was being built, and that was the useful part of the work. Two candidate rules could be written but never made to fire from any authored document, so rather than ship them as coverage that measures nothing, the reasoning is recorded where the next reader will look for it — in `diagnostics.ts`, in `DRAW-010`, and in the ADR — so nobody restores them as an oversight.
+
+### Mini recap
+
+A valid document can describe an unreadable drawing, and nothing reported that. View Model now reviews one: six rules, each finding naming its subject and its measurement and the repairs that would clear it, ordered so a repair loop converges. `infoschematics check` is a thin outlet over it that exits `1` when the drawing cannot be read and `0` when it is merely tight. Every published example is asserted clean by a walk that also proves it is still measuring. It unblocks `INFOSCHEMATICS-TOOL-107`, whose repair loop had nothing to iterate against, and delivers the reporting half of `INFOSCHEMATICS-TOOL-116`.
 
 ## Discussion
 

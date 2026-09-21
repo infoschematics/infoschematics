@@ -26,6 +26,7 @@ IDs are append-only within their registered prefix and are never reused. The one
 | appearance.md                 | `APPEAR`  | Authored semantic identity, output-detail policy, shared visual tokens, and accessible renderer parity.         |
 | routing-and-placement.md      | `ROUTE`   | Flow routes, ports, grid rounding, labels, overlays, and Card-internal layout in diagram coordinates.           |
 | static-rendering.md           | `STATIC`  | Deterministic, accessible, framework-neutral SVG output from the canonical model and View Model.                |
+| diagnostics.md                | `DRAW`    | What a valid document still gets wrong about its drawing: rule codes, measured findings, severity, and gating.   |
 | command-line-rendering.md     | `CLI`     | Portable YAML and JSON input, SVG streams, diagnostics, exit status, and publishable command boundaries.        |
 | renderer-extensions.md        | `EXTEND`  | Host-provided visual implementations, compatibility, validation, and accessible generic fallbacks.              |
 | flow-signals.md               | `SIGNAL`  | Finite runtime Flow occurrences, replay, cancellation, announcements, and reduced-motion treatment.             |

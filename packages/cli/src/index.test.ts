@@ -546,3 +546,117 @@ describe('renderer CLI preview server', () => {
     expect(piped.output().stderr).toContain('standard input')
   })
 })
+
+/** A document whose drawing reads, and the same document with three things wrong with it. */
+const drawn = `id: CLI
+title: Drawing
+diagram:
+  bounds: 0 0 800 400
+  gridSize: 10
+  families:
+    - id: link
+      label: Link
+      color: "#79c9ff"
+  cards:
+    - id: ONE
+      label: One
+      bounds: 40 40 160 100
+      ports:
+        east: 1
+    - id: TWO
+      label: Two
+      bounds: 560 40 160 100
+      ports:
+        west: 1
+  flows:
+    - id: LINK
+      family: link
+      link: ONE E1 -> TWO W1
+scopes:
+  - id: all
+    label: All
+    description: Everything
+    elements: []
+`
+
+const overlapping = drawn.replace('bounds: 560 40 160 100', 'bounds: 180 40 160 100')
+
+/**
+ * A third Card in the route's way, with the Flow's label pinned 180 units along it - `labelAt` is a distance in
+ * diagram units - which lands the label on that Card. Both rules fire, and they fire at different severities.
+ */
+const obstructed = drawn
+  .replace(
+    '  flows:',
+    `    - id: MIDDLE
+      label: Middle
+      bounds: 300 40 160 100
+  flows:`
+  )
+  .replace('link: ONE E1 -> TWO W1', 'link: ONE E1 -> TWO W1\n      labelAt: 180')
+
+describe('drawing check', () => {
+  it('reports that a drawing reads, and changes nothing', async () => {
+    const run = harness({ 'model.yaml': drawn })
+    expect(await runRendererCli(['check', 'model.yaml'], run.io)).toBe(rendererCliExit.success)
+    expect(run.output().stdout).toBe('model.yaml: the drawing reads.\n')
+    expect(run.output().stderr).toBe('')
+    expect(run.output().written.size).toBe(0)
+  })
+
+  it('fails a drawing that cannot be read, naming the subject and the measurement', async () => {
+    const run = harness({ 'model.yaml': overlapping })
+    expect(await runRendererCli(['check', 'model.yaml'], run.io)).toBe(rendererCliExit.drawing)
+
+    const stdout = run.output().stdout
+    expect(stdout).toContain('error artefacts-overlap: ONE, TWO')
+    expect(stdout).toContain('overlap by 20 by 100 units.')
+    expect(stdout).toContain('- Move ONE or TWO so their boxes do not intersect.')
+    expect(run.output().stderr).toBe('')
+  })
+
+  // Severity is reported per finding rather than collapsed into the status, because the two say different things: an
+  // error is the drawing being unreadable, an observation is a judgement left with the author.
+  it('separates an observation from an error in what it prints', async () => {
+    const run = harness({ 'model.yaml': obstructed })
+    expect(await runRendererCli(['check', 'model.yaml'], run.io)).toBe(rendererCliExit.drawing)
+
+    const stdout = run.output().stdout
+    expect(stdout).toContain('(1 error, 1 observation)')
+    expect(stdout).toContain('observation flow-label-obstructed: LINK, MIDDLE')
+    expect(stdout).toContain("Flow LINK's label falls on Card MIDDLE.")
+    expect(stdout).toContain('error route-crosses-artefact: LINK, MIDDLE')
+  })
+
+  it('writes machine-readable findings a repair loop can act on', async () => {
+    const run = harness({ 'model.yaml': overlapping })
+    expect(await runRendererCli(['check', 'model.yaml', '--json'], run.io)).toBe(rendererCliExit.drawing)
+
+    const reported = JSON.parse(run.output().stdout) as {
+      document: string
+      findings: readonly { concerns: readonly string[]; measured: Record<string, number>; rule: string }[]
+      unreadable: boolean
+    }
+    expect(reported.document).toBe('model.yaml')
+    expect(reported.unreadable).toBe(true)
+    expect(reported.findings[0]).toMatchObject({
+      concerns: ['ONE', 'TWO'],
+      measured: { area: 2000, height: 100, width: 20 },
+      rule: 'artefacts-overlap'
+    })
+  })
+
+  it('refuses a render option on the checker rather than ignoring it', async () => {
+    const run = harness({ 'model.yaml': drawn })
+    expect(await runRendererCli(['check', 'model.yaml', '--scale', '2'], run.io)).toBe(rendererCliExit.usage)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).toContain('Unknown option --scale.')
+  })
+
+  it('reports an invalid document the way rendering does', async () => {
+    const run = harness({ 'model.yaml': 'id: CLI\ntitle: Broken\n' })
+    expect(await runRendererCli(['check', 'model.yaml'], run.io)).toBe(rendererCliExit.validation)
+    expect(run.output().stdout).toBe('')
+    expect(run.output().stderr).not.toBe('')
+  })
+})

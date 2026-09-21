@@ -8,6 +8,7 @@
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0",
     "@infoschematics/render-svg": "0.1.0",
+    "@infoschematics/view-model": "0.1.0",
     "@resvg/resvg-js": "2.6.2"
   },
   "engines": {
