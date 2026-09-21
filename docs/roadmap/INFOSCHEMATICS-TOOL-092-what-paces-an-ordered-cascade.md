@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-19T00:00:00Z
+updated_at: 2026-09-21T00:00:00Z
 ---
 
 # What paces an ordered cascade in an untimed Sequence
@@ -48,6 +48,8 @@ Move this item to Next only when the owner has chosen between the three candidat
 ## Current state
 
 The waiting condition is **not met**. The three candidates were put to the owner on 2026-09-19, which is the whole of step 1; the answer has not been given. Nothing else in the item can proceed without it, because every remaining step records or implements that answer.
+
+The owner released the rest of the queue on 2026-09-21 and every other item in it has been worked. This one did not move, and deliberately: what a cascade means in an untimed Sequence is an authored decision about the notation, and recording an answer the owner has not given would put a fabricated decision into a durable record. The candidates were put again with the same recommendation.
 
 ## Discussion
 
