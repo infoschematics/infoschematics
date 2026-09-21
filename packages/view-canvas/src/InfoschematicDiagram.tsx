@@ -152,6 +152,26 @@ const graphicBounds = (graphic: Overlay, viewBox: Box): Box => {
   }
 }
 
+type CanvasRegion = Parameters<typeof resolveRegionTreatment>[0] &
+  Readonly<{ box: Box & { radius?: number }; fill?: string }>
+
+/*
+ * One Region resolved once, read in two places.
+ *
+ * Its fill and frame are drawn where the Region sits in the stack; its label is drawn in a layer over the routes, so
+ * a Flow that legitimately crosses the label's band cannot cut through the glyphs - `ROUTE-019`. Both reads take the
+ * same treatment, geometry and ink from here rather than resolving a Region twice and risking two answers.
+ */
+const regionVisual = (region: CanvasRegion) => {
+  const treatment = resolveRegionTreatment(region)
+  const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+  // A boundary-mounted label sits over the backdrop the notch exposes,
+  // not the fill, so only a plain label takes its ink from the fill.
+  const ink =
+    region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
+  return { geometry, ink, treatment }
+}
+
 /**
  * Domain answers what semantic family a Card belongs to; Scope answers whether
  * it is applicable and visible. Cards authored before Domain classification
@@ -2309,14 +2329,7 @@ export function InfoschematicDiagram({
             kind: 'region'
           } as const satisfies ArtefactSelection
           const legacyKey = `region:${region.id}`
-          const treatment = resolveRegionTreatment(region)
-          const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
-          // A boundary-mounted label sits over the backdrop the notch exposes,
-          // not the fill, so only a plain label takes its ink from the fill.
-          const ink =
-            region.fill && geometry.label && treatment.labelTreatment === 'plain'
-              ? resolveReadableInk(region.fill)
-              : null
+          const { geometry, treatment } = regionVisual(region)
           return (
             // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
@@ -2359,24 +2372,6 @@ export function InfoschematicDiagram({
                   d={geometry.outline}
                   strokeOpacity={treatment.frameOpacity === 1 ? undefined : treatment.frameOpacity}
                 />
-              ) : null}
-              {geometry.label ? (
-                <text
-                  className={`infoschematic-region-label${interactive('region') && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
-                    artefactSelected(selection, legacyKey) ? ' selected' : ''
-                  }${hovered === legacyKey ? ' pointed' : ''}`}
-                  data-ink={ink ?? undefined}
-                  dominantBaseline={geometry.label.dominantBaseline}
-                  lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
-                  onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
-                  onPointerLeave={onHover ? () => onHover(null) : undefined}
-                  textAnchor={geometry.label.textAnchor}
-                  textLength={geometry.label.length ?? undefined}
-                  x={geometry.label.x}
-                  y={geometry.label.y}
-                >
-                  {region.label.toUpperCase()}
-                </text>
               ) : null}
             </g>
           )
@@ -2500,6 +2495,72 @@ export function InfoschematicDiagram({
             )
             .map(renderFlow)}
         </g>
+
+        {/* A Region's label, over the routes rather than under them.
+          A Flow between a Card inside a Region and one outside it crosses the frame the label is mounted on, and the
+          crossing is legitimate - the band is not reserved by refusing the route. So the glyphs are drawn here, after
+          the Flow layer and before the Cards, over an opaque backing in the surface the label sits on: a plain label
+          sets down on the Region's fill, a boundary-mounted one on the backdrop the notch exposes. `ROUTE-019`. */}
+        {infoschematicRegions.map((region) => {
+          const { geometry, ink, treatment } = regionVisual(region)
+          if (!geometry.label) return null
+          const selection = {
+            code: null,
+            geometry: 'box',
+            id: region.id,
+            kind: 'region'
+          } as const satisfies ArtefactSelection
+          const legacyKey = `region:${region.id}`
+          return (
+            // biome-ignore lint/a11y/noStaticElementInteractions: the region's own group carries the role and the accessible name; this is the same target lifted into a later layer.
+            <g
+              className={`infoschematic-region-label-layer${pendingRemovals[region.id] ? ' going' : ''}${inert('region')}`}
+              data-artefact-id={selection.id}
+              data-artefact-kind={selection.kind}
+              key={region.id}
+              onPointerDown={
+                interactive('region')
+                  ? dragArtefact(
+                      selection,
+                      legacyKey,
+                      { x: region.box.x + region.box.width / 2, y: region.box.y + region.box.height / 2 },
+                      { x: true, y: true }
+                    )
+                  : undefined
+              }
+            >
+              {geometry.labelBacking ? (
+                <rect
+                  className="infoschematic-region-label-backing"
+                  /* A `fill` attribute loses to the class rule that gives the band its surface colour, so a Region
+                     that states its own fill has to state it where it wins. `ROUTE-019` asks for the Region's
+                     resolved surface, and for a plain label that surface is the fill it sets down on. */
+                  style={ink !== null ? { fill: region.fill } : undefined}
+                  height={geometry.labelBacking.height}
+                  width={geometry.labelBacking.width}
+                  x={geometry.labelBacking.x}
+                  y={geometry.labelBacking.y}
+                />
+              ) : null}
+              <text
+                className={`infoschematic-region-label${treatment.labelTreatment === 'notched' ? ' notched' : ''}${interactive('region') && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
+                  artefactSelected(selection, legacyKey) ? ' selected' : ''
+                }${hovered === legacyKey ? ' pointed' : ''}`}
+                data-ink={ink ?? undefined}
+                dominantBaseline={geometry.label.dominantBaseline}
+                lengthAdjust={geometry.label.length === null ? undefined : 'spacingAndGlyphs'}
+                onPointerEnter={onHover ? () => onHover(legacyKey) : undefined}
+                onPointerLeave={onHover ? () => onHover(null) : undefined}
+                textAnchor={geometry.label.textAnchor}
+                textLength={geometry.label.length ?? undefined}
+                x={geometry.label.x}
+                y={geometry.label.y}
+              >
+                {region.label.toUpperCase()}
+              </text>
+            </g>
+          )
+        })}
 
         {/* An adapter is a socket the card it holds sits down into, so it is drawn
           with that card's shape cut out of it rather than as a panel behind:

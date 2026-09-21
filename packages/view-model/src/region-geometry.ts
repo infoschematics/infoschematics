@@ -21,8 +21,21 @@ export type RegionNotchGeometry = Readonly<{
   start: number
 }>
 
+/**
+ * The opaque band a Region label is drawn over, so a route that crosses it legitimately leaves no stroke standing
+ * between the glyph strokes - `ROUTE-019`. Derived from the resolved label rather than measured, so both renderers
+ * cover the same band instead of each estimating its own.
+ */
+export type RegionLabelBackingGeometry = Readonly<{
+  height: number
+  width: number
+  x: number
+  y: number
+}>
+
 export type RegionGeometry = Readonly<{
   label: RegionLabelGeometry | null
+  labelBacking: RegionLabelBackingGeometry | null
   notch: RegionNotchGeometry | null
   outline: string | null
 }>
@@ -79,6 +92,26 @@ const labelGeometry = (
           : x + offset
         : x + width / 2,
     y: north ? y + edgeInset : south ? y + height - edgeInset : y + height / 2
+  }
+}
+
+/*
+ * The band the glyphs occupy, padded by the same figure that pads the notch.
+ *
+ * A notched label's backing then covers exactly the gap the frame leaves for it, and a plain label's covers the run
+ * of glyphs and no more. The extent is the pinned rendered length where there is one, and the character count
+ * otherwise, which is the same measure `fitNotch` sizes the notch by.
+ */
+const labelBacking = (label: RegionLabelGeometry, labelText: string): RegionLabelBackingGeometry => {
+  const extent = label.length ?? labelText.length * regionGeometryDefaults.characterWidth
+  const padding = regionGeometryDefaults.notchPadding
+  const left =
+    label.textAnchor === 'start' ? label.x : label.textAnchor === 'end' ? label.x - extent : label.x - extent / 2
+  return {
+    height: Number(regionGeometryDefaults.labelHeight.toFixed(3)),
+    width: Number((extent + padding * 2).toFixed(3)),
+    x: Number((left - padding).toFixed(3)),
+    y: Number((label.y - regionGeometryDefaults.labelHeight / 2).toFixed(3))
   }
 }
 
@@ -160,10 +193,13 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
           treatment.labelOffset ?? regionGeometryDefaults.labelInset
         )
       : null
-  if (treatment.frame === 'none') return { label: resolvedLabel, notch: null, outline: null }
+  const backingFor = (resolved: RegionLabelGeometry | null) => (resolved ? labelBacking(resolved, label) : null)
+  if (treatment.frame === 'none')
+    return { label: resolvedLabel, labelBacking: backingFor(resolvedLabel), notch: null, outline: null }
   if (treatment.labelTreatment !== 'notched' || !resolvedLabel) {
     return {
       label: resolvedLabel,
+      labelBacking: backingFor(resolvedLabel),
       notch: null,
       outline: roundedFrame(box, resolvedRadius)
     }
@@ -172,11 +208,13 @@ export const regionGeometry = ({ box, label, treatment }: RegionGeometryInput): 
   if (!fitted)
     return {
       label: resolvedLabel,
+      labelBacking: backingFor(resolvedLabel),
       notch: null,
       outline: roundedFrame(box, resolvedRadius)
     }
   return {
     label: fitted.label,
+    labelBacking: backingFor(fitted.label),
     notch: fitted.notch,
     outline: notchedFrame(box, resolvedRadius, fitted.notch)
   }

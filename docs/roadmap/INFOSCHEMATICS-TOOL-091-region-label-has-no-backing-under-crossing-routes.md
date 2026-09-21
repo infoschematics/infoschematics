@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-091
 area: TOOL
 title: A Region label has no backing under a crossing route
 theme: tool
-horizon: parked
-status: draft
+horizon: now
+status: done
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 1fad183b359db5db2e7d79af77b40f775b15ee2f
 created_at: 2026-09-18T03:50:00Z
-updated_at: 2026-09-19T00:00:00Z
+updated_at: 2026-09-21T19:40:00Z
 ---
 
 # A Region label has no backing under a crossing route
@@ -36,11 +36,11 @@ This does not move a Region label, change `ROUTE-018`'s metrics, reserve the ban
 
 ## Steps
 
-1. [ ] Decide where the backing band is resolved, and resolve it once in View Model so both renderers consume the same rectangle.
-2. [ ] Emit it in both renderers immediately beneath the label glyphs, in the Region's resolved surface colour, so the static renderer's Region-before-Flow paint order stops mattering.
-3. [ ] Add an authored case that routes a Flow through a Region label's glyphs, and assert the backing's geometry in `scripts/visual-treatment-parity.test.ts` rather than only in one renderer.
-4. [ ] Render it and read the label, in both outlets, under a blueprint and a paper surface — a passing geometry comparison is not evidence the glyphs survived.
-5. [ ] Move `ROUTE-019` to `conforming` and repoint its `_Verify:_` at the new case rather than at a document that no longer crosses the glyphs.
+1. [x] Decide where the backing band is resolved, and resolve it once in View Model so both renderers consume the same rectangle.
+2. [x] Emit it in both renderers immediately beneath the label glyphs, in the Region's resolved surface colour, so the static renderer's Region-before-Flow paint order stops mattering.
+3. [x] Add an authored case that routes a Flow through a Region label's glyphs, and assert the backing's geometry in `scripts/visual-treatment-parity.test.ts` rather than only in one renderer.
+4. [x] Render it and read the label, in both outlets, under a blueprint and a paper surface — a passing geometry comparison is not evidence the glyphs survived.
+5. [x] Move `ROUTE-019` to `conforming` and repoint its `_Verify:_` at the new case rather than at a document that no longer crosses the glyphs.
 
 ## Files touched
 
@@ -56,7 +56,67 @@ Return this item to Next when the current user-acceptance pass over the rendered
 
 ## Current state
 
-Paused, not blocked. The acceptance pass is live and is the channel currently finding defects, so the renderer surfaces this item paints into are the ones under active change. The code gap itself is unchanged and confirmed: neither renderer emits a backing.
+Done. Returned from Parked on 2026-09-21 when the owner released the queue, and delivered against baseline `1fad183b359db5db2e7d79af77b40f775b15ee2f`.
+
+## Verify
+
+`bun run self:check`, and the new parity case in `scripts/visual-treatment-parity.test.ts`: "keeps a Region label legible under a route that crosses its band, in both renderers".
+
+## Dependencies / blocks
+
+None.
+
+## Documentation impact
+
+### Decision Records
+
+None. `ROUTE-019` was already decided; this item implements it.
+
+### Specifications
+
+`ROUTE-019` moves from `divergent` to `conforming`, its `_Verify:_` moves from an example that no longer crosses its glyphs to the authored case, and its `_Evidence:_` names the resolved band and the two layers.
+
+### Guides
+
+None. Nothing a reader authors changes: a label that was crossed is now legible, which is what the guidance already implied.
+
+### Roadmap
+
+This record.
+
+## Review
+
+### Delivered
+
+Every Step, within the stated Boundary.
+
+### Summary of changes
+
+`regionGeometry` resolves a `labelBacking` rectangle beside the label it belongs to, padded by the same figure that pads the notch and extended by the pinned rendered length where there is one. Both renderers then draw their Region labels in a layer of their own, after the Flows and before the Cards, each label over a rectangle in that band: the static renderer collects a `regionLabelLayer` in the manner of its existing `codeLayer`, and Canvas maps the Regions a second time after `infoschematic-flows`. A Region resolved twice in Canvas would be a Region that could answer differently twice, so both reads go through one `regionVisual`.
+
+The band takes the surface its label sits on, which is the same reading the label's ink already took: a plain label sets down on the Region's fill, a boundary-mounted one sits on the frame line over the backdrop the notch exposes.
+
+### Verification
+
+`bun run self:check` — green. Beyond the suites, the case was rendered and read in both outlets on a blueprint and a paper surface, which is how two things a green run had nothing to say about were found: a `fill` presentation attribute loses to the class rule that gives the band its surface colour, so Canvas states a Region's own fill as an inline style; and carrying the label treatment as a data attribute on the lifted group both doubled every `data-label-treatment` census and, at three classes of specificity, overrode the neutral surface's own label colour. The treatment travels as a class on the glyphs instead, at the weight the attribute selector had.
+
+### Outstanding concerns
+
+The band is a rectangle around the whole run of glyphs rather than the glyphs themselves, so a route crossing it is cut over the label's full width and padding, not only where a stroke would actually touch a letter. That is what `ROUTE-019` asks for and it reads well, but it is a wider interruption than the defect strictly required.
+
+A Card is drawn after the label layer, so a Region label under a Card is still covered by it. That is deliberate — a Card is content, a Region label is geography — and unchanged by this item.
+
+### Post-change review
+
+The item was parked in preference to the acceptance pass, and the pass did reshape it: the renderer surfaces moved underneath it, and both defects above were found by looking rather than by running. Nothing the pass found superseded the backing.
+
+### Mini recap
+
+A Region label had nothing beneath it, and every route that crossed its band was painted after it, so the glyphs were cut. The band is now resolved once in View Model and drawn in both renderers in a layer over the routes, in the surface colour the label sits on.
+
+## Done
+
+Closed 2026-09-21 under the owner's release of the queue, which returned this item from Parked ahead of its stated trigger.
 
 ## Discussion
 

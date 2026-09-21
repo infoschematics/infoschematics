@@ -688,6 +688,11 @@ export const renderInfoschematicSvg = (
   /* Every code drawn on something other than a Card's own detail row, collected as each element is drawn and laid
      over the diagram at the end, because a code is read against the drawing rather than buried in it. */
   const codeLayer: string[] = []
+  /* Region labels, lifted out of their own groups and laid over the Flow layer - `ROUTE-019`. Region-before-Flow is
+     the right order for a fill and a frame and the wrong one for the glyphs, which a route that legitimately crosses
+     the band would otherwise cut through. Cards are drawn after this, so the label rises above the routes and stays
+     under the elements the Region contains. */
+  const regionLabelLayer: string[] = []
   if (artworkDefs.length > 0) body.push(['  <defs>', ...artworkDefs, '  </defs>'].join('\n'))
   body.push(line(1, 'title', [], xmlText(config.title)))
   if (accessibleSummary) body.push(line(1, 'desc', [], xmlText(accessibleSummary)))
@@ -862,12 +867,29 @@ export const renderInfoschematicSvg = (
       )
     }
     if (geometry.label) {
-      content.push(
+      /* The glyphs and the band beneath them, drawn in the Region's own layer group over the routes rather than in
+         the Region's group under them. The backing takes the surface the label actually sits on: a plain label sets
+         down on the fill, a boundary-mounted one sits on the frame line over the backdrop the notch exposes - the
+         same reading the ink above takes. */
+      const labelContent: string[] = []
+      if (geometry.labelBacking) {
+        labelContent.push(
+          line(2, 'rect', [
+            ['class', 'infoschematic-region-label-backing'],
+            ['fill', ink !== null && region.fill ? region.fill : backdrop],
+            ['height', geometry.labelBacking.height],
+            ['width', geometry.labelBacking.width],
+            ['x', geometry.labelBacking.x],
+            ['y', geometry.labelBacking.y]
+          ])
+        )
+      }
+      labelContent.push(
         line(
           2,
           'text',
           [
-            ['class', 'infoschematic-region-label'],
+            ['class', `infoschematic-region-label${treatment.labelTreatment === 'notched' ? ' notched' : ''}`],
             ['data-ink', ink ?? undefined],
             [
               'fill',
@@ -890,6 +912,17 @@ export const renderInfoschematicSvg = (
           ],
           xmlText(region.label.toUpperCase())
         )
+      )
+      regionLabelLayer.push(
+        group(
+          1,
+          [
+            ['class', 'infoschematic-region-label-layer'],
+            ['data-artefact-id', region.id],
+            ['data-artefact-kind', 'region']
+          ],
+          labelContent
+        ).join('\n')
       )
     }
     if (drawsOwnCode(region, visualTreatment.identity)) {
@@ -1051,6 +1084,8 @@ export const renderInfoschematicSvg = (
       ).join('\n')
     )
   }
+
+  body.push(...regionLabelLayer)
 
   /* Every visible Flow is placed, not only the coded ones: the placement avoids the other labels on the surface, so
      asking it about a subset would move a chip because a Flow beside it happens to be drawing nothing. */

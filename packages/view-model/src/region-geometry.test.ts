@@ -159,6 +159,49 @@ describe('region outline geometry', () => {
     expect(centered.outline?.endsWith(' Z')).toBe(true)
   })
 
+  /*
+   * The band a crossing route is covered over - `ROUTE-019`.
+   *
+   * It is asserted against the label it belongs to rather than against fixed numbers, because the requirement is
+   * that both renderers cover the same band as the glyphs they were given, not that the band has a chosen size.
+   */
+  it.each([
+    ['north-west', 'plain'],
+    ['north', 'notched'],
+    ['north-east', 'plain'],
+    ['west', 'notched'],
+    ['center', 'plain']
+  ] as const)('backs a %s label over the run of its own glyphs', (placement, labelTreatment) => {
+    const label = 'Distribution'
+    const geometry = regionGeometry({
+      box,
+      label,
+      treatment: treatment({ frame: 'solid', label: placement as RegionLabelPlacement, labelTreatment })
+    })
+    const backing = geometry.labelBacking
+    const resolved = geometry.label
+    if (!backing || !resolved) throw new Error('a labelled Region resolves both a label and its backing')
+
+    const extent = resolved.length ?? label.length * regionGeometryDefaults.characterWidth
+    const padding = regionGeometryDefaults.notchPadding
+    expect(backing.width).toBeCloseTo(extent + padding * 2, 9)
+    expect(backing.height).toBe(regionGeometryDefaults.labelHeight)
+    // Centred on the same point the glyphs are set from, whichever end they are anchored by.
+    expect(backing.x + backing.width / 2).toBeCloseTo(
+      resolved.textAnchor === 'start'
+        ? resolved.x + extent / 2
+        : resolved.textAnchor === 'end'
+          ? resolved.x - extent / 2
+          : resolved.x,
+      9
+    )
+    expect(backing.y + backing.height / 2).toBeCloseTo(resolved.y, 9)
+  })
+
+  it('resolves no backing where there is no label to back', () => {
+    expect(regionGeometry({ box, label: 'Quiet', treatment: treatment({ frame: 'solid' }) }).labelBacking).toBeNull()
+  })
+
   it('is byte-stable and clamps the invariant radius to the region bounds', () => {
     const input = {
       box: { height: 12, width: 20, x: 1, y: 2 },

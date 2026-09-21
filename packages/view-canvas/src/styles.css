@@ -199,10 +199,31 @@
   letter-spacing: 1.5px;
 }
 
-[data-label-treatment="notched"] .infoschematic-region-label {
+.infoschematic-region-label.notched {
   fill: #9ed9ff;
   font: 600 13px var(--infoschematic-canvas-text-code-family);
   letter-spacing: 1.6px;
+}
+
+/* The lifted label layer is a place in the stack rather than a target: the
+   glyphs stay as clickable as they were inside the region's own group, and the
+   backing takes no pointer at all - it is drawn over the routes it protects,
+   and one that answered a click would take it from the line underneath. */
+.infoschematic-region-label-layer {
+  pointer-events: visible;
+}
+
+/* The band the label is read against, so a route that crosses it legitimately
+   leaves no stroke standing between the glyph strokes. A plain label over a
+   fill takes that fill inline; everything else reads against the backdrop the
+   notch exposes, which is the surface, not a colour of its own. */
+.infoschematic-region-label-backing {
+  fill: var(--infoschematic-canvas-surfaces-backdrop);
+  pointer-events: none;
+}
+
+.infoschematic-svg.surface-neutral .infoschematic-region-label-backing {
+  fill: var(--infoschematic-canvas-output-backdrop);
 }
 
 /* Ink follows the Region fill's own luminance so both renderers agree. */

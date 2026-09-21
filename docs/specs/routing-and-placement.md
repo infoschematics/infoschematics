@@ -206,11 +206,11 @@ A Flow route MAY occupy a Region label's band. A Flow between a Card inside a Re
 
 Legibility here MUST NOT be pursued by moving the label. ROUTE-018 fixes Region label geometry to shared deterministic metrics, and a label whose position depends on which engine measured it would break the parity that requirement exists to hold.
 
-_Conformance:_ divergent
+_Conformance:_ conforming
 
-_Verify:_ Render a document that routes a Flow through a Region label's band through both renderers and read the label. `examples/is-infoschematics/infoschematic.yaml` is one: two routes cross its "View and renderer packages" band.
+_Verify:_ `scripts/visual-treatment-parity.test.ts` — "keeps a Region label legible under a route that crosses its band, in both renderers", which drives a Flow down the middle of a boundary-mounted label and a plain one, compares the two renderers' bands, and asserts each is drawn after the routes.
 
-_Evidence:_ Divergent in both renderers as of 2026-09-16. `infoschematic-region-label` in `packages/render-svg/src/index.ts` and `packages/view-canvas/src/InfoschematicDiagram.tsx` carries no backing, and the static renderer emits every Region before every Flow, so a crossing route erases glyphs; the same label loses the same glyphs in Chromium. Both engines place it within a pixel of each other, so this is paint order rather than measurement.
+_Evidence:_ `regionGeometry` resolves a `labelBacking` band from the same label geometry both renderers already consume (`packages/view-model/src/region-geometry.ts`), and each renderer draws its Region labels in a layer after the Flows rather than in the Region's own group: `regionLabelLayer` in `packages/render-svg/src/index.ts`, `infoschematic-region-label-layer` in `packages/view-canvas/src/InfoschematicDiagram.tsx`. Read on 2026-09-21 in both outlets, on a blueprint and a paper surface: the glyphs survive the crossing and the band takes the surface its label sits on.
 
 ## Gaps
 

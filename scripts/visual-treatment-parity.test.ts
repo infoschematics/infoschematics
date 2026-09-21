@@ -166,6 +166,32 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
   surface: values(output, 'data-surface-treatment')
 })
 
+/**
+ * The band each renderer draws beneath a Region label, as geometry rather than as markup.
+ *
+ * `ROUTE-019` requires both to derive it from the same resolved label geometry, and the two write the same rectangle
+ * with different attributes around it - Canvas omits a fill it takes from the stylesheet, the static renderer always
+ * states one - so the comparable thing is the rectangle, read attribute by attribute rather than as a string.
+ */
+const labelBackings = (output: string) =>
+  [...output.matchAll(/<rect class="infoschematic-region-label-backing"[^>]*>/g)].map((match) => {
+    const attributes = Object.fromEntries(
+      [...match[0].matchAll(/([a-z-]+)="([^"]*)"/g)].map((attribute) => [
+        attribute[1] as string,
+        attribute[2] as string
+      ])
+    )
+    return `${attributes.width}x${attributes.height}@${attributes.x},${attributes.y}`
+  })
+
+const labelBackingBoxes = (output: string) =>
+  labelBackings(output).map((band) => {
+    const [width, height, x, y] = (band.match(/([\d.-]+)x([\d.-]+)@([\d.-]+),([\d.-]+)/) as RegExpMatchArray)
+      .slice(1)
+      .map(Number)
+    return { height: height as number, width: width as number, x: x as number, y: y as number }
+  })
+
 describe('visual treatment renderer parity', () => {
   it('keeps authored visual decisions byte-stable and equivalent across Canvas and static SVG', () => {
     const canvas = renderToStaticMarkup(createElement(Canvas, { config }))
@@ -383,6 +409,111 @@ describe('visual treatment renderer parity', () => {
       label: ['10,38', '10,38', '10,38', '10,28'],
       stereotype: ['10,18', '10,18', '10,18']
     })
+  })
+
+  it('keeps a Region label legible under a route that crosses its band, in both renderers', () => {
+    /*
+     * A route driven deliberately through the glyphs.
+     *
+     * `ROUTE-019` lets a Flow occupy a Region label's band - a Card inside a Region talking to one outside it has to
+     * cross the frame the label is mounted on - and requires the label to survive the crossing rather than the band
+     * to be reserved. The example the requirement used to cite no longer demonstrates it: its crossing routes pass
+     * to the left of the glyphs. This document puts one straight down the middle of two labels, a boundary-mounted
+     * one over the backdrop the notch exposes and a plain one set down on its Region's own fill.
+     */
+    const crossed = defineInfoschematic({
+      title: 'Crossed label reference',
+      infoschematic: {
+        appearance: { surface: 'blueprint' },
+        scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
+        flowFamilies: [{ color: '#79c9ff', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
+        regions: [
+          {
+            box: { height: 200, radius: 8, width: 360, x: 20, y: 120 },
+            frame: { style: 'solid' },
+            id: 'runtime',
+            label: 'Runtime',
+            labelMount: 'boundary',
+            labelPlacement: 'north'
+          },
+          {
+            box: { height: 60, width: 280, x: 60, y: 130 },
+            fill: '#0b2a3a',
+            id: 'inner',
+            label: 'Inner band',
+            labelPlacement: 'north'
+          }
+        ],
+        cards: [
+          {
+            code: 'ONE-001',
+            detail: 'Inside the region',
+            id: 'inside',
+            label: 'Inside',
+            placement: { box: { height: 60, width: 120, x: 140, y: 200 }, ports: { north: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          },
+          {
+            code: 'ONE-002',
+            detail: 'Outside the region',
+            id: 'outside',
+            label: 'Outside',
+            placement: { box: { height: 60, width: 120, x: 140, y: 20 }, ports: { south: 1 } },
+            scope: 'one',
+            scopes: ['one']
+          }
+        ],
+        flows: [
+          {
+            code: 'CALL-001',
+            family: 'calls',
+            id: 'call',
+            points: [
+              { x: 200, y: 200 },
+              { x: 200, y: 80 }
+            ],
+            source: 'inside',
+            sourcePort: 'N1',
+            target: 'outside',
+            targetPort: 'S1'
+          }
+        ]
+      }
+    })
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: crossed }))
+    const svg = renderInfoschematicSvg(crossed)
+
+    // One rectangle per label, identical in both, because both take it from the resolved label geometry rather than
+    // measuring their own. Two labels are drawn, so two bands are.
+    expect(labelBackings(canvas)).toEqual(labelBackings(svg))
+    expect(labelBackings(canvas)).toHaveLength(2)
+
+    // The route is what the band exists for, so the case asserts the crossing rather than assuming it: the line runs
+    // down x=200 from y=200 to y=80, and each band has to contain that column over its own run of the line.
+    for (const band of labelBackingBoxes(svg)) {
+      expect(band.x).toBeLessThan(200)
+      expect(band.x + band.width).toBeGreaterThan(200)
+      expect(band.y).toBeGreaterThan(80)
+      expect(band.y + band.height).toBeLessThan(200)
+    }
+
+    // Each band is filled with the surface its label sits on: the Region's own fill under a plain label, the
+    // backdrop under a boundary-mounted one, which is the same reading the label's ink takes.
+    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="#0b2a3a"`)
+    expect(svg).toContain(
+      `<rect class="infoschematic-region-label-backing" fill="${visualTokens.canvas.surfaces.backdrop}"`
+    )
+    // Canvas states the fill where it beats the class rule that gives every other band its surface colour: a
+    // presentation attribute loses to a stylesheet, so the Region's own fill is inline style or it is not applied.
+    expect(canvas).toContain('class="infoschematic-region-label-backing" style="fill:#0b2a3a"')
+
+    // Paint order, which is the half of the requirement geometry cannot show: the glyphs are drawn after the routes
+    // in both outlets, so the backing covers stroke rather than being covered by it.
+    expect(canvas.indexOf('infoschematic-region-label-layer')).toBeGreaterThan(canvas.lastIndexOf('flow-family-calls'))
+    expect(svg.indexOf('infoschematic-region-label-layer')).toBeGreaterThan(
+      svg.lastIndexOf('class="infoschematic-flow"')
+    )
   })
 
   it('arms a Flow with the same arrowhead in both renderers', () => {
