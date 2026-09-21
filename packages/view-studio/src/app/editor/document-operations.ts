@@ -236,7 +236,7 @@ const scopeDiff = (
  * Every Flow the operation moved without naming it.
  *
  * A Card carries the ends of the Flows attached to it, and the draft repairs each of those routes as the Card
- * moves: `moveRouteEnd` gives the run beside a moved port the corner that keeps it orthogonal. Projecting only the
+ * moves: `moveRouteEnds` gives the run beside a moved port the corner that keeps it orthogonal. Projecting only the
  * member the Producer named leaves that repair in the draft, so the document keeps the Card's new box beside the
  * route's old waypoints, the first run arrives diagonally, and `ROUTE-001` refuses the document the edit just
  * wrote - `COMPOSE-002`, thrown out of runtime construction rather than refused at the edit.
@@ -255,7 +255,7 @@ const dependentFlowDiff = (
     if (flow.id === named || !previous || same(previous, flow)) return []
     /*
      * Only a route that carries waypoints is written. A Flow authored by its ports alone has no shape of its own to
-     * keep: the runtime derives it through `routeBetweenPorts` every time, so it already follows a port that moved,
+     * keep: `moveRouteEnds` derives it through `routeBetweenPorts` every time, so it already follows a port that moved,
      * and writing the bend the draft derived would freeze a derived route into the document as though someone had
      * drawn it - the re-routing `INFOSCHEMATICS-TOOL-084` deliberately did not introduce.
      */

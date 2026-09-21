@@ -103,19 +103,42 @@ const facing = (side: string): Offset =>
  * Every other route in the model was drawn by hand and is only ever adjusted;
  * a created line has to start somewhere, and the one thing it must get right is
  * leaving and arriving square to the sides it is attached to. So both ends step
- * off their port far enough to clear the card before anything turns, and the
- * two cleared points are joined with a single corner placed on the axis the
- * leaving run is already travelling. The result is a plain dog-leg, which is
- * what a reader would draw first and then move.
+ * off their port far enough to clear the card before anything turns.
+ *
+ * Where the far stub is ahead of the leaving direction, the two cleared points
+ * are joined with a single corner placed on the axis the leaving run is already
+ * travelling: a plain dog-leg, which is what a reader would draw first and then
+ * move. Where it is behind - dragging a Card past the one it feeds puts it
+ * there - that one corner sends the run straight back along the axis it has
+ * just left, across the Card it came from and over its own arrowhead. So a
+ * route that has to double back turns twice instead, on a lane midway between
+ * the two stubs, which leaves both cards by the front and crosses neither.
  */
 export const routeBetweenPorts = (from: Point, fromSide: string, to: Point, toSide: string): Point[] => {
   const out = facing(fromSide)
   const back = facing(toSide)
   const left = shifted(from, { dx: out.dx * portClearance, dy: out.dy * portClearance })
   const arrive = shifted(to, { dx: back.dx * portClearance, dy: back.dy * portClearance })
-  const corner = out.dx !== 0 ? { x: arrive.x, y: left.y } : { x: left.x, y: arrive.y }
+  const sideways = out.dx !== 0
+  const ahead = sideways ? (arrive.x - left.x) * out.dx > 0 : (arrive.y - left.y) * out.dy > 0
 
-  return normaliseRoute([from, left, corner, arrive, to])
+  if (ahead) {
+    const corner = sideways ? { x: arrive.x, y: left.y } : { x: left.x, y: arrive.y }
+    return normaliseRoute([from, left, corner, arrive, to])
+  }
+
+  const lane = sideways ? (left.y + arrive.y) / 2 : (left.x + arrive.x) / 2
+  const corners = sideways
+    ? [
+        { x: left.x, y: lane },
+        { x: arrive.x, y: lane }
+      ]
+    : [
+        { x: lane, y: left.y },
+        { x: lane, y: arrive.y }
+      ]
+
+  return normaliseRoute([from, left, ...corners, arrive, to])
 }
 
 /**
@@ -140,4 +163,37 @@ export const normaliseRoute = (points: readonly Point[]): Point[] => {
   }
 
   return kept
+}
+
+/**
+ * Move the ends of one Flow with the components they are attached to.
+ *
+ * A route of two points is not a shape anyone drew: it is what `routeBetweenPorts` derives from the two ports, and
+ * the document keeps it that way - nothing writes a derived route back. So when a port moves, the derivation is
+ * made again from the moved port rather than the old run bent to reach it. `moveRouteEnd` would insert a corner
+ * against the anchored far end, which leaves a run arriving sideways into a port and puts the draft somewhere the
+ * committed document is not - the divergence `ROUTE-002` forbids, since both must reach the same construction.
+ *
+ * A route with waypoints is a shape someone drew, and only the run beside the moved port is repaired.
+ *
+ * Both ends are given at once because they can move together - a Flow whose two ends are on the same Card, or on
+ * two Cards dragged as a group - and a derived route has to be made once from both new ports rather than twice.
+ */
+export const moveRouteEnds = (
+  points: readonly Point[],
+  ports: Readonly<{ source: string; target: string }>,
+  offsets: Readonly<{ source?: Offset; target?: Offset }>
+): Point[] => {
+  if (!offsets.source && !offsets.target) return points.map((point) => ({ ...point }))
+
+  if (points.length === 2) {
+    const from = offsets.source ? shifted(points[0], offsets.source) : points[0]
+    const to = offsets.target ? shifted(points[1], offsets.target) : points[1]
+    return routeBetweenPorts(from, ports.source, to, ports.target)
+  }
+
+  let moved = points.map((point) => ({ ...point }))
+  if (offsets.source) moved = moveRouteEnd(moved, 'start', offsets.source)
+  if (offsets.target) moved = moveRouteEnd(moved, 'end', offsets.target)
+  return moved
 }

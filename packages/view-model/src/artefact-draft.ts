@@ -17,7 +17,7 @@ import type {
 } from './editable.ts'
 import type { Offset } from './geometry.ts'
 import { portsForBox } from './ports.ts'
-import { moveRouteEnd } from './routing.ts'
+import { moveRouteEnds } from './routing.ts'
 
 type SelectionFor<K extends ArtefactKind> = Extract<ArtefactSelection, { kind: K }>
 
@@ -111,24 +111,16 @@ const moveAttachedFlowEnds = (
     return from && to ? { dx: to.x - from.x, dy: to.y - from.y } : undefined
   }
 
+  const moved = (delta: Offset | undefined) => (delta && (delta.dx !== 0 || delta.dy !== 0) ? delta : undefined)
+
   return flows.map((flow) => {
-    let points = flow.points
-    let changed = false
-    if (flow.source === endpointId) {
-      const delta = deltaFor(flow.sourcePort)
-      if (delta && (delta.dx !== 0 || delta.dy !== 0)) {
-        points = moveRouteEnd(points, 'start', delta)
-        changed = true
-      }
+    const offsets = {
+      source: flow.source === endpointId ? moved(deltaFor(flow.sourcePort)) : undefined,
+      target: flow.target === endpointId ? moved(deltaFor(flow.targetPort)) : undefined
     }
-    if (flow.target === endpointId) {
-      const delta = deltaFor(flow.targetPort)
-      if (delta && (delta.dx !== 0 || delta.dy !== 0)) {
-        points = moveRouteEnd(points, 'end', delta)
-        changed = true
-      }
-    }
-    return changed ? { ...flow, points } : flow
+    if (!offsets.source && !offsets.target) return flow
+    const ports = { source: flow.sourcePort, target: flow.targetPort }
+    return { ...flow, points: moveRouteEnds(flow.points, ports, offsets) }
   })
 }
 
@@ -137,17 +129,13 @@ const moveAttachedFlowEnds = (
 const movePointFlowEnds = (flows: readonly FlowConfig[], pointId: string, delta: Offset): readonly FlowConfig[] => {
   if (delta.dx === 0 && delta.dy === 0) return flows
   return flows.map((flow) => {
-    let points = flow.points
-    let changed = false
-    if (flow.source === pointId) {
-      points = moveRouteEnd(points, 'start', delta)
-      changed = true
+    const offsets = {
+      source: flow.source === pointId ? delta : undefined,
+      target: flow.target === pointId ? delta : undefined
     }
-    if (flow.target === pointId) {
-      points = moveRouteEnd(points, 'end', delta)
-      changed = true
-    }
-    return changed ? { ...flow, points } : flow
+    if (!offsets.source && !offsets.target) return flow
+    const ports = { source: flow.sourcePort, target: flow.targetPort }
+    return { ...flow, points: moveRouteEnds(flow.points, ports, offsets) }
   })
 }
 

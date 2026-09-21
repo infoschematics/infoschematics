@@ -19,7 +19,7 @@ import type { Box, Offset, Point } from './geometry.ts'
 import { routeEndpoints, routePath } from './geometry.ts'
 import { placeLabels } from './placement.ts'
 import { auditPorts, minimumPortGap, type PortCounts, portsForBox } from './ports.ts'
-import { joinedToPort, moveRouteEnd, normaliseRoute, routeBetweenPorts } from './routing.ts'
+import { joinedToPort, moveRouteEnds, normaliseRoute, routeBetweenPorts } from './routing.ts'
 import { annotationLabelWidth, visualTokens } from './tokens.ts'
 
 export type RuntimeCard = Card & {
@@ -139,8 +139,6 @@ export type RuntimeStoryScene = RuntimeSequenceScene & { scene?: string; short?:
 
 /** Safe readable fallback for timed Scenes without an authored duration. */
 /** A point moved by an offset, for a draft that re-derives a run rather than bending it. */
-const shiftedPoint = (point: Point, delta: Offset): Point => ({ x: point.x + delta.dx, y: point.y + delta.dy })
-
 export const defaultSceneDuration = 3100
 
 export type RuntimeDrafts = {
@@ -528,21 +526,15 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       const sourceOffset = offsets.get(endpointCodes.get(flow.source) ?? flow.source)
       const targetOffset = offsets.get(endpointCodes.get(flow.target) ?? flow.target)
       if (!sourceOffset && !targetOffset) return flow
-      let points = flow.points
-      if (points.length === 2) {
-        /*
-         * A straight run carries no shape anyone drew, so the draft derives it the way the document does rather
-         * than bending it. `moveRouteEnd` would insert its corner against the anchored far end, which leaves the
-         * port sideways and puts the draft somewhere the committed route is not.
-         */
-        const from = sourceOffset ? shiftedPoint(points[0], sourceOffset) : points[0]
-        const to = targetOffset ? shiftedPoint(points[1], targetOffset) : points[1]
-        points = routeBetweenPorts(from, flow.sourcePort, to, flow.targetPort)
-      } else {
-        if (sourceOffset) points = moveRouteEnd(points, 'start', sourceOffset)
-        if (targetOffset) points = moveRouteEnd(points, 'end', targetOffset)
-      }
-      points = normaliseRoute(points)
+      /* The same construction the draft document reaches, so a move looks the same before and after it is
+         committed - `ROUTE-002`. */
+      const points = normaliseRoute(
+        moveRouteEnds(
+          flow.points,
+          { source: flow.sourcePort, target: flow.targetPort },
+          { source: sourceOffset, target: targetOffset }
+        )
+      )
       return { ...flow, d: routePath(points), points }
     })
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { projectOntoRoute } from './geometry.ts'
-import { moveRouteEnd, normaliseRoute } from './routing.ts'
+import { moveRouteEnd, moveRouteEnds, normaliseRoute, routeBetweenPorts } from './routing.ts'
 import { moveWaypoint } from './waypoints.ts'
 
 const orthogonal = (points: readonly { x: number; y: number }[]) =>
@@ -166,5 +166,126 @@ describe('re-attaching never leaves a diagonal', () => {
       const next = moveWaypoint(moved, 1, { x: moved[1].x, y: moved[0].y })
       expect(orthogonal(next), `y ${y}`).toBe(true)
     }
+  })
+})
+
+/*
+ * A first route between two ports, and what it does when the target is behind the port it leaves by.
+ *
+ * Dragging a Card past the one it feeds leaves the run that way round, and a route with one corner then doubles
+ * back along the axis it has just left - across the Card it came from, over its own arrowhead.
+ */
+describe('routing between two ports', () => {
+  const orthogonal = (points: readonly { x: number; y: number }[]) =>
+    points.slice(1).every((point, index) => point.x === points[index].x || point.y === points[index].y)
+
+  it('turns once where the arriving stub is ahead of the leaving one', () => {
+    const points = routeBetweenPorts({ x: 100, y: 100 }, 'E1', { x: 300, y: 200 }, 'W1')
+
+    expect(points).toEqual([
+      { x: 100, y: 100 },
+      { x: 280, y: 100 },
+      { x: 280, y: 200 },
+      { x: 300, y: 200 }
+    ])
+    expect(orthogonal(points)).toBe(true)
+  })
+
+  it('collapses to the straight run where the two ports line up', () => {
+    const points = routeBetweenPorts({ x: 100, y: 100 }, 'E1', { x: 300, y: 100 }, 'W1')
+
+    expect(points).toEqual([
+      { x: 100, y: 100 },
+      { x: 300, y: 100 }
+    ])
+  })
+
+  it('turns twice on a lane between the stubs where the arriving stub is behind', () => {
+    // The target Card sits to the left of the Card whose east port the route leaves by.
+    const points = routeBetweenPorts({ x: 300, y: 100 }, 'E1', { x: 100, y: 300 }, 'W1')
+
+    expect(points).toEqual([
+      { x: 300, y: 100 },
+      { x: 320, y: 100 },
+      { x: 320, y: 200 },
+      { x: 80, y: 200 },
+      { x: 80, y: 300 },
+      { x: 100, y: 300 }
+    ])
+    expect(orthogonal(points)).toBe(true)
+    // Neither stub is crossed: the lane lies between them rather than back along either one.
+    expect(points.every((point) => point.y <= 300)).toBe(true)
+  })
+
+  it('turns twice on a lane between the stubs where a vertical pair doubles back', () => {
+    const points = routeBetweenPorts({ x: 100, y: 300 }, 'S1', { x: 300, y: 100 }, 'N1')
+
+    expect(points).toEqual([
+      { x: 100, y: 300 },
+      { x: 100, y: 320 },
+      { x: 200, y: 320 },
+      { x: 200, y: 80 },
+      { x: 300, y: 80 },
+      { x: 300, y: 100 }
+    ])
+    expect(orthogonal(points)).toBe(true)
+  })
+})
+
+/*
+ * Moving the ends of a Flow with the components they are attached to.
+ *
+ * The draft overlay and the draft document both move a Flow end through this, so a move looks the same before and
+ * after it is committed - `ROUTE-002`.
+ */
+describe('moving the ends of a flow', () => {
+  const derived = [
+    { x: 100, y: 100 },
+    { x: 300, y: 100 }
+  ]
+
+  it('derives a route of two points again from the port that moved', () => {
+    const moved = moveRouteEnds(derived, { source: 'E1', target: 'W1' }, { source: { dx: 0, dy: 100 } })
+
+    expect(moved).toEqual(routeBetweenPorts({ x: 100, y: 200 }, 'E1', { x: 300, y: 100 }, 'W1'))
+  })
+
+  it('derives once from both ports where both ends move together', () => {
+    const moved = moveRouteEnds(
+      derived,
+      { source: 'E1', target: 'W1' },
+      { source: { dx: 40, dy: 0 }, target: { dx: 40, dy: 0 } }
+    )
+
+    // Two Cards dragged as a group keep the run they had, rather than gaining a corner apiece.
+    expect(moved).toEqual([
+      { x: 140, y: 100 },
+      { x: 340, y: 100 }
+    ])
+  })
+
+  it('leaves an authored waypoint where it was and repairs the run beside the moved port', () => {
+    const drawn = [
+      { x: 100, y: 100 },
+      { x: 200, y: 100 },
+      { x: 200, y: 300 },
+      { x: 300, y: 300 }
+    ]
+
+    const moved = moveRouteEnds(drawn, { source: 'E1', target: 'W1' }, { source: { dx: 0, dy: 40 } })
+
+    expect(moved).toEqual([
+      { x: 100, y: 140 },
+      { x: 200, y: 140 },
+      { x: 200, y: 300 },
+      { x: 300, y: 300 }
+    ])
+  })
+
+  it('returns the route unchanged where neither end moved', () => {
+    const moved = moveRouteEnds(derived, { source: 'E1', target: 'W1' }, {})
+
+    expect(moved).toEqual(derived)
+    expect(moved).not.toBe(derived)
   })
 })

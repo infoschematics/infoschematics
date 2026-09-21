@@ -385,9 +385,13 @@ describe('applyArtefactOperations', () => {
     ])
 
     expect(result.rejected).toEqual([])
+    /* The route was two points, which is nobody's drawing: it is what the ports derive. So the derivation is made
+       again from the port that moved, leaving and arriving square to the sides it is attached to, rather than the
+       old run bent to reach the new port. */
     expect(result.config.infoschematic.flows[0]?.points).toEqual([
       { x: 250, y: 140 },
-      { x: 300, y: 140 },
+      { x: 280, y: 140 },
+      { x: 280, y: 100 },
       { x: 300, y: 100 }
     ])
   })
@@ -428,11 +432,12 @@ describe('applyArtefactOperations', () => {
     // Nothing else about the Point changes, and it acquires no box.
     expect(moved[0]).toEqual({ ...point('point-one', 'P1', 520), point: { x: 520, y: 150 } })
     expect(moved[1]?.point).toEqual({ x: 700, y: 110 })
-    /* The attached end travels and the far end, on a Card nobody moved, stays - and the route keeps its right angle
-       by gaining the bend that costs, exactly as a moved Card's route does. */
+    /* The attached end travels and the far end, on a Card nobody moved, stays - and the derived route is derived
+       again between the two ports, exactly as a moved Card's route is. */
     expect(result.config.infoschematic.flows[0]?.points).toEqual([
       { x: 520, y: 150 },
-      { x: 600, y: 150 },
+      { x: 580, y: 150 },
+      { x: 580, y: 110 },
       { x: 600, y: 110 }
     ])
   })
@@ -483,9 +488,14 @@ describe('applyArtefactOperations', () => {
     ])
 
     expect(result.rejected).toEqual([])
+    /* The move leaves the Adapter's east port past the port it feeds, so the derived route cannot turn once without
+       running back across the Adapter: it turns twice, on a lane midway between the two stubs. */
     expect(result.config.infoschematic.flows[0]?.points).toEqual([
       afterPort.at,
-      { x: 300, y: afterPort.at.y },
+      { x: 290, y: afterPort.at.y },
+      { x: 290, y: 150 },
+      { x: 280, y: 150 },
+      { x: 280, y: beforePort.at.y },
       { x: 300, y: beforePort.at.y }
     ])
   })
@@ -534,7 +544,8 @@ describe('applyArtefactOperations', () => {
     expect(result.rejected).toEqual([])
     expect(result.config.infoschematic.flows[0]?.points).toEqual([
       { x: 250, y: 140 },
-      { x: 300, y: 140 },
+      { x: 280, y: 140 },
+      { x: 280, y: 100 },
       { x: 300, y: 100 }
     ])
   })

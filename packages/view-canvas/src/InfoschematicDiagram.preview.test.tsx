@@ -438,7 +438,9 @@ describe('InfoschematicDiagram draft preview', () => {
 
     const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
 
-    expect(markup).toContain('d="M220 205 H360 V195"')
+    /* The Flow carries no waypoints, so the preview derives it between the two ports again rather than bending the
+       old run onto the moved one: it leaves the east port and arrives at the west port square to both. */
+    expect(markup).toContain('d="M220 205 H340 V195 H360"')
   })
 
   it('ignores rejected operations and preserves the active Present Graphic', () => {

@@ -284,7 +284,9 @@ test('pointer movement carries a Flow end with its Card port', async () => {
   window.dispatchEvent(new PointerEvent('pointermove', { ...at(170, 205), bubbles: true, pointerId: 1 }))
   window.dispatchEvent(new PointerEvent('pointerup', { ...at(170, 205), bubbles: true, pointerId: 1 }))
 
-  await expect.poll(() => container.querySelector('.infoschematic-route')?.getAttribute('d')).toBe('M220 205 H360 V195')
+  await expect
+    .poll(() => container.querySelector('.infoschematic-route')?.getAttribute('d'))
+    .toBe('M220 205 H340 V195 H360')
 })
 
 /*
@@ -307,7 +309,7 @@ test('dragging a Point carries the Flow that ends on it', async () => {
     .poll(() => container.querySelector('[data-artefact-id="POINT-X"] .point-mark')?.getAttribute('cx'))
     .toBe('300')
   expect(container.querySelector('[data-artefact-id="POINT-X"] .point-mark')?.getAttribute('cy')).toBe('140')
-  expect(route()?.getAttribute('d')).toBe('M300 140 H420 V100')
+  expect(route()?.getAttribute('d')).toBe('M300 140 H400 V100 H420')
 })
 
 test('dragging an Adapter moves its held Card and the Flow attached to the Adapter', async () => {
@@ -485,7 +487,9 @@ test('a zoomed and panned pointer move keeps Card and connected Flow geometry to
   window.dispatchEvent(new PointerEvent('pointerup', { ...screenAt(170, 205), bubbles: true, pointerId: 13 }))
 
   await expect.poll(() => card.getAttribute('transform')).toBe('translate(120 180)')
-  await expect.poll(() => container.querySelector('.infoschematic-route')?.getAttribute('d')).toBe('M220 205 H360 V195')
+  await expect
+    .poll(() => container.querySelector('.infoschematic-route')?.getAttribute('d'))
+    .toBe('M220 205 H340 V195 H360')
 })
 
 test('materialised route drafts and newly created endpoints preserve dependent geometry', async () => {
@@ -573,7 +577,7 @@ test('materialised route drafts and newly created endpoints preserve dependent g
     .toBe('translate(80 60)')
   await expect
     .poll(() => created.container.querySelector('[data-artefact-id="FLOW-C"] .infoschematic-route')?.getAttribute('d'))
-    .toBe('M180 85 H360 V195')
+    .toBe('M180 85 H340 V195 H360')
 })
 
 test('Flow attachment and route-label gestures reach the rendered editing callbacks', async () => {
