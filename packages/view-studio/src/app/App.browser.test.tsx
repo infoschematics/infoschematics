@@ -1608,6 +1608,115 @@ diagram:
 })
 
 /*
+ * A dragged Card follows the hand, and only the hand.
+ *
+ * Writing the document mid-drag hands the moved position back through the parse, the layout and the projection, and
+ * the frame that lands while the hand is still moving is drawn from whichever step the round trip started from. The
+ * Card shakes: forward with the pointer, back to a position it has already left, forward again. Every transform the
+ * Card is drawn at is collected here, so a single backward frame fails even though the resting place is right.
+ */
+test('a dragged Card only ever moves the way the pointer moves, and writes once when it is let go', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: TRACKED
+title: Tracked by the hand
+diagram:
+  bounds: 0 0 640 480
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+`)
+  if (!parsed.ok) throw new Error('drag fixture should parse')
+  const initialDocument = parsed.document
+  let written = 0
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return (
+      <Studio
+        document={document}
+        onDocumentChange={(change) => {
+          written += 1
+          setDocument(change.document)
+        }}
+      />
+    )
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  // The editing grid is drawn from the editor session, so waiting for it is waiting for a press to mean a drag.
+  await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
+
+  const card = () => container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
+  const held = card()
+  if (!held) throw new Error('Studio did not render Card A')
+
+  /* Every drawn position, not just the ones a poll happens to catch: a shake is two frames, and the second one
+     hides the first from anything that reads the attribute after the fact. */
+  const drawn: string[] = []
+  const observed = new MutationObserver((records) => {
+    for (const record of records) {
+      const target = record.target as Element
+      if (target instanceof Element && target.getAttribute('data-artefact-id') === 'CARD-A') {
+        drawn.push(target.getAttribute('transform') ?? '')
+      }
+    }
+  })
+  observed.observe(container, { attributeFilter: ['transform'], attributes: true, subtree: true })
+
+  const at = (x: number, y: number) => {
+    const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+    const matrix = svg?.getScreenCTM()
+    if (!svg || !matrix) throw new Error('rendered Studio diagram has no screen transform')
+    const point = svg.createSVGPoint()
+    point.x = x
+    point.y = y
+    const screen = point.matrixTransform(matrix)
+    return { clientX: screen.x, clientY: screen.y }
+  }
+
+  try {
+    held.dispatchEvent(new PointerEvent('pointerdown', { ...at(60, 65), bubbles: true, button: 0, pointerId: 62 }))
+    // The press selects, and the selection is what the drag moves, so the drag starts once that has landed.
+    await expect.poll(() => held.classList.contains('selected')).toBe(true)
+
+    // Six steps down a grid line each, each one a chance for the document to be written and the position to be lost.
+    for (const step of [1, 2, 3, 4, 5, 6]) {
+      window.dispatchEvent(new PointerEvent('pointermove', { ...at(60, 65 + step * 20), bubbles: true, pointerId: 62 }))
+      await expect.poll(() => card()?.getAttribute('transform')).toBe(`translate(20 ${40 + step * 20})`)
+    }
+    // The hand has not been lifted, so nothing has been decided and nothing has been written.
+    expect(written).toBe(0)
+
+    window.dispatchEvent(new PointerEvent('pointerup', { ...at(60, 185), bubbles: true, button: 0, pointerId: 62 }))
+    await expect.poll(() => written).toBe(1)
+  } finally {
+    observed.disconnect()
+  }
+
+  const travelled = drawn.map((transform) =>
+    Number(/translate\(20 (-?\d+(?:\.\d+)?)\)/.exec(transform)?.[1] ?? Number.NaN)
+  )
+  expect(travelled.length).toBeGreaterThanOrEqual(6)
+  expect(travelled.some(Number.isNaN)).toBe(false)
+  // Down, and only down: a position lower than one already drawn is the Card being put back where it has been.
+  expect(travelled).toEqual([...travelled].sort((left, right) => left - right))
+  expect(travelled.at(-1)).toBe(160)
+  // One drag, one write, whatever the hand did on the way.
+  expect(written).toBe(1)
+})
+
+/*
  * An element made this session can be dragged, like every other element.
  *
  * Found by user-acceptance testing, verbatim: "When a new node is created, you can't click and drag to move it."
