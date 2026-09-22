@@ -211,6 +211,7 @@ export type StudioProps = Omit<PresentProps, 'config'> &
 export function Studio({
   config,
   document: authoredDocument,
+  graphicVisibility = 'all',
   onDocumentChange,
   onDocumentReplace,
   renderers,
@@ -225,6 +226,7 @@ export function Studio({
       <InfoschematicContext value={runtime}>
         <AppContent
           authoredDocument={authoredDocument}
+          graphicVisibility={graphicVisibility}
           onDocumentChange={onDocumentChange}
           onDocumentReplace={onDocumentReplace}
           responsiveCardDetails={responsiveCardDetails}
@@ -239,11 +241,13 @@ export const App = Studio
 
 function AppContent({
   authoredDocument,
+  graphicVisibility,
   onDocumentChange,
   onDocumentReplace,
   responsiveCardDetails
 }: {
   authoredDocument?: InfoschematicDocument
+  graphicVisibility: NonNullable<PresentProps['graphicVisibility']>
   onDocumentChange?: StudioDocumentChangeHandler
   onDocumentReplace?: StudioDocumentReplacementHandler
   responsiveCardDetails: boolean
@@ -1192,6 +1196,7 @@ function AppContent({
                 annotated={presentation.annotated}
                 grid={editor.editing}
                 graphic={activeSequenceScene?.graphic ?? runningStoryScene?.graphic}
+                graphicVisibility={graphicVisibility}
                 responsiveCardDetails={responsiveCardDetails}
                 visibleScopes={visibleScopes}
                 viewportControllerRef={diagramViewport}

@@ -46,6 +46,7 @@ import {
 } from 'react'
 export type CanvasMode = 'design' | 'scenes' | 'stories' | null
 export type DiagramMinimapPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
+export type GraphicVisibility = 'all' | 'none' | 'scene'
 export type DiagramViewportController = Readonly<{
   fit: () => void
   zoomIn: () => void
@@ -328,6 +329,7 @@ export function InfoschematicDiagram({
   responsiveCardDetails = false,
   grid,
   graphic,
+  graphicVisibility = 'all',
   visibleScopes,
   minimap = 'top-right',
   viewportControllerRef,
@@ -434,8 +436,10 @@ export function InfoschematicDiagram({
   responsiveCardDetails?: boolean
   /** Legacy Design grid overlay, independent of the authored grid treatment. */
   grid?: boolean
-  /** A resolved Graphic drawn by the active Story Scene. */
+  /** A resolved Graphic drawn by the active Scene. */
   graphic?: Overlay
+  /** Which authored Graphics Present draws. Design always keeps every Graphic available. */
+  graphicVisibility?: GraphicVisibility
   visibleScopes: ReadonlySet<string>
   /** Overview map shown while zoomed; false disables it, otherwise selects its corner. */
   minimap?: false | DiagramMinimapPosition
@@ -677,20 +681,16 @@ export function InfoschematicDiagram({
    * and waypoint controls simply are not rendered.
    */
   const editing = mode === 'design'
-  /*
-   * Every authored Graphic, wherever the Diagram is drawn, with a Scene's own Graphic added to them.
-   *
-   * This was `editing ? config.diagram.overlays : graphic ? [graphic] : []`, so an authored Overlay appeared in
-   * Design and nowhere else, and the only Graphic a reader ever saw was one a Scene named. An authored Scene has no
-   * field that can name one, so for an authored document that set was always empty and the declaration drew nothing
-   * at all — `ADR-INFOSCHEMATICS-037`. A Scene now adds to what is drawn rather than replacing it, deduplicated by id
-   * because a Scene naming an authored Overlay means the same Overlay.
-   */
+  /* Diagram-scoped remains the default from `ADR-INFOSCHEMATICS-037`; a host may explicitly ask for the Scene set,
+     matching static output. Design keeps all authored Graphics reachable regardless of the audience policy. */
   const graphics = useMemo(() => {
+    if (editing) return config.diagram.overlays
+    if (graphicVisibility === 'none') return []
+    if (graphicVisibility === 'scene') return graphic ? [graphic] : []
     const authored = config.diagram.overlays
     if (!graphic || authored.some((overlay) => overlay.id === graphic.id)) return authored
     return [...authored, graphic]
-  }, [config.diagram.overlays, graphic])
+  }, [config.diagram.overlays, editing, graphic, graphicVisibility])
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
   const focusing = mode === 'scenes' || mode === 'stories'

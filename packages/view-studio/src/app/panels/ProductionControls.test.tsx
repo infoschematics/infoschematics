@@ -83,6 +83,13 @@ const runtime = createInfoschematicRuntime(
             focus: { artefacts: ['card-one'] },
             id: 'ready-theme-scene',
             label: 'Ready theme'
+          },
+          {
+            callout: { body: 'An explanation that intentionally focuses nothing.' },
+            code: 'CALLOUT-THEME',
+            focus: {},
+            id: 'callout-theme-scene',
+            label: 'Callout theme'
           }
         ],
         title: 'Theme one'
@@ -224,14 +231,24 @@ describe('production controls', () => {
   })
 
   it('disables empty and stale activation while retaining ready work', () => {
-    const markup = renderToStaticMarkup(
+    const expanded = renderToStaticMarkup(
       withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
     )
+    const compact = renderToStaticMarkup(
+      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
+    )
 
-    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>Empty<\/button>/)
-    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>Stale<\/button>/)
-    expect(markup).toMatch(/<button[^>]*>Ready<\/button>/)
-    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>Stale theme<\/button>/)
-    expect(markup).toMatch(/<button[^>]*>Ready theme<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Empty<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*>Ready<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale theme<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*>Ready theme<\/button>/)
+
+    const expandedCallout = expanded.match(/<button[^>]*>Callout theme<\/button>/)?.[0]
+    const compactCallout = compact.match(/<button[^>]*aria-label="Callout theme"[^>]*>/)?.[0]
+    expect(expandedCallout).toBeDefined()
+    expect(expandedCallout).not.toContain('disabled')
+    expect(compactCallout).toBeDefined()
+    expect(compactCallout).not.toContain('disabled')
   })
 })

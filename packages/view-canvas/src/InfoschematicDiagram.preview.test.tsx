@@ -469,6 +469,18 @@ describe('InfoschematicDiagram draft preview', () => {
         renderers={renderers}
       />
     )
+    const unscenedMarkup = renderToStaticMarkup(
+      <Canvas config={initial} graphicVisibility="scene" renderers={renderers} />
+    )
+    const sceneMarkup = renderToStaticMarkup(
+      <Canvas config={initial} graphic={activeGraphic} graphicVisibility="scene" renderers={renderers} />
+    )
+    const suppressedMarkup = renderToStaticMarkup(
+      <Canvas config={initial} graphic={activeGraphic} graphicVisibility="none" renderers={renderers} />
+    )
+    const designMarkup = renderToStaticMarkup(
+      <Canvas config={initial} graphicVisibility="scene" mode="design" renderers={renderers} />
+    )
 
     expect(rejectedMarkup).toBe(baseMarkup)
     expect(presentMarkup).toContain('Present Graphic')
@@ -481,5 +493,12 @@ describe('InfoschematicDiagram draft preview', () => {
     expect(presentMarkup).toContain('Graphic A:')
     expect(presentMarkup).toContain('Graphic B:')
     expect(presentMarkup).toContain('infoschematic-graphic going')
+    expect(unscenedMarkup).not.toContain('infoschematic-graphic')
+    expect(sceneMarkup).toContain('Present Graphic')
+    expect(sceneMarkup).not.toContain('Graphic A:')
+    expect(sceneMarkup).not.toContain('Graphic B:')
+    expect(suppressedMarkup).not.toContain('infoschematic-graphic')
+    expect(designMarkup).toContain('Graphic A:')
+    expect(designMarkup).toContain('Graphic B:')
   })
 })

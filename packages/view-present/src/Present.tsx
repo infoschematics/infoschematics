@@ -19,6 +19,8 @@ export type PresentProps = Readonly<{
    * while a Scene is on screen. Neither suppresses the other, and a renderer sees both as occurrences it may play.
    */
   dynamics?: CanvasProps['dynamics']
+  /** Which authored Graphics to draw outside Design. Defaults to every authored Graphic. */
+  graphicVisibility?: CanvasProps['graphicVisibility']
   renderers?: CanvasProps['renderers']
   /** Opt into rendered-size Card detail reduction in the Canvas. */
   responsiveCardDetails?: boolean
@@ -30,6 +32,7 @@ export function Present({
   className,
   config,
   dynamics,
+  graphicVisibility = 'all',
   renderers,
   responsiveCardDetails = false,
   signalPolicy = 'focused-flows'
@@ -165,6 +168,7 @@ export function Present({
             dynamics={occurrences}
             flows={derived.visibleFlows}
             graphic={derived.activeSequenceScene?.graphic}
+            graphicVisibility={graphicVisibility}
             highlight={derived.highlight}
             renderers={renderers}
             responsiveCardDetails={responsiveCardDetails}

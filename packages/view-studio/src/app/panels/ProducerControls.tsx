@@ -1,6 +1,7 @@
 import { type RuntimeStory, useInfoschematic, useInfoschematicRenderers } from '@infoschematics/view-canvas'
 import type { Ref } from 'react'
 import type { Presentation } from '../hooks/use-presentation.ts'
+import { sceneCanActivate } from '../scene-activation.ts'
 
 export function ProducerControls({
   onPlay: _onPlay,
@@ -21,13 +22,9 @@ export function ProducerControls({
   const { scopeIcons } = useInfoschematicRenderers()
   const validElements = new Set(infoschematicRegister.all.map(({ id }) => id))
   const validFlows = new Set(infoschematicFlows.map(({ id }) => id))
-  /* A Scene is worth activating if it changes what the Diagram shows, and a cue does that: a Scene that focuses
-     nothing but asks for a Dynamic is a Scene, not an empty step. */
   const validDynamics = new Set(config.diagram.dynamics.map(({ id }) => id))
-  const sceneCanActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
-    scene.components.some((id) => validElements.has(id)) ||
-    scene.flows.some((id) => validFlows.has(id)) ||
-    scene.cues.some((cue) => validDynamics.has(cue.dynamic))
+  const canActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
+    sceneCanActivate(scene, validElements, validFlows, validDynamics)
 
   /*
    * Which scopes and which Flow families are drawn is a question about the Diagram, not about presenting it, so the
@@ -107,7 +104,7 @@ export function ProducerControls({
                     <button
                       aria-pressed={presentation.playing?.id === sequence.id && presentation.playing.step === step}
                       className="toggle-button"
-                      disabled={!sceneCanActivate(scene)}
+                      disabled={!canActivate(scene)}
                       key={`${sequence.id}/${scene.id}`}
                       onClick={() => presentation.activateSequence(sequence, step)}
                       title={`${sequence.label} — ${scene.description}`}
@@ -120,7 +117,7 @@ export function ProducerControls({
                     <button
                       aria-pressed={presentation.playing?.id === sequence.id}
                       className="toggle-button"
-                      disabled={!sequence.scenes.some(sceneCanActivate)}
+                      disabled={!sequence.scenes.some(canActivate)}
                       key={sequence.id}
                       onClick={() => presentation.activateSequence(sequence)}
                       title={`${sequence.code} — ${sequence.description}`}
@@ -134,7 +131,7 @@ export function ProducerControls({
                   <button
                     aria-pressed={presentation.playing?.id === sequence.id && presentation.autoAdvance}
                     className="toggle-button"
-                    disabled={!sequence.scenes.some(sceneCanActivate)}
+                    disabled={!sequence.scenes.some(canActivate)}
                     key={`${sequence.id}/play`}
                     onClick={() => presentation.activateSequence(sequence)}
                     type="button"

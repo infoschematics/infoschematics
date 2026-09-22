@@ -50,6 +50,7 @@ export {
   type CanvasMode,
   type DiagramMinimapPosition,
   type DiagramViewportController,
+  type GraphicVisibility,
   InfoschematicDiagram
 } from './InfoschematicDiagram.tsx'
 export type {
