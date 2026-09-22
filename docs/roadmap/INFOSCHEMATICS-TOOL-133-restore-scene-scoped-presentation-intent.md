@@ -4,12 +4,12 @@ area: TOOL
 title: Restore scene-scoped presentation intent
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 52d3f2e8b2cfaedccdb30bbb533c20788dae7803
 created_at: 2026-09-22T22:33:00Z
-updated_at: 2026-09-22T23:06:33Z
+updated_at: 2026-09-22T23:22:44Z
 ---
 
 # Restore scene-scoped presentation intent
@@ -95,6 +95,10 @@ The implementation preserves the diagram-scoped default, makes the already-decid
 ### Mini recap
 
 Scene-owned walkthrough graphics and Callout-only partner introductions now work through reusable upstream behaviour; the IBC host contains only the one-line policy selection. No additional durable learning route is required beyond the updated specification and this delivery record.
+
+## Done
+
+Accepted 2026-09-23 by Kris Brown on the review packet above.
 
 ## Discussion
 
