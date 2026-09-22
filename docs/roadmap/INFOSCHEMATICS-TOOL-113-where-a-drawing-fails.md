@@ -123,6 +123,10 @@ The rule set shrank while it was being built, and that was the useful part of th
 
 A valid document can describe an unreadable drawing, and nothing reported that. View Model now reviews one: six rules, each finding naming its subject and its measurement and the repairs that would clear it, ordered so a repair loop converges. `infoschematics check` is a thin outlet over it that exits `1` when the drawing cannot be read and `0` when it is merely tight. Every published example is asserted clean by a walk that also proves it is still measuring. It unblocks `INFOSCHEMATICS-TOOL-107`, whose repair loop had nothing to iterate against, and delivers the reporting half of `INFOSCHEMATICS-TOOL-116`.
 
+## Done
+
+A valid document is reviewed for the drawing it describes. Six rules report what a reader cannot read, each finding naming its subject, its measurement in diagram units and the repairs that would clear it, ordered so a repair loop converges; `infoschematics check` is the outlet, exiting `1` only when the drawing cannot be read as authored, and every published example is asserted clean by a walk proven to still be measuring.
+
 ## Discussion
 
 Captured on 2026-09-21 from the Archify comparison. No existing roadmap record, specification, or decision record covers geometric validation; `ADR-INFOSCHEMATICS-013` covers contract validation only, so this is new ground.

@@ -119,6 +119,10 @@ The useful part was that the convergence forced two decisions into the open that
 
 Studio made an element two ways and only one of them reached the document. It now makes one: a create operation the projection carries, offered from the Library, the factories and the element controls alike. The `cards` draft map is retired rather than repurposed, because nothing in the product wanted what it was holding. A browser case asserts a control-made Card in the document the host holds, and undo taking it back out — the assertion whose absence let `-104`, `-105` and `-106` be found and fixed three separate times.
 
+## Done
+
+Making an element in Studio reaches the document by one route: a create operation the projection carries, offered alike from the Library, the artefact factories and the element controls. The `cards` draft map is retired, one expression says where a creation lands, and a control-made Card is asserted in the document the host holds rather than in the editor's own draft.
+
 ## Discussion
 
 Captured on 2026-09-21 while closing `INFOSCHEMATICS-TOOL-104` and `-105`, each a defect in one of the two creation paths where neither touched the other. The item was captured without assuming the paths should converge: a draft Card the host has not been told about may be a coherent thing for an editor to hold. What argues the other way is the defect history — while the question stays open, a defect in one path says nothing about the other, which is how those two arrived separately.
