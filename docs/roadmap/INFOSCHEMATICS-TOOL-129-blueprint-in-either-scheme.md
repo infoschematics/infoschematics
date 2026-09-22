@@ -28,6 +28,16 @@ What makes it wrong in practice is the corpus. **Every published example authors
 
 The reversal is not the only way out, and probably not the right one. `blueprint` is a treatment — a technical-drawing look — and a treatment can have a palette per scheme exactly as the neutral surface does. Reading it as a third peer of `light` and `dark` is the category error `ADR-INFOSCHEMATICS-041` otherwise argues against: a palette belongs to a colour scheme. Making blueprint a treatment realised by two palettes honours the author's choice and the reader's context at once, where making the scheme outrank the surface honours only the reader and discards what the author asked for.
 
+### What a comparable tool does
+
+[Archify](https://tt-a1i.github.io/archify/), recorded in [the related-tools reference](../reference/related-tools.md), answers this with two independent axes and is worth reading before the decision is taken, because it reached the same shape from the other direction. It offers four visual presets — classic, signal-flow, blueprint, editorial — and two themes, and its skill contract states that colour mode and visual preset are independent: switching light and dark preserves the preset, and its blueprint preset ships coordinated dark and light variables rather than one fixed palette. Its exported SVG carries both variable sets behind `prefers-color-scheme`, which is what `--scheme adaptive` already does here.
+
+Its theme resolution is near-identical to `packages/view-canvas/src/colour-scheme.ts`, arrived at independently: a `data-theme` attribute on the document element, resolved from a URL parameter, then storage, then `matchMedia`, applied by an inline script before first paint so a light-preference reader never sees a dark flash.
+
+Its palette discipline is the part that does not transfer unchanged. The colours are Tailwind's defaults — slate for chrome, and cyan, emerald, violet, amber, rose and orange for its seven fixed semantic roles — and they are **not** chosen to work neutrally on either ground. The hue is what stays constant; the lightness step is what moves. A dark theme strokes with the 400 step (`#22d3ee` for its frontend role) and a light theme with the 600 (`#0891b2`), while the light fill reuses the dark theme's stroke hue at low alpha. That is a more robust rule than a single accent that must read on both grounds, and it is the rule worth adopting for the palettes this repository owns.
+
+It does not transfer to the colours an author picks. Archify's seven roles are fixed and the tool owns their colours; here, Scope, Domain and Flow-family colours are authored, and `ADR-INFOSCHEMATICS-041` holds that a scheme must never repaint an author's choice. The product's answer is already `readableInk` in `packages/view-model/src/appearance.ts:126`, which measures the authored fill's WCAG relative luminance against a 0.179 threshold and picks the ink accordingly. So an authored fill keeps its colour in both themes and only the ink over it flips — which is correct, and leaves a near-black authored fill near-black on a white ground. Whether that is a defect is a separate question from this item.
+
 ## Boundary
 
 How an authored surface treatment is realised across colour schemes, and the token, generator, renderer, command and specification surfaces that currently encode "one treatment, one palette".
