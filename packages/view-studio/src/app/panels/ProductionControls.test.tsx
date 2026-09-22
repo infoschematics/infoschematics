@@ -160,7 +160,9 @@ describe('production controls', () => {
     expect(present.indexOf('aria-label="Production mode"')).toBeLessThan(
       present.indexOf('aria-label="Window and panels"')
     )
-    expect(present.match(/class="tool-divider"/g)).toHaveLength(3)
+    /* Four now: the Appearance bank holding the colour-scheme switch sits between the mode controls and the window
+       controls, so it brings a divider of its own. */
+    expect(present.match(/class="tool-divider"/g)).toHaveLength(4)
     expect(direct).toContain('aria-label="Direct mode" aria-pressed="true"')
     expect(direct).not.toContain('aria-label="Show tags"')
     expect(direct).not.toContain('aria-label="Show overlays"')

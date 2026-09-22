@@ -1,5 +1,5 @@
 import { standardFabricKeys, standardGraphicKeys } from '@infoschematics/view-canvas'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { DocsSidebar } from './DocsSidebar.tsx'
 import { GuideJourneyNav } from './GuideJourneyNav.tsx'
 import { type ComponentRoute, componentPaths, componentRoutes, componentsPath } from './routes.ts'
@@ -38,6 +38,31 @@ const previewSpecimen = (componentId: SpecimenKind | 'dynamics') =>
  * the claim a reviewer has to settle by looking. Three renderings of one definition say it: two resolved, so the
  * palettes can be compared side by side, and one that defers, so the page shows what a reader actually gets.
  */
+/**
+ * The chrome roles a reader can see the effect of, rather than all thirty-six.
+ *
+ * A full dump would be a token table with extra steps. These are the ones that carry the structure of an interface —
+ * the planes it is built from, the lines between them, the four levels of type, the accent and the three states — so
+ * a reader can see what a scheme change actually does before deciding they want one.
+ */
+const chromeRoles = [
+  'page',
+  'surface',
+  'surface-raised',
+  'surface-sunken',
+  'border',
+  'border-strong',
+  'text',
+  'text-secondary',
+  'text-muted',
+  'text-faint',
+  'accent',
+  'text-on-accent',
+  'positive',
+  'caution',
+  'negative'
+] as const
+
 const schemeDrawings = [
   { id: 'light', label: 'Light', options: { scheme: 'light' } },
   { id: 'dark', label: 'Dark', options: { scheme: 'dark' } },
@@ -247,6 +272,23 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
                     resourceIdPrefix={`scheme-${id}`}
                   />
                   <p className="scheme-gallery__caption">{label}</p>
+                </li>
+              ))}
+            </ul>
+            <p>
+              The interface around a drawing answers the same schemes, from its own set of roles. These swatches are
+              painted from those roles rather than listed, so they are showing you the scheme you are actually in — use
+              the switch in the header and they move with everything else.
+            </p>
+            <ul className="chrome-roles">
+              {chromeRoles.map((role) => (
+                <li className="chrome-roles__item" key={role}>
+                  <span
+                    aria-hidden="true"
+                    className="chrome-roles__swatch"
+                    style={{ '--chrome-role': `var(--infoschematic-chrome-paint-${role})` } as CSSProperties}
+                  />
+                  <code className="chrome-roles__name">{role}</code>
                 </li>
               ))}
             </ul>

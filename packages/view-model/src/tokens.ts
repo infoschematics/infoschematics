@@ -68,6 +68,100 @@ export type PaintRoles = Readonly<{
   }>
 }>
 
+/**
+ * What the product's own surfaces are painted in, as distinct from what a drawing is painted in.
+ *
+ * A drawing's roles name parts of a drawing — a Region's fill, a Flow's casing. These name parts of an interface:
+ * the plane something sits on, the hairline between two planes, the four levels of type, the accent a control is
+ * picked out in, and the four things an interface has to be able to say about state. They are deliberately few and
+ * deliberately generic, because three surfaces share them and a role invented for one of them is a literal with a
+ * longer name.
+ *
+ * There is no `blueprint` here. Blueprint is an authored treatment of a drawing, and the chrome around a drawing
+ * belongs to whoever is reading rather than to whoever authored it.
+ */
+export type ChromeRoles = Readonly<{
+  /** A control picked out from its surroundings, and the colour a focus ring is drawn in. */
+  accent: string
+  /** A hairline where the accent is the thing being bounded. */
+  accentBorder: string
+  /** The plane an accented control is filled with, which carries `text` rather than `textOnAccent`. */
+  accentSurface: string
+  /** The accent under a pointer or against a heavier weight of type. */
+  accentStrong: string
+  /** A wash of the accent, for a selected row or a hovered control. */
+  accentSoft: string
+  /** The standard hairline between two planes. */
+  border: string
+  /** Heavier, for a boundary that has to be read rather than merely felt. */
+  borderStrong: string
+  /** Lighter, for a division inside one component. */
+  borderSubtle: string
+  /** A warning that the reader may proceed through. */
+  caution: string
+  /** A wash of it, behind text that stays `text`. */
+  cautionSoft: string
+  /** A hairline around a cautioned region. */
+  cautionBorder: string
+  /** Something the reader should know but need not act on. */
+  informational: string
+  /** A wash of it. */
+  informationalSoft: string
+  /** Something wrong: a failure, a refusal, a destructive control. */
+  negative: string
+  /** A hairline around it, which reads as an outline rather than as text. */
+  negativeBorder: string
+  /** A wash of it. */
+  negativeSoft: string
+  /** A filled plane for it, dark enough in either scheme to carry `text`. */
+  negativeSurface: string
+  /** The page behind every panel, which is the furthest-back plane a surface has. */
+  page: string
+  /** A panel that floats above the page, which needs its own near-opaque plane and a shadow. */
+  panelFloating: string
+  /** Something that succeeded, is live, or is within tolerance. */
+  positive: string
+  /** A wash of it. */
+  positiveSoft: string
+  /** What dims the page behind a dialogue or a menu. */
+  scrim: string
+  /** What a drop shadow is cast in. */
+  shadow: string
+  /** The same, for something floating further from its plane. */
+  shadowStrong: string
+  /** A panel: the plane most of the interface sits on. */
+  surface: string
+  /** A pointer resting on something that can be picked. */
+  surfaceHover: string
+  /** A row, cell, or card lifted off its panel. */
+  surfaceRaised: string
+  /** What is currently chosen, which has to read as chosen without relying on the accent alone. */
+  surfaceSelected: string
+  /** An input, a well, or anything the reader types into. */
+  surfaceSunken: string
+  /** Body type. */
+  text: string
+  /** The accent as type, which needs more contrast against a plane than the accent itself does. */
+  textAccent: string
+  /** Type on an accented fill, which is not the same colour in both schemes. */
+  textOnAccent: string
+  /** Type that is present but not being read: a timestamp, a hint, a disabled control. */
+  textFaint: string
+  /** A label, a caption, or a secondary line under a heading. */
+  textMuted: string
+  /** A subheading, or a value against its label. */
+  textSecondary: string
+  /** A heading, or the one line on a panel that should be read first. */
+  textStrong: string
+}>
+
+/** Chrome resolves for a reader, so it has the reader's two schemes and not the drawing's authored third. */
+export type ChromeScheme = 'dark' | 'light'
+
+export type ChromeRole = keyof ChromeRoles
+
+const chromePalette = (roles: ChromeRoles): ChromeRoles => Object.freeze({ ...roles })
+
 const palette = (roles: PaintRoles): PaintRoles =>
   Object.freeze({ ...roles, artwork: Object.freeze({ ...roles.artwork }) })
 
@@ -82,8 +176,11 @@ const palette = (roles: PaintRoles): PaintRoles =>
 export type PaintScheme = 'blueprint' | 'dark' | 'light'
 
 /**
- * Framework-neutral visual decisions shared by the interactive Canvas and static renderers.
- * View-specific controls and host chrome deliberately stay outside the manifest.
+ * Framework-neutral visual decisions: what a drawing is painted in, and what the product's own surfaces are.
+ *
+ * A drawing's palette and the chrome around it are declared together because they answer one preference. A
+ * stylesheet that invented its own palette for the same schemes is exactly what left the chrome un-switchable
+ * while the drawing followed its reader. Layout, spacing and behaviour stay with whoever draws them.
  */
 export const visualTokens = Object.freeze({
   canvas: Object.freeze({
@@ -356,6 +453,98 @@ export const visualTokens = Object.freeze({
       staticBodyFamily: 'system-ui, sans-serif',
       staticCodeFamily: 'ui-monospace, Menlo, monospace'
     })
+  }),
+  /**
+   * The product's own surfaces, in the reader's two schemes.
+   *
+   * These declarations ride in the same generated stylesheet as the drawing's, under the same selectors and in the
+   * same order, because a second mechanism for the same preference is how a surface ends up half-switched. The dark
+   * palette is the interface this repository already had, consolidated: several near-identical planes and a long
+   * ramp of alpha-white hairlines became one role each, which is the point of a role.
+   *
+   * The light palette is not the dark one inverted. Alpha-white hairlines become alpha-ink ones, the accent darkens
+   * because a pale blue on white is not a readable accent, and type on an accented fill changes colour rather than
+   * weight. `ADR-INFOSCHEMATICS-041` records the decision; the browser suites record whether it reads.
+   */
+  chrome: Object.freeze({
+    paint: Object.freeze({
+      dark: chromePalette({
+        accent: '#79c9ff',
+        accentBorder: '#79c9ff66',
+        accentSurface: '#163451',
+        accentStrong: '#8fcff8',
+        accentSoft: '#79c9ff22',
+        border: '#ffffff1e',
+        borderStrong: '#ffffff2e',
+        borderSubtle: '#ffffff12',
+        caution: '#f0b357',
+        cautionSoft: '#f0b35714',
+        cautionBorder: '#f0b35799',
+        informational: '#c39bff',
+        informationalSoft: '#6f4aa055',
+        negative: '#ff8398',
+        negativeBorder: '#ff8f78',
+        negativeSoft: '#ff647c22',
+        negativeSurface: '#5c2030',
+        page: '#07111e',
+        panelFloating: '#0a1929f2',
+        positive: '#78e6a5',
+        positiveSoft: '#48c6a833',
+        scrim: '#02060cb3',
+        shadow: '#00000066',
+        shadowStrong: '#00000080',
+        surface: '#0c1c2b',
+        surfaceHover: '#ffffff08',
+        surfaceRaised: '#10263b',
+        surfaceSelected: '#173653',
+        surfaceSunken: '#081523',
+        text: '#dff0ff',
+        textAccent: '#79c9ff',
+        textOnAccent: '#07111e',
+        textFaint: '#4a5d70',
+        textMuted: '#8fa9c4',
+        textSecondary: '#a9c4dc',
+        textStrong: '#f5f8ff'
+      }),
+      light: chromePalette({
+        accent: '#1b7ec4',
+        accentBorder: '#1b7ec466',
+        accentSurface: '#dcecf9',
+        accentStrong: '#0f5c8f',
+        accentSoft: '#1b7ec41f',
+        border: '#0d22331f',
+        borderStrong: '#0d223342',
+        borderSubtle: '#0d223312',
+        caution: '#8a5600',
+        cautionSoft: '#8a560014',
+        cautionBorder: '#8a560099',
+        informational: '#5b3aa0',
+        informationalSoft: '#5b3aa024',
+        negative: '#a3203a',
+        negativeBorder: '#a3203a99',
+        negativeSoft: '#a3203a14',
+        negativeSurface: '#f7dde2',
+        page: '#eef3f8',
+        panelFloating: '#fffffff2',
+        positive: '#0f7047',
+        positiveSoft: '#0f704724',
+        scrim: '#0d2233a6',
+        shadow: '#0d223326',
+        shadowStrong: '#0d22333d',
+        surface: '#ffffff',
+        surfaceHover: '#0d223309',
+        surfaceRaised: '#f4f8fc',
+        surfaceSelected: '#d9e9f7',
+        surfaceSunken: '#eaf1f8',
+        text: '#122536',
+        textAccent: '#125f96',
+        textOnAccent: '#ffffff',
+        textFaint: '#6b8298',
+        textMuted: '#4a6478',
+        textSecondary: '#2b4558',
+        textStrong: '#08151f'
+      })
+    })
   })
 })
 
@@ -413,6 +602,26 @@ export const adaptivePaint: PaintRoles = Object.freeze({
   ) as Omit<PaintRoles, 'artwork'>),
   artwork: artworkPaintVariables
 })
+
+/** What the chrome around a drawing is painted in, for the scheme the reader turned out to be in. */
+export const chromeFor = (scheme: ChromeScheme): ChromeRoles => visualTokens.chrome.paint[scheme]
+
+/**
+ * A chrome role as the custom property the generated stylesheet declares it under.
+ *
+ * Chrome is styled in CSS rather than resolved in TypeScript, so this exists for the suites that assert what a
+ * stylesheet should be referencing and for a host that needs the same role in an inline style.
+ */
+export const chromeVariable = (role: ChromeRole): string => `var(--infoschematic-chrome-paint-${cssRole(role)})`
+
+/** One scheme's chrome roles as CSS declarations, in the generated stylesheet's own order. */
+export const chromeDeclarations = (scheme: ChromeScheme): readonly (readonly [name: string, value: string])[] => {
+  const roles = chromeFor(scheme)
+  const named = (Object.keys(roles) as readonly ChromeRole[]).map(
+    (role) => [`--infoschematic-chrome-paint-${cssRole(role)}`, roles[role]] as const
+  )
+  return Object.freeze([...named].sort((left, right) => (left[0] < right[0] ? -1 : left[0] > right[0] ? 1 : 0)))
+}
 
 /**
  * One scheme's paint roles as the CSS declarations that realise them, in the generated stylesheet's own order.

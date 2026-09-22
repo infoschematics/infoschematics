@@ -130,6 +130,18 @@ _Verify:_ zoom until the minimap appears, then navigate it by pointer and keyboa
 
 _Evidence:_ `packages/view-canvas/src/viewport.test.ts` covers minimap clamping and `InfoschematicDiagram.tsx` exposes the interactive overview.
 
+### PRESENT-013 — A presentation resolves in the reader's colour scheme and offers no control over it
+
+Present MUST render in whichever colour scheme its host resolved, naming chrome roles rather than colours of its own, and every role MUST be answered in both schemes so no part of the shell is painted in one while the rest is painted in the other.
+
+Present MUST NOT offer a colour-scheme control. Its controls are the presenter's and the Audience watches them being used, so a reader's viewing preference does not belong among them; a presenter pins the scheme before starting, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A host that wants the choice offered MUST offer it in its own chrome, which is what [ADR-INFOSCHEMATICS-005](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md) already gives it.
+
+_Conformance:_ conforming
+
+_Verify:_ mount Present under each preference and confirm the shell follows it; confirm no control in the rendered markup names a colour scheme. Falsified by a colour written into `packages/view-present/src/styles.css`, which is a floor rather than a count and so cannot pass by attrition.
+
+_Evidence:_ `packages/view-present/src/Present.test.tsx` asserts the absent control and the resolved shell; `scripts/stylesheet-literals.test.ts` holds the zero-literal floor for the Present stylesheet; `packages/view-canvas/src/ColourScheme.browser.test.tsx` proves the chrome roles resolve per scheme in a browser.
+
 ## Gaps
 
 - End-to-end keyboard operation and focus management do not yet have dedicated interaction coverage.

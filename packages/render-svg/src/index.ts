@@ -111,27 +111,39 @@ export type RenderInfoschematicSvgOptions = {
  */
 export type RenderedScheme = PaintScheme | 'adaptive'
 
-/** The attribute that marks a rendering as carrying its own palettes, and scopes the block that declares them. */
-const adaptiveMarker = 'data-infoschematic-paint'
+/** The attribute that says which palette a rendering was painted from, and scopes the block that declares it. */
+const paintMarker = 'data-infoschematic-paint'
 
 /**
- * The palettes an adaptive rendering carries, as a stylesheet inside the document.
+ * The palette a rendering carries, as a stylesheet inside the document.
  *
  * Scoped to the marker attribute rather than `:root`, because `:root` is this `<svg>` in a standalone file and the
  * host's `<html>` once the same markup is inlined into a page — which would declare a drawing's palette over
- * everything around it. Declaring on the drawing's own element is enough either way: custom properties inherit.
+ * everything around it. Declaring on the drawing's own element is enough either way: custom properties inherit, and
+ * the selector names the palette, so two drawings resolved differently on one page do not reach each other.
  *
- * Paper is light whatever the screen was. A dark palette printed is a page of ink and a reader who cannot read the
- * result, so the print rule comes last and restores the light palette; an authored blueprint outranks it, because
- * that is a treatment its author chose rather than a scheme resolved for a reader.
+ * A resolved rendering carries one block, which looks redundant beside colours it already wrote as attributes and
+ * is not. A presentation attribute loses to any CSS declaration, so the moment such a drawing is inlined into a page
+ * that loads the Canvas stylesheet — the guide's own light-beside-dark gallery, a README rendered in place — every
+ * `fill: var(--infoschematic-canvas-paint-…)` rule repaints it in the page's scheme, and `--scheme dark` produces a
+ * drawing indistinguishable from `--scheme light`. Declaring the palette it settled on makes those rules resolve to
+ * the rendering's own colours rather than the host's.
+ *
+ * `adaptive` carries every palette it might need instead. Paper is light whatever the screen was: a dark palette
+ * printed is a page of ink and a reader who cannot read the result, so the print rule comes last and restores the
+ * light palette. An authored blueprint outranks both, because that is a treatment its author chose rather than a
+ * scheme resolved for a reader.
  */
-const adaptivePalettes = (depth: number) => {
+const paintPalettes = (depth: number, marker: RenderedScheme) => {
   const indentation = '  '.repeat(depth)
   const block = (indent: string, scheme: PaintScheme) => [
-    `${indent}[${adaptiveMarker}="adaptive"] {`,
+    `${indent}[${paintMarker}="${marker}"] {`,
     ...paintDeclarations(scheme).map(([name, value]) => `${indent}  ${name}: ${value};`),
     `${indent}}`
   ]
+  if (marker !== 'adaptive') {
+    return [`${indentation}<style>`, ...block(`${indentation}  `, marker), `${indentation}</style>`].join('\n')
+  }
   return [
     `${indentation}<style>`,
     ...block(`${indentation}  `, 'light'),
@@ -595,15 +607,13 @@ export const renderInfoschematicSvg = (
   /* A drawing that defers the scheme carries the palettes with it; one that was given a scheme carries colours. An
      authored blueprint is a palette in its own right, so there is nothing for a reader's preference to change. */
   const adaptive = requestedScheme === 'adaptive' && visualTreatment.surface !== 'blueprint'
-  const paint = adaptive
-    ? adaptivePaint
-    : paintFor(
-        visualTreatment.surface === 'blueprint'
-          ? 'blueprint'
-          : requestedScheme === 'adaptive'
-            ? 'light'
-            : requestedScheme
-      )
+  /* Which palette this rendering settled on, and the value it marks itself with so the block it carries reaches it
+     and nothing else. An authored blueprint answers for itself; a caller who asked to defer and was overruled by one
+     is marked `blueprint` rather than `adaptive`, because that is what it is. */
+  const resolvedScheme: PaintScheme =
+    visualTreatment.surface === 'blueprint' ? 'blueprint' : requestedScheme === 'adaptive' ? 'light' : requestedScheme
+  const paintMarkerValue: RenderedScheme = adaptive ? 'adaptive' : resolvedScheme
+  const paint = adaptive ? adaptivePaint : paintFor(resolvedScheme)
   const backdrop = paint.backdrop
   const regionStroke = paint.regionStroke
   const visibleScopes = new Set(options.visibility?.scopes ?? config.scopes.map((scope) => scope.id))
@@ -1594,7 +1604,7 @@ export const renderInfoschematicSvg = (
     `<svg${attributes([
       ['xmlns', 'http://www.w3.org/2000/svg'],
       ['aria-label', `${config.title} structural Infoschematic`],
-      [adaptiveMarker, adaptive ? 'adaptive' : undefined],
+      [paintMarker, paintMarkerValue],
       ['data-grid-treatment', visualTreatment.grid],
       ['data-surface-treatment', visualTreatment.surface],
       ['height', options.responsiveCardDetails?.height ?? viewBox.height],
@@ -1603,7 +1613,7 @@ export const renderInfoschematicSvg = (
       ['viewBox', `${number(viewBox.x)} ${number(viewBox.y)} ${number(viewBox.width)} ${number(viewBox.height)}`],
       ['width', options.responsiveCardDetails?.width ?? viewBox.width]
     ])}>`,
-    ...(adaptive ? [adaptivePalettes(1)] : []),
+    paintPalettes(1, paintMarkerValue),
     ...body,
     '</svg>'
   ].join('\n')

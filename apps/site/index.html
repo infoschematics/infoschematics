@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#07111e" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#eef3f8" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#07111e" />
     <meta
       name="description"
       content="An Infoschematic turns a system's architecture and the flows that move through it into one live, explorable view."
@@ -20,6 +21,20 @@
     <title>Infoschematic · Complex systems, made comprehensible</title>
   </head>
   <body>
+    <!--
+      A scheme resolved after the module script runs is a scheme the reader sees flash. The stylesheet already
+      follows `prefers-color-scheme` with no script at all, so this is only needed for the one case CSS cannot
+      answer: a reader who chose the scheme their machine does not prefer. Nothing stored, nothing written.
+    -->
+    <script>
+      try {
+        var chosen = window.localStorage.getItem('infoschematics.colour-scheme')
+        if (chosen === 'dark' || chosen === 'light')
+          document.documentElement.setAttribute('data-infoschematic-scheme', chosen)
+      } catch (unavailable) {
+        /* A page that refuses storage follows the operating system, which is the default path anyway. */
+      }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

@@ -88,7 +88,7 @@ const backdropToken = () =>
  */
 const paintedFrom = (element: Element, colour: string) => {
   const probe = document.createElement('div')
-  probe.style.backgroundColor = `color-mix(in srgb, ${colour} 72%, #000)`
+  probe.style.backgroundColor = `color-mix(in srgb, ${colour} 72%, var(--infoschematic-chrome-paint-page))`
   document.body.append(probe)
   const expected = getComputedStyle(probe).backgroundColor
   probe.remove()
@@ -107,7 +107,9 @@ test('paints the diagram container from the backdrop token, not a literal Studio
   // a backdrop change would have reached every surface except the editor. Reading the token and the painted colour
   // together is what says the container is taking Canvas's rule rather than a copy that happens to agree today. The
   // token is now per-scheme, so a literal would only be wrong under the other preference: both are read here, and the
-  // expected value comes from the manifest rather than from a colour spelled out in this file.
+  // expected value comes from the manifest rather than from a colour spelled out in this file. The container settles
+  // toward the page it sits on rather than toward black, which in the light scheme is the difference between a frame
+  // and a mid-grey slab; the probe therefore carries the same chrome role the rule does.
   const surface = container.querySelector('.infoschematic')
   if (!surface) throw new Error('Studio did not render the diagram container')
 

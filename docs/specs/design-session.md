@@ -208,6 +208,20 @@ _Verify:_ run the dock cases in `packages/view-studio/src/app/App.browser.test.t
 
 _Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override on entry to a Producer mode, drops it on entry to `present`, and routes the panel toggle to whichever of the two the current mode owns; `packages/view-studio/src/app/panels/PanelRail.tsx` stays Present-only; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when the mode changes; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records the preference model and the rejected alternative.
 
+### DESIGN-022 — A design session resolves in the reader's colour scheme, and the reader may choose it
+
+Studio MUST render its whole surface — title bar, panels, editors, and the frame around the Diagram — in whichever colour scheme is resolved, naming chrome roles rather than colours of its own. Every role MUST be answered in both schemes, so no panel is painted in one while the rest is painted in the other, and type over an accented or selected plane MUST move with the plane beneath it rather than staying a fixed ink.
+
+Studio MUST offer a colour-scheme control in its title bar. It MUST carry an accessible name saying which scheme it moves to, MUST report the current scheme through `aria-pressed`, and MUST be operable from the keyboard, following the toggle conventions `DESIGN-005` already establishes for that bank. "Mode" is taken by `ADR-INFOSCHEMATICS-028`, so the control MUST say colour scheme.
+
+Resolution order MUST be an explicit host choice, then the reader's stored choice, then the operating system, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A choice MUST survive a reload, and while none is stored the surface MUST keep following the operating system as it changes.
+
+_Conformance:_ conforming
+
+_Verify:_ run the Chromium cases in `packages/view-studio/src/app/App.schemes.browser.test.tsx`, which assert painted colour rather than resolved custom properties, because a role that resolves and is never painted from leaves the surface exactly as it was. Ask the runner for each preference rather than reading a rule out of the stylesheet. Falsified by a colour written into `packages/view-studio/src/styles.css`, by a pressed control whose type does not move with its plane, or by a stored choice the operating system overrides.
+
+_Evidence:_ `packages/view-studio/src/app/App.schemes.browser.test.tsx` covers the resolved chrome, the control in the Appearance bank, the repaint on use, and emphatic type against the selected wash; `packages/view-canvas/src/colour-scheme.ts` holds the resolution order and the storage; `packages/view-canvas/src/ColourScheme.browser.test.tsx` covers the control's name, state, keyboard operation, and persistence; `scripts/stylesheet-literals.test.ts` holds the zero-literal floor.
+
 ## Quality properties
 
 ### DESIGN-015 — The rendered editor is tested

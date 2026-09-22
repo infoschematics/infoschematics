@@ -31,6 +31,18 @@ export {
   useDiagramAnnouncements
 } from './announcements.tsx'
 export { Canvas, type CanvasProps } from './Canvas.tsx'
+export { ColourSchemeButton } from './ColourSchemeButton.tsx'
+export {
+  applyColourScheme,
+  type ColourScheme,
+  colourSchemeAttribute,
+  colourSchemeStorageKey,
+  otherColourScheme,
+  preferredColourScheme,
+  resolveColourScheme,
+  storedColourScheme,
+  useColourScheme
+} from './colour-scheme.ts'
 export { drawnElementIds } from './drawn-elements.ts'
 export { elementEmphasisDuration } from './element-emphasis.ts'
 export { flowSignalDuration } from './flow-signals.ts'

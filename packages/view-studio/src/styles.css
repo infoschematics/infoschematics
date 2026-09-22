@@ -3,8 +3,8 @@
 
 :root {
   --app-chrome: 196px;
-  color: #f5f8ff;
-  background: #07111e;
+  color: var(--infoschematic-chrome-paint-text-strong);
+  background: var(--infoschematic-chrome-paint-page);
   font-family: Manrope, Arial, sans-serif;
   font-synthesis: none;
 }
@@ -24,8 +24,8 @@ body {
   min-width: 1100px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 12% 6%, #12334d 0, transparent 26rem),
-    radial-gradient(circle at 78% 32%, #17144e 0, transparent 30rem), #07111e;
+    radial-gradient(circle at 12% 6%, var(--infoschematic-chrome-paint-surface-selected) 0, transparent 26rem),
+    radial-gradient(circle at 78% 32%, var(--infoschematic-chrome-paint-informational-soft) 0, transparent 30rem), var(--infoschematic-chrome-paint-page);
 }
 
 button {
@@ -67,7 +67,7 @@ main {
 /* The expanded header has room for title, subtitle and attribution. */
 .title-bar {
   align-items: center;
-  border-bottom: 1px solid #ffffff1c;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border);
   display: flex;
   gap: 16px;
   justify-content: space-between;
@@ -91,7 +91,7 @@ main {
 }
 
 .title-bar hgroup p {
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   letter-spacing: 0.02em;
   margin: 0;
@@ -118,7 +118,7 @@ main {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -128,20 +128,20 @@ main {
 }
 
 .panel-rail .rail-action:hover {
-  border-color: #ffffff2e;
-  color: #cde8fb;
+  border-color: var(--infoschematic-chrome-paint-border-strong);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .panel-rail .rail-action[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .title-bar-actions .icon-button[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .legend {
@@ -150,7 +150,7 @@ main {
 }
 
 .eyebrow {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     500 10px/1 "DM Mono",
     monospace;
@@ -179,7 +179,7 @@ h2 {
 }
 
 .flow {
-  color: #b7c7dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font:
     500 12px "DM Mono",
     monospace;
@@ -192,17 +192,17 @@ h2 {
 }
 
 .toggle-button[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
-  box-shadow: 0 0 0 1px #79c9ff55;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  box-shadow: 0 0 0 1px var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .toggle-button:disabled,
 .action-button:disabled {
-  background: #0d1c2b;
-  border-color: #ffffff10;
-  color: #55697d;
+  background: var(--infoschematic-chrome-paint-surface);
+  border-color: var(--infoschematic-chrome-paint-border-subtle);
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: not-allowed;
 }
 
@@ -210,7 +210,7 @@ h2 {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: #55708c;
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: pointer;
   font:
     600 8px "DM Mono",
@@ -221,18 +221,18 @@ h2 {
 }
 
 .panel-rail .rail-pathway[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 /* The maximised diagram keeps every reset the tray offers, so a presenter never
    has to restore the panels just to switch everything back on. */
 .panel-rail .rail-toggle {
-  background: #10263b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #a9c2da;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   cursor: pointer;
   font:
     600 8px "DM Mono",
@@ -246,12 +246,12 @@ h2 {
 }
 
 .panel-rail .rail-toggle:hover:not(:disabled) {
-  border-color: #79c9ff;
-  color: white;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .panel-rail .rail-toggle:disabled {
-  color: #4a5d70;
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: not-allowed;
   opacity: 0.6;
 }
@@ -262,7 +262,7 @@ h2 {
    the dot. */
 .scope-button {
   border-color: color-mix(in srgb, var(--family-color) 55%, transparent);
-  color: color-mix(in srgb, var(--family-color) 45%, #dbe7f5);
+  color: color-mix(in srgb, var(--family-color) 45%, var(--infoschematic-chrome-paint-text));
 }
 
 .scope-button[aria-pressed="true"] {
@@ -284,12 +284,12 @@ h2 {
 }
 
 .flow .up {
-  background: #78e6a5;
-  box-shadow: 0 0 14px #78e6a5;
+  background: var(--infoschematic-chrome-paint-positive);
+  box-shadow: 0 0 14px var(--infoschematic-chrome-paint-positive);
 }
 
 .flow .down {
-  background: #ff7290;
+  background: var(--infoschematic-chrome-paint-negative);
 }
 
 .control-room {
@@ -348,7 +348,7 @@ h2 {
 .panel-resizer::after {
   background-image: radial-gradient(
     circle at center,
-    #ffffff40 1.1px,
+    var(--infoschematic-chrome-paint-border-strong) 1.1px,
     transparent 1.3px
   );
   background-position: center;
@@ -368,7 +368,7 @@ h2 {
 .panel-resizer:focus-visible::after {
   background-image: radial-gradient(
     circle at center,
-    #79c9ff 1.4px,
+    var(--infoschematic-chrome-paint-accent) 1.4px,
     transparent 1.6px
   );
 }
@@ -423,7 +423,7 @@ h2 {
 .panel-rail button {
   background: transparent;
   border: 0;
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   font-size: 11px;
   padding: 4px 0;
@@ -431,11 +431,11 @@ h2 {
 }
 
 .panel-rail button:hover {
-  color: #cce1f8;
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .rail-group {
-  border-top: 1px solid #ffffff15;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   display: grid;
   gap: 6px;
   justify-items: center;
@@ -445,7 +445,7 @@ h2 {
 
 .panel-rail .rail-swatch {
   background: var(--family-color);
-  border: 1px solid #ffffff33;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 4px;
   cursor: pointer;
   height: 16px;
@@ -455,7 +455,7 @@ h2 {
 }
 
 .panel-rail .rail-swatch[aria-pressed="true"] {
-  border-color: #ffffff77;
+  border-color: var(--infoschematic-chrome-paint-border-strong);
   opacity: 1;
 }
 
@@ -463,7 +463,7 @@ h2 {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  color: #55708c;
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: pointer;
   display: grid;
   padding: 4px;
@@ -478,17 +478,17 @@ h2 {
 }
 
 .panel-rail .rail-scope[aria-pressed="true"] {
-  background: #10263b;
-  border-color: #ffffff1e;
-  color: #cce1f8;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border-color: var(--infoschematic-chrome-paint-border);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .infoschematic-panel,
 .details-panel {
-  background: #0a1929d9;
-  border: 1px solid #ffffff1c;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 14px;
-  box-shadow: 0 15px 60px #00000030;
+  box-shadow: 0 15px 60px var(--infoschematic-chrome-paint-shadow);
 }
 
 /* The column the Infoschematic and its controls share, seamed like everything else. */
@@ -501,7 +501,7 @@ h2 {
 }
 
 .infoschematic-panel {
-  background: #081725;
+  background: var(--infoschematic-chrome-paint-surface-sunken);
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
@@ -522,17 +522,17 @@ h2 {
 
 .quiet {
   background: transparent;
-  border: 1px solid #8cacce55;
+  border: 1px solid var(--infoschematic-chrome-paint-accent-border);
   border-radius: 7px;
-  color: #cce1f8;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   font-size: 11px;
   padding: 7px 10px;
 }
 
 .quiet:hover {
-  border-color: #79c9ff;
-  color: white;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 /* A toggle has to show which way it is set. Annotate and Takeaways keep one
@@ -542,20 +542,20 @@ h2 {
    not in this rule: their labels change, which says it already. */
 .audit-toggle[aria-pressed="true"],
 .quiet[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
-  box-shadow: inset 0 0 0 1px #79c9ff55;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  box-shadow: inset 0 0 0 1px var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 /* Typed as readily as stepped: a side with room for sixteen counts is a lot of
    clicking to cross, and the number is the thing being chosen. */
 .port-count {
   appearance: textfield;
-  background: #0c1c2c;
-  border: 1px solid #ffffff1f;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dce9f7;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 11px "DM Mono",
     monospace;
@@ -572,14 +572,14 @@ h2 {
 }
 
 .port-count:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
   outline: none;
 }
 
 /* How regular the spacing turns out at this count: "even" where the side
    divides exactly, otherwise the narrowest and widest gap it produces. */
 .port-spacing {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     400 9px "DM Mono",
     monospace;
@@ -604,7 +604,7 @@ h2 {
 }
 
 .text-row span {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 9px "DM Mono",
     monospace;
@@ -616,7 +616,7 @@ h2 {
    and the headings use, and given no field around it, so it does not invite an
    edit the panel will not take. */
 .text-row output {
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px "DM Mono",
     monospace;
@@ -626,10 +626,10 @@ h2 {
 
 .text-row input,
 .text-row select {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px Manrope,
     Arial,
@@ -640,7 +640,7 @@ h2 {
 
 .text-row input:focus,
 .text-row select:focus {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
   outline: none;
 }
 
@@ -661,7 +661,7 @@ h2 {
 }
 
 .port-counts dt {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 9px "DM Mono",
     monospace;
@@ -677,10 +677,10 @@ h2 {
 }
 
 .port-counts button {
-  background: #10263b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   font:
     600 11px "DM Mono",
@@ -689,17 +689,17 @@ h2 {
 }
 
 .port-counts button:hover:not(:disabled) {
-  border-color: #79c9ff;
-  color: white;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .port-counts button:disabled {
-  color: #4a5d70;
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: not-allowed;
 }
 
 .port-counts span {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 11px "DM Mono",
     monospace;
@@ -710,7 +710,7 @@ h2 {
 /* Named like the changes below it, so the two halves of the tab read as a pair
    rather than one being labelled and the other simply starting. */
 .pane-heading {
-  color: #82b366;
+  color: var(--infoschematic-chrome-paint-positive);
   margin-bottom: 8px;
 }
 
@@ -721,10 +721,10 @@ h2 {
 }
 
 .placement-input {
-  background: #0b1d33;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 4px;
-  color: #dff3ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 11px "DM Mono",
     monospace;
@@ -734,7 +734,7 @@ h2 {
 }
 
 .placement-input:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
   outline: none;
 }
 
@@ -751,7 +751,7 @@ h2 {
 }
 
 .placement-row dt {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 9px "DM Mono",
     monospace;
@@ -760,7 +760,7 @@ h2 {
 }
 
 .placement-row dd {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 11px "DM Mono",
     monospace;
@@ -768,7 +768,7 @@ h2 {
 }
 
 .change-panel .eyebrow {
-  color: #82b366;
+  color: var(--infoschematic-chrome-paint-positive);
 }
 
 /* The edit tab is split: what is selected above, what it changed below, with a
@@ -835,7 +835,7 @@ h2 {
  * drawn and the handle overlays its centre.
  */
 .split-handle {
-  background: linear-gradient(#ffffff14, #ffffff14) center / 100% 1px no-repeat;
+  background: linear-gradient(var(--infoschematic-chrome-paint-surface-hover), var(--infoschematic-chrome-paint-surface-hover)) center / 100% 1px no-repeat;
   border: none;
   cursor: row-resize;
   height: 10px;
@@ -846,7 +846,7 @@ h2 {
 .split-handle::after {
   background-image: radial-gradient(
     circle at center,
-    #ffffff40 1.1px,
+    var(--infoschematic-chrome-paint-border-strong) 1.1px,
     transparent 1.3px
   );
   background-position: center;
@@ -871,7 +871,7 @@ h2 {
 .split-handle:hover::after {
   background-image: radial-gradient(
     circle at center,
-    #79c9ff 1.4px,
+    var(--infoschematic-chrome-paint-accent) 1.4px,
     transparent 1.6px
   );
 }
@@ -933,13 +933,13 @@ h2 {
 
 .change-list li:hover,
 .change-list li.highlighted {
-  background: #ffffff0d;
+  background: var(--infoschematic-chrome-paint-surface-hover);
 }
 
 /* A change points at what it is about, so it is lit the same way the thing on
    Infoschematic is - and the row it is on is a button, not a line of text. */
 .change-list li.highlighted {
-  box-shadow: inset 2px 0 0 #79c9ff;
+  box-shadow: inset 2px 0 0 var(--infoschematic-chrome-paint-accent);
 }
 
 .change-pick {
@@ -954,7 +954,7 @@ h2 {
 }
 
 .change-list code {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   display: block;
   font:
     500 11px "DM Mono",
@@ -966,7 +966,7 @@ h2 {
 
 .change-pick:focus-visible {
   border-radius: 3px;
-  outline: 2px solid #79c9ff;
+  outline: 2px solid var(--infoschematic-chrome-paint-accent);
   outline-offset: 1px;
 }
 
@@ -975,7 +975,7 @@ h2 {
   background: none;
   border: none;
   border-radius: 4px;
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   display: flex;
   height: 18px;
@@ -991,12 +991,12 @@ h2 {
 }
 
 .change-drop:hover {
-  background: #ff647c22;
-  color: #ff647c;
+  background: var(--infoschematic-chrome-paint-negative-soft);
+  color: var(--infoschematic-chrome-paint-negative);
 }
 
 .change-carried {
-  color: #4d6070;
+  color: var(--infoschematic-chrome-paint-text-faint);
   font-size: 11px;
   text-align: center;
 }
@@ -1005,7 +1005,7 @@ h2 {
    record rather than a handle: nothing here can be selected, hovered onto the
    Infoschematic or dropped, because it is no longer the editor's to take back. */
 .change-written-count {
-  border-top: 1px solid #ffffff14;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   margin-top: 8px;
   padding-top: 8px;
 }
@@ -1016,14 +1016,14 @@ h2 {
 }
 
 .change-written code {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 .change-panel pre {
-  background: #08151f;
-  border: 1px solid #ffffff14;
+  background: var(--infoschematic-chrome-paint-surface-sunken);
+  border: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   border-radius: 8px;
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 10px "DM Mono",
     monospace;
@@ -1057,11 +1057,11 @@ h2 {
  * so the Themes get the room that was being held for nothing.
  */
 .producer-controls {
-  background: #0a1929d9;
-  border: 1px solid #ffffff1c;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 14px;
-  box-shadow: 0 15px 60px #00000030;
-  color: #aabbd0;
+  box-shadow: 0 15px 60px var(--infoschematic-chrome-paint-shadow);
+  color: var(--infoschematic-chrome-paint-text-secondary);
   display: grid;
   gap: 6px;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1074,7 +1074,7 @@ h2 {
   align-content: center;
   align-items: center;
   row-gap: 4px;
-  border: 1px solid #ffffff12;
+  border: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   border-radius: 6px;
   display: flex;
   flex-wrap: wrap;
@@ -1111,11 +1111,11 @@ h2 {
 }
 
 .producer-label {
-  color: #d7e6f8;
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .family-description {
-  color: #8fa8c1;
+  color: var(--infoschematic-chrome-paint-text-muted);
   margin-left: auto;
 }
 
@@ -1125,10 +1125,10 @@ h2 {
 .scope-button,
 .signal-button {
   align-items: center;
-  background: #10263b;
-  border: 1px solid #ffffff25;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 6px;
-  color: #c9d7e7;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   cursor: pointer;
   display: inline-flex;
   font-size: 9px;
@@ -1141,37 +1141,37 @@ h2 {
 .action-button:hover,
 .scope-button:hover,
 .signal-button:hover {
-  background: #18344d;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .flow-family-button[aria-pressed="true"] {
   border-color: var(--family-color);
   box-shadow:
     inset 0 0 0 1px var(--family-color),
-    0 0 14px #00000042;
-  color: white;
+    0 0 14px var(--infoschematic-chrome-paint-shadow);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .scope-button[aria-pressed="true"] {
-  background: #18344d;
-  border-color: #79c9ff;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
   box-shadow:
-    inset 0 0 0 1px #79c9ff66,
-    0 0 14px #00000042;
-  color: white;
+    inset 0 0 0 1px var(--infoschematic-chrome-paint-accent-border),
+    0 0 14px var(--infoschematic-chrome-paint-shadow);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .action-button {
-  border-color: #79c9ff88;
-  color: #dff1ff;
+  border-color: var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text);
   margin-left: 4px;
 }
 
 .signal-button {
-  background: #20405a;
-  border-color: #79c9ff;
-  color: white;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .action-button:disabled,
@@ -1190,7 +1190,7 @@ h2 {
 }
 
 .state-panel {
-  border-bottom: 1px solid #ffffff15;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   min-height: 0;
@@ -1200,7 +1200,7 @@ h2 {
 
 .panel-tabs {
   align-items: center;
-  border-bottom: 1px solid #ffffff15;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   display: flex;
   gap: 4px;
   margin-bottom: 10px;
@@ -1210,19 +1210,19 @@ h2 {
   background: transparent;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   font-size: 12px;
   padding: 10px 6px;
 }
 
 .panel-tabs button:hover {
-  color: #cce1f8;
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .panel-tabs button.active {
-  border-bottom-color: #79c9ff;
-  color: white;
+  border-bottom-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .panel-tabs .flow {
@@ -1245,7 +1245,7 @@ h2 {
 }
 
 .specifications-detail {
-  border-top: 1px solid #ffffff1c;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border);
 }
 
 .specification-tree {
@@ -1263,9 +1263,9 @@ h2 {
 
 .specification-disclosure,
 .specification-node {
-  background: #10263b;
-  border: 1px solid #ffffff1e;
-  color: #cde8fb;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
 }
 
@@ -1302,7 +1302,7 @@ h2 {
 }
 
 .specification-node small {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 8px;
   text-transform: uppercase;
 }
@@ -1310,12 +1310,12 @@ h2 {
 .specification-node:hover,
 .specification-disclosure:hover,
 .specification-node[aria-pressed="true"] {
-  background: #173653;
-  border-color: #79c9ff;
+  background: var(--infoschematic-chrome-paint-surface-selected);
+  border-color: var(--infoschematic-chrome-paint-accent);
 }
 
 .specification-group-node {
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-weight: 600;
 }
 
@@ -1330,7 +1330,7 @@ h2 {
 }
 
 .specifications-detail h2 {
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-size: 14px;
   margin: 2px 0 0;
 }
@@ -1352,7 +1352,7 @@ h2 {
 }
 
 .state-summary dt {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 9px "DM Mono",
     monospace;
@@ -1362,7 +1362,7 @@ h2 {
 }
 
 .state-summary dd {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 11px;
   margin: 0;
 }
@@ -1397,7 +1397,7 @@ h2 {
 }
 
 .contract-detail .compact-heading a {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     500 10px "DM Mono",
     monospace;
@@ -1406,14 +1406,14 @@ h2 {
 }
 
 .contract-body {
-  color: #c3d4e6;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-size: 12px;
   min-height: 0;
   overflow-y: auto;
 }
 
 .contract-meta {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 10px "DM Mono",
     monospace;
@@ -1422,7 +1422,7 @@ h2 {
 /* Guidance rather than content: it says what to do next, so it is set apart
    from the values a filled panel shows rather than sitting where they would. */
 .contract-empty {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 12px;
   font-style: italic;
   line-height: 1.5;
@@ -1438,7 +1438,7 @@ h2 {
 
 .contract-operations li {
   align-items: baseline;
-  border-top: 1px solid #ffffff12;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   display: grid;
   gap: 8px;
   grid-template-columns: max-content minmax(0, 1fr);
@@ -1446,7 +1446,7 @@ h2 {
 }
 
 .contract-operations code {
-  color: #82b366;
+  color: var(--infoschematic-chrome-paint-positive);
   font:
     600 10px "DM Mono",
     monospace;
@@ -1465,20 +1465,20 @@ h2 {
 }
 
 .contract-operations em {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   font-style: normal;
   grid-column: 2;
 }
 
 .contract-flows {
-  border-top: 1px solid #ffffff1c;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border);
   margin-top: 14px;
   padding-top: 10px;
 }
 
 .contract-flows .eyebrow {
-  color: #9673a6;
+  color: var(--infoschematic-chrome-paint-informational);
   margin-bottom: 6px;
 }
 
@@ -1489,7 +1489,7 @@ h2 {
 }
 
 .contract-flows .contract-operations code {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
 }
 
 .compact-heading {
@@ -1509,7 +1509,7 @@ h2 {
 
 .compact-heading > span,
 .compact-heading-actions > span {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 9px "DM Mono",
     monospace;
@@ -1534,11 +1534,11 @@ h2 {
 
 .scene-callout {
   animation: callout-in 220ms ease-out;
-  background: #071624f2;
-  border: 1px solid #79c9ff66;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-accent-border);
   border-radius: 10px;
-  box-shadow: 0 10px 34px #00000066;
-  color: #f2f8ff;
+  box-shadow: 0 10px 34px var(--infoschematic-chrome-paint-shadow);
+  color: var(--infoschematic-chrome-paint-text-strong);
   max-width: min(400px, 74%);
   padding: 13px 17px;
   position: absolute;
@@ -1561,7 +1561,7 @@ h2 {
 /* What this one is called, between whose voice it is and what it says. A scene
    and a theme briefing both carry it, which is what makes them one card. */
 .callout-title {
-  color: #cfe6ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.01em;
@@ -1573,7 +1573,7 @@ h2 {
    room reads these. Set quieter than the body, so the prose stays the thing
    being read and these stay the thing being glanced at. */
 .callout-takeaways {
-  color: #a9c4dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   display: grid;
   font-size: 11.5px;
   gap: 3px;
@@ -1589,7 +1589,7 @@ h2 {
 }
 
 .callout-takeaways li::before {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   content: "\203A";
   left: 2px;
   position: absolute;
@@ -1616,7 +1616,7 @@ h2 {
 }
 
 .callout-sides > div + div {
-  border-left: 1px solid #ffffff1a;
+  border-left: 1px solid var(--infoschematic-chrome-paint-border);
   padding-left: 16px;
 }
 
@@ -1632,7 +1632,7 @@ h2 {
   }
 
   .specifications-detail {
-    border-top: 1px solid #ffffff1c;
+    border-top: 1px solid var(--infoschematic-chrome-paint-border);
   }
 
   .callout-sides {
@@ -1641,7 +1641,7 @@ h2 {
 
   .callout-sides > div + div {
     border-left: 0;
-    border-top: 1px solid #ffffff1a;
+    border-top: 1px solid var(--infoschematic-chrome-paint-border);
     padding-left: 0;
     padding-top: 12px;
   }
@@ -1673,7 +1673,7 @@ h2 {
 }
 
 .callout-aside p {
-  color: #a9c4dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-size: 11.5px;
   line-height: 1.45;
   margin: 0;
@@ -1710,7 +1710,7 @@ h2 {
   align-items: center;
   background: transparent;
   border: 0;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   display: flex;
   font-size: 13px;
@@ -1724,7 +1724,7 @@ h2 {
 }
 
 .register-part:hover {
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .register-part span {
@@ -1734,7 +1734,7 @@ h2 {
 /* What is inside a part you have shut, which is the one thing worth saying
    about it while it is closed. */
 .register-part em {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 10px "DM Mono",
     monospace;
@@ -1746,7 +1746,7 @@ h2 {
 }
 
 .register-note {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   line-height: 1.4;
   margin: -3px 0 9px;
@@ -1810,15 +1810,15 @@ h2 {
    direction. */
 .register-row:hover,
 .register-row.pointed {
-  background: #173653;
+  background: var(--infoschematic-chrome-paint-surface-selected);
 }
 
 .register-row.pointed dt {
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .register-row dt {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     600 9px "DM Mono",
     monospace;
@@ -1837,19 +1837,19 @@ h2 {
 }
 
 .register-name {
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 11.5px;
   line-height: 1.3;
 }
 
 .register-detail {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 10px;
   line-height: 1.3;
 }
 
 .theme-headline {
-  color: #c39bff;
+  color: var(--infoschematic-chrome-paint-informational);
   font:
     600 11px "DM Mono",
     monospace;
@@ -1867,7 +1867,7 @@ h2 {
 }
 
 .callout-heading span {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     600 10px "DM Mono",
     monospace;
@@ -1876,7 +1876,7 @@ h2 {
 }
 
 .callout-heading em {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 10px "DM Mono",
     monospace;
@@ -1902,8 +1902,8 @@ h2 {
 /* Dismissal turns red on approach, wherever it is. */
 .callout-exit:hover:not(:disabled),
 .icon-button.dismiss:hover {
-  border-color: #ff8398;
-  color: #ffd2da;
+  border-color: var(--infoschematic-chrome-paint-negative);
+  color: var(--infoschematic-chrome-paint-negative);
 }
 
 .callout-countdown {
@@ -1914,7 +1914,7 @@ h2 {
 
 .countdown-track {
   fill: none;
-  stroke: #ffffff26;
+  stroke: var(--infoschematic-chrome-paint-border-strong);
   stroke-width: 2.25;
 }
 
@@ -1922,7 +1922,7 @@ h2 {
 .countdown-sweep {
   animation: countdown linear forwards;
   fill: none;
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-chrome-paint-accent);
   stroke-dasharray: 39.27;
   stroke-linecap: round;
   stroke-width: 2.25;
@@ -1946,10 +1946,10 @@ h2 {
 .callout-actions button,
 .icon-button {
   align-items: center;
-  background: #10263b;
-  border: 1px solid #ffffff26;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 6px;
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   display: flex;
   padding: 4px 9px;
@@ -1957,12 +1957,12 @@ h2 {
 
 .callout-actions button:hover:not(:disabled),
 .icon-button:hover {
-  border-color: #79c9ff;
-  color: white;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .callout-actions button:disabled {
-  color: #4a5d70;
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -1985,10 +1985,10 @@ h2 {
 }
 
 .error {
-  background: #5c2030;
-  border: 1px solid #ff8398;
+  background: var(--infoschematic-chrome-paint-negative-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-negative);
   border-radius: 7px;
-  color: #ffd2da;
+  color: var(--infoschematic-chrome-paint-negative);
   font-size: 12px;
   left: 50%;
   margin: 0;
@@ -2012,7 +2012,7 @@ h2 {
 
 button:focus-visible,
 .state-panel a:focus-visible {
-  outline: 2px solid #79c9ff;
+  outline: 2px solid var(--infoschematic-chrome-paint-accent);
   outline-offset: 2px;
 }
 
@@ -2131,7 +2131,7 @@ button:focus-visible,
    this size reads as a wrap. */
 .tool-divider {
   align-self: stretch;
-  background: #ffffff1c;
+  background: var(--infoschematic-chrome-paint-border);
   margin: 2px 2px;
   width: 1px;
 }
@@ -2144,16 +2144,16 @@ button:focus-visible,
 }
 
 .tool-button:disabled:hover {
-  background: #ffffff08;
+  background: var(--infoschematic-chrome-paint-surface-hover);
   color: inherit;
 }
 
 .tool-button {
   align-items: center;
-  background: #ffffff08;
-  border: 1px solid #ffffff18;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 6px;
-  color: #9fb4cc;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   display: flex;
   height: 30px;
@@ -2163,43 +2163,43 @@ button:focus-visible,
 }
 
 .tool-button:hover {
-  border-color: #79c9ff55;
-  color: #dff3ff;
+  border-color: var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .tool-button[aria-pressed="true"] {
-  background: #79c9ff22;
-  border-color: #79c9ff;
-  color: #dff3ff;
+  background: var(--infoschematic-chrome-paint-accent-soft);
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 /* A layer control is pressed in the state a session opens in, so five lit
    buttons would be the resting appearance of the row and would say nothing.
    The closed layer is the exceptional one, so it is the one that is marked. */
 .tool-button.layer-button[aria-pressed="true"] {
-  background: #ffffff08;
-  border-color: #ffffff18;
-  color: #9fb4cc;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border-color: var(--infoschematic-chrome-paint-border);
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 .tool-button.layer-button[aria-pressed="true"]:hover {
-  border-color: #79c9ff55;
-  color: #dff3ff;
+  border-color: var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .tool-button.layer-button[aria-pressed="false"] {
-  background: #f0b35714;
-  border-color: #f0b35799;
-  color: #f0b357;
+  background: var(--infoschematic-chrome-paint-caution-soft);
+  border-color: var(--infoschematic-chrome-paint-caution-border);
+  color: var(--infoschematic-chrome-paint-caution);
   opacity: 0.85;
 }
 
 .grid-size-control {
   align-items: center;
-  background: #ffffff08;
-  border: 1px solid #ffffff18;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 6px;
-  color: #9fb4cc;
+  color: var(--infoschematic-chrome-paint-text-muted);
   display: flex;
   gap: 5px;
   height: 30px;
@@ -2207,8 +2207,8 @@ button:focus-visible,
 }
 
 .grid-size-control:focus-within {
-  border-color: #79c9ff;
-  color: #dff3ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .grid-size-control input {
@@ -2242,7 +2242,7 @@ button:focus-visible,
 }
 
 .shortcut-scrim {
-  background: #040a12b8;
+  background: var(--infoschematic-chrome-paint-scrim);
   border: none;
   cursor: default;
   inset: 0;
@@ -2251,10 +2251,10 @@ button:focus-visible,
 }
 
 .shortcut-card {
-  background: #0a1929;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 12px;
-  box-shadow: 0 24px 60px #02060cb3;
+  box-shadow: 0 24px 60px var(--infoschematic-chrome-paint-scrim);
   max-height: 88vh;
   max-width: 940px;
   overflow-y: auto;
@@ -2277,7 +2277,7 @@ button:focus-visible,
    column so it turns with the layout: a line down the middle while they are
    side by side, a line across once they stack. */
 .shortcut-columns > div + div {
-  border-left: 1px solid #ffffff1a;
+  border-left: 1px solid var(--infoschematic-chrome-paint-border);
   padding-left: 26px;
 }
 
@@ -2288,7 +2288,7 @@ button:focus-visible,
 
   .shortcut-columns > div + div {
     border-left: 0;
-    border-top: 1px solid #ffffff1a;
+    border-top: 1px solid var(--infoschematic-chrome-paint-border);
     padding-left: 0;
     padding-top: 22px;
   }
@@ -2317,7 +2317,7 @@ button:focus-visible,
 /* A form has no colour to show, so its name takes the column the swatch and
    code share on the two lists above it. */
 .legend-row.form dt {
-  color: #cfe6ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 10px;
   letter-spacing: 0.04em;
   line-height: 1.25;
@@ -2325,7 +2325,7 @@ button:focus-visible,
 }
 
 .legend-row dd {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 12px;
   margin: 0;
 }
@@ -2366,16 +2366,16 @@ button:focus-visible,
 }
 
 .shortcut-row dd {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 12px;
   margin: 0;
 }
 
 .shortcut-row kbd {
-  background: #10263b;
-  border: 1px solid #ffffff24;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff3ff;
+  color: var(--infoschematic-chrome-paint-text);
   display: inline-block;
   font:
     600 10px "DM Mono",
@@ -2397,10 +2397,10 @@ button:focus-visible,
 }
 
 .specification-card {
-  background: #0a1929;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 12px;
-  box-shadow: 0 24px 60px #02060cb3;
+  box-shadow: 0 24px 60px var(--infoschematic-chrome-paint-scrim);
   display: flex;
   flex-direction: column;
   height: 90vh;
@@ -2412,7 +2412,7 @@ button:focus-visible,
 
 .specification-head {
   align-items: center;
-  border-bottom: 1px solid #ffffff14;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   display: flex;
   flex: none;
   gap: 12px;
@@ -2433,7 +2433,7 @@ button:focus-visible,
 }
 
 .specification-head-actions a {
-  color: #7fb2e5;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font-size: 12px;
 }
 
@@ -2448,7 +2448,7 @@ button:focus-visible,
 .link-button {
   background: none;
   border: none;
-  color: #7fb2e5;
+  color: var(--infoschematic-chrome-paint-text-accent);
   cursor: pointer;
   font: inherit;
   padding: 0;
@@ -2458,7 +2458,7 @@ button:focus-visible,
 /* Sits above the specification list, ruled off from it: what the tab is for,
    read before the list rather than after it. */
 .specification-lead {
-  border-bottom: 1px solid #ffffff14;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   margin: 0 0 12px;
   padding-bottom: 10px;
 }
@@ -2466,14 +2466,14 @@ button:focus-visible,
 /* A removal in the change list. Struck through like the thing it names is on
    the Infoschematic, so the two read as the same edit seen twice. */
 .change-list li.removing code {
-  color: #e0a0a0;
+  color: var(--infoschematic-chrome-paint-negative);
   text-decoration: line-through;
 }
 
 /* A creation in the same list. Marked in the affirmative colour a removal is
    marked in the negative one, so the two ends of the same idea look like it. */
 .change-list li.creating code {
-  color: #9fd6a4;
+  color: var(--infoschematic-chrome-paint-positive);
 }
 
 /*
@@ -2484,10 +2484,10 @@ button:focus-visible,
  * the question somewhere other than the reader's hand.
  */
 .family-choice {
-  background: #10161f;
-  border: 1px solid #2c3a4d;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 8px;
-  box-shadow: 0 12px 32px #00000080;
+  box-shadow: 0 12px 32px var(--infoschematic-chrome-paint-shadow-strong);
   display: flex;
   flex-direction: column;
   padding: 6px;
@@ -2497,7 +2497,7 @@ button:focus-visible,
 }
 
 .family-choice p {
-  color: #8fa3bd;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   letter-spacing: 0.08em;
   margin: 2px 6px 6px;
@@ -2509,7 +2509,7 @@ button:focus-visible,
   background: none;
   border: 0;
   border-radius: 5px;
-  color: #d6e2f0;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   display: flex;
   font-size: 12px;
@@ -2520,11 +2520,11 @@ button:focus-visible,
 }
 
 .family-choice button:hover {
-  background: #1d2735;
+  background: var(--infoschematic-chrome-paint-surface);
 }
 
 .family-choice button b {
-  color: #8fa3bd;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-weight: 600;
   min-width: 34px;
 }
@@ -2573,18 +2573,18 @@ button:focus-visible,
 
 .scene-tools button {
   align-items: center;
-  background: #ffffff08;
-  border: 1px solid #ffffff1a;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #aabbd0;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   cursor: pointer;
   display: inline-flex;
   padding: 4px 6px;
 }
 
 .scene-tools button:hover:not(:disabled) {
-  background: #1d2735;
-  color: #dff0ff;
+  background: var(--infoschematic-chrome-paint-surface);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .scene-tools button:disabled {
@@ -2595,7 +2595,7 @@ button:focus-visible,
 /* The run time, which follows every hold rather than policing one. */
 .scene-run-time {
   align-items: center;
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   display: inline-flex;
   font:
     600 10px "DM Mono",
@@ -2619,7 +2619,7 @@ button:focus-visible,
   background: none;
   border: 1px solid transparent;
   border-radius: 4px;
-  color: #aabbd0;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   cursor: pointer;
   display: grid;
   font-size: 11px;
@@ -2631,17 +2631,17 @@ button:focus-visible,
 }
 
 .scene-row:hover {
-  background: #ffffff08;
+  background: var(--infoschematic-chrome-paint-surface-hover);
 }
 
 .scene-row.selected {
-  background: #16283a;
-  border-color: #2f5878;
-  color: #dff0ff;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border-color: var(--infoschematic-chrome-paint-border-strong);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .scene-row em {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 10px "DM Mono",
     monospace;
@@ -2655,7 +2655,7 @@ button:focus-visible,
 }
 
 .scene-row b {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 10px "DM Mono",
     monospace;
@@ -2667,10 +2667,10 @@ button:focus-visible,
 }
 
 .scene-fields textarea {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px Manrope,
     Arial,
@@ -2687,10 +2687,10 @@ button:focus-visible,
 }
 
 .scene-hold input {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px Manrope,
     Arial,
@@ -2702,10 +2702,10 @@ button:focus-visible,
 
 .scene-hold button,
 .scene-lit button {
-  background: #1d2735;
-  border: 1px solid #2c3a4d;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 4px;
-  color: #d6e2f0;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   font-size: 11px;
   padding: 3px 8px;
@@ -2718,24 +2718,24 @@ button:focus-visible,
 }
 
 .scene-lit {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   margin: 2px 0 0;
 }
 
 /* The scene editor has no tools of its own, so it says what to do instead. */
 .scene-hint {
-  color: #8fa3bd;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
 }
 
 /* Naming a new scene sits with the controls that act on the list, since making
    one is the first thing done here and the rest follow from it. */
 .scene-tools input[type="text"] {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   flex: 1 1 auto;
   font:
     500 11px Manrope,
@@ -2753,10 +2753,10 @@ button:focus-visible,
 }
 
 .scene-fields textarea {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px Manrope,
     Arial,
@@ -2769,7 +2769,7 @@ button:focus-visible,
 /* Following a run: the panel says so, because a scene list that changes under
    the reader without explanation looks like a bug rather than a feature. */
 .scene-following {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   font-style: italic;
   line-height: 1.5;
@@ -2785,7 +2785,7 @@ button:focus-visible,
 }
 
 .line-list-label {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 9px "DM Mono",
     monospace;
@@ -2807,10 +2807,10 @@ button:focus-visible,
 }
 
 .line-list-row input {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px Manrope,
     Arial,
@@ -2822,10 +2822,10 @@ button:focus-visible,
 .line-list-row button,
 .line-list-add {
   align-items: center;
-  background: #ffffff08;
-  border: 1px solid #ffffff1a;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   display: inline-flex;
   gap: 4px;
@@ -2836,8 +2836,8 @@ button:focus-visible,
 
 .line-list-row button:hover,
 .line-list-add:hover {
-  background: #1d2735;
-  color: #dff0ff;
+  background: var(--infoschematic-chrome-paint-surface);
+  color: var(--infoschematic-chrome-paint-text);
 }
 /*
  * Studio panel chrome.
@@ -2875,7 +2875,7 @@ button:focus-visible,
 /* Says what the list is, because it sits immediately under the kind buttons and
    would otherwise read as one more of them. */
 .library-note {
-  color: #7892ad;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 10px;
   margin: -2px 0 0;
 }
@@ -2896,7 +2896,7 @@ button:focus-visible,
   background: none;
   border: 1px solid transparent;
   border-radius: 4px;
-  color: #aabbd0;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   cursor: pointer;
   display: grid;
   gap: 2px;
@@ -2906,9 +2906,9 @@ button:focus-visible,
 }
 
 .library-item:hover {
-  background: #ffffff08;
-  border-color: #2f5878;
-  color: #dff0ff;
+  background: var(--infoschematic-chrome-paint-surface-hover);
+  border-color: var(--infoschematic-chrome-paint-border-strong);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .library-item span {
@@ -2919,7 +2919,7 @@ button:focus-visible,
 }
 
 .library-item small {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 10px;
   line-height: 1.4;
 }
@@ -2948,13 +2948,13 @@ button:focus-visible,
 }
 
 .artefact-identity {
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 11px;
   margin: 0;
 }
 
 .artefact-identity strong {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     600 10px "DM Mono",
     monospace;
@@ -2964,7 +2964,7 @@ button:focus-visible,
 }
 
 .artefact-geometry {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     500 10px "DM Mono",
     monospace;
@@ -2972,7 +2972,7 @@ button:focus-visible,
 }
 
 .artefact-properties {
-  border: 1px solid #ffffff1a;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
   display: grid;
   gap: 5px;
@@ -2981,7 +2981,7 @@ button:focus-visible,
 }
 
 .artefact-properties legend {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 9px "DM Mono",
     monospace;
@@ -2991,7 +2991,7 @@ button:focus-visible,
 }
 
 .artefact-properties label {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   display: grid;
   font:
     600 9px "DM Mono",
@@ -3004,10 +3004,10 @@ button:focus-visible,
 .artefact-properties input,
 .artefact-properties select,
 .artefact-properties textarea {
-  background: #0c1c2b;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 11px "DM Mono",
     monospace;
@@ -3022,7 +3022,7 @@ button:focus-visible,
 .artefact-properties input:focus,
 .artefact-properties select:focus,
 .artefact-properties textarea:focus {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
   outline: none;
 }
 
@@ -3033,7 +3033,7 @@ button:focus-visible,
 
 /* A refusal, not a value: it is set apart from the fields it is about. */
 .artefact-alert {
-  color: #ffb4a2;
+  color: var(--infoschematic-chrome-paint-negative);
   font-size: 11px;
   line-height: 1.4;
   margin: 0;
@@ -3078,10 +3078,10 @@ button:focus-visible,
 }
 
 .source-panel button {
-  background: #142a3f;
-  border: 1px solid #ffffff1e;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 5px;
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   font: 600 10px "DM Mono", monospace;
   padding: 6px 9px;
@@ -3098,10 +3098,10 @@ button:focus-visible,
 }
 
 .source-panel-editor textarea {
-  background: #081523;
-  border: 1px solid #ffffff24;
+  background: var(--infoschematic-chrome-paint-surface-sunken);
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 6px;
-  color: #cce1f8;
+  color: var(--infoschematic-chrome-paint-text);
   font: 500 11px/1.55 "DM Mono", monospace;
   min-height: 180px;
   padding: 10px;
@@ -3111,16 +3111,16 @@ button:focus-visible,
 }
 
 .source-panel-editor textarea:focus {
-  border-color: #79c9ff;
-  outline: 2px solid #79c9ff2e;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  outline: 2px solid var(--infoschematic-chrome-paint-accent-soft);
 }
 
 .source-panel-editor textarea[aria-invalid="true"] {
-  border-color: #ff8f78;
+  border-color: var(--infoschematic-chrome-paint-negative-border);
 }
 
 .source-panel-errors {
-  color: #ffb4a2;
+  color: var(--infoschematic-chrome-paint-negative);
   font-size: 11px;
   line-height: 1.4;
   max-height: 130px;
@@ -3143,7 +3143,7 @@ button:focus-visible,
 }
 
 .source-panel-status {
-  color: #8fa9c4;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 10px;
   min-height: 14px;
 }

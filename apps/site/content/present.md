@@ -46,6 +46,10 @@ Under `prefers-reduced-motion`, a travelling pulse becomes finite in-place empha
 
 Where a document declares named [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic), Present passes host occurrences straight through to the Canvas: `dynamics={[{ dynamicId: 'playback-stalled', occurrenceKey: event.id }]}` signals or emphasises whatever that Dynamic names, without the host knowing the diagram. Scene signalling is untouched by it, a new occurrence key replays, dropping the occurrence cancels, and the live region says the Dynamic's own label whether the treatment moves or not.
 
+## Light and dark
+
+A presentation takes the colour scheme of the page it is on, and carries no switch of its own. Changing scheme partway through is a change everyone in the room sees, and the person who wants it is rarely the person at the controls — so pin the scheme before you start, in the Studio you present from or in the page you embed into.
+
 ## Where next
 
 Present is one of three mount choices. The [React integration guide](/docs/react-integration/) covers choosing between Canvas, Present, and Studio and supplying host renderers. To understand Scenes and Sequences before authoring them, see [Components](/docs/components/) and then continue to [authoring](/docs/authoring/).

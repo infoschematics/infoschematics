@@ -179,9 +179,19 @@ describe('renderInfoschematicSvg', () => {
   })
 
   it('renders a title-only Infoschematic as stable standalone SVG', () => {
+    /* The palette block is spelled out from the manifest rather than pasted, because what this case is for is the
+       shape around it: one `<style>`, then the title, then the drawing, in that order and no other. */
+    const palette = [
+      '  <style>',
+      '    [data-infoschematic-paint="light"] {',
+      ...paintDeclarations('light').map(([name, value]) => `      ${name}: ${value};`),
+      '    }',
+      '  </style>'
+    ]
     expect(renderInfoschematicSvg(blank('A & <B> "quoted"'))).toBe(
       [
-        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-infoschematic-paint="light" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
+        ...palette,
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
         `  <rect class="infoschematic-backdrop" fill="${paintFor('light').backdrop}" height="80" width="120" x="0" y="0" />`,
         '</svg>'
@@ -544,6 +554,36 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toContain(
       `fill="${paintFor('blueprint').backdrop}"`
     )
+    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toContain(
+      'data-infoschematic-paint="blueprint"'
+    )
+  })
+
+  /*
+   * And the colours it wrote survive being inlined into a page that has colours of its own.
+   *
+   * Written as attributes they do not: a presentation attribute loses to every CSS declaration, so the Canvas
+   * stylesheet's `fill: var(--infoschematic-canvas-paint-backdrop)` repainted each of these in the host page's
+   * scheme, and the guide's own gallery showed a light drawing, a dark drawing, and a deferring drawing as three
+   * identical pictures. The rendering therefore declares the palette it settled on, on itself, so that rule
+   * resolves to the drawing's colours; the marker keeps a light and a dark drawing on one page out of each other's
+   * block. This reads the bytes, because there is no browser here — the picture is what the gallery is for.
+   */
+  it("declares the palette it resolved, so a host stylesheet paints it in its own scheme rather than the page's", () => {
+    const document = blank('Scheme lock')
+
+    for (const scheme of ['light', 'dark'] as const) {
+      const drawn = renderInfoschematicSvg(document, { scheme })
+      expect(drawn, scheme).toContain(`data-infoschematic-paint="${scheme}"`)
+      for (const [name, value] of paintDeclarations(scheme)) expect(drawn, name).toContain(`${name}: ${value};`)
+      // Scoped to the marker, never to `:root` — inlined, `:root` is the host's `<html>`.
+      expect(drawn, scheme).toContain(`[data-infoschematic-paint="${scheme}"] {`)
+      expect(drawn, scheme).not.toContain(':root')
+      // One palette, and no rule that would let anything re-resolve it.
+      expect(drawn, scheme).not.toContain('@media')
+      const other = scheme === 'light' ? 'dark' : 'light'
+      expect(drawn, scheme).not.toContain(`[data-infoschematic-paint="${other}"]`)
+    }
   })
 
   it('carries both palettes when it is asked to defer the scheme, and pins an authored blueprint anyway', () => {

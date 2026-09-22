@@ -4,12 +4,12 @@ area: TOOL
 title: Chrome in both schemes
 theme: tool
 horizon: now
-status: draft
+status: awaiting-review
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-117]
-baseline_ref: null
+blocked_by: []
+baseline_ref: 9f0503bb1229a82fee2bfcf349d1c75b827548f6
 created_at: 2026-09-21T23:20:00Z
-updated_at: 2026-09-21T23:20:00Z
+updated_at: 2026-09-22T06:40:00Z
 ---
 
 # Chrome in both schemes
@@ -48,15 +48,15 @@ The dependency gates are live constraints rather than background noise: `self:bo
 
 ## Steps
 
-- [ ] Name the chrome paint roles once, in the same token manifest TOOL-117 establishes, and emit them in both schemes — a second palette invented inside a stylesheet is exactly what left the chrome un-themeable the first time.
-- [ ] Replace the literals in `packages/view-studio/src/styles.css` with those roles, surface by surface, until the file's raw colour count is zero.
-- [ ] Do the same for `packages/view-present/src/styles.css` and the chrome parts of `packages/view-canvas/src/styles.css`.
-- [ ] Decide whether the website consumes the published token stylesheet or keeps its own role layer, then recolour `apps/site/src/styles.css` the same way.
-- [ ] Add the scheme switch to Studio's title bar as an icon button in the existing tool bank, reporting state through `aria-pressed` and carrying an accessible name that says which scheme it moves to.
-- [ ] Add the switch to the website header, resolving the icon question without pulling Studio's icon dependency into the site.
-- [ ] Add it to Present's controls, or decide deliberately that a presenter pins the scheme before presenting and record which.
-- [ ] Resolve and remember a scheme in this order: an explicit choice, then a stored preference, then `prefers-color-scheme`; resolve it before first paint in the site document, and keep following the operating system while no explicit choice is stored.
-- [ ] Hold the result with a check that fails when a stylesheet in these packages gains a raw colour literal, so the layer cannot quietly decay back.
+- [x] Name the chrome paint roles once, in the same token manifest TOOL-117 establishes, and emit them in both schemes — a second palette invented inside a stylesheet is exactly what left the chrome un-themeable the first time.
+- [x] Replace the literals in `packages/view-studio/src/styles.css` with those roles, surface by surface, until the file's raw colour count is zero.
+- [x] Do the same for `packages/view-present/src/styles.css` and the chrome parts of `packages/view-canvas/src/styles.css`.
+- [x] Decide whether the website consumes the published token stylesheet or keeps its own role layer, then recolour `apps/site/src/styles.css` the same way.
+- [x] Add the scheme switch to Studio's title bar as an icon button in the existing tool bank, reporting state through `aria-pressed` and carrying an accessible name that says which scheme it moves to.
+- [x] Add the switch to the website header, resolving the icon question without pulling Studio's icon dependency into the site.
+- [x] Add it to Present's controls, or decide deliberately that a presenter pins the scheme before presenting and record which.
+- [x] Resolve and remember a scheme in this order: an explicit choice, then a stored preference, then `prefers-color-scheme`; resolve it before first paint in the site document, and keep following the operating system while no explicit choice is stored.
+- [x] Hold the result with a check that fails when a stylesheet in these packages gains a raw colour literal, so the layer cannot quietly decay back.
 
 ## Files touched
 
@@ -98,7 +98,68 @@ None expected. If the recolour exposes chrome that cannot be expressed as a role
 
 ## Review
 
-The packet carries the literal counts before and after per file, the browser evidence for each resolved scheme, the switch's accessibility assertions, and screenshots of all four surfaces in both schemes. The claim being reviewed is that the light scheme is genuinely readable rather than merely light, which only looking can settle.
+### Delivered
+
+Studio, Present, the website and the chrome parts of Canvas painted from a chrome role set in two schemes, with a scheme switch in Studio's title bar and in the site header, a pre-paint resolution step in the site document, and a check that holds the literal floor at zero.
+
+Baseline `9f0503bb1229a82fee2bfcf349d1c75b827548f6`. The reasoning extends [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md) rather than opening a second record: the chrome answers the same reader preference from its own role set, and the decision now says so.
+
+Four departures from the plan:
+
+- **Present carries no switch.** The Step left the choice open; it is resolved as a deliberate absence and written into `docs/specs/presentation.md` as PRESENT-013. A presentation is the presenter's, and the scheme is the reader's viewing preference rather than a presentation control — a control that changes what an Audience sees mid-presentation is a different promise from one that changes what a reader sees. Present resolves in whichever scheme the page around it is in, and offers nothing to change it.
+- **Twenty-two named-colour literals beyond the record's scope.** The Boundary says colour, not redesign, and these were both. `color: white` sat in Studio's chrome twenty-two times, invisible to a `#`-shaped pattern, and every one was a bug rather than a survivor: white type on the light scheme's pale selected wash is unreadable, so the scheme nobody could select was also the scheme that was wrong. They are fixed, and the checker's pattern now names the colour words so they cannot return.
+- **An SSR defect, found by the gate rather than by a case.** `preferredColourScheme` called `window.matchMedia` behind a `typeof window` guard, which is true during the site's static-markup render and where `matchMedia` does not exist. The guard is now on the function, and `colour-scheme.test.ts` is the regression witness.
+- **A repainting defect in the still renderer, found by looking.** Recorded under Outstanding concerns below, because it is TOOL-117's contract rather than this record's chrome — but it was this record's guide page that made it visible, and it is fixed here rather than left to read as delivered.
+
+### Summary of changes
+
+Palette and generator — `packages/view-model/src/tokens.ts` adds `visualTokens.chrome.paint.{dark,light}` over 36 chrome roles, alongside the 36 canvas paint roles TOOL-117 established, and exports `chromeDeclarations`. `scripts/generate-visual-tokens.ts` emits them under the same carriers as the drawing's palettes — `:root`, `prefers-color-scheme: dark`, and the `data-infoschematic-scheme` host attribute — and reports `36 chrome roles in 2` schemes. `packages/view-model/src/tokens.generated.css` gains 180 lines.
+
+Stylesheets — the four files go from 542 raw colour literals to none: `apps/site/src/styles.css` 156, `packages/view-studio/src/styles.css` 314, `packages/view-present/src/styles.css` 31, `packages/view-canvas/src/styles.css` 41. Canvas's chrome rules take chrome roles where they frame a drawing and canvas roles where they paint one; the diagram container settles toward `var(--infoschematic-chrome-paint-page)` rather than toward black, which in the light scheme is the difference between a frame and a mid-grey slab.
+
+The switch — `packages/view-canvas/src/colour-scheme.ts` is new and owns the whole resolution: `preferredColourScheme`, `storedColourScheme`, `resolveColourScheme`, `applyColourScheme`, `useColourScheme`, the `data-infoschematic-scheme` attribute and the `infoschematics.colour-scheme` storage key. `ColourSchemeButton.tsx` is the shared control, carrying an inline sun/crescent mark so the site gets an icon without `lucide-react`, an accessible name saying which scheme it moves _to_, and `aria-pressed`. Studio mounts it in the existing tool bank in `TitleBar.tsx`; the site mounts it in `SiteNav.tsx`; `apps/site/index.html` resolves and applies the scheme before the module script runs, so no reader sees a flash of the wrong one.
+
+Still rendering — `packages/render-svg/src/index.ts` now has every rendering declare the palette it settled on, scoped to `data-infoschematic-paint`, not only the `adaptive` one.
+
+Documentation — `ADR-INFOSCHEMATICS-041` gains the chrome clause and the two sentences that separate the promises ("a drawing we embed is not" the same as a surface we host; "there is no blueprint chrome"). `docs/specs/design-session.md` gains DESIGN-022 and `docs/specs/presentation.md` gains PRESENT-013. `apps/site/content/studio.md` and `present.md` each gain a "Light and dark" section, and the Canvas guide page gains a strip of fifteen chrome swatches painted from the roles themselves.
+
+Checks — `scripts/stylesheet-literals.test.ts` is new: it parses declarations by delimiter rather than by line, exempts `mask-image` by property, blanks comments, and asserts an empty list per file. It carries two coverage assertions of its own — a per-file and a union floor on role references, and a positive case over an inline fixture, because a scanner that had stopped recognising colours would return the same empty list the four real cases want. `ColourScheme.browser.test.tsx`, `App.schemes.browser.test.tsx`, `SiteNav.browser.test.tsx` and `colour-scheme.test.ts` are new; `Present.test.tsx`, `App.treatments.browser.test.tsx`, `viewport-frame.test.ts`, `ProductionControls.test.tsx` and `render-svg/index.test.ts` are extended.
+
+### Verification
+
+`bun run self:check` — green, 48/48 tasks.
+
+The literal floor measured rather than asserted from memory: 542 literals across the four stylesheets at the baseline, 158 of them distinct, and zero now. The checker's own coverage assertions hold at 85 distinct role references across the union.
+
+Both schemes read out of the browser rather than out of a stylesheet: the browser suites emulate `prefers-color-scheme` through a runner command and compare what the page resolved against the manifest, or — inside `apps/site`, where `site-does-not-own-product-model` forbids importing the model even in a test — against a probe element the browser computed.
+
+Looked at, per `AGENTS.md`, from a real browser in both schemes, written to `reports/schemes/`: the website homepage, the Canvas guide page with its scheme gallery and chrome swatch strip, Studio in Design, and Present. The light scheme is readable rather than merely light; the authored blueprint drawing on the homepage stays blueprint under both, which is the ADR's claim rather than a defect; and the swatch strip moves with the switch.
+
+### Outstanding concerns
+
+**A resolved still rendering was repainted by the page it was inlined into.** The guide's own gallery is what showed it: a light drawing, a dark drawing and a deferring drawing rendered as three identical pictures. A presentation attribute loses to every CSS declaration, so `fill: var(--infoschematic-canvas-paint-backdrop)` in the Canvas stylesheet overrode the colours `--scheme dark` had baked in. Fixed by having every rendering declare the palette it resolved on its own root, scoped by a marker so a light and a dark drawing on one page do not reach each other. This is TOOL-117's contract, not this record's chrome, and it is flagged for that record's acceptance as much as this one's.
+
+**The still renderer and Canvas disagree about the identity chip, and always have.** The renderer paints it from `annotationFill` — a contrast chip, dark on light paper — while `.infoschematic-card-identity rect` paints it from the backdrop at 88% alpha, a paper chip. Both predate TOOL-117; putting a still drawing beside a live one on the guide page is what made the disagreement visible. Out of scope here and captured as its own record rather than widened into this one.
+
+**A scheme switch during a presentation is still reachable through Studio's header.** Present offers none of its own, as PRESENT-013 says, but Present inside Studio inherits Studio's. That is correct — the presenter is the one holding Studio — and is noted because the two records read as contradictory without it.
+
+### Post-change review
+
+The Goal is met: Studio, Present and the website resolve in both schemes; a reader switches from a header control on the two surfaces that have a header; the choice survives a reload and defers to the operating system while none is stored; nothing flashes; and an embedded Diagram still takes its scheme from its host.
+
+Scope held to colour. The regression risk is concentrated in the stylesheet rewrite, where a role picked wrong looks perfectly correct in whichever scheme it was picked in — which is why the evidence is a browser reading the resolved value against the manifest, and four surfaces looked at, rather than a green suite. The `color: white` cluster is the proof that this failure mode is real and that reading the stylesheet would not have caught it.
+
+Ready for acceptance on that evidence, with the identity-chip parity gap accepted as pre-existing and separately captured.
+
+### Mini recap
+
+Delivered: 36 chrome roles in two schemes, 542 literals removed from four stylesheets, a shared scheme switch on the two surfaces that own a header, a pre-paint step so nothing flashes, and a check that fails when a literal returns.
+
+Verified: a green `self:check`, a measured before-and-after literal count, browser cases that ask the page what it resolved, and all four surfaces captured from a real browser in both schemes into `reports/schemes/`.
+
+Concerns: a resolved rendering was being repainted by its host page and is now fixed — TOOL-117's contract, worth its reviewer's attention; the identity chip's renderer/stylesheet disagreement is pre-existing and goes to its own record.
+
+Learning routes, proposed and not taken: that a presentation attribute loses to any CSS declaration, so a "resolved once" rendering has to declare what it resolved, belongs with `AGENTS.md`'s existing passage about looking at output. The identity-chip gap belongs in a Triage record. Neither is promoted here.
 
 ## Done
 

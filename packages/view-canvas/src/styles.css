@@ -3,7 +3,7 @@
 
 .infoschematic {
   aspect-ratio: 3 / 2;
-  background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, #000);
+  background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, var(--infoschematic-chrome-paint-page));
   display: grid;
   margin-inline: auto;
   max-height: 100%;
@@ -32,8 +32,8 @@
 }
 
 .infoschematic-viewport-controls {
-  background: #071624e6;
-  border: 1px solid #ffffff2b;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 7px;
   display: flex;
   gap: 3px;
@@ -46,10 +46,10 @@
 
 .infoschematic-viewport-controls button {
   align-items: center;
-  background: #10263b;
+  background: var(--infoschematic-chrome-paint-surface-raised);
   border: 1px solid transparent;
   border-radius: 4px;
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   display: inline-flex;
   font: 600 14px/1 var(--infoschematic-canvas-typography-code-family);
@@ -61,8 +61,8 @@
 
 .infoschematic-viewport-controls button:hover:not(:disabled),
 .infoschematic-viewport-controls button:focus-visible {
-  border-color: #79c9ff;
-  color: #fff;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
   outline: none;
 }
 
@@ -73,10 +73,10 @@
 
 .infoschematic-minimap {
   appearance: none;
-  background: #071624e6;
-  border: 1px solid #79c9ff88;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-accent-border);
   border-radius: 8px;
-  box-shadow: 0 8px 24px #02091266;
+  box-shadow: 0 8px 24px var(--infoschematic-chrome-paint-shadow);
   cursor: crosshair;
   display: block;
   line-height: 0;
@@ -119,7 +119,7 @@
 }
 
 .infoschematic-minimap:focus-visible {
-  outline: 2px solid #79c9ff;
+  outline: 2px solid var(--infoschematic-chrome-paint-accent);
   outline-offset: 3px;
 }
 
@@ -128,39 +128,39 @@
 }
 
 .infoschematic-minimap-backdrop {
-  fill: #081725;
+  fill: var(--infoschematic-canvas-paint-backdrop);
 }
 
 .infoschematic-minimap-region {
-  fill: #19314999;
-  stroke: #6689a8;
+  fill: var(--infoschematic-canvas-paint-region-fill);
+  stroke: var(--infoschematic-canvas-paint-region-stroke);
   vector-effect: non-scaling-stroke;
 }
 
 .infoschematic-minimap-flow {
   fill: none;
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-chrome-paint-accent);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }
 
 .infoschematic-minimap-placeable {
-  fill: #21415d;
-  stroke: #a7c9e3;
+  fill: var(--infoschematic-canvas-paint-surface);
+  stroke: var(--infoschematic-canvas-paint-stroke);
   vector-effect: non-scaling-stroke;
 }
 
 .infoschematic-minimap-graphic {
-  fill: #6f4aa055;
-  stroke: #b990e8;
+  fill: var(--infoschematic-canvas-paint-graphic-fill);
+  stroke: var(--infoschematic-canvas-paint-graphic-stroke);
   stroke-dasharray: 4 3;
   vector-effect: non-scaling-stroke;
 }
 
 .infoschematic-minimap-viewport {
-  fill: #79c9ff22;
+  fill: var(--infoschematic-chrome-paint-accent-soft);
   pointer-events: none;
-  stroke: #e4f5ff;
+  stroke: var(--infoschematic-chrome-paint-text-strong);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }
@@ -420,7 +420,7 @@
 }
 
 .infoschematic-route {
-  filter: drop-shadow(0 0 4px #000000cc);
+  filter: drop-shadow(0 0 4px var(--infoschematic-chrome-paint-shadow-strong));
   opacity: var(--infoschematic-canvas-flows-route-opacity);
   stroke-width: var(--infoschematic-canvas-flows-route-width);
 }
@@ -588,12 +588,12 @@
   > g.highlighted
   .infoschematic-pipe {
   opacity: 1;
-  stroke: #06101ce6;
+  stroke: var(--infoschematic-canvas-paint-flow-pipe);
   stroke-width: 11px;
 }
 
 .infoschematic-svg.highlighting .infoschematic-service.highlighted > rect {
-  filter: drop-shadow(0 0 10px #79c9ff5c);
+  filter: drop-shadow(0 0 10px var(--infoschematic-chrome-paint-accent-border));
   stroke-width: 3px;
 }
 
@@ -605,7 +605,7 @@
 .infoschematic-svg.highlighting
   .infoschematic-fabric.highlighted
   .fabric-shell {
-  filter: drop-shadow(0 0 12px #79c9ff4a);
+  filter: drop-shadow(0 0 12px var(--infoschematic-chrome-paint-accent-border));
 }
 
 /* One treatment for "this one", whichever kind of thing it is and whichever end
@@ -712,7 +712,7 @@
 }
 
 .infoschematic-service > rect {
-  filter: drop-shadow(0 8px 18px #00000038);
+  filter: drop-shadow(0 8px 18px var(--infoschematic-chrome-paint-shadow));
   stroke-width: 2px;
 }
 
@@ -852,7 +852,7 @@
 /* Shown only while a handle is being dragged, so the Infoschematic never fills
    with outlines that mean nothing. */
 .infoschematic-svg.editing .audit-flow.editable rect {
-  stroke: #79c9ff88;
+  stroke: var(--infoschematic-chrome-paint-accent-border);
   stroke-width: 1px;
 }
 .audit-component-code,
@@ -861,7 +861,7 @@
 }
 
 .audit-port circle {
-  fill: #0b1d33;
+  fill: var(--infoschematic-chrome-paint-surface-sunken);
   stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-width: 1.5;
 }
@@ -886,7 +886,7 @@
 }
 
 .audit-port.in-use circle {
-  fill: #57d9a3;
+  fill: var(--infoschematic-chrome-paint-positive);
   stroke: var(--infoschematic-canvas-paint-annotation-halo);
   stroke-width: 1.5;
 }
@@ -952,7 +952,7 @@
 .canvas-edge {
   fill: none;
   pointer-events: none;
-  stroke: #79c9ffcc;
+  stroke: var(--infoschematic-chrome-paint-accent-border);
   stroke-width: 1.5px;
 }
 
@@ -1030,8 +1030,8 @@
 .route-free-end {
   cursor: grab;
   pointer-events: auto;
-  fill: #0b1d33;
-  stroke: #f0b357;
+  fill: var(--infoschematic-chrome-paint-surface-sunken);
+  stroke: var(--infoschematic-chrome-paint-caution);
   stroke-width: 2;
 }
 
@@ -1043,7 +1043,7 @@
    fifty-eight lines do not turn into fifty-eight lines of dots. */
 .route-waypoint {
   cursor: grab;
-  fill: #0b1d33;
+  fill: var(--infoschematic-chrome-paint-surface-sunken);
   pointer-events: auto;
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 2px;
@@ -1061,7 +1061,7 @@
    itself so a horizontal or vertical run is easy to catch precisely. */
 .route-segment-grip {
   cursor: move;
-  fill: #79c9ff33;
+  fill: var(--infoschematic-chrome-paint-accent-soft);
   pointer-events: auto;
   stroke: var(--infoschematic-canvas-selection-pointed);
   stroke-width: 1px;
@@ -1077,13 +1077,13 @@
 }
 
 .waypoint-add circle {
-  fill: #0b1d33e6;
-  stroke: #57d9a3;
+  fill: var(--infoschematic-chrome-paint-panel-floating);
+  stroke: var(--infoschematic-chrome-paint-positive);
   stroke-width: 1.5;
 }
 
 .waypoint-add path {
-  stroke: #57d9a3;
+  stroke: var(--infoschematic-chrome-paint-positive);
   stroke-width: 1.5;
 }
 
@@ -1095,14 +1095,14 @@
 }
 
 .waypoint-delete circle {
-  fill: #2a0e14;
-  stroke: #ff647c;
+  fill: var(--infoschematic-chrome-paint-negative-surface);
+  stroke: var(--infoschematic-chrome-paint-negative);
   stroke-width: 1.5px;
 }
 
 .waypoint-delete path {
   fill: none;
-  stroke: #ff647c;
+  stroke: var(--infoschematic-chrome-paint-negative);
   stroke-linecap: round;
   stroke-width: 1.5px;
 }
@@ -1135,7 +1135,7 @@
 .infoschematic-svg.focusing
   .infoschematic-service.lit
   .infoschematic-service-label {
-  fill: white;
+  fill: var(--infoschematic-canvas-paint-text-strong);
 }
 
 .infoschematic-svg.focusing [class*="flow-family-"].lit .infoschematic-route {
@@ -1241,4 +1241,20 @@
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-dasharray: 5 4;
   stroke-width: 2px;
+}
+
+/*
+ * The reader's colour-scheme switch, which every host mounts and each host places.
+ *
+ * Only what the control itself needs is here — the mark's size and the fact that a pressed switch is not a selected
+ * tool. Where it sits, and what bank it sits in, belongs to whichever chrome mounted it.
+ */
+.colour-scheme-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.colour-scheme-button svg {
+  display: block;
 }

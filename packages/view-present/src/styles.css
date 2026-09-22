@@ -1,11 +1,11 @@
 @import "@infoschematics/view-canvas/styles.css";
 
 .infoschematic-present {
-  --isp-accent: #79c9ff;
-  --isp-border: #ffffff24;
-  --isp-panel: #0b1d2d;
-  background: #07111e;
-  color: #f5f8ff;
+  --isp-accent: var(--infoschematic-chrome-paint-accent);
+  --isp-border: var(--infoschematic-chrome-paint-border);
+  --isp-panel: var(--infoschematic-chrome-paint-surface);
+  background: var(--infoschematic-chrome-paint-page);
+  color: var(--infoschematic-chrome-paint-text-strong);
   display: grid;
   font-family: Manrope, Arial, sans-serif;
   gap: 10px;
@@ -42,7 +42,7 @@
 }
 
 .isp-title-bar p {
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   margin: 4px 0 0;
 }
@@ -57,10 +57,10 @@
 .isp-callout-actions button,
 .isp-controls button,
 .isp-tabs button {
-  background: #10263b;
+  background: var(--infoschematic-chrome-paint-surface-raised);
   border: 1px solid var(--isp-border);
   border-radius: 6px;
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   cursor: pointer;
   padding: 5px 8px;
 }
@@ -70,14 +70,14 @@
 .isp-controls button:hover:not(:disabled),
 .isp-tabs button:hover {
   border-color: var(--isp-accent);
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .isp-title-actions button[aria-pressed="true"],
 .isp-controls button[aria-pressed="true"] {
-  background: #173653;
+  background: var(--infoschematic-chrome-paint-surface-selected);
   border-color: var(--isp-accent);
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .isp-room {
@@ -109,7 +109,7 @@
   background: var(--isp-panel);
   border: 1px solid var(--isp-border);
   border-radius: 10px;
-  box-shadow: 0 8px 24px #00000024;
+  box-shadow: 0 8px 24px var(--infoschematic-chrome-paint-shadow);
 }
 
 .isp-controls {
@@ -126,7 +126,7 @@
 }
 
 .isp-control-bank > span:first-child {
-  color: #d7e6f8;
+  color: var(--infoschematic-chrome-paint-text);
   flex: 0 0 62px;
   font:
     500 9px "DM Mono",
@@ -171,7 +171,7 @@
 
 .isp-tabs button[aria-selected="true"] {
   border-bottom-color: var(--isp-accent);
-  color: white;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .isp-details-body {
@@ -179,14 +179,14 @@
 }
 
 .isp-details-body > p {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 12px;
   line-height: 1.5;
   margin: 0 0 14px;
 }
 
 .isp-details-body .isp-muted {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 .isp-register {
@@ -216,12 +216,12 @@
 }
 
 .isp-register strong {
-  color: #dff0ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 11px;
 }
 
 .isp-register span {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 10px;
 }
 
@@ -230,7 +230,7 @@
 }
 
 .isp-specification-group h2 {
-  color: #d7e6f8;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     500 10px "DM Mono",
     monospace;
@@ -253,12 +253,12 @@
 
 .isp-specification-group a,
 .isp-specification-group li > span {
-  color: #cde8fb;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 11px;
 }
 
 .isp-specification-group small {
-  color: #7f9bb3;
+  color: var(--infoschematic-chrome-paint-text-muted);
   line-height: 1.35;
 }
 
@@ -270,11 +270,11 @@
 }
 
 .isp-callout {
-  background: #071624f2;
-  border: 1px solid #79c9ff66;
+  background: var(--infoschematic-chrome-paint-panel-floating);
+  border: 1px solid var(--infoschematic-chrome-paint-accent-border);
   border-radius: 10px;
-  box-shadow: 0 10px 34px #00000066;
-  color: #f2f8ff;
+  box-shadow: 0 10px 34px var(--infoschematic-chrome-paint-shadow);
+  color: var(--infoschematic-chrome-paint-text-strong);
   max-width: min(400px, 74%);
   padding: 13px 17px;
   position: absolute;
@@ -307,12 +307,12 @@
 }
 
 .isp-callout-heading em {
-  color: #8fa8c1;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-style: normal;
 }
 
 .isp-callout-title {
-  color: #cfe6ff;
+  color: var(--infoschematic-chrome-paint-text);
   font-size: 13px;
   font-weight: 600;
   margin: 0 0 5px;
@@ -326,7 +326,7 @@
 }
 
 .isp-callout-takeaways {
-  color: #a9c4dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   display: grid;
   font-size: 11px;
   gap: 4px;
@@ -347,7 +347,7 @@
 }
 
 .isp-callout-sides > div + div {
-  border-left: 1px solid #ffffff1a;
+  border-left: 1px solid var(--infoschematic-chrome-paint-border);
   padding-left: 16px;
 }
 
@@ -365,7 +365,7 @@
 }
 
 .isp-callout-aside p {
-  color: #a9c4dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-size: 11px;
   line-height: 1.45;
   margin: 0;
@@ -394,7 +394,7 @@
 
   .isp-callout-sides > div + div {
     border-left: 0;
-    border-top: 1px solid #ffffff1a;
+    border-top: 1px solid var(--infoschematic-chrome-paint-border);
     padding-left: 0;
     padding-top: 12px;
   }

@@ -1,3 +1,4 @@
+import { ColourSchemeButton } from '@infoschematics/view-canvas'
 import { docsIndexPath, playgroundPath } from './routes.ts'
 
 const repositoryUrl = 'https://github.com/infoschematics/infoschematics'
@@ -35,6 +36,8 @@ export function SiteNav({ section }: { section?: SiteSection }) {
           GitHub
         </a>
       </nav>
+      {/* The product's own switch, so the site does not need an icon set to offer what the token layer already holds. */}
+      <ColourSchemeButton className="site-nav__scheme" />
     </header>
   )
 }

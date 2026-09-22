@@ -1,4 +1,4 @@
-import { useInfoschematic } from '@infoschematics/view-canvas'
+import { ColourSchemeButton, useInfoschematic } from '@infoschematics/view-canvas'
 import type { ProductionMode } from '@infoschematics/view-present'
 import {
   Clapperboard,
@@ -119,6 +119,13 @@ export function TitleBar({
               </button>
             )
           })}
+        </fieldset>
+
+        <span aria-hidden="true" className="tool-divider" />
+
+        {/* The reader's own preference, not the document's: it sits with the window controls rather than the tools. */}
+        <fieldset aria-label="Appearance" className="tool-bank">
+          <ColourSchemeButton />
         </fieldset>
 
         <span aria-hidden="true" className="tool-divider" />

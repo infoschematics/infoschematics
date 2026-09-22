@@ -41,6 +41,12 @@ A draft can survive an accidental reload, but the session boundary holds: reload
 
 An artefact marked for removal remains visible, selectable and visibly pending until you lift the mark or apply the set.
 
+## Light and dark
+
+The switch in the title bar changes the colour scheme — the whole surface, not only the drawing. Your choice is remembered, so Studio opens the way you left it, and until you make one it follows your operating system: a machine that goes dark at dusk takes Studio with it.
+
+A colour scheme is your context, not part of the document. Nothing about the scheme is written into what you author, and a definition you make in dark reads the same way to someone who opens it in light. The exception is a blueprint surface, which is a treatment you chose deliberately and stays a blueprint in either scheme.
+
 ## Where next
 
 Studio mounts like any other view — see the [React integration guide](/docs/react-integration/). The [authoring guide](/docs/authoring/) covers the same definition written directly, which remains the right choice for a definition that lives in a package.

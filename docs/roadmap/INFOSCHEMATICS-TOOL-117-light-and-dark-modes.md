@@ -5,7 +5,7 @@ title: Light and dark modes
 theme: tool
 horizon: now
 status: awaiting-review
-blocks: [INFOSCHEMATICS-TOOL-118]
+blocks: []
 blocked_by: []
 baseline_ref: df789b80abddc782f04a2e14ed7497cb6abe0d16
 created_at: 2026-09-21T20:15:00Z

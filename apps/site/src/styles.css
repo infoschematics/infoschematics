@@ -1,6 +1,14 @@
+/*
+ * The site takes the product's own role layer rather than keeping a second one: one manifest answers one preference,
+ * and a second palette invented in a stylesheet is what left this chrome un-switchable while the drawing followed
+ * its reader. It arrives through the Canvas stylesheet the site already loads, which is where the generated token
+ * declarations live, so the site declares no dependency it did not already have.
+ */
+@import "@infoschematics/view-canvas/styles.css";
+
 :root {
-  color: #f5f8ff;
-  background: #07111e;
+  color: var(--infoschematic-chrome-paint-text-strong);
+  background: var(--infoschematic-chrome-paint-page);
   font-family: Manrope, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -12,7 +20,7 @@
 html {
   min-width: 320px;
   min-height: 100%;
-  background: #07111e;
+  background: var(--infoschematic-chrome-paint-page);
 }
 
 body {
@@ -21,8 +29,8 @@ body {
   margin: 0;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 8% 0%, #12334d 0, transparent 30rem),
-    radial-gradient(circle at 88% 46%, #17144e 0, transparent 34rem), #07111e;
+    radial-gradient(circle at 8% 0%, var(--infoschematic-chrome-paint-surface-selected) 0, transparent 30rem),
+    radial-gradient(circle at 88% 46%, var(--infoschematic-chrome-paint-informational-soft) 0, transparent 34rem), var(--infoschematic-chrome-paint-page);
 }
 
 button,
@@ -32,7 +40,7 @@ a {
 
 button:focus-visible,
 a:focus-visible {
-  outline: 2px solid #79c9ff;
+  outline: 2px solid var(--infoschematic-chrome-paint-accent);
   outline-offset: 4px;
 }
 
@@ -64,7 +72,7 @@ a:focus-visible {
   justify-content: space-between;
   gap: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #ffffff1c;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border);
 }
 
 .site-nav nav {
@@ -74,7 +82,7 @@ a:focus-visible {
 }
 
 .site-nav nav a {
-  color: #8fcff8;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font:
     500 11px/1.5 "DM Mono",
     monospace;
@@ -84,18 +92,43 @@ a:focus-visible {
 
 .site-nav nav a:hover,
 .site-nav nav a:focus-visible {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .site-nav nav a[aria-current="page"] {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
+}
+
+/* The site has no icon bank, so the switch carries its own frame rather than borrowing a tool button's. */
+.site-nav__scheme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
+  border-radius: 8px;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text-muted);
+  cursor: pointer;
+}
+
+.site-nav__scheme:hover {
+  border-color: var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text-strong);
+}
+
+.site-nav__scheme:focus-visible {
+  outline: 2px solid var(--infoschematic-chrome-paint-accent);
+  outline-offset: 2px;
 }
 
 .wordmark {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-size: 18px;
   font-weight: 750;
   letter-spacing: -0.045em;
@@ -116,30 +149,30 @@ a:focus-visible {
 }
 
 .brand-mark__rail {
-  stroke: #1e3850;
+  stroke: var(--infoschematic-chrome-paint-border-strong);
   stroke-width: 6;
 }
 
 .brand-mark__signal {
-  stroke: #79c9ff;
+  stroke: var(--infoschematic-chrome-paint-accent);
   stroke-width: 1.5;
 }
 
 .brand-mark__node {
-  fill: #10263b;
+  fill: var(--infoschematic-chrome-paint-surface-raised);
   stroke-width: 2.5;
 }
 
 .brand-mark__node--violet {
-  stroke: #9673a6;
+  stroke: var(--infoschematic-chrome-paint-informational);
 }
 
 .brand-mark__node--green {
-  stroke: #82b366;
+  stroke: var(--infoschematic-chrome-paint-positive);
 }
 
 .brand-mark__junction {
-  fill: #79c9ff;
+  fill: var(--infoschematic-chrome-paint-accent);
 }
 
 .hero {
@@ -170,7 +203,7 @@ a:focus-visible {
 
 .eyebrow {
   margin: 0;
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     600 11px/1.4 "DM Mono",
     monospace;
@@ -189,14 +222,14 @@ a:focus-visible {
 
 .hero h1 span {
   display: block;
-  color: #a7c3dc;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-weight: 500;
 }
 
 .hero__lede {
   max-width: 520px;
   margin: 0 0 10px;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: clamp(15px, 1.25vw, 18px);
   line-height: 1.75;
 }
@@ -213,10 +246,10 @@ a:focus-visible {
   gap: 9px;
   width: fit-content;
   padding: 10px 14px;
-  border: 1px solid #79c9ff66;
+  border: 1px solid var(--infoschematic-chrome-paint-accent-border);
   border-radius: 5px;
-  background: #10283d;
-  color: #d8eeff;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text);
   font:
     650 12px/1.4 "DM Mono",
     monospace;
@@ -227,9 +260,9 @@ a:focus-visible {
 
 .hero__cta:hover,
 .hero__cta:focus-visible {
-  border-color: #79c9ff;
-  background: #163451;
-  color: #ffffff;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  background: var(--infoschematic-chrome-paint-accent-surface);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 /*
@@ -295,10 +328,10 @@ a:focus-visible {
 
 .inline-svg-reference__actions button {
   padding: 7px 10px;
-  border: 1px solid #ffffff2b;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 4px;
-  background: #0d2031;
-  color: #9db4c9;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
   font:
     500 10px/1.4 "DM Mono",
@@ -308,13 +341,13 @@ a:focus-visible {
 
 .inline-svg-reference__actions button:hover,
 .inline-svg-reference__actions button:focus-visible {
-  border-color: #79c9ff;
-  color: #f5f8ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .inline-svg-reference__status {
   margin: 0;
-  color: #4d687f;
+  color: var(--infoschematic-chrome-paint-text-faint);
   font:
     500 9px/1.4 "DM Mono",
     monospace;
@@ -328,8 +361,8 @@ a:focus-visible {
   justify-content: space-between;
   gap: 24px;
   padding-top: 15px;
-  border-top: 1px solid #ffffff12;
-  color: #4d687f;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
+  color: var(--infoschematic-chrome-paint-text-faint);
   font:
     500 9px/1.4 "DM Mono",
     monospace;
@@ -363,9 +396,9 @@ a:focus-visible {
   left: 8px;
   z-index: 10;
   padding: 10px 14px;
-  color: #07111e;
+  color: var(--infoschematic-chrome-paint-text-on-accent);
   border-radius: 5px;
-  background: #79c9ff;
+  background: var(--infoschematic-chrome-paint-accent);
   transform: translateY(-160%);
 }
 
@@ -382,11 +415,11 @@ a:focus-visible {
 
 .index-list li {
   padding: 16px 0;
-  border-bottom: 1px solid #ffffff12;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
 }
 
 .index-list a {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font-size: 18px;
   font-weight: 650;
   text-decoration: none;
@@ -399,13 +432,13 @@ a:focus-visible {
 
 .index-list p {
   margin: 6px 0 0;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 .document-content {
   max-width: 960px;
   padding: 0 0 clamp(48px, 8vw, 84px);
-  color: #b8cad9;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-size: clamp(16px, 1.8vw, 18px);
   line-height: 1.75;
 }
@@ -425,7 +458,7 @@ a:focus-visible {
 .document-content h1,
 .document-content h2,
 .document-content h3 {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   letter-spacing: -0.035em;
   line-height: 1.15;
 }
@@ -455,16 +488,16 @@ a:focus-visible {
 }
 
 .document-content a {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   text-underline-offset: 3px;
 }
 
 .document-content code {
   padding: 0.12em 0.35em;
-  border: 1px solid #ffffff12;
+  border: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   border-radius: 4px;
-  background: #0d2031;
-  color: #d8eeff;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text);
   font:
     0.88em/1.6 "DM Mono",
     monospace;
@@ -474,9 +507,9 @@ a:focus-visible {
   max-width: 100%;
   padding: 20px;
   overflow-x: auto;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 9px;
-  background: #050d17;
+  background: var(--infoschematic-chrome-paint-page);
 }
 
 .document-content pre code {
@@ -487,8 +520,8 @@ a:focus-visible {
 
 .document-content blockquote {
   padding-left: 20px;
-  border-left: 3px solid #79c9ff;
-  color: #d3e1ec;
+  border-left: 3px solid var(--infoschematic-chrome-paint-accent);
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .document-content table {
@@ -501,7 +534,7 @@ a:focus-visible {
 .document-content th,
 .document-content td {
   padding: 10px 14px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   text-align: left;
 }
 
@@ -509,12 +542,12 @@ a:focus-visible {
   max-width: 960px;
   margin-top: clamp(36px, 6vw, 64px);
   padding: 24px 0 clamp(48px, 8vw, 84px);
-  border-top: 1px solid #ffffff1c;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border);
 }
 
 .guide-journey > p {
   margin: 0 0 14px;
-  color: #8fcff8;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font:
     600 11px/1.45 "DM Mono",
     monospace;
@@ -524,15 +557,15 @@ a:focus-visible {
 
 .guide-journey__accelerators {
   margin-left: 0.6em;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 .guide-journey__accelerators kbd {
   padding: 1px 5px;
-  border: 1px solid #ffffff2e;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 4px;
-  background: #0d2031;
-  color: #f5f8ff;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text-strong);
   font:
     600 11px/1.45 "DM Mono",
     monospace;
@@ -551,10 +584,10 @@ a:focus-visible {
   align-items: start;
   min-height: 132px;
   padding: 18px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 9px;
-  background: linear-gradient(145deg, #0d2031, #091725);
-  color: #79c9ff;
+  background: linear-gradient(145deg, var(--infoschematic-chrome-paint-surface-raised), var(--infoschematic-chrome-paint-page));
+  color: var(--infoschematic-chrome-paint-accent);
   text-decoration: none;
   transition:
     border-color 160ms ease,
@@ -563,7 +596,7 @@ a:focus-visible {
 
 .guide-journey__link:hover,
 .guide-journey__link:focus-visible {
-  border-color: #79c9ff80;
+  border-color: var(--infoschematic-chrome-paint-accent-border);
   transform: translateY(-2px);
 }
 
@@ -585,7 +618,7 @@ a:focus-visible {
 
 .guide-journey__link small {
   margin-bottom: 4px;
-  color: #8fcff8;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font:
     600 10px/1.4 "DM Mono",
     monospace;
@@ -594,14 +627,14 @@ a:focus-visible {
 }
 
 .guide-journey__link strong {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-size: 18px;
   line-height: 1.35;
 }
 
 .guide-journey__link em {
   margin-top: 7px;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 13px;
   font-style: normal;
   line-height: 1.5;
@@ -629,9 +662,9 @@ a:focus-visible {
 
 .specimen-card {
   padding: 14px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 9px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .specimen-card img {
@@ -642,7 +675,7 @@ a:focus-visible {
 
 .specimen-card p {
   margin: 10px 0 0;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 9px/1.4 "DM Mono",
     monospace;
@@ -658,7 +691,7 @@ a:focus-visible {
 
 .visual-guide__component {
   padding-top: 34px;
-  border-top: 1px solid #ffffff16;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border);
 }
 
 .visual-guide__component > h2 {
@@ -669,9 +702,9 @@ a:focus-visible {
 .interactive-specimen__output {
   margin: 0;
   overflow: hidden;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 12px;
-  background: #071624;
+  background: var(--infoschematic-chrome-paint-page);
 }
 
 .visual-guide__anatomy-drawing > svg,
@@ -683,8 +716,8 @@ a:focus-visible {
 
 .visual-guide__anatomy figcaption {
   padding: 12px 16px;
-  border-top: 1px solid #ffffff12;
-  color: #8fa8bc;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 13px;
 }
 
@@ -693,9 +726,9 @@ a:focus-visible {
   gap: 0;
   margin: 0;
   padding: 4px 18px;
-  border: 1px solid #ffffff16;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 10px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
   list-style: none;
 }
 
@@ -704,7 +737,7 @@ a:focus-visible {
   grid-template-columns: 28px minmax(0, 1fr);
   gap: 10px;
   padding: 12px 0;
-  border-top: 1px solid #ffffff12;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
 }
 
 .visual-guide__anatomy-key li:first-child {
@@ -712,7 +745,7 @@ a:focus-visible {
 }
 
 .visual-guide__anatomy-key li > span {
-  color: #79c9ff;
+  color: var(--infoschematic-chrome-paint-accent);
   font:
     650 10px/1.5 "DM Mono",
     monospace;
@@ -721,13 +754,13 @@ a:focus-visible {
 
 .visual-guide__anatomy-key strong {
   display: block;
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-size: 14px;
 }
 
 .visual-guide__anatomy-key p {
   margin: 3px 0 0;
-  color: #8fa8bc;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -750,14 +783,14 @@ a:focus-visible {
   min-width: 0;
   margin: 0;
   padding: 18px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 10px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .interactive-specimen__controls legend {
   padding: 0 6px;
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font:
     650 11px/1.4 "DM Mono",
     monospace;
@@ -768,7 +801,7 @@ a:focus-visible {
 .visual-guide-control {
   display: grid;
   gap: 7px;
-  color: #b8cad9;
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font-size: 13px;
 }
 
@@ -792,10 +825,10 @@ a:focus-visible {
 .interactive-specimen__controls button {
   width: 100%;
   padding: 9px 10px;
-  border: 1px solid #ffffff26;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 6px;
-  color: #e8f2fa;
-  background: #071624;
+  color: var(--infoschematic-chrome-paint-text);
+  background: var(--infoschematic-chrome-paint-page);
 }
 
 .visual-guide-control input[type="range"] {
@@ -805,7 +838,7 @@ a:focus-visible {
 
 .visual-guide-colour-value code,
 .visual-guide-number-value output {
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 11px/1.4 "DM Mono",
     monospace;
@@ -823,7 +856,7 @@ a:focus-visible {
 
 .interactive-specimen__controls button:hover,
 .interactive-specimen__controls button:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
 }
 
 .visual-guide__anatomy {
@@ -842,9 +875,9 @@ a:focus-visible {
   gap: 0;
   overflow: hidden;
   padding: 0;
-  border: 1px solid #ffffff16;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 10px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .visual-guide__anatomy-key li,
@@ -855,7 +888,7 @@ a:focus-visible {
   min-width: 0;
   padding: 14px 16px;
   border: 0;
-  border-top: 1px solid #ffffff12;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -878,9 +911,9 @@ a:focus-visible {
   display: block;
   margin: 0;
   overflow: hidden;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 12px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .interactive-specimen__header {
@@ -889,8 +922,8 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  border-bottom: 1px solid #ffffff16;
-  color: #b8cad9;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border);
+  color: var(--infoschematic-chrome-paint-text-secondary);
   font:
     650 11px/1.4 "DM Mono",
     monospace;
@@ -902,10 +935,10 @@ a:focus-visible {
 .specimen-snippet button {
   width: auto;
   padding: 6px 9px;
-  border: 1px solid #ffffff26;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 6px;
-  color: #dcebf5;
-  background: #071624;
+  color: var(--infoschematic-chrome-paint-text);
+  background: var(--infoschematic-chrome-paint-page);
   cursor: pointer;
   font:
     600 11px/1.4 "DM Mono",
@@ -916,7 +949,7 @@ a:focus-visible {
 .interactive-specimen__header button:focus-visible,
 .specimen-snippet button:hover,
 .specimen-snippet button:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
 }
 
 .interactive-specimen__output {
@@ -929,15 +962,15 @@ a:focus-visible {
   gap: 14px 18px;
   padding: 18px;
   border: 0;
-  border-top: 1px solid #ffffff16;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 0;
 }
 
 .specimen-snippet {
   overflow: hidden;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 10px;
-  background: #071624;
+  background: var(--infoschematic-chrome-paint-page);
 }
 
 .specimen-snippet__toolbar {
@@ -945,8 +978,8 @@ a:focus-visible {
   gap: 10px;
   align-items: center;
   padding: 9px 10px;
-  border-bottom: 1px solid #ffffff16;
-  background: #0d2031;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border);
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .specimen-snippet__tabs {
@@ -960,9 +993,9 @@ a:focus-visible {
 }
 
 .specimen-snippet__tabs button[aria-selected="true"] {
-  border-color: #79c9ff55;
-  color: #071624;
-  background: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent-border);
+  color: var(--infoschematic-chrome-paint-text-on-accent);
+  background: var(--infoschematic-chrome-paint-accent);
 }
 
 .specimen-snippet pre {
@@ -970,7 +1003,7 @@ a:focus-visible {
   margin: 0;
   padding: 16px;
   overflow: auto;
-  color: #c7e3f4;
+  color: var(--infoschematic-chrome-paint-text);
   font:
     12px/1.65 "DM Mono",
     monospace;
@@ -986,7 +1019,7 @@ a:focus-visible {
 
 .specimen-snippet__notice {
   margin: 0 4px 0 0;
-  color: #8fa8bc;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   text-align: right;
 }
@@ -1002,9 +1035,9 @@ a:focus-visible {
 .visual-guide__property-reference {
   overflow: hidden;
   margin-top: 24px;
-  border: 1px solid #ffffff16;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 10px;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
 }
 
 .visual-guide__property-table {
@@ -1019,13 +1052,13 @@ a:focus-visible {
 .visual-guide__property-table th,
 .visual-guide__property-table td {
   padding: 11px 16px;
-  border-bottom: 1px solid #ffffff12;
+  border-bottom: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   text-align: left;
   vertical-align: top;
 }
 
 .visual-guide__property-table thead th {
-  color: #8fa8bc;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     650 10px/1.4 "DM Mono",
     monospace;
@@ -1035,14 +1068,14 @@ a:focus-visible {
 
 .visual-guide__property-table tbody th {
   width: 34%;
-  color: #8fcff8;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font:
     500 12px/1.5 "DM Mono",
     monospace;
 }
 
 .visual-guide__property-table tbody td {
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 13px;
   line-height: 1.55;
 }
@@ -1105,7 +1138,7 @@ a:focus-visible {
 
 .docs-navigation section {
   padding-top: 16px;
-  border-top: 1px solid #ffffff12;
+  border-top: 1px solid var(--infoschematic-chrome-paint-border-subtle);
 }
 
 .docs-navigation section:first-child {
@@ -1115,7 +1148,7 @@ a:focus-visible {
 
 .docs-navigation h2 {
   margin: 0 0 6px;
-  color: #5c7a92;
+  color: var(--infoschematic-chrome-paint-text-faint);
   font:
     600 10px/1.5 "DM Mono",
     monospace;
@@ -1132,7 +1165,7 @@ a:focus-visible {
 }
 
 .docs-navigation a {
-  color: #8fcff8;
+  color: var(--infoschematic-chrome-paint-text-accent);
   font:
     500 12px/1.5 "DM Mono",
     monospace;
@@ -1142,28 +1175,28 @@ a:focus-visible {
 
 .docs-navigation a:hover,
 .docs-navigation a:focus-visible {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .docs-navigation a[aria-current="page"] {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .docs-navigation .docs-sidebar__outline {
   gap: 4px;
   margin: 7px 0 8px 10px;
   padding-left: 11px;
-  border-left: 1px solid #ffffff1c;
+  border-left: 1px solid var(--infoschematic-chrome-paint-border);
 }
 
 .docs-navigation .docs-sidebar__outline a {
-  color: #668ba6;
+  color: var(--infoschematic-chrome-paint-text-faint);
   font-size: 11px;
   line-height: 1.4;
 }
 
 .docs-navigation .docs-sidebar__outline a[aria-current="location"] {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
   font-weight: 650;
 }
 
@@ -1187,9 +1220,9 @@ a:focus-visible {
   .docs-mobile-navigation {
     display: block;
     margin: 0 0 12px;
-    border: 1px solid #ffffff1c;
+    border: 1px solid var(--infoschematic-chrome-paint-border);
     border-radius: 9px;
-    background: #0d2031;
+    background: var(--infoschematic-chrome-paint-surface-raised);
   }
 
   .docs-mobile-navigation > summary {
@@ -1198,7 +1231,7 @@ a:focus-visible {
     justify-content: space-between;
     gap: 16px;
     padding: 13px 15px;
-    color: #8fcff8;
+    color: var(--infoschematic-chrome-paint-text-accent);
     font:
       600 11px/1.45 "DM Mono",
       monospace;
@@ -1207,11 +1240,11 @@ a:focus-visible {
   }
 
   .docs-mobile-navigation > summary::marker {
-    color: #79c9ff;
+    color: var(--infoschematic-chrome-paint-accent);
   }
 
   .docs-mobile-navigation > summary strong {
-    color: #f5f8ff;
+    color: var(--infoschematic-chrome-paint-text-strong);
     font-weight: 600;
   }
 
@@ -1219,7 +1252,7 @@ a:focus-visible {
     display: grid;
     gap: 18px;
     padding: 16px;
-    border-top: 1px solid #ffffff16;
+    border-top: 1px solid var(--infoschematic-chrome-paint-border);
   }
 }
 
@@ -1247,16 +1280,16 @@ a:focus-visible {
   min-width: 0;
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 9px;
-  background: #0b1a28cc;
+  background: var(--infoschematic-chrome-paint-panel-floating);
 }
 
 .playground-preset {
   display: flex;
   gap: 8px;
   align-items: center;
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font:
     600 11px/1 "DM Mono",
     monospace;
@@ -1266,10 +1299,10 @@ a:focus-visible {
 
 .playground-preset select {
   padding: 7px 10px;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 7px;
-  background: #0d2031;
-  color: #e8f1f8;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 11px/1 "DM Mono",
     monospace;
@@ -1277,9 +1310,9 @@ a:focus-visible {
 
 .playground-document-state {
   padding: 5px 8px;
-  border: 1px solid #48c6a833;
+  border: 1px solid var(--infoschematic-chrome-paint-positive-soft);
   border-radius: 999px;
-  color: #7de2c8;
+  color: var(--infoschematic-chrome-paint-positive);
   font:
     600 9px/1 "DM Mono",
     monospace;
@@ -1288,8 +1321,8 @@ a:focus-visible {
 }
 
 .playground-document-state[data-state="edited"] {
-  border-color: #f5c97644;
-  color: #f5c976;
+  border-color: var(--infoschematic-chrome-paint-caution-border);
+  color: var(--infoschematic-chrome-paint-caution);
 }
 
 .playground-actions {
@@ -1300,10 +1333,10 @@ a:focus-visible {
 
 .playground-actions button {
   padding: 8px 10px;
-  border: 1px solid #ffffff26;
+  border: 1px solid var(--infoschematic-chrome-paint-border-strong);
   border-radius: 7px;
-  background: #0d2031;
-  color: #e8f1f8;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+  color: var(--infoschematic-chrome-paint-text);
   font:
     600 10px/1 "DM Mono",
     monospace;
@@ -1313,18 +1346,18 @@ a:focus-visible {
 
 .playground-actions button:hover,
 .playground-actions button:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
 }
 
 .playground-actions button:disabled {
-  border-color: #ffffff12;
-  color: #607689;
+  border-color: var(--infoschematic-chrome-paint-border-subtle);
+  color: var(--infoschematic-chrome-paint-text-faint);
   cursor: not-allowed;
 }
 
 .playground-guidance {
   margin: 0;
-  color: #8fa9bf;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-size: 11px;
   line-height: 1.45;
 }
@@ -1332,7 +1365,7 @@ a:focus-visible {
 .playground-studio {
   flex: 1;
   min-height: 0;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1353,19 +1386,19 @@ a:focus-visible {
   justify-content: center;
   height: 100%;
   padding: 24px;
-  color: #d8e4ee;
+  color: var(--infoschematic-chrome-paint-text);
 }
 
 .view-boundary-title {
   margin: 0;
-  color: #ff9d9d;
+  color: var(--infoschematic-chrome-paint-negative);
   font-size: 15px;
 }
 
 .view-boundary-detail {
   margin: 0;
   max-width: 60ch;
-  color: #8fa9bf;
+  color: var(--infoschematic-chrome-paint-text-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
   line-height: 1.5;
@@ -1539,9 +1572,9 @@ a:focus-visible {
 
 .component-tour__item {
   align-items: center;
-  border: 1px solid #ffffff1c;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
   border-radius: 0.75rem;
-  background: #0d2031;
+  background: var(--infoschematic-chrome-paint-surface-raised);
   display: grid;
   gap: 1.25rem;
   grid-template-columns: minmax(0, 1fr) 260px;
@@ -1551,7 +1584,7 @@ a:focus-visible {
 
 .component-tour__item:hover,
 .component-tour__item:focus-visible {
-  border-color: #79c9ff;
+  border-color: var(--infoschematic-chrome-paint-accent);
 }
 
 .component-tour__text {
@@ -1560,11 +1593,11 @@ a:focus-visible {
 }
 
 .component-tour__text strong {
-  color: #f5f8ff;
+  color: var(--infoschematic-chrome-paint-text-strong);
 }
 
 .component-tour__text span {
-  color: #9db4c9;
+  color: var(--infoschematic-chrome-paint-text-muted);
 }
 
 /* The aside is a glance rather than a specimen: small enough that the blurb stays the reason to open the page, and
@@ -1574,7 +1607,7 @@ a:focus-visible {
   width: 100%;
   height: auto;
   overflow: hidden;
-  border: 1px solid #ffffff14;
+  border: 1px solid var(--infoschematic-chrome-paint-border-subtle);
   border-radius: 0.4rem;
 }
 
@@ -1609,6 +1642,44 @@ a:focus-visible {
   font-size: 0.875rem;
   margin: 0.5rem 0 0;
   opacity: 0.8;
+}
+
+/* The chrome's own roles, painted rather than tabulated, so the strip shows the scheme the reader is actually in. */
+.chrome-roles {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.chrome-roles__item {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/*
+ * A hairline of its own, because a role whose value is the page would otherwise be an invisible swatch.
+ *
+ * Which role a swatch shows is the markup's business; painting from it is this stylesheet's, so the element carries
+ * only `--chrome-role` and the paint rule lives here with every other one.
+ */
+.chrome-roles__swatch {
+  background: var(--chrome-role);
+  block-size: 1.5rem;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
+  border-radius: 4px;
+  flex: none;
+  inline-size: 1.5rem;
+}
+
+.chrome-roles__name {
+  font-size: 0.75rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 640px) {

@@ -21,6 +21,25 @@ describe('Present', () => {
     expect(markup).not.toContain('Design')
   })
 
+  /*
+   * A deliberate absence, so it cannot be mistaken for an oversight and quietly filled in.
+   *
+   * Present's controls belong to the presenter: they are what the Audience watches being used. A reader's viewing
+   * preference is not one of them — changing scheme mid-presentation is a change everyone in the room sees, and the
+   * person who wants it is not usually the person holding the controls. So a presenter pins the scheme before
+   * starting, and Present follows whatever its host resolved. `ADR-INFOSCHEMATICS-041` records the same division.
+   */
+  it('offers no colour-scheme control of its own, and still resolves in either scheme', () => {
+    const markup = renderToStaticMarkup(<Present config={defineInfoschematic({ title: 'Audience view' })} />)
+
+    expect(markup).not.toContain('colour-scheme-button')
+    expect(markup).not.toContain('colour scheme')
+
+    /* It follows a scheme rather than ignoring one: its stylesheet names roles and never a colour of its own, which
+       `scripts/stylesheet-literals.test.ts` holds as a floor. */
+    expect(markup).toContain('isp-stage')
+  })
+
   it('shows an authored Overlay to an audience', () => {
     /*
      * Present supplies a Scene's own Graphic and nothing else, so before `ADR-INFOSCHEMATICS-037` an authored

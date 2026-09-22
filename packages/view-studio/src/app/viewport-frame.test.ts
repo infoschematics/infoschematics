@@ -8,9 +8,13 @@ describe('Studio diagram frame', () => {
     const canvas = await stylesheet('../../../view-canvas/src/styles.css')
 
     expect(canvas).toContain('place-items: center;')
-    // The token, not the `#081725` it happens to generate today: Studio's copy wrote the literal, which is how a
-    // backdrop change would have reached the diagram everywhere except the editor.
-    expect(canvas).toContain('background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, #000);')
+    // Two tokens, not the colours they happen to generate today: Studio's copy wrote the literal, which is how a
+    // backdrop change would have reached the diagram everywhere except the editor. The mix settles toward the chrome
+    // the container sits in rather than toward black, which in the light scheme is the difference between a frame and
+    // a mid-grey slab.
+    expect(canvas).toContain(
+      'background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, var(--infoschematic-chrome-paint-page));'
+    )
   })
 
   it('takes the frame and its container from the Canvas stylesheet it imports, rather than copies of its own', async () => {
