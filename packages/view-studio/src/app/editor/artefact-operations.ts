@@ -321,6 +321,28 @@ export const planArtefactRemoval = (
   }
 }
 
+/**
+ * Where the next created artefact goes: after everything authored and everything already created.
+ *
+ * One expression rather than one per creation surface. Every kind is made the same way and counted the same way, so
+ * the Library, the element buttons and the Card control cannot disagree about which end of the document they add to.
+ */
+export const nextArtefactIndex = (
+  config: InfoschematicConfig,
+  operations: readonly ArtefactDraftOperation[]
+): number => {
+  const definition = config.infoschematic
+  return (
+    definition.cards.length +
+    definition.fabrics.length +
+    definition.flows.length +
+    definition.graphics.length +
+    definition.points.length +
+    definition.regions.length +
+    operations.length
+  )
+}
+
 export const artefactIndex = (config: InfoschematicConfig, target: ArtefactSelection): number | undefined => {
   const index = (() => {
     switch (target.kind) {

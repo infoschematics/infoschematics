@@ -107,7 +107,6 @@ const diagram = infoschematicEditable(
   new Map(),
   new Map(),
   new Map(),
-  [],
   {
     fabrics: runtime.infoschematicFabrics,
     overlays: runtime.infoschematicOverlays

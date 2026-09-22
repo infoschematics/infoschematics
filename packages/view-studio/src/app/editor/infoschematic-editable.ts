@@ -102,26 +102,13 @@ export const infoschematicEditable = (
   drafts: ReadonlyMap<string, Offset>,
   labels: ReadonlyMap<string, number> = new Map(),
   attachments: ReadonlyMap<string, { source?: AttachedEnd; target?: AttachedEnd }> = new Map(),
-  // Cards made in the editor. Defaulted so every existing caller and every test
-  // keeps working unchanged; supplied by the app, which is the only place that
-  // holds drafts.
-  createdCards: readonly CreatedComponent[] = [],
   authoredArtefacts: AuthoredEditableArtefacts = {}
 ): EditableDiagram => {
-  const register = model.registerWith(createdCards)
-  /*
-   * Where a card was before this session moved it.
-   *
-   * The authored layout for an authored card, and the creation itself for a
-   * created one - which is the same thing said twice, since a created card's
-   * box *is* what was written down for it. Without the second half a created
-   * card has no origin to measure a drag against, so it draws and cannot be
-   * dragged: on the Infoschematic and inert, which is worse than absent.
-   */
-  const originOf = (card: { code: string; id: string }): Box | undefined =>
-    model.layout[card.id] ?? createdCards.find((made) => made.code === card.code)?.box
+  const register = model.registerWith([])
+  /* Where a card was before this session moved it, which is what a drag is measured against. */
+  const originOf = (card: { code: string; id: string }): Box | undefined => model.layout[card.id]
   const placeables = (scopes: ReadonlySet<InfoschematicScopeId>, more?: { offsets?: ReadonlyMap<string, Offset> }) =>
-    model.placeables(scopes, { created: createdCards, ...more })
+    model.placeables(scopes, more)
   // Where a port is, worked out here rather than passed in: the editable knows
   // every placeable already, and asking the caller would make it depend on the
   // hook that depends on it.

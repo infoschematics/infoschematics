@@ -9,7 +9,6 @@ import {
   type ArtefactValueByKind,
   alignOffsets,
   type Change,
-  type CreatedComponent,
   type CreatedFlow,
   artefactCapabilities as capabilitiesByKind,
   createArtefactOperation,
@@ -55,7 +54,6 @@ import {
 } from './artefact-operations.ts'
 import {
   type Attachment,
-  type CardCreation,
   type Creation,
   type EditorDraft,
   editorDraftHasChanges,
@@ -68,7 +66,7 @@ import {
 } from './editor-draft.ts'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
-export type { Attachment, CardCreation, Creation, TextDraft, TextField } from './editor-draft.ts'
+export type { Attachment, Creation, TextDraft, TextField } from './editor-draft.ts'
 
 // Editing state is held apart from the Infoschematic and its host. Drafts
 // persist because they represent unsaved work; the active editor does not.
@@ -101,7 +99,6 @@ export type PendingOrigin = {
   map:
     | 'artefactOperations'
     | 'attachments'
-    | 'cards'
     | 'components'
     | 'creations'
     | 'labels'
@@ -167,7 +164,6 @@ type PendingField =
   | 'artefact-operation'
   | 'card'
   | 'create'
-  | 'create-card'
   | 'detail'
   | 'family'
   | 'group'
@@ -284,8 +280,7 @@ export function useEditor(
     // has been created, not only for what was authored. A created line the
     // editable did not know about could be drawn but not selected or dragged,
     // which is a line the reader can see and cannot touch.
-    created: readonly CreatedFlow[],
-    createdCards: readonly CreatedComponent[]
+    created: readonly CreatedFlow[]
   ) => EditableDiagram,
   gridSize: number
 ) {
@@ -341,7 +336,6 @@ export function useEditor(
   const {
     artefactOperations: storedArtefactOperations,
     attachments,
-    cards,
     components: drafts,
     creations,
     labels,
@@ -369,10 +363,6 @@ export function useEditor(
       const next = typeof update === 'function' ? update(typed) : update
       return next as EditorDraft['artefactOperations']
     })
-  const setCards = useCallback(
-    (update: SetStateAction<EditorDraft['cards']>) => setDraftField('cards', update),
-    [setDraftField]
-  )
   const setCreations = useCallback(
     (update: SetStateAction<EditorDraft['creations']>) => setDraftField('creations', update),
     [setDraftField]
@@ -472,16 +462,9 @@ export function useEditor(
     () => Object.entries(creations).map(([code, line]) => ({ code, ...line })),
     [creations]
   )
-  // The created cards as a list, for the same reason the lines are one: the map
-  // is keyed by code so a draft can be dropped on its own, and the code is a
-  // property of the card everywhere else.
-  const createdCards = useMemo<readonly CreatedComponent[]>(
-    () => Object.entries(cards).map(([code, card]) => ({ code, ...card })),
-    [cards]
-  )
   const diagram = useMemo(
-    () => build(offsets, labelPositions, attached, created, createdCards),
-    [attached, build, created, createdCards, labelPositions, offsets]
+    () => build(offsets, labelPositions, attached, created),
+    [attached, build, created, labelPositions, offsets]
   )
   const selectedArtefactDetails = useMemo(
     () =>
@@ -548,7 +531,6 @@ export function useEditor(
     // was missing - so the only question worth asking is whether the model has
     // caught up, which is to say whether it now carries the code at all.
     setCreations((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !diagram.authors(key))))
-    setCards((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !diagram.authors(key))))
 
     setLabels((current) =>
       Object.fromEntries(
@@ -610,7 +592,6 @@ export function useEditor(
     diagram,
     draft,
     setAttachments,
-    setCards,
     setCreations,
     setDrafts,
     setLabels,
@@ -694,37 +675,6 @@ export function useEditor(
           }))
       ),
       /*
-       * A whole registry entry, and a layout entry beside it, because a card is
-       * written down in two files. The two are handed back as one change so a
-       * reader pasting half of it is not a thing that can happen quietly.
-       */
-      ...Object.entries(cards).flatMap(([code, card]) => {
-        // An adapter states no position. Its box follows from the card it
-        // clasps, so a layout line placing one would be a second answer to a
-        // question the model already answers - and the two would part company
-        // the first time that card was dragged. Its ports are its own, so it
-        // states those.
-        const ports = `ports: { ${(['north', 'east', 'south', 'west'] as const)
-          .filter((side) => card.ports[side] !== undefined)
-          .map((side) => `${side}: ${card.ports[side]}`)
-          .join(', ')} }`
-
-        return [
-          {
-            field: 'create-card' as const,
-            key: code,
-            origin: { key: code, map: 'cards' as const },
-            source: `${code}  ->  { code: '${code}', id: '${card.id}', label: '${card.label}', detail: '${card.detail}', group: '${card.group}', scopes: [${card.scopes.map((scope) => `'${scope}'`).join(', ')}]${card.wraps ? `, wraps: '${card.wraps}'` : ''} },`
-          },
-          {
-            field: 'card' as const,
-            key: code,
-            origin: { key: code, map: 'cards' as const },
-            source: card.box ? `${code}  ->  card(${card.box.x}, ${card.box.y}), ${ports},` : `${code}  ->  ${ports},`
-          }
-        ]
-      }),
-      /*
        * A whole entry rather than one property of one, because that is what a
        * created line is. `id` is left for the reader: a code says which family
        * a line belongs to and a name says what it is for, and only the second
@@ -773,8 +723,7 @@ export function useEditor(
         }
       }
       const identity = diagram.identityOf(change.key)
-      const phase =
-        change.field === 'remove' ? 'remove' : change.field === 'create' || cards[change.key] ? 'create' : 'update'
+      const phase = change.field === 'remove' ? 'remove' : change.field === 'create' ? 'create' : 'update'
       const kind: ArtefactKind =
         change.field === 'create' ||
         change.field === 'family' ||
@@ -788,15 +737,12 @@ export function useEditor(
       const target: ArtefactSelection =
         kind === 'flow'
           ? { code: change.key, geometry: 'route', id: change.key, kind }
-          : { code: change.key, geometry: 'box', id: cards[change.key]?.id ?? change.key, kind }
+          : { code: change.key, geometry: 'box', id: change.key, kind }
       const authoredIndex = Number(/(\d+)$/.exec(change.key)?.[1])
       return {
         ...change,
         authoredIndex: Number.isFinite(authoredIndex) ? authoredIndex : undefined,
-        owner:
-          kind === 'flow'
-            ? (creations[change.key]?.family ?? identity?.family)
-            : (cards[change.key]?.group ?? identity?.group),
+        owner: kind === 'flow' ? (creations[change.key]?.family ?? identity?.family) : identity?.group,
         phase,
         target
       }
@@ -812,7 +758,7 @@ export function useEditor(
     return orderSourceChanges(
       [...latest.values()].filter((change) => change.source !== diagram.authored(change.key, change.field))
     )
-  }, [artefactOperations, attachments, cards, changes, creations, diagram, labels, portCounts, removals, routes, text])
+  }, [artefactOperations, attachments, changes, creations, diagram, labels, portCounts, removals, routes, text])
 
   /*
    * Hold exactly this group, with its first element as the anchor.
@@ -1291,27 +1237,8 @@ export function useEditor(
       setCreations((current) => ({ ...current, [code]: line }))
       selectKey(code)
     },
-    cards,
     created,
-    createdCards,
     creations,
-    /*
-     * Make a card.
-     *
-     * The code, the id and the box all come from the caller, because none of
-     * them is the editor's to decide: which series a scope numbers in, what an
-     * id should look like in this model, and where on the Infoschematic there is room
-     * are all questions about the diagram. What this owns is that making one is
-     * an undoable edit, and that the new card is what the reader is now working
-     * on.
-     */
-    createCard: (code: string, card: CardCreation) => {
-      if (sameValue(cards[code], card)) return
-      checkpoint()
-      closeGesture()
-      setCards((current) => ({ ...current, [code]: card }))
-      selectKey(code)
-    },
     hover: setHovered,
     hovered,
     labelPositions,
@@ -1494,38 +1421,6 @@ export function useEditor(
      * keystroke put it back.
      */
     retext: (code: string, field: TextField, value: string) => {
-      /*
-       * A card that does not exist yet is edited in place, not described.
-       *
-       * Every other draft says how something authored should differ, so naming
-       * a created card through the same route produced two lines about one
-       * card: the creation still saying `New card` and a text draft saying what
-       * it had been renamed to. Both true, neither the whole story, and a
-       * reader pasting them has to apply them in order to get what they see on
-       * the Infoschematic. There is nothing to differ from here, so the creation itself
-       * is what changes.
-       */
-      if (cards[code]) {
-        const property = ({ detail: 'detail', group: 'group', name: 'label' } as const)[
-          field as 'detail' | 'group' | 'name'
-        ]
-        if (property) {
-          const nextCard = {
-            ...cards[code],
-            [property]: value,
-            ...(property === 'group' ? { scopes: [value] } : {})
-          }
-          if (sameValue(cards[code], nextCard)) return
-          checkpoint()
-          closeGesture()
-          setCards((current) => ({
-            ...current,
-            [code]: nextCard
-          }))
-        }
-        return
-      }
-
       const authored = diagram.authored(code, field)
       const same = authored === `${code}  ->  ${textProperty[field]}: '${value}',`
       if ((same && text[code]?.[field] === undefined) || (!same && text[code]?.[field] === value)) return
@@ -1563,12 +1458,7 @@ export function useEditor(
       if (unmade.size > 0) {
         setCreations((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !unmade.has(key))))
       }
-      // A created card goes the same way its lines do. Its own lines are in
-      // `meeting`, so they are already accounted for above or below.
-      if (cards[code]) {
-        setCards((current) => Object.fromEntries(Object.entries(current).filter(([key]) => key !== code)))
-      }
-      if (unmade.has(code) || cards[code]) {
+      if (unmade.has(code)) {
         if (meeting.some((line) => !unmade.has(line))) {
           setRemovals((current) => ({
             ...current,
@@ -1624,7 +1514,6 @@ export function useEditor(
         }
         if (origin.map === 'attachments')
           return origin.end ? attachments[origin.key]?.[origin.end] !== undefined : false
-        if (origin.map === 'cards') return cards[origin.key] !== undefined
         if (origin.map === 'components') return drafts[origin.key] !== undefined
         if (origin.map === 'creations') return creations[origin.key] !== undefined
         if (origin.map === 'labels') return labels[origin.key] !== undefined
@@ -1644,7 +1533,6 @@ export function useEditor(
         setArtefactOperations((current) => discardArtefactOperation(current, origin.key))
       }
       if (origin.map === 'components') setDrafts(without)
-      if (origin.map === 'cards') setCards(without)
       if (origin.map === 'creations') setCreations(without)
       if (origin.map === 'labels') setLabels(without)
       if (origin.map === 'routes') setRoutes(without)

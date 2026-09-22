@@ -1,10 +1,9 @@
-import type { ArtefactOperation, AttachedEnd, CreatedComponent, CreatedFlow } from '@infoschematics/view-model/editable'
+import type { ArtefactOperation, AttachedEnd, CreatedFlow } from '@infoschematics/view-model/editable'
 import type { Offset, Point } from '@infoschematics/view-model/geometry'
 import type { PortCounts } from '@infoschematics/view-model/ports'
 import type { SetStateAction } from 'react'
 
 export type Creation = Omit<CreatedFlow, 'code'>
-export type CardCreation = Omit<CreatedComponent, 'code'>
 export type Removal = { because?: string }
 export type TextDraft = { detail?: string; family?: string; group?: string; name?: string }
 export type TextField = keyof TextDraft
@@ -23,7 +22,6 @@ export const editorDraftVersion = 1 as const
 export type EditorDraft = {
   artefactOperations: readonly ArtefactOperation[]
   attachments: Record<string, Attachment>
-  cards: Record<string, CardCreation>
   components: Record<string, ComponentDraft>
   creations: Record<string, Creation>
   labels: Record<string, number>
@@ -37,7 +35,6 @@ export type EditorDraft = {
 export const emptyEditorDraft = (): EditorDraft => ({
   artefactOperations: [],
   attachments: {},
-  cards: {},
   components: {},
   creations: {},
   labels: {},
@@ -59,7 +56,6 @@ export const normaliseEditorDraft = (value: unknown): EditorDraft => {
       ? (candidate.artefactOperations as readonly ArtefactOperation[])
       : [],
     attachments: record<Attachment>(candidate.attachments),
-    cards: record<CardCreation>(candidate.cards),
     components: record<ComponentDraft>(candidate.components ?? candidate.drafts),
     creations: record<Creation>(candidate.creations),
     labels: record<number>(candidate.labels),
@@ -88,7 +84,6 @@ export const readPreviousEditorDraft = (storage: string | undefined, store: Stor
   if (!storage || !store) return emptyEditorDraft()
   return normaliseEditorDraft({
     attachments: read(store, `${storage}.diagram.attachments`, {}),
-    cards: read(store, `${storage}.diagram.cards`, {}),
     components: read(store, `${storage}.diagram.labels`, {}),
     creations: read(store, `${storage}.diagram.creations`, {}),
     labels: read(store, `${storage}.diagram.labels.along`, {}),
@@ -113,7 +108,6 @@ export const editorDraftHasChanges = (draft: EditorDraft): boolean =>
   (
     [
       draft.attachments,
-      draft.cards,
       draft.components,
       draft.creations,
       draft.labels,
@@ -148,7 +142,6 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
     )
   )
   const creations = Object.fromEntries(Object.entries(draft.creations).filter(([key]) => !model.authors(key)))
-  const cards = Object.fromEntries(Object.entries(draft.cards).filter(([key]) => !model.authors(key)))
   const labels = Object.fromEntries(
     Object.entries(draft.labels).filter(
       ([key, along]) =>
@@ -208,7 +201,6 @@ export const sweepEditorDraft = (draft: EditorDraft, model: DraftModel): EditorD
   return {
     ...draft,
     attachments,
-    cards,
     components,
     creations,
     labels,

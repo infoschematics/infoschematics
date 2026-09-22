@@ -246,23 +246,23 @@ _Evidence:_ `useDocumentTimeline` records structured document results from `AppC
 
 ### EDIT-023 — Creation is offered from one place
 
-In Design, Studio MUST offer the creation of every directly creatable element kind from a single labelled group, and MUST keep a creation whose precondition is unmet present and disabled with the precondition stated rather than withdrawing it.
+In Design, Studio MUST offer the creation of every directly creatable element kind from a single labelled group, and MUST keep a creation whose precondition is unmet present and disabled with the precondition stated rather than withdrawing it. Every creation offered MUST reach the document by the same route — a create operation the projection carries — whichever surface offers it, so no surface holds a creation the document is never told about.
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/ArtefactControls.test.tsx` asserts the four creations appear in the one `Create an element` group in a fixed order, and that Adapter is disabled with its precondition in the title while Card is not; `packages/view-studio/src/app/panels/DetailsPanel.artefacts.test.tsx` asserts the Canvas toolbar carries no creation control.
+_Verify:_ `packages/view-studio/src/app/editor/ArtefactControls.test.tsx` asserts the four creations appear in the one `Create an element` group in a fixed order, and that Adapter is disabled with its precondition in the title while Card is not; `packages/view-studio/src/app/panels/DetailsPanel.artefacts.test.tsx` asserts the Canvas toolbar carries no creation control; `packages/view-studio/src/app/App.browser.test.tsx` asserts a Card made from the control reaches the document the host holds and leaves again on undo, which is the route rather than the offering.
 
-_Evidence:_ `packages/view-studio/src/app/editor/ArtefactControls.tsx` renders Card, Adapter, Region and Graphic in one `role="group"` under `CREATE`, taking Card and Adapter from the host's `createCard` and Region and Graphic from the local factories; `packages/view-studio/src/app/editor/EditorTools.tsx` carries selection and route tools only; `packages/view-studio/src/app/editor/LibraryPanel.tsx` names its entries as starting points that produce one of those kinds.
+_Evidence:_ `packages/view-studio/src/app/editor/ArtefactControls.tsx` renders Card, Adapter, Region and Graphic in one `role="group"` under `CREATE`; `packages/view-studio/src/app/editor/EditorTools.tsx` carries selection and route tools only; `packages/view-studio/src/app/editor/LibraryPanel.tsx` names its entries as starting points that produce one of those kinds. All four reach `editor.createArtefact` and are projected by `projectStudioDocumentOperations`, landing at the index `nextArtefactIndex` computes for every surface alike, per [`ADR-INFOSCHEMATICS-042`](../decisions/ADR-INFOSCHEMATICS-042-a-creation-reaches-the-document-by-one-route.md). Card and Adapter previously wrote a `cards` draft map the projection never read, so the change pane counted creations the document never received.
 
 ### EDIT-024 — A created element answers to one name
 
-A coded element Studio creates MUST carry a single identity, and that identity MUST be its code: the `id` the creating operation names MUST be the code the element is drawn under, so every selection, move, resize and property edit made against what is drawn reaches the operation that made it.
+A coded element Studio creates MUST carry a single identity, and that identity MUST be its code: the `id` the creating operation names MUST be the code the element is drawn under, so every selection, move, resize and property edit made against what is drawn reaches the operation that made it. That code MUST be allocated against the whole document register rather than against one surface's own record of what it has made, so two surfaces cannot issue the same name.
 
 _Conformance:_ conforming
 
 _Verify:_ `packages/view-studio/src/app/editor/library.test.ts` asserts the allocator issues `id` equal to `code` while avoiding both authored sets; `packages/view-studio/src/app/App.browser.test.tsx` drags a Card added from the Library and asserts it follows the pointer, comes to rest where it was dropped, and is named in the written record.
 
-_Evidence:_ `createLibraryIdentityAllocator` in `packages/view-studio/src/app/editor/library.ts` issues one string as both fields; `infoschematicModelOf` in `packages/domain-core/src/model.ts` publishes an element's code as its `id`, which is why a second name was never visible to anything that matched against what was drawn.
+_Evidence:_ `createLibraryIdentityAllocator` in `packages/view-studio/src/app/editor/library.ts` issues one string as both fields; `createCard` in `packages/view-studio/src/app/App.tsx` allocates through `nextCodeIn` over `infoschematicRegister.all`, which is the same register; `infoschematicModelOf` in `packages/domain-core/src/model.ts` publishes an element's code as its `id`, which is why a second name was never visible to anything that matched against what was drawn.
 
 ### EDIT-025 — A creation names only what the document declares
 

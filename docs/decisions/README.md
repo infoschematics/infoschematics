@@ -56,6 +56,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 44. [ADR-INFOSCHEMATICS-039](ADR-INFOSCHEMATICS-039-a-sequence-paces-a-cascade-and-a-declaration-never-does.md) — let a Scene cue an ordered cascade in either kind of Sequence, paced by the Sequence's own stepping rather than by anything the document counts.
 45. [ADR-INFOSCHEMATICS-040](ADR-INFOSCHEMATICS-040-a-checker-measures-a-drawing-and-never-repairs-it.md) — review a drawing by measuring it and reporting findings a reader can act on, never by moving anything or choosing a repair.
 46. [ADR-INFOSCHEMATICS-041](ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md) — attach a palette to a colour scheme rather than to the outlet drawing it, resolved by the browser for an interactive drawing and once by the renderer for a still.
+47. [ADR-INFOSCHEMATICS-042](ADR-INFOSCHEMATICS-042-a-creation-reaches-the-document-by-one-route.md) — make every element by one route, a create operation the projection carries to the document, so a defect in creation is one defect rather than one per surface.
 
 ## Repository operation
 

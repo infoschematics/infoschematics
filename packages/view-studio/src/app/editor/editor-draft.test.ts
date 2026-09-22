@@ -51,7 +51,6 @@ describe('the canonical editor draft', () => {
       attachments: {
         'TEL-01': { source: { component: 'card', from: 'old', port: 'E1' } }
       },
-      cards: { 'STD-NEW': { detail: '', group: 'scope', id: 'new', label: 'New', ports: {}, scopes: ['scope'] } },
       creations: {
         'TEL-NEW': { family: 'family', source: 'a', sourcePort: 'E1', target: 'b', targetPort: 'W1' }
       },
@@ -81,7 +80,6 @@ describe('the canonical editor draft', () => {
     })
 
     expect(swept.attachments).toEqual({})
-    expect(swept.cards).toEqual({})
     expect(swept.creations).toEqual({})
     expect(swept.labels).toEqual({})
     expect(swept.portCounts).toEqual({})

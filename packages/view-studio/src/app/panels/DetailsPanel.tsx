@@ -20,7 +20,7 @@ import { type SetStateAction, useEffect, useMemo, useState } from 'react'
 import { type DirectOption, directOptionsFor, directTargetKey } from '../direct-targets.ts'
 import { ArtefactControls, type ArtefactControlsEditor } from '../editor/ArtefactControls.tsx'
 import { type ArtefactFactoryContext, createFactoryIdentityAllocator } from '../editor/artefact-factories.ts'
-import type { ArtefactPropertiesPatch } from '../editor/artefact-operations.ts'
+import { type ArtefactPropertiesPatch, nextArtefactIndex } from '../editor/artefact-operations.ts'
 import { ChangePane } from '../editor/ChangePane.tsx'
 import type { StudioSourcePanelController } from '../editor/document-history.ts'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
@@ -241,7 +241,7 @@ export const detailsArtefactContexts = (
     x: Math.max(view.x, Math.min(view.x + view.width - width, (selectedBox?.x ?? view.x + 16) + 24)),
     y: Math.max(view.y, Math.min(view.y + view.height - height, (selectedBox?.y ?? view.y + 16) + 24))
   }
-  const at = allAuthored.length + editor.artefactOperations.length
+  const at = nextArtefactIndex(config, editor.artefactOperations)
   const selectedPlaceable = effectivePlaceable(config, editor.selectedArtefact, editor.artefactValue)
 
   return {

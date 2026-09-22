@@ -1871,3 +1871,79 @@ diagram:
   await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
   expect(container.querySelectorAll('[data-artefact-kind="card"]').length).toBe(1)
 })
+
+/*
+ * One creation path.
+ *
+ * `INFOSCHEMATICS-TOOL-112`: Studio made a Card two ways. The Library and the element buttons wrote a create
+ * operation, which reaches the document; the Card button wrote into a draft map of its own, which the overlay drew
+ * and the change pane accounted for and the projection never read. Each path then carried its own defects —
+ * `-104` and `-105` in one, `-106` in the other — and neither could be found from the other.
+ *
+ * This asserts the convergence where it is observable: what the host is handed. A Card made from the control has to
+ * arrive in the document the same way a Card made from the Library does, and undo has to take it back out again.
+ */
+test('a Card made from the control reaches the document, as a Card made from the Library does', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: MADE-ONE-WAY
+title: Made one way
+diagram:
+  bounds: 0 0 640 320
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+scopes:
+  - id: SCOPE
+    label: Scope
+    elements: [CARD-A]
+`)
+  if (!parsed.ok) throw new Error('creation fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design mode control')
+  design.click()
+  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+
+  /* What the host holds, read off the diagram it is being drawn from: a Card the projection never wrote would be
+     drawn by the overlay and absent here, which is exactly the split this closes. */
+  const authoredCards = () =>
+    [...container.querySelectorAll<SVGGElement>('[data-artefact-kind="card"]')].flatMap((element) => {
+      const id = element.getAttribute('data-artefact-id')
+      return id ? [id] : []
+    })
+
+  const create = container.querySelector<HTMLButtonElement>('button[aria-label="Create Card"]')
+  if (!create) throw new Error('Studio did not render the Card control')
+  expect(create.disabled).toBe(false)
+  create.click()
+
+  await expect.poll(() => authoredCards().length).toBe(2)
+  const made = authoredCards().find((code) => code !== 'CARD-A')
+  if (!made) throw new Error('the control made no Card')
+  // The Scope's own prefix, which is what says the code was issued against the document's register rather than by a
+  // creation surface carrying a scheme of its own.
+  expect(made.startsWith('SCOPE-')).toBe(true)
+
+  const undo = container.querySelector<HTMLButtonElement>('button[aria-label="Undo"]')
+  if (!undo) throw new Error('Studio did not render history controls')
+  undo.click()
+  await expect.poll(() => authoredCards()).toEqual(['CARD-A'])
+})

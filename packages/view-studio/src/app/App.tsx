@@ -23,7 +23,6 @@ import {
 import {
   type ArtefactGeometry,
   type ArtefactSelection,
-  type CreatedComponent,
   type CreatedFlow,
   movableBox
 } from '@infoschematics/view-model/editable'
@@ -38,6 +37,7 @@ import {
 import { type PresentProps, useCueCadence } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { directOptionsFor } from './direct-targets.ts'
+import { nextArtefactIndex } from './editor/artefact-operations.ts'
 import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
 import {
   isStudioDocumentAcknowledgement,
@@ -139,18 +139,11 @@ const gridSizeDocumentEdit = (gridSize: number) =>
  * positions and then moving it would apply the same offset twice.
  */
 const authoredPortAt =
-  (
-    runtime: InfoschematicRuntime,
-    visibleScopes: ReadonlySet<InfoschematicScopeId>,
-    created: readonly CreatedComponent[] = []
-  ) =>
+  (runtime: InfoschematicRuntime, visibleScopes: ReadonlySet<InfoschematicScopeId>) =>
   (endpoint: string, port: string) => {
-    // Created cards are included but their offsets are not, which is the same
-    // rule authored cards get here: a created card's own box is what was
-    // written down for it, and the drag on top of that is applied afterwards.
-    const placeable = runtime
-      .infoschematicPlaceables(visibleScopes, { created })
-      .find((candidate) => candidate.id === endpoint)
+    // Where the model says the endpoint is, with no draft offset applied: a created line is routed from these and
+    // the move drafts are applied to it afterwards, exactly as they are to an authored one.
+    const placeable = runtime.infoschematicPlaceables(visibleScopes).find((candidate) => candidate.id === endpoint)
     return placeable && portsForBox(placeable.box, placeable.ports).find((candidate) => candidate.id === port)?.at
   }
 
@@ -332,21 +325,15 @@ function AppContent({
       drafts: ReadonlyMap<string, { dx: number; dy: number }>,
       labels: ReadonlyMap<string, number>,
       attached: ReadonlyMap<string, Attachment>,
-      created: readonly CreatedFlow[],
-      createdCards: readonly CreatedComponent[]
+      created: readonly CreatedFlow[]
     ) =>
       infoschematicEditable(
         runtime.editableModel,
-        flowsAfterCreations(
-          presentation.visibleFlows,
-          created,
-          authoredPortAt(runtime, presentation.visibleScopes, createdCards)
-        ),
+        flowsAfterCreations(presentation.visibleFlows, created, authoredPortAt(runtime, presentation.visibleScopes)),
         presentation.visibleScopes,
         drafts,
         labels,
         attached,
-        createdCards,
         {
           fabrics: infoschematicFabrics,
           overlays: infoschematicOverlays,
@@ -584,7 +571,7 @@ function AppContent({
   // rather than the authored ones while an edit is live.
   // The register the app reads, which is the effective one: a card created a
   // moment ago has to answer what it is exactly as an authored one does.
-  const register = infoschematicRegisterWith(editor.createdCards)
+  const register = infoschematicRegisterWith()
 
   /*
    * An adapter has no independent position, so it inherits the held Card's
@@ -604,12 +591,12 @@ function AppContent({
   // the port as it is now rather than as it was authored.
   const portAt = useCallback(
     (endpoint: string, port: string) => {
-      const drafts = { created: editor.createdCards, offsets: movedComponents, portCounts: editor.portCounts }
+      const drafts = { offsets: movedComponents, portCounts: editor.portCounts }
       const placeable = infoschematicPlaceables(visibleScopes, drafts).find((candidate) => candidate.id === endpoint)
       if (!placeable) return undefined
       return portsForBox(placeable.box, placeable.ports).find((candidate) => candidate.id === port)?.at
     },
-    [editor.createdCards, editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes]
+    [editor.portCounts, infoschematicPlaceables, movedComponents, visibleScopes]
   )
   const typedRemovals = useMemo(
     () =>
@@ -716,27 +703,54 @@ function AppContent({
       if (!scope || !prefix) return
 
       const label = held ? `${held.label} adapter` : 'New card'
-      const taken = [...infoschematicRegister.all.map((entry) => entry.code), ...Object.keys(editor.cards)]
+      const taken = infoschematicRegister.all.map((entry) => entry.code)
       const code = nextCodeIn(prefix, taken)
-      editor.createCard(code, {
-        // An adapter has no box: it is placed from the card it clasps.
-        box: held ? undefined : roomForCard(runtime.infoschematicViewBox, editor.createdCards.length),
-        detail: '',
-        group: scope,
-        id: identifierFrom(held ? `${held.label} adapter` : code),
-        label,
-        ports: held ? { east: 0, north: 0, south: 3, west: 0 } : { east: 3, north: 3, south: 3, west: 3 },
-        scopes: [scope],
-        wraps: held?.id
-      })
+      /*
+       * Each new Card a step along from the last, counted from the creations already drafted so two made in a row do
+       * not land on each other. An Adapter starts on the Card it clasps: `ADR-INFOSCHEMATICS-036` draws it from that
+       * Card wherever the Card goes, so this box is a legal starting value rather than the position it will keep.
+       */
+      const made = editor.artefactOperations.filter(
+        (operation) => operation.operation === 'create' && operation.target.kind === 'card'
+      ).length
+      const heldBox = held
+        ? infoschematicPlaceables(visibleScopes).find((candidate) => candidate.id === held.id)?.box
+        : undefined
+      editor.createArtefact(
+        'card',
+        {
+          code,
+          detail: '',
+          id: identifierFrom(held ? `${held.label} adapter` : code),
+          label,
+          placement: {
+            box: heldBox ?? roomForCard(runtime.infoschematicViewBox, made),
+            ports: held ? { east: 0, north: 0, south: 3, west: 0 } : { east: 3, north: 3, south: 3, west: 3 }
+          },
+          scope,
+          scopes: [scope],
+          ...(held ? { wraps: held.id } : {})
+        },
+        nextArtefactIndex(compatibilityConfig, editor.artefactOperations)
+      )
     },
-    [editor.cards, editor.createCard, editor.createdCards.length, infoschematicRegister, infoschematicScopes, wrappable]
+    [
+      compatibilityConfig,
+      editor.artefactOperations,
+      editor.createArtefact,
+      infoschematicPlaceables,
+      infoschematicRegister,
+      infoschematicScopes,
+      runtime.infoschematicViewBox,
+      visibleScopes,
+      wrappable
+    ]
   )
 
   // Created lines join the authored ones before the edit drafts are folded in,
   // so a line made and then dragged ends up where it was dragged to.
   const drawnFlows = flowsAfterEdits(
-    flowsAfterCreations(visibleFlows, editor.created, authoredPortAt(runtime, visibleScopes, editor.createdCards)),
+    flowsAfterCreations(visibleFlows, editor.created, authoredPortAt(runtime, visibleScopes)),
     // Each adapter's move carried over from the card it clasps, so a line
     // meeting an adapter travels with that card. Passing the raw drafts here
     // was the whole of why three connectors of four moved and one did not.
@@ -1120,7 +1134,6 @@ function AppContent({
                 layers={editor.layers}
                 litByScene={presentation.mode === 'direct' ? directLit : undefined}
                 onLight={presentation.mode === 'direct' ? directToggle : undefined}
-                createdCards={editor.createdCards}
                 onCreateLine={editor.editing ? proposeLine : undefined}
                 onFreeEnd={editor.editing ? editor.moveFreeEnd : undefined}
                 onComponentMove={editor.editing ? editor.moveTo : undefined}
