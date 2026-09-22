@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-123
 area: TOOL
 title: Configuration disagrees with itself
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Configuration disagrees with itself

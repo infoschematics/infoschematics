@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-119
 area: TOOL
 title: Ordered cascade of cues
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T21:15:00Z
-updated_at: 2026-09-21T23:59:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Ordered cascade of cues

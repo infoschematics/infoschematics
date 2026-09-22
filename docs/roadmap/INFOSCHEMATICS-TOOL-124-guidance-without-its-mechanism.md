@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-124
 area: TOOL
 title: Guidance without its mechanism
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Guidance without its mechanism

@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-125
 area: TOOL
 title: Room for a creation
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Room for a creation

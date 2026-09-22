@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-121
 area: TOOL
 title: One chip, two colours
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T12:20:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # One chip, two colours

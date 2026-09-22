@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-114
 area: TOOL
 title: Detail follows magnification
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-22T00:15:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Detail follows magnification

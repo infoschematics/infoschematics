@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-127
 area: TOOL
 title: Missing decision serial
 theme: tool
-horizon: now
+horizon: next
 status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T12:10:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T19:40:00Z
 ---
 
 # Missing decision serial
