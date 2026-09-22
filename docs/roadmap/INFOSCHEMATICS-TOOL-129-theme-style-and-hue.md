@@ -55,9 +55,11 @@ The static outlet mirrors the pin: `packages/render-svg/src/index.ts:609` suppre
 - [ ] Give blueprint a light realisation across all 36 roles plus the artwork inks, and look at it. A blueprint is a dark-ground convention, so its light form is a real design question — cyanotype ink on paper, not the dark palette lightened.
 - [ ] Resolve an authored colour as a hue seed: the style derives the per-theme brightness step from it, so one authored value reads on either ground. Keep an explicit opt-in pin for an author who means that exact value, and make the seed the default rather than the exception.
 - [ ] Settle fill opacity alongside it, so the style's own ground reads through a coloured fill rather than being covered by it — a grid of lines or dots is part of what a blueprint is, and an opaque Collection fill erases it. Opacity is a style decision resolved per theme, not an authored value, unless a reason appears to make it one.
-- [ ] Add `diagram.appearance.theme` with values `light` and `dark`, authored as the document's default, and a companion field stating whether a reader may change it. A locked document renders as authored and offers no control; an unlocked one defaults as authored and then follows the reader.
+- [ ] Add `diagram.appearance.theme` with values `light`, `dark` and `system`, authored as the document's default and defaulting to `system` when absent, and a companion field stating whether a reader may change it. The two are orthogonal: `system` locked means the drawing tracks the machine and offers no control, which is a coherent thing to want.
+- [ ] Keep `system` out of the resolved type. It is a refusal to pick, not a third theme, so it resolves to `light` or `dark` before any palette is chosen and no paint code ever sees it. `packages/view-canvas/src/colour-scheme.ts` already implements the state unnamed — storage empty means follow the machine, and withdrawing a choice resumes tracking it rather than freezing on its current value — so this names an existing behaviour in the control rather than building one.
+- [ ] Offer the reader all three, labelled without a noun: light, dark, system. Reserve the word _mode_ for what Studio already uses it for — design, direct, producer, present — and keep _theme_ as the single identifier for this axis, so the contract, the type, the attribute and the flag agree on one word.
 - [ ] Rename `surface` to `style` in the authored contract, carrying the old name through `packages/view-model/src/compatibility.ts` so existing documents keep working, and drop `neutral` unless a second style arrives to justify it.
-- [ ] Let `--scheme adaptive` carry both blueprint palettes, removing the suppression at `packages/render-svg/src/index.ts:609`, and correct the CLI help at `packages/cli/src/options.ts:47`.
+- [ ] Rename the render flag to `--theme light | dark | system`, retiring `adaptive`, which `packages/cli/src/options.ts:73` already documents as "not a palette but a refusal to pick one" — the same idea under a fourth name. Keep the old flag accepted, keep the refusal for `--format png`, and let it carry both blueprint palettes by removing the suppression at `packages/render-svg/src/index.ts:609`.
 - [ ] Migrate the five published documents: existing hexes become hue seeds, and anything copied from a palette token is replaced rather than seeded.
 - [ ] Make Studio's colour control pick a hue rather than an arbitrary value, so the editor offers what the model now means. This is the natural split point if the rest proves large enough to land first.
 - [ ] Rewrite the browser assertions that prove the pin so they prove the new behaviour, in a browser, through the scheme command rather than from the stylesheet.
@@ -85,11 +87,11 @@ Nothing blocks it. It overlaps `INFOSCHEMATICS-TOOL-121` — the identity chip's
 
 ### Specifications
 
-`docs/specs/appearance.md:133` reverses, and gains the theme field, the lock, the hue-seed resolution and the opacity rule. `docs/specs/command-line-rendering.md:123` keeps its prohibition on offering a style from `--scheme` and drops the consequence that a blueprint document renders identically under both themes, which its verification at `:127` asserts.
+`docs/specs/appearance.md:133` reverses, and gains the theme field with its three authored values, the lock, the hue-seed resolution and the opacity rule. `docs/specs/command-line-rendering.md:121` becomes `--theme` with `light`, `dark` and `system`, keeps its prohibition on offering a style from the flag and its refusal of an unresolved theme for a raster, and drops the consequence at `:127` that a blueprint document renders identically under both themes.
 
 ### Guides
 
-`apps/site/content/authoring.md` gains the theme field and what a hue seed means for an author picking a colour. The visual guide's scheme section is rewritten and its gallery gains a blueprint pair, so the claim is shown rather than stated.
+`apps/site/content/authoring.md` gains the theme field, what `system` means for a document that declines to choose, and what a hue seed means for an author picking a colour. The visual guide's scheme section is rewritten and its gallery gains a blueprint pair, so the claim is shown rather than stated.
 
 ### Roadmap
 
@@ -101,8 +103,10 @@ Raised on 2026-09-22 from the reader's side — the light/dark control changes t
 
 The hue-seed decision is the substance. Two answers were on the table: close the colour vocabulary to a fixed set of roles a style can guarantee, or keep authored colour open and make the style resolve its brightness. The first is the comparable tool's answer and it is coherent, but it removes a capability this product already ships. The second keeps the capability and costs a contrast obligation the product must now meet rather than delegate to the author's taste — which is the right trade, because the author was never in a position to meet it for two grounds at once.
 
+The naming is part of the work rather than a tidy-up after it, because this axis currently answers to four words — `PaintScheme` in the view model, `--scheme` and `adaptive` at the command line, and _theme_ in the authored contract this record adds. Two of those name the same refusal to choose. One word, `theme`, with `system` as the value that declines: _mode_ stays with Studio's design, direct, producer and present, where it means what the tool is doing rather than how the drawing is painted.
+
 Worth stating plainly: this reverses a recorded decision made recently and deliberately, and it is safe to reverse because the decision's principle survives. "A palette belongs to a colour scheme" is the argument for giving a style two palettes, not against it. What does not survive is one enum carrying a treatment and two contexts, which is what made a single blueprint palette look like a complete answer.
 
 ### Adoption
 
-Adopted into Now on 2026-09-22, with the model agreed with the owner in the same conversation: theme locked to light or dark, style owning what cannot be colourised, authored colour as a hue seed, opacity settled so the style's ground reads through, and the five published documents migrated as part of the work rather than after it.
+Adopted into Now on 2026-09-22, with the model agreed with the owner in the same conversation: a resolved theme of light or dark with `system` as a third authored and reader-facing choice that resolves to one of them, style owning what cannot be colourised, authored colour as a hue seed, opacity settled so the style's ground reads through, and the five published documents migrated as part of the work rather than after it.
