@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T17:30:00Z
+updated_at: 2026-09-22T17:55:00Z
 ---
 
 # Dependencies past their window
@@ -34,13 +34,13 @@ Where an update cannot be taken, the outcome is a recorded dependency hold with 
 
 ## Current state
 
-`ki repo audit --skill ki-engineering` reports `DEPS-1` against five packages past the 14-day adoption window: `@types/react-dom` 19.2.5, `@vitest/browser-playwright` 4.1.11, `lint-staged` 17.4.1, `rumdl` 0.2.64 and `vitest` 4.1.11. `bun outdated` additionally shows `@biomejs/biome` 2.5.12, `@types/node` 22.20.2, `@types/react` 19.2.18, `dependency-cruiser` 18.3.1 and `knip` 6.34.0 behind their latest, all still inside the window.
+The routine currency was taken on 2026-09-22 in `08408284`: Biome, `@types/react`, `@types/react-dom`, `dependency-cruiser`, Knip, `lint-staged`, React, rumdl and Turborepo all moved to current within their declared majors, and `@types/node` moved to 22.20.4 rather than to the 26 line, because `GDR-INFOSCHEMATICS-004` promises the oldest supported Node line. The boundary checker's separate install root at `tooling/boundaries` moved with it, which `scripts/dependency-boundaries.ts` asserts and which failed the gate until it did. `bun run self:check` was green across 48 tasks afterwards.
 
-Two of those carry a real judgement. `vitest` and `@vitest/browser-playwright` are a major behind — 4.1.11 to 5.0.x — and move together; the repository runs six browser suites across View Canvas, View Studio and Site, three `vitest.browser.config.ts` files, and a custom `emulateColourScheme` browser command that every colour-scheme requirement's evidence depends on. `@types/node` is at 22.20.x against a latest of 26.x, and `GDR-INFOSCHEMATICS-004` promises the oldest supported Node line, so the types should track that promise rather than the newest release.
+What remains is the judgement the rest was never blocking. `vitest` and `@vitest/browser-playwright` are a major behind — 4.1.11 to 5.0.x — and move together; `ki repo audit --skill ki-engineering` now reports `DEPS-1` against those two alone. The repository leans on browser mode harder than most: six browser suites across View Canvas, View Studio and Site, three `vitest.browser.config.ts` files, and a custom `emulateColourScheme` browser command that every colour-scheme requirement's evidence depends on. And `@types/node`'s pin against the oldest supported line is a standing position that should be written down rather than re-derived at each update.
 
 ## Steps
 
-- [ ] Take the patch and minor updates that carry no argument — `@biomejs/biome`, `@types/react`, `@types/react-dom`, `dependency-cruiser`, `knip`, `lint-staged`, `rumdl` — in one change, and run the full gate behind them.
+- [x] Take the patch and minor updates that carry no argument — `@biomejs/biome`, `@types/react`, `@types/react-dom`, `dependency-cruiser`, `knip`, `lint-staged`, `rumdl` — in one change, and run the full gate behind them.
 - [ ] Take Vitest 4 to 5 with `@vitest/browser-playwright` together, then re-prove the browser evidence rather than trusting a green run: the `emulateColourScheme` command and the reduced-motion cases are the two places a browser-mode major is most likely to change behaviour quietly.
 - [ ] Decide `@types/node` against `GDR-INFOSCHEMATICS-004`'s oldest-supported-line promise and pin deliberately, so the audit stops reading it as neglect.
 - [ ] Record any update deliberately not taken as a dependency hold with its reason, which is what `DEPS-1` asks for; do not leave this item open standing in for that record.
@@ -56,7 +56,7 @@ Two of those carry a real judgement. `vitest` and `@vitest/browser-playwright` a
 
 ## Dependencies / blocks
 
-Nothing blocks it. It is adjacent to `INFOSCHEMATICS-TOOL-123`, which covers the other two standing `ki-engineering` findings — those are configuration rather than versions, and the two are worth doing in one sitting without being one item.
+Nothing blocks it. It is adjacent to `INFOSCHEMATICS-TOOL-123` and `INFOSCHEMATICS-TOOL-128`, which cover the standing `ki-engineering` findings — those are configuration rather than versions, and the two are worth doing in one sitting without being one item.
 
 ## Documentation impact
 
