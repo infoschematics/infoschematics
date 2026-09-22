@@ -4,12 +4,12 @@ area: TOOL
 title: One creation path unwritten
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 0a41cbb1952944312efcfe1f2374125b9338737f
 created_at: 2026-09-21T18:15:00Z
-updated_at: 2026-09-22T07:05:00Z
+updated_at: 2026-09-22T14:07:29Z
 ---
 
 # One creation path unwritten

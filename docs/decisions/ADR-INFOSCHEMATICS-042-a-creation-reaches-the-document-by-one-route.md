@@ -29,7 +29,7 @@ The `cards` draft map is therefore retired rather than re-pointed. It was not a 
 Two things the draft path had to itself become shared, because a route only converges if the decisions on it do:
 
 - **Where a creation lands.** `nextArtefactIndex` in `packages/view-studio/src/app/editor/artefact-operations.ts` is the single expression of "after everything authored and everything already created". Two Cards made in a row cannot land on each other, and no surface can disagree with another about the end of the document, because there is only one place that computes it.
-- **What an [Adapter](../reference/vocabulary.md#adapter-card) starts as.** [`ADR-INFOSCHEMATICS-036`](ADR-INFOSCHEMATICS-036-an-adapter-is-positioned-by-what-it-holds.md) says an Adapter is drawn at the Card it clasps rather than at its own authored box, so the box a creation writes is a legal starting value and nothing more. The control seeds it from the held Card's current box for exactly that reason, and the drawing does not depend on it.
+- **What an [Adapter](../reference/vocabulary.md#adapter-card) starts as.** [`ADR-INFOSCHEMATICS-036`](ADR-INFOSCHEMATICS-036-an-adapter-card-is-positioned-by-what-it-holds.md) says an Adapter is drawn at the Card it clasps rather than at its own authored box, so the box a creation writes is a legal starting value and nothing more. The control seeds it from the held Card's current box for exactly that reason, and the drawing does not depend on it.
 
 The surfaces keep what is genuinely theirs. The element controls still decide the Scope, the prefix, the next free code and the room a new Card is given, because those are questions about what a Producer just did; they express the answer as a `CardConfig`, and hand it to the one route.
 

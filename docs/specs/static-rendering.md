@@ -120,7 +120,7 @@ _Evidence:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compat
 
 Static output MUST draw an [Adapter Card](../reference/vocabulary.md#adapter-card) as the notched clasp the interactive Diagram draws, traced from View Model's one outline rather than assembled here, so nothing the adapter paints passes under the Card it holds. It MUST place the adapter's own label in the footer band below the notch rather than centred in the clasp box, and MUST NOT draw an adapter whose held Card this rendering did not draw.
 
-The clasp box MUST be derived from the held Card in both renderers, and an Adapter Card's authored `bounds` MUST NOT position it, as [`ADR-INFOSCHEMATICS-036`](../decisions/ADR-INFOSCHEMATICS-036-an-adapter-is-positioned-by-what-it-holds.md) records. An element emphasis over an Adapter Card MUST take the same derived box.
+The clasp box MUST be derived from the held Card in both renderers, and an Adapter Card's authored `bounds` MUST NOT position it, as [`ADR-INFOSCHEMATICS-036`](../decisions/ADR-INFOSCHEMATICS-036-an-adapter-card-is-positioned-by-what-it-holds.md) records. An element emphasis over an Adapter Card MUST take the same derived box.
 
 _Conformance:_ conforming
 

@@ -52,7 +52,7 @@ Resolution MUST remain pure and framework-neutral: no renderer reads authored Dy
 
 Where a treatment needs geometry more specific than a box — a line a mark can be seen to travel rather than a rectangle to outline — that calculation MUST live in View Model and MUST be the single calculation every renderer draws from, so two renderers cannot disagree about where an element's perimeter runs. The calculation MUST answer only where the perimeter is: it MUST NOT state what is drawn on it, which way round it is travelled, or where anything rests along it, all of which stay renderer choices.
 
-Resolution MUST NOT say which geometries a treatment is offered for. A renderer MAY decline a treatment for an element whose geometry cannot carry it legibly, and MUST then draw that element the treatment it can carry rather than nothing, so an element a Dynamic names is never left unmarked. Which geometries a renderer declines, and at what cost to the reader, MUST be recorded in [ADR-INFOSCHEMATICS-029](../decisions/ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means.md) rather than discovered from the output.
+Resolution MUST NOT say which geometries a treatment is offered for. A renderer MAY decline a treatment for an element whose geometry cannot carry it legibly, and MUST then draw that element the treatment it can carry rather than nothing, so an element a Dynamic names is never left unmarked. Which geometries a renderer declines, and at what cost to the reader, MUST be recorded in [ADR-INFOSCHEMATICS-029](../decisions/ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means-not-how-it-is-played.md) rather than discovered from the output.
 
 _Conformance:_ conforming
 

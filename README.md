@@ -117,7 +117,7 @@ The `self:` commands, by subject:
 
 Two rules keep the surface honest, and `scripts/command-surface.test.ts` enforces them.
 
-A generated artefact's `generate` command is always paired with a `verify` command that runs the same script in check mode, so the gate can prove the committed artefact matches its generator without a second implementation of the generator's rules. And a `self:` name reads subject first, then verb — `self:tokens:verify`, never `self:verify:visual-tokens` — so the commands for one subject sort together and a new verb cannot start a rival naming scheme. The reasoning is recorded in [GDR-INFOSCHEMATICS-005](docs/decisions/GDR-INFOSCHEMATICS-005-command-naming.md).
+A generated artefact's `generate` command is always paired with a `verify` command that runs the same script in check mode, so the gate can prove the committed artefact matches its generator without a second implementation of the generator's rules. And a `self:` name reads subject first, then verb — `self:tokens:verify`, never `self:verify:visual-tokens` — so the commands for one subject sort together and a new verb cannot start a rival naming scheme. The reasoning is recorded in [GDR-INFOSCHEMATICS-005](docs/decisions/GDR-INFOSCHEMATICS-005-name-commands-by-owner-then-subject-then-verb.md).
 
 A new command belongs in the root manifest when it spans workspaces, and in the workspace's own manifest when it does not — a package's suite, typecheck, or build stays with the package, so Turborepo can cache it there. A root script that wraps a module under `scripts/` names that module directly, because the test above rejects a command module no root script, commit hook, or this section reaches.
 

@@ -13,7 +13,7 @@ An example package holds six things.
 5. **A README** covering purpose, files, install, render, edit, and host integration, linking directly to the canonical YAML.
 6. **Tests** asserting the exported model's shape and its serialisability, so a document that parses but means something else still fails.
 
-Example packages stay `private: true`; they are copied, not installed. [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-example-packages-copyable-not-published.md) records that choice and the verification that keeps it honest.
+Example packages stay `private: true`; they are copied, not installed. [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-example-packages-copyable-rather-than-published.md) records that choice and the verification that keeps it honest.
 
 ## Add an example
 

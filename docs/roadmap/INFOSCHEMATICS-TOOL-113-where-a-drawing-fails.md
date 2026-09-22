@@ -4,12 +4,12 @@ area: TOOL
 title: Where a drawing fails
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-107]
 blocked_by: []
 baseline_ref: f93c162c6dfcd8e93c6c52a6110601d60a7bcd30
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-22T11:30:00Z
+updated_at: 2026-09-22T14:07:29Z
 ---
 
 # Where a drawing fails

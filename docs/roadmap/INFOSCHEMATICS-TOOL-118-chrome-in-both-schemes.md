@@ -4,12 +4,12 @@ area: TOOL
 title: Chrome in both schemes
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 9f0503bb1229a82fee2bfcf349d1c75b827548f6
 created_at: 2026-09-21T23:20:00Z
-updated_at: 2026-09-22T06:40:00Z
+updated_at: 2026-09-22T14:07:29Z
 ---
 
 # Chrome in both schemes
