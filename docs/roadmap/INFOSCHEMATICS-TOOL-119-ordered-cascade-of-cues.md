@@ -3,8 +3,8 @@ id: INFOSCHEMATICS-TOOL-119
 area: TOOL
 title: Ordered cascade of cues
 theme: tool
-horizon: next
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
