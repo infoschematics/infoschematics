@@ -204,19 +204,23 @@ The format is taken from the pathname's extension — `.ts`, `.json`, `.yaml`, o
 
 Validation is strict about keys. A misspelt `subtitel` is a reported fault, not a silently dropped field, because a dropped field renders a subtly wrong Infoschematic rather than an obvious one.
 
-Point an editor at the committed schema, `packages/domain-core/schema/infoschematic.schema.json`, for completion and inline errors. It is generated from the same schema the loader validates with, so the two cannot disagree.
-
-```jsonc
-// infoschematic.json
-{ "$schema": "../packages/domain-core/schema/infoschematic.schema.json", "title": "My Infoschematic" }
-```
+Point an editor at the published schema for completion and inline errors. It is generated from the same schema the loader validates with, so the two cannot disagree, and every field carries a description saying what it is for — which turns a bare list of permitted values into an account of which one to reach for.
 
 ```yaml
-# yaml-language-server: $schema=../packages/domain-core/schema/infoschematic.schema.json
+# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
 title: My Infoschematic
 ```
 
-The `$schema` key is editor metadata; the loader removes it before validating. The schema is a repository file rather than a published package export, so a document outside this repository points at a copy or a checkout. `bun run self:examples:render infoschematic.yaml` renders a document straight to SVG. TypeScript authoring keeps its compile-time guarantee and remains the right choice for a definition that lives in a package.
+```jsonc
+// infoschematic.json
+{ "$schema": "https://infoschematics.info/schema/infoschematic.schema.json", "title": "My Infoschematic" }
+```
+
+This needs a YAML language server; in Visual Studio Code that is the Red Hat YAML extension, which this repository recommends. The line is a comment in YAML and the `$schema` key is editor metadata in JSON, so the loader ignores both — validation happens the same way whether or not your editor reads them.
+
+The schema is served at the address its own `$id` declares, so a document anywhere points at it without a copy or a checkout. Inside this repository, `.vscode/settings.json` maps any `infoschematic.yaml` to the working copy's generated `packages/domain-core/schema/infoschematic.schema.json` instead, so a contributor is completed against the contract they are changing rather than the published one.
+
+`bun run self:examples:render infoschematic.yaml` renders a document straight to SVG. TypeScript authoring keeps its compile-time guarantee and remains the right choice for a definition that lives in a package.
 
 ## Canonical YAML convention
 

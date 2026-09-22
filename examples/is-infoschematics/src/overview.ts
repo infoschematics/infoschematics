@@ -5,7 +5,8 @@
  */
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 
-const source = `id: infoschematic-overview
+const source = `# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
+id: infoschematic-overview
 title: What makes an Infoschematic
 subtitle: Structure and presentation, rendered or presented
 description: Structure and presentation material combine in one Infoschematic, which can be rendered as static output or presented as a live, interactive view.

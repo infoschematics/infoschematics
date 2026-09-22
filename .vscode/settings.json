@@ -1,0 +1,7 @@
+{
+  "// yaml.schemas": "Validates and completes an authored Infoschematic against the working copy's generated schema, so a contributor sees their own contract rather than the published one. The examples carry a modeline naming the published URL, which the YAML language server prefers over this mapping; this covers a new document that has not been given one yet.",
+  "yaml.schemas": {
+    "./packages/domain-core/schema/infoschematic.schema.json": ["infoschematic.yaml", "examples/**/*.yaml"]
+  },
+  "yaml.format.printWidth": 140
+}

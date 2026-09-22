@@ -1,0 +1,4 @@
+{
+  "// recommendations": "The YAML language server is what reads the schema mapping in settings.json and the modeline in each authored document.",
+  "recommendations": ["redhat.vscode-yaml"]
+}

@@ -5,7 +5,8 @@
  */
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 
-const source = `id: INFOSCHEMATIC
+const source = `# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
+id: INFOSCHEMATIC
 title: Infoschematics
 diagram:
   bounds: 0 0 1920 1080

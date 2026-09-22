@@ -5,7 +5,8 @@
  */
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 
-const source = `id: infoschematics-architecture
+const source = `# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
+id: infoschematics-architecture
 title: An Infoschematic of Infoschematics
 subtitle: One serialisable product from authored data to public host
 description: The repository separates its authored contract, framework-neutral behaviour, interactive Views, renderers, examples, and hosts with dependencies pointing toward lower-level packages.

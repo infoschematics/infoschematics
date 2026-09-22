@@ -4,12 +4,12 @@ area: TOOL
 title: Autocomplete while authoring
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 0b69e9f13d3c77e53eaf76c49f11b84fcc600726
 created_at: 2026-09-22T20:05:00Z
-updated_at: 2026-09-23T09:00:00Z
+updated_at: 2026-09-23T00:45:00Z
 ---
 
 # Autocomplete while authoring
@@ -44,13 +44,13 @@ Three files carry the modeline today and none of them is a document an author wo
 
 ## Steps
 
-- [ ] Describe every enum in `packages/domain-core/src/schema.ts` — what each value means and when to reach for it — since a bare list of words is the case the owner raised. Cover the properties that carry them too, because an author reads the property's description before opening its value list.
-- [ ] Describe the rest of the authored contract as far as it pays: an artefact kind, a Collection, a Fabric, a Point, a Flow, a Scope, an Overlay, a Dynamic. Stop where a description would only restate the property name.
-- [ ] Regenerate the committed schema and let `--check` prove it current, so descriptions cannot go stale against the Zod source.
-- [ ] Add the modeline to the five documents under `examples/`, so the corpus an author copies from is itself assisted.
-- [ ] Add a `.vscode/settings.json` `yaml.schemas` mapping over an `infoschematic.yaml` glob, so a new document is covered without anyone remembering a relative path.
-- [ ] Serve the schema from the site at the `$id` it already declares, `https://infoschematics.info/schema/infoschematic.schema.json`, so an author working outside this repository can resolve it. This is a static asset on our own site, not a registry publication.
-- [ ] Point the guide at the published URL rather than a relative path, and say plainly in `apps/site/content/authoring.md` how to switch an editor on.
+- [x] Describe every enum in `packages/domain-core/src/schema.ts` — what each value means and when to reach for it — since a bare list of words is the case the owner raised. Cover the properties that carry them too, because an author reads the property's description before opening its value list.
+- [x] Describe the rest of the authored contract as far as it pays: an artefact kind, a Collection, a Fabric, a Point, a Flow, a Scope, an Overlay, a Dynamic. Stop where a description would only restate the property name.
+- [x] Regenerate the committed schema and let `--check` prove it current, so descriptions cannot go stale against the Zod source.
+- [x] Add the modeline to the five documents under `examples/`, so the corpus an author copies from is itself assisted.
+- [x] Add a `.vscode/settings.json` `yaml.schemas` mapping over an `infoschematic.yaml` glob, so a new document is covered without anyone remembering a relative path.
+- [x] Serve the schema from the site at the `$id` it already declares, `https://infoschematics.info/schema/infoschematic.schema.json`, so an author working outside this repository can resolve it. This is a static asset on our own site, not a registry publication.
+- [x] Point the guide at the published URL rather than a relative path, and say plainly in `apps/site/content/authoring.md` how to switch an editor on.
 
 ## Files touched
 
@@ -85,6 +85,50 @@ If the published URL becomes something consumers rely on, its stability is a cla
 ### Roadmap
 
 Nothing follows. `INFOSCHEMATICS-TOOL-108` remains the separate, larger machine-readable diagnostics surface; this is what an editor can already do unaided.
+
+## Review
+
+### Delivered
+
+Every property the contract declares now says what it is for, the schema is served at the address its own `$id` names, and the documents an author copies from resolve it. An author typing inside `appearance` is offered `neutral` and `blueprint` with an account of each beside it, rather than two bare words.
+
+The work also produced the finding that a static check would not have: driving the real language server showed that the nine element collections under `diagram` — `cards`, `flows`, `regions` and the rest, the keys an author reaches for first — were still bare after the enum pass looked complete. Those are described now, and a coverage check holds the whole surface at zero undescribed properties.
+
+### Summary of changes
+
+`packages/domain-core/src/schema.ts` carries `.describe()` throughout: every closed value set, every named artefact, the geometry, the ports, the unwrapped identity shorthand, and the document root. The regenerated `packages/domain-core/schema/infoschematic.schema.json` holds **0 undescribed properties**, up from zero descriptions of any kind.
+
+`apps/site/vite.config.ts` gains a plugin that publishes the generated schema at `/schema/infoschematic.schema.json` in development and in the built site. It reads the generated file rather than copying it into `public/`, because a second committed copy drifts silently and `self:schema:verify` already proves the generated one matches the runtime contract. `apps/site/public/_headers` adds the content type and the cross-origin header an editor needs to fetch it.
+
+The five authored documents under `examples/` carry the published modeline. `.vscode/settings.json` maps `infoschematic.yaml` to the working copy's generated schema instead, so a contributor is completed against the contract they are changing; `.vscode/extensions.json` recommends the extension that reads it. `apps/site/content/authoring.md` now shows the published URL, says which extension is needed, and explains which of the two mappings applies where.
+
+`scripts/schema-publication.test.ts` is new: it holds the `$id` and the site's publication path together, requires the modeline on every authored example, and asserts that no property is left undescribed. `turbo.json` declares the two files it reads that were not already inputs.
+
+### Verification
+
+`bun run self:check` — 48 tasks, 48 successful.
+
+The evidence the record asked for is in `reports/TOOL-132-authoring-autocomplete.md`, taken by driving `yaml-language-server` — the server the Visual Studio Code extension runs — over stdio and asking it for completions at a cursor, with the probes kept beside it. It covers both halves: a document in this repository, and a document at `/tmp/outside-repo` with no checkout resolving the schema over HTTP from the built site. A deliberate `surface: sepia` is reported as `Value is not accepted. Valid values: "neutral", "blueprint".`
+
+Two checks were proven by breaking them rather than by passing: removing one `description` from the generated schema fails the coverage assertion with the offending path named, and touching `.vscode/settings.json` turns the cached `self:scripts:test` replay into a miss.
+
+### Outstanding concerns
+
+The published URL only becomes live on deploy. Everything up to DNS and TLS is proven against the built site over HTTP, but the modelines in the five example documents point at an address that does not answer until `main` is pushed and the site is published. That is a push decision, not a code one.
+
+`apps/site/content/authoring.md` is stale in ways outside this boundary — it documents `domains`, `flowFamilies`, `interfaces` and `specificationGroups` against a contract that now says `families`, `scopes` and `specifications`. The sections this work touched are correct; the rest was left alone and is worth its own record.
+
+`INFOSCHEMATICS-TOOL-129` renames `surface` to `style` and adds a mode. The descriptions written here for `surface` will need one sentence rewritten when it lands, which the record already anticipated.
+
+### Post-change review
+
+The interesting part is that the static sweep and the language server disagreed, and the language server was right. Counting `description` fields in the generated JSON said 126 and looked like coverage; asking the server what it would actually offer an author at a cursor showed nine of eleven keys arriving bare. The sweep was counting descriptions that existed anywhere in the tree, including ones no completion would ever surface. The coverage check now walks properties and resolves `$ref`, which is the shape the question actually has.
+
+That is the same lesson `AGENTS.md` records about a passing suite and visual treatment, arriving through a different door: the check has to measure the thing the reader experiences, not a proxy for it.
+
+### Mini recap
+
+Descriptions throughout the Zod contract, published at the `$id`, modelines on the corpus, editor mapping for contributors, guide corrected, and a check that holds all of it. Proven by driving the real language server from inside and outside the repository. Left for the owner: whether to push, which is what makes the published URL answer.
 
 ## Discussion
 

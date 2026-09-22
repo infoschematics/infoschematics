@@ -5,7 +5,8 @@
  */
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 
-const source = `id: system-explained
+const source = `# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
+id: system-explained
 title: A system, explained
 subtitle: From observed signals to a shared view
 description: Observation gathers signals, arrangement gives them structure, illumination draws out meaning, and the result is a view a whole team can share.

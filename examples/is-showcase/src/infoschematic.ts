@@ -5,7 +5,8 @@
  */
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 
-const source = `id: showcase
+const source = `# yaml-language-server: $schema=https://infoschematics.info/schema/infoschematic.schema.json
+id: showcase
 title: Every capability, in one Infoschematic
 subtitle: one document that exercises every authored notation
 description: >-
