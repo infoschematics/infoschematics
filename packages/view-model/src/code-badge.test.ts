@@ -67,14 +67,14 @@ describe('code badge placement', () => {
   })
 
   it('draws every code as one shape, so a tag and a chip are not two shapes a reader must reconcile', () => {
-    expect(codeBadgeRadius).toBe(visualTokens.canvas.output.annotationRadius)
+    expect(codeBadgeRadius).toBe(visualTokens.canvas.metrics.annotationRadius)
     for (const anchor of [
       { box, kind: 'box' },
       { at: { x: 0, y: 0 }, kind: 'route' },
       { at: { x: 0, y: 0 }, kind: 'mark' }
     ] as const) {
       const badge = resolveCodeBadge(anchor, 'ANY-001')
-      expect(badge.height).toBe(visualTokens.canvas.output.annotationHeight)
+      expect(badge.height).toBe(visualTokens.canvas.metrics.annotationHeight)
       expect(badge.textX).toBe(badge.x + badge.width / 2)
       expect(badge.textY).toBe(badge.y + badge.height - 6)
     }

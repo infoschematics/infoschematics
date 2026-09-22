@@ -3,7 +3,7 @@
 
 .infoschematic {
   aspect-ratio: 3 / 2;
-  background: color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 72%, #000);
+  background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, #000);
   display: grid;
   margin-inline: auto;
   max-height: 100%;
@@ -15,7 +15,7 @@
 }
 
 .infoschematic-frame {
-  background: var(--infoschematic-canvas-surfaces-backdrop);
+  background: var(--infoschematic-canvas-paint-backdrop);
   min-height: 0;
   min-width: 0;
   overflow: hidden;
@@ -52,7 +52,7 @@
   color: #cde8fb;
   cursor: pointer;
   display: inline-flex;
-  font: 600 14px/1 var(--infoschematic-canvas-text-code-family);
+  font: 600 14px/1 var(--infoschematic-canvas-typography-code-family);
   height: 28px;
   justify-content: center;
   padding: 0;
@@ -174,34 +174,18 @@
   cursor: grabbing;
 }
 
-.infoschematic-svg.surface-neutral .infoschematic-backdrop {
-  fill: var(--infoschematic-canvas-output-backdrop);
-}
-
-.infoschematic-svg.surface-blueprint .infoschematic-backdrop {
-  fill: var(--infoschematic-canvas-surfaces-backdrop);
-}
-
-.infoschematic-svg.surface-neutral .infoschematic-region-frame {
-  stroke: var(--infoschematic-canvas-output-region-stroke);
-}
-
-.infoschematic-svg.surface-neutral .infoschematic-region-label {
-  fill: var(--infoschematic-canvas-output-text-muted);
-}
-
 /* An internal label sets down inside the region and reads quietly against its
    fill; a boundary-mounted label sits on the frame line over the backdrop the
    notch exposes, so it takes the frame's brighter voice. */
 .infoschematic-region-label {
-  fill: var(--infoschematic-canvas-text-region);
-  font: 600 12px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-region-text);
+  font: 600 12px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 1.5px;
 }
 
 .infoschematic-region-label.notched {
-  fill: #9ed9ff;
-  font: 600 13px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-region-text-notched);
+  font: 600 13px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 1.6px;
 }
 
@@ -218,37 +202,33 @@
    fill takes that fill inline; everything else reads against the backdrop the
    notch exposes, which is the surface, not a colour of its own. */
 .infoschematic-region-label-backing {
-  fill: var(--infoschematic-canvas-surfaces-backdrop);
+  fill: var(--infoschematic-canvas-paint-backdrop);
   pointer-events: none;
-}
-
-.infoschematic-svg.surface-neutral .infoschematic-region-label-backing {
-  fill: var(--infoschematic-canvas-output-backdrop);
 }
 
 /* Ink follows the Region fill's own luminance so both renderers agree. */
 .infoschematic-svg .infoschematic-region-label[data-ink="dark"] {
-  fill: var(--infoschematic-canvas-output-text-muted);
+  fill: var(--infoschematic-canvas-ink-dark-muted);
 }
 
 .infoschematic-svg .infoschematic-region-label[data-ink="light"] {
-  fill: var(--infoschematic-canvas-output-text-muted-inverse);
+  fill: var(--infoschematic-canvas-ink-light-muted);
 }
 
 /* Fill stays separate from the shared frame path so a notched border does not
    punch a gap through the region surface. */
 .infoschematic-region-frame {
   fill: none;
-  stroke: var(--infoschematic-canvas-surfaces-region-stroke);
+  stroke: var(--infoschematic-canvas-paint-region-stroke);
   stroke-width: 1.5px;
 }
 
 [data-frame-treatment="dashed"] .infoschematic-region-frame {
-  stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dash);
+  stroke-dasharray: var(--infoschematic-canvas-metrics-region-dash);
 }
 
 [data-frame-treatment="dotted"] .infoschematic-region-frame {
-  stroke-dasharray: var(--infoschematic-canvas-surfaces-region-dot);
+  stroke-dasharray: var(--infoschematic-canvas-metrics-region-dot);
   stroke-linecap: round;
 }
 
@@ -259,8 +239,8 @@
 }
 
 .fabric-shell {
-  fill: var(--infoschematic-canvas-surfaces-fabric-fill);
-  stroke: var(--infoschematic-canvas-surfaces-fabric-stroke);
+  fill: var(--infoschematic-canvas-paint-fabric-fill);
+  stroke: var(--infoschematic-canvas-paint-fabric-stroke);
   stroke-width: 3px;
 }
 
@@ -268,29 +248,29 @@
    draws an irregular shape within them. */
 .fabric-frame {
   fill: none;
-  stroke: var(--infoschematic-canvas-surfaces-fabric-frame);
+  stroke: var(--infoschematic-canvas-paint-fabric-frame);
   stroke-dasharray: 2 6;
   stroke-linecap: round;
   stroke-width: 1.5px;
 }
 
 .fabric-title {
-  fill: var(--infoschematic-canvas-text-fabric);
-  font: 600 13px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-fabric-text);
+  font: 600 13px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 1.5px;
   text-anchor: middle;
 }
 
 .fabric-detail {
-  fill: var(--infoschematic-canvas-text-muted);
-  font: 500 9px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-text-muted);
+  font: 500 9px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 1.2px;
   text-anchor: middle;
 }
 
 /* A Fabric remains selectable regardless of the host renderer it uses. */
 .infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
-  stroke: var(--infoschematic-canvas-text-strong);
+  stroke: var(--infoschematic-canvas-paint-text-strong);
   stroke-width: 2.5px;
 }
 
@@ -331,7 +311,7 @@
 .graphic-frame {
   fill: transparent;
   pointer-events: all;
-  stroke: var(--infoschematic-canvas-surfaces-fabric-frame);
+  stroke: var(--infoschematic-canvas-paint-fabric-frame);
   stroke-dasharray: 2 6;
   stroke-width: 1.5px;
 }
@@ -402,7 +382,7 @@
 
 .artefact-resize-handle rect,
 .artefact-action circle {
-  fill: var(--infoschematic-canvas-text-strong);
+  fill: var(--infoschematic-canvas-paint-text-strong);
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 2px;
 }
@@ -413,8 +393,8 @@
 }
 
 .artefact-action text {
-  fill: var(--infoschematic-canvas-surfaces-backdrop);
-  font: 700 11px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-backdrop);
+  font: 700 11px var(--infoschematic-canvas-typography-code-family);
   pointer-events: none;
   text-anchor: middle;
 }
@@ -435,12 +415,8 @@
 
 .infoschematic-pipe {
   opacity: 0.75;
-  stroke: var(--infoschematic-canvas-surfaces-flow-pipe);
+  stroke: var(--infoschematic-canvas-paint-flow-pipe);
   stroke-width: var(--infoschematic-canvas-flows-pipe-width);
-}
-
-.infoschematic-svg.surface-neutral .infoschematic-pipe {
-  stroke: var(--infoschematic-canvas-output-flow-pipe);
 }
 
 .infoschematic-route {
@@ -681,7 +657,7 @@
 }
 
 .infoschematic-svg .region-selectable.pointed {
-  fill: var(--infoschematic-canvas-text-strong);
+  fill: var(--infoschematic-canvas-paint-text-strong);
 }
 
 /* A port and a waypoint are small enough that the glow is most of what is seen,
@@ -700,8 +676,8 @@
 /* The socket the card drops into: the rim is what is seen, so the outline
    carries it and the fill only separates the recess from the region behind. */
 .adapter-socket {
-  fill: var(--infoschematic-canvas-surfaces-graphic-fallback-fill);
-  stroke: var(--infoschematic-canvas-surfaces-graphic-fallback-stroke);
+  fill: var(--infoschematic-canvas-paint-graphic-fill);
+  stroke: var(--infoschematic-canvas-paint-graphic-stroke);
   stroke-width: 2px;
 }
 
@@ -726,8 +702,8 @@
    every other component does. It carried its own size and a scope tint that
    nothing else on the Infoschematic uses - no card colours its name by scope. */
 .adapter-label {
-  fill: var(--infoschematic-canvas-text-label);
-  font: 700 14px var(--infoschematic-canvas-text-body-family);
+  fill: var(--infoschematic-canvas-paint-text);
+  font: 700 14px var(--infoschematic-canvas-typography-body-family);
   text-anchor: middle;
 }
 
@@ -744,8 +720,8 @@
    its visual centre, so the Canvas and the static SVG draw it in the same place. */
 .infoschematic-service-label {
   dominant-baseline: middle;
-  fill: var(--infoschematic-canvas-text-label);
-  font: 700 14px var(--infoschematic-canvas-text-body-family);
+  fill: var(--infoschematic-canvas-paint-text);
+  font: 700 14px var(--infoschematic-canvas-typography-body-family);
   text-anchor: middle;
 }
 
@@ -755,15 +731,15 @@
 }
 
 .infoschematic-card-identity rect {
-  fill: color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 88%, transparent);
+  fill: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 88%, transparent);
   stroke: currentColor;
   stroke-width: 1px;
 }
 
 .infoschematic-card-identity text {
   dominant-baseline: middle;
-  fill: var(--infoschematic-canvas-text-strong);
-  font: 600 9px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-text-strong);
+  font: 600 9px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 0.5px;
   text-anchor: middle;
 }
@@ -771,31 +747,31 @@
 .infoschematic-card-stereotype {
   dominant-baseline: middle;
   fill: currentColor;
-  font: 500 9px var(--infoschematic-canvas-text-code-family);
+  font: 500 9px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 0.4px;
 }
 
 .infoschematic-card-description {
   dominant-baseline: middle;
-  fill: var(--infoschematic-canvas-text-muted);
-  font: 500 10px var(--infoschematic-canvas-text-body-family);
+  fill: var(--infoschematic-canvas-paint-text-muted);
+  font: 500 10px var(--infoschematic-canvas-typography-body-family);
 }
 
 /* Ink follows the Card fill's own luminance so both renderers agree. */
 .infoschematic-service[data-ink="dark"] .infoschematic-service-label {
-  fill: var(--infoschematic-canvas-output-card-text);
+  fill: var(--infoschematic-canvas-ink-dark);
 }
 
 .infoschematic-service[data-ink="light"] .infoschematic-service-label {
-  fill: var(--infoschematic-canvas-output-card-text-inverse);
+  fill: var(--infoschematic-canvas-ink-light);
 }
 
 .infoschematic-service[data-ink="dark"] .infoschematic-card-description {
-  fill: var(--infoschematic-canvas-output-text-muted);
+  fill: var(--infoschematic-canvas-ink-dark-muted);
 }
 
 .infoschematic-service[data-ink="light"] .infoschematic-card-description {
-  fill: var(--infoschematic-canvas-output-text-muted-inverse);
+  fill: var(--infoschematic-canvas-ink-light-muted);
 }
 
 .infoschematic-audit,
@@ -806,17 +782,17 @@
 
 .audit-component-code-bg,
 .audit-flow rect {
-  fill: var(--infoschematic-canvas-output-annotation-fill);
-  stroke: #79c9ffaa;
+  fill: var(--infoschematic-canvas-paint-annotation-fill);
+  stroke: var(--infoschematic-canvas-paint-audit-stroke);
   stroke-width: 1px;
 }
 
 .audit-component-code,
 .audit-flow text {
-  fill: var(--infoschematic-canvas-text-strong);
-  font: 700 9px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-annotation-text);
+  font: 700 9px var(--infoschematic-canvas-typography-code-family);
   paint-order: stroke;
-  stroke: #06101e;
+  stroke: var(--infoschematic-canvas-paint-annotation-halo);
   stroke-width: 3px;
 }
 
@@ -825,12 +801,16 @@
   pointer-events: auto;
 }
 
-/* Sits behind everything else on the Infoschematic, transparent rather than absent, so
-   a click only ever reaches it once every card, region and line drawn above it
-   has been missed - which is what makes an empty Infoschematic clickable to clear the
-   selection without this having to know what else is on screen. */
+/* Sits behind everything else on the Infoschematic, so a click only ever reaches it
+   once every card, region and line drawn above it has been missed - which is what
+   makes an empty Infoschematic clickable to clear the selection without this having
+   to know what else is on screen.
+
+   It takes the resolved palette's paper rather than a surface-specific colour: a
+   blueprint drawing redeclares the palette on its own element, and custom properties
+   inherit, so one rule paints a blueprint and a neutral surface correctly. */
 .infoschematic-backdrop {
-  fill: transparent;
+  fill: var(--infoschematic-canvas-paint-backdrop);
   pointer-events: none;
 }
 
@@ -901,13 +881,13 @@
 
 .audit-port.selected circle {
   fill: var(--infoschematic-canvas-selection-pointed);
-  stroke: var(--infoschematic-canvas-text-strong);
+  stroke: var(--infoschematic-canvas-paint-text-strong);
   stroke-width: 2;
 }
 
 .audit-port.in-use circle {
   fill: #57d9a3;
-  stroke: #06101e;
+  stroke: var(--infoschematic-canvas-paint-annotation-halo);
   stroke-width: 1.5;
 }
 
@@ -947,12 +927,12 @@
 }
 
 .audit-port text {
-  fill: var(--infoschematic-canvas-text-strong);
-  font: 700 9px var(--infoschematic-canvas-text-code-family);
+  fill: var(--infoschematic-canvas-paint-annotation-text);
+  font: 700 9px var(--infoschematic-canvas-typography-code-family);
   opacity: 0;
   paint-order: stroke;
   pointer-events: none;
-  stroke: #06101e;
+  stroke: var(--infoschematic-canvas-paint-annotation-halo);
   stroke-width: 3px;
   transition: opacity 100ms ease;
 }
@@ -962,7 +942,7 @@
 }
 
 .audit-flow rect {
-  stroke: var(--infoschematic-canvas-output-annotation-stroke);
+  stroke: var(--infoschematic-canvas-paint-annotation-stroke);
 }
 
 /*
@@ -985,7 +965,7 @@
 
 .infoschematic-grid-line {
   fill: none;
-  stroke: var(--infoschematic-canvas-output-region-stroke);
+  stroke: var(--infoschematic-canvas-paint-region-stroke);
   stroke-width: var(--infoschematic-canvas-geometry-grid-minor-stroke-width);
 }
 
@@ -994,15 +974,7 @@
 }
 
 .infoschematic-grid-dot {
-  fill: var(--infoschematic-canvas-output-region-stroke);
-}
-
-.infoschematic-svg.surface-blueprint .infoschematic-grid-line {
-  stroke: var(--infoschematic-canvas-surfaces-region-stroke);
-}
-
-.infoschematic-svg.surface-blueprint .infoschematic-grid-dot {
-  fill: var(--infoschematic-canvas-surfaces-region-stroke);
+  fill: var(--infoschematic-canvas-paint-region-stroke);
 }
 
 .infoschematic-authored-grid {
@@ -1248,13 +1220,9 @@
    Flows that leave the Point, so this rule only says how the line reads. It takes no pointer events, because the text
    sits outside the press target and a drag begun on the label would otherwise never reach the mark. */
 .infoschematic-point-label {
-  fill: var(--infoschematic-canvas-text-label);
-  font: 500 12px var(--infoschematic-canvas-text-body-family);
+  fill: var(--infoschematic-canvas-paint-text);
+  font: 500 12px var(--infoschematic-canvas-typography-body-family);
   pointer-events: none;
-}
-
-.infoschematic-svg.surface-neutral .infoschematic-point-label {
-  fill: var(--infoschematic-canvas-output-text);
 }
 
 /* Selection, hover and being held are stated on the mark rather than as a ring around it: the Point is the smallest

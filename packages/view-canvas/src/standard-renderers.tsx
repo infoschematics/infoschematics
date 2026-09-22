@@ -21,7 +21,7 @@ import {
   standardFabricKeys,
   standardGraphicKeys
 } from '@infoschematics/view-model/standard-artwork'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import { artworkPaintVariables, visualTokens } from '@infoschematics/view-model/tokens'
 import type { ReactNode } from 'react'
 import { useId } from 'react'
 
@@ -33,7 +33,9 @@ import type {
 } from './renderer-contract.ts'
 
 const artwork = visualTokens.canvas.artwork
-const ink = artwork.ink
+/* A piece names the role it wants and the page resolves the colour, so one catalogue paints correctly in every
+   scheme rather than carrying the interactive palette's values. */
+const ink = artworkPaintVariables
 
 const strokeProps = (stroke: ArtworkStroke | undefined) =>
   stroke
@@ -118,7 +120,7 @@ const primitiveElements = (
         fill={ink[primitive.fill]}
         /* The scale is shared with the static renderer and the family is not, exactly as a Card's already is: this
            surface sets the interactive face and `render-svg` sets its paper one. */
-        fontFamily={visualTokens.canvas.text.bodyFamily}
+        fontFamily={visualTokens.canvas.typography.bodyFamily}
         fontSize={fontSize(primitive.role)}
         fontWeight={primitive.role === 'caption' || primitive.role === 'glyph' ? 600 : undefined}
         key={key}

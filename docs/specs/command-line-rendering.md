@@ -116,6 +116,18 @@ _Evidence:_ `packages/cli/src/index.test.ts`, whose `drawing check` cases cover 
 
 ## Quality properties
 
+### CLI-013 — The caller names the colour scheme
+
+`render` MUST accept `--scheme` with `light`, `dark`, or `adaptive`, defaulting to `light`. A named scheme MUST be resolved once and written as colours, so the file keeps the scheme it was given rather than becoming another one later. `adaptive` MUST write one SVG carrying every palette behind `prefers-color-scheme`, and MUST be refused with a usage exit for `--format png`, because a raster's colour is settled before the pixels exist.
+
+The command MUST NOT offer `blueprint`. A blueprint surface is authored by the document per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md), and offering it here would let whoever renders a document contradict it; a document that authors one gets it whatever this option says.
+
+_Conformance:_ conforming
+
+_Verify:_ render one document under each scheme and confirm the outputs differ; render a document authoring a blueprint surface under both and confirm they are identical; confirm `--scheme adaptive` emits the media rule, and that `--scheme adaptive --format png` and `--scheme sepia` both exit with the usage status and write nothing to standard output.
+
+_Evidence:_ `packages/cli/src/options.ts` and `packages/cli/src/index.test.ts`.
+
 ### CLI-005 — Publishable package boundary
 
 The CLI package MUST remain a Node 22 ESM adapter whose workspace dependencies are limited to Domain Core, the static SVG renderer, and View Model, whose drawing review CLI-012 reports. Its third-party runtime dependencies MUST be limited to the named raster conversion engine `@resvg/resvg-js`, per [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md); any further third-party runtime dependency requires amending this requirement.

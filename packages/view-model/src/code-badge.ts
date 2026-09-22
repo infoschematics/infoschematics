@@ -12,7 +12,7 @@ import { annotationLabelWidth, visualTokens } from './tokens.ts'
  * the placement cannot live in the layer that draws one of them: it belongs here, where a renderer drawing either
  * takes the same answer from the same element.
  */
-const { annotationHeight, annotationRadius } = visualTokens.canvas.output
+const { annotationHeight, annotationRadius } = visualTokens.canvas.metrics
 const { pointLabelGap, pointLabelHeight, pointRadius } = visualTokens.canvas.geometry
 
 /** The inset from a box's top-right corner, which is the corner nothing else on an element claims. */

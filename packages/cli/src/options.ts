@@ -43,6 +43,11 @@ export const renderOptionSpecs = {
     kind: 'value',
     placeholder: '<number>'
   },
+  scheme: {
+    describe: 'Colour scheme: light, dark, or adaptive. Defaults to light. An authored blueprint is unaffected.',
+    kind: 'value',
+    placeholder: '<scheme>'
+  },
   serve: { alias: 's', describe: 'Preview the render in a browser and refresh it on every change.', kind: 'flag' },
   scale: { describe: 'Multiply the raster pixel size. Defaults to 1.', kind: 'value', placeholder: '<number>' },
   watch: { alias: 'w', describe: 'Re-render whenever the input document changes. Requires --output.', kind: 'flag' }
@@ -59,6 +64,17 @@ export type CheckOptionName = keyof typeof checkOptionSpecs
 
 export type RenderFormat = 'png' | 'svg'
 
+/**
+ * The schemes this command offers, which is not every scheme the manifest holds.
+ *
+ * `blueprint` is authored by the document, not chosen by whoever renders it, so offering it here would let a caller
+ * contradict the drawing. A document that asks for a blueprint surface gets one whatever this option says.
+ *
+ * `adaptive` is not a palette but a refusal to pick one: the SVG carries both and whatever displays it decides. A
+ * raster cannot take it, because the choice has to be made before the pixels exist.
+ */
+export type RenderScheme = 'adaptive' | 'dark' | 'light'
+
 export type RenderArguments = Readonly<{
   /** Font files pinned for text, in declaration order. Empty means the host font stack. */
   fonts: readonly string[]
@@ -71,6 +87,8 @@ export type RenderArguments = Readonly<{
   /** Serve the render to a browser instead of, or as well as, writing it. */
   serve: boolean
   scale: number
+  /** The palette the output is painted in. A still cannot react to a preference, so it resolves one and writes it. */
+  scheme: RenderScheme
   /** Keep rendering until the process is interrupted, rather than converting once and exiting. */
   watch: boolean
 }>
@@ -119,6 +137,10 @@ check options
 ${optionLines(checkOptionSpecs)}
 
 Rendering the same document twice on one machine produces identical bytes. Pass --font to pin text across machines.
+--scheme dark writes a dark drawing rather than one that might become dark, because nothing downstream of a file
+reports a reader's preference. --scheme adaptive instead writes one SVG carrying both palettes, which follows the
+reader wherever CSS applies. It needs a consumer that resolves custom properties: one that does not paints those
+roles black, so name a scheme for anything but a browser. A PNG cannot carry both at all.
 Watch mode keeps the last good output while a document does not parse, and recovers when it parses again.
 
 Checking reports what is wrong with the drawing a valid document describes, and changes nothing. It exits 0 when the
@@ -168,6 +190,12 @@ const scaleOf = (value: string | undefined) => {
   return scale
 }
 
+const schemeOf = (value: string | undefined): RenderScheme => {
+  if (value === undefined) return 'light'
+  if (value === 'adaptive' || value === 'dark' || value === 'light') return value
+  throw new Error(`Unsupported scheme ${value}. Expected light, dark, or adaptive.`)
+}
+
 const portOf = (value: string | undefined) => {
   if (value === undefined) return defaultPort
   const port = Number(value)
@@ -199,6 +227,13 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
   const fonts = parsed.values.get('font') ?? []
   const output = parsed.single('output')
   const scale = scaleOf(parsed.single('scale'))
+  const scheme = schemeOf(parsed.single('scheme'))
+
+  /* A PNG is pixels, and a pixel cannot hold two colours pending a preference. The refusal is here rather than in
+     the encoder so the caller is told which of the two options to change. */
+  if (format === 'png' && scheme === 'adaptive') {
+    throw new Error('The adaptive scheme applies to SVG output. A raster cannot carry both palettes.')
+  }
 
   if (format === 'svg') {
     for (const option of ['font', 'scale'] as const) {
@@ -224,5 +259,5 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
     throw new Error('The watch option requires --output, because standard output cannot be rewritten.')
   if (watch && input === '-') throw new Error('The watch option requires a file to watch, not standard input.')
 
-  return { fonts, format, host, input, ...(output ? { output } : {}), port, scale, serve, watch }
+  return { fonts, format, host, input, ...(output ? { output } : {}), port, scale, scheme, serve, watch }
 }

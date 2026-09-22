@@ -80,7 +80,7 @@ _Evidence:_ authored appearance in `packages/domain-model/src/appearance.ts` car
 
 ### APPEAR-006 — Shared visual semantics have one source
 
-View Model MUST export a deeply readonly `visualTokens` manifest for visual values that must agree across renderer paths or between TypeScript geometry and rendered output. The manifest MUST group Canvas values by geometry, surfaces, text, Flows, focus, selection, and motion-independent output defaults. Token names MUST describe stable semantic roles rather than literal colours or measurements.
+View Model MUST export a deeply readonly `visualTokens` manifest for visual values that must agree across renderer paths or between TypeScript geometry and rendered output. The manifest MUST group Canvas values by geometry, typography, metrics, Flows, focus, selection, readable ink, and paint, where paint holds one role set realised by every colour scheme the product offers. Token names MUST describe stable semantic roles rather than literal colours or measurements.
 
 Authored Scope fills and Flow-family colours MUST remain `InfoschematicConfig` data. Present chrome, Studio chrome, and intentional one-off composition values MUST NOT be promoted solely because they repeat within one View.
 
@@ -88,7 +88,7 @@ _Conformance:_ conforming
 
 _Verify:_ inspect the manifest in `packages/view-model/src/tokens.ts` for its grouping and its names.
 
-_Evidence:_ `packages/view-model/src/tokens.ts` freezes a `visualTokens` manifest grouping Canvas values by geometry, surfaces, text, flows, emphasis, focus, selection and output defaults, and `packages/view-model/src/tokens.test.ts` asserts the semantic names and representative values. Authored Scope fills and Flow-family colours stay in `packages/domain-model/src/model.ts`.
+_Evidence:_ `packages/view-model/src/tokens.ts` freezes a `visualTokens` manifest grouping Canvas values by geometry, typography, metrics, flows, emphasis, focus, selection, ink and per-scheme paint defaults, and `packages/view-model/src/tokens.test.ts` asserts the semantic names and representative values. Authored Scope fills and Flow-family colours stay in `packages/domain-model/src/model.ts`.
 
 ### APPEAR-007 — CSS projection is deterministic
 
@@ -112,7 +112,7 @@ _Evidence:_ `packages/view-canvas/src/tokens.test.tsx` asserts Canvas consumes o
 
 ### APPEAR-009 — Shared Canvas semantics use generated tokens
 
-Canvas MUST consume the generated CSS projection of View Model's `visualTokens` manifest for shared geometry, surfaces, text, Flow, focus, selection, and output-default values. Generated custom properties MUST use the `--infoschematic-canvas-<group>-<token>` namespace and MUST NOT be edited as an independent styling source.
+Canvas MUST consume the generated CSS projection of View Model's `visualTokens` manifest for shared geometry, typography, metrics, Flow, focus, selection, ink and paint-role values. Generated custom properties MUST use the `--infoschematic-canvas-<group>-<token>` namespace and MUST NOT be edited as an independent styling source.
 
 Canvas-only hit targets, drag handles, editing guides, and transient motion MAY remain local when no framework-neutral calculation or renderer must agree on their value. Authored Scope fills and Flow-family colours MUST continue to come from `InfoschematicConfig` rather than the generated token set.
 
@@ -121,6 +121,22 @@ _Conformance:_ conforming
 _Verify:_ inspect the custom properties Canvas resolves, and confirm authored colours still arrive as data.
 
 _Evidence:_ `packages/view-canvas/src/tokens.test.tsx` covers the three clauses in turn: shared CSS decisions come only from generated custom properties, component and editing-grid geometry come from the manifest, and authored Scope, Flow-family and Region colours stay in the rendered data rather than the generated token set.
+
+### APPEAR-019 — A colour scheme is the reader's context and a surface is authored
+
+The product MUST offer the same authored Infoschematic in every colour scheme it supports, and a scheme MUST NOT be authorable: no appearance field names one, because a definition outlives the contexts it is read in. Every palette MUST answer every paint role, so no drawing can be painted half in one scheme and half in another.
+
+An interactive drawing MUST let the page resolve the scheme, referencing each role as its generated custom property rather than resolving a palette in TypeScript: the reader's preference and a host's override are both the browser's to settle, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). The generated projection MUST therefore declare the default scheme unconditionally, the alternative behind `prefers-color-scheme`, and each scheme behind an attribute a host sets when it has resolved one itself — so the default path needs no script at all, per [ADR-INFOSCHEMATICS-005](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md).
+
+The generated projection MUST also restore the default scheme under `print` media, declared after both the reader's preference and the host's override so that source order settles it on equal specificity: a dark palette on paper is a page of ink and a drawing a reader cannot read. An authored `blueprint` surface MUST keep its own palette when printed, because it outranks a scheme by specificity rather than by order.
+
+An authored `blueprint` surface MUST pin its palette in either scheme and MUST override any scheme a caller asked for, because it is authored data and a scheme is not. Authored Scope, Domain and Flow-family colours MUST be unchanged by a scheme: a scheme change re-resolves only the readable ink measured against an authored fill, and the readable-ink pair MUST stay outside the palettes so it follows the fill rather than the scheme.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test --filter=@infoschematics/view-model` and the Canvas browser suite, then ask the page for each `prefers-color-scheme` preference and read what the drawing resolved — not what the stylesheet says, because a role one block declares and another omits resolves to whatever was left behind and looks correct in the scheme that declared it. Confirm a blueprint document stays blueprint under both preferences and under a host attribute; confirm an authored fill's resolved ink does not change with the scheme. Falsified by a palette missing a role, by a literal colour in a Canvas source file, or by a scheme reaching an authored colour. Ask the same page for `print` media: the default palette must come back over a dark preference, while an authored blueprint keeps its own.
+
+_Evidence:_ `packages/view-model/src/tokens.ts` holds one role set per scheme with `paintVariable` naming each as a custom property; `scripts/generate-visual-tokens.ts` refuses to write the stylesheet when the palettes disagree about their roles; `packages/view-canvas/src/Canvas.schemes.browser.test.tsx` proves the resolved scheme, the host override and the blueprint pin in a browser; `packages/view-canvas/src/tokens.test.tsx` holds the per-block role floor.
 
 ### APPEAR-010 — Visual reduction preserves accessible meaning
 

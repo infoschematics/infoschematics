@@ -164,6 +164,91 @@ const withDiagramParts = (
   }
 })
 
+/**
+ * One drawing that leaves to the palette everything a document does not state, so a scheme is what decides it.
+ *
+ * Every other specimen authors a blueprint surface and fills tuned for it, which is a deliberate treatment and
+ * therefore the same in either scheme — correct, and useless for showing what a scheme changes. This one authors
+ * no surface, no grid colour, no Region fill and no frame colour, so paper, grid, frames and every piece of type
+ * come from the palette. A Card still names a Scope and a Flow still names a family, and both carry an author's
+ * colour: those stay put in either scheme, which is the other half of what the page has to show.
+ */
+export const schemeSpecimen: InfoschematicConfig = defineInfoschematic({
+  title: 'Colour scheme example',
+  subtitle: 'The same definition, painted by the scheme it is read in.',
+  infoschematic: {
+    viewBox: { x: 0, y: 0, width: 720, height: 260 },
+    appearance: { grid: 'major-plus-minor', card: { identity: true, stereotype: true } },
+    /* Mid-tone rather than tuned to a paper: an authored colour is not repainted by a scheme, so one chosen for
+       light paper would still be sitting on dark paper under the other preference. The ink over it is resolved
+       from its luminance either way. */
+    scopes: [
+      {
+        id: 'placed',
+        label: 'Placed',
+        prefix: 'PLA',
+        description: 'Placed components',
+        color: '#79c9ff',
+        fill: '#3f5a70'
+      }
+    ],
+    flowFamilies: [
+      { id: 'connection', label: 'Flow', prefix: 'FLOW', description: 'A meaningful connection', color: '#79c9ff' }
+    ],
+    regions: [
+      {
+        id: 'region',
+        label: 'Region',
+        box: { x: 30, y: 30, width: 660, height: 200, radius: 10 },
+        frame: { style: 'solid', opacity: 1 },
+        labelMount: 'boundary',
+        labelPlacement: 'north-west'
+      }
+    ],
+    cards: [
+      {
+        id: 'source',
+        code: 'CARD-01',
+        label: 'Source',
+        detail: 'Placed component',
+        stereotype: 'Component',
+        scopes: ['placed'],
+        scope: 'placed',
+        placement: { box: { x: 80, y: 90, width: 220, height: 100 }, ports: { east: 1 } }
+      },
+      {
+        id: 'target',
+        code: 'CARD-02',
+        label: 'Target',
+        detail: 'Placed component',
+        stereotype: 'Component',
+        scopes: ['placed'],
+        scope: 'placed',
+        placement: { box: { x: 420, y: 90, width: 220, height: 100 }, ports: { west: 1 } }
+      }
+    ],
+    fabrics: [],
+    points: [],
+    flows: [
+      {
+        id: 'flow',
+        code: 'FLOW-01',
+        family: 'connection',
+        source: 'source',
+        sourcePort: 'E1',
+        target: 'target',
+        targetPort: 'W1',
+        label: { along: 0.5 },
+        points: [
+          { x: 300, y: 140 },
+          { x: 420, y: 140 }
+        ]
+      }
+    ],
+    graphics: []
+  }
+})
+
 export const anatomySpecimen = completeSpecimen()
 
 export function specimenFor(kind: SpecimenKind): InfoschematicConfig {

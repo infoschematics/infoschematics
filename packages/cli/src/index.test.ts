@@ -180,8 +180,50 @@ describe('renderer CLI', () => {
     expect(run.output().stderr).toContain('--format png')
   })
 
+  /*
+   * A scheme is resolved by whoever renders, and written into what they get.
+   *
+   * The command's output is a file: no stylesheet follows it and no preference reaches it, so asking for dark has to
+   * change the bytes. Asserting the two renderings differ is the whole claim — a `--scheme` that parsed and then
+   * painted the same drawing would pass every other case here.
+   */
+  it('paints the scheme it was asked for and refuses one it does not offer', async () => {
+    const light = harness({ 'model.yaml': yaml })
+    const dark = harness({ 'model.yaml': yaml })
+    const authored = `${yaml}  appearance:\n    surface: blueprint\n`
+    const blueprint = harness({ 'model.yaml': authored })
+    const blueprintDark = harness({ 'model.yaml': authored })
+
+    expect(await runRendererCli(['render', 'model.yaml'], light.io)).toBe(rendererCliExit.success)
+    expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'dark'], dark.io)).toBe(rendererCliExit.success)
+    expect(dark.output().stdout).not.toBe(light.output().stdout)
+
+    // The document authored its surface, so the caller's scheme does not reach it.
+    expect(await runRendererCli(['render', 'model.yaml'], blueprint.io)).toBe(rendererCliExit.success)
+    expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'dark'], blueprintDark.io)).toBe(
+      rendererCliExit.success
+    )
+    expect(blueprintDark.output().stdout).toBe(blueprint.output().stdout)
+
+    /* Asked to defer instead of choose, the SVG carries both palettes and the rule that picks between them. */
+    const adaptive = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'adaptive'], adaptive.io)).toBe(
+      rendererCliExit.success
+    )
+    expect(adaptive.output().stdout).toContain('@media (prefers-color-scheme: dark)')
+
+    // A raster has to be told: the colour is in the pixel, so nothing about it can wait for a reader.
+    const raster = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(['render', 'model.yaml', '--format', 'png', '--scheme', 'adaptive'], raster.io)).toBe(
+      rendererCliExit.usage
+    )
+    expect(raster.output().stderr).toContain('A raster cannot carry both palettes.')
+  })
+
   it.each([
     ['render', 'model.yaml', '--format', 'gif'],
+    ['render', 'model.yaml', '--scheme', 'blueprint'],
+    ['render', 'model.yaml', '--scheme', 'sepia'],
     ['render', 'model.yaml', '--format', 'png', '--scale', 'wide'],
     ['render', 'model.yaml', '--format', 'png', '--scale', '0'],
     ['render', 'model.yaml', '-o', 'one.svg', '-o', 'two.svg'],

@@ -55,6 +55,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 43. [ADR-INFOSCHEMATICS-038](ADR-INFOSCHEMATICS-038-a-scene-cues-a-dynamic-and-a-view-owns-the-cadence.md) — let a Scene cue named Dynamics with a bounded `once` or `repeat` policy, keeping every timer in the View that plays it.
 44. [ADR-INFOSCHEMATICS-039](ADR-INFOSCHEMATICS-039-a-sequence-paces-a-cascade-and-a-declaration-never-does.md) — let a Scene cue an ordered cascade in either kind of Sequence, paced by the Sequence's own stepping rather than by anything the document counts.
 45. [ADR-INFOSCHEMATICS-040](ADR-INFOSCHEMATICS-040-a-checker-measures-a-drawing-and-never-repairs-it.md) — review a drawing by measuring it and reporting findings a reader can act on, never by moving anything or choosing a repair.
+46. [ADR-INFOSCHEMATICS-041](ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md) — attach a palette to a colour scheme rather than to the outlet drawing it, resolved by the browser for an interactive drawing and once by the renderer for a still.
 
 ## Repository operation
 

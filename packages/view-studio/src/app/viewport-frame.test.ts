@@ -10,7 +10,7 @@ describe('Studio diagram frame', () => {
     expect(canvas).toContain('place-items: center;')
     // The token, not the `#081725` it happens to generate today: Studio's copy wrote the literal, which is how a
     // backdrop change would have reached the diagram everywhere except the editor.
-    expect(canvas).toContain('background: color-mix(in srgb, var(--infoschematic-canvas-surfaces-backdrop) 72%, #000);')
+    expect(canvas).toContain('background: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 72%, #000);')
   })
 
   it('takes the frame and its container from the Canvas stylesheet it imports, rather than copies of its own', async () => {

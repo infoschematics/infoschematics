@@ -1,6 +1,12 @@
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
 import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
-import { annotationLabelWidth, visualTokens } from '@infoschematics/view-model/tokens'
+import {
+  adaptivePaint,
+  annotationLabelWidth,
+  paintDeclarations,
+  paintFor,
+  visualTokens
+} from '@infoschematics/view-model/tokens'
 import { describe, expect, it } from 'vitest'
 import { renderInfoschematicSvg } from './index.ts'
 
@@ -177,7 +183,7 @@ describe('renderInfoschematicSvg', () => {
       [
         '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
-        `  <rect class="infoschematic-backdrop" fill="${visualTokens.canvas.output.backdrop}" height="80" width="120" x="0" y="0" />`,
+        `  <rect class="infoschematic-backdrop" fill="${paintFor('light').backdrop}" height="80" width="120" x="0" y="0" />`,
         '</svg>'
       ].join('\n')
     )
@@ -321,17 +327,17 @@ describe('renderInfoschematicSvg', () => {
       visibility: { graphics: 'all' }
     })
 
-    expect(svg).toContain(`fill="${visualTokens.canvas.output.backdrop}"`)
+    expect(svg).toContain(`fill="${paintFor('light').backdrop}"`)
     expect(svg).toContain(`rx="${visualTokens.canvas.geometry.cornerRadius}"`)
     expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.pipeWidth}"`)
     expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.routeWidth}"`)
     expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.flows.dash}"`)
     expect(svg).toContain(`stroke-linecap="${visualTokens.canvas.flows.lineCap}"`)
     expect(svg).toContain(`stroke-linejoin="${visualTokens.canvas.flows.lineJoin}"`)
-    expect(svg).toContain(`opacity="${visualTokens.canvas.output.unfocusedOpacity}"`)
-    expect(svg).toContain(`font-family="${visualTokens.canvas.output.fontFamily}"`)
-    expect(svg).toContain(`font-size="${visualTokens.canvas.output.metadataFontSize}"`)
-    expect(svg).toContain(`fill="${visualTokens.canvas.output.cardText}"`)
+    expect(svg).toContain(`opacity="${visualTokens.canvas.metrics.unfocusedOpacity}"`)
+    expect(svg).toContain(`font-family="${visualTokens.canvas.typography.staticBodyFamily}"`)
+    expect(svg).toContain(`font-size="${visualTokens.canvas.typography.metadataFontSize}"`)
+    expect(svg).toContain(`fill="${visualTokens.canvas.ink.dark}"`)
 
     expect(svg).toContain('fill="#f8fafc"')
     expect(svg).toContain('fill="#dbeafe"')
@@ -384,14 +390,14 @@ describe('renderInfoschematicSvg', () => {
     const svg = renderInfoschematicSvg(config)
     expect(svg).toContain('data-grid-treatment="major-plus-minor"')
     expect(svg).toContain('data-surface-treatment="blueprint"')
-    expect(svg).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}"`)
+    expect(svg).toContain(`fill="${paintFor('blueprint').backdrop}"`)
     expect(svg).toContain('id="infoschematic-grid-major-plus-minor"')
     expect(svg).toContain('data-frame-treatment="dashed"')
     expect(svg).toContain('data-frame-treatment="dotted"')
     expect(svg).toContain('data-label-treatment="notched"')
     expect(svg).toContain('data-label-treatment="plain"')
-    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.surfaces.regionDash}"`)
-    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.surfaces.regionDot}"`)
+    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.metrics.regionDash}"`)
+    expect(svg).toContain(`stroke-dasharray="${visualTokens.canvas.metrics.regionDot}"`)
     expect(svg).toContain('stroke-linecap="round"')
     expect(svg).toContain('data-label-placement="south-east"')
     expect(svg).toContain('data-collection="platform"')
@@ -402,7 +408,7 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('stroke="#13579b"')
     expect(svg).toContain('class="infoschematic-card-identity"')
     expect(svg).toContain('data-card-detail="identity"')
-    expect(svg).toContain(`<rect fill="${visualTokens.canvas.surfaces.backdrop}" height="20" rx="4"`)
+    expect(svg).toContain(`<rect fill="${paintFor('blueprint').annotationFill}" height="20" rx="4"`)
     expect(svg).toContain('class="infoschematic-card-stereotype"')
     expect(svg).toContain('>SERVICE<')
     expect(svg).toContain('class="infoschematic-card-description"')
@@ -433,8 +439,9 @@ describe('renderInfoschematicSvg', () => {
     expect(labelOnly).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
   })
 
-  it('paints the midground from the blueprint palette rather than the neutral output set', () => {
-    const { output, surfaces } = visualTokens.canvas
+  it('paints the midground from the palette the drawing resolved rather than one fixed set', () => {
+    const light = paintFor('light')
+    const blueprintPaint = paintFor('blueprint')
     const empty = blank('Midground palette')
     const withFabric: InfoschematicConfig = {
       ...empty,
@@ -489,18 +496,92 @@ describe('renderInfoschematicSvg', () => {
       visibility: { graphics: 'all' }
     })
 
-    // The Canvas draws blueprint natively, so a Fabric or Graphic left on the
-    // light output set here is a white slab on a dark backdrop in this renderer
-    // alone. Neutral keeps that same output set unchanged.
-    expect(blueprint).toContain(`fill="${surfaces.fabricFill}"`)
-    expect(blueprint).toContain(`stroke="${surfaces.fabricStroke}"`)
-    expect(blueprint).toContain(`fill="${surfaces.graphicFallbackFill}"`)
-    expect(blueprint).toContain(`stroke="${surfaces.graphicFallbackStroke}"`)
-    expect(blueprint).not.toContain(`fill="${output.surface}"`)
-    expect(blueprint).not.toContain(`fill="${output.graphicFill}"`)
-    expect(neutral).toContain(`fill="${output.surface}"`)
-    expect(neutral).toContain(`fill="${output.graphicFill}"`)
-    expect(neutral).not.toContain(`fill="${surfaces.fabricFill}"`)
+    // A Fabric or Graphic left on the light palette while the drawing is a blueprint is a white slab on a dark
+    // backdrop, which is the defect this case was opened for; the same mistake is now possible in either direction,
+    // so both are asserted.
+    expect(blueprint).toContain(`fill="${blueprintPaint.fabricFill}"`)
+    expect(blueprint).toContain(`stroke="${blueprintPaint.fabricStroke}"`)
+    expect(blueprint).toContain(`fill="${blueprintPaint.graphicFill}"`)
+    expect(blueprint).toContain(`stroke="${blueprintPaint.graphicStroke}"`)
+    expect(blueprint).not.toContain(`fill="${light.surface}"`)
+    expect(blueprint).not.toContain(`fill="${light.graphicFill}"`)
+    expect(neutral).toContain(`fill="${light.surface}"`)
+    expect(neutral).toContain(`fill="${light.graphicFill}"`)
+    expect(neutral).not.toContain(`fill="${blueprintPaint.fabricFill}"`)
+  })
+
+  /*
+   * A still rendering resolves the scheme once and writes what it settled on.
+   *
+   * Nothing downstream can re-resolve it: a PNG has no preference to read and an `<img>` carries no stylesheet, so
+   * asking for the dark scheme has to change the bytes rather than add a rule that something else might apply. An
+   * authored blueprint is not a scheme, and a caller asking for dark must not be able to repaint it.
+   */
+  it('writes the scheme it was asked for, and lets an authored blueprint override it', () => {
+    const dark = paintFor('dark')
+    const light = paintFor('light')
+    const document = blank('Scheme lock')
+
+    const defaulted = renderInfoschematicSvg(document)
+    const asLight = renderInfoschematicSvg(document, { scheme: 'light' })
+    const asDark = renderInfoschematicSvg(document, { scheme: 'dark' })
+
+    expect(defaulted).toBe(asLight)
+    expect(asLight).toContain(`fill="${light.backdrop}"`)
+    expect(asDark).toContain(`fill="${dark.backdrop}"`)
+    expect(asDark).not.toContain(`fill="${light.backdrop}"`)
+    // The resolved colours are literals, so nothing in the output defers the decision to a reader's preference.
+    expect(asDark).not.toContain('prefers-color-scheme')
+    expect(asDark).not.toContain('var(--infoschematic')
+
+    const asBlueprintDocument: InfoschematicConfig = {
+      ...document,
+      infoschematic: { ...document.infoschematic, appearance: { surface: 'blueprint' } }
+    }
+    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toBe(
+      renderInfoschematicSvg(asBlueprintDocument, { scheme: 'light' })
+    )
+    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toContain(
+      `fill="${paintFor('blueprint').backdrop}"`
+    )
+  })
+
+  it('carries both palettes when it is asked to defer the scheme, and pins an authored blueprint anyway', () => {
+    const document = blank('Self-theming')
+    const adaptive = renderInfoschematicSvg(document, { scheme: 'adaptive' })
+
+    /* Both palettes and the rule that chooses between them, so the file answers a preference it was never told. */
+    expect(adaptive).toContain('data-infoschematic-paint="adaptive"')
+    expect(adaptive).toContain('@media (prefers-color-scheme: dark)')
+    /* And paper, last: a drawing that followed a dark-preference reader onto a page is a page of ink. */
+    expect(adaptive.indexOf('@media print')).toBeGreaterThan(adaptive.indexOf('@media (prefers-color-scheme: dark)'))
+    const printed = adaptive.slice(adaptive.indexOf('@media print'), adaptive.indexOf('</style>'))
+    for (const [name, value] of paintDeclarations('light')) expect(printed, name).toContain(`${name}: ${value};`)
+    for (const scheme of ['light', 'dark'] as const) {
+      for (const [name, value] of paintDeclarations(scheme)) expect(adaptive, name).toContain(`${name}: ${value};`)
+    }
+
+    /* Referenced through inline style, never a presentation attribute: `fill="var(...)"` is a CSS value only where
+       SVG 2 parsing is implemented, and this is the output that lands in a browser nobody chose. */
+    expect(adaptive).toContain(`style="fill: ${adaptivePaint.backdrop}"`)
+    expect(adaptive).not.toMatch(/(?:fill|stroke)="var\(/)
+    /* Outside that stylesheet, no palette colour is written at all: a literal on a drawn element is a colour this
+       rendering decided, which is the one thing an adaptive rendering does not do. A fallback would be such a
+       colour, and buys nothing anyway: a consumer that does not resolve `var()` does not read its fallback. */
+    const drawn = adaptive.slice(adaptive.indexOf('</style>'))
+    for (const scheme of ['light', 'dark'] as const) {
+      for (const [name, value] of paintDeclarations(scheme)) expect(drawn, name).not.toContain(value)
+    }
+
+    const asBlueprintDocument: InfoschematicConfig = {
+      ...document,
+      infoschematic: { ...document.infoschematic, appearance: { surface: 'blueprint' } }
+    }
+    // An authored blueprint has no scheme to defer: there is one palette, and a reader's preference is not about it.
+    const blueprint = renderInfoschematicSvg(asBlueprintDocument, { scheme: 'adaptive' })
+    expect(blueprint).toBe(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'light' }))
+    expect(blueprint).not.toContain('prefers-color-scheme')
+    expect(blueprint).toContain(`fill="${paintFor('blueprint').backdrop}"`)
   })
 
   it('renders the dots grid treatment as a point pattern at each grid intersection', () => {
@@ -680,8 +761,8 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(representative, { annotations: { flows: true } })).toBe(annotated)
     expect(annotated).toContain('class="infoschematic-flow-annotation"')
     expect(annotated).toContain('>CALL-001</text>')
-    expect(annotated).toContain(`fill="${visualTokens.canvas.output.annotationFill}"`)
-    expect(annotated).toContain(`font-family="${visualTokens.canvas.output.codeFontFamily}"`)
+    expect(annotated).toContain(`fill="${paintFor('light').annotationFill}"`)
+    expect(annotated).toContain(`font-family="${visualTokens.canvas.typography.staticCodeFamily}"`)
     expect(annotated).toContain(`width="${annotationLabelWidth('CALL-001')}"`)
     expect(annotated).toContain('x="200" y="114"')
 
@@ -801,9 +882,9 @@ describe('renderInfoschematicSvg', () => {
     expect(dark).toContain('data-ink="light"')
     expect(dark).toContain('data-ink="dark"')
     expect(dark).toContain('class="infoschematic-region-label" data-ink="light"')
-    expect(dark).toContain(`fill="${visualTokens.canvas.output.cardTextInverse}"`)
-    expect(dark).toContain(`fill="${visualTokens.canvas.output.textMutedInverse}"`)
-    expect(dark).toContain(`fill="${visualTokens.canvas.surfaces.backdrop}" height="20"`)
+    expect(dark).toContain(`fill="${visualTokens.canvas.ink.light}"`)
+    expect(dark).toContain(`fill="${visualTokens.canvas.ink.lightMuted}"`)
+    expect(dark).toContain(`fill="${paintFor('light').annotationFill}" height="20"`)
   })
 
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
@@ -882,14 +963,14 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('url(#infoschematic-artwork-1-grid)')
     // A version the catalogue does not state leaves the generic plane, which is `EXTEND-001`'s fallback drawn.
     expect(svg).toContain('>FUTURE: future · A substrate every stage can reach<')
-    expect(svg).toContain(`fill="${visualTokens.canvas.output.surface}" height="80" rx=`)
+    expect(svg).toContain(`fill="${paintFor('light').surface}" height="80" rx=`)
 
     // Paint is the outlet's: the paper palette by default, the interactive ink where the document asks for blueprint.
-    expect(svg).toContain(`fill="${visualTokens.canvas.artwork.output.shell}"`)
-    expect(svg).not.toContain(`fill="${visualTokens.canvas.artwork.ink.shell}"`)
+    expect(svg).toContain(`fill="${paintFor('light').artwork.shell}"`)
+    expect(svg).not.toContain(`fill="${paintFor('blueprint').artwork.shell}"`)
     const blueprint = renderInfoschematicSvg(catalogue('blueprint'))
-    expect(blueprint).toContain(`fill="${visualTokens.canvas.artwork.ink.shell}"`)
-    expect(blueprint).not.toContain(`fill="${visualTokens.canvas.artwork.output.shell}"`)
+    expect(blueprint).toContain(`fill="${paintFor('blueprint').artwork.shell}"`)
+    expect(blueprint).not.toContain(`fill="${paintFor('light').artwork.shell}"`)
   })
 
   it('fails explicitly when a selected Scene does not exist', () => {

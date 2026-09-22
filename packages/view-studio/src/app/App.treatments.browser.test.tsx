@@ -9,8 +9,9 @@
  * These cases assert Canvas-owned treatments through Studio's stylesheet, so the shadowing is observable.
  */
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import { expect, test } from 'vitest'
-import { page } from 'vitest/browser'
+import { paintFor } from '@infoschematics/view-model/tokens'
+import { afterEach, expect, test } from 'vitest'
+import { commands, page } from 'vitest/browser'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
 import '../styles.css'
@@ -75,24 +76,47 @@ test('paints a selected Card from the shared tokens, so a Canvas treatment reach
   expect(getComputedStyle(shell).stroke).toBe('rgb(130, 179, 102)')
 })
 
+/** What the page currently resolves the shared backdrop role to, which is the only value Studio may be painting from. */
+const backdropToken = () =>
+  getComputedStyle(document.documentElement).getPropertyValue('--infoschematic-canvas-paint-backdrop').trim()
+
+/**
+ * Whether an element's background is the panel's mix of a given colour.
+ *
+ * The mix is computed by the browser, so the expected value is produced the same way rather than written out: a
+ * hand-converted `rgb()` would be asserting this suite's colour arithmetic instead of the rule Studio applied.
+ */
+const paintedFrom = (element: Element, colour: string) => {
+  const probe = document.createElement('div')
+  probe.style.backgroundColor = `color-mix(in srgb, ${colour} 72%, #000)`
+  document.body.append(probe)
+  const expected = getComputedStyle(probe).backgroundColor
+  probe.remove()
+  return { actual: getComputedStyle(element).backgroundColor, expected }
+}
+
+/* One browser context serves this whole file, so a preference outlives the case that asked for it. */
+afterEach(async () => {
+  await commands.emulateColourScheme('no-preference')
+})
+
 test('paints the diagram container from the backdrop token, not a literal Studio copy of it', async () => {
   const container = await designing()
 
-  // Studio carried its own `.infoschematic`, identical but for `#081725` where Canvas writes the token — so a backdrop
-  // change would have reached every surface except the editor. Reading the token and the painted colour together is
-  // what says the container is taking Canvas's rule rather than a copy that happens to agree today.
-  const backdrop = getComputedStyle(document.documentElement)
-    .getPropertyValue('--infoschematic-canvas-surfaces-backdrop')
-    .trim()
-  expect(backdrop).toBe('#081725')
-
+  // Studio carried its own `.infoschematic`, identical but for a blueprint literal where Canvas writes the token — so
+  // a backdrop change would have reached every surface except the editor. Reading the token and the painted colour
+  // together is what says the container is taking Canvas's rule rather than a copy that happens to agree today. The
+  // token is now per-scheme, so a literal would only be wrong under the other preference: both are read here, and the
+  // expected value comes from the manifest rather than from a colour spelled out in this file.
   const surface = container.querySelector('.infoschematic')
   if (!surface) throw new Error('Studio did not render the diagram container')
-  const probe = document.createElement('div')
-  probe.style.backgroundColor = `color-mix(in srgb, ${backdrop} 72%, #000)`
-  document.body.append(probe)
-  expect(getComputedStyle(surface).backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
-  probe.remove()
+
+  for (const scheme of ['light', 'dark'] as const) {
+    await commands.emulateColourScheme(scheme)
+    expect(backdropToken(), scheme).toBe(paintFor(scheme).backdrop)
+    const { actual, expected } = paintedFrom(surface, backdropToken())
+    expect(actual, scheme).toBe(expected)
+  }
 
   // Studio's panel override is the one thing it does say about the container, and it has to keep saying it.
   expect(getComputedStyle(surface).aspectRatio).toBe('auto')

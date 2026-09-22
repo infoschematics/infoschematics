@@ -25,7 +25,7 @@ const { geometry } = visualTokens.canvas.artwork
 /**
  * What one part of a piece is painted in, named by its role rather than by a colour.
  *
- * A renderer resolves the role against its own palette — `visualTokens.canvas.artwork.ink` for the dark interactive
+ * A renderer resolves the role against the resolved palette — `artworkPaintVariable` for the interactive
  * surface, `.output` for the static renderer's light paper — exactly as a Card's ink is already resolved per outlet.
  */
 export type ArtworkPaint =

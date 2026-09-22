@@ -633,9 +633,9 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
       candidates: [0.5, 0.4, 0.6, 0.3, 0.7, 0.25, 0.75, 0.2, 0.8, 0.15, 0.85],
       drafts,
       label: {
-        height: visualTokens.canvas.output.annotationHeight,
+        height: visualTokens.canvas.metrics.annotationHeight,
         width: Math.max(
-          visualTokens.canvas.output.annotationWidth,
+          visualTokens.canvas.metrics.annotationWidth,
           ...shownFlows.map((flow) => annotationLabelWidth(flow.code))
         )
       },

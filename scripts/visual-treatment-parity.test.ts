@@ -8,7 +8,7 @@ import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '../
 import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
 import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
-import { visualTokens } from '../packages/view-model/src/tokens.ts'
+import { paintFor, visualTokens } from '../packages/view-model/src/tokens.ts'
 
 /**
  * Every `url(#…)` reference in one rendering, paired with whether that same rendering defines it.
@@ -501,9 +501,7 @@ describe('visual treatment renderer parity', () => {
     // Each band is filled with the surface its label sits on: the Region's own fill under a plain label, the
     // backdrop under a boundary-mounted one, which is the same reading the label's ink takes.
     expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="#0b2a3a"`)
-    expect(svg).toContain(
-      `<rect class="infoschematic-region-label-backing" fill="${visualTokens.canvas.surfaces.backdrop}"`
-    )
+    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="${paintFor('blueprint').backdrop}"`)
     // Canvas states the fill where it beats the class rule that gives every other band its surface colour: a
     // presentation attribute loses to a stylesheet, so the Region's own fill is inline style or it is not applied.
     expect(canvas).toContain('class="infoschematic-region-label-backing" style="fill:#0b2a3a"')
@@ -838,19 +836,39 @@ const artworkPiece = (markup: string, key: string) => {
   return markup.slice(start, closed)
 }
 
+/** Which artwork role a blueprint drawing resolved, keyed by the colour it resolved to. */
+const artworkRoleByValue = new Map(
+  Object.entries(paintFor('blueprint').artwork).map(([role, value]) => [value, `artwork:${role}`])
+)
+
+/**
+ * The role a paint attribute names, whichever outlet wrote it.
+ *
+ * The two renderers agree about the role and deliberately differ about who resolves it: an interactive drawing
+ * references the custom property so it follows the scheme the page settled on, and a still writes the colour it
+ * resolved because nothing downstream of it can. Comparing the two literally would therefore fail on every piece
+ * while both were correct, so the comparison is made in the terms they actually share.
+ */
+const paintRole = (value: string) => {
+  const referenced = /^var\(--infoschematic-canvas-paint-artwork-([a-z-]+)\)$/.exec(value)
+  if (referenced?.[1]) return `artwork:${referenced[1].replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())}`
+  return artworkRoleByValue.get(value) ?? value
+}
+
 /**
  * What one piece draws, in the terms both renderers are meant to agree on.
  *
  * Shape counts and geometry are the agreement: a piece that draws six arrows in Canvas and five here is the defect
  * this check exists for. Resource references are reduced to a placeholder because each rendering names its own ids
  * — `resolvedReferences` is what asserts those resolve — and `font-family` is left out because the two surfaces
- * deliberately set their own, exactly as a Card's already does.
+ * deliberately set their own, exactly as a Card's already does. Paint is compared as the role each side names,
+ * per `paintRole`.
  */
 const artworkDrawing = (markup: string, key: string) => {
   const piece = artworkPiece(markup, key)
-  const attribute = (name: string) =>
+  const attribute = (name: string, normalise: (value: string) => string = (value) => value) =>
     [...piece.matchAll(new RegExp(`\\b${name}="([^"]*)"`, 'g'))]
-      .map((match) => match[1].replace(/url\(#[^)]*\)/g, 'url(#resource)'))
+      .map((match) => normalise(match[1].replace(/url\(#[^)]*\)/g, 'url(#resource)')))
       .sort()
   return {
     counts: Object.fromEntries(
@@ -860,11 +878,11 @@ const artworkDrawing = (markup: string, key: string) => {
       ])
     ),
     d: attribute('d'),
-    fill: attribute('fill'),
+    fill: attribute('fill', paintRole),
     height: attribute('height'),
     markerEnd: attribute('marker-end'),
     r: attribute('r'),
-    stroke: attribute('stroke'),
+    stroke: attribute('stroke', paintRole),
     strokeDash: attribute('stroke-dasharray'),
     strokeWidth: attribute('stroke-width'),
     text: [...piece.matchAll(/<text\b[^>]*>([^<]*)<\/text>/g)].map((match) => match[1]).sort(),
@@ -878,8 +896,8 @@ const artworkDrawing = (markup: string, key: string) => {
 /*
  * The standard renderer catalogue is nine pieces the product offers rather than a host does, and each one is drawn
  * twice: once as React elements and once as SVG strings. Nothing but this check says the two walks of the one
- * description arrive at the same drawing. The documents ask for `blueprint`, because that is the surface on which
- * the static renderer resolves the interactive palette, so paint is comparable here too rather than only geometry.
+ * description arrive at the same drawing. The documents ask for `blueprint`, because that is the one surface both
+ * outlets resolve the same way, so paint is comparable here too rather than only geometry.
  */
 describe('standard renderer catalogue parity', () => {
   const box = (index: number) => ({ height: 140, width: 320, x: 40, y: 40 + index * 200 })

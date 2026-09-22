@@ -9,7 +9,7 @@ import { componentSections, type SpecimenKind } from './visual-guide/curriculum.
 import { DynamicsSpecimen } from './visual-guide/DynamicsSpecimen.tsx'
 import { dynamicsSpecimen } from './visual-guide/dynamics.ts'
 import { InteractiveSpecimen } from './visual-guide/InteractiveSpecimen.tsx'
-import { specimenFor } from './visual-guide/specimens.ts'
+import { schemeSpecimen, specimenFor } from './visual-guide/specimens.ts'
 import './styles.css'
 
 /* The catalogue's own key lists drive this, so a treatment added to the product appears here without an edit. */
@@ -30,6 +30,19 @@ const previewOptions = { annotations: { flows: true }, visibility: { graphics: '
 
 const previewSpecimen = (componentId: SpecimenKind | 'dynamics') =>
   componentId === 'dynamics' ? dynamicsSpecimen : specimenFor(componentId)
+
+/*
+ * The palette, drawn rather than tabulated.
+ *
+ * A swatch grid says which colours exist; it cannot say whether the light scheme is readable or only light, which is
+ * the claim a reviewer has to settle by looking. Three renderings of one definition say it: two resolved, so the
+ * palettes can be compared side by side, and one that defers, so the page shows what a reader actually gets.
+ */
+const schemeDrawings = [
+  { id: 'light', label: 'Light', options: { scheme: 'light' } },
+  { id: 'dark', label: 'Dark', options: { scheme: 'dark' } },
+  { id: 'adaptive', label: 'Follows your preference', options: { scheme: 'adaptive' } }
+] as const
 
 const futureRoute = {
   path: componentPaths.future,
@@ -134,6 +147,7 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
       currentPath={route.path}
       outline={[
         { depth: 2, slug: `${component.id}-example`, label: 'Example' },
+        ...(component.id === 'canvas' ? ([{ depth: 2, slug: 'canvas-schemes', label: 'Colour scheme' }] as const) : []),
         { depth: 2, slug: `${component.id}-properties`, label: 'Properties' }
       ]}
     >
@@ -207,6 +221,37 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
             />
           )}
         </section>
+        {component.id === 'canvas' && (
+          <section aria-labelledby="canvas-schemes" className="component-page__section">
+            <h2 id="canvas-schemes">Colour scheme</h2>
+            <p>
+              A colour scheme is the reader's context, not part of the definition: there is no appearance field for it,
+              and the same document is drawn in whichever scheme it is read in. An authored <code>surface</code> is the
+              other thing entirely — a blueprint drawing stays a blueprint in either scheme, because that is a treatment
+              its author chose.
+            </p>
+            <p>
+              An interactive drawing follows the page. A rendered file cannot, so{' '}
+              <code>infoschematics render --scheme dark</code> writes a dark drawing rather than one that might become
+              dark, and <code>--scheme adaptive</code> writes one SVG carrying both palettes — which is what the third
+              drawing below is.
+            </p>
+            <ul className="scheme-gallery">
+              {schemeDrawings.map(({ id, label, options }) => (
+                <li className="scheme-gallery__item" key={id}>
+                  <StaticInfoschematic
+                    className="scheme-gallery__drawing"
+                    input={schemeSpecimen}
+                    label={`Colour scheme example, ${label.toLowerCase()}`}
+                    options={options}
+                    resourceIdPrefix={`scheme-${id}`}
+                  />
+                  <p className="scheme-gallery__caption">{label}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section aria-labelledby={`${component.id}-properties`} className="component-page__section">
           <h2 id={`${component.id}-properties`}>Properties</h2>
           <p>The portable fields this component represents.</p>

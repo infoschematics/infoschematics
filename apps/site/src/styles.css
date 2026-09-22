@@ -1589,6 +1589,28 @@ a:focus-visible {
   scroll-margin-top: 1.5rem;
 }
 
+/* Three renderings of one definition, laid out so the palettes can be compared rather than only counted. */
+.scheme-gallery {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.scheme-gallery__drawing svg {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+.scheme-gallery__caption {
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+  opacity: 0.8;
+}
+
 @media (max-width: 640px) {
   .component-tour__item {
     grid-template-columns: minmax(0, 1fr);

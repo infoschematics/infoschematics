@@ -27,7 +27,14 @@ import {
   standardArtworkFor,
   standardArtworkSchemaVersion
 } from '@infoschematics/view-model/standard-artwork'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import {
+  adaptivePaint,
+  type PaintRoles,
+  type PaintScheme,
+  paintDeclarations,
+  paintFor,
+  visualTokens
+} from '@infoschematics/view-model/tokens'
 
 const canvasTokens = visualTokens.canvas
 
@@ -74,6 +81,16 @@ export type RenderInfoschematicSvgOptions = {
   cardDetails?: CardDetailOverrides
   /** Opt into responsive Card detail for this explicit rendered output size. */
   responsiveCardDetails?: RenderedSize
+  /**
+   * Which colour scheme this rendering is painted in. Defaults to `light`.
+   *
+   * A named scheme is resolved once and written as colours, which is what a raster encoder and a print path need:
+   * neither has a preference left to read. `adaptive` instead carries both palettes in the document's own
+   * stylesheet behind `prefers-color-scheme`, so one committed SVG reads correctly for someone whose preference
+   * this renderer will never know. An authored blueprint surface is not a scheme and overrides either, per
+   * `ADR-INFOSCHEMATICS-041`.
+   */
+  scheme?: RenderedScheme
   /** An authored Scene to render without introducing playback or other motion. */
   scene?: SvgSceneSelection
   /** Host-owned Dynamic occurrences, interpreted as this renderer's still treatment. Defaults to none. */
@@ -83,6 +100,49 @@ export type RenderInfoschematicSvgOptions = {
   /** Host-owned prefix for internal SVG resource ids. Use a unique value for each inline SVG. */
   resourceIdPrefix?: string
   visibility?: SvgVisibilityOptions
+}
+
+/**
+ * How a rendering answers the colour-scheme question.
+ *
+ * A `PaintScheme` names the answer, and `adaptive` declines to: the document then carries every palette it might
+ * need and lets whatever displays it choose. `blueprint` is accepted here because a caller may pin it, but a
+ * document that authored it does not need to.
+ */
+export type RenderedScheme = PaintScheme | 'adaptive'
+
+/** The attribute that marks a rendering as carrying its own palettes, and scopes the block that declares them. */
+const adaptiveMarker = 'data-infoschematic-paint'
+
+/**
+ * The palettes an adaptive rendering carries, as a stylesheet inside the document.
+ *
+ * Scoped to the marker attribute rather than `:root`, because `:root` is this `<svg>` in a standalone file and the
+ * host's `<html>` once the same markup is inlined into a page — which would declare a drawing's palette over
+ * everything around it. Declaring on the drawing's own element is enough either way: custom properties inherit.
+ *
+ * Paper is light whatever the screen was. A dark palette printed is a page of ink and a reader who cannot read the
+ * result, so the print rule comes last and restores the light palette; an authored blueprint outranks it, because
+ * that is a treatment its author chose rather than a scheme resolved for a reader.
+ */
+const adaptivePalettes = (depth: number) => {
+  const indentation = '  '.repeat(depth)
+  const block = (indent: string, scheme: PaintScheme) => [
+    `${indent}[${adaptiveMarker}="adaptive"] {`,
+    ...paintDeclarations(scheme).map(([name, value]) => `${indent}  ${name}: ${value};`),
+    `${indent}}`
+  ]
+  return [
+    `${indentation}<style>`,
+    ...block(`${indentation}  `, 'light'),
+    `${indentation}  @media (prefers-color-scheme: dark) {`,
+    ...block(`${indentation}    `, 'dark'),
+    `${indentation}  }`,
+    `${indentation}  @media print {`,
+    ...block(`${indentation}    `, 'light'),
+    `${indentation}  }`,
+    `${indentation}</style>`
+  ].join('\n')
 }
 
 type Attributes = readonly (readonly [name: string, value: boolean | number | string | undefined])[]
@@ -108,11 +168,29 @@ const number = (value: number) => {
   return Object.is(value, -0) ? '0' : String(value)
 }
 
-const attributes = (values: Attributes) =>
-  values
-    .filter((entry): entry is readonly [string, boolean | number | string] => entry[1] !== undefined)
-    .map(([name, value]) => ` ${name}="${xmlAttribute(typeof value === 'number' ? number(value) : String(value))}"`)
+const literal = (value: boolean | number | string) => (typeof value === 'number' ? number(value) : String(value))
+
+/**
+ * One element's attributes, with any custom-property reference moved into an inline style.
+ *
+ * `fill="var(--paint)"` is only a CSS value where SVG 2's presentation-attribute parsing is implemented, so it
+ * resolves in some engines and silently paints black in others. `style="fill: var(--paint)"` is the one spelling
+ * every engine agrees on — and a self-theming rendering is precisely the output that ends up in a browser nobody
+ * chose, in somebody else's README. A rendering that resolved its scheme writes colours and never reaches this.
+ */
+const attributes = (values: Attributes) => {
+  const present = values.filter(
+    (entry): entry is readonly [string, boolean | number | string] => entry[1] !== undefined
+  )
+  const referenced = present.filter(([, value]) => typeof value === 'string' && value.startsWith('var('))
+  const written = present
+    .filter((entry) => !referenced.includes(entry))
+    .map(([name, value]) => ` ${name}="${xmlAttribute(literal(value))}"`)
     .join('')
+  if (referenced.length === 0) return written
+  const declarations = referenced.map(([name, value]) => `${name}: ${literal(value)}`).join('; ')
+  return `${written} style="${xmlAttribute(declarations)}"`
+}
 
 const line = (depth: number, name: string, values: Attributes, content?: string) => {
   const indentation = '  '.repeat(depth)
@@ -135,14 +213,14 @@ const group = (depth: number, values: Attributes, children: readonly string[]) =
  * in the same place — `ROUTE-021` — so both come through here, and `resolveCodeBadge` rather than this file decides
  * where that place is for each kind of element.
  */
-const codeBadge = (depth: number, values: Attributes, anchor: CodeBadgeAnchor, code: string) => {
+const codeBadge = (depth: number, values: Attributes, anchor: CodeBadgeAnchor, code: string, paint: PaintRoles) => {
   const placement = resolveCodeBadge(anchor, code)
   return group(depth, values, [
     line(depth + 1, 'rect', [
-      ['fill', canvasTokens.output.annotationFill],
+      ['fill', paint.annotationFill],
       ['height', placement.height],
       ['rx', codeBadgeRadius],
-      ['stroke', canvasTokens.output.annotationStroke],
+      ['stroke', paint.annotationStroke],
       ['width', placement.width],
       ['x', placement.x],
       ['y', placement.y]
@@ -151,9 +229,9 @@ const codeBadge = (depth: number, values: Attributes, anchor: CodeBadgeAnchor, c
       depth + 1,
       'text',
       [
-        ['fill', canvasTokens.text.strong],
-        ['font-family', canvasTokens.output.codeFontFamily],
-        ['font-size', canvasTokens.output.annotationFontSize],
+        ['fill', paint.annotationText],
+        ['font-family', canvasTokens.typography.staticCodeFamily],
+        ['font-size', canvasTokens.typography.annotationFontSize],
         ['font-weight', 700],
         ['text-anchor', 'middle'],
         ['x', placement.textX],
@@ -259,7 +337,7 @@ const artworkPrimitives = (
           ['fill', ink[primitive.fill]],
           /* The scale is shared and the family is not, exactly as a Card's already is: this renderer sets its own
              paper face, and Canvas sets the interactive surface's. */
-          ['font-family', canvasTokens.output.fontFamily],
+          ['font-family', canvasTokens.typography.staticBodyFamily],
           ['font-size', artworkFontSize(primitive.role)],
           ['font-weight', primitive.role === 'caption' || primitive.role === 'glyph' ? 600 : undefined],
           ['text-anchor', primitive.anchor],
@@ -508,19 +586,26 @@ export const renderInfoschematicSvg = (
       (id) => legacyFlowIds.get(id) ?? id
     )
   )
-  /* The interactive Canvas draws the blueprint palette natively and overrides
-     only what neutral changes, so this renderer has to pick the same side for
-     every surface-sensitive token. Anything left on the `output` set alone
-     paints a light slab onto the blueprint backdrop. */
-  const blueprint = visualTreatment.surface === 'blueprint'
-  const backdrop = blueprint ? canvasTokens.surfaces.backdrop : canvasTokens.output.backdrop
-  const fabricFill = blueprint ? canvasTokens.surfaces.fabricFill : canvasTokens.output.surface
-  const fabricStroke = blueprint ? canvasTokens.surfaces.fabricStroke : canvasTokens.output.stroke
-  const fabricText = blueprint ? canvasTokens.text.fabric : canvasTokens.output.text
-  const graphicFill = blueprint ? canvasTokens.surfaces.graphicFallbackFill : canvasTokens.output.graphicFill
-  const graphicStroke = blueprint ? canvasTokens.surfaces.graphicFallbackStroke : canvasTokens.output.stroke
-  const graphicText = blueprint ? canvasTokens.text.muted : canvasTokens.output.textMuted
-  const regionStroke = blueprint ? canvasTokens.surfaces.regionStroke : canvasTokens.output.regionStroke
+  /* One palette, resolved once, for every colour this rendering writes.
+     The surface-sensitive tokens used to be picked one branch at a time, and a token left on the light set alone
+     painted a light slab onto the blueprint backdrop. There is now nothing to pick: an authored blueprint surface
+     is its own palette, anything else takes the scheme the caller asked for, and a role neither answers does not
+     exist. */
+  const requestedScheme = options.scheme ?? 'light'
+  /* A drawing that defers the scheme carries the palettes with it; one that was given a scheme carries colours. An
+     authored blueprint is a palette in its own right, so there is nothing for a reader's preference to change. */
+  const adaptive = requestedScheme === 'adaptive' && visualTreatment.surface !== 'blueprint'
+  const paint = adaptive
+    ? adaptivePaint
+    : paintFor(
+        visualTreatment.surface === 'blueprint'
+          ? 'blueprint'
+          : requestedScheme === 'adaptive'
+            ? 'light'
+            : requestedScheme
+      )
+  const backdrop = paint.backdrop
+  const regionStroke = paint.regionStroke
   const visibleScopes = new Set(options.visibility?.scopes ?? config.scopes.map((scope) => scope.id))
   const unfocused = options.visibility?.unfocused ?? 'dim'
   const graphicVisibility = options.visibility?.graphics ?? 'all'
@@ -608,7 +693,7 @@ export const renderInfoschematicSvg = (
    * same resource name with different geometry, so a name shared across pieces would give the second one the first
    * one's lattice.
    */
-  const artworkInk: ArtworkPalette = blueprint ? artworkTokens.ink : artworkTokens.output
+  const artworkInk: ArtworkPalette = paint.artwork
   const artworkDefs: string[] = []
   const artworkContent = new Map<string, readonly string[]>()
   const drawStandardArtwork = (
@@ -856,9 +941,9 @@ export const renderInfoschematicSvg = (
           [
             'stroke-dasharray',
             treatment.frame === 'dashed'
-              ? canvasTokens.surfaces.regionDash
+              ? canvasTokens.metrics.regionDash
               : treatment.frame === 'dotted'
-                ? canvasTokens.surfaces.regionDot
+                ? canvasTokens.metrics.regionDot
                 : undefined
           ],
           ['stroke-linecap', treatment.frame === 'dotted' ? 'round' : undefined],
@@ -895,15 +980,13 @@ export const renderInfoschematicSvg = (
               'fill',
               ink !== null
                 ? ink === 'light'
-                  ? canvasTokens.output.textMutedInverse
-                  : canvasTokens.output.textMuted
-                : visualTreatment.surface === 'blueprint'
-                  ? canvasTokens.text.muted
-                  : canvasTokens.output.textMuted
+                  ? canvasTokens.ink.lightMuted
+                  : canvasTokens.ink.darkMuted
+                : paint.textMuted
             ],
             ['dominant-baseline', geometry.label.dominantBaseline],
-            ['font-family', canvasTokens.output.fontFamily],
-            ['font-size', canvasTokens.output.metadataFontSize],
+            ['font-family', canvasTokens.typography.staticBodyFamily],
+            ['font-size', canvasTokens.typography.metadataFontSize],
             ['lengthAdjust', geometry.label.length === null ? undefined : 'spacingAndGlyphs'],
             ['text-anchor', geometry.label.textAnchor],
             ['textLength', geometry.label.length ?? undefined],
@@ -936,7 +1019,8 @@ export const renderInfoschematicSvg = (
             ['data-code', region.id]
           ],
           { box: region.box, kind: 'box' },
-          region.id
+          region.id,
+          paint
         )
       )
     }
@@ -967,10 +1051,10 @@ export const renderInfoschematicSvg = (
       line(2, 'title', [], xmlText(`${fabric.code}: ${fabric.label} · ${fabric.detail}`)),
       ...(artworkContent.get(fabric.id) ?? [
         line(2, 'rect', [
-          ['fill', fabricFill],
+          ['fill', paint.fabricFill],
           ['height', box.height],
           ['rx', canvasTokens.geometry.cornerRadius],
-          ['stroke', fabricStroke],
+          ['stroke', paint.fabricStroke],
           ['width', box.width],
           ['x', box.x],
           ['y', box.y]
@@ -979,9 +1063,9 @@ export const renderInfoschematicSvg = (
           2,
           'text',
           [
-            ['fill', fabricText],
-            ['font-family', canvasTokens.output.fontFamily],
-            ['font-size', canvasTokens.output.componentFontSize],
+            ['fill', paint.fabricText],
+            ['font-family', canvasTokens.typography.staticBodyFamily],
+            ['font-size', canvasTokens.typography.componentFontSize],
             ['text-anchor', 'middle'],
             ['x', box.x + box.width / 2],
             ['y', box.y + box.height / 2 + 4]
@@ -1000,10 +1084,11 @@ export const renderInfoschematicSvg = (
             ['data-artefact-id', fabric.id],
             ['data-artefact-kind', 'fabric'],
             ['data-code', fabric.code],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+            ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
           ],
           { box, kind: 'box' },
-          fabric.code
+          fabric.code,
+          paint
         )
       )
     }
@@ -1018,7 +1103,7 @@ export const renderInfoschematicSvg = (
           ['data-id', fabric.id],
           [
             'opacity',
-            focusClass(fabric.id, focus?.artefacts, unfocused) ? canvasTokens.output.unfocusedOpacity : undefined
+            focusClass(fabric.id, focus?.artefacts, unfocused) ? canvasTokens.metrics.unfocusedOpacity : undefined
           ]
         ],
         content
@@ -1026,10 +1111,10 @@ export const renderInfoschematicSvg = (
     )
   }
 
-  const flowPipe = blueprint ? canvasTokens.surfaces.flowPipe : canvasTokens.output.flowPipe
+  const flowPipe = paint.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
-    const color = resolved?.family.color ?? canvasTokens.output.fallbackFamily
+    const color = resolved?.family.color ?? paint.unauthored
     const head = arrowheadFor(flow, false)
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
     const signalled = signalledFlows.has(flow.id)
@@ -1078,7 +1163,7 @@ export const renderInfoschematicSvg = (
           ['data-artefact-kind', 'flow'],
           ['data-id', flow.id],
           ['data-signalled', signalled || undefined],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         content
       ).join('\n')
@@ -1104,10 +1189,11 @@ export const renderInfoschematicSvg = (
           ['data-artefact-id', flow.id],
           ['data-artefact-kind', 'flow'],
           ['data-code', flow.code],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         { at, kind: 'route' },
-        flow.code
+        flow.code,
+        paint
       )
     )
   }
@@ -1128,10 +1214,11 @@ export const renderInfoschematicSvg = (
             ['data-artefact-id', card.id],
             ['data-artefact-kind', 'card'],
             ['data-code', card.code],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+            ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
           ],
           { box: clasp, held, kind: 'clasp' },
-          card.code
+          card.code,
+          paint
         )
       )
     }
@@ -1145,15 +1232,15 @@ export const renderInfoschematicSvg = (
           ['data-artefact-kind', 'card'],
           ['data-code', card.code],
           ['data-id', card.id],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         [
           line(2, 'title', [], xmlText([card.code, card.label, card.detail].filter(Boolean).join(' \u00b7 '))),
           line(2, 'path', [
             ['class', 'adapter-socket'],
             ['d', adapterClaspOutline(held, canvasTokens.geometry.cornerRadius)],
-            ['fill', graphicFill],
-            ['stroke', graphicStroke],
+            ['fill', paint.graphicFill],
+            ['stroke', paint.graphicStroke],
             ['stroke-width', 2]
           ]),
           line(
@@ -1162,8 +1249,8 @@ export const renderInfoschematicSvg = (
             [
               ['class', 'adapter-label'],
               ['dominant-baseline', 'middle'],
-              ['fill', blueprint ? canvasTokens.text.label : canvasTokens.output.text],
-              ['font-family', canvasTokens.text.bodyFamily],
+              ['fill', paint.text],
+              ['font-family', canvasTokens.typography.bodyFamily],
               ['font-size', 14],
               ['font-weight', 700],
               ['text-anchor', 'middle'],
@@ -1181,9 +1268,9 @@ export const renderInfoschematicSvg = (
     const box = card.bounds
     const appearance = card.collection ? collections.get(card.collection) : undefined
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
-    const fill = appearance?.fill ?? canvasTokens.output.surface
+    const fill = appearance?.fill ?? paint.surface
     const ink = resolveReadableInk(fill)
-    const metadataColor = ink === 'light' ? canvasTokens.output.textMutedInverse : canvasTokens.output.textMuted
+    const metadataColor = ink === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
     /* The chip is resolved whether or not this Card draws one, because its slot is also where a code the caller
        asked for goes, and nothing else in the layout depends on the flag. The Card draws it only where its author
@@ -1208,7 +1295,7 @@ export const renderInfoschematicSvg = (
         ['fill', fill],
         ['height', box.height],
         ['rx', canvasTokens.geometry.cornerRadius],
-        ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
+        ['stroke', appearance?.color ?? paint.unauthored],
         ['stroke-width', 2],
         ['width', box.width]
       ])
@@ -1221,8 +1308,8 @@ export const renderInfoschematicSvg = (
           [
             ['class', 'infoschematic-card-stereotype'],
             ['dominant-baseline', 'middle'],
-            ['fill', appearance?.color ?? canvasTokens.output.fallbackFamily],
-            ['font-family', canvasTokens.text.codeFamily],
+            ['fill', appearance?.color ?? paint.unauthored],
+            ['font-family', canvasTokens.typography.codeFamily],
             ['font-size', 9],
             ['font-weight', 500],
             ['letter-spacing', '0.4px'],
@@ -1244,10 +1331,10 @@ export const renderInfoschematicSvg = (
           ],
           [
             line(3, 'rect', [
-              ['fill', canvasTokens.surfaces.backdrop],
+              ['fill', paint.annotationFill],
               ['height', layout.identity.height],
               ['rx', 4],
-              ['stroke', appearance?.color ?? canvasTokens.output.fallbackFamily],
+              ['stroke', appearance?.color ?? paint.unauthored],
               ['stroke-width', 1],
               ['width', layout.identity.width],
               ['x', layout.identity.x],
@@ -1258,8 +1345,8 @@ export const renderInfoschematicSvg = (
               'text',
               [
                 ['dominant-baseline', 'middle'],
-                ['fill', canvasTokens.text.strong],
-                ['font-family', canvasTokens.text.codeFamily],
+                ['fill', paint.annotationText],
+                ['font-family', canvasTokens.typography.codeFamily],
                 ['font-size', 9],
                 ['font-weight', 600],
                 ['letter-spacing', '0.5px'],
@@ -1282,10 +1369,11 @@ export const renderInfoschematicSvg = (
             ['data-artefact-id', card.id],
             ['data-artefact-kind', 'card'],
             ['data-code', card.code],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+            ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
           ],
           layout.identity ? { box, kind: 'chip', slot: layout.identity } : { box, kind: 'box' },
-          card.code
+          card.code,
+          paint
         )
       )
     }
@@ -1296,8 +1384,8 @@ export const renderInfoschematicSvg = (
         [
           ['class', 'infoschematic-card-label'],
           ['dominant-baseline', 'middle'],
-          ['fill', ink === 'light' ? canvasTokens.output.cardTextInverse : canvasTokens.output.cardText],
-          ['font-family', canvasTokens.text.bodyFamily],
+          ['fill', ink === 'light' ? canvasTokens.ink.light : canvasTokens.ink.dark],
+          ['font-family', canvasTokens.typography.bodyFamily],
           ['font-size', visualTreatment.card.compact ? 13 : 14],
           ['font-weight', 700],
           ['text-anchor', layout.label.anchor],
@@ -1326,7 +1414,7 @@ export const renderInfoschematicSvg = (
             ['class', 'infoschematic-card-description'],
             ['dominant-baseline', 'middle'],
             ['fill', metadataColor],
-            ['font-family', canvasTokens.text.bodyFamily],
+            ['font-family', canvasTokens.typography.bodyFamily],
             ['font-size', 10],
             ['text-anchor', layout.description.anchor],
             ['x', layout.description.x],
@@ -1350,7 +1438,7 @@ export const renderInfoschematicSvg = (
           ['data-id', card.id],
           ['data-ink', ink],
           ['data-stereotype', card.stereotype],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined],
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined],
           ['transform', `translate(${number(box.x)} ${number(box.y)})`]
         ],
         content
@@ -1375,9 +1463,9 @@ export const renderInfoschematicSvg = (
         [
           ['class', 'infoschematic-point-label'],
           ['dominant-baseline', 'middle'],
-          ['fill', blueprint ? canvasTokens.text.label : canvasTokens.output.text],
-          ['font-family', canvasTokens.text.bodyFamily],
-          ['font-size', canvasTokens.output.metadataFontSize],
+          ['fill', paint.text],
+          ['font-family', canvasTokens.typography.bodyFamily],
+          ['font-size', canvasTokens.typography.metadataFontSize],
           ['font-weight', 500],
           ['text-anchor', placement.anchor],
           ['x', placement.at.x],
@@ -1399,10 +1487,11 @@ export const renderInfoschematicSvg = (
             ['data-artefact-id', point.id],
             ['data-artefact-kind', 'point'],
             ['data-code', point.id],
-            ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+            ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
           ],
           { at: point.at, kind: 'mark', labelSide: resolvePointLabel(point, flows)?.side },
-          point.id
+          point.id,
+          paint
         )
       )
     }
@@ -1415,16 +1504,16 @@ export const renderInfoschematicSvg = (
           ['data-artefact-id', point.id],
           ['data-artefact-kind', 'point'],
           ['data-id', point.id],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         [
           line(2, 'title', [], xmlText(`${point.id}: ${point.label}`)),
           line(2, 'circle', [
             ['cx', point.at.x],
             ['cy', point.at.y],
-            ['fill', point.appearance?.fill ?? canvasTokens.output.backdrop],
+            ['fill', point.appearance?.fill ?? paint.backdrop],
             ['r', canvasTokens.geometry.pointRadius],
-            ['stroke', point.appearance?.color ?? canvasTokens.output.fallbackFamily],
+            ['stroke', point.appearance?.color ?? paint.unauthored],
             ['stroke-width', 2]
           ]),
           ...pointLabel(point, flows)
@@ -1448,13 +1537,13 @@ export const renderInfoschematicSvg = (
           ['data-id', graphic.id],
           ['data-renderer', renderer.key],
           ['data-renderer-version', renderer.version],
-          ['opacity', dimmed ? canvasTokens.output.unfocusedOpacity : undefined]
+          ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         artworkContent.get(graphic.id) ?? [
           line(2, 'rect', [
-            ['fill', graphicFill],
+            ['fill', paint.graphicFill],
             ['height', box.height],
-            ['stroke', graphicStroke],
+            ['stroke', paint.graphicStroke],
             ['stroke-dasharray', '6 4'],
             ['width', box.width],
             ['x', box.x],
@@ -1465,9 +1554,9 @@ export const renderInfoschematicSvg = (
             'text',
             [
               ['dominant-baseline', 'middle'],
-              ['fill', graphicText],
-              ['font-family', canvasTokens.output.fontFamily],
-              ['font-size', canvasTokens.output.metadataFontSize],
+              ['fill', paint.textMuted],
+              ['font-family', canvasTokens.typography.staticBodyFamily],
+              ['font-size', canvasTokens.typography.metadataFontSize],
               ['text-anchor', 'middle'],
               ['x', box.x + box.width / 2],
               ['y', box.y + box.height / 2]
@@ -1505,6 +1594,7 @@ export const renderInfoschematicSvg = (
     `<svg${attributes([
       ['xmlns', 'http://www.w3.org/2000/svg'],
       ['aria-label', `${config.title} structural Infoschematic`],
+      [adaptiveMarker, adaptive ? 'adaptive' : undefined],
       ['data-grid-treatment', visualTreatment.grid],
       ['data-surface-treatment', visualTreatment.surface],
       ['height', options.responsiveCardDetails?.height ?? viewBox.height],
@@ -1513,6 +1603,7 @@ export const renderInfoschematicSvg = (
       ['viewBox', `${number(viewBox.x)} ${number(viewBox.y)} ${number(viewBox.width)} ${number(viewBox.height)}`],
       ['width', options.responsiveCardDetails?.width ?? viewBox.width]
     ])}>`,
+    ...(adaptive ? [adaptivePalettes(1)] : []),
     ...body,
     '</svg>'
   ].join('\n')

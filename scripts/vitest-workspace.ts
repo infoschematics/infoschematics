@@ -53,6 +53,36 @@ const emulateReducedMotion = defineBrowserCommand<[boolean]>(async ({ page }, re
   await page.emulateMedia({ reducedMotion: reduce ? 'reduce' : 'no-preference' })
 })
 
+/**
+ * A colour-scheme preference, asked of the page for the same reason.
+ *
+ * The palette a drawing is painted in is resolved by the browser from `(prefers-color-scheme)`, so a case that read
+ * the generated stylesheet would be asserting the rule it hoped applied rather than the one that did — and a role
+ * declared by one scheme and not another resolves to whatever an earlier block left behind, which is invisible from
+ * the source. `commands.emulateColourScheme('dark')` makes the page answer for real.
+ *
+ * A case that changes it owns changing it back: one context serves a whole file.
+ */
+const emulateColourScheme = defineBrowserCommand<[scheme: 'dark' | 'light' | 'no-preference']>(
+  async ({ page }, scheme) => {
+    await page.emulateMedia({ colorScheme: scheme })
+  }
+)
+
+/**
+ * Print, asked of the page because paper is where the answer changes.
+ *
+ * A drawing painted for a dark-preference reader prints as a page of ink, so the palettes carry a print rule that
+ * restores the light one. It shares its selector's specificity with the reader's preference and with a host's
+ * override, which makes source order the whole of the mechanism — exactly the kind of claim reading the stylesheet
+ * cannot settle. `commands.emulatePrintMedia(true)` makes the page answer `print` for real.
+ *
+ * A case that changes it owns changing it back: one context serves a whole file.
+ */
+const emulatePrintMedia = defineBrowserCommand<[printing: boolean]>(async ({ page }, printing) => {
+  await page.emulateMedia({ media: printing ? 'print' : 'screen' })
+})
+
 /** The browser suite for one workspace, for the four that render into a real page. */
 export const workspaceBrowserTests = (workspace: string): ViteUserConfig =>
   defineConfig({
@@ -65,7 +95,7 @@ export const workspaceBrowserTests = (workspace: string): ViteUserConfig =>
     resolve: { ...shared().resolve, dedupe: ['react', 'react-dom'] },
     test: {
       browser: {
-        commands: { emulateReducedMotion },
+        commands: { emulateColourScheme, emulatePrintMedia, emulateReducedMotion },
         enabled: true,
         headless: true,
         instances: [{ browser: 'chromium' }],

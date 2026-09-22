@@ -29,7 +29,7 @@ import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-mo
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import type { FlowSignal } from '@infoschematics/view-model/signals'
-import { visualTokens } from '@infoschematics/view-model/tokens'
+import { paintVariable, visualTokens } from '@infoschematics/view-model/tokens'
 import { segmentAt } from '@infoschematics/view-model/waypoints'
 import {
   type CSSProperties,
@@ -229,10 +229,9 @@ const arrowTokens = visualTokens.canvas.arrowhead
 // travelling on it, because the direction a mark traces is chosen from the geometry and not stated by the document.
 const emphasisMarkRadius = 5
 
-/* What an unscoped Point is painted in. The static renderer reaches for its own light-paper defaults here; the
-   interactive surface is dark, so the two renderings agree on the Point's geometry and differ on its palette
-   exactly as a Card's already does. */
-const pointTokens = { fill: visualTokens.canvas.surfaces.backdrop, stroke: visualTokens.canvas.text.muted }
+/* What an unscoped Point is painted in. Referenced as custom properties rather than resolved here, so the fallback
+   follows whichever palette the page settled on; an authored fill or colour still wins over both. */
+const pointTokens = { fill: paintVariable('backdrop'), stroke: paintVariable('textMuted') }
 
 /**
  * What an emphasis draws for one element.
