@@ -1,5 +1,5 @@
 ---
-id: INFOSCHEMATICS-TOOL-122
+id: INFOSCHEMATICS-TOOL-126
 area: TOOL
 title: Emphasis for a Point
 theme: tool
