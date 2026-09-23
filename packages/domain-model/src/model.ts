@@ -103,6 +103,11 @@ export type Flow = {
   source: FlowEndpoint
   target: FlowEndpoint
   direction?: 'forward' | 'bidirectional'
+  /**
+   * `labelAt` is a fraction of the route's length, `0` at the source and `1` at the target - the unit the schema
+   * publishes and both renderers resolve. It is stated here because the name invites a distance in diagram units,
+   * and a number typed without one reads as whichever the reader assumes.
+   */
   route?: { waypoints?: readonly Coordinate[]; labelAt?: number }
   /** Whether this element draws its own code permanently, overriding the Diagram's default. */
   identity?: boolean

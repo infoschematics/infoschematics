@@ -88,11 +88,11 @@ _Evidence:_ `packages/view-model/src/diagnostics.test.ts` and `scripts/example-d
 
 ### DRAW-009 — `flow-label-obstructed`
 
-A Flow label whose anchor falls on an artefact MUST be reported as an observation carrying the distance along the route and the position it resolved to. It is an observation because the drawing is still readable — the label is not — and the label's distance is the one thing an author can move without changing the drawing.
+A Flow label whose anchor falls on an artefact MUST be reported as an observation carrying the authored share of route length and the position it resolved to. That anchor MUST be the position the renderers draw, resolved from the share as `ROUTE-013` requires; a rule that resolves it in another unit measures a point the reader never sees. It is an observation because the drawing is still readable — the label is not — and the label's position is the one thing an author can move without changing the drawing.
 
 _Conformance:_ conforming
 
-_Verify:_ pin a label at a distance that lands it on a Card and read the reported position; confirm the severity does not fail a gate.
+_Verify:_ pin a label at a share that lands it on a Card and read the reported position; confirm it is the midpoint of the route rather than a fraction of a unit from its source, and that the severity does not fail a gate.
 
 _Evidence:_ `packages/view-model/src/diagnostics.test.ts` and `packages/cli/src/index.test.ts`.
 
@@ -129,3 +129,13 @@ _Conformance:_ conforming
 _Verify:_ review every published example, then break one on purpose and confirm the same walk reports it — a review that resolved to an empty rule set would otherwise satisfy the first half.
 
 _Evidence:_ `scripts/example-drawings.test.ts`, which carries both the clean walk and the deliberately broken document.
+
+### DRAW-013 — `flow-label-off-route`
+
+A `labelAt` outside `0`–`1` MUST be reported as an observation carrying the authored value, the route's length, and the share that value would have meant had it been a distance in diagram units. It is an observation rather than an error because the drawing still reads — the label is clamped to an end rather than absent — which is precisely why the confusion is worth reporting: nothing else tells an author that the number they wrote is in the wrong unit.
+
+_Conformance:_ conforming
+
+_Verify:_ author `labelAt: 180` on a route three hundred and sixty units long and read the suggested share back; then author `labelAt: 0.5` on the same route and confirm nothing is reported, because a rule that fires on correct authored geometry costs every author who runs the checker.
+
+_Evidence:_ `packages/view-model/src/diagnostics.test.ts` holds both directions, and `scripts/example-drawings.test.ts` asserts the published set reports nothing.

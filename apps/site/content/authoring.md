@@ -228,7 +228,7 @@ Prefer the compact YAML form for hand-authored canonical [Infoschematics](/docs/
 
 Order every mapping by meaning rather than alphabetically. Put identity first (`id`, `title` or `label`, `subtitle`, `description`), followed by classification, geometry, nested content, then appearance. At the document root use `id`, `title`, `subtitle`, `description`, `diagram`, `scopes`, `specifications`, `sequences`. Within `diagram`, use `bounds` and `appearance`; vocabularies (`collections`, `families`); placeables (`cards`, `fabrics`, `points`, `regions`); wiring (`flows`, `overlays`); then `calloutPositions`.
 
-Use SVG view-box order for bounds, coordinate-pair notation for positions, CSS box shorthand clockwise from north for ports, SVG points syntax for waypoints, and an arrow for a Flow's endpoints:
+Use SVG view-box order for bounds, coordinate-pair notation for positions, CSS box shorthand clockwise from north for ports, SVG points syntax for waypoints, and an arrow for a Flow's endpoints. A Flow's `labelAt` is a share of the route's length rather than a distance in diagram units — `0` at the source, `1` at the target, `0.5` halfway along — so a value outside that range is drawn against a port and reported by `infoschematics check`:
 
 ```yaml
 id: DELIVERY
@@ -252,7 +252,7 @@ diagram:
     - id: LOAD
       family: DATA
       link: SRC E2 -> SNK W2
-      labelAt: 0.8286
+      labelAt: 0.5
       waypoints: 470,890 470,810
       line: dashed
 ```

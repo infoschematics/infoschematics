@@ -212,8 +212,8 @@ describe('reviewInfoschematicDrawing', () => {
     ])
   })
 
-  // `along` is a distance in diagram units, so this is a label pinned 180 units from the source port, which lands on
-  // the Card in the middle. An observation rather than an error: the drawing is readable, the label is not.
+  // `along` is a fraction of the route's length, so this is a label pinned at its midpoint, which lands on the Card
+  // in the middle. An observation rather than an error: the drawing is readable, the label is not.
   it('observes a Flow label falling on an artefact, and where', () => {
     const findings = findingsFor(`  cards:
     - id: ONE
@@ -233,12 +233,12 @@ describe('reviewInfoschematicDrawing', () => {
     - id: LINK
       family: link
       link: ONE E1 -> TWO W1
-      labelAt: 180`)
+      labelAt: 0.5`)
 
     expect(findings).toMatchObject([
       {
         concerns: ['LINK', 'MIDDLE'],
-        measured: { along: 180, x: 380, y: 90 },
+        measured: { along: 0.5, x: 380, y: 90 },
         reads: "Flow LINK's label falls on Card MIDDLE.",
         rule: 'flow-label-obstructed',
         severity: 'observation'
@@ -246,6 +246,63 @@ describe('reviewInfoschematicDrawing', () => {
       { rule: 'route-crosses-artefact' }
     ])
     expect(drawingIsUnreadable(findings.filter((finding) => finding.rule === 'flow-label-obstructed'))).toBe(false)
+  })
+
+  /*
+   * The confusion this rule exists for, and the confusion it must not invent. `INFOSCHEMATICS-TOOL-120` found the
+   * checker reading `labelAt` as a distance while both renderers read it as a fraction, so both directions are held
+   * here: a distance written into a fraction is reported with the fraction that would have meant it, and the
+   * fractions four published documents author are reported as nothing at all.
+   */
+  it('observes a Flow label placed beyond the route, and says what the fraction would have been', () => {
+    const findings = findingsFor(`  cards:
+    - id: ONE
+      label: One
+      bounds: 40 40 160 100
+      ports:
+        east: 1
+    - id: TWO
+      label: Two
+      bounds: 560 40 160 100
+      ports:
+        west: 1
+  flows:
+    - id: LINK
+      family: link
+      link: ONE E1 -> TWO W1
+      labelAt: 180`)
+
+    expect(findings).toMatchObject([
+      {
+        concerns: ['LINK'],
+        measured: { along: 180, length: 360, suggested: 0.5 },
+        reads: "Flow LINK's label is placed at 180 along a route measured in fractions, so it is drawn at its target.",
+        rule: 'flow-label-off-route',
+        severity: 'observation'
+      }
+    ])
+    expect(drawingIsUnreadable(findings)).toBe(false)
+  })
+
+  it('reports nothing about a Flow label placed at a fraction of its route', () => {
+    const findings = findingsFor(`  cards:
+    - id: ONE
+      label: One
+      bounds: 40 40 160 100
+      ports:
+        east: 1
+    - id: TWO
+      label: Two
+      bounds: 560 40 160 100
+      ports:
+        west: 1
+  flows:
+    - id: LINK
+      family: link
+      link: ONE E1 -> TWO W1
+      labelAt: 0.5`)
+
+    expect(findings).toEqual([])
   })
 
   it('reports two Flows meeting one endpoint at the same port', () => {

@@ -624,8 +624,8 @@ scopes:
 const overlapping = drawn.replace('bounds: 560 40 160 100', 'bounds: 180 40 160 100')
 
 /**
- * A third Card in the route's way, with the Flow's label pinned 180 units along it - `labelAt` is a distance in
- * diagram units - which lands the label on that Card. Both rules fire, and they fire at different severities.
+ * A third Card in the route's way, with the Flow's label pinned halfway along it - `labelAt` is a fraction of the
+ * route's length - which lands the label on that Card. Both rules fire, and they fire at different severities.
  */
 const obstructed = drawn
   .replace(
@@ -635,7 +635,7 @@ const obstructed = drawn
       bounds: 300 40 160 100
   flows:`
   )
-  .replace('link: ONE E1 -> TWO W1', 'link: ONE E1 -> TWO W1\n      labelAt: 180')
+  .replace('link: ONE E1 -> TWO W1', 'link: ONE E1 -> TWO W1\n      labelAt: 0.5')
 
 describe('drawing check', () => {
   it('reports that a drawing reads, and changes nothing', async () => {

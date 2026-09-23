@@ -1,6 +1,6 @@
 import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { adapterBoundsFor } from './assembly.ts'
-import { type Box, type Point, pointAlongRoute, routePoints } from './geometry.ts'
+import { type Box, type Point, pointAlongRoute, routeLength, routePoints } from './geometry.ts'
 import { createInfoschematicRuntime, type RuntimeFlow } from './runtime.ts'
 
 /**
@@ -30,6 +30,7 @@ export type DrawingRuleCode =
   | 'artefact-outside-view'
   | 'artefacts-overlap'
   | 'flow-label-obstructed'
+  | 'flow-label-off-route'
   | 'port-collision'
   | 'route-crosses-artefact'
   | 'route-re-enters-endpoint'
@@ -60,6 +61,7 @@ const severityOf: Readonly<Record<DrawingRuleCode, DrawingSeverity>> = {
   'artefact-outside-view': 'error',
   'artefacts-overlap': 'error',
   'flow-label-obstructed': 'observation',
+  'flow-label-off-route': 'observation',
   'port-collision': 'error',
   'route-crosses-artefact': 'error',
   'route-re-enters-endpoint': 'error'
@@ -284,7 +286,15 @@ const artefactCrossingFindings = (
     })
   })
 
-/** A Flow's label sitting on an artefact is unreadable wherever the text itself ends up. */
+/**
+ * A Flow's label sitting on an artefact is unreadable wherever the text itself ends up.
+ *
+ * `along` is a fraction of the route's length, which is what `placeLabels` resolves it as and therefore what both
+ * renderers draw. This read it as an absolute distance until `INFOSCHEMATICS-TOOL-120`, so it measured a point the
+ * reader never sees - for a route 200 units long, `0.5` was checked half a unit from the source port rather than at
+ * the midpoint. The checker has to resolve an authored value exactly as the drawing does, or it is answering about a
+ * different drawing.
+ */
 const flowLabelFindings = (
   flows: readonly RuntimeFlow[],
   artefacts: readonly DrawnArtefact[]
@@ -292,7 +302,7 @@ const flowLabelFindings = (
   flows.flatMap((flow) => {
     const along = flow.label?.along
     if (along === undefined) return []
-    const at = pointAlongRoute(flow.d, along)
+    const at = pointAlongRoute(flow.d, along * routeLength(flow.d))
     return artefacts.flatMap((artefact) => {
       if (artefact.kind === 'Fabric') return []
       if (!holds(shrunk(artefact.box), at)) return []
@@ -310,6 +320,35 @@ const flowLabelFindings = (
         )
       ]
     })
+  })
+
+/**
+ * A label position that is not a position on the route.
+ *
+ * `labelAt` is a fraction, so anything outside `0`-`1` is clamped to an end and the label is drawn against a port
+ * rather than where it was authored. This exists because the unit invites exactly one mistake: `labelAt` is named
+ * after a position, so an author reaches for a distance in diagram units, writes `180`, and gets a drawing that
+ * still reads - the label is near a line end rather than absent, which is why the confusion survived four published
+ * documents and a checker. An observation rather than an error: the drawing can be read, but not as authored.
+ */
+const flowLabelRangeFindings = (flows: readonly RuntimeFlow[]): readonly DrawingFinding[] =>
+  flows.flatMap((flow) => {
+    const along = flow.label?.along
+    if (along === undefined || (along >= 0 && along <= 1)) return []
+    const length = routeLength(flow.d)
+    return [
+      found(
+        'flow-label-off-route',
+        [flow.code],
+        { along: round(along), length: round(length), suggested: round(Math.min(Math.max(along / length, 0), 1)) },
+        `Flow ${flow.code}'s label is placed at ${round(along)} along a route measured in fractions, so it is drawn at its ${along < 0 ? 'source' : 'target'}.`,
+        [
+          `Give ${flow.code} a labelAt between 0 and 1.`,
+          `Divide a distance in diagram units by the route's length of ${round(length)}.`,
+          'Drop labelAt to have the label placed automatically.'
+        ]
+      )
+    ]
   })
 
 /**
@@ -363,6 +402,7 @@ export const reviewInfoschematicDrawing = (input: InfoschematicInput): readonly 
     ...endpointCrossingFindings(flows, boxes),
     ...artefactCrossingFindings(flows, artefacts),
     ...flowLabelFindings(flows, artefacts),
+    ...flowLabelRangeFindings(flows),
     ...portFindings(runtime)
   ].sort((one, other) => order(one).localeCompare(order(other)))
 }

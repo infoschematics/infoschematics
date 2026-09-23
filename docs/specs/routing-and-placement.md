@@ -112,11 +112,13 @@ _Evidence:_ grid projection in `packages/view-studio/src/app/editor/use-editor.t
 
 A flow-label position MUST be represented as a share of route length rather than as a free coordinate. Projecting a loose point onto a route MUST return the nearest point on one of its runs.
 
+The authored `labelAt` is that share: `0` at the source, `1` at the target, and a fraction of the route's total length between them. Every consumer that resolves it MUST resolve it the same way against the same length — a renderer placing the label, an editor moving it, and a checker measuring it are answering about one position, so a consumer reading the number in another unit reports about a drawing nobody sees. A value outside `0`–`1` MUST be clamped to the nearer end rather than extended past the route, and MUST be reported, because the unit is not recoverable from the number.
+
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run --filter=@infoschematics/view-studio test`, which cover projection onto horizontal and vertical runs and label-share precision. Then place a route label, edit the route's geometry, and look at the label: held as a share of route length it stays on the route, so a label that leaves the route when the route changes has been stored as a free coordinate.
+_Verify:_ run `bun run --filter=@infoschematics/view-model test` and `bun run --filter=@infoschematics/view-studio test`, which cover projection onto horizontal and vertical runs and label-share precision. Then place a route label, edit the route's geometry, and look at the label: held as a share of route length it stays on the route, so a label that leaves the route when the route changes has been stored as a free coordinate. Then author `labelAt: 0.5` on a route two hundred units long and ask the checker where the label is: a consumer answering one hundred units from the source is reading the share as a distance.
 
-_Evidence:_ `packages/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `packages/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision.
+_Evidence:_ `packages/view-model/src/routing.test.ts` covers projection onto horizontal and vertical runs; `packages/view-studio/src/app/editor/use-editor.test.ts` covers label-share precision. `placeLabels` in `packages/view-model/src/placement.ts` multiplies the share by `routeLength`, and `packages/view-model/src/diagnostics.ts` resolves it identically; `packages/domain-core/src/schema.ts` publishes the unit to an author, and `packages/domain-model/src/model.ts` states it beside the type.
 
 ### ROUTE-014 — Automatic label placement avoids occupied space
 

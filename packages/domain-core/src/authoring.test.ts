@@ -44,7 +44,7 @@ ${defaultCalloutPositions.map(({ x, y }) => `    - { x: ${x}, y: ${y} }`).join('
       target: { element: SNK, port: W2 }
       direction: forward
       route:
-        labelAt: 0.8286
+        labelAt: 0.5
         waypoints:
           - { x: 470, y: 890 }
           - { x: 470, y: 810 }
@@ -92,7 +92,7 @@ diagram:
     - id: LOAD
       family: DATA
       link: SRC E2 -> SNK W2
-      labelAt: 0.8286
+      labelAt: 0.5
       waypoints: 470,890 470,810
       line: dashed
 scopes:
@@ -130,7 +130,7 @@ describe('canonical authored form', () => {
       appearance: { line: 'dashed' },
       direction: 'forward',
       route: {
-        labelAt: 0.8286,
+        labelAt: 0.5,
         waypoints: [
           { x: 470, y: 890 },
           { x: 470, y: 810 }
