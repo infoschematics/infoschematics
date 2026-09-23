@@ -4,12 +4,12 @@ area: TOOL
 title: Toolchain behind its standard
 theme: tool
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 518a5f0cbb06db9b4019fb94b137675edfd9d0ca
 created_at: 2026-09-22T17:50:00Z
-updated_at: 2026-09-22T18:40:00Z
+updated_at: 2026-09-23T17:40:00Z
 ---
 
 # Toolchain behind its standard
@@ -46,13 +46,13 @@ Nothing type-checks those files today, and nothing would type-check their replac
 
 ## Steps
 
-- [ ] Install `@commitlint/cli`, `@commitlint/config-conventional` and `syncpack` as devDependencies, then run `bunx syncpack format` and `bun install` before reading any re-audit — the standard records that the appended entries fail Syncpack on order and fail Knip on a dependency it cannot resolve until the sequence is finished.
-- [ ] Clear the four `PackagePropertiesAreNotSorted` findings in the example manifests, so `syncpack format --check` passes on a clean tree rather than on a tree someone has just tidied by hand.
-- [ ] Write `commitlint.config.ts` extending `@commitlint/config-conventional`, restricted to `chore`, `docs`, `feat`, `fix`, `refactor` and `test`, with lowercase kebab-case scopes and a non-empty subject carrying no terminal full stop.
-- [ ] Bind `.husky/commit-msg` to `bunx commitlint --edit "$1" || exit 1`, and extend `.husky/pre-commit` to `bunx lint-staged || exit 1` followed by `bunx syncpack format --check || exit 1`.
-- [ ] Run `bunx knip --no-progress --treat-config-hints-as-errors` after the install: a hook invoking a tool is a use of it, the root script treats a configuration hint as an error, and this is where the three new dependencies are first visible to Knip.
-- [ ] Take the `test:browser` question as a decision rather than a rename typed in passing: either an exact `script_exclusions` entry under `[skills.ki-engineering]` in `.ki.toml`, or the subject-first `self:browser:test`, which carries `README.md`, `scripts/command-surface.test.ts` and `GDR-INFOSCHEMATICS-005` with it. Whichever is chosen, the decision record changes, because it currently states a bare set the standard does not permit.
-- [ ] Land that group and re-run the audit before touching a build script, so `PKG-5`, `SCR-1`, `SCR-3`, `SCR-11` and `SYNC-1` are verified clear on their own and `BUN-2` is the only finding this item still owns.
+- [x] Install `@commitlint/cli`, `@commitlint/config-conventional` and `syncpack` as devDependencies, then run `bunx syncpack format` and `bun install` before reading any re-audit — the standard records that the appended entries fail Syncpack on order and fail Knip on a dependency it cannot resolve until the sequence is finished.
+- [x] Clear the four `PackagePropertiesAreNotSorted` findings in the example manifests, so `syncpack format --check` passes on a clean tree rather than on a tree someone has just tidied by hand.
+- [x] Write `commitlint.config.ts` extending `@commitlint/config-conventional`, restricted to `chore`, `docs`, `feat`, `fix`, `refactor` and `test`, with lowercase kebab-case scopes and a non-empty subject carrying no terminal full stop.
+- [x] Bind `.husky/commit-msg` to `bunx commitlint --edit "$1" || exit 1`, and extend `.husky/pre-commit` to `bunx lint-staged || exit 1` followed by `bunx syncpack format --check || exit 1`.
+- [x] Run `bunx knip --no-progress --treat-config-hints-as-errors` after the install: a hook invoking a tool is a use of it, the root script treats a configuration hint as an error, and this is where the three new dependencies are first visible to Knip.
+- [x] Take the `test:browser` question as a decision rather than a rename typed in passing: either an exact `script_exclusions` entry under `[skills.ki-engineering]` in `.ki.toml`, or the subject-first `self:browser:test`, which carries `README.md`, `scripts/command-surface.test.ts` and `GDR-INFOSCHEMATICS-005` with it. Whichever is chosen, the decision record changes, because it currently states a bare set the standard does not permit.
+- [x] Land that group and re-run the audit before touching a build script, so `PKG-5`, `SCR-1`, `SCR-3`, `SCR-11` and `SYNC-1` are verified clear on their own and `BUN-2` is the only finding this item still owns.
 - [ ] Migrate one package first — `packages/domain-core`, the simplest of the six identical copies — to a `build.ts` run as `bun build.ts`, and compare its `dist/` against the `dist/` the `.mjs` produced before treating the remaining seven as routine.
 - [ ] Give the migrated script somewhere to be checked, by extending a tsconfig's `include` and knip's `packages/*` project glob to reach `build.ts`; without it the migration exchanges eight unchecked `.mjs` files for eight unchecked `.ts` files and passes `BUN-2` on a technicality.
 - [ ] Carry the two divergences deliberately: the `cli` script keeps its `chmod` and the `view-studio` script keeps its `@import` hoisting. Decide whether the six identical copies collapse into one shared script, and if they do, whether the two special cases extend it or stay separate.

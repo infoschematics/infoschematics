@@ -1,8 +1,10 @@
 {
+  "name": "@infoschematics/is-showcase",
+  "description": "An authored Infoschematic that exercises every capability the document contract offers.",
+  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
   },
-  "description": "An authored Infoschematic that exercises every capability the document contract offers.",
   "devDependencies": {
     "@infoschematics/cli": "0.1.0"
   },
@@ -20,7 +22,6 @@
     ]
   },
   "license": "MIT",
-  "name": "@infoschematics/is-showcase",
   "private": true,
   "scripts": {
     "build": "bun run check",
@@ -29,6 +30,5 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "type": "module",
-  "version": "0.1.0"
+  "type": "module"
 }

@@ -1,7 +1,7 @@
 ---
 id: GDR-INFOSCHEMATICS-005
 title: Name commands by owner, then subject, then verb
-date: 2026-09-16
+date: 2026-09-23
 status: current
 decision_type: governance
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/gdr
@@ -27,6 +27,8 @@ The owner is the prefix. There are exactly three regimes, and they are a hierarc
 - **No prefix** for the lifecycle idioms the package manager and Turborepo already define — `build`, `clean`, `prepare`, `test`, `test:browser`. A bare name passes straight through to the task it is named after and adds nothing, so `bun run test` and `turbo run test` are the same run. A bare name is never invented for anything else.
 - **`ki:`** for a command whose shape is mandated by a Knowledge Islands capability outside this repository. Its name and its behaviour are not ours to reword, even when a local name would read better.
 - **`self:`** for everything this repository owns.
+
+One of those bare names is this repository's own rather than the ecosystem's. The Knowledge Islands engineering standard admits six bare idioms — `build`, `prepare`, `test`, `test:coverage`, `test:watch`, `clean` — and `test:browser` is not among them. It is kept, and recorded as an exact `script_exclusions` entry under `[skills.ki-engineering]` in `.ki.toml`, because what constrains the name is the task graph rather than taste: four workspaces declare a `test:browser` task, and a bare root script that did not match the task name would stop being the passthrough this decision requires. The rename that would satisfy the standard's list is `self:browser:test` — `self:test:browser` fails this record's own subject-first rule, because the command-surface test reads `test` as a verb — and it would carry `README.md`, `scripts/command-surface.test.ts`, and the five specifications that cite `bun run test:browser --filter=…` as their verification with it. A name that appears in a specification's verification is a contract with a reader, so the exclusion is the smaller and more honest change.
 
 Within `self:`, the subject comes before the verb: `self:tokens:verify`, not `self:verify:visual-tokens`. The subject is the thing acted on — `boundaries`, `examples`, `packages`, `schema`, `scripts`, `tokens` — and the verb is last. A generated artefact's `generate` command is always paired with a `verify` command that runs the same script in check mode, so the pair sorts together and the gate proves the committed artefact matches its generator without a second implementation of the generator's rules.
 

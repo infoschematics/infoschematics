@@ -1,8 +1,10 @@
 {
+  "name": "@infoschematics/is-infoschematics",
+  "description": "A self-describing authored Infoschematic of the Infoschematics package architecture.",
+  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
   },
-  "description": "A self-describing authored Infoschematic of the Infoschematics package architecture.",
   "devDependencies": {
     "@infoschematics/cli": "0.1.0"
   },
@@ -26,7 +28,6 @@
     ]
   },
   "license": "MIT",
-  "name": "@infoschematics/is-infoschematics",
   "private": true,
   "scripts": {
     "build": "bun run check",
@@ -35,6 +36,5 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "type": "module",
-  "version": "0.1.0"
+  "type": "module"
 }

@@ -1,8 +1,10 @@
 {
+  "name": "@infoschematics/is-blank",
+  "description": "A blank Infoschematic definition for examples and host integration checks.",
+  "version": "0.1.0",
   "dependencies": {
     "@infoschematics/domain-core": "0.1.0"
   },
-  "description": "A blank Infoschematic definition for examples and host integration checks.",
   "devDependencies": {
     "@infoschematics/cli": "0.1.0"
   },
@@ -20,7 +22,6 @@
     ]
   },
   "license": "MIT",
-  "name": "@infoschematics/is-blank",
   "private": true,
   "scripts": {
     "build": "bun run check",
@@ -29,6 +30,5 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
-  "type": "module",
-  "version": "0.1.0"
+  "type": "module"
 }
