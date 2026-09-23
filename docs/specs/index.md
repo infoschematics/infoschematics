@@ -14,7 +14,7 @@ The two lines carry different jobs and must not restate each other. A `_Verify:_
 
 Requirements are grouped as **user-observable behaviours** or **quality properties**. A numbered requirement remains accepted while pending or divergent. Unnumbered Gaps are candidates not yet accepted.
 
-IDs are append-only within their registered prefix and are never reused. The one-time migration from the former package-shaped corpus is recorded in [Specification ID migration](../reference/specification-id-migration.md).
+IDs are append-only within their registered prefix and are never reused.
 
 ## Areas
 

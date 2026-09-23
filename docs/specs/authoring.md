@@ -46,7 +46,7 @@ _Evidence:_ the strict objects in `packages/domain-core/src/schema.ts`.
 
 ### AUTHOR-005 — Rejection is a result, not an exception
 
-`parseInfoschematic` MUST return a discriminated result rather than throwing. A failure MUST carry one or more issues, each naming the dotted path of the offending value — empty for the document itself — a message, and the document pathname when the caller supplied one. Unparseable syntax, contract violations, and the referential checks in CORE-001 MUST all be reported in that same shape, so a caller has one thing to print.
+`parseInfoschematic` MUST return a discriminated result rather than throwing. A failure MUST carry one or more issues, each naming the dotted path of the offending value — empty for the document itself — a message, and the document pathname when the caller supplied one. Unparseable syntax, contract violations, and the referential checks in `AUTHOR-010` MUST all be reported in that same shape, so a caller has one thing to print.
 
 _Conformance:_ conforming
 

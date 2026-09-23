@@ -1,6 +1,6 @@
 # Related tools and inspiration
 
-This is a curated set of adjacent projects worth revisiting when designing Infoschematics authoring, rendering, presentation, and documentation. Inclusion means that a project offers a useful comparison or design lesson; it does not make the project a dependency or imply feature parity.
+This is a curated set of adjacent projects worth revisiting when designing Infoschematics authoring, rendering, presentation, and documentation. Inclusion means that a project offers a useful comparison or design lesson; it does not make the project a dependency or imply feature parity. The purpose is to be informed by what others have learned, not to take anything from them: what is recorded here is the reasoning a project makes visible, and every choice Infoschematics reaches is argued in its own Decision Records against this product's own constraints.
 
 ## Model-driven architecture
 
@@ -25,7 +25,7 @@ This is a curated set of adjacent projects worth revisiting when designing Infos
   - **Catalogues asked for, not embedded.** Enumerations come from the tool at authoring time rather than from lists inside the instructions, which is the drift [the option catalogue](../../packages/domain-model/src/option-catalogue.ts) exists to prevent.
   - **Checks the author declares.** A document may state the graph sources, sinks, required relationships, and required reachability it intends, and the compiler holds them, so a later edit cannot quietly break a reading the document promised.
 
-Two of its choices are deliberately not worth copying. It validates five separate schemas with disjoint structural arrays, one per diagram type, where one document model consumed by every outlet is the durable advantage here. Its containment rules also measure the artefact against whole desktop viewports, which does not apply to a diagram embedded in a column of someone else's document.
+Two of its choices are instructive in the other direction, because they answer a question Infoschematics answers differently. It validates five separate schemas with disjoint structural arrays, one per diagram type, where one document model consumed by every outlet is the durable advantage here. Its containment rules also measure the artefact against whole desktop viewports, where an Infoschematic is embedded in a column of someone else's document and has no viewport of its own.
 
 ## Visual architecture editors
 
@@ -52,4 +52,4 @@ Two of its choices are deliberately not worth copying. It validates five separat
 
 ## What to capture
 
-When adding a project, note the specific idea worth revisiting rather than recording a bare link. Useful areas include authoring models, reusable visual vocabulary, interactive editing, static rendering, presentation, accessibility, and documentation structure.
+When adding a project, note the specific idea worth revisiting rather than recording a bare link, and say what question it answers rather than what it does — an entry earns its place by making a trade-off visible, including where the project resolves one the other way. Useful areas include authoring models, reusable visual vocabulary, interactive editing, static rendering, presentation, accessibility, and documentation structure.

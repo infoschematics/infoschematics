@@ -156,7 +156,7 @@ _Evidence:_ `packages/view-model/src/card-layout.test.ts` covers the reference, 
 
 View Model MUST resolve the text a Card draws as well as where it draws it: the lines its label is drawn on, and the stereotype and description strings that fit their own bands. Text that does not fit MUST be reduced rather than drawn past the Card's border — wrapped onto the lines the treatment allows, then ended with an ellipsis. A compact Card MUST keep its label to one line, because its stack already carries a band and a description; the legacy treatment MAY wrap onto a second line where the box is tall enough for it. Wrapping MUST break on word boundaries against the box's usable width, never on a character count, and the stereotype MUST be fitted to the box rather than to the space the identity chip leaves.
 
-A fitted string is a visual reduction only. Every renderer MUST keep the authored label, stereotype, and description in full in the Card's accessible name, as CANVAS-007 requires.
+A fitted string is a visual reduction only. Every renderer MUST keep the authored label, stereotype, and description in full in the Card's accessible name, as `APPEAR-010` requires.
 
 _Conformance:_ conforming
 
