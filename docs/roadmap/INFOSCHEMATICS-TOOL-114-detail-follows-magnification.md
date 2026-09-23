@@ -24,7 +24,7 @@ The Canvas already moves. `packages/view-canvas/src/viewport.ts:49` zooms around
 
 The separation this would need is already decided. `ADR-INFOSCHEMATICS-011` keeps semantic authored identity apart from output-detail policy, so detail is already a policy question rather than an authored property. What that policy speaks does not exist yet; Current state says what is actually there.
 
-The nearest comparison is Structurizr's hierarchical zoom and Ilograph's levels of detail, both recorded in [the related-tools reference](../reference/related-tools.md). Both treat detail as a step between named views rather than a continuous function of scale, which is a materially different product feel and worth choosing deliberately.
+The nearest comparison is Structurizr's hierarchical zoom and Ilograph's levels of detail, both recorded in [the related-tools reference](../decisions/references/related-tools.md). Both treat detail as a step between named views rather than a continuous function of scale, which is a materially different product feel and worth choosing deliberately.
 
 ## Boundary
 

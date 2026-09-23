@@ -24,7 +24,7 @@ An Infoschematic explains a system, and the explanation is the point: that a req
 
 `ADR-INFOSCHEMATICS-030` already establishes that a cross-feature composition is stated as its own requirement rather than as a clause inside a newer feature, which is the same instinct applied to the repository's own specifications: a promise that is not stated somewhere durable is not held.
 
-The comparison that raised it is Archify's author-declared semantic checks, recorded in [the related-tools reference](../reference/related-tools.md): a document may declare allowed roots, allowed terminals, required edges, and required paths, and the compiler enforces them.
+The comparison that raised it is Archify's author-declared semantic checks, recorded in [the related-tools reference](../decisions/references/related-tools.md): a document may declare allowed roots, allowed terminals, required edges, and required paths, and the compiler enforces them.
 
 ## Boundary
 

@@ -24,4 +24,4 @@ Decision records, specifications, and roadmap records remain maintainer-facing, 
 
 ## Product research
 
-[Related tools and inspiration](reference/related-tools.md) collects adjacent projects and the specific design ideas that make them worth revisiting as Infoschematics evolves.
+[Related tools and inspiration](decisions/references/related-tools.md) collects adjacent projects and the trade-offs their answers make visible. It sits in [`decisions/references/`](decisions/references/) with the other material that supports the records without being one, and [PDR-INFOSCHEMATICS-003](decisions/PDR-INFOSCHEMATICS-003-adjacent-projects-inform-rather-than-supply.md) states what it is for: adjacent projects inform this product's reasoning and never supply it.

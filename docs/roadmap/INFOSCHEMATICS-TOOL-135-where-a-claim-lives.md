@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-23T17:10:00Z
-updated_at: 2026-09-23T17:40:00Z
+updated_at: 2026-09-23T19:20:00Z
 ---
 
 # Where a claim lives
@@ -24,7 +24,7 @@ The Decision Record corpus has just been consolidated: five records that said on
 
 Three specific doubts prompted this record. `docs/reference/related-tools.md` framed two of Archify's choices as "deliberately not worth copying", which describes the wrong relationship: this repository is informed by what adjacent projects have learned and argues every choice it reaches in its own Decision Records. `docs/reference/specification-id-migration.md` recorded a one-time rename that has completed. And `docs/reference/vocabulary.md` is a canonical glossary that may not belong under `reference/` at all — it is published to the public site as "Terminology", it is cited by name from specifications, guides and source, and [KDR-INFOSCHEMATICS-001](../decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md) already governs it.
 
-The first two are fixed in the same change that opens this record, because they are corrections rather than questions. The third is a real question and is the substantial part of the work, together with a read of `docs/design/` and `docs/guides/` against what the product now does.
+The first two were fixed in the same change that opened this record, because they were corrections rather than questions, and the survey has since moved to `docs/decisions/references/related-tools.md` under [PDR-INFOSCHEMATICS-003](../decisions/PDR-INFOSCHEMATICS-003-adjacent-projects-inform-rather-than-supply.md), which settles what a survey of adjacent projects is for and where it lives. The third is a real question and is the substantial part of the work remaining, together with a read of `docs/design/` and `docs/guides/` against what the product now does.
 
 ## Boundary
 
@@ -42,17 +42,17 @@ It does not change the model, any package, the specification corpus under `docs/
 
 That last pairing is the crux. The `ki-decision-records` standard caps a record body at 200 to 500 words and treats a record as a living document whose obsolete wording simply goes — which is exactly the wrong container for 27 anchors that 107 citations depend on. The likely answer is therefore that the glossary stays a document and moves to where a reader expects a glossary, with `KDR-001` continuing to govern it; but the alternative is a real one and the record should state which was chosen and why.
 
-`docs/reference/` will hold only `related-tools.md` and `vocabulary.md` once the migration table is removed, which is itself a reason to ask whether the directory is carrying its own meaning.
+`docs/reference/` now holds `vocabulary.md` alone, the migration table having been removed and the survey moved, which is itself a reason to ask whether the directory is carrying its own meaning.
 
-There is an established answer to that in the sibling repositories, which this repository has not adopted. Both `ki-agentic-harness` and `vallearmonia-website` keep a `docs/decisions/references/` directory for material that supports the records without being one, and the harness states the rule in its own decisions README: supporting evidence that is not itself a Decision Record lives there. Its seven files are cited from the records they support — `ADR-KI-HARNESS-012` points at a contract document, `SDR-KI-HARNESS-002` at a coverage matrix — while the single file in `vallearmonia-website` stands alone as evidence nothing cites. This is convention rather than a rule `standards-decision-records.md` imposes, so adopting it is a choice this repository would be making, and `docs/decisions/README.md` would have to say the directory exists and what belongs in it.
+That question no longer has to be settled here. `docs/decisions/references/` was the established convention in `ki-agentic-harness` and `vallearmonia-website`, and `standards-decision-records.md` now states it as a rule: supporting material lives in a `references/` directory inside the decisions collection, cited from a record's body by a sibling path, never listed among the records. This repository has adopted it — the directory exists, `docs/decisions/README.md` says what belongs in it, and `related-tools.md` is its first occupant. What remains open is only whether the glossary belongs there too, which is a harder case because the directory's name tells a reader "supporting evidence for the decisions" and the glossary is a public page the site renders as "Terminology".
 
 ## Steps
 
 - [ ] Read `docs/design/`'s four documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time.
 - [ ] Repair those statements, or delete the passage where the claim now lives in a record or a specification and the design document was only restating it.
 - [ ] Read `docs/guides/`'s seven guides the same way, and confirm each is a maintainer or operator procedure rather than a duplicate of the Site-owned consumer journey `ADR-INFOSCHEMATICS-014` places under `apps/site/content/`.
-- [ ] Decide where the vocabulary belongs — a guide, a reference document, `docs/decisions/references/` beside the record that governs it, or folded into `KDR-INFOSCHEMATICS-001` — and record the reasoning in the review rather than only the outcome.
-- [ ] Settle whether this repository adopts `docs/decisions/references/` at all, since the answer decides `related-tools.md` as well as the glossary, and say so in `docs/decisions/README.md` if it does.
+- [ ] Decide where the vocabulary belongs — a guide, a reference document, `docs/decisions/references/` beside the record that governs it, or folded into `KDR-INFOSCHEMATICS-001` — and record the reasoning in the review rather than only the outcome. The directory is now available to it, so this is a question about the glossary alone.
+- [x] Settle whether this repository adopts `docs/decisions/references/` at all, and say so in `docs/decisions/README.md`. It does: the directory holds the survey of adjacent projects, and `PDR-INFOSCHEMATICS-003` states what that survey is for.
 - [ ] Apply that decision, keeping every `<span id>` anchor stable if the document moves, and update `apps/site/src/routes.ts` and the three vocabulary checks together with it.
 - [ ] Decide whether `docs/reference/` still names a distinct kind of document once the migration table is gone, and merge it away if it does not.
 - [ ] Look at every site route whose source document moved, in a real browser per `AGENTS.md`, because a route that resolves is not evidence that the page reads.
@@ -95,7 +95,7 @@ Raised on 2026-09-23 while reviewing the consolidated Decision Records, on the o
 
 The vocabulary question is left open deliberately. Folding a glossary into a Decision Record is attractive because it puts the canonical terms with the record that governs them, and wrong for mechanical reasons the record standard makes explicit; but "wrong for mechanical reasons" is worth writing down once rather than re-deriving, which is what this item's review section is for.
 
-The `docs/decisions/references/` pattern was raised on the same day and is the most promising of the four, because it keeps the glossary beside the record that governs it without putting it inside a body that is meant to be rewritten freely. The complication it has to answer is publication: the material in that directory in both precedent repositories is internal evidence, whereas this glossary is a public page the site renders as "Terminology", and a directory whose name tells a reader "supporting evidence for the decisions" is not obviously where a public terminology page belongs. `related-tools.md` has no such complication and would fit the directory immediately, which is a reason to decide the two together rather than let the easy case set a precedent the hard case then has to live with.
+The `docs/decisions/references/` pattern was raised on the same day and is the most promising of the four, because it keeps the glossary beside the record that governs it without putting it inside a body that is meant to be rewritten freely. The complication it has to answer is publication: the material in that directory in both precedent repositories is internal evidence, whereas this glossary is a public page the site renders as "Terminology", and a directory whose name tells a reader "supporting evidence for the decisions" is not obviously where a public terminology page belongs. `related-tools.md` had no such complication and has been moved, with [PDR-INFOSCHEMATICS-003](../decisions/PDR-INFOSCHEMATICS-003-adjacent-projects-inform-rather-than-supply.md) recording the general approach to tracking adjacent projects rather than only the placement. Deciding the easy case first was accepted knowingly: the record states the directory holds supporting material for the decisions, which is a claim the glossary has to satisfy on its own terms rather than one the move has already made for it.
 
 ### Adoption
 
