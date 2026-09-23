@@ -51,7 +51,7 @@ Supporting material lives in [`references/`](references/), inside this directory
 
 29. [ADR-INFOSCHEMATICS-024](ADR-INFOSCHEMATICS-024-name-dynamics-in-the-document.md) — let a document name the Dynamics it can express and leave every occurrence to the host.
 30. [ADR-INFOSCHEMATICS-025](ADR-INFOSCHEMATICS-025-one-ordered-selection-with-an-anchor.md) — make the Design selection one ordered set and measure every group operation from its anchor.
-31. [ADR-INFOSCHEMATICS-026](ADR-INFOSCHEMATICS-026-panels-follow-the-mode.md) — split whether a Producer is producing from which workspace they are in, and let the panels follow both.
+31. [ADR-INFOSCHEMATICS-026](ADR-INFOSCHEMATICS-026-panels-follow-both-axes.md) — split whether a Producer is producing from which workspace they are in, and let the panels follow both.
 32. [ADR-INFOSCHEMATICS-027](ADR-INFOSCHEMATICS-027-author-what-an-emphasis-means-not-how-it-is-played.md) — let a Dynamic say whether it depicts an event or a state, and leave every treatment choice to the renderer.
 33. [ADR-INFOSCHEMATICS-028](ADR-INFOSCHEMATICS-028-a-point-is-its-own-artefact-kind.md) — make a Point a sixth artefact kind carrying a coordinate rather than a box, created from the Library and standing alone.
 34. [ADR-INFOSCHEMATICS-029](ADR-INFOSCHEMATICS-029-a-diagram-host-mounts-the-announcement-surface.md) — make announcing a Dynamic an obligation of every host that mounts the Diagram, over one shared surface.

@@ -100,7 +100,7 @@ _Conformance:_ conforming
 
 _Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load Studio's own stylesheet and assert reachability rather than presence.
 
-_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable while not producing and no rail at all while producing; `docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-the-mode.md` records why the rail stays Present-only.
+_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable while not producing and no rail at all while producing; `docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-both-axes.md` records why the rail stays Present-only.
 
 ### PRESENT-010 — Zoom follows pointer and resets to fit
 

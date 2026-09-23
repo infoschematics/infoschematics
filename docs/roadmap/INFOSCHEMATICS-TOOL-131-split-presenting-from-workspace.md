@@ -110,7 +110,7 @@ The behaviour no unit assertion reaches was captured from Chromium against the b
 
 Site copy in `apps/site/content/studio.md` still describes switching into Design or Direct without mentioning that the workspace is now kept. It names no retired word, so it is correct rather than stale, and it follows as its own record per the standing convention that Site prose trails the feature.
 
-`ADR-INFOSCHEMATICS-026` keeps its filename slug and title, `panels-follow-the-mode`. Renaming a Decision Record breaks every citation of it for a word in a title; the amendment note states the split instead.
+`ADR-INFOSCHEMATICS-026` was left titled `panels-follow-the-mode` here, with an amendment note stating the split, on the assumption that renaming a record would break every citation of it for a word in a title. It carried three. The record has since been retitled `panels-follow-both-axes` and its amendment note replaced with a present-state opening, outside this item.
 
 ### Post-change review
 

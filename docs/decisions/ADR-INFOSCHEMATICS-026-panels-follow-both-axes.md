@@ -1,6 +1,6 @@
 ---
 id: ADR-INFOSCHEMATICS-026
-title: Panels follow the mode
+title: Panels follow both axes
 date: 2026-09-16
 status: current
 decision_type: architecture
@@ -8,7 +8,7 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [PDR-INFOSCHEMATICS-001, ADR-INFOSCHEMATICS-025]
 ---
 
-# ADR-INFOSCHEMATICS-026: Panels follow the mode
+# ADR-INFOSCHEMATICS-026: Panels follow both axes
 
 ## Context
 
@@ -28,7 +28,7 @@ Separately, the tab the dock lands on was already wrong. `sourceOpen` is plain c
 
 ## Decision
 
-Amended on 2026-09-23 by `INFOSCHEMATICS-TOOL-131`, which split the single production enum into two axes: whether a [Producer](../reference/vocabulary.md#producer) is producing, and which workspace — `design` or `direct` — they are in. The reasoning below is unchanged and is now stated against the axis each part of it actually depends on. It reads as a choice between two fixes because it was written against one enum; with the axes apart, both are true of different axes, and the record's title keeps the word it was filed under.
+Two axes carry the Producer's position, not one. Whether a [Producer](../reference/vocabulary.md#producer) is producing is one question; which workspace — `design` or `direct` — they are in is another. Each clause below depends on one of them, and the panels follow both.
 
 The collapsed rail is a Present affordance. It carries Present's compact filters and gains no Producer branch, and the dead `.panel-rail .rail-restore` rule is removed rather than given a component to style.
 

@@ -1,6 +1,6 @@
 # Guides
 
-Guides explain **how**. Each one is written for a single audience, and its filename says which: `host-` guides are for developers building an application on the published packages, `repository-` guides are for people working on Infoschematics itself. A guide that would serve both is really two guides.
+Guides explain **how**. Each one is written for a single audience, and its filename says which: `host-` guides are for developers building an application on the published packages, `repository-` guides are for people working on Infoschematics itself. A guide that would serve both is really two guides. `cloudflare.md` is the one exception: the hosting instrument looks for that exact path in every repository it governs, so the address is fixed and the prefix would hide it.
 
 Neither group is the reader of the public consumer journey, which is Site-owned content under `apps/site/content/` by [ADR-INFOSCHEMATICS-014](../decisions/ADR-INFOSCHEMATICS-014-site-owned-user-guide.md). That journey teaches the product; these guides carry the procedures it does not stop for. Where a guide and the journey cover the same ground, the journey wins for teaching and the guide keeps only what it adds.
 
@@ -21,4 +21,4 @@ For maintainers and the release owner.
 
 - [Author an example package](repository-authoring-example-packages.md) — keep every `examples/` directory a copyable starting point with one authored document and a generated export.
 - [Release npm packages](repository-releasing-packages.md) — prepare, publish, verify, and recover a coordinated public package release.
-- [Cloudflare hosting](repository-cloudflare-hosting.md) — configure public hosting, custom domains, redirects, and Workers Builds.
+- [Cloudflare hosting](cloudflare.md) — configure public hosting, custom domains, redirects, and Workers Builds.
