@@ -21,7 +21,7 @@
         "infoschematic.yaml",
         "package.json",
         "tsconfig.build.json",
-        "build.mjs"
+        "build.ts"
       ],
       "outputs": ["dist/**"]
     },

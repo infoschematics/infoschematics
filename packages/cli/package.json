@@ -33,8 +33,8 @@
     "directory": "packages/cli"
   },
   "scripts": {
-    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs ../../LICENSE dist/LICENSE",
-    "clean": "node build.mjs --clean",
+    "build": "bun run clean && tsc -p tsconfig.build.json && bun build.ts ../../LICENSE dist/LICENSE",
+    "clean": "bun build.ts --clean",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

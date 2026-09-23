@@ -113,8 +113,8 @@
     "directory": "packages/view-model"
   },
   "scripts": {
-    "build": "bun run clean && tsc -p tsconfig.build.json && node build.mjs src/tokens.generated.css dist/tokens.generated.css ../../LICENSE dist/LICENSE",
-    "clean": "node build.mjs --clean",
+    "build": "bun run clean && tsc -p tsconfig.build.json && bun build.ts src/tokens.generated.css dist/tokens.generated.css ../../LICENSE dist/LICENSE",
+    "clean": "bun build.ts --clean",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

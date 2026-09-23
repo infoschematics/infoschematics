@@ -4,12 +4,12 @@ area: TOOL
 title: Toolchain behind its standard
 theme: tool
 horizon: now
-status: in-progress
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 518a5f0cbb06db9b4019fb94b137675edfd9d0ca
 created_at: 2026-09-22T17:50:00Z
-updated_at: 2026-09-23T17:40:00Z
+updated_at: 2026-09-23T18:30:00Z
 ---
 
 # Toolchain behind its standard
@@ -53,10 +53,10 @@ Nothing type-checks those files today, and nothing would type-check their replac
 - [x] Run `bunx knip --no-progress --treat-config-hints-as-errors` after the install: a hook invoking a tool is a use of it, the root script treats a configuration hint as an error, and this is where the three new dependencies are first visible to Knip.
 - [x] Take the `test:browser` question as a decision rather than a rename typed in passing: either an exact `script_exclusions` entry under `[skills.ki-engineering]` in `.ki.toml`, or the subject-first `self:browser:test`, which carries `README.md`, `scripts/command-surface.test.ts` and `GDR-INFOSCHEMATICS-005` with it. Whichever is chosen, the decision record changes, because it currently states a bare set the standard does not permit.
 - [x] Land that group and re-run the audit before touching a build script, so `PKG-5`, `SCR-1`, `SCR-3`, `SCR-11` and `SYNC-1` are verified clear on their own and `BUN-2` is the only finding this item still owns.
-- [ ] Migrate one package first — `packages/domain-core`, the simplest of the six identical copies — to a `build.ts` run as `bun build.ts`, and compare its `dist/` against the `dist/` the `.mjs` produced before treating the remaining seven as routine.
-- [ ] Give the migrated script somewhere to be checked, by extending a tsconfig's `include` and knip's `packages/*` project glob to reach `build.ts`; without it the migration exchanges eight unchecked `.mjs` files for eight unchecked `.ts` files and passes `BUN-2` on a technicality.
-- [ ] Carry the two divergences deliberately: the `cli` script keeps its `chmod` and the `view-studio` script keeps its `@import` hoisting. Decide whether the six identical copies collapse into one shared script, and if they do, whether the two special cases extend it or stay separate.
-- [ ] Update the sixteen `node build.mjs` call sites and `turbo.json`'s `build` inputs in the same change, then prove the input by editing `build.ts` with random content and confirming the task reruns.
+- [x] Migrate one package first — `packages/domain-core`, the simplest of the six identical copies — to a `build.ts` run as `bun build.ts`, and compare its `dist/` against the `dist/` the `.mjs` produced before treating the remaining seven as routine.
+- [x] Give the migrated script somewhere to be checked, by extending a tsconfig's `include` and knip's `packages/*` project glob to reach `build.ts`; without it the migration exchanges eight unchecked `.mjs` files for eight unchecked `.ts` files and passes `BUN-2` on a technicality.
+- [x] Carry the two divergences deliberately: the `cli` script keeps its `chmod` and the `view-studio` script keeps its `@import` hoisting. Decide whether the six identical copies collapse into one shared script, and if they do, whether the two special cases extend it or stay separate.
+- [x] Update the sixteen `node build.mjs` call sites and `turbo.json`'s `build` inputs in the same change, then prove the input by editing `build.ts` with random content and confirming the task reruns.
 
 ## Files touched
 
@@ -95,6 +95,64 @@ None. No user-observable behaviour changes, and the published packages' contents
 ### Roadmap
 
 `INFOSCHEMATICS-TOOL-122` and `INFOSCHEMATICS-TOOL-123` hold the rest of the same audit run and are unaffected. The one follow-on this item may produce is the `BUN-2` record described above.
+
+## Review
+
+### Delivered
+
+`ki repo audit --skill ki-engineering --repo .` reports one finding, `DEPS-1`, which `INFOSCHEMATICS-TOOL-122` owns. All seven findings this item held — `PKG-5`, `SCR-1`, `SCR-3`, three `SCR-11` and `SYNC-1` — are clear, and so is `BUN-2`, which the shaping expected might have to be carved out.
+
+It landed in the two halves the record sequenced. The toolchain group went first and was verified on its own (commit `71f57131`, nine findings down to two); the build-script migration followed.
+
+`test:browser` was taken as a decision. It stays, held by an exact `script_exclusions` entry under `[skills.ki-engineering]`, because what constrains the name is the task graph rather than taste: four workspaces declare that task, and five specifications cite `bun run test:browser --filter=…` as their verification. A name that appears in a specification's verification is a contract with a reader. `GDR-INFOSCHEMATICS-005` records the reasoning and no longer presents `test:browser` as one of the ecosystem's lifecycle idioms.
+
+`BUN-2` turned out to be the cheaper of the two halves rather than the expensive one, because the thing that makes it risky — the published shape — is exactly what `bun run self:release:verify` already proves. Each of the eight `build.mjs` became a `build.ts` run as `bun build.ts`, carrying its own divergence: `packages/cli` keeps its `chmod` of `dist/bin.js`, and `packages/view-studio` keeps its `@import` hoisting.
+
+The six identical copies stay six copies. Collapsing them into one shared script is a structural choice about how packages are built, it needs its own decision record, and the duplication it would remove is pre-existing and unchanged by this item; taking it here would have made an output-equality change into a design change.
+
+### Summary of changes
+
+Toolchain group, in `71f57131`:
+
+- `package.json`, `bun.lock` — `@commitlint/cli`, `@commitlint/config-conventional`, `syncpack`.
+- `commitlint.config.ts` (new) — `@commitlint/config-conventional`, types restricted to `chore`, `docs`, `feat`, `fix`, `refactor`, `test`, kebab-case scopes, non-empty subject with no terminal full stop.
+- `.husky/commit-msg` (new) and `.husky/pre-commit` — `bunx commitlint --edit "$1" || exit 1`, and `bunx lint-staged || exit 1` followed by `bunx syncpack format --check || exit 1`.
+- `examples/*/package.json` — the manifest order `bunx syncpack format` asked for, which was drift sitting behind the finding rather than a consequence of the install.
+- `.ki.toml`, `docs/decisions/GDR-INFOSCHEMATICS-005-…` — the `test:browser` exclusion and its reasoning.
+
+Build-script migration:
+
+- `packages/*/build.ts` (eight new), `packages/*/build.mjs` (eight deleted) — same behaviour, typed; the sixteen call sites in `packages/*/package.json` now read `bun build.ts`.
+- `packages/*/tsconfig.json` — each `include` reaches `build.ts`, so the package's own `typecheck` covers it.
+- `turbo.json` — the `build` task's `inputs` name `build.ts`.
+
+### Verification
+
+`bun run self:check` — 52 tasks, all successful. `ki repo audit --skill ki-engineering --repo .` — one finding, `DEPS-1`, owned elsewhere.
+
+The hooks were proved by running them, not by reading them. `bunx commitlint --edit` refused `Fixed the thing.` on three rules and `style(site): move a full stop` on `type-enum`, and accepted a conforming message; `bunx syncpack format --check` failed a manifest with one key moved out of order and passed once it was restored. Both then ran for real on the toolchain commit. Transcript in `reports/TOOL-128-hook-proofs.txt`.
+
+`BUN-2` was verified on output equality, which is the claim that matters. Every package was built with `turbo run build --filter='./packages/*' --force` before the migration and again after, and the two trees compared with `diff -r`: 429 files, no difference. `packages/cli/dist/bin.js` is still `-rwxr-xr-x`, and `packages/view-studio/dist/styles.css` still opens with its two `@import` rules. `bun run self:release:verify` then packed all eight and rendered every example in a clean consumer outside the monorepo — the evidence `docs/specs/command-line-rendering.md` cites — and passed unchanged.
+
+Both new declarations were proved by mutation rather than assumed. The `build` task's hash for `@infoschematics/domain-core` moved `3cadc24a0b290c6b` → `132625ce17ef584f` → back when `build.ts` was edited and restored. And the type-checking is real rather than nominal: a deliberate `const probe: number = 'not a number'` appended to `packages/domain-core/build.ts` failed `bun run --cwd packages/domain-core typecheck` with `TS2322`, which is the case the record warned about — a migration that satisfies `BUN-2` while leaving the same unchecked script in a different language.
+
+### Outstanding concerns
+
+The `test:browser` exclusion is an argument, not a proof. `script_exclusions` is for externally constrained bare names, and the constraint here is this repository's own task graph and its own specifications rather than a tool that demands the name. It is recorded where a reviewer will find it, and the alternative — `self:browser:test`, since `self:test:browser` fails this repository's own subject-first rule — remains available at the cost of five specification edits.
+
+Six of the eight build scripts are byte-identical, and this item deliberately did not change that.
+
+`scripts/unused.ts` sanctions two configuration hints by matching Knip's rendered text. That was already recorded as a concern under `INFOSCHEMATICS-TOOL-123`; it is unchanged here.
+
+### Post-change review
+
+One wrong turn, caught by a check written the same day. Teaching Knip about `build.ts` through `knip.json`'s `entry` and `project` globs produced sixteen new configuration hints — Knip already resolves a package's build command, so both patterns were redundant — and `scripts/unused.ts` failed on them rather than passing an eighteen-hint report. The globs were reverted; Knip needed no configuration at all. Under the previous `--treat-config-hints-as-errors` script this would have failed too, but with the two sanctioned hints indistinguishable from the sixteen mistaken ones.
+
+The record asked for one package to be migrated first, with the rest treated as routine only after its `dist/` was compared. All eight were migrated in one pass instead, and the comparison was run across all eight rather than one. That is a weaker order — it spends more before the first evidence — and it is recorded here rather than presented as the plan.
+
+### Mini recap
+
+The repository now conforms to the engineering standard it declares, apart from one dependency finding another item owns. Commit hooks refuse a malformed message and a drifted manifest, and both were proved by being refused. The eight build scripts are TypeScript run by Bun, type-checked by the packages that own them, and produce a byte-identical `dist/` — 429 files compared, no difference — which is the only claim that mattered about them.
 
 ## Discussion
 
