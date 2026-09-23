@@ -20,7 +20,7 @@ A [Scene](../reference/vocabulary.md#scene) can cue several [Diagram Dynamics](.
 
 ## Context
 
-`ADR-INFOSCHEMATICS-038` gave a Scene the power to cue a Dynamic under a `once` or `repeat` policy and left the ordered cascade out of scope, because nothing said what a cascade divides when a Scene declares no duration. `INFOSCHEMATICS-TOOL-092` put that question to the owner, who chose presenter-stepped stages; `ADR-INFOSCHEMATICS-039` records the answer. This item implements it.
+`ADR-INFOSCHEMATICS-034` gave a Scene the power to cue a Dynamic under a `once` or `repeat` policy and left the ordered cascade out of scope, because nothing said what a cascade divides when a Scene declares no duration. `INFOSCHEMATICS-TOOL-092` put that question to the owner, who chose presenter-stepped stages; `ADR-INFOSCHEMATICS-035` records the answer. This item implements it.
 
 The decision is the whole of the design constraint. The document carries an order and never a measurement, so `DYNAMIC-001` needs no amendment; a cascade is cancelled by leaving its Scene exactly as a single cue is, so `SIGNAL-003` needs none either. What changes is that an untimed Sequence gains a step that advances within a Scene rather than past it.
 
@@ -28,7 +28,7 @@ The decision is the whole of the design constraint. The document carries an orde
 
 This is cue ordering and the stepping that plays it. It is not a new Dynamic kind, not a second way of saying how something is drawn, and not a timing field: a cue that carries a duration must still fail validation after this item as before it.
 
-Derivation stays pure. `packages/view-present/src/presentation.ts` derives occurrences from `cueCycle` and the focused Scene without reading a clock, and a cascade's stage index belongs in that same presentation state rather than in a timer. The View continues to own every interval, per `ADR-INFOSCHEMATICS-038`.
+Derivation stays pure. `packages/view-present/src/presentation.ts` derives occurrences from `cueCycle` and the focused Scene without reading a clock, and a cascade's stage index belongs in that same presentation state rather than in a timer. The View continues to own every interval, per `ADR-INFOSCHEMATICS-034`.
 
 ## Current state
 
@@ -63,7 +63,7 @@ Follows `INFOSCHEMATICS-TOOL-092`, which took the decision this implements. Bloc
 
 ### Decision Records
 
-None new: `ADR-INFOSCHEMATICS-039` already states the rule, and this item implements it rather than revisiting it.
+None new: `ADR-INFOSCHEMATICS-035` already states the rule, and this item implements it rather than revisiting it.
 
 ### Specifications
 
@@ -81,4 +81,4 @@ Closes this item; nothing else depends on it.
 
 ### Why the stage index belongs in presentation state
 
-`packages/view-present/src/presentation.ts` derives occurrences purely from `cueCycle` and the focused Scene, so deriving twice from one state gives one answer. A stage index kept anywhere else — a ref, a timer, a renderer — would make the second derivation disagree with the first, which is the property `ADR-INFOSCHEMATICS-038` set out to keep.
+`packages/view-present/src/presentation.ts` derives occurrences purely from `cueCycle` and the focused Scene, so deriving twice from one state gives one answer. A stage index kept anywhere else — a ref, a timer, a renderer — would make the second derivation disagree with the first, which is the property `ADR-INFOSCHEMATICS-034` set out to keep.

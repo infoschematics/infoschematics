@@ -24,7 +24,7 @@ Whether a Producer is working and which set of tools they are working with becom
 
 The first is a capability boundary. `docs/reference/vocabulary.md:105` draws it as a role: a Producer shapes, controls and presents the product, and an Audience "experiences the product without receiving editorial capability". Present is not a way of working — it is the absence of the producer's tools.
 
-The second is an arrangement of those tools. Design and Direct are two tasks over the same document with the same capability, differing in which panels and which interaction layers are in front of the Producer. That is what an editing application normally calls a workspace, and it is what `ADR-INFOSCHEMATICS-028` already says in its title: panels follow the mode.
+The second is an arrangement of those tools. Design and Direct are two tasks over the same document with the same capability, differing in which panels and which interaction layers are in front of the Producer. That is what an editing application normally calls a workspace, and it is what `ADR-INFOSCHEMATICS-026` already says in its title: panels follow the mode.
 
 Collapsing the two costs something concrete. Because the enum holds one value, entering Present overwrites the Producer's workspace, so a Producer directing a Sequence who presents it and comes back lands in Design and has to find their way to Direct again. The type shows the seam directly: `PresentProductionState` and `DesignProductionState` are structurally identical, both pinning `directTarget: null`, and differ only in the literal they carry. A boundary that changes what a reader may do and a preference about panel layout have no business being the same field.
 
@@ -49,12 +49,12 @@ Around twenty-five files in `packages/` and `apps/` read the mode. Studio's `App
 - [x] Replace the `set-mode` action with actions that move each axis independently, and keep every mount starting as not producing, which `PRESENT-001` requires.
 - [x] Split `data-production-mode` into an attribute per axis, and update the assertions that read it.
 - [x] Take the Canvas prop with it, so a host says what it means in the same two terms rather than passing a word that no longer exists.
-- [x] Update Studio's panel branching so each decision reads the axis it actually depends on — the rail's Present-only rule is a capability question, and the dock's contents are a workspace question, and `ADR-INFOSCHEMATICS-028` conflates them only because the enum did.
+- [x] Update Studio's panel branching so each decision reads the axis it actually depends on — the rail's Present-only rule is a capability question, and the dock's contents are a workspace question, and `ADR-INFOSCHEMATICS-026` conflates them only because the enum did.
 - [x] Retire the word `mode` from this axis across code, attributes, specifications and guide copy, leaving it free.
 
 ## Files touched
 
-`packages/view-present/src/production.ts` and its tests; `packages/view-studio/src/app/App.tsx`, `panels/PanelRail.tsx`, `panels/TitleBar.tsx`, `panels/DetailsPanel.tsx`, `panels/ProductionControls.test.tsx`, `hooks/use-presentation.ts` and the browser suites; the Canvas prop in `packages/view-canvas/src`; `apps/site/src/Playground.test.tsx` and `visual-guide/DemoFrame.tsx`; `docs/specs/presentation.md`, `docs/specs/design-editing.md`, `docs/reference/vocabulary.md`, `docs/design/view-studio.md`; `ADR-INFOSCHEMATICS-028`.
+`packages/view-present/src/production.ts` and its tests; `packages/view-studio/src/app/App.tsx`, `panels/PanelRail.tsx`, `panels/TitleBar.tsx`, `panels/DetailsPanel.tsx`, `panels/ProductionControls.test.tsx`, `hooks/use-presentation.ts` and the browser suites; the Canvas prop in `packages/view-canvas/src`; `apps/site/src/Playground.test.tsx` and `visual-guide/DemoFrame.tsx`; `docs/specs/presentation.md`, `docs/specs/design-editing.md`, `docs/reference/vocabulary.md`, `docs/design/view-studio.md`; `ADR-INFOSCHEMATICS-026`.
 
 ## Verify
 
@@ -72,7 +72,7 @@ Nothing blocks this. It is adjacent to the Theme-to-Sequence vocabulary drift �
 
 ### Decision Records
 
-`ADR-INFOSCHEMATICS-028` is amended in place, keeping `status: current`. Its reasoning survives — the panel dock opens for producer work and the rail belongs to Present — but it was written against one enum, and it reads as a choice between two fixes where the split makes both true of different axes.
+`ADR-INFOSCHEMATICS-026` is amended in place, keeping `status: current`. Its reasoning survives — the panel dock opens for producer work and the rail belongs to Present — but it was written against one enum, and it reads as a choice between two fixes where the split makes both true of different axes.
 
 ### Specifications
 
@@ -98,7 +98,7 @@ Two independent axes in place of the three-valued `ProductionMode`: whether the 
 
 Studio's `use-presentation.ts` exposes `producing`, `presenting`, `designing`, `directing`, `workspace`, `setProducing` and `produceIn`. `App.tsx` writes `data-producing` and `data-workspace` in place of `data-production-mode`, and its dock override now fires whenever either axis moves while producing and drops when the tools go down. `PanelRail` reads only the capability axis; `TitleBar` offers a Present toggle beside a two-button Workspace bank. Canvas takes `editor?: CanvasEditor` (`'design' | 'scenes' | 'stories' | null`) rather than a production word, so a host says which editor is open rather than which mode a different application is in.
 
-`PRESENT-001`, `PRESENT-002`, `PRESENT-009`, `DESIGN-001`, `DESIGN-005` and `DESIGN-021` are restated against the axis each governs; `ADR-INFOSCHEMATICS-028` is amended in place, keeping `status: current`, with a dated note saying why its title keeps the word it was filed under. `Workspace` is a new vocabulary term with its own stable id.
+`PRESENT-001`, `PRESENT-002`, `PRESENT-009`, `DESIGN-001`, `DESIGN-005` and `DESIGN-021` are restated against the axis each governs; `ADR-INFOSCHEMATICS-026` is amended in place, keeping `status: current`, with a dated note saying why its title keeps the word it was filed under. `Workspace` is a new vocabulary term with its own stable id.
 
 ### Verification
 
@@ -110,7 +110,7 @@ The behaviour no unit assertion reaches was captured from Chromium against the b
 
 Site copy in `apps/site/content/studio.md` still describes switching into Design or Direct without mentioning that the workspace is now kept. It names no retired word, so it is correct rather than stale, and it follows as its own record per the standing convention that Site prose trails the feature.
 
-`ADR-INFOSCHEMATICS-028` keeps its filename slug and title, `panels-follow-the-mode`. Renaming a Decision Record breaks every citation of it for a word in a title; the amendment note states the split instead.
+`ADR-INFOSCHEMATICS-026` keeps its filename slug and title, `panels-follow-the-mode`. Renaming a Decision Record breaks every citation of it for a word in a title; the amendment note states the split instead.
 
 ### Post-change review
 

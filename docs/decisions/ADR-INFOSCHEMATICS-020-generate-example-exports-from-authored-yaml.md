@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-022
+id: ADR-INFOSCHEMATICS-020
 title: Generate example exports from authored YAML
 date: 2026-09-15
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-008, ADR-INFOSCHEMATICS-013, ADR-INFOSCHEMATICS-020]
+decision_depends_on: [ADR-INFOSCHEMATICS-008, ADR-INFOSCHEMATICS-013, ADR-INFOSCHEMATICS-019]
 ---
 
-# ADR-INFOSCHEMATICS-022: Generate example exports from authored YAML
+# ADR-INFOSCHEMATICS-020: Generate example exports from authored YAML
 
 ## Context
 

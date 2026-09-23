@@ -231,7 +231,7 @@ export const selectionSetWithinLayers = (
  * Route geometry is excluded by role as well as by capability, because that is the actual reason a Flow sits out: it
  * has no single extent to bring onto an edge. A Point has no extent either, but it does have one position, and every
  * edge and centre line of a zero-extent element resolves to that position - so a Point aligns and distributes exactly
- * as `ADR-INFOSCHEMATICS-031` reasons, and only geometry that is a path rather than a place is filtered out here.
+ * as `ADR-INFOSCHEMATICS-028` reasons, and only geometry that is a path rather than a place is filtered out here.
  */
 export const groupMovableSelection = (selection: ArtefactSelectionSet): ArtefactSelectionSet =>
   selection.filter((artefact) => artefact.geometry !== 'route' && artefactCan(artefact.kind, 'move'))
@@ -523,7 +523,7 @@ export const alignOffsets = (anchor: Box, boxes: readonly Box[], edge: AlignEdge
  * A Point is a place rather than a size, so it is measured as a zero-extent box at its coordinate. Every edge and
  * centre line of that box is the Point's own coordinate, so aligning a Point to any edge puts the Point on the
  * anchor's named line; and distribute counts it as one participant occupying none of the space the others share,
- * which is what equalising the gaps around a thing with no width means. `ADR-INFOSCHEMATICS-031` works both through.
+ * which is what equalising the gaps around a thing with no width means. `ADR-INFOSCHEMATICS-028` works both through.
  *
  * This is a measurement, not a geometry: nothing here is written back, so a Point never acquires a box.
  */

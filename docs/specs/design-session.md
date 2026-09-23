@@ -148,7 +148,7 @@ The selected kind MUST determine the Properties controls. A stale or empty selec
 
 _Conformance:_ conforming
 
-A Point carries the third geometry role rather than a box, which is what `ADR-INFOSCHEMATICS-031` settles: it is a sixth kind of its own, so it moves as a coordinate and offers no box resize to withhold.
+A Point carries the third geometry role rather than a box, which is what `ADR-INFOSCHEMATICS-028` settles: it is a sixth kind of its own, so it moves as a coordinate and offers no box resize to withhold.
 
 _Verify:_ run the Point cases in `packages/view-studio/src/app/App.browser.test.tsx`. They aim a press eight units off a Point's centre and resolve it through `elementFromPoint`, so a Point that is drawn but cannot be reached fails rather than passing on its presence in the tree; deleting the widened target circle from `packages/view-canvas/src/InfoschematicDiagram.tsx` fails that one case.
 
@@ -206,15 +206,15 @@ _Conformance:_ conforming
 
 _Verify:_ run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load `packages/view-studio/src/styles.css` and assert reachability through `offsetParent` rather than presence, because the collapsed dock hides a mounted panel rather than unmounting it.
 
-_Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override whenever either axis moves while producing, drops it when the tools go down, and routes the panel toggle to whichever of the two the current position owns; `packages/view-studio/src/app/panels/PanelRail.tsx` renders nothing while producing; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when either axis moves; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records the preference model and the rejected alternative.
+_Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override whenever either axis moves while producing, drops it when the tools go down, and routes the panel toggle to whichever of the two the current position owns; `packages/view-studio/src/app/panels/PanelRail.tsx` renders nothing while producing; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when either axis moves; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-the-mode.md` records the preference model and the rejected alternative.
 
 ### DESIGN-022 — A design session resolves in the reader's colour scheme, and the reader may choose it
 
 Studio MUST render its whole surface — title bar, panels, editors, and the frame around the Diagram — in whichever colour scheme is resolved, naming chrome roles rather than colours of its own. Every role MUST be answered in both schemes, so no panel is painted in one while the rest is painted in the other, and type over an accented or selected plane MUST move with the plane beneath it rather than staying a fixed ink.
 
-Studio MUST offer a colour-scheme control in its title bar. It MUST carry an accessible name saying which scheme it moves to, MUST report the current scheme through `aria-pressed`, and MUST be operable from the keyboard, following the toggle conventions `DESIGN-005` already establishes for that bank. "Mode" is taken by `ADR-INFOSCHEMATICS-028`, so the control MUST say colour scheme.
+Studio MUST offer a colour-scheme control in its title bar. It MUST carry an accessible name saying which scheme it moves to, MUST report the current scheme through `aria-pressed`, and MUST be operable from the keyboard, following the toggle conventions `DESIGN-005` already establishes for that bank. "Mode" is taken by `ADR-INFOSCHEMATICS-026`, so the control MUST say colour scheme.
 
-Resolution order MUST be an explicit host choice, then the reader's stored choice, then the operating system, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A choice MUST survive a reload, and while none is stored the surface MUST keep following the operating system as it changes.
+Resolution order MUST be an explicit host choice, then the reader's stored choice, then the operating system, per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A choice MUST survive a reload, and while none is stored the surface MUST keep following the operating system as it changes.
 
 _Conformance:_ conforming
 

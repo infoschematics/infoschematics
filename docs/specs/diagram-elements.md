@@ -114,7 +114,7 @@ _Evidence:_ `packages/domain-model/src/model.ts` declares the required field and
 
 An authored [Overlay](../reference/vocabulary.md#overlay) MUST be drawn wherever the Diagram is drawn, not only in a Producer editing mode. A [Scene](../reference/vocabulary.md#scene)'s own Graphic MUST add to the authored set rather than replace it, and the union MUST be deduplicated by identifier so a Scene naming an authored Overlay draws it once. A Scene's focus MUST express itself as dimming or hiding rather than as absence from the drawn set.
 
-[`ADR-INFOSCHEMATICS-037`](../decisions/ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records the reversal. [Present](../reference/vocabulary.md#present) needs nothing of its own: it keeps supplying the active Sequence Scene's Graphic, and the authored declaration reaches an audience because the Diagram draws it.
+[`ADR-INFOSCHEMATICS-033`](../decisions/ADR-INFOSCHEMATICS-033-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records the reversal. [Present](../reference/vocabulary.md#present) needs nothing of its own: it keeps supplying the active Sequence Scene's Graphic, and the authored declaration reaches an audience because the Diagram draws it.
 
 _Conformance:_ conforming
 

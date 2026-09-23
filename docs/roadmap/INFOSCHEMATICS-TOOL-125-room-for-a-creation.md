@@ -28,9 +28,9 @@ That reasoning is sound and this is not a request to overturn it. What it does n
 
 ## Boundary
 
-Where a created Card is first placed, and only that. It does not change the creation route, which `INFOSCHEMATICS-TOOL-112` and `ADR-INFOSCHEMATICS-042` settled, and it does not introduce automatic layout — the Card still goes somewhere provisional that the Producer is expected to move.
+Where a created Card is first placed, and only that. It does not change the creation route, which `INFOSCHEMATICS-TOOL-112` and `ADR-INFOSCHEMATICS-038` settled, and it does not introduce automatic layout — the Card still goes somewhere provisional that the Producer is expected to move.
 
-An [Adapter](../reference/vocabulary.md#adapter-card) is out of scope: `ADR-INFOSCHEMATICS-036` draws it from the Card it clasps, so its authored box is a starting value nothing depends on.
+An [Adapter](../reference/vocabulary.md#adapter-card) is out of scope: `ADR-INFOSCHEMATICS-032` draws it from the Card it clasps, so its authored box is a starting value nothing depends on.
 
 ## Current state
 
@@ -49,7 +49,7 @@ Nothing consults what is already drawn. `reviewInfoschematicDrawing` in `package
 
 ## Steps
 
-- [ ] Settle the boundary question first: whether a creation surface may ask the checker for a measurement. `ADR-INFOSCHEMATICS-040` says a checker measures and never repairs; asking for a measurement is not a repair, but the boundary is close enough to state explicitly rather than assume, and the answer decides whether the overlap test is shared or duplicated.
+- [ ] Settle the boundary question first: whether a creation surface may ask the checker for a measurement. `ADR-INFOSCHEMATICS-036` says a checker measures and never repairs; asking for a measurement is not a repair, but the boundary is close enough to state explicitly rather than assume, and the answer decides whether the overlap test is shared or duplicated.
 - [ ] Give the placement a search: candidates outward from the view-box centre, each tested for overlap against the authored artefacts and the operations already pending.
 - [ ] Keep the current stepped-centre position as the fallback when no candidate is clear, so a dense document still produces a visible Card rather than none.
 - [ ] Hold the behaviour in the Studio browser suite: create into a document whose centre is occupied and assert the new Card overlaps nothing.
@@ -65,13 +65,13 @@ Nothing consults what is already drawn. `reviewInfoschematicDrawing` in `package
 
 ## Dependencies / blocks
 
-Nothing blocks it and it blocks nothing. It sits downstream of `INFOSCHEMATICS-TOOL-112` and `ADR-INFOSCHEMATICS-042` only in that those settled the creation route this places into.
+Nothing blocks it and it blocks nothing. It sits downstream of `INFOSCHEMATICS-TOOL-112` and `ADR-INFOSCHEMATICS-038` only in that those settled the creation route this places into.
 
 ## Documentation impact
 
 ### Decision Records
 
-A record only if the boundary question resolves into a general rule about editing surfaces consuming diagnostics; if it resolves narrowly, `ADR-INFOSCHEMATICS-040`'s consequences gain a clarifying sentence instead.
+A record only if the boundary question resolves into a general rule about editing surfaces consuming diagnostics; if it resolves narrowly, `ADR-INFOSCHEMATICS-036`'s consequences gain a clarifying sentence instead.
 
 ### Specifications
 
@@ -89,7 +89,7 @@ Nothing follows. Automatic layout remains explicitly out of scope and is not imp
 
 Found on 2026-09-22 during the browser look for `INFOSCHEMATICS-TOOL-112`, and deliberately not folded into it — that item converged the creation route and this is about placement, which was unchanged by it and equally true before.
 
-The obvious implementation is to search outward from the centre for a clear box, testing candidates with the same overlap measurement `INFOSCHEMATICS-TOOL-113` already computes, and to keep the current position as the fallback when nothing is clear. Worth settling when shaped: whether reusing the diagnostics rule is right, or whether the checker reviewing a document and the editor choosing a position should stay separate, since `ADR-INFOSCHEMATICS-040` says a checker measures and never repairs — a creation surface asking it for a measurement is not a repair, but the boundary is close enough to state rather than assume.
+The obvious implementation is to search outward from the centre for a clear box, testing candidates with the same overlap measurement `INFOSCHEMATICS-TOOL-113` already computes, and to keep the current position as the fallback when nothing is clear. Worth settling when shaped: whether reusing the diagnostics rule is right, or whether the checker reviewing a document and the editor choosing a position should stay separate, since `ADR-INFOSCHEMATICS-036` says a checker measures and never repairs — a creation surface asking it for a measurement is not a repair, but the boundary is close enough to state rather than assume.
 
 Per `AGENTS.md` this needs the browser look to verify, since where a Card lands is exactly what a green suite cannot tell anyone.
 

@@ -1,18 +1,18 @@
 ---
-id: ADR-INFOSCHEMATICS-033
+id: ADR-INFOSCHEMATICS-029
 title: A Diagram host mounts the announcement surface
 date: 2026-09-17
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-026, ADR-INFOSCHEMATICS-029]
+decision_depends_on: [ADR-INFOSCHEMATICS-024, ADR-INFOSCHEMATICS-027]
 ---
 
-# ADR-INFOSCHEMATICS-033: A Diagram host mounts the announcement surface
+# ADR-INFOSCHEMATICS-029: A Diagram host mounts the announcement surface
 
 ## Context
 
-[`ADR-INFOSCHEMATICS-026`](ADR-INFOSCHEMATICS-026-name-dynamics-in-the-document.md) made a [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) a meaning a document names and a host plays, and [`ADR-INFOSCHEMATICS-029`](ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means-not-how-it-is-played.md) added the held state. Both rest on the same promise: a Dynamic is legible to a reader who cannot see the treatment, because the interactive renderer says what happened in a polite live region. `DYNAMIC-006` states it.
+[`ADR-INFOSCHEMATICS-024`](ADR-INFOSCHEMATICS-024-name-dynamics-in-the-document.md) made a [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) a meaning a document names and a host plays, and [`ADR-INFOSCHEMATICS-027`](ADR-INFOSCHEMATICS-027-author-what-an-emphasis-means-not-how-it-is-played.md) added the held state. Both rest on the same promise: a Dynamic is legible to a reader who cannot see the treatment, because the interactive renderer says what happened in a polite live region. `DYNAMIC-006` states it.
 
 `Canvas` composed those live regions, and for as long as it was the only host of `InfoschematicDiagram` the requirement's "interactive renderer" and the component that satisfied it were the same thing. They are not. Studio mounts `InfoschematicDiagram` directly — it resolves its own Dynamics for rehearsal and materialises a draft runtime, which is why it cannot mount `Canvas`: `Canvas` builds a runtime from `config`, and Studio's runtime already carries the draft overlay, so mounting one inside the other would put two runtimes behind one surface.
 

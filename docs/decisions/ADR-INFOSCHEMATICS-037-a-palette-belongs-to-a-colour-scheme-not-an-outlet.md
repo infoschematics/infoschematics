@@ -1,20 +1,20 @@
 ---
-id: ADR-INFOSCHEMATICS-041
+id: ADR-INFOSCHEMATICS-037
 title: A palette belongs to a colour scheme, not an outlet
 date: 2026-09-22
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-011, ADR-INFOSCHEMATICS-024, ADR-INFOSCHEMATICS-035]
+decision_depends_on: [ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-011, ADR-INFOSCHEMATICS-022, ADR-INFOSCHEMATICS-031]
 ---
 
-# ADR-INFOSCHEMATICS-041: A palette belongs to a colour scheme, not an outlet
+# ADR-INFOSCHEMATICS-037: A palette belongs to a colour scheme, not an outlet
 
 ## Context
 
 Until now the drawing's colours were chosen by the outlet that drew them. The token manifest said so in as many words — the interactive surface was dark, the static renderer's paper was light — and the tokens followed: `canvas.surfaces.backdrop` was `#081725` while `canvas.output.backdrop` was `#ffffff`, and `canvas.artwork` carried two complete ink groups so a piece of standard artwork could be painted either way.
 
-That agreement was coherent while the question was "which renderer is this". It stops being coherent the moment the question is "what does the reader prefer", because the reader's preference is not a property of the renderer. [PDR-INFOSCHEMATICS-004](PDR-INFOSCHEMATICS-004-product-messaging.md) positions an [Infoschematic](../reference/vocabulary.md#infoschematic) as an input embedded where it is read — in a document, a site, a build pipeline. A definition that can only be drawn dark cannot honour that: embedded in a light document it is a black rectangle in the middle of the page, and an SVG committed to a repository is wrong for half the people who open it.
+That agreement was coherent while the question was "which renderer is this". It stops being coherent the moment the question is "what does the reader prefer", because the reader's preference is not a property of the renderer. [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md) positions an [Infoschematic](../reference/vocabulary.md#infoschematic) as an input embedded where it is read — in a document, a site, a build pipeline. A definition that can only be drawn dark cannot honour that: embedded in a light document it is a black rectangle in the middle of the page, and an SVG committed to a repository is wrong for half the people who open it.
 
 Nothing in the repository read `prefers-color-scheme` at all, in any TypeScript, stylesheet, document or manifest. So the decision was not how to add a second palette to an existing scheme mechanism; it was whether a scheme exists as a concept here, and who gets to resolve it.
 
@@ -28,7 +28,7 @@ A palette belongs to a **colour scheme**. One role set — 36 paint roles plus t
 
 **A still rendering resolves the scheme once and writes the colours it settled on** — because nothing downstream of it can react. A caller who wants both renders twice, which is also what makes the two comparable.
 
-**A rendering may also decline to choose.** `scheme: 'adaptive'` writes one SVG carrying both palettes in its own `<style>` element behind `prefers-color-scheme`, scoped to the drawing's own element rather than `:root` so the same markup inlines into a page without declaring a palette over everything around it. This is the form our output most often takes in somebody else's repository, read by people whose preference we will never know. A raster cannot take it: the colour is in the pixel, so [ADR-INFOSCHEMATICS-024](ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md)'s encoder has to be told, and `--scheme adaptive --format png` is refused rather than quietly resolved.
+**A rendering may also decline to choose.** `scheme: 'adaptive'` writes one SVG carrying both palettes in its own `<style>` element behind `prefers-color-scheme`, scoped to the drawing's own element rather than `:root` so the same markup inlines into a page without declaring a palette over everything around it. This is the form our output most often takes in somebody else's repository, read by people whose preference we will never know. A raster cannot take it: the colour is in the pixel, so [ADR-INFOSCHEMATICS-022](ADR-INFOSCHEMATICS-022-rasterise-with-a-native-resvg-binding.md)'s encoder has to be told, and `--scheme adaptive --format png` is refused rather than quietly resolved.
 
 An adaptive rendering references its roles through inline `style` rather than presentation attributes. `fill="var(--paint)"` is a CSS value only where SVG 2's presentation-attribute parsing is implemented — it resolves in Chromium — and a file committed for strangers to open is exactly the output that cannot depend on which engine they use.
 
@@ -44,7 +44,7 @@ There is no blueprint chrome. `blueprint` is an authored treatment of a drawing 
 
 ## Consequences
 
-The `output`, `surfaces` and `artwork.ink` token groups are gone. Every consumer now names a role and either resolves it for a scheme or references it as a custom property, and the standard-artwork catalogue of [ADR-INFOSCHEMATICS-035](ADR-INFOSCHEMATICS-035-the-product-offers-renderer-artwork-as-data.md) paints itself from the artwork roles rather than from one outlet's inks — one catalogue, correct in every scheme.
+The `output`, `surfaces` and `artwork.ink` token groups are gone. Every consumer now names a role and either resolves it for a scheme or references it as a custom property, and the standard-artwork catalogue of [ADR-INFOSCHEMATICS-031](ADR-INFOSCHEMATICS-031-the-product-offers-renderer-artwork-as-data.md) paints itself from the artwork roles rather than from one outlet's inks — one catalogue, correct in every scheme.
 
 Renderer parity now compares the **role** each outlet names rather than the colour it wrote, because the two deliberately differ about resolution: Canvas emits `var(--infoschematic-canvas-paint-artwork-mark)` where the static renderer writes `#9cd5f58c`, and both are right. A parity check that compared literals would fail on a correct pair.
 

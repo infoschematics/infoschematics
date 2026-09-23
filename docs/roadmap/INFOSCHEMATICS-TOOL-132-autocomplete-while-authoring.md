@@ -26,7 +26,7 @@ So the mechanism is present and proven, and is simply not pointed at the places 
 
 The larger gap is what the schema offers once it is resolved. It has 330 typed nodes, 15 enums and **zero `description` fields**, with a single `title` on the root. Property-name completion works, enum-value completion works for those 15, and `additionalProperties: false` in 61 places turns a misspelling into a reported error rather than silence — that part is genuinely good. But every suggestion arrives as a bare word. An author offered `major-plus-minor` beside `dots` learns nothing about either, which is the moment the guide was supposed to become unnecessary.
 
-The schema also declares `$id: https://infoschematics.info/schema/infoschematic.schema.json`, and nothing serves that URL. Relative paths work inside this repository and break everywhere else, so an author embedding an Infoschematic in their own project — which `PDR-INFOSCHEMATICS-004` positions as the normal case — cannot resolve the schema at all.
+The schema also declares `$id: https://infoschematics.info/schema/infoschematic.schema.json`, and nothing serves that URL. Relative paths work inside this repository and break everywhere else, so an author embedding an Infoschematic in their own project — which `PDR-INFOSCHEMATICS-002` positions as the normal case — cannot resolve the schema at all.
 
 ## Boundary
 

@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-028
+id: ADR-INFOSCHEMATICS-026
 title: Panels follow the mode
 date: 2026-09-16
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [PDR-INFOSCHEMATICS-002, ADR-INFOSCHEMATICS-027]
+decision_depends_on: [PDR-INFOSCHEMATICS-001, ADR-INFOSCHEMATICS-025]
 ---
 
-# ADR-INFOSCHEMATICS-028: Panels follow the mode
+# ADR-INFOSCHEMATICS-026: Panels follow the mode
 
 ## Context
 

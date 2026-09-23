@@ -728,7 +728,7 @@ describe('renderInfoschematicSvg', () => {
     // Nothing travels in a still frame, and this output cannot tell a travelling emphasis from a finite one. That is
     // a recorded decision rather than an oversight: the direction a mark traces is chosen from the geometry, so there
     // is no authored direction for a still frame to record, and inventing one would show the reader a movement the
-    // document never states. `ADR-INFOSCHEMATICS-029`.
+    // document never states. `ADR-INFOSCHEMATICS-027`.
     expect(emphasised).not.toContain('animateMotion')
     expect(emphasised).not.toContain('infoschematic-element-emphasis-mark')
     // The occurrence key is a host's identity for a replay, not part of deterministic output.
@@ -949,7 +949,7 @@ describe('renderInfoschematicSvg', () => {
   it('draws every authored Overlay by default and narrows to a Scene only when asked', () => {
     /*
      * The default was `scene`, and no authored Scene can name a Graphic, so every authored Overlay was filtered
-     * out of every still rendering — `ADR-INFOSCHEMATICS-037`. A caller that wants the scene-scoped set asks for it.
+     * out of every still rendering — `ADR-INFOSCHEMATICS-033`. A caller that wants the scene-scoped set asks for it.
      */
     const everything = renderInfoschematicSvg(representative)
     expect(everything).toContain('data-artefact-kind="overlay"')

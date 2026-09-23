@@ -5,7 +5,7 @@ date: 2026-09-23
 status: current
 decision_type: governance
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/gdr
-decision_depends_on: [ADR-INFOSCHEMATICS-021]
+decision_depends_on: [ADR-INFOSCHEMATICS-017]
 ---
 
 # GDR-INFOSCHEMATICS-005: Name commands by owner, then subject, then verb
@@ -42,4 +42,4 @@ The subject-first rule is enforced by a small list of known verbs, so a verb the
 
 Writing the surface down in the README makes the list a reviewable artefact rather than a side effect of the manifest's sort order, and the test makes an undocumented command fail. It also means adding a command is two edits, not one. That is the intended cost: a command nobody can find is not a capability.
 
-The rule says nothing about how a command parses its own arguments. [ADR-INFOSCHEMATICS-021](ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) governs that, and the repository currently has two implementations of it — `scripts/cli.ts` for the scripts and the argument handling inside `@infoschematics/cli`. Unifying them is deliberately out of scope here, because the published command and the repository script do not offer the same options.
+The rule says nothing about how a command parses its own arguments. [ADR-INFOSCHEMATICS-017](ADR-INFOSCHEMATICS-017-the-renderer-command-is-thin-and-its-input-is-inert.md) governs that, and the repository currently has two implementations of it — `scripts/cli.ts` for the scripts and the argument handling inside `@infoschematics/cli`. Unifying them is deliberately out of scope here, because the published command and the repository script do not offer the same options.

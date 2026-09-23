@@ -1,20 +1,20 @@
 ---
-id: ADR-INFOSCHEMATICS-025
+id: ADR-INFOSCHEMATICS-023
 title: Keep the preview server local and in memory
 date: 2026-09-15
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-018, ADR-INFOSCHEMATICS-021]
+decision_depends_on: [ADR-INFOSCHEMATICS-017]
 ---
 
-# ADR-INFOSCHEMATICS-025: Keep the preview server local and in memory
+# ADR-INFOSCHEMATICS-023: Keep the preview server local and in memory
 
 ## Context
 
 `infoschematics render --serve` is the first listening socket this product publishes. Everything before it was a filter: read a path, write a path, exit. A server that runs on an author's machine while they edit has defaults that are a security contract rather than a convenience, and the usual shape for a development preview — serve a directory, watch everything under it, bind all interfaces so a phone on the same network can look — is exactly the shape that leaks a working tree.
 
-`ADR-INFOSCHEMATICS-021` already decided that the command treats its input as inert data rather than code. A preview that served files by pathname would undo the spirit of that: the command would go from reading one document the user named to exposing whatever a request asked for.
+`ADR-INFOSCHEMATICS-017` already decided that the command treats its input as inert data rather than code. A preview that served files by pathname would undo the spirit of that: the command would go from reading one document the user named to exposing whatever a request asked for.
 
 ## Decision
 

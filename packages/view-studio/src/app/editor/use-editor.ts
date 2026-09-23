@@ -883,7 +883,7 @@ export function useEditor(
         }
         /*
          * A Point has no extent to centre the pointer inside, so the wanted coordinate is the pointer itself,
-         * measured as the zero-extent box `ADR-INFOSCHEMATICS-031` licenses. Every edge of that box is the
+         * measured as the zero-extent box `ADR-INFOSCHEMATICS-028` licenses. Every edge of that box is the
          * Point's own coordinate, so rounding the box is rounding the Point.
          */
         case 'point': {

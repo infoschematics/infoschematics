@@ -22,7 +22,7 @@ A reader switching a page between light and dark sees the drawing change with it
 
 One field is doing three jobs. `packages/view-model/src/tokens.ts:176` types `PaintScheme` as `'blueprint' | 'dark' | 'light'`, putting an authored treatment in the same enum as a reader's context, and `scripts/generate-visual-tokens.ts:35` emits the blueprint palette last at higher specificity than either scheme selector — so a blueprint drawing resolves one fixed dark palette whatever the page is in. Every published example authors `surface: blueprint`, so in practice the scheme control changes the interface and leaves every drawing dark.
 
-Underneath that is the larger gap. An author may colour a Collection, a Flow family, a Fabric or a Point with a literal hex, and `ADR-INFOSCHEMATICS-041` holds that a scheme must never repaint an authored colour. So an authored colour is pinned in both modes, and only the ink over it flips, via `readableInk` in `packages/view-model/src/appearance.ts:126` measuring the fill's WCAG relative luminance against a 0.179 threshold. Everything else — backdrop, grid, strokes, text, annotations, and the Fabric paint roles — comes from the palette and follows the mode.
+Underneath that is the larger gap. An author may colour a Collection, a Flow family, a Fabric or a Point with a literal hex, and `ADR-INFOSCHEMATICS-037` holds that a scheme must never repaint an authored colour. So an authored colour is pinned in both modes, and only the ink over it flips, via `readableInk` in `packages/view-model/src/appearance.ts:126` measuring the fill's WCAG relative luminance against a 0.179 threshold. Everything else — backdrop, grid, strokes, text, annotations, and the Fabric paint roles — comes from the palette and follows the mode.
 
 The corpus shows what that costs. The showcase's two Fabrics author `#4d7ea8` and `#6c8ebf`; its Collections and families author `#9673a6`, `#6c8ebf`, `#82b366`, `#79c9ff` and `#f5a742`. Those are the draw.io default stroke palette, chosen for a white ground — and `#4d7ea8` is verbatim the light palette's own `artwork-accent` token, hand-copied into authored data where no mode can ever reach it again. A Fabric therefore renders two entirely different ways depending on whether its author happened to set a colour, which is not a distinction any author made deliberately.
 
@@ -50,7 +50,7 @@ The static outlet mirrors the pin: `packages/render-svg/src/index.ts:609` suppre
 
 ## Steps
 
-- [ ] Record the model as an amendment to `ADR-INFOSCHEMATICS-041`, keeping `status: current`. A mode is `light` or `dark` and nothing else. A style owns every role an author cannot colour. An authored colour is a hue the style realises per mode, rather than a value pinned against it. Note why the alternative — a closed role vocabulary, which is what the comparable tool does — is rejected: it would remove a capability this product already offers.
+- [ ] Record the model as an amendment to `ADR-INFOSCHEMATICS-037`, keeping `status: current`. A mode is `light` or `dark` and nothing else. A style owns every role an author cannot colour. An authored colour is a hue the style realises per mode, rather than a value pinned against it. Note why the alternative — a closed role vocabulary, which is what the comparable tool does — is rejected: it would remove a capability this product already offers.
 - [ ] Split `PaintScheme` into `mode: 'light' | 'dark'` and a separate style axis, so the palette manifest becomes style × mode and no type carries both. Keep the generator's refusal to write a stylesheet when palettes disagree about their roles, now across every pair.
 - [ ] Give blueprint a light realisation across all 36 roles plus the artwork inks, and look at it. A blueprint is a dark-ground convention, so its light form is a real design question — cyanotype ink on paper, not the dark palette lightened.
 - [ ] Resolve an authored colour as a hue seed: the style derives the per-mode brightness step from it, so one authored value reads on either ground. Keep an explicit opt-in pin for an author who means that exact value, and make the seed the default rather than the exception.
@@ -67,7 +67,7 @@ The static outlet mirrors the pin: `packages/render-svg/src/index.ts:609` suppre
 
 ## Files touched
 
-`packages/view-model/src/tokens.ts`, `tokens.test.ts`, `tokens.generated.css` and `appearance.ts`; `packages/domain-model/src/appearance.ts` and `model.ts`; `packages/domain-core/schema/infoschematic.schema.json` via `scripts/generate-schema.ts`; `packages/view-model/src/compatibility.ts` and `runtime.ts`; `scripts/generate-visual-tokens.ts`; `packages/render-svg/src/index.ts`; `packages/cli/src/options.ts`; `packages/view-canvas/src/Canvas.schemes.browser.test.tsx`, `tokens.test.tsx`, `colour-scheme.ts` and `styles.css`; `packages/view-studio` for the hue control; `apps/site/src/VisualGuide.tsx`; the five documents under `examples/`; `docs/specs/appearance.md` and `docs/specs/command-line-rendering.md`; `ADR-INFOSCHEMATICS-041`.
+`packages/view-model/src/tokens.ts`, `tokens.test.ts`, `tokens.generated.css` and `appearance.ts`; `packages/domain-model/src/appearance.ts` and `model.ts`; `packages/domain-core/schema/infoschematic.schema.json` via `scripts/generate-schema.ts`; `packages/view-model/src/compatibility.ts` and `runtime.ts`; `scripts/generate-visual-tokens.ts`; `packages/render-svg/src/index.ts`; `packages/cli/src/options.ts`; `packages/view-canvas/src/Canvas.schemes.browser.test.tsx`, `tokens.test.tsx`, `colour-scheme.ts` and `styles.css`; `packages/view-studio` for the hue control; `apps/site/src/VisualGuide.tsx`; the five documents under `examples/`; `docs/specs/appearance.md` and `docs/specs/command-line-rendering.md`; `ADR-INFOSCHEMATICS-037`.
 
 ## Verify
 
@@ -85,7 +85,7 @@ It overlaps `INFOSCHEMATICS-TOOL-121` — the identity chip's two spellings — 
 
 ### Decision Records
 
-`ADR-INFOSCHEMATICS-041` is amended in place. Its "a scheme is not authored data, and `blueprint` is not a scheme" clause becomes the sharper claim it was reaching for: a style is not a mode, and an authored colour is a hue a style realises rather than a value a mode must not touch.
+`ADR-INFOSCHEMATICS-037` is amended in place. Its "a scheme is not authored data, and `blueprint` is not a scheme" clause becomes the sharper claim it was reaching for: a style is not a mode, and an authored colour is a hue a style realises rather than a value a mode must not touch.
 
 ### Specifications
 
@@ -101,7 +101,7 @@ It overlaps `INFOSCHEMATICS-TOOL-121` — the identity chip's two spellings — 
 
 ## Discussion
 
-Raised on 2026-09-22 from the reader's side — the light/dark control changes the page and not the drawing — and worked through with the owner into a model rather than a fix. The behaviour is correct against `ADR-INFOSCHEMATICS-041` and the four surfaces that encode it, and is still the wrong outcome, because every document in the corpus authors the treatment that opts out.
+Raised on 2026-09-22 from the reader's side — the light/dark control changes the page and not the drawing — and worked through with the owner into a model rather than a fix. The behaviour is correct against `ADR-INFOSCHEMATICS-037` and the four surfaces that encode it, and is still the wrong outcome, because every document in the corpus authors the treatment that opts out.
 
 The hue-seed decision is the substance. Two answers were on the table: close the colour vocabulary to a fixed set of roles a style can guarantee, or keep authored colour open and make the style resolve its brightness. The first is the comparable tool's answer and it is coherent, but it removes a capability this product already ships. The second keeps the capability and costs a contrast obligation the product must now meet rather than delegate to the author's taste — which is the right trade, because the author was never in a position to meet it for two grounds at once.
 

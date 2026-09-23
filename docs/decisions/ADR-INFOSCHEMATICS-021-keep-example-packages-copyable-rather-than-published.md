@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-023
+id: ADR-INFOSCHEMATICS-021
 title: Keep example packages copyable rather than published
 date: 2026-09-15
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-010, ADR-INFOSCHEMATICS-022]
+decision_depends_on: [ADR-INFOSCHEMATICS-010, ADR-INFOSCHEMATICS-020]
 ---
 
-# ADR-INFOSCHEMATICS-023: Keep example packages copyable rather than published
+# ADR-INFOSCHEMATICS-021: Keep example packages copyable rather than published
 
 ## Context
 

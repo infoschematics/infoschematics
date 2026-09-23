@@ -246,7 +246,7 @@ export const createdArtefactDetails = (operation: CreateArtefactOperation): Edit
         return placement ? { box: placement, role: 'box' as const } : undefined
       }
       /* The authored coordinate is the whole geometry, so there is nothing to fall back to and nothing to
-         guard: `ADR-INFOSCHEMATICS-031` is what says a Point acquires no box on the way through here. */
+         guard: `ADR-INFOSCHEMATICS-028` is what says a Point acquires no box on the way through here. */
       case 'point':
         return {
           at: (operation.value as InfoschematicConfig['infoschematic']['points'][number]).point,

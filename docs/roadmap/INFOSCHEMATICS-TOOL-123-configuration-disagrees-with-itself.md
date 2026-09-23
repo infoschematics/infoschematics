@@ -34,7 +34,7 @@ Configuration files and the audit contract they answer to: `knip.json`, `turbo.j
 
 It does not include dependency currency, which is `INFOSCHEMATICS-TOOL-122`.
 
-Whether the examples should build at all is in scope as a question. `ADR-INFOSCHEMATICS-023` keeps example packages copyable rather than published, so a `build` script may be the wrong answer and excluding them from the task correspondence rule may be the right one.
+Whether the examples should build at all is in scope as a question. `ADR-INFOSCHEMATICS-021` keeps example packages copyable rather than published, so a `build` script may be the wrong answer and excluding them from the task correspondence rule may be the right one.
 
 ## Current state
 
@@ -47,7 +47,7 @@ Two standing `ki repo audit --skill ki-engineering` findings, both configuration
 ## Steps
 
 - [x] Add `.claude/skills/` and `.agents/skills/` to `knip.json`'s ignores and confirm `knip --treat-config-hints-as-errors` still passes — if it reports the entries as unused hints, resolve that rather than dropping the exclusion.
-- [x] Decide whether the four example workspaces declare a no-op `build` or whether `turbo.json` stops expecting one from every workspace, and apply it. `ADR-INFOSCHEMATICS-023` is the record that made examples independently authored; check it before assuming a build script is the right answer.
+- [x] Decide whether the four example workspaces declare a no-op `build` or whether `turbo.json` stops expecting one from every workspace, and apply it. `ADR-INFOSCHEMATICS-021` is the record that made examples independently authored; check it before assuming a build script is the right answer.
 - [x] Declare `self:lockfile:verify` as a task in `turbo.json` so the root script invokes something the graph knows about.
 - [x] Prove each declaration by editing a file the task reads and confirming it reruns, per `AGENTS.md`'s rule about `inputs`.
 
@@ -67,7 +67,7 @@ Nothing blocks it and it blocks nothing. It is the configuration half of the sam
 
 ### Decision Records
 
-None expected. If the answer to the example workspaces is that `turbo.json` should stop requiring a build from every workspace, `ADR-INFOSCHEMATICS-023` is amended rather than superseded.
+None expected. If the answer to the example workspaces is that `turbo.json` should stop requiring a build from every workspace, `ADR-INFOSCHEMATICS-021` is amended rather than superseded.
 
 ### Specifications
 
@@ -89,7 +89,7 @@ Both standing `ki repo audit --skill ki-engineering` findings are gone: the audi
 
 `GEN-1` was the interesting half. Adding `.claude/skills` and `.agents/skills` to `knip.json` makes Knip report both as configuration hints asking for their removal, because its root project glob is `scripts/**/*.ts` and neither path is anything it would otherwise read. The root script ran `knip --treat-config-hints-as-errors`, so taking the contract seriously failed the check, and the flag cannot tell a hint that is advice from a hint that is the contract working. The resolution is `scripts/unused.ts`: it runs Knip, sanctions exactly those two hints by name, and fails on every other hint and every issue — so the strictness the flag was there for survives without its one wrong answer.
 
-`TURBO-2` was two smaller things. The four example workspaces now declare a `build` that runs their existing `check` — rendering their own YAML to `/dev/null` — which is a real obligation rather than a no-op, and is what `ADR-INFOSCHEMATICS-023` already says an example owes: its content has to render through the published CLI. Each carries a package-level `turbo.json` saying that build has no outputs, because the root `build` task declares `dist/**` and an example emits nothing; without it Turborepo warned about missing output files on every run. And the root `self:check` now names its root tasks as `//#self:…`, which is what the graph calls them.
+`TURBO-2` was two smaller things. The four example workspaces now declare a `build` that runs their existing `check` — rendering their own YAML to `/dev/null` — which is a real obligation rather than a no-op, and is what `ADR-INFOSCHEMATICS-021` already says an example owes: its content has to render through the published CLI. Each carries a package-level `turbo.json` saying that build has no outputs, because the root `build` task declares `dist/**` and an example emits nothing; without it Turborepo warned about missing output files on every run. And the root `self:check` now names its root tasks as `//#self:…`, which is what the graph calls them.
 
 ### Summary of changes
 

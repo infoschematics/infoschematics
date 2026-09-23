@@ -1,5 +1,5 @@
 ---
-id: ADR-INFOSCHEMATICS-019
+id: ADR-INFOSCHEMATICS-018
 title: Unify presentation sequences
 date: 2026-09-14
 status: current
@@ -8,7 +8,7 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-006]
 ---
 
-# ADR-INFOSCHEMATICS-019: Unify presentation sequences
+# ADR-INFOSCHEMATICS-018: Unify presentation sequences
 
 ## Context
 

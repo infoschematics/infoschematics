@@ -595,7 +595,7 @@ export function DetailsPanel({
   const libraryChanges = scenes.edited
     ? [{ field: 'points' as const, key: 'standaloneScenes', source: scenes.source }]
     : []
-  // The key names the authored field the change lands in, which `ADR-INFOSCHEMATICS-019` retains as `themes`.
+  // The key names the authored field the change lands in, which `ADR-INFOSCHEMATICS-018` retains as `themes`.
   const sequenceChanges = sequences.edited
     ? [{ field: 'points' as const, key: 'themes', source: sequences.source }]
     : []

@@ -289,7 +289,7 @@ describe('createInfoschematicRuntime', () => {
 
   it('anchors a Flow to the Adapter the reader sees, not to its authored box', () => {
     /*
-     * `ADR-INFOSCHEMATICS-036`: an Adapter is a grip on the Card it holds rather than a thing with a position of
+     * `ADR-INFOSCHEMATICS-032`: an Adapter is a grip on the Card it holds rather than a thing with a position of
      * its own, so its drawn box is derived from that Card. The Flow endpoint lookup read the adapter's own authored
      * bounds instead, so moving the held Card left the Flow hanging in the space the adapter used to occupy.
      */

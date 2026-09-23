@@ -11,7 +11,7 @@ import { createInfoschematicRuntime, type RuntimeFlow } from './runtime.ts'
  * across the Card it leaves, or push an element outside the view nobody can scroll to.
  *
  * The geometry lives here rather than in a command because View Model already owns every measurement involved —
- * `ADR-INFOSCHEMATICS-018` puts the calculation in the library and the thin caller in the outlet — so the interactive
+ * `ADR-INFOSCHEMATICS-017` puts the calculation in the library and the thin caller in the outlet — so the interactive
  * Diagram, Studio, a build pipeline and an authoring agent read the same findings rather than three approximations of
  * them.
  *
@@ -151,7 +151,7 @@ const drawnArtefactsOf = (runtime: Runtime): readonly DrawnArtefact[] => {
 /**
  * Two artefacts drawn on top of each other.
  *
- * An Adapter and the Card it holds are exempt because overlapping is what an Adapter is — `ADR-INFOSCHEMATICS-036`
+ * An Adapter and the Card it holds are exempt because overlapping is what an Adapter is — `ADR-INFOSCHEMATICS-032`
  * makes it a grip on the thing it holds rather than a box with a position of its own. A Fabric is exempt as a place:
  * a Card drawn on a Fabric is an element sitting in the medium it uses, which is the Fabric's whole purpose.
  */

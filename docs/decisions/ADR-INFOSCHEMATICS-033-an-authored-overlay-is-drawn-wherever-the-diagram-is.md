@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-037
+id: ADR-INFOSCHEMATICS-033
 title: An authored Overlay is drawn wherever the Diagram is
 date: 2026-09-18
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-035]
+decision_depends_on: [ADR-INFOSCHEMATICS-031]
 ---
 
-# ADR-INFOSCHEMATICS-037: An authored Overlay is drawn wherever the Diagram is
+# ADR-INFOSCHEMATICS-033: An authored Overlay is drawn wherever the Diagram is
 
 ## Context
 

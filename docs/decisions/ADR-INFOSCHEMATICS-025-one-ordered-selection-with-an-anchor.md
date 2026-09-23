@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-027
+id: ADR-INFOSCHEMATICS-025
 title: One ordered selection with an anchor
 date: 2026-09-15
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-002, ADR-INFOSCHEMATICS-016, PDR-INFOSCHEMATICS-002]
+decision_depends_on: [ADR-INFOSCHEMATICS-002, ADR-INFOSCHEMATICS-016, PDR-INFOSCHEMATICS-001]
 ---
 
-# ADR-INFOSCHEMATICS-027: One ordered selection with an anchor
+# ADR-INFOSCHEMATICS-025: One ordered selection with an anchor
 
 ## Context
 

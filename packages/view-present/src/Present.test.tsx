@@ -27,7 +27,7 @@ describe('Present', () => {
    * Present's controls belong to the presenter: they are what the Audience watches being used. A reader's viewing
    * preference is not one of them — changing scheme mid-presentation is a change everyone in the room sees, and the
    * person who wants it is not usually the person holding the controls. So a presenter pins the scheme before
-   * starting, and Present follows whatever its host resolved. `ADR-INFOSCHEMATICS-041` records the same division.
+   * starting, and Present follows whatever its host resolved. `ADR-INFOSCHEMATICS-037` records the same division.
    */
   it('offers no colour-scheme control of its own, and still resolves in either scheme', () => {
     const markup = renderToStaticMarkup(<Present config={defineInfoschematic({ title: 'Audience view' })} />)
@@ -42,7 +42,7 @@ describe('Present', () => {
 
   it('shows an authored Overlay to an audience', () => {
     /*
-     * Present supplies a Scene's own Graphic and nothing else, so before `ADR-INFOSCHEMATICS-037` an authored
+     * Present supplies a Scene's own Graphic and nothing else, so before `ADR-INFOSCHEMATICS-033` an authored
      * Overlay reached Studio's Design workspace and no audience. Present is unchanged: Canvas draws the declaration.
      */
     const markup = renderToStaticMarkup(

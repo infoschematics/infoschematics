@@ -11,7 +11,7 @@ const packagesRoot = 'packages'
  * `watched` is the only classification that scans the code: the word may not name its canonical
  * concept there, because two words for one concept is how a contributor learns the wrong one.
  *
- * `retained` is a compatibility input name `ADR-INFOSCHEMATICS-019` deliberately keeps, so the code
+ * `retained` is a compatibility input name `ADR-INFOSCHEMATICS-018` deliberately keeps, so the code
  * that accepts that format is correctly named after it. `ordinary` is a word that carries its plain
  * English sense far more often than the vocabulary's - a `box` is geometry, `state` is React's, an
  * `editor` is the editing surface - and watching it would report noise rather than drift. `gloss` is

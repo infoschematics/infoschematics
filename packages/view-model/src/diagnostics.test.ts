@@ -82,7 +82,7 @@ describe('reviewInfoschematicDrawing', () => {
     ])
   })
 
-  // An Adapter is a grip on the Card it holds, per `ADR-INFOSCHEMATICS-036`, so the one pair of boxes that is
+  // An Adapter is a grip on the Card it holds, per `ADR-INFOSCHEMATICS-032`, so the one pair of boxes that is
   // supposed to overlap must not be reported - the rule would otherwise fire on every correctly authored Adapter.
   it('exempts an Adapter from overlapping the Card it holds', () => {
     expect(

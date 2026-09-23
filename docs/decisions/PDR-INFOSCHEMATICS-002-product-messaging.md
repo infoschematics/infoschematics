@@ -1,14 +1,14 @@
 ---
-id: PDR-INFOSCHEMATICS-004
+id: PDR-INFOSCHEMATICS-002
 title: Product messaging
 date: 2026-09-21
 status: current
 decision_type: product
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/pdr
-decision_depends_on: [PDR-INFOSCHEMATICS-003, KDR-INFOSCHEMATICS-001]
+decision_depends_on: [PDR-INFOSCHEMATICS-001, KDR-INFOSCHEMATICS-001]
 ---
 
-# PDR-INFOSCHEMATICS-004: Product messaging
+# PDR-INFOSCHEMATICS-002: Product messaging
 
 ## Context
 
@@ -24,16 +24,14 @@ Canonical messaging is:
 - **Mission** — _Make complex systems comprehensible to the people who build them, run them, and depend on them._
 - **Vision** — _Serious systems explained by a live instrument, not a stale diagram._
 
-An Infoschematic is positioned as an input rather than an output. It is authored once and embedded where it is read — in a document, a website, a build pipeline, or a presentation — and each rendering is an outlet for that definition. Public copy therefore describes one definition and the outlets that draw it, and does not present the product as a generator of finished pictures.
-
 Public copy follows five rules:
 
 1. Be precise and calm; avoid marketing hyperbole and exclamation.
-2. Prefer operation language such as “works”, “moves”, and “explains” over assembly language.
+2. Prefer operation language such as "works", "moves", and "explains" over assembly language.
 3. Describe the product, not whether a surface is complete or forthcoming.
 4. Use canonical product terms from [KDR-INFOSCHEMATICS-001](KDR-INFOSCHEMATICS-001-product-vocabulary.md).
-5. Describe the definition and its outlets rather than a finished picture; a diagram that is redrawn for each outlet is not what is being offered.
+5. Describe the definition and its outlets rather than a finished picture, per [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md); a diagram redrawn for each outlet is not what is being offered, and copy does not present the product as a generator of finished pictures.
 
 ## Consequences
 
-The homepage, metadata, README, and future package descriptions share one review point. A better canonical phrase changes here before it propagates to public surfaces. The positioning claim has the same single review point: guide copy such as [the Getting started overview](../../apps/site/content/getting-started.md) cites this record's account of an embedded input rather than arguing it again. Mission and vision provide orientation; delivery planning remains in the roadmap.
+The homepage, metadata, README, and future package descriptions share one review point. A better canonical phrase changes here before it propagates to public surfaces, and it changes without reopening what the product is — that question belongs to `PDR-INFOSCHEMATICS-001`. Mission and vision provide orientation; delivery planning remains in the roadmap.

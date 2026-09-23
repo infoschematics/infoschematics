@@ -100,7 +100,7 @@ _Conformance:_ conforming
 
 _Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load Studio's own stylesheet and assert reachability rather than presence.
 
-_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable while not producing and no rail at all while producing; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records why the rail stays Present-only.
+_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable while not producing and no rail at all while producing; `docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-the-mode.md` records why the rail stays Present-only.
 
 ### PRESENT-010 — Zoom follows pointer and resets to fit
 
@@ -136,7 +136,7 @@ _Evidence:_ `packages/view-canvas/src/viewport.test.ts` covers minimap clamping 
 
 Present MUST render in whichever colour scheme its host resolved, naming chrome roles rather than colours of its own, and every role MUST be answered in both schemes so no part of the shell is painted in one while the rest is painted in the other.
 
-Present MUST NOT offer a colour-scheme control. Its controls are the presenter's and the Audience watches them being used, so a reader's viewing preference does not belong among them; a presenter pins the scheme before starting, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A host that wants the choice offered MUST offer it in its own chrome, which is what [ADR-INFOSCHEMATICS-005](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md) already gives it.
+Present MUST NOT offer a colour-scheme control. Its controls are the presenter's and the Audience watches them being used, so a reader's viewing preference does not belong among them; a presenter pins the scheme before starting, per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md). A host that wants the choice offered MUST offer it in its own chrome, which is what [ADR-INFOSCHEMATICS-005](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md) already gives it.
 
 _Conformance:_ conforming
 

@@ -1,5 +1,5 @@
 ---
-id: ADR-INFOSCHEMATICS-020
+id: ADR-INFOSCHEMATICS-019
 title: Preserve authored source through validated edits
 date: 2026-09-14
 status: current
@@ -8,7 +8,7 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-013]
 ---
 
-# ADR-INFOSCHEMATICS-020: Preserve authored source through validated edits
+# ADR-INFOSCHEMATICS-019: Preserve authored source through validated edits
 
 ## Context
 

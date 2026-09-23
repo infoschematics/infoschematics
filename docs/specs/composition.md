@@ -2,7 +2,7 @@
 
 What two features must still promise when they are used together. Part of the [Specifications corpus](index.md).
 
-Every requirement here names the two owning requirements whose composition it states, and states only the property that emerges between them — never what either feature promises alone. [`ADR-INFOSCHEMATICS-034`](../decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) records why a composition is a requirement of its own rather than a clause in the newer feature, and enumerates the contended resources these pairs are derived from.
+Every requirement here names the two owning requirements whose composition it states, and states only the property that emerges between them — never what either feature promises alone. [`ADR-INFOSCHEMATICS-030`](../decisions/ADR-INFOSCHEMATICS-030-a-composition-is-its-own-requirement.md) records why a composition is a requirement of its own rather than a clause in the newer feature, and enumerates the contended resources these pairs are derived from.
 
 ## User-observable behaviours
 

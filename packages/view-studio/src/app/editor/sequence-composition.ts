@@ -175,7 +175,7 @@ export const sequenceCanActivate = (
  * The complete authored collection, so fields not exposed by the panel survive.
  *
  * The emitted key stays `sequences` because that is the field an author pastes back into, and
- * `ADR-INFOSCHEMATICS-019` retains it as a compatibility input under that name.
+ * `ADR-INFOSCHEMATICS-018` retains it as a compatibility input under that name.
  */
 export const sequencesAsSource = (sequences: SequenceCollection): string =>
   `sequences  ->  ${JSON.stringify(sequences, null, 2)}`

@@ -120,7 +120,7 @@ _Evidence:_ `packages/render-svg/src/index.test.ts` covers all six kinds, compat
 
 Static output MUST draw an [Adapter Card](../reference/vocabulary.md#adapter-card) as the notched clasp the interactive Diagram draws, traced from View Model's one outline rather than assembled here, so nothing the adapter paints passes under the Card it holds. It MUST place the adapter's own label in the footer band below the notch rather than centred in the clasp box, and MUST NOT draw an adapter whose held Card this rendering did not draw.
 
-The clasp box MUST be derived from the held Card in both renderers, and an Adapter Card's authored `bounds` MUST NOT position it, as [`ADR-INFOSCHEMATICS-036`](../decisions/ADR-INFOSCHEMATICS-036-an-adapter-card-is-positioned-by-what-it-holds.md) records. An element emphasis over an Adapter Card MUST take the same derived box.
+The clasp box MUST be derived from the held Card in both renderers, and an Adapter Card's authored `bounds` MUST NOT position it, as [`ADR-INFOSCHEMATICS-032`](../decisions/ADR-INFOSCHEMATICS-032-an-adapter-card-is-positioned-by-what-it-holds.md) records. An element emphasis over an Adapter Card MUST take the same derived box.
 
 _Conformance:_ conforming
 
@@ -132,7 +132,7 @@ _Evidence:_ `adapterClaspOutline` and `adapterLabelBaseline` in `packages/view-m
 
 Static output MUST draw every authored [Overlay](../reference/vocabulary.md#overlay) when the caller passes no visibility options, so a document rendered through `infoschematics render` shows the Overlays it declares. `visibility.graphics` MUST keep `scene`, which narrows the drawn set to the Graphics the selected Scene names, and `none`, which draws no Overlay at all; neither MUST be the default. A Scene's focus MUST continue to dim or hide an unfocused Overlay through `unfocused` rather than remove it from the default set.
 
-[`ADR-INFOSCHEMATICS-037`](../decisions/ADR-INFOSCHEMATICS-037-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records why the default reversed: an authored Scene has no field that can name a Graphic, so the scene-scoped default was unreachable from every authored document and no document depended on it.
+[`ADR-INFOSCHEMATICS-033`](../decisions/ADR-INFOSCHEMATICS-033-an-authored-overlay-is-drawn-wherever-the-diagram-is.md) records why the default reversed: an authored Scene has no field that can name a Graphic, so the scene-scoped default was unreachable from every authored document and no document depended on it.
 
 _Conformance:_ conforming
 
@@ -216,7 +216,7 @@ _Evidence:_ `artworkPrimitives` and `artworkResources` in `packages/render-svg/s
 
 ### STATIC-020 — A rendering states the colour scheme it is painted in
 
-A static rendering MUST be painted in one named colour scheme, resolved once from View Model's paint roles and written as colours, because nothing downstream of a file reports a reader's preference. The scheme MUST default to `light`. An authored blueprint surface MUST override it in either scheme, per [ADR-INFOSCHEMATICS-041](../decisions/ADR-INFOSCHEMATICS-041-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md): a scheme is a reader's context and a surface treatment is authored data.
+A static rendering MUST be painted in one named colour scheme, resolved once from View Model's paint roles and written as colours, because nothing downstream of a file reports a reader's preference. The scheme MUST default to `light`. An authored blueprint surface MUST override it in either scheme, per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md): a scheme is a reader's context and a surface treatment is authored data.
 
 A caller MAY instead ask the rendering to defer the choice. An `adaptive` SVG MUST carry every palette it might need in its own `<style>` element behind `prefers-color-scheme`, MUST scope those declarations to the drawing's own element rather than `:root` so inlining it into a host page does not repaint that page, and MUST reference each role through an inline `style` declaration rather than a presentation attribute, which is a CSS value only where SVG 2 parsing is implemented. An adaptive rendering MUST NOT write a palette colour on any drawn element, and MUST NOT be offered for raster output, where the choice is made before the pixels exist. An `adaptive` SVG MUST also carry a `print` rule restoring the default scheme, declared after the preference rule for the same reason the generated projection does. An adaptive rendering depends on a consumer that resolves custom properties; a consumer that does not paints those roles black rather than reading a fallback, so the guidance for a caller MUST say that anything other than a browser asks for a named scheme.
 
@@ -228,4 +228,4 @@ _Evidence:_ `packages/render-svg/src/index.ts` resolves one palette at the top o
 
 ## Gaps
 
-- `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-034](../decisions/ADR-INFOSCHEMATICS-034-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.
+- `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-030](../decisions/ADR-INFOSCHEMATICS-030-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.

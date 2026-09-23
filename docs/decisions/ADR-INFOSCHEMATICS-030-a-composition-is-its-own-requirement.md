@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-034
+id: ADR-INFOSCHEMATICS-030
 title: A composition is its own requirement
 date: 2026-09-17
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-033]
+decision_depends_on: [ADR-INFOSCHEMATICS-029]
 ---
 
-# ADR-INFOSCHEMATICS-034: A composition is its own requirement
+# ADR-INFOSCHEMATICS-030: A composition is its own requirement
 
 ## Context
 

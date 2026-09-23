@@ -45,7 +45,7 @@ infoschematics render architecture.yaml --format png --scale 2 --output architec
 
 `--scale` multiplies the document's own pixel size, so `--scale 2` doubles both dimensions without changing the diagram. Standard output stays binary-clean, so redirecting or piping the bytes is safe. `--scale` and `--font` apply to raster output only and are rejected as usage errors when the output stays SVG.
 
-Conversion runs through a pinned build of resvg rather than a browser, chosen in [ADR-INFOSCHEMATICS-024](../decisions/ADR-INFOSCHEMATICS-024-rasterise-with-a-native-resvg-binding.md). There is no background option: the renderer already paints an opaque backdrop across the whole image, so there is no transparency behind it to fill.
+Conversion runs through a pinned build of resvg rather than a browser, chosen in [ADR-INFOSCHEMATICS-022](../decisions/ADR-INFOSCHEMATICS-022-rasterise-with-a-native-resvg-binding.md). There is no background option: the renderer already paints an opaque backdrop across the whole image, so there is no transparency behind it to fill.
 
 ### Pin fonts for reproducible text
 
@@ -95,13 +95,13 @@ To show the preview on another device, name an interface deliberately:
 infoschematics render architecture.yaml --serve --host 0.0.0.0
 ```
 
-The command says plainly that the preview is now reachable from the network. The reasoning behind these defaults is in [ADR-INFOSCHEMATICS-025](../decisions/ADR-INFOSCHEMATICS-025-keep-the-preview-server-local-and-in-memory.md).
+The command says plainly that the preview is now reachable from the network. The reasoning behind these defaults is in [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-the-preview-server-local-and-in-memory.md).
 
 Add `--output architecture.svg` to keep a file current at the same time, and `--format png` to preview the raster instead. `Ctrl-C` releases the socket and the watcher and exits with status `130`.
 
 ## Render a TypeScript definition
 
-The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
+The command reads inert documents only, and deliberately never executes a module: loading one would run code with your authority before any Infoschematic exists to validate, and [ADR-INFOSCHEMATICS-017](../decisions/ADR-INFOSCHEMATICS-017-the-renderer-command-is-thin-and-its-input-is-inert.md) keeps that step yours rather than the command's. Import the definition in a script you own and render it through the library:
 
 ```ts
 import { writeFile } from 'node:fs/promises'

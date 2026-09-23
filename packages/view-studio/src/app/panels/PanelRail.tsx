@@ -9,7 +9,7 @@ import { sceneCanActivate } from '../scene-activation.ts'
  * and which workspace the Producer would return to has no bearing on it. Scope, Family and Sequence are small,
  * mutually exclusive choices that fit; Design's properties, tools and layer controls and Direct's target chooser
  * are not, so there is no workspace branch here and collapsed is not a compact set of Producer tools. Taking up
- * those tools opens the dock instead - App.tsx holds that transition, and ADR-INFOSCHEMATICS-028 records why it
+ * those tools opens the dock instead - App.tsx holds that transition, and ADR-INFOSCHEMATICS-026 records why it
  * went this way round.
  */
 export function PanelRail({

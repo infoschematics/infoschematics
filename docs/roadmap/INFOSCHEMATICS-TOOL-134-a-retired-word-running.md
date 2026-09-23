@@ -32,7 +32,7 @@ The retired word where it names a Sequence: the `DirectTarget` shape, the three 
 
 It excludes `theme` where it legitimately means something else: the roadmap frontmatter field, the browser `theme-color` meta tag, the visual-treatment sense in the guide, and the light or dark axis, which `INFOSCHEMATICS-TOOL-129` names `mode`.
 
-It also excludes the retained legacy input. `ADR-INFOSCHEMATICS-019` decided that "the compatibility boundary temporarily retains established Theme and Story inputs", so `ThemeConfig` in Domain Model, the `themes` field on `InfoschematicConfig`, and the code that reads them are correctly named after the format they accept. Renaming those would misname the compatibility surface, not fix it.
+It also excludes the retained legacy input. `ADR-INFOSCHEMATICS-018` decided that "the compatibility boundary temporarily retains established Theme and Story inputs", so `ThemeConfig` in Domain Model, the `themes` field on `InfoschematicConfig`, and the code that reads them are correctly named after the format they accept. Renaming those would misname the compatibility surface, not fix it.
 
 It excludes `story` in the same sense. A collapsed Sequence is called a Story in exactly the way an expanded one is called a Theme, so `owner: 'story' | 'sequence'` is left uneven on purpose: evening it up means deciding whether Direct still distinguishes the two editing shapes, which is behaviour rather than a rename.
 
@@ -40,7 +40,7 @@ It excludes `story` in the same sense. A collapsed Sequence is called a Story in
 
 The survey is wider than the capture's estimate of eleven files, and it divides cleanly in two.
 
-**Retained legacy input, correctly named.** `packages/domain-model/src/theme.ts` declares `ThemeConfig` and `ThematicSceneConfig`; `InfoschematicConfig.themes` accepts them; `view-model/src/artefact-draft.ts:447` and `compatibility.ts:337` read and write that field. `ADR-INFOSCHEMATICS-019` sanctions all of it. `view-model/src/signals.ts:17` and `render-svg/src/index.ts:449` belong here too rather than with the drift: each declares a `kind: 'theme'` selection _beside_ its own `kind: 'sequence'` one, and resolves it against `config.themes` — so it selects a Scene inside a retained Theme, and is named after the input it reads.
+**Retained legacy input, correctly named.** `packages/domain-model/src/theme.ts` declares `ThemeConfig` and `ThematicSceneConfig`; `InfoschematicConfig.themes` accepts them; `view-model/src/artefact-draft.ts:447` and `compatibility.ts:337` read and write that field. `ADR-INFOSCHEMATICS-018` sanctions all of it. `view-model/src/signals.ts:17` and `render-svg/src/index.ts:449` belong here too rather than with the drift: each declares a `kind: 'theme'` selection _beside_ its own `kind: 'sequence'` one, and resolves it against `config.themes` — so it selects a Scene inside a retained Theme, and is named after the input it reads.
 
 **The retired word naming a canonical Sequence.** `packages/view-studio/src/app/editor/sequence-editing.ts:50` is the tell: `themesForEditing` takes `readonly SequenceConfig[]` and returns `readonly ThemeConfig[]`, so a canonical Sequence is converted _into_ the retired shape purely to be edited, then converted back by `sequencesWithEditorDrafts`. The canonical model is already the source of truth, and the retired type is an internal editing view of it — which is what makes this a rename rather than a migration.
 
@@ -83,7 +83,7 @@ Nothing blocks it and it blocks nothing.
 
 ### Decision Records
 
-None. `ADR-INFOSCHEMATICS-019` already decided that Sequence is the one canonical concept and that Theme is a retained input name. This makes the code agree with a decision that is already current, and the ADR's wording stays accurate.
+None. `ADR-INFOSCHEMATICS-018` already decided that Sequence is the one canonical concept and that Theme is a retained input name. This makes the code agree with a decision that is already current, and the ADR's wording stays accurate.
 
 ### Specifications
 
@@ -101,7 +101,7 @@ A follow-up for `story`, which is the same drift in the collapsed half and needs
 
 ### Delivered
 
-Studio and View Present name a Sequence a Sequence. The retired word survives in exactly one place — the compatibility input `ADR-INFOSCHEMATICS-019` retains — and a check now reads the vocabulary's own list of non-canonical alternatives and fails when one of them re-enters the packages under any other pretext.
+Studio and View Present name a Sequence a Sequence. The retired word survives in exactly one place — the compatibility input `ADR-INFOSCHEMATICS-018` retains — and a check now reads the vocabulary's own list of non-canonical alternatives and fails when one of them re-enters the packages under any other pretext.
 
 The rename found what a survey would not: the retired names were not a parallel set but an overlapping one. `toggle-sequence-scene` and `step-sequence` already existed as canonical actions on the collapsed half, so renaming `toggle-theme-scene` onto them would have silently merged two different actions. They became `toggle-expanded-scene` and `step-expanded` instead, which is what the state they carry actually distinguishes.
 

@@ -285,7 +285,7 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     scopes: scopesOf(fabric.id)
   }))
   /*
-   * An Adapter is anchored to the Card it holds, never to its own authored `bounds` — `ADR-INFOSCHEMATICS-036`, and
+   * An Adapter is anchored to the Card it holds, never to its own authored `bounds` — `ADR-INFOSCHEMATICS-032`, and
    * the rule every drawn adapter already follows through `adapterBoundsFor`. This lookup read the authored box, so a
    * Flow leaving an adapter stayed where the adapter had been authored while the adapter itself went with the Card a
    * Producer moved, and the two came apart on screen.

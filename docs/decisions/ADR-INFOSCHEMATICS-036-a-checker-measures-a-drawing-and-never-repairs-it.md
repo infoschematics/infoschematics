@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-040
+id: ADR-INFOSCHEMATICS-036
 title: A checker measures a drawing and never repairs it
 date: 2026-09-22
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-018, ADR-INFOSCHEMATICS-021, ADR-INFOSCHEMATICS-036]
+decision_depends_on: [ADR-INFOSCHEMATICS-017, ADR-INFOSCHEMATICS-032]
 ---
 
-# ADR-INFOSCHEMATICS-040: A checker measures a drawing and never repairs it
+# ADR-INFOSCHEMATICS-036: A checker measures a drawing and never repairs it
 
 ## Context
 
@@ -22,13 +22,13 @@ Three questions had to be answered together. Where the geometry lives, because b
 
 A drawing review is a **measurement, reported**. The checker states what is wrong, names the subject, gives the number, lists the repairs that would clear it — and changes nothing.
 
-The geometry lives in View Model, per [ADR-INFOSCHEMATICS-018](ADR-INFOSCHEMATICS-018-keep-the-renderer-command-thin.md), because every measurement involved is already there: ports, routes, label placement and the [Adapter](../reference/vocabulary.md#adapter-card) grip of ADR-INFOSCHEMATICS-036. `infoschematics check` is a thin outlet over it, as `render` is over the static renderer, and stays inert per [ADR-INFOSCHEMATICS-021](ADR-INFOSCHEMATICS-021-keep-command-line-input-inert.md). A second implementation of any rule in a renderer, in Studio or in the command would be the failure this arrangement exists to prevent.
+The geometry lives in View Model, per [ADR-INFOSCHEMATICS-017](ADR-INFOSCHEMATICS-017-the-renderer-command-is-thin-and-its-input-is-inert.md), because every measurement involved is already there: ports, routes, label placement and the [Adapter](../reference/vocabulary.md#adapter-card) grip of ADR-INFOSCHEMATICS-032. `infoschematics check` is a thin outlet over it, as `render` is over the static renderer, and stays inert per [ADR-INFOSCHEMATICS-017](ADR-INFOSCHEMATICS-017-the-renderer-command-is-thin-and-its-input-is-inert.md). A second implementation of any rule in a renderer, in Studio or in the command would be the failure this arrangement exists to prevent.
 
 Every finding carries a stable rule code, the authored identities it concerns, the measurement in diagram units, one sentence for a person, and the legal repairs. The rule code is public contract from the moment anything keys off it, so it is specified in [the drawing diagnostics specification](../specs/diagnostics.md) before it is implemented. Findings are ordered by rule and subject, so a repair loop sees a repaired finding leave the list rather than the list reshuffle.
 
 Severity is split, and only one half gates. An **error** says the drawing cannot be read as authored; an **observation** says it is tight or unusual and leaves the judgement with the author. The command exits `1` on an error and `0` on observations alone, because a checker that refuses a merely cramped document is a checker people learn to skip.
 
-Automatic layout is still not a product capability. The checker judges placement; it never chooses it. That is what makes an authoring skill tractable without a solver, and it keeps [PDR-INFOSCHEMATICS-002](PDR-INFOSCHEMATICS-002-a-structured-editor-not-a-drawing-tool.md)'s structured-editor position intact: the author, or the agent acting as one, moves things.
+Automatic layout is still not a product capability. The checker judges placement; it never chooses it. That is what makes an authoring skill tractable without a solver, and it keeps [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md)'s structured-editor position intact: the author, or the agent acting as one, moves things.
 
 A rule that cannot fire is not admitted. The port audit's `crowded` and `misassigned` severities describe a route whose endpoint has moved away from the port it names, which only an editing host produces — a side offers only ports it has room for at the minimum gap, so no authored pair of distinct ports can be closer. They stay Studio's live audit rather than document rules that would read like coverage and measure nothing.
 

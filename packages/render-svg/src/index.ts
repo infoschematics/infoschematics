@@ -50,7 +50,7 @@ export type SvgVisibilityOptions = {
    *
    * `scene` narrows the set to the Graphics the selected Scene names, which is what this defaulted to until an
    * authored document proved the default unreachable: no authored Scene can name a Graphic, so every authored
-   * Overlay was filtered out of every still rendering — `ADR-INFOSCHEMATICS-037`.
+   * Overlay was filtered out of every still rendering — `ADR-INFOSCHEMATICS-033`.
    */
   graphics?: 'all' | 'none' | 'scene'
   /** Scope ids to show. Omit this field to show every declared Scope. */
@@ -88,7 +88,7 @@ export type RenderInfoschematicSvgOptions = {
    * neither has a preference left to read. `adaptive` instead carries both palettes in the document's own
    * stylesheet behind `prefers-color-scheme`, so one committed SVG reads correctly for someone whose preference
    * this renderer will never know. An authored blueprint surface is not a scheme and overrides either, per
-   * `ADR-INFOSCHEMATICS-041`.
+   * `ADR-INFOSCHEMATICS-037`.
    */
   scheme?: RenderedScheme
   /** An authored Scene to render without introducing playback or other motion. */
@@ -519,7 +519,7 @@ const arrowReference = (head: Arrowhead | undefined, end: 'end' | 'start'): stri
  * renderer sends a mark along that same line and the two cannot be allowed to disagree about where it runs. Nothing
  * travels here: a single frame has no time to travel, and the direction a mark traces is chosen from the geometry
  * rather than stated by the document, so there is no authored direction for a still frame to record.
- * `ADR-INFOSCHEMATICS-029` records that decision and its cost.
+ * `ADR-INFOSCHEMATICS-027` records that decision and its cost.
  */
 const boxEmphasis = (box: { height: number; width: number; x: number; y: number }): EmphasisShape => [
   'path',
@@ -630,7 +630,7 @@ export const renderInfoschematicSvg = (
   )
   /*
    * An Adapter Card is drawn as a clasp derived from the Card it holds, and its own authored `bounds` do not position
-   * it — `ADR-INFOSCHEMATICS-036`. This renderer read those bounds and painted an opaque rectangle, so a still
+   * it — `ADR-INFOSCHEMATICS-032`. This renderer read those bounds and painted an opaque rectangle, so a still
    * rendering covered the lower half of the held Card and the two renderers placed the same adapter in two places
    * wherever the authored box was not already the derived one. An adapter whose held Card this render did not draw is
    * not drawn either: a clasp with nothing in it is a notch around empty space.
@@ -816,7 +816,7 @@ export const renderInfoschematicSvg = (
           ['markerUnits', 'userSpaceOnUse'],
           ['markerWidth', arrow.size],
           /* `auto`, never the SVG 2 `auto-start-reverse` the Canvas uses: the rasteriser chosen in
-             `ADR-INFOSCHEMATICS-024` ignores that value and paints the head unrotated rather than failing, so
+             `ADR-INFOSCHEMATICS-022` ignores that value and paints the head unrotated rather than failing, so
              every PNG hung a flat pennant off its target and every check agreed. A head that has to face back
              out of its source is mirrored geometry here rather than a reversed axis. */
           ['orient', 'auto'],

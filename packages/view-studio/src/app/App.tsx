@@ -69,7 +69,7 @@ export function designArrowPoint(geometry: ArtefactGeometry, key: string, step: 
   /*
    * The answer is where the artefact's centre lands after one step, and a Point's coordinate already
    * is its centre: `movableBox` measures it as a zero-extent box, so the half-extent terms fall to
-   * zero rather than needing a branch. `ADR-INFOSCHEMATICS-031` is what licenses measuring it that way.
+   * zero rather than needing a branch. `ADR-INFOSCHEMATICS-028` is what licenses measuring it that way.
    */
   const box = movableBox(geometry)
   return {
@@ -311,7 +311,7 @@ function AppContent({
    * The override is transient and is not written back, because one visit to Design must not change what a presented
    * document looks like from then on. It is set on the transition rather than held, so collapsing the dock inside
    * Design is respected for the rest of that visit. Presenting again drops it and the persisted preference decides.
-   * See ADR-INFOSCHEMATICS-028.
+   * See ADR-INFOSCHEMATICS-026.
    */
   const [dockOverride, setDockOverride] = useState<boolean | null>(null)
   const [dockProducing, setDockProducing] = useState(presentation.producing)
@@ -718,7 +718,7 @@ function AppContent({
       const code = nextCodeIn(prefix, taken)
       /*
        * Each new Card a step along from the last, counted from the creations already drafted so two made in a row do
-       * not land on each other. An Adapter starts on the Card it clasps: `ADR-INFOSCHEMATICS-036` draws it from that
+       * not land on each other. An Adapter starts on the Card it clasps: `ADR-INFOSCHEMATICS-032` draws it from that
        * Card wherever the Card goes, so this box is a legal starting value rather than the position it will keep.
        */
       const made = editor.artefactOperations.filter(

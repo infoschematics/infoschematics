@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-036
+id: ADR-INFOSCHEMATICS-032
 title: An Adapter Card is positioned by what it holds
 date: 2026-09-18
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [PDR-INFOSCHEMATICS-002]
+decision_depends_on: [PDR-INFOSCHEMATICS-001]
 ---
 
-# ADR-INFOSCHEMATICS-036: An Adapter Card is positioned by what it holds
+# ADR-INFOSCHEMATICS-032: An Adapter Card is positioned by what it holds
 
 ## Context
 
@@ -22,7 +22,7 @@ A Card carries `bounds` because every placed artefact does, so the field exists 
 
 **An Adapter Card's position is derived from the Card it holds. Its authored `bounds` do not position it, in any renderer, and the clasp outline is stated once in View Model for both.**
 
-An adapter is a grip on the thing it holds rather than a thing with a position of its own: that is what the notation says, and [PDR-INFOSCHEMATICS-002](PDR-INFOSCHEMATICS-002-a-structured-editor-not-a-drawing-tool.md) is why a coordinate the structure already implies is not one an author maintains, and it is why taking hold of one in the editor moves the Card it clasps. Deriving the box makes that true of the data as well, so an adapter cannot be authored adrift from what it wraps, and a Card that moves carries its adapter with it without a second coordinate to keep in step by hand.
+An adapter is a grip on the thing it holds rather than a thing with a position of its own: that is what the notation says, and [PDR-INFOSCHEMATICS-001](PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md) is why a coordinate the structure already implies is not one an author maintains, and it is why taking hold of one in the editor moves the Card it clasps. Deriving the box makes that true of the data as well, so an adapter cannot be authored adrift from what it wraps, and a Card that moves carries its adapter with it without a second coordinate to keep in step by hand.
 
 The alternative was to honour the authored box in both renderers, which would have made `bounds` mean one thing everywhere. It was rejected because it changes the delivered interactive treatment and asks an author to maintain a coordinate that is already derivable — and because a clasp authored away from the Card it holds is a notch around empty space, which the notation has nothing to say about.
 

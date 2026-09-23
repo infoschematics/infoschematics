@@ -1,5 +1,5 @@
 ---
-id: ADR-INFOSCHEMATICS-026
+id: ADR-INFOSCHEMATICS-024
 title: Name Dynamics in the document
 date: 2026-09-15
 status: current
@@ -8,7 +8,7 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [ADR-INFOSCHEMATICS-005, ADR-INFOSCHEMATICS-006, ADR-INFOSCHEMATICS-012]
 ---
 
-# ADR-INFOSCHEMATICS-026: Name Dynamics in the document
+# ADR-INFOSCHEMATICS-024: Name Dynamics in the document
 
 ## Context
 
@@ -36,6 +36,6 @@ Static output stays deterministic and quiet unless a caller asks for a named occ
 
 ## Amendments
 
-`ADR-INFOSCHEMATICS-038` adds a second origin for an occurrence: a Scene may cue a named Dynamic with a bounded `once` or `repeat` policy. The vocabulary, the occurrence shape, and the refusal to carry timing in the document are all unchanged — the cue names which Dynamic and how often, and the View that plays it owns every timer. Scene-authored choreography is therefore the binding this record anticipated rather than the parallel animation contract it refused.
+`ADR-INFOSCHEMATICS-034` adds a second origin for an occurrence: a Scene may cue a named Dynamic with a bounded `once` or `repeat` policy. The vocabulary, the occurrence shape, and the refusal to carry timing in the document are all unchanged — the cue names which Dynamic and how often, and the View that plays it owns every timer. Scene-authored choreography is therefore the binding this record anticipated rather than the parallel animation contract it refused.
 
-`ADR-INFOSCHEMATICS-039` settles the ordered cascade `ADR-INFOSCHEMATICS-038` left out of scope: a Scene may cue several Dynamics in an authored order, and the Sequence paces them — stages divide a timed Scene's hold, and each stage is one presenter step in an untimed one. The refusal to carry timing in the document is untouched, because an order is not a duration.
+`ADR-INFOSCHEMATICS-035` settles the ordered cascade `ADR-INFOSCHEMATICS-034` left out of scope: a Scene may cue several Dynamics in an authored order, and the Sequence paces them — stages divide a timed Scene's hold, and each stage is one presenter step in an untimed one. The refusal to carry timing in the document is untouched, because an order is not a duration.

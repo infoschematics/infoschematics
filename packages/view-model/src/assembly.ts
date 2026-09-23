@@ -22,7 +22,7 @@ export const adapterBoundsFor = (held: Box): Box => ({
  * way each corner turns.
  *
  * The box comes from the held Card, never from the adapter's own authored `bounds`: an adapter is a grip on the thing
- * it holds rather than a thing with a position of its own, as `ADR-INFOSCHEMATICS-036` records.
+ * it holds rather than a thing with a position of its own, as `ADR-INFOSCHEMATICS-032` records.
  */
 export const adapterClaspOutline = (held: Box, cornerRadius: number): string => {
   const box = adapterBoundsFor(held)

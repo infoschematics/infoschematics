@@ -1,18 +1,18 @@
 ---
-id: ADR-INFOSCHEMATICS-029
+id: ADR-INFOSCHEMATICS-027
 title: Author what an emphasis means, not how it is played
 date: 2026-09-16
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-012, ADR-INFOSCHEMATICS-026]
+decision_depends_on: [ADR-INFOSCHEMATICS-012, ADR-INFOSCHEMATICS-024]
 ---
 
-# ADR-INFOSCHEMATICS-029: Author what an emphasis means, not how it is played
+# ADR-INFOSCHEMATICS-027: Author what an emphasis means, not how it is played
 
 ## Context
 
-[`ADR-INFOSCHEMATICS-026`](ADR-INFOSCHEMATICS-026-name-dynamics-in-the-document.md) gave a document a vocabulary of named [Diagram Dynamics](../reference/vocabulary.md#diagram-dynamic) and kept every depiction choice out of it: no duration, easing, colour, selector, callback, timer, or renderer component. It named the finite kind list as the deliberate cost, and said a third kind would be a decision with its own static and accessible obligations rather than a configuration value.
+[`ADR-INFOSCHEMATICS-024`](ADR-INFOSCHEMATICS-024-name-dynamics-in-the-document.md) gave a document a vocabulary of named [Diagram Dynamics](../reference/vocabulary.md#diagram-dynamic) and kept every depiction choice out of it: no duration, easing, colour, selector, callback, timer, or renderer component. It named the finite kind list as the deliberate cost, and said a third kind would be a decision with its own static and accessible obligations rather than a configuration value.
 
 Two asks have since arrived from the same rehearsal, the IBC 2026 5G-EMERGE walkthrough, and they are not the same ask.
 
@@ -20,7 +20,7 @@ The first is a hold. Every `emphasise-elements` occurrence outlines its targets 
 
 The second is a travelling mark: an emphasis whose treatment runs the perimeter of the element instead of brightening all of it at once, so the eye follows a direction. Held and travelling arrive together, they want the same four edit regions, and a held travelling mark is what the walkthrough actually asks for — so the surface question has to be answered once, for both, rather than twice with the second answer contradicting the first.
 
-Answering it twice is the real hazard. Each ask has an obvious local answer: a `held` kind for the first, an `animate` kind or a technique field for the second. Taken one at a time, both are plausible; taken together they turn `diagram.dynamics` into a small animation language, which is exactly the outcome `ADR-INFOSCHEMATICS-026` declined. There needs to be a test that says which of the two asks the document may express, and it has to be a test a reader can apply to the third ask as well.
+Answering it twice is the real hazard. Each ask has an obvious local answer: a `held` kind for the first, an `animate` kind or a technique field for the second. Taken one at a time, both are plausible; taken together they turn `diagram.dynamics` into a small animation language, which is exactly the outcome `ADR-INFOSCHEMATICS-024` declined. There needs to be a test that says which of the two asks the document may express, and it has to be a test a reader can apply to the third ask as well.
 
 ## Decision
 
@@ -34,9 +34,9 @@ That test settles both asks.
 
 **A travelling mark is not authored.** It is a second renderer interpretation of the same declaration, chosen from the element's geometry rather than from anything the document said, and it needs no authored surface at all. A document that wanted to insist on it would be naming a technique, which this decision refuses.
 
-`depicts: state` describes the change; it does not grant the document a lifetime. The occurrence remains host-owned in exactly the terms [`ADR-INFOSCHEMATICS-012`](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) set: the host supplies an occurrence key, retaining it holds the occurrence, changing it replays, and withdrawing it ends it. What `depicts: state` changes is only who decides the end. For an event, the renderer's own finite duration ends it, and the document is asking for that. For a state, nothing but the host's withdrawal ends it, because a state has no intrinsic duration to expire — which is why this is not the persistent presentation state `ADR-INFOSCHEMATICS-026` excluded. Nothing is written to the authored document, no occurrence or timer becomes authored data, and a held occurrence still reaches only elements the renderer actually drew. Scope filtering, Scene change, a replaced key, and host withdrawal all end a hold as they end an event.
+`depicts: state` describes the change; it does not grant the document a lifetime. The occurrence remains host-owned in exactly the terms [`ADR-INFOSCHEMATICS-012`](ADR-INFOSCHEMATICS-012-keep-flow-signals-transient.md) set: the host supplies an occurrence key, retaining it holds the occurrence, changing it replays, and withdrawing it ends it. What `depicts: state` changes is only who decides the end. For an event, the renderer's own finite duration ends it, and the document is asking for that. For a state, nothing but the host's withdrawal ends it, because a state has no intrinsic duration to expire — which is why this is not the persistent presentation state `ADR-INFOSCHEMATICS-024` excluded. Nothing is written to the authored document, no occurrence or timer becomes authored data, and a held occurrence still reaches only elements the renderer actually drew. Scope filtering, Scene change, a replaced key, and host withdrawal all end a hold as they end an event.
 
-Every treatment obligation that `ADR-INFOSCHEMATICS-026` placed on a kind is placed on `depicts: state` too, and the answers are these.
+Every treatment obligation that `ADR-INFOSCHEMATICS-024` placed on a kind is placed on `depicts: state` too, and the answers are these.
 
 Full motion sustains rather than repeats: the outline breathes on the same `canvas.emphasis` period and never reaches full transparency, so a reader arriving mid-hold sees it and a reader watching it start does not see it restart.
 

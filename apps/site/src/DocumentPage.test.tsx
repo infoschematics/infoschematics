@@ -153,7 +153,7 @@ describe('documentation pages', () => {
     const page = renderToStaticMarkup(<DocumentPage route={route} />)
 
     expect(page).toContain(
-      'href="https://github.com/infoschematics/infoschematics/blob/main/docs/decisions/PDR-INFOSCHEMATICS-001-framework-neutral-library.md"'
+      'href="https://github.com/infoschematics/infoschematics/blob/main/docs/decisions/PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md"'
     )
     expect(page).not.toContain('href="../decisions/')
   })

@@ -416,7 +416,7 @@ describe('Group alignment geometry', () => {
    *
    * A Point is measured as a zero-extent box at its coordinate, so no group operation needs a special case for it:
    * align resolves every edge of that box to the coordinate, and distribute counts the Point as a participant that
-   * occupies none of the run. Both halves of `ADR-INFOSCHEMATICS-031`'s arithmetic are asserted here, including its
+   * occupies none of the run. Both halves of `ADR-INFOSCHEMATICS-028`'s arithmetic are asserted here, including its
    * worked example, because the prediction before it was worked through was that distribute would be incoherent.
    */
   it('measures a Point as a place, so a mixed group aligns and distributes with one', () => {

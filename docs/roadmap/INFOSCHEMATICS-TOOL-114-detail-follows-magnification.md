@@ -42,7 +42,7 @@ There is no detail vocabulary to reuse, which this record's capture assumed ther
 - [ ] Define the detail bands and what each reveals, in the View Model, as a pure function of scale so both a View and a static outlet can resolve the same band.
 - [ ] Apply the band in the Canvas so crossing a threshold reveals or withdraws detail, with hysteresis at the boundary: a drawing that flickers as a reader's hand moves is worse than one that never changes.
 - [ ] Give the static renderer the same resolved band as an input, so an SVG of a magnified part matches what the Canvas shows at that scale.
-- [ ] Announce a detail change to an assistive reader without implying the document changed, per the announcement surface `ADR-INFOSCHEMATICS-033` mounts.
+- [ ] Announce a detail change to an assistive reader without implying the document changed, per the announcement surface `ADR-INFOSCHEMATICS-029` mounts.
 - [ ] State the bands and their contents as requirements, so a later change to what a band reveals is a visible contract change.
 
 ## Files touched

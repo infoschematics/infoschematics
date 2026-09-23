@@ -334,7 +334,7 @@ const report = (io: RendererCliIo, diagnostic: string, status: number) => {
 /**
  * Review the drawing one document describes and report the findings, changing nothing.
  *
- * The geometry is View Model's, per `ADR-INFOSCHEMATICS-018`: this decides who reads the answer and what the exit
+ * The geometry is View Model's, per `ADR-INFOSCHEMATICS-017`: this decides who reads the answer and what the exit
  * status says about it, and nothing else. `--json` exists because the two readers want different things - a person
  * wants the sentence and what to try, a repair loop wants the rule code and the measurement - and a checker that
  * offers only prose forces an agent to parse English.

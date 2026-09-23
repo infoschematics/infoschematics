@@ -1,14 +1,14 @@
 ---
-id: ADR-INFOSCHEMATICS-042
+id: ADR-INFOSCHEMATICS-038
 title: A creation reaches the document by one route
 date: 2026-09-22
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-032, ADR-INFOSCHEMATICS-036]
+decision_depends_on: [ADR-INFOSCHEMATICS-028, ADR-INFOSCHEMATICS-032]
 ---
 
-# ADR-INFOSCHEMATICS-042: A creation reaches the document by one route
+# ADR-INFOSCHEMATICS-038: A creation reaches the document by one route
 
 ## Context
 
@@ -18,7 +18,7 @@ The Library and the artefact factories build a domain-shaped value and one `Crea
 
 Two paths is not by itself a defect — a draft the host has not been told about is a coherent thing for an editor to hold, and the second path may have been reaching for that. What made it one is that nothing said which it was, so the two diverged on everything else as well. `INFOSCHEMATICS-TOOL-104` (a made Card answering to two names) and `-105` (a creation the document could take) were defects in the operation path; `-106` was a defect in the draft path. Neither pair could have been found from the other, and each was fixed without anyone looking at the other path, because there was no statement saying the two were supposed to agree.
 
-[`ADR-INFOSCHEMATICS-032`](ADR-INFOSCHEMATICS-032-a-point-is-created-from-the-library.md) settled the same question once, for one kind: a [Point](../reference/vocabulary.md#point) is created from the Library, and the reason given was about identity — a Point is coded and Scoped, so it belongs on the path that allocates a code and applies the current [Scope](../reference/vocabulary.md#scope). That reasoning generalises and was never generalised. A Card is coded and Scoped too.
+[`ADR-INFOSCHEMATICS-028`](ADR-INFOSCHEMATICS-028-a-point-is-its-own-artefact-kind.md) settled the same question once, for one kind: a [Point](../reference/vocabulary.md#point) is created from the Library, and the reason given was about identity — a Point is coded and Scoped, so it belongs on the path that allocates a code and applies the current [Scope](../reference/vocabulary.md#scope). That reasoning generalises and was never generalised. A Card is coded and Scoped too.
 
 ## Decision
 
@@ -29,7 +29,7 @@ The `cards` draft map is therefore retired rather than re-pointed. It was not a 
 Two things the draft path had to itself become shared, because a route only converges if the decisions on it do:
 
 - **Where a creation lands.** `nextArtefactIndex` in `packages/view-studio/src/app/editor/artefact-operations.ts` is the single expression of "after everything authored and everything already created". Two Cards made in a row cannot land on each other, and no surface can disagree with another about the end of the document, because there is only one place that computes it.
-- **What an [Adapter](../reference/vocabulary.md#adapter-card) starts as.** [`ADR-INFOSCHEMATICS-036`](ADR-INFOSCHEMATICS-036-an-adapter-card-is-positioned-by-what-it-holds.md) says an Adapter is drawn at the Card it clasps rather than at its own authored box, so the box a creation writes is a legal starting value and nothing more. The control seeds it from the held Card's current box for exactly that reason, and the drawing does not depend on it.
+- **What an [Adapter](../reference/vocabulary.md#adapter-card) starts as.** [`ADR-INFOSCHEMATICS-032`](ADR-INFOSCHEMATICS-032-an-adapter-card-is-positioned-by-what-it-holds.md) says an Adapter is drawn at the Card it clasps rather than at its own authored box, so the box a creation writes is a legal starting value and nothing more. The control seeds it from the held Card's current box for exactly that reason, and the drawing does not depend on it.
 
 The surfaces keep what is genuinely theirs. The element controls still decide the Scope, the prefix, the next free code and the room a new Card is given, because those are questions about what a Producer just did; they express the answer as a `CardConfig`, and hand it to the one route.
 

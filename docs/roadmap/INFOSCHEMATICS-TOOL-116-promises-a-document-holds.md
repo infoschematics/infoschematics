@@ -22,7 +22,7 @@ An [Infoschematic](../reference/vocabulary.md#infoschematic) may state the readi
 
 An Infoschematic explains a system, and the explanation is the point: that a request reaches the database through the gateway, that nothing bypasses the queue, that every ingress terminates somewhere. Today those readings live only in the author's head. The schema holds the shape of the document and nothing holds its meaning, so an edit made months later can silently break the very reading the diagram was drawn to support, and every check will still pass.
 
-`ADR-INFOSCHEMATICS-034` already establishes that a cross-feature composition is stated as its own requirement rather than as a clause inside a newer feature, which is the same instinct applied to the repository's own specifications: a promise that is not stated somewhere durable is not held.
+`ADR-INFOSCHEMATICS-030` already establishes that a cross-feature composition is stated as its own requirement rather than as a clause inside a newer feature, which is the same instinct applied to the repository's own specifications: a promise that is not stated somewhere durable is not held.
 
 The comparison that raised it is Archify's author-declared semantic checks, recorded in [the related-tools reference](../reference/related-tools.md): a document may declare allowed roots, allowed terminals, required edges, and required paths, and the compiler enforces them.
 
@@ -59,7 +59,7 @@ The identities a promise would be written over are already stable: `ADR-INFOSCHE
 
 ## Dependencies / blocks
 
-Nothing blocks it any longer. The reporting surface a declared check needs is delivered under [the drawing diagnostics](../specs/diagnostics.md) and [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-checker-measures-a-drawing-and-never-repairs-it.md). It blocks nothing.
+Nothing blocks it any longer. The reporting surface a declared check needs is delivered under [the drawing diagnostics](../specs/diagnostics.md) and [ADR-INFOSCHEMATICS-036](../decisions/ADR-INFOSCHEMATICS-036-a-checker-measures-a-drawing-and-never-repairs-it.md). It blocks nothing.
 
 ## Documentation impact
 

@@ -171,7 +171,7 @@ const palette = (roles: PaintRoles): PaintRoles =>
  * `light` and `dark` are the reader's context: the same document is drawn in whichever one the reader is in, and
  * nothing about the document chooses between them. `blueprint` is the authored `appearance.surface` of the same
  * name — a technical-drawing look a document asks for deliberately — so it is pinned rather than following the
- * reader, and a blueprint stays a blueprint in either scheme. `ADR-INFOSCHEMATICS-041` records why.
+ * reader, and a blueprint stays a blueprint in either scheme. `ADR-INFOSCHEMATICS-037` records why.
  */
 export type PaintScheme = 'blueprint' | 'dark' | 'light'
 
@@ -385,7 +385,7 @@ export const visualTokens = Object.freeze({
      *
      * Direction is carried by `orient`, and the two renderers cannot use the same value for it. A browser
      * implements the SVG 2 `auto-start-reverse`, which turns a `marker-start` to face back out of its source; the
-     * rasteriser chosen in `ADR-INFOSCHEMATICS-024` does not, and draws the head unrotated rather than failing. So
+     * rasteriser chosen in `ADR-INFOSCHEMATICS-022` does not, and draws the head unrotated rather than failing. So
      * the static renderer orients every head with `auto` and reaches for `reversed` — the same triangle mirrored,
      * with its apex as the reference point — where a browser would reverse the axis instead.
      *
@@ -464,7 +464,7 @@ export const visualTokens = Object.freeze({
    *
    * The light palette is not the dark one inverted. Alpha-white hairlines become alpha-ink ones, the accent darkens
    * because a pale blue on white is not a readable accent, and type on an accented fill changes colour rather than
-   * weight. `ADR-INFOSCHEMATICS-041` records the decision; the browser suites record whether it reads.
+   * weight. `ADR-INFOSCHEMATICS-037` records the decision; the browser suites record whether it reads.
    */
   chrome: Object.freeze({
     paint: Object.freeze({

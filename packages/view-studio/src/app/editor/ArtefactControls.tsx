@@ -63,7 +63,7 @@ export const describeArtefactGeometry = (geometry: ArtefactGeometry | undefined)
     case 'route':
       return `Orthogonal route with ${geometry.points.length} points`
     /* A place, stated as a place: there is no extent to report, and reporting a zero one would invite a reader
-       to think a Point had been given a size. `ADR-INFOSCHEMATICS-031` is why there is nothing more to say. */
+       to think a Point had been given a size. `ADR-INFOSCHEMATICS-028` is why there is nothing more to say. */
     case 'point':
       return `Point at ${geometry.at.x}, ${geometry.at.y}`
   }

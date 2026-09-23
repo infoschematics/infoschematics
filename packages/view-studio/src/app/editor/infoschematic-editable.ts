@@ -226,7 +226,7 @@ export const infoschematicEditable = (
     /*
      * A Point resolves by its own id, which is also its code: the document and the configuration agree on one
      * identifier for a Point, so there is no separate code to key it by the way a Card has one. The geometry is
-     * the authored coordinate and nothing else, which is what `ADR-INFOSCHEMATICS-031` settles - no box is
+     * the authored coordinate and nothing else, which is what `ADR-INFOSCHEMATICS-028` settles - no box is
      * invented here for a thing that has none, and `artefactCapabilities.point` is what withholds the resize.
      */
     if (key.startsWith('point:')) {
@@ -539,7 +539,7 @@ export const infoschematicEditable = (
 
       /* Two numbers and no others, both typed: a Point is placed exactly as a Card is, and it has no extent
          for the panel to state. A suppressed width and height would leave a reader deciding whether an absent
-         extent meant zero or unknown, which is the case `ADR-INFOSCHEMATICS-031` gives a Point its own kind for. */
+         extent meant zero or unknown, which is the case `ADR-INFOSCHEMATICS-028` gives a Point its own kind for. */
       if (key.startsWith('point:')) {
         const point = authoredArtefacts.points?.find((candidate) => candidate.id === key.slice('point:'.length))
         if (!point) return undefined

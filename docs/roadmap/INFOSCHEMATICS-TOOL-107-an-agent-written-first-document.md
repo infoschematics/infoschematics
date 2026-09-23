@@ -30,7 +30,7 @@ The bar also turns out to be lower than it looked. Studio edits a validated docu
 
 ## Boundary
 
-A decision item. It does not add a model concept, change what a definition may carry, or put a language runtime inside any package: authored definitions stay serialisable data, hosts keep mounting, and `ADR-INFOSCHEMATICS-021` keeps command-line input inert. It does not adopt automatic layout as a product capability — the skill chooses placement the way an author does, and the checker judges the result.
+A decision item. It does not add a model concept, change what a definition may carry, or put a language runtime inside any package: authored definitions stay serialisable data, hosts keep mounting, and `ADR-INFOSCHEMATICS-017` keeps command-line input inert. It does not adopt automatic layout as a product capability — the skill chooses placement the way an author does, and the checker judges the result.
 
 It does not cover the diagnostics surface itself, which is delivered as [the drawing diagnostics](../specs/diagnostics.md), or the semantic promises a document might declare, which is [INFOSCHEMATICS-TOOL-116](INFOSCHEMATICS-TOOL-116-promises-a-document-holds.md).
 
@@ -66,7 +66,7 @@ A produced document is rendered and looked at, per `AGENTS.md`: a document that 
 
 ## Dependencies / blocks
 
-Nothing blocks it any longer. The repair loop is the whole method, and the coded findings it repairs against are delivered: `infoschematics check` and `reviewInfoschematicDrawing`, specified as [the drawing diagnostics](../specs/diagnostics.md) and decided in [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-checker-measures-a-drawing-and-never-repairs-it.md). It blocks nothing.
+Nothing blocks it any longer. The repair loop is the whole method, and the coded findings it repairs against are delivered: `infoschematics check` and `reviewInfoschematicDrawing`, specified as [the drawing diagnostics](../specs/diagnostics.md) and decided in [ADR-INFOSCHEMATICS-036](../decisions/ADR-INFOSCHEMATICS-036-a-checker-measures-a-drawing-and-never-repairs-it.md). It blocks nothing.
 
 ## Documentation impact
 

@@ -8,12 +8,12 @@ An example package holds six things.
 
 1. **A canonical YAML document**, at the package root, named for what it contains. This is the only authored copy of the Infoschematic.
 2. **Package metadata** under an `infoschematics.examples` key, declaring each document's stable `id`, `title`, `source` pathname, and the `export` name generated from it.
-3. **A generated typed export** at `src/<document>.ts`, produced by `bun run self:examples:generate` and re-exported from `src/index.ts`. It embeds the document's exact bytes and parses them at import time, so it cannot describe a model the YAML does not. [ADR-INFOSCHEMATICS-022](../decisions/ADR-INFOSCHEMATICS-022-generate-example-exports-from-authored-yaml.md) records why the export is generated rather than authored.
+3. **A generated typed export** at `src/<document>.ts`, produced by `bun run self:examples:generate` and re-exported from `src/index.ts`. It embeds the document's exact bytes and parses them at import time, so it cannot describe a model the YAML does not. [ADR-INFOSCHEMATICS-020](../decisions/ADR-INFOSCHEMATICS-020-generate-example-exports-from-authored-yaml.md) records why the export is generated rather than authored.
 4. **`check` and `render` commands** in `package.json`, invoking `@infoschematics/cli` against the YAML by relative pathname so they behave identically inside the workspace and in a copy.
 5. **A README** covering purpose, files, install, render, edit, and host integration, linking directly to the canonical YAML.
 6. **Tests** asserting the exported model's shape and its serialisability, so a document that parses but means something else still fails.
 
-Example packages stay `private: true`; they are copied, not installed. [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-example-packages-copyable-rather-than-published.md) records that choice and the verification that keeps it honest.
+Example packages stay `private: true`; they are copied, not installed. [ADR-INFOSCHEMATICS-021](../decisions/ADR-INFOSCHEMATICS-021-keep-example-packages-copyable-rather-than-published.md) records that choice and the verification that keeps it honest.
 
 ## Add an example
 

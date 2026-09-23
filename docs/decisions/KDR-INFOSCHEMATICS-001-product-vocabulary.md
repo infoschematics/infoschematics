@@ -5,7 +5,7 @@ date: 2026-09-02
 status: current
 decision_type: knowledge
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/kdr
-decision_depends_on: [PDR-INFOSCHEMATICS-003]
+decision_depends_on: [PDR-INFOSCHEMATICS-001]
 ---
 
 # KDR-INFOSCHEMATICS-001: Product vocabulary

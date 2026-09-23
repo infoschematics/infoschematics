@@ -1,18 +1,18 @@
 ---
-id: ADR-INFOSCHEMATICS-038
+id: ADR-INFOSCHEMATICS-034
 title: A Scene cues a Dynamic, and a View owns the cadence
 date: 2026-09-18
 status: current
 decision_type: architecture
 decision_type_url: https://knowledgeislands.info/specifications/decision-records/adr
-decision_depends_on: [ADR-INFOSCHEMATICS-026]
+decision_depends_on: [ADR-INFOSCHEMATICS-024]
 ---
 
-# ADR-INFOSCHEMATICS-038: A Scene cues a Dynamic, and a View owns the cadence
+# ADR-INFOSCHEMATICS-034: A Scene cues a Dynamic, and a View owns the cadence
 
 ## Context
 
-`ADR-INFOSCHEMATICS-026` put [Diagram Dynamics](../reference/vocabulary.md#diagram-dynamic) in the document and left every occurrence of one to a host: `DYNAMIC-002` recognises a `DynamicOccurrence` carrying a `dynamicId` and a host-owned `occurrenceKey`, and nothing else can originate one. A [Scene](../reference/vocabulary.md#scene) could already signal the Flows it focuses — `SIGNAL-003` — but that is focus read as movement, not the document naming what it wants shown.
+`ADR-INFOSCHEMATICS-024` put [Diagram Dynamics](../reference/vocabulary.md#diagram-dynamic) in the document and left every occurrence of one to a host: `DYNAMIC-002` recognises a `DynamicOccurrence` carrying a `dynamicId` and a host-owned `occurrenceKey`, and nothing else can originate one. A [Scene](../reference/vocabulary.md#scene) could already signal the Flows it focuses — `SIGNAL-003` — but that is focus read as movement, not the document naming what it wants shown.
 
 So an authored [Sequence](../reference/vocabulary.md#sequence) could not say "play this Dynamic here". A Producer who declared `record-delivered` and wanted it to play as a Scene arrives had to wire the host to the Sequence's position, which puts the choreography of a presentation outside the document that is the presentation.
 
@@ -42,4 +42,4 @@ A document that declares no cue is unchanged, byte for byte, through canonicalis
 
 ## Amendments
 
-`ADR-INFOSCHEMATICS-039` admits the ordered cascade this record placed out of scope, on the ground that resolved the objection: a cascade divides a Sequence's stepping rather than a Scene's declared duration, so it needs no measurement in the document. Everything else here stands, including the reasoning that keeps `continuous` out of the policy vocabulary.
+`ADR-INFOSCHEMATICS-035` admits the ordered cascade this record placed out of scope, on the ground that resolved the objection: a cascade divides a Sequence's stepping rather than a Scene's declared duration, so it needs no measurement in the document. Everything else here stands, including the reasoning that keeps `continuous` out of the policy vocabulary.

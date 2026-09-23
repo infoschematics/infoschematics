@@ -8,7 +8,7 @@ Validation answers whether a document is well formed; this answers whether the d
 
 ### DRAW-001 — Review without alteration
 
-Reviewing an [Infoschematic](../reference/vocabulary.md#infoschematic) MUST report findings about the drawing it describes and MUST NOT change the document, move anything, or choose a repair. The geometry MUST be calculated in View Model, per [ADR-INFOSCHEMATICS-018](../decisions/ADR-INFOSCHEMATICS-018-keep-the-renderer-command-thin.md), so the interactive Diagram, Studio, the command and an authoring agent read one list rather than three approximations of it. Reviewing the same document twice MUST give the same answer, and a review MUST NOT depend on a clock, a viewport, or a host.
+Reviewing an [Infoschematic](../reference/vocabulary.md#infoschematic) MUST report findings about the drawing it describes and MUST NOT change the document, move anything, or choose a repair. The geometry MUST be calculated in View Model, per [ADR-INFOSCHEMATICS-017](../decisions/ADR-INFOSCHEMATICS-017-the-renderer-command-is-thin-and-its-input-is-inert.md), so the interactive Diagram, Studio, the command and an authoring agent read one list rather than three approximations of it. Reviewing the same document twice MUST give the same answer, and a review MUST NOT depend on a clock, a viewport, or a host.
 
 _Conformance:_ conforming
 
@@ -48,7 +48,7 @@ _Evidence:_ `drawingIsUnreadable` in `packages/view-model/src/diagnostics.ts`, e
 
 ### DRAW-005 — `artefacts-overlap`
 
-Two [artefacts](../reference/vocabulary.md#infoschematic-artefact) whose boxes intersect MUST be reported as an error, measured by the width, height and area they share. An [Adapter](../reference/vocabulary.md#adapter-card) and the Card it holds MUST be exempt, because overlapping is what an Adapter is per [ADR-INFOSCHEMATICS-036](../decisions/ADR-INFOSCHEMATICS-036-an-adapter-card-is-positioned-by-what-it-holds.md), and a [Fabric](../reference/vocabulary.md#fabric) MUST be exempt as a place rather than a neighbour.
+Two [artefacts](../reference/vocabulary.md#infoschematic-artefact) whose boxes intersect MUST be reported as an error, measured by the width, height and area they share. An [Adapter](../reference/vocabulary.md#adapter-card) and the Card it holds MUST be exempt, because overlapping is what an Adapter is per [ADR-INFOSCHEMATICS-032](../decisions/ADR-INFOSCHEMATICS-032-an-adapter-card-is-positioned-by-what-it-holds.md), and a [Fabric](../reference/vocabulary.md#fabric) MUST be exempt as a place rather than a neighbour.
 
 _Conformance:_ conforming
 

@@ -239,7 +239,7 @@ const pointTokens = { fill: paintVariable('backdrop'), stroke: paintVariable('te
  *
  * A travelling mark is offered only where the element has a closed perimeter a mark can be seen to follow. A Flow is
  * a route that may already be carrying a signal along its own length, so a second mark on the same line would be read
- * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-029` records which geometries are declined and why.
+ * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-027` records which geometries are declined and why.
  */
 type CanvasEmphasisGeometry = Readonly<{
   d: string
@@ -681,7 +681,7 @@ export function InfoschematicDiagram({
    * and waypoint controls simply are not rendered.
    */
   const editing = editor === 'design'
-  /* Diagram-scoped remains the default from `ADR-INFOSCHEMATICS-037`; a host may explicitly ask for the Scene set,
+  /* Diagram-scoped remains the default from `ADR-INFOSCHEMATICS-033`; a host may explicitly ask for the Scene set,
      matching static output. Design keeps all authored Graphics reachable regardless of the audience policy. */
   const graphics = useMemo(() => {
     if (editing) return config.diagram.overlays

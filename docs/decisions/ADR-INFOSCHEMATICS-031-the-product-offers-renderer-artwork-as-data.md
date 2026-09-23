@@ -1,5 +1,5 @@
 ---
-id: ADR-INFOSCHEMATICS-035
+id: ADR-INFOSCHEMATICS-031
 title: The product offers renderer artwork as data
 date: 2026-09-17
 status: current
@@ -8,7 +8,7 @@ decision_type_url: https://knowledgeislands.info/specifications/decision-records
 decision_depends_on: [ADR-INFOSCHEMATICS-009]
 ---
 
-# ADR-INFOSCHEMATICS-035: The product offers renderer artwork as data
+# ADR-INFOSCHEMATICS-031: The product offers renderer artwork as data
 
 ## Context
 

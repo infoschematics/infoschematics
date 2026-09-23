@@ -216,7 +216,7 @@ test('steering a timed Sequence mid-hold leaves no timeout behind', async () => 
 /**
  * A repeating Scene cue, measured on the same terms.
  *
- * `ADR-INFOSCHEMATICS-038` puts the cadence of a `repeat` cue in the View, which brings it under `SCENE-006`: a
+ * `ADR-INFOSCHEMATICS-034` puts the cadence of a `repeat` cue in the View, which brings it under `SCENE-006`: a
  * repeat runs cycles, and cycles must not accumulate. The shape is one interval advancing one occurrence key, so the
  * count to hold flat is the interval plus whatever the Canvas holds for the occurrence currently playing.
  */

@@ -20,7 +20,7 @@ Surrounding prose can point at one part of an embedded [Infoschematic](../refere
 
 ## Context
 
-[PDR-INFOSCHEMATICS-004](../decisions/PDR-INFOSCHEMATICS-004-product-messaging.md) positions an Infoschematic as an input embedded where it is read, and [the Getting started guide](../../apps/site/content/getting-started.md) now says so. Nothing delivers the capability that positioning implies: an embedded Diagram is reached as a whole, and a document that wants to discuss one part of it has to describe where to look.
+[PDR-INFOSCHEMATICS-001](../decisions/PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md) positions an Infoschematic as an input embedded where it is read, and [the Getting started guide](../../apps/site/content/getting-started.md) now says so. Nothing delivers the capability that positioning implies: an embedded Diagram is reached as a whole, and a document that wants to discuss one part of it has to describe where to look.
 
 The identities needed already exist and are stable by design. `ADR-INFOSCHEMATICS-003` authors human-readable identity codes rather than deriving them from order, so an artefact can be named durably from outside; Scopes and Scenes are named in the document too. The Canvas can already centre on a coordinate (`packages/view-canvas/src/viewport.ts`), and Present already selects a Scene, so the mechanics of arriving somewhere exist.
 
@@ -34,7 +34,7 @@ It does not cover editing, linking into Studio state, or linking to a Dynamic oc
 
 ## Current state
 
-An embedded Diagram is reached as a whole. `packages/view-canvas/src/viewport.ts` can centre on a diagram coordinate, `ADR-INFOSCHEMATICS-027` already models one ordered selection with an anchor, and Present already focuses a Scene — so arriving somewhere is mechanically solved in three places and addressable from none of them.
+An embedded Diagram is reached as a whole. `packages/view-canvas/src/viewport.ts` can centre on a diagram coordinate, `ADR-INFOSCHEMATICS-025` already models one ordered selection with an anchor, and Present already focuses a Scene — so arriving somewhere is mechanically solved in three places and addressable from none of them.
 
 The identities are stable by design: `ADR-INFOSCHEMATICS-003` authors human-readable codes rather than deriving them from order, and Scopes and Scenes are named in the document.
 
@@ -46,7 +46,7 @@ The constraint is ownership. `ADR-INFOSCHEMATICS-005` gives the host routing, pa
 - [ ] Define the destination in the View Model over authored identity — an artefact code or a Scope id — and resolve it to a viewport and a selection without reading any browser state.
 - [ ] Accept the destination as a Diagram input, centring the viewport and selecting the named part, and leave authored Dynamics untouched: arrival is not an emphasis.
 - [ ] Make an unresolvable destination a quiet no-op with a reported reason rather than a thrown error, because an address in someone else's prose outlives the document it points into.
-- [ ] Announce arrival to an assistive reader, per `ADR-INFOSCHEMATICS-033`.
+- [ ] Announce arrival to an assistive reader, per `ADR-INFOSCHEMATICS-029`.
 - [ ] State plainly what a static outlet does: an SVG cannot navigate, so the deterministic renderer either frames the named part or says it does not honour a destination.
 - [ ] Show the mechanism working from a host in the website, since the claim is that surrounding prose can point into a drawing.
 
