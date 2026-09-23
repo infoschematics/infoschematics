@@ -450,8 +450,8 @@ const resolveFocus = (
     const legacyScene = runtime.compatibilityConfig.themes
       .find((candidate) => candidate.id === selection.themeId)
       ?.scenes.find((candidate) => candidate.id === selection.sceneId)
-    const scene = runtime.thematicScenes.find((candidate) => candidate.id === (legacyScene?.code ?? selection.sceneId))
-    if (!scene) throw new Error(`Unknown Thematic Scene in ${selection.themeId}: ${selection.sceneId}`)
+    const scene = runtime.expandedScenes.find((candidate) => candidate.id === (legacyScene?.code ?? selection.sceneId))
+    if (!scene) throw new Error(`Unknown Scene in Theme ${selection.themeId}: ${selection.sceneId}`)
     return focusOf(scene)
   }
 

@@ -1,7 +1,7 @@
 import {
+  type RuntimeExpandedScene,
   type RuntimeStandaloneScene,
   type RuntimeStory,
-  type RuntimeThemeScene,
   useInfoschematic
 } from '@infoschematics/view-canvas'
 import {
@@ -159,15 +159,15 @@ export function usePresentation() {
       }),
     stepSequence: (delta: number) =>
       dispatchPresentation({ delta, sequences: runtime.sequences, type: 'step-sequence' }),
-    stepThematicScene: (delta: number) =>
+    stepExpandedScene: (delta: number) =>
       dispatchPresentation({
         delta,
-        scenes: runtime.thematicScenes,
-        type: 'step-theme'
+        scenes: runtime.expandedScenes,
+        type: 'step-expanded'
       }),
     stopStory: () => dispatchPresentation({ type: 'stop-story' }),
     stopSequence: () => dispatchPresentation({ type: 'stop-sequence' }),
-    thematicScene: derived.thematicScene,
+    expandedScene: derived.expandedScene,
     toggleAnnotated: () =>
       dispatchPresentation({
         type: 'set-annotated',
@@ -183,7 +183,8 @@ export function usePresentation() {
     toggleScope: (id: string) => dispatchPresentation({ id, type: 'toggle-scope' }),
     toggleStandaloneScene: (scene: RuntimeStandaloneScene) =>
       dispatchPresentation({ scene, type: 'toggle-standalone-scene' }),
-    toggleThematicScene: (scene: RuntimeThemeScene) => dispatchPresentation({ scene, type: 'toggle-theme-scene' }),
+    toggleExpandedScene: (scene: RuntimeExpandedScene) =>
+      dispatchPresentation({ scene, type: 'toggle-expanded-scene' }),
     visibleCards,
     visibleFabrics,
     visibleFamilies,

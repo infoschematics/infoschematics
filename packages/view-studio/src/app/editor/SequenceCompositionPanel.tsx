@@ -2,29 +2,29 @@ import { rendererReferenceOf } from '@infoschematics/domain-model/renderer'
 import { ChevronDown, ChevronUp, ListX, Plus, RotateCcw, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { LineList } from './LineList.tsx'
-import type { ThemeComposition } from './use-theme-composition.ts'
+import type { SequenceComposition } from './use-sequence-composition.ts'
 
-/** Theme and Thematic Scene authoring for Direct mode. */
-export function ThemeCompositionPanel({
+/** Sequence and Expanded Scene authoring for Direct mode. */
+export function SequenceCompositionPanel({
   editor,
   selected,
   selectedIsFlow
 }: {
-  editor: ThemeComposition
+  editor: SequenceComposition
   selected: string | null
   selectedIsFlow: boolean
 }) {
-  const [themeName, setThemeName] = useState('')
+  const [sequenceName, setSequenceName] = useState('')
   const [sceneName, setSceneName] = useState('')
-  const { scene, theme } = editor
+  const { scene, sequence } = editor
   const lit = scene ? (scene.focus.artefacts?.length ?? 0) + (scene.focus.flows?.length ?? 0) : 0
 
   return (
     <div className="story-panel">
       <label className="text-row">
-        <span>Theme</span>
-        <select onChange={(event) => editor.chooseTheme(event.target.value)} value={editor.chosenTheme}>
-          {editor.themes.map((entry) => (
+        <span>Sequence</span>
+        <select onChange={(event) => editor.chooseSequence(event.target.value)} value={editor.chosenSequence}>
+          {editor.sequences.map((entry) => (
             <option key={entry.id} value={entry.id}>
               {entry.title}
             </option>
@@ -34,33 +34,38 @@ export function ThemeCompositionPanel({
 
       <div className="scene-tools">
         <input
-          aria-label="Name a new Theme"
-          onChange={(event) => setThemeName(event.target.value)}
+          aria-label="Name a new Sequence"
+          onChange={(event) => setSequenceName(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key !== 'Enter' || !themeName.trim()) return
-            editor.addTheme(themeName)
-            setThemeName('')
+            if (event.key !== 'Enter' || !sequenceName.trim()) return
+            editor.addSequence(sequenceName)
+            setSequenceName('')
           }}
-          placeholder="Name new Theme"
+          placeholder="Name new Sequence"
           type="text"
-          value={themeName}
+          value={sequenceName}
         />
         <button
-          aria-label="Add a Theme"
-          disabled={!themeName.trim()}
+          aria-label="Add a Sequence"
+          disabled={!sequenceName.trim()}
           onClick={() => {
-            editor.addTheme(themeName)
-            setThemeName('')
+            editor.addSequence(sequenceName)
+            setSequenceName('')
           }}
           type="button"
         >
           <Plus aria-hidden="true" size={13} />
         </button>
-        <button aria-label="Remove this Theme" disabled={!theme} onClick={() => editor.removeTheme()} type="button">
+        <button
+          aria-label="Remove this Sequence"
+          disabled={!sequence}
+          onClick={() => editor.removeSequence()}
+          type="button"
+        >
           <Trash2 aria-hidden="true" size={13} />
         </button>
         <button
-          aria-label="Discard edits to Themes"
+          aria-label="Discard edits to Sequences"
           disabled={!editor.edited}
           onClick={() => editor.revert()}
           type="button"
@@ -69,34 +74,34 @@ export function ThemeCompositionPanel({
         </button>
       </div>
 
-      {theme ? (
+      {sequence ? (
         <div className="scene-fields">
           <label className="text-row">
             <span>Name</span>
             <input
-              onChange={(event) => editor.editTheme({ title: event.target.value })}
+              onChange={(event) => editor.editSequence({ title: event.target.value })}
               type="text"
-              value={theme.title}
+              value={sequence.title}
             />
           </label>
           <label className="text-row">
             <span>Detail</span>
             <textarea
-              onChange={(event) => editor.editTheme({ description: event.target.value })}
+              onChange={(event) => editor.editSequence({ description: event.target.value })}
               rows={2}
-              value={theme.description ?? ''}
+              value={sequence.description ?? ''}
             />
           </label>
         </div>
       ) : (
-        <p className="contract-empty">There are no Themes. Create one to begin composing its Scenes.</p>
+        <p className="contract-empty">There are no Sequences. Create one to begin composing its Scenes.</p>
       )}
 
-      {theme ? (
+      {sequence ? (
         <>
           <div className="scene-tools">
             <input
-              aria-label="Name a new Thematic Scene"
+              aria-label="Name a new Expanded Scene"
               onChange={(event) => setSceneName(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key !== 'Enter' || !sceneName.trim()) return
@@ -108,7 +113,7 @@ export function ThemeCompositionPanel({
               value={sceneName}
             />
             <button
-              aria-label="Add a Thematic Scene"
+              aria-label="Add a Expanded Scene"
               disabled={!sceneName.trim()}
               onClick={() => {
                 editor.addScene(sceneName)
@@ -119,7 +124,7 @@ export function ThemeCompositionPanel({
               <Plus aria-hidden="true" size={13} />
             </button>
             <button
-              aria-label="Move this Thematic Scene earlier"
+              aria-label="Move this Expanded Scene earlier"
               disabled={!scene || editor.at === 0}
               onClick={() => editor.move(-1)}
               type="button"
@@ -127,7 +132,7 @@ export function ThemeCompositionPanel({
               <ChevronUp aria-hidden="true" size={13} />
             </button>
             <button
-              aria-label="Move this Thematic Scene later"
+              aria-label="Move this Expanded Scene later"
               disabled={!scene || editor.at >= editor.scenes.length - 1}
               onClick={() => editor.move(1)}
               type="button"
@@ -135,7 +140,7 @@ export function ThemeCompositionPanel({
               <ChevronDown aria-hidden="true" size={13} />
             </button>
             <button
-              aria-label="Remove this Thematic Scene"
+              aria-label="Remove this Expanded Scene"
               disabled={!scene}
               onClick={() => editor.removeScene()}
               type="button"
@@ -143,7 +148,7 @@ export function ThemeCompositionPanel({
               <Trash2 aria-hidden="true" size={13} />
             </button>
             <button
-              aria-label="Clear every Scene from this Theme"
+              aria-label="Clear every Scene from this Sequence"
               disabled={editor.scenes.length === 0}
               onClick={() => editor.clear()}
               type="button"
@@ -154,7 +159,7 @@ export function ThemeCompositionPanel({
 
           {!editor.canActivate ? (
             <p className="scene-following">
-              This Theme can be drafted empty, but it needs a valid Scene before it can be shown in Present.
+              This Sequence can be drafted empty, but it needs a valid Scene before it can be shown in Present.
             </p>
           ) : null}
 

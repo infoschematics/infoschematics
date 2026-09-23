@@ -1047,14 +1047,14 @@ h2 {
 /*
  * Two columns sized to what is in them, not to each other.
  *
- * Equal halves put three scope buttons in the same width as eight theme
+ * Equal halves put three scope buttons in the same width as eight sequence
  * marks: the left column sat mostly empty while the right wrapped onto a
  * second line. The banks hold very different numbers of very different
  * things, and a grid that insists they are the same size is asserting
  * something about them that is not true.
  *
  * `auto` takes what the narrow column needs and the rest goes to the wide one,
- * so the Themes get the room that was being held for nothing.
+ * so the Sequences get the room that was being held for nothing.
  */
 .producer-controls {
   background: var(--infoschematic-chrome-paint-panel-floating);
@@ -1549,7 +1549,7 @@ h2 {
   width: max-content;
 }
 
-/* The theme's mark where one has arrived, sized to sit on the heading line
+/* The sequence's mark where one has arrived, sized to sit on the heading line
    rather than above it. */
 .callout-logo {
   height: 18px;
@@ -1559,7 +1559,7 @@ h2 {
 }
 
 /* What this one is called, between whose voice it is and what it says. A scene
-   and a theme briefing both carry it, which is what makes them one card. */
+   and a sequence briefing both carry it, which is what makes them one card. */
 .callout-title {
   color: var(--infoschematic-chrome-paint-text);
   font-size: 13px;
@@ -1596,7 +1596,7 @@ h2 {
 }
 
 /* The cover carries the whole synopsis and four takeaways rather than one
-   theme's contribution, so it is given the room to hold them without becoming
+   sequence's contribution, so it is given the room to hold them without becoming
    a column of six-word lines. */
 .scene-callout.wide {
   max-width: min(560px, 84%);
@@ -1663,7 +1663,7 @@ h2 {
   align-content: start;
 }
 
-/* Larger than the mark on the heading line: here it is the theme's own side
+/* Larger than the mark on the heading line: here it is the sequence's own side
    of the card rather than a tag beside their name. */
 .callout-mark {
   height: 30px;
@@ -1848,7 +1848,7 @@ h2 {
   line-height: 1.3;
 }
 
-.theme-headline {
+.sequence-headline {
   color: var(--infoschematic-chrome-paint-informational);
   font:
     600 11px "DM Mono",

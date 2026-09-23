@@ -2,10 +2,10 @@ import type { Sequence } from '@infoschematics/domain-model'
 import type { SequenceConfig } from '@infoschematics/domain-model/sequence'
 import { describe, expect, it } from 'vitest'
 import {
+  expandedSequencesForEditing,
   sequencesWithEditorDrafts,
   standaloneScenesForEditing,
-  storiesForEditing,
-  themesForEditing
+  storiesForEditing
 } from './sequence-editing.ts'
 
 const sequences: readonly Sequence[] = [
@@ -16,15 +16,15 @@ const sequences: readonly Sequence[] = [
     scenes: [{ focus: { elements: ['CARD-A', 'FLOW-A'] }, id: 'OV-01', label: 'Overview scene' }]
   },
   {
-    id: 'THEME',
-    label: 'Theme',
+    id: 'SEQUENCE',
+    label: 'Sequence',
     presentation: { callouts: true, display: 'expanded', timed: true },
     scenes: [
       {
         callout: { body: 'Body', properties: { retained: true } },
         focus: { elements: ['CARD-A'] },
         id: 'THM-01',
-        label: 'Theme scene',
+        label: 'Sequence scene',
         visibility: { hide: { elements: ['FLOW-A'] } }
       }
     ]
@@ -61,25 +61,25 @@ const compatibilitySequences: readonly SequenceConfig[] = sequences.map((sequenc
 describe('canonical Sequence editing adapters', () => {
   it('opens all four presentation combinations through the existing editor panels', () => {
     expect(standaloneScenesForEditing(compatibilitySequences).map(({ code }) => code)).toEqual(['OV-01'])
-    expect(themesForEditing(compatibilitySequences).map(({ id }) => id)).toEqual(['THEME'])
+    expect(expandedSequencesForEditing(compatibilitySequences).map(({ id }) => id)).toEqual(['SEQUENCE'])
     expect(storiesForEditing(compatibilitySequences).map(({ id }) => id)).toEqual(['STORY'])
   })
 
   it('merges edited fields while retaining canonical presentation and unexposed scene properties', () => {
-    const themes = themesForEditing(compatibilitySequences)
-    const theme = themes[0]
-    if (!theme) throw new Error('missing Theme fixture')
-    const changedThemes = [
+    const drafts = expandedSequencesForEditing(compatibilitySequences)
+    const sequence = drafts[0]
+    if (!sequence) throw new Error('missing Sequence fixture')
+    const changedSequences = [
       {
-        ...theme,
-        scenes: theme.scenes.map((scene) => ({ ...scene, focus: { artefacts: ['CARD-B'], flows: [] } })),
-        title: 'Changed theme'
+        ...sequence,
+        scenes: sequence.scenes.map((scene) => ({ ...scene, focus: { artefacts: ['CARD-B'], flows: [] } })),
+        title: 'Changed sequence'
       }
     ]
 
-    const changed = sequencesWithEditorDrafts(sequences, { expanded: changedThemes })
-    const result = changed.find(({ id }) => id === 'THEME')
-    expect(result?.label).toBe('Changed theme')
+    const changed = sequencesWithEditorDrafts(sequences, { expanded: changedSequences })
+    const result = changed.find(({ id }) => id === 'SEQUENCE')
+    expect(result?.label).toBe('Changed sequence')
     expect(result?.presentation).toEqual({ callouts: true, display: 'expanded', timed: true })
     expect(result?.scenes[0]?.focus?.elements).toEqual(['CARD-B'])
     expect(result?.scenes[0]?.visibility).toEqual({ hide: { elements: ['FLOW-A'] } })

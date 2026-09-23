@@ -1,7 +1,7 @@
 import type { DirectTarget } from '@infoschematics/view-present'
 import type { SceneLibraryEditor } from './editor/use-scene-library.ts'
 import type { SceneList } from './editor/use-scene-list.ts'
-import type { ThemeComposition } from './editor/use-theme-composition.ts'
+import type { SequenceComposition } from './editor/use-sequence-composition.ts'
 
 /**
  * Every Direct target the authored document currently offers, and the label the chooser shows for it.
@@ -21,8 +21,8 @@ export const directTargetKey = (target: DirectTarget): string => {
   switch (target.kind) {
     case 'standalone-scene':
       return `${target.kind}:${target.sceneId}`
-    case 'theme':
-      return `${target.kind}:${target.themeId}`
+    case 'sequence':
+      return `${target.kind}:${target.sequenceId}`
     case 'story':
     case 'storyboard':
       return `${target.kind}:${target.storyId}`
@@ -33,28 +33,28 @@ export const directTargetKey = (target: DirectTarget): string => {
 
 export const directOptionsFor = (
   scenes: SceneLibraryEditor['library'],
-  themes: ThemeComposition['themes'],
+  sequences: SequenceComposition['sequences'],
   stories: SceneList['stories']
 ): readonly DirectOption[] => {
   const standaloneScenes = scenes.map((scene) => ({
     label: scene.label,
     target: { kind: 'standalone-scene', sceneId: scene.id } as const
   }))
-  const themeTargets = themes.map((theme) => ({
-    label: theme.title,
-    target: { kind: 'theme', themeId: theme.id } as const
+  const sequenceTargets = sequences.map((sequence) => ({
+    label: sequence.title,
+    target: { kind: 'sequence', sequenceId: sequence.id } as const
   }))
   const storyTargets = stories.map((story) => ({
     label: story.label,
     target: { kind: 'story', storyId: story.id } as const
   }))
-  const themeCallouts = themes.flatMap((theme) =>
-    theme.scenes.map((scene) => ({
-      label: `${theme.title} — ${scene.label}`,
+  const sequenceCallouts = sequences.flatMap((sequence) =>
+    sequence.scenes.map((scene) => ({
+      label: `${sequence.title} — ${scene.label}`,
       target: {
         kind: 'callout',
-        owner: 'theme',
-        ownerId: theme.id,
+        owner: 'sequence',
+        ownerId: sequence.id,
         sceneId: scene.id
       } as const
     }))
@@ -75,5 +75,12 @@ export const directOptionsFor = (
     target: { kind: 'storyboard', storyId: story.id } as const
   }))
 
-  return [...standaloneScenes, ...themeTargets, ...storyTargets, ...themeCallouts, ...storyCallouts, ...storyboards]
+  return [
+    ...standaloneScenes,
+    ...sequenceTargets,
+    ...storyTargets,
+    ...sequenceCallouts,
+    ...storyCallouts,
+    ...storyboards
+  ]
 }

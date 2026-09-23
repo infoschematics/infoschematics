@@ -4,11 +4,11 @@ export type ProductionMode = 'present' | 'design' | 'direct'
 
 export type DirectTarget =
   | Readonly<{ kind: 'standalone-scene'; sceneId: string }>
-  | Readonly<{ kind: 'theme'; themeId: string }>
+  | Readonly<{ kind: 'sequence'; sequenceId: string }>
   | Readonly<{ kind: 'story'; storyId: string }>
   | Readonly<{
       kind: 'callout'
-      owner: 'story' | 'theme'
+      owner: 'story' | 'sequence'
       ownerId: string
       sceneId: string
     }>
@@ -65,14 +65,14 @@ export const directTargetIsValid = (target: DirectTarget): boolean => {
   switch (target.kind) {
     case 'standalone-scene':
       return hasText(target.sceneId)
-    case 'theme':
-      return hasText(target.themeId)
+    case 'sequence':
+      return hasText(target.sequenceId)
     case 'story':
     case 'storyboard':
       return hasText(target.storyId)
     case 'callout':
       return (
-        hasText(target.ownerId) && hasText(target.sceneId) && (target.owner === 'story' || target.owner === 'theme')
+        hasText(target.ownerId) && hasText(target.sceneId) && (target.owner === 'story' || target.owner === 'sequence')
       )
   }
 }
@@ -83,8 +83,8 @@ const directTargetsEqual = (left: DirectTarget, right: DirectTarget) => {
   switch (left.kind) {
     case 'standalone-scene':
       return right.kind === left.kind && right.sceneId === left.sceneId
-    case 'theme':
-      return right.kind === left.kind && right.themeId === left.themeId
+    case 'sequence':
+      return right.kind === left.kind && right.sequenceId === left.sequenceId
     case 'story':
     case 'storyboard':
       return right.kind === left.kind && right.storyId === left.storyId

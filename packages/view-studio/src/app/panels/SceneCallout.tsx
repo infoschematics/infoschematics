@@ -11,7 +11,7 @@ import { chooseSpot, type Obstacle } from '@infoschematics/view-model/placement'
 import { ChevronLeft, ChevronRight, Pause, X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
 
-/** Anything that focuses part of the Infoschematic: a Story Scene or Thematic Scene. */
+/** Anything that focuses part of the Infoschematic: a Story Scene or Sequence Scene. */
 export type Lit = { components: readonly string[]; flows: readonly string[]; callout?: { x: number; y: number } }
 
 // The callout gets out of the way of whatever the step has lit, so the
@@ -77,11 +77,11 @@ export const litObstacles = (step: Lit, runtime: InfoschematicRuntime): Obstacle
 /*
  * One callout for both things that narrate the Infoschematic.
  *
- * A Story Scene and a Thematic Scene are the same object to a reader -
+ * A Story Scene and a Sequence Scene are the same object to a reader -
  * a card that says whose voice this is, what this one is called, and a
  * paragraph - and they place themselves against the same obstacles. What
- * differs is the timer: a Story advances itself and offers a hold, and a Theme
- * does not, because stepping between Thematic Scenes is browsing rather than
+ * differs is the timer: a Story advances itself and offers a hold, and a Sequence
+ * does not, because stepping between Sequence Scenes is browsing rather than
  * a performance. Passing no `autoAdvance` is what says so.
  */
 export function SceneCallout({
@@ -124,7 +124,7 @@ export function SceneCallout({
   const renderers = useInfoschematicRenderers()
   const { calloutPorts, infoschematicViewBox } = runtime
   // A side of its own is worth having only where there is something to put in
-  // it. A Thematic Scene with neither a mark nor a profile reads as a Story Scene does.
+  // it. A Sequence Scene with neither a mark nor a profile reads as a Story Scene does.
   const aside = Boolean(logo || profile?.length)
   const callout = useRef<HTMLDivElement>(null)
   const [port, setPort] = useState(step.callout ?? calloutPorts[0] ?? { x: 0.5, y: 0.5 })

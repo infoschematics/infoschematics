@@ -67,7 +67,7 @@ describe('Present', () => {
     expect(markup).toContain('infoschematic-graphic')
   })
 
-  it('offers visibility, Scene, Theme and Story presentation controls', () => {
+  it('offers visibility, Scene, Sequence and Story presentation controls', () => {
     const config = defineInfoschematic({
       title: 'Narrative view',
       infoschematic: {
@@ -93,13 +93,13 @@ describe('Present', () => {
       ],
       themes: [
         {
-          id: 'theme',
-          title: 'Theme',
+          id: 'sequence',
+          title: 'Sequence',
           scenes: [
             {
-              id: 'theme-scene',
-              code: 'THEME-001',
-              label: 'Theme scene',
+              id: 'sequence-scene',
+              code: 'SEQUENCE-001',
+              label: 'Sequence scene',
               focus: {}
             }
           ]

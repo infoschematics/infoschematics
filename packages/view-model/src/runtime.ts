@@ -125,7 +125,7 @@ export type RuntimeSequence = {
 /** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
 export type RuntimeStandaloneScene = RuntimeSequenceScene & { scene?: string; short?: string }
 /** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
-export type RuntimeThemeScene = RuntimeSequenceScene & { scene?: string; short?: string }
+export type RuntimeExpandedScene = RuntimeSequenceScene & { scene?: string; short?: string }
 /** @deprecated Studio source editing removes these Sequence projections in TOOL-033. */
 export type RuntimeStory = {
   id: string
@@ -724,11 +724,11 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     labelOffset: region.appearance?.label?.offset,
     labelPlacement: region.appearance?.label?.placement
   }))
-  const themeLogos = Object.fromEntries(
+  const sceneLogos = Object.fromEntries(
     sequences.flatMap((sequence) => sequence.scenes.flatMap((scene) => (scene.logo ? [[scene.id, scene.logo]] : [])))
   )
   const standaloneScenes = sequences.find((sequence) => sequence.id === 'OVERVIEW')?.scenes ?? []
-  const thematicScenes = sequences
+  const expandedScenes = sequences
     .filter((sequence) => sequence.presentation.display === 'expanded' && sequence.id !== 'OVERVIEW')
     .flatMap((sequence) => sequence.scenes)
   const stories: readonly RuntimeStory[] = sequences
@@ -811,9 +811,9 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
     sequences,
     standaloneScenes,
     stories,
-    thematicScenes,
+    expandedScenes,
     calloutPorts: definition.calloutPositions,
-    themeLogos,
+    sceneLogos,
     adapterFloor
   }
 }

@@ -2,9 +2,9 @@ import type { Callout, Sequence, SequenceScene } from '@infoschematics/domain-mo
 import { rendererReferenceOf } from '@infoschematics/domain-model/renderer'
 import type { SequenceConfig } from '@infoschematics/domain-model/sequence'
 import type { StoryConfig, StorySceneConfig } from '@infoschematics/domain-model/story'
-import type { ThematicSceneConfig, ThemeConfig } from '@infoschematics/domain-model/theme'
 import type { Scene as LibraryScene } from './scene-library.ts'
 import { type Story, storyForEditing } from './scenes.ts'
+import type { SequenceDraft, SequenceDraftScene } from './sequence-composition.ts'
 
 const uniqueSorted = (values: readonly string[]): readonly string[] =>
   [...new Set(values)].sort((left, right) => left.localeCompare(right))
@@ -23,7 +23,7 @@ const focusOf = (
 }
 
 const calloutOf = (
-  value: ThematicSceneConfig['callout'] | StorySceneConfig['callout'],
+  value: SequenceDraftScene['callout'] | StorySceneConfig['callout'],
   original?: Callout
 ): Callout | undefined => {
   if (!value) return undefined
@@ -48,14 +48,14 @@ export const standaloneScenesForEditing = (sequences: readonly SequenceConfig[])
     label: scene.label
   }))
 
-export const themesForEditing = (sequences: readonly SequenceConfig[]): readonly ThemeConfig[] =>
+export const expandedSequencesForEditing = (sequences: readonly SequenceConfig[]): readonly SequenceDraft[] =>
   sequences
     .filter((sequence) => sequence.presentation.display === 'expanded' && sequence.id !== 'OVERVIEW')
     .map((sequence) => ({
       description: sequence.description,
       id: sequence.id,
       scenes: sequence.scenes.map(
-        (scene): ThematicSceneConfig => ({
+        (scene): SequenceDraftScene => ({
           callout: scene.callout,
           code: scene.code,
           description: scene.description,
@@ -114,7 +114,7 @@ const sequenceFromStandalone = (scenes: readonly LibraryScene[], original?: Sequ
   }
 }
 
-const sequenceSceneFromTheme = (scene: ThematicSceneConfig, original?: SequenceScene): SequenceScene => ({
+const sequenceSceneFromDraft = (scene: SequenceDraftScene, original?: SequenceScene): SequenceScene => ({
   ...original,
   callout: calloutOf(scene.callout, original?.callout),
   description: scene.description,
@@ -123,13 +123,13 @@ const sequenceSceneFromTheme = (scene: ThematicSceneConfig, original?: SequenceS
   label: scene.label
 })
 
-const sequenceFromTheme = (theme: ThemeConfig, original?: Sequence): Sequence => ({
-  description: theme.description,
-  id: theme.id,
-  label: theme.title,
+const sequenceFromDraft = (sequence: SequenceDraft, original?: Sequence): Sequence => ({
+  description: sequence.description,
+  id: sequence.id,
+  label: sequence.title,
   presentation: original?.presentation ?? { callouts: true, display: 'expanded', timed: false },
-  scenes: theme.scenes.map((scene) =>
-    sequenceSceneFromTheme(
+  scenes: sequence.scenes.map((scene) =>
+    sequenceSceneFromDraft(
       scene,
       original?.scenes.find((candidate) => candidate.id === scene.code || candidate.id === scene.id)
     )
@@ -159,7 +159,7 @@ const sequenceFromStory = (story: Story, original: Sequence): Sequence => ({
 
 export type SequenceEditorDrafts = Readonly<{
   collapsed?: readonly Story[]
-  expanded?: readonly ThemeConfig[]
+  expanded?: readonly SequenceDraft[]
   overview?: readonly LibraryScene[]
 }>
 
@@ -170,7 +170,7 @@ export const sequencesWithEditorDrafts = (
 ): readonly Sequence[] => {
   const byId = new Map(original.map((sequence) => [sequence.id, sequence]))
   const overview = drafts.overview ? sequenceFromStandalone(drafts.overview, byId.get('OVERVIEW')) : undefined
-  const expanded = drafts.expanded?.map((theme) => sequenceFromTheme(theme, byId.get(theme.id)))
+  const expanded = drafts.expanded?.map((sequence) => sequenceFromDraft(sequence, byId.get(sequence.id)))
   const expandedById = expanded ? new Map(expanded.map((sequence) => [sequence.id, sequence])) : undefined
   const collapsed = drafts.collapsed?.flatMap((story) => {
     const authored = byId.get(story.id)

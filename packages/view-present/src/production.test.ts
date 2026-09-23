@@ -10,7 +10,7 @@ const presentation = (): PresentationState => ({
   sceneOccurrence: 3,
   standaloneSceneId: null,
   takeaways: false,
-  thematicSceneId: 'theme-scene-one',
+  expandedSceneId: 'sequence-scene-one',
   visibleFamilies: new Set(['family-one']),
   visibleScopes: new Set(['scope-one'])
 })
@@ -46,11 +46,11 @@ describe('production mode', () => {
 
         if (to === 'present' && from === 'present') {
           expect(after.presentation.playing).toEqual({ id: 'story-one', step: 2 })
-          expect(after.presentation.thematicSceneId).toBe('theme-scene-one')
+          expect(after.presentation.expandedSceneId).toBe('sequence-scene-one')
         } else {
           expect(after.presentation.playing).toBeNull()
           expect(after.presentation.standaloneSceneId).toBeNull()
-          expect(after.presentation.thematicSceneId).toBeNull()
+          expect(after.presentation.expandedSceneId).toBeNull()
         }
       })
     }
@@ -68,7 +68,7 @@ describe('production mode', () => {
     })
 
     expect(presenting.presentation.playing).toBeNull()
-    expect(presenting.presentation.thematicSceneId).toBeNull()
+    expect(presenting.presentation.expandedSceneId).toBeNull()
   })
 
   /*
@@ -107,13 +107,13 @@ describe('production mode', () => {
 describe('Direct targets', () => {
   const targets = [
     { kind: 'standalone-scene', sceneId: 'scene-one' },
-    { kind: 'theme', themeId: 'theme-one' },
+    { kind: 'sequence', sequenceId: 'sequence-one' },
     { kind: 'story', storyId: 'story-one' },
     {
       kind: 'callout',
-      owner: 'theme',
-      ownerId: 'theme-one',
-      sceneId: 'theme-scene-one'
+      owner: 'sequence',
+      ownerId: 'sequence-one',
+      sceneId: 'sequence-scene-one'
     },
     { kind: 'storyboard', storyId: 'story-one' }
   ] as const satisfies readonly DirectTarget[]
@@ -127,7 +127,7 @@ describe('Direct targets', () => {
 
     expect(selected.directTarget).toEqual(target)
     expect(selected.presentation.playing).toBeNull()
-    expect(selected.presentation.thematicSceneId).toBeNull()
+    expect(selected.presentation.expandedSceneId).toBeNull()
   })
 
   it('ignores Direct target actions outside Direct', () => {

@@ -1,10 +1,10 @@
 import type { DynamicOccurrence } from '@infoschematics/view-model/dynamics'
 import type {
   InfoschematicRuntime,
+  RuntimeExpandedScene,
   RuntimeSequence,
   RuntimeStandaloneScene,
-  RuntimeStory,
-  RuntimeThemeScene
+  RuntimeStory
 } from '@infoschematics/view-model/runtime'
 
 export type PlayingSequence = Readonly<{ id: string; step: number }>
@@ -29,7 +29,7 @@ export type PresentationState = Readonly<{
   sceneOccurrence: number
   standaloneSceneId: string | null
   takeaways: boolean
-  thematicSceneId: string | null
+  expandedSceneId: string | null
   visibleFamilies: ReadonlySet<string>
   visibleScopes: ReadonlySet<string>
 }>
@@ -47,13 +47,13 @@ export type PresentationAction =
   | Readonly<{ type: 'toggle-sequence-scene'; sequence: RuntimeSequence; step: number }>
   | Readonly<{ type: 'step-sequence'; sequences: readonly RuntimeSequence[]; delta: number }>
   | Readonly<{ type: 'step-story'; stories: readonly RuntimeStory[]; delta: number }>
-  | Readonly<{ type: 'step-theme'; scenes: readonly RuntimeThemeScene[]; delta: number }>
+  | Readonly<{ type: 'step-expanded'; scenes: readonly RuntimeExpandedScene[]; delta: number }>
   | Readonly<{ type: 'stop-story' }>
   | Readonly<{ type: 'stop-sequence' }>
   | Readonly<{ type: 'toggle-family'; id: string }>
   | Readonly<{ type: 'toggle-scope'; id: string }>
   | Readonly<{ type: 'toggle-standalone-scene'; scene: RuntimeStandaloneScene }>
-  | Readonly<{ type: 'toggle-theme-scene'; scene: RuntimeThemeScene }>
+  | Readonly<{ type: 'toggle-expanded-scene'; scene: RuntimeExpandedScene }>
 
 export const initialPresentationState = (runtime: InfoschematicRuntime): PresentationState => ({
   annotated: false,
@@ -63,7 +63,7 @@ export const initialPresentationState = (runtime: InfoschematicRuntime): Present
   sceneOccurrence: 0,
   standaloneSceneId: null,
   takeaways: false,
-  thematicSceneId: null,
+  expandedSceneId: null,
   visibleFamilies: new Set(runtime.infoschematicFamilies.map((family) => family.id)),
   visibleScopes: new Set(runtime.infoschematicScopes.map((scope) => scope.id))
 })
@@ -78,7 +78,7 @@ const toggled = (current: ReadonlySet<string>, id: string): ReadonlySet<string> 
 export const presentationReducer = (state: PresentationState, action: PresentationAction): PresentationState => {
   switch (action.type) {
     case 'clear-focus':
-      return { ...state, playing: null, standaloneSceneId: null, thematicSceneId: null }
+      return { ...state, playing: null, standaloneSceneId: null, expandedSceneId: null }
     case 'replay-cues':
       // Every Scene change already changes `sceneOccurrence`, which is part of the key, so the cycle needs no reset.
       return { ...state, cueCycle: state.cueCycle + 1 }
@@ -109,7 +109,7 @@ export const presentationReducer = (state: PresentationState, action: Presentati
         playing: { id: action.story.id, step: 0 },
         sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
-        thematicSceneId: null
+        expandedSceneId: null
       }
     case 'toggle-sequence-scene':
       if (action.sequence.scenes.length === 0 || !action.sequence.scenes[action.step]) return state
@@ -139,11 +139,11 @@ export const presentationReducer = (state: PresentationState, action: Presentati
       const step = (state.playing.step + action.delta + story.steps.length) % story.steps.length
       return { ...state, playing: { ...state.playing, step }, sceneOccurrence: state.sceneOccurrence + 1 }
     }
-    case 'step-theme': {
-      if (!state.thematicSceneId || action.scenes.length === 0) return state
-      const current = action.scenes.findIndex((entry) => entry.id === state.thematicSceneId)
+    case 'step-expanded': {
+      if (!state.expandedSceneId || action.scenes.length === 0) return state
+      const current = action.scenes.findIndex((entry) => entry.id === state.expandedSceneId)
       const scene = action.scenes[(current + action.delta + action.scenes.length) % action.scenes.length]
-      return scene ? { ...state, sceneOccurrence: state.sceneOccurrence + 1, thematicSceneId: scene.id } : state
+      return scene ? { ...state, sceneOccurrence: state.sceneOccurrence + 1, expandedSceneId: scene.id } : state
     }
     case 'toggle-family':
       return { ...state, visibleFamilies: toggled(state.visibleFamilies, action.id) }
@@ -155,15 +155,15 @@ export const presentationReducer = (state: PresentationState, action: Presentati
         playing: null,
         sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: state.standaloneSceneId === action.scene.id ? null : action.scene.id,
-        thematicSceneId: null
+        expandedSceneId: null
       }
-    case 'toggle-theme-scene':
+    case 'toggle-expanded-scene':
       return {
         ...state,
         playing: null,
         sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
-        thematicSceneId: state.thematicSceneId === action.scene.id ? null : action.scene.id
+        expandedSceneId: state.expandedSceneId === action.scene.id ? null : action.scene.id
       }
   }
 }
@@ -186,13 +186,13 @@ export const derivePresentation = (
   const activeSequenceScene = state.playing ? activeSequence?.scenes[state.playing.step] : undefined
   const runningStory = state.playing ? runtime.stories.find((entry) => entry.id === state.playing?.id) : undefined
   const runningStoryScene = state.playing ? runningStory?.steps[state.playing.step] : undefined
-  const thematicScene = state.thematicSceneId
-    ? runtime.thematicScenes.find((entry) => entry.id === state.thematicSceneId)
+  const expandedScene = state.expandedSceneId
+    ? runtime.expandedScenes.find((entry) => entry.id === state.expandedSceneId)
     : undefined
   const standaloneScene = state.standaloneSceneId
     ? runtime.standaloneScenes.find((entry) => entry.id === state.standaloneSceneId)
     : undefined
-  const focusedScene = activeSequenceScene ?? runningStoryScene ?? thematicScene ?? standaloneScene
+  const focusedScene = activeSequenceScene ?? runningStoryScene ?? expandedScene ?? standaloneScene
   const focusedFlows = focusedScene
     ? [...new Set(focusedScene.flows)].filter((flowId) => runtime.infoschematicFlows.some(({ id }) => id === flowId))
     : []
@@ -238,7 +238,7 @@ export const derivePresentation = (
     runningStory,
     runningStoryScene,
     standaloneScene,
-    thematicScene,
+    expandedScene,
     visibleCards,
     visibleFabrics,
     visibleFlows

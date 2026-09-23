@@ -269,7 +269,7 @@ diagram:
   it('exposes the settled Infoschematic runtime vocabulary', () => {
     const runtime = createInfoschematicRuntime(defineInfoschematic({ title: 'Vocabulary' }))
 
-    expect(runtime).toMatchObject({ standaloneScenes: [], stories: [], thematicScenes: [] })
+    expect(runtime).toMatchObject({ expandedScenes: [], standaloneScenes: [], stories: [] })
   })
 })
 

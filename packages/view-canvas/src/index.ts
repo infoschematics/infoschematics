@@ -4,6 +4,7 @@ export type {
   InfoschematicRuntime,
   RuntimeCard,
   RuntimeDrafts,
+  RuntimeExpandedScene,
   RuntimeFabric,
   RuntimeFlow,
   RuntimeIdentity,
@@ -11,8 +12,7 @@ export type {
   RuntimeScope,
   RuntimeStandaloneScene,
   RuntimeStory,
-  RuntimeStoryScene,
-  RuntimeThemeScene
+  RuntimeStoryScene
 } from '@infoschematics/view-model/runtime'
 export type { FlowSignal } from '@infoschematics/view-model/signals'
 /* The catalogue's keys are public so a host can enumerate what it may override, rather than restate a list

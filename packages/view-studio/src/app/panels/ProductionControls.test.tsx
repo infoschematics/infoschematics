@@ -70,29 +70,29 @@ const runtime = createInfoschematicRuntime(
     ],
     themes: [
       {
-        id: 'theme-one',
+        id: 'sequence-one',
         scenes: [
           {
-            code: 'STALE-THEME',
+            code: 'STALE-SEQUENCE',
             focus: { artefacts: ['missing-card'] },
-            id: 'stale-theme-scene',
-            label: 'Stale theme'
+            id: 'stale-sequence-scene',
+            label: 'Stale sequence'
           },
           {
-            code: 'READY-THEME',
+            code: 'READY-SEQUENCE',
             focus: { artefacts: ['card-one'] },
-            id: 'ready-theme-scene',
-            label: 'Ready theme'
+            id: 'ready-sequence-scene',
+            label: 'Ready sequence'
           },
           {
             callout: { body: 'An explanation that intentionally focuses nothing.' },
-            code: 'CALLOUT-THEME',
+            code: 'CALLOUT-SEQUENCE',
             focus: {},
-            id: 'callout-theme-scene',
-            label: 'Callout theme'
+            id: 'callout-sequence-scene',
+            label: 'Callout sequence'
           }
         ],
-        title: 'Theme one'
+        title: 'Sequence one'
       }
     ]
   })
@@ -108,12 +108,12 @@ const presentation = (mode: 'present' | 'design' | 'direct') =>
     setMode: vi.fn(),
     startStory: vi.fn(),
     stopStory: vi.fn(),
-    thematicScene: null,
+    expandedScene: null,
     toggleAnnotated: vi.fn(),
     toggleFamily: vi.fn(),
     toggleOverlays: vi.fn(),
     toggleScope: vi.fn(),
-    toggleThematicScene: vi.fn(),
+    toggleExpandedScene: vi.fn(),
     visibleFamilies: new Set<string>(),
     visibleScopes: new Set(['scope-one'])
   }) as unknown as Presentation
@@ -241,11 +241,11 @@ describe('production controls', () => {
     expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Empty<\/button>/)
     expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale<\/button>/)
     expect(expanded).toMatch(/<button[^>]*>Ready<\/button>/)
-    expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale theme<\/button>/)
-    expect(expanded).toMatch(/<button[^>]*>Ready theme<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale sequence<\/button>/)
+    expect(expanded).toMatch(/<button[^>]*>Ready sequence<\/button>/)
 
-    const expandedCallout = expanded.match(/<button[^>]*>Callout theme<\/button>/)?.[0]
-    const compactCallout = compact.match(/<button[^>]*aria-label="Callout theme"[^>]*>/)?.[0]
+    const expandedCallout = expanded.match(/<button[^>]*>Callout sequence<\/button>/)?.[0]
+    const compactCallout = compact.match(/<button[^>]*aria-label="Callout sequence"[^>]*>/)?.[0]
     expect(expandedCallout).toBeDefined()
     expect(expandedCallout).not.toContain('disabled')
     expect(compactCallout).toBeDefined()

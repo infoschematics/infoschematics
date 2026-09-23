@@ -25,10 +25,10 @@ const groups = [
   },
   {
     bindings: [
-      ['←  →', 'Step to the previous or next Thematic Scene, wrapping at either end'],
-      ['Esc', 'Clear the Theme']
+      ['←  →', 'Step to the previous or next Sequence Scene, wrapping at either end'],
+      ['Esc', 'Clear the Sequence']
     ],
-    label: 'While a Theme is open'
+    label: 'While a Sequence is open'
   },
   {
     bindings: [

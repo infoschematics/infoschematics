@@ -33,7 +33,7 @@ import {
 } from '../editor/library.ts'
 import { SceneLibraryPanel } from '../editor/SceneLibraryPanel.tsx'
 import { SceneListPanel } from '../editor/SceneListPanel.tsx'
-import { ThemeCompositionPanel } from '../editor/ThemeCompositionPanel.tsx'
+import { SequenceCompositionPanel } from '../editor/SequenceCompositionPanel.tsx'
 import type {
   EditorMode,
   PendingChange,
@@ -44,7 +44,7 @@ import type {
 } from '../editor/use-editor.ts'
 import type { SceneLibraryEditor } from '../editor/use-scene-library.ts'
 import type { SceneList } from '../editor/use-scene-list.ts'
-import type { ThemeComposition } from '../editor/use-theme-composition.ts'
+import type { SequenceComposition } from '../editor/use-sequence-composition.ts'
 import { useSessionState } from '../hooks/use-persistent-state.ts'
 import type { Presentation } from '../hooks/use-presentation.ts'
 import { useContractDetail } from './contracts.ts'
@@ -59,7 +59,7 @@ type DirectKind = DirectTarget['kind']
 
 const directKinds = [
   ['standalone-scene', 'Scenes'],
-  ['theme', 'Themes'],
+  ['sequence', 'Sequences'],
   ['story', 'Stories'],
   ['callout', 'Callouts'],
   ['storyboard', 'Storyboard']
@@ -323,7 +323,7 @@ export function DetailsPanel({
   editor,
   scenes,
   stories,
-  themes,
+  sequences,
   onAddWaypoint,
   onCreateCard,
   onGridSizeChange,
@@ -340,7 +340,7 @@ export function DetailsPanel({
   /** The scene library, lifted for the same reason the stories are. */
   scenes: SceneLibraryEditor
   stories: SceneList
-  themes: ThemeComposition
+  sequences: SequenceComposition
   /** Both need the Infoschematic: where there is room on a route, and where its ports are. */
   onAddWaypoint: () => void
   onResetRoute: () => void
@@ -418,8 +418,8 @@ export function DetailsPanel({
   }
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
   const directOptions = useMemo<readonly DirectOption[]>(
-    () => directOptionsFor(scenes.library, themes.themes, stories.stories),
-    [scenes.library, stories.stories, themes.themes]
+    () => directOptionsFor(scenes.library, sequences.sequences, stories.stories),
+    [scenes.library, stories.stories, sequences.sequences]
   )
   const directOptionsForKind = directOptions.filter((option) => option.target.kind === directKind)
   const selectedDirectTarget = presentation.directTarget
@@ -432,7 +432,7 @@ export function DetailsPanel({
       ? selectedDirectTarget.owner
       : firstCalloutTarget?.kind === 'callout'
         ? firstCalloutTarget.owner
-        : 'theme'
+        : 'sequence'
   const [selectedContract, setSelectedContract] = useState<RuntimeInterface | null>(null)
   /* Reading opens the document overlay; selecting a tree node keeps detail in the panel. */
   const [reading, setReading] = useState<RuntimeInterface | null>(null)
@@ -448,14 +448,15 @@ export function DetailsPanel({
     .filter(Boolean)
     .join(' · ')
   const selectedDocumentMeta = selectedDocuments.length === 1 ? selectedDocumentSummary : undefined
-  const { activeSequence, activeSequenceScene, runningStory, standaloneScene, thematicScene } = presentation
+  const { activeSequence, activeSequenceScene, runningStory, standaloneScene, expandedScene } = presentation
 
   const { mode, setMode } = editor
   const directUsesStories =
     directKind === 'story' ||
     directKind === 'storyboard' ||
     (directKind === 'callout' && activeCalloutOwner === 'story')
-  const directUsesThemes = directKind === 'theme' || (directKind === 'callout' && activeCalloutOwner === 'theme')
+  const directUsesSequences =
+    directKind === 'sequence' || (directKind === 'callout' && activeCalloutOwner === 'sequence')
   const directUsesStandaloneScenes = directKind === 'standalone-scene'
 
   const chooseDirectTarget = (target: DirectTarget) => {
@@ -463,19 +464,19 @@ export function DetailsPanel({
       case 'standalone-scene':
         scenes.choose(target.sceneId)
         break
-      case 'theme':
-        themes.chooseTheme(target.themeId)
+      case 'sequence':
+        sequences.chooseSequence(target.sequenceId)
         break
       case 'story':
       case 'storyboard':
         stories.choose(target.storyId)
         break
       case 'callout':
-        if (target.owner === 'theme') {
-          themes.chooseTheme(target.ownerId)
-          const theme = themes.themes.find((candidate) => candidate.id === target.ownerId)
-          const at = theme?.scenes.findIndex((scene) => scene.id === target.sceneId) ?? -1
-          if (at >= 0) themes.chooseScene(at)
+        if (target.owner === 'sequence') {
+          sequences.chooseSequence(target.ownerId)
+          const sequence = sequences.sequences.find((candidate) => candidate.id === target.ownerId)
+          const at = sequence?.scenes.findIndex((scene) => scene.id === target.sceneId) ?? -1
+          if (at >= 0) sequences.chooseScene(at)
         } else {
           stories.choose(target.ownerId)
           const story = stories.stories.find((candidate) => candidate.id === target.ownerId)
@@ -505,35 +506,35 @@ export function DetailsPanel({
       chooseDirectTarget({ kind: 'standalone-scene', sceneId: id })
     }
   }
-  const themeEditor: ThemeComposition = {
-    ...themes,
+  const sequenceEditor: SequenceComposition = {
+    ...sequences,
     chooseScene: (action) => {
-      const at = resolveStateAction(action, themes.at)
-      themes.chooseScene(at)
+      const at = resolveStateAction(action, sequences.at)
+      sequences.chooseScene(at)
       if (directKind !== 'callout') return
-      const theme = themes.themes.find((candidate) => candidate.id === themes.chosenTheme)
-      const scene = theme?.scenes[at]
-      if (theme && scene) {
+      const sequence = sequences.sequences.find((candidate) => candidate.id === sequences.chosenSequence)
+      const scene = sequence?.scenes[at]
+      if (sequence && scene) {
         presentation.setDirectTarget({
           kind: 'callout',
-          owner: 'theme',
-          ownerId: theme.id,
+          owner: 'sequence',
+          ownerId: sequence.id,
           sceneId: scene.id
         })
       }
     },
-    chooseTheme: (action) => {
-      const id = resolveStateAction(action, themes.chosenTheme)
-      themes.chooseTheme(id)
-      const theme = themes.themes.find((candidate) => candidate.id === id)
-      if (directKind === 'theme') {
-        presentation.setDirectTarget({ kind: 'theme', themeId: id })
-      } else if (directKind === 'callout' && theme?.scenes[0]) {
+    chooseSequence: (action) => {
+      const id = resolveStateAction(action, sequences.chosenSequence)
+      sequences.chooseSequence(id)
+      const sequence = sequences.sequences.find((candidate) => candidate.id === id)
+      if (directKind === 'sequence') {
+        presentation.setDirectTarget({ kind: 'sequence', sequenceId: id })
+      } else if (directKind === 'callout' && sequence?.scenes[0]) {
         presentation.setDirectTarget({
           kind: 'callout',
-          owner: 'theme',
+          owner: 'sequence',
           ownerId: id,
-          sceneId: theme.scenes[0].id
+          sceneId: sequence.scenes[0].id
         })
       } else if (directKind === 'callout') {
         presentation.setDirectTarget(null)
@@ -592,14 +593,17 @@ export function DetailsPanel({
   const libraryChanges = scenes.edited
     ? [{ field: 'points' as const, key: 'standaloneScenes', source: scenes.source }]
     : []
-  const themeChanges = themes.edited ? [{ field: 'points' as const, key: 'themes', source: themes.source }] : []
+  // The key names the authored field the change lands in, which `ADR-INFOSCHEMATICS-019` retains as `themes`.
+  const sequenceChanges = sequences.edited
+    ? [{ field: 'points' as const, key: 'themes', source: sequences.source }]
+    : []
   const layerChanges =
     presentation.mode !== 'direct'
       ? []
       : directUsesStories
         ? storyChanges
-        : directUsesThemes
-          ? themeChanges
+        : directUsesSequences
+          ? sequenceChanges
           : directUsesStandaloneScenes
             ? libraryChanges
             : []
@@ -608,8 +612,8 @@ export function DetailsPanel({
       ? editor.source
       : directUsesStories
         ? stories.source
-        : directUsesThemes
-          ? themes.source
+        : directUsesSequences
+          ? sequences.source
           : directUsesStandaloneScenes
             ? scenes.source
             : ''
@@ -618,8 +622,8 @@ export function DetailsPanel({
       ? editor.discard
       : directUsesStories
         ? stories.revert
-        : directUsesThemes
-          ? themes.revert
+        : directUsesSequences
+          ? sequences.revert
           : directUsesStandaloneScenes
             ? scenes.revert
             : () => undefined
@@ -779,11 +783,11 @@ export function DetailsPanel({
             <div className="editor-panes">
               {presentation.mode === 'design' ? (
                 <DesignDetails contexts={artefactContexts} editor={editor} onCreateCard={onCreateCard} />
-              ) : directUsesThemes ? (
+              ) : directUsesSequences ? (
                 <>
-                  <p className="eyebrow pane-heading">THEMES</p>
-                  <ThemeCompositionPanel
-                    editor={themeEditor}
+                  <p className="eyebrow pane-heading">SEQUENCES</p>
+                  <SequenceCompositionPanel
+                    editor={sequenceEditor}
                     selected={editor.selected}
                     selectedIsFlow={editor.selectedIsFlow ?? false}
                   />
@@ -832,15 +836,15 @@ export function DetailsPanel({
         <div className="contract-body">
           {activeSequence ? (
             <>
-              <p className="theme-headline">{activeSequenceScene?.headline ?? activeSequence.label}</p>
+              <p className="sequence-headline">{activeSequenceScene?.headline ?? activeSequence.label}</p>
               <p>{activeSequence.description || activeSequenceScene?.description}</p>
             </>
           ) : runningStory ? (
             <p>{runningStory.question}</p>
-          ) : thematicScene ? (
+          ) : expandedScene ? (
             <>
-              <p className="theme-headline">{thematicScene.headline}</p>
-              <p>{thematicScene.description}</p>
+              <p className="sequence-headline">{expandedScene.headline}</p>
+              <p>{expandedScene.description}</p>
             </>
           ) : standaloneScene ? (
             <p>{standaloneScene.description}</p>
@@ -857,7 +861,7 @@ export function DetailsPanel({
         <div className="contract-body specifications-body">
           <div className="specifications-selection">
             <p className="register-note specification-lead">
-              Specifications are grouped by thematic area. Expand the tree to inspect conformance points and operations.
+              Specifications are grouped by expanded area. Expand the tree to inspect conformance points and operations.
             </p>
             <SpecificationTree
               onHover={onSpecificationHover}

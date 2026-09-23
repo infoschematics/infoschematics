@@ -104,15 +104,15 @@ const runtime = () =>
       ],
       themes: [
         {
-          id: 'theme',
-          title: 'Theme',
+          id: 'sequence',
+          title: 'Sequence',
           scenes: [
             {
-              id: 'theme-scene',
-              code: 'THEME-001',
-              label: 'Theme focus',
+              id: 'sequence-scene',
+              code: 'SEQUENCE-001',
+              label: 'Sequence focus',
               focus: { artefacts: ['target'], flows: ['delivery-flow'] },
-              callout: { body: 'A thematic focus' }
+              callout: { body: 'A expanded focus' }
             }
           ]
         }
@@ -221,30 +221,30 @@ describe('presentation state', () => {
     expect(shown.visibleFlows).toEqual([])
   })
 
-  it('makes Story, Theme and standalone Scene focus mutually exclusive', () => {
+  it('makes Story, Sequence and standalone Scene focus mutually exclusive', () => {
     const source = runtime()
     const standalone = reducePresentation(createPresentationState(source), {
       type: 'toggle-standalone-scene',
       scene: source.standaloneScenes[0]!
     })
-    const themed = reducePresentation(standalone, {
-      type: 'toggle-theme-scene',
-      scene: source.thematicScenes[0]!
+    const sequenced = reducePresentation(standalone, {
+      type: 'toggle-expanded-scene',
+      scene: source.expandedScenes[0]!
     })
-    const playing = reducePresentation(themed, {
+    const playing = reducePresentation(sequenced, {
       type: 'start-story',
       story: source.stories[0]!
     })
 
-    expect(themed).toMatchObject({
+    expect(sequenced).toMatchObject({
       playing: null,
       standaloneSceneId: null,
-      thematicSceneId: 'THEME-001'
+      expandedSceneId: 'SEQUENCE-001'
     })
     expect(playing).toMatchObject({
       playing: { id: 'STORY-001', step: 0 },
       standaloneSceneId: null,
-      thematicSceneId: null
+      expandedSceneId: null
     })
   })
 
@@ -321,8 +321,8 @@ describe('presentation state', () => {
       scene: source.standaloneScenes[0]!
     })
     const changed = reducePresentation(replayed, {
-      type: 'toggle-theme-scene',
-      scene: source.thematicScenes[0]!
+      type: 'toggle-expanded-scene',
+      scene: source.expandedScenes[0]!
     })
 
     expect(derivePresentation(source, cleared).signals).toEqual([])

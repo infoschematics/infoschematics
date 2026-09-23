@@ -1739,7 +1739,7 @@ export function InfoschematicDiagram({
   // nearest the waypoint, so it never lands back over the card it is beside.
 
   // A Fabric is an artefact like any other: it dims with the rest and is focused
-  // when a Standalone Scene, Thematic Scene or Story Scene names it.
+  // when a Standalone Scene, Sequence Scene or Story Scene names it.
   /*
    * What a thing says when the pointer rests on it. One shape for all four
    * kinds - code, name, what it is - because a reader hovering a cloud and a

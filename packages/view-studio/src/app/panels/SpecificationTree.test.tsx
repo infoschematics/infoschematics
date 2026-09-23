@@ -41,7 +41,7 @@ const within: RuntimeInterface[] = [
 ]
 
 describe('SpecificationTree', () => {
-  it('renders thematic groups with expandable specification branches and no disabled nodes', () => {
+  it('renders subject groups with expandable specification branches and no disabled nodes', () => {
     const markup = renderToStaticMarkup(
       <SpecificationTree onHover={vi.fn()} onSelect={vi.fn()} sections={[{ group, within }]} selected={null} />
     )

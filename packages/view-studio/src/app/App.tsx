@@ -50,7 +50,7 @@ import { sequencesWithEditorDrafts } from './editor/sequence-editing.ts'
 import { type Attachment, type PendingOrigin, useEditor } from './editor/use-editor.ts'
 import { useSceneLibrary } from './editor/use-scene-library.ts'
 import { useSceneList } from './editor/use-scene-list.ts'
-import { useThemeComposition } from './editor/use-theme-composition.ts'
+import { useSequenceComposition } from './editor/use-sequence-composition.ts'
 import { usePersistentState } from './hooks/use-persistent-state.ts'
 import { usePresentation } from './hooks/use-presentation.ts'
 import { DetailsPanel } from './panels/DetailsPanel.tsx'
@@ -278,8 +278,8 @@ function AppContent({
     infoschematicRegister,
     infoschematicRegisterWith,
     infoschematicScopes,
-    thematicScenes,
-    themeLogos
+    expandedScenes,
+    sceneLogos
   } = runtime
   const storage = compatibilityConfig.id
   const [storedCollapsed, setStoredCollapsed] = usePersistentState(storage && `${storage}.panels.collapsed`, true)
@@ -359,13 +359,13 @@ function AppContent({
   editorRef.current = editor
   const sceneList = useSceneList()
   const sceneLibrary = useSceneLibrary()
-  const themeComposition = useThemeComposition()
-  const presentationEdited = sceneList.hasEdits || sceneLibrary.edited || themeComposition.edited
+  const sequenceComposition = useSequenceComposition()
+  const presentationEdited = sceneList.hasEdits || sceneLibrary.edited || sequenceComposition.edited
   const editedSequences = useMemo(
     () =>
       sequencesWithEditorDrafts(runtime.config.sequences, {
         collapsed: sceneList.hasEdits ? sceneList.stories : undefined,
-        expanded: themeComposition.edited ? themeComposition.themes : undefined,
+        expanded: sequenceComposition.edited ? sequenceComposition.sequences : undefined,
         overview: sceneLibrary.edited ? sceneLibrary.library : undefined
       }),
     [
@@ -374,13 +374,13 @@ function AppContent({
       sceneLibrary.library,
       sceneList.hasEdits,
       sceneList.stories,
-      themeComposition.edited,
-      themeComposition.themes
+      sequenceComposition.edited,
+      sequenceComposition.sequences
     ]
   )
   const emittedDocument = useRef<Readonly<{
     origins: readonly PendingOrigin[]
-    presentation?: Readonly<{ library: boolean; source: string; stories: boolean; themes: boolean }>
+    presentation?: Readonly<{ library: boolean; source: string; stories: boolean; sequences: boolean }>
     source: string
     /** The change lines going with this document, so the pane can account for them once the host takes it. */
     written: readonly string[]
@@ -397,7 +397,7 @@ function AppContent({
       if (emitted.presentation?.source === JSON.stringify(editedSequences)) {
         if (emitted.presentation.library) sceneLibrary.revert()
         if (emitted.presentation.stories) sceneList.revertAll()
-        if (emitted.presentation.themes) themeComposition.revert()
+        if (emitted.presentation.sequences) sequenceComposition.revert()
       }
       emittedDocument.current = null
       return
@@ -429,7 +429,7 @@ function AppContent({
             library: sceneLibrary.edited,
             source: JSON.stringify(editedSequences),
             stories: sceneList.hasEdits,
-            themes: themeComposition.edited
+            sequences: sequenceComposition.edited
           }
         : undefined,
       source: applied.source,
@@ -453,19 +453,21 @@ function AppContent({
     sceneLibrary.revert,
     sceneList.hasEdits,
     sceneList.revertAll,
-    themeComposition.edited,
-    themeComposition.revert
+    sequenceComposition.edited,
+    sequenceComposition.revert
   ])
   /*
    * A Direct target that has left the document cannot be presented, so holding it would leave Direct pointing at a
-   * Scene, Theme or Story no Producer can reach. The production reducer has always cleared it; nothing told it the
+   * Scene, Sequence or Story no Producer can reach. The production reducer has always cleared it; nothing told it the
    * available targets had changed. The list is derived here rather than in the panel that chooses from it, because a
    * panel can be closed and a target can be deleted from the Design tools while it is.
    */
   const directTargets = useMemo(
     () =>
-      directOptionsFor(sceneLibrary.library, themeComposition.themes, sceneList.stories).map(({ target }) => target),
-    [sceneLibrary.library, sceneList.stories, themeComposition.themes]
+      directOptionsFor(sceneLibrary.library, sequenceComposition.sequences, sceneList.stories).map(
+        ({ target }) => target
+      ),
+    [sceneLibrary.library, sceneList.stories, sequenceComposition.sequences]
   )
   // biome-ignore lint/correctness/useExhaustiveDependencies: the available targets own this reconciliation; the presentation facade is rebuilt every render.
   useEffect(() => {
@@ -476,23 +478,23 @@ function AppContent({
   // the Infoschematic that marks what the selected one lights.
   const directTarget = presentation.directTarget
   const directUsesStandalone = directTarget?.kind === 'standalone-scene'
-  const directUsesTheme =
-    directTarget?.kind === 'theme' || (directTarget?.kind === 'callout' && directTarget.owner === 'theme')
+  const directUsesSequence =
+    directTarget?.kind === 'sequence' || (directTarget?.kind === 'callout' && directTarget.owner === 'sequence')
   const directUsesStory =
     directTarget?.kind === 'story' ||
     directTarget?.kind === 'storyboard' ||
     (directTarget?.kind === 'callout' && directTarget.owner === 'story')
   const directLit = directUsesStandalone
     ? sceneLibrary.lit
-    : directUsesTheme
-      ? themeComposition.lit
+    : directUsesSequence
+      ? sequenceComposition.lit
       : directUsesStory
         ? sceneList.lit
         : undefined
   const directToggle = directUsesStandalone
     ? sceneLibrary.toggle
-    : directUsesTheme
-      ? themeComposition.toggle
+    : directUsesSequence
+      ? sequenceComposition.toggle
       : directUsesStory
         ? sceneList.toggle
         : undefined
@@ -502,7 +504,7 @@ function AppContent({
       : presentation.mode === 'direct'
         ? directUsesStory
           ? 'stories'
-          : directUsesStandalone || directUsesTheme
+          : directUsesStandalone || directUsesSequence
             ? 'scenes'
             : null
         : null
@@ -521,19 +523,19 @@ function AppContent({
       sceneLibrary.choose(directTarget.sceneId)
       return
     }
-    if (directTarget.kind === 'theme') {
-      themeComposition.chooseTheme(directTarget.themeId)
+    if (directTarget.kind === 'sequence') {
+      sequenceComposition.chooseSequence(directTarget.sequenceId)
       return
     }
     if (directTarget.kind === 'story' || directTarget.kind === 'storyboard') {
       sceneList.choose(directTarget.storyId)
       return
     }
-    if (directTarget.owner === 'theme') {
-      themeComposition.chooseTheme(directTarget.ownerId)
-      const theme = themeComposition.themes.find((entry) => entry.id === directTarget.ownerId)
-      const at = theme?.scenes.findIndex((entry) => entry.id === directTarget.sceneId) ?? -1
-      if (at >= 0) themeComposition.chooseScene(at)
+    if (directTarget.owner === 'sequence') {
+      sequenceComposition.chooseSequence(directTarget.ownerId)
+      const sequence = sequenceComposition.sequences.find((entry) => entry.id === directTarget.ownerId)
+      const at = sequence?.scenes.findIndex((entry) => entry.id === directTarget.sceneId) ?? -1
+      if (at >= 0) sequenceComposition.chooseScene(at)
       return
     }
 
@@ -565,10 +567,10 @@ function AppContent({
   const storyCallout = playing
     ? compatibilityConfig.stories.find((story) => story.id === playing.id)?.scenes[playing.step]?.callout
     : undefined
-  const thematicCallout = presentation.thematicScene
+  const expandedCallout = presentation.expandedScene
     ? compatibilityConfig.themes
         .flatMap((theme) => theme.scenes)
-        .find((scene) => scene.id === presentation.thematicScene?.id)?.callout
+        .find((scene) => scene.id === presentation.expandedScene?.id)?.callout
     : undefined
   // A dragged card's routes have to redraw with it, and a hand-edited route
   // has to draw as edited, so the Infoschematic draws flows folded with both
@@ -946,13 +948,13 @@ function AppContent({
       // brief render before their editor panel has synchronised its own mode.
       if (presentation.mode !== 'present') return
 
-      // A chosen Thematic Scene steps the same way a Story does, minus the
+      // A chosen Expanded Scene steps the same way a Story does, minus the
       // hold: there is nothing running to pause. Stepping is by hand either way,
       // so the keys mean the same thing whichever card is open.
-      if (!playing && presentation.thematicScene) {
+      if (!playing && presentation.expandedScene) {
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
           event.preventDefault()
-          presentation.stepThematicScene(event.key === 'ArrowRight' ? 1 : -1)
+          presentation.stepExpandedScene(event.key === 'ArrowRight' ? 1 : -1)
         } else if (event.key === 'Escape') {
           event.preventDefault()
           presentation.lightNothing()
@@ -1004,8 +1006,8 @@ function AppContent({
     shortcuts,
     presentation.lightNothing,
     presentation.mode,
-    presentation.stepThematicScene,
-    presentation.thematicScene,
+    presentation.stepExpandedScene,
+    presentation.expandedScene,
     drawnFlows,
     runtime
   ])
@@ -1255,25 +1257,25 @@ function AppContent({
                   takeaways={runningStoryScene.takeaways}
                   title={runningStoryScene.title}
                 />
-              ) : presentation.overlays && presentation.thematicScene ? (
-                /* The same card for a Thematic Scene, without the timer: its content is
+              ) : presentation.overlays && presentation.expandedScene ? (
+                /* The same card for a Expanded Scene, without the timer: its content is
                  read at the reader's pace, so it steps by hand and never on
                  its own. */
                 <SceneCallout
-                  body={presentation.thematicScene.description}
-                  calloutConfig={thematicCallout}
-                  eyebrow={presentation.thematicScene.label}
-                  key={presentation.thematicScene.id}
-                  logo={themeLogos[presentation.thematicScene.id]}
-                  profile={presentation.thematicScene.profile}
+                  body={presentation.expandedScene.description}
+                  calloutConfig={expandedCallout}
+                  eyebrow={presentation.expandedScene.label}
+                  key={presentation.expandedScene.id}
+                  logo={sceneLogos[presentation.expandedScene.id]}
+                  profile={presentation.expandedScene.profile}
                   onExit={presentation.lightNothing}
-                  onStep={presentation.stepThematicScene}
-                  step={presentation.thematicScene}
-                  stepNumber={thematicScenes.findIndex((entry) => entry.id === presentation.thematicScene?.id) + 1}
-                  stepTotal={thematicScenes.length}
-                  takeaways={presentation.thematicScene.takeaways}
-                  wide={presentation.thematicScene.cover}
-                  title={presentation.thematicScene.headline}
+                  onStep={presentation.stepExpandedScene}
+                  step={presentation.expandedScene}
+                  stepNumber={expandedScenes.findIndex((entry) => entry.id === presentation.expandedScene?.id) + 1}
+                  stepTotal={expandedScenes.length}
+                  takeaways={presentation.expandedScene.takeaways}
+                  wide={presentation.expandedScene.cover}
+                  title={presentation.expandedScene.headline}
                 />
               ) : null}
             </section>
@@ -1304,7 +1306,7 @@ function AppContent({
           <DetailsPanel
             scenes={sceneLibrary}
             stories={sceneList}
-            themes={themeComposition}
+            sequences={sequenceComposition}
             editor={{
               ...editor,
               canRoute: Boolean(selectedRoute),
