@@ -10,8 +10,8 @@ describe('Playground', () => {
 
     expect(page).toContain('>Playground controls</legend>')
     expect(page).toContain('class="playground-studio"')
-    expect(page).toContain('data-production-mode="present"')
-    expect(page).toContain('aria-label="Design mode')
+    expect(page).toContain('data-producing="false"')
+    expect(page).toContain('aria-label="Design workspace')
     expect(page).toContain('aria-label="Every capability, in one Infoschematic Infoschematic"')
     expect(page).not.toContain('playground-editor-pane')
     expect(page).not.toContain('aria-label="Infoschematic document"')

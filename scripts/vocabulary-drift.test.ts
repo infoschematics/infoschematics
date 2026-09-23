@@ -69,6 +69,7 @@ const decisions: Readonly<Record<string, 'watched' | 'retained' | 'ordinary' | '
   plane: 'ordinary',
   playback: 'ordinary',
   'presentation editing': 'gloss',
+  "producer's arrangement of tools": 'gloss',
   'primary selection': 'gloss',
   region: 'ordinary',
   schematic: 'ordinary',

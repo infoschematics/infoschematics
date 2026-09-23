@@ -4,12 +4,12 @@ area: TOOL
 title: Split presenting from workspace
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: [INFOSCHEMATICS-TOOL-129]
 blocked_by: []
-baseline_ref: null
+baseline_ref: 843281de8cfec6c22231bba9e3356755f0a2c485
 created_at: 2026-09-22T19:45:00Z
-updated_at: 2026-09-22T19:45:00Z
+updated_at: 2026-09-23T02:30:00Z
 ---
 
 # Split presenting from workspace
@@ -44,13 +44,13 @@ Around twenty-five files in `packages/` and `apps/` read the mode. Studio's `App
 
 ## Steps
 
-- [ ] Replace `ProductionMode` with two fields on `ProductionState`: whether the application is producing, and which workspace — `design` or `direct` — the Producer is in. Keep the workspace while presenting rather than discarding it, so returning resumes where the Producer left.
-- [ ] Keep `directTarget` where it belongs, on the Direct workspace, so the structural duplication between the present and design shapes goes with the enum.
-- [ ] Replace the `set-mode` action with actions that move each axis independently, and keep every mount starting as not producing, which `PRESENT-001` requires.
-- [ ] Split `data-production-mode` into an attribute per axis, and update the assertions that read it.
-- [ ] Take the Canvas prop with it, so a host says what it means in the same two terms rather than passing a word that no longer exists.
-- [ ] Update Studio's panel branching so each decision reads the axis it actually depends on — the rail's Present-only rule is a capability question, and the dock's contents are a workspace question, and `ADR-INFOSCHEMATICS-028` conflates them only because the enum did.
-- [ ] Retire the word `mode` from this axis across code, attributes, specifications and guide copy, leaving it free.
+- [x] Replace `ProductionMode` with two fields on `ProductionState`: whether the application is producing, and which workspace — `design` or `direct` — the Producer is in. Keep the workspace while presenting rather than discarding it, so returning resumes where the Producer left.
+- [x] Keep `directTarget` where it belongs, on the Direct workspace, so the structural duplication between the present and design shapes goes with the enum.
+- [x] Replace the `set-mode` action with actions that move each axis independently, and keep every mount starting as not producing, which `PRESENT-001` requires.
+- [x] Split `data-production-mode` into an attribute per axis, and update the assertions that read it.
+- [x] Take the Canvas prop with it, so a host says what it means in the same two terms rather than passing a word that no longer exists.
+- [x] Update Studio's panel branching so each decision reads the axis it actually depends on — the rail's Present-only rule is a capability question, and the dock's contents are a workspace question, and `ADR-INFOSCHEMATICS-028` conflates them only because the enum did.
+- [x] Retire the word `mode` from this axis across code, attributes, specifications and guide copy, leaving it free.
 
 ## Files touched
 
@@ -85,6 +85,42 @@ Nothing blocks this. It is adjacent to the Theme-to-Sequence vocabulary drift �
 ### Roadmap
 
 `INFOSCHEMATICS-TOOL-129` proceeds once this lands. The Theme-to-Sequence drift is captured separately.
+
+## Review
+
+### Delivered
+
+Two independent axes in place of the three-valued `ProductionMode`: whether the application is producing, and which workspace — `design` or `direct` — the Producer is in. The workspace is retained across a visit to the Audience's view, so presenting a drawing and coming back resumes Direct rather than landing in Design. The word `mode` no longer names this axis anywhere in code, attributes, specifications, Decision Records or guide copy, which is what `INFOSCHEMATICS-TOOL-129` was waiting for.
+
+### Summary of changes
+
+`packages/view-present/src/production.ts` replaces the enum with `producing: boolean` and a `Workspace` carrying its own `directTarget`, so the structural duplication between the old present and design shapes goes with it. `set-mode` becomes `set-producing`, `enter-workspace` and the two direct-target actions; `directTargetOf` reads a target only from a Direct workspace. `createProductionState` still starts not producing, and `enter-workspace` returns a fresh workspace so leaving Direct drops its target.
+
+Studio's `use-presentation.ts` exposes `producing`, `presenting`, `designing`, `directing`, `workspace`, `setProducing` and `produceIn`. `App.tsx` writes `data-producing` and `data-workspace` in place of `data-production-mode`, and its dock override now fires whenever either axis moves while producing and drops when the tools go down. `PanelRail` reads only the capability axis; `TitleBar` offers a Present toggle beside a two-button Workspace bank. Canvas takes `editor?: CanvasEditor` (`'design' | 'scenes' | 'stories' | null`) rather than a production word, so a host says which editor is open rather than which mode a different application is in.
+
+`PRESENT-001`, `PRESENT-002`, `PRESENT-009`, `DESIGN-001`, `DESIGN-005` and `DESIGN-021` are restated against the axis each governs; `ADR-INFOSCHEMATICS-028` is amended in place, keeping `status: current`, with a dated note saying why its title keeps the word it was filed under. `Workspace` is a new vocabulary term with its own stable id.
+
+### Verification
+
+`bun run self:check` — 52 tasks, all successful, including the Vitest browser suites and the production Site build. `packages/view-present/src/production.test.ts` covers each axis separately, and `packages/view-studio/src/app/App.browser.test.tsx` gains a real-browser case for the retention and the reload boundary (27 tests in that file, passing in Chromium).
+
+The behaviour no unit assertion reaches was captured from Chromium against the built Site and written to `reports/TOOL-131-two-axes.md` and `reports/tool-131/`: fresh mount `producing=false workspace=design`; Direct `true/direct`; presenting from Direct `false/direct`; presenting again `true/direct` with the target chooser back; after reload `false/design`. Screenshots were looked at, not merely written.
+
+### Outstanding concerns
+
+Site copy in `apps/site/content/studio.md` still describes switching into Design or Direct without mentioning that the workspace is now kept. It names no retired word, so it is correct rather than stale, and it follows as its own record per the standing convention that Site prose trails the feature.
+
+`ADR-INFOSCHEMATICS-028` keeps its filename slug and title, `panels-follow-the-mode`. Renaming a Decision Record breaks every citation of it for a word in a title; the amendment note states the split instead.
+
+### Post-change review
+
+The defect was legible in the type before anyone hit it: `PresentProductionState` and `DesignProductionState` were structurally identical and differed only in a literal. Two structurally identical members of a union is the shape of two things wedged into one field, and it is worth reading as a defect report rather than as duplication to tidy.
+
+The rename surface was larger than the state change by an order of magnitude, and the part that mattered least — the DOM attribute — is the part every rendered assertion read. Splitting one attribute into two made a local test helper (`producingIn`) worth more than the assertions it replaced, because the helper states what the pair means and each call site then reads as a sentence.
+
+### Mini recap
+
+Delivered the split and the retention with browser evidence; the word `mode` is free for `INFOSCHEMATICS-TOOL-129`, which was the reason this was urgent. One follow-up worth its own record: Site copy that describes the Producer's two axes to a reader.
 
 ## Discussion
 

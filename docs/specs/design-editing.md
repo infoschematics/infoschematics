@@ -1,6 +1,6 @@
 # Design editing — EDIT
 
-Geometry, route, attachment, creation, removal, appearance, and complete preview behaviour in Design mode. Part of the [Specifications corpus](index.md).
+Geometry, route, attachment, creation, removal, appearance, and complete preview behaviour in the Design workspace. Part of the [Specifications corpus](index.md).
 
 ## User-observable behaviours
 

@@ -16,6 +16,17 @@ import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
 import '../styles.css'
 
+/**
+ * Which workspace the Producer is working in, or `null` while the application is presenting.
+ *
+ * Both axes are read, because either one alone would pass a state nobody asked for: the workspace attribute is
+ * retained across a visit to the Audience's view, so it says `design` while presenting too.
+ */
+const producingIn = (container: Element) => {
+  const main = container.querySelector('main')
+  return main?.getAttribute('data-producing') === 'true' ? main.getAttribute('data-workspace') : null
+}
+
 const config = defineInfoschematic({
   title: 'Studio treatments',
   infoschematic: {
@@ -45,9 +56,9 @@ const designing = async () => {
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
 
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
   return container
 }
 

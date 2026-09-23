@@ -18,31 +18,33 @@ Studio's panel dock collapses to a forty-eight pixel rail, remembers that choice
 
 There are two ways to fix that, and they are not variants of one change.
 
-The rail could gain a Design and Direct branch. Collapsed Design would then be a usable narrow mode, and forcing the dock open would be an override a Producer never asked for. But it means designing a compact control surface for two modes, deciding what of a six-kind properties panel, a tools row, six interaction layers, a change set and a target chooser belongs in forty-eight pixels, and widening `PRESENT-009` rather than narrowing it. Scope, Family and Sequence fit a rail because each is a small set of mutually exclusive choices. Nothing a Producer mode owns is shaped like that.
+The rail could gain a Design and Direct branch. Collapsed Design would then be a usable narrow layout, and forcing the dock open would be an override a Producer never asked for. But it means designing a compact control surface for two workspaces, deciding what of a six-kind properties panel, a tools row, six interaction layers, a change set and a target chooser belongs in forty-eight pixels, and widening `PRESENT-009` rather than narrowing it. Scope, Family and Sequence fit a rail because each is a small set of mutually exclusive choices. Nothing a Producer workspace owns is shaped like that.
 
-Or the mode opens the dock, and the rail is stated to be what it already is.
+Or producing opens the dock, and the rail is stated to be what it already is.
 
 A forced open then raises its own question, because the preference is persisted. Writing `panels.collapsed = false` on entering Design means one visit to Design permanently changes what Present looks like for that document — the opposite of the premise the collapsed layout rests on. Not writing it means the dock opens on every entry to Design forever, including for the Producer who has deliberately collapsed it there ten times. Session-scoped memory sits between the two, but it adds a third lifetime for panel state beside the persisted preference and plain component state, and three lifetimes for one panel is something to choose rather than accumulate.
 
-Separately, the tab the dock lands on was already wrong. `sourceOpen` is plain component state that only the tab buttons ever set, and it takes priority over the mode's own panel, so leaving Present with the YAML open and entering Design showed the YAML. The tab strip reads identically either way, which is why no rendered case had ever caught it.
+Separately, the tab the dock lands on was already wrong. `sourceOpen` is plain component state that only the tab buttons ever set, and it takes priority over the entered workspace's own panel, so leaving Present with the YAML open and entering Design showed the YAML. The tab strip reads identically either way, which is why no rendered case had ever caught it.
 
 ## Decision
 
-The collapsed rail is a Present affordance. It carries Present's compact filters and gains no Producer-mode branch, and the dead `.panel-rail .rail-restore` rule is removed rather than given a component to style.
+Amended on 2026-09-23 by `INFOSCHEMATICS-TOOL-131`, which split the single production enum into two axes: whether a [Producer](../reference/vocabulary.md#producer) is producing, and which workspace — `design` or `direct` — they are in. The reasoning below is unchanged and is now stated against the axis each part of it actually depends on. It reads as a choice between two fixes because it was written against one enum; with the axes apart, both are true of different axes, and the record's title keeps the word it was filed under.
 
-Entering a Producer mode therefore opens the dock. The open is a transient override held beside the persisted preference, not a write to it: `App.tsx` keeps a nullable override, sets it to open on the transition into `design` or `direct`, and drops it to null on the transition into `present`, where the document's own preference decides again. The preference is never rewritten by a mode change, so a visit to Design leaves Present exactly as the Producer left it, and a reload restores the preference and no part of the mode that opened the dock.
+The collapsed rail is a Present affordance. It carries Present's compact filters and gains no Producer branch, and the dead `.panel-rail .rail-restore` rule is removed rather than given a component to style.
 
-Because the override is set on the transition rather than held across the mode, collapsing the dock inside Design stands for the rest of that visit — through re-renders and selection changes — and the panel toggle writes the override rather than the preference while a Producer mode is current. Entering the other Producer mode is another entry, and opens the dock again; the dock follows the mode, and each mode's tools are different.
+Entering a Producer workspace therefore opens the dock. The open is a transient override held beside the persisted preference, not a write to it: `App.tsx` keeps a nullable override, sets it to open whenever either axis moves while the Producer is producing, and drops it to null when the tools go down, where the document's own preference decides again. The preference is never rewritten by a move on either axis, so a visit to Design leaves Present exactly as the Producer left it, and a reload restores the preference and no part of the producing that opened the dock.
 
-A mode change also lands on that mode's own panel. `sourceOpen` resets when the mode changes, so entering Design shows Design's tools and entering Direct shows Direct's chooser, whatever was last read.
+Because the override is set on the transition rather than held across the visit, collapsing the dock inside Design stands for the rest of that visit — through re-renders and selection changes — and the panel toggle writes the override rather than the preference while a Producer workspace is current. Entering the other Producer workspace is another entry, and opens the dock again; the dock follows the workspace, and each workspace's tools are different.
 
-Two lifetimes, not three: `localStorage` for what a Producer chose for the document, and ordinary component state for what this mode entry did. Nothing about panel visibility reaches the authored document.
+A move on either axis also lands on that entered workspace's own panel. `sourceOpen` resets when either axis moves, so entering Design shows Design's tools and entering Direct shows Direct's chooser, whatever was last read.
+
+Two lifetimes, not three: `localStorage` for what a Producer chose for the document, and ordinary component state for what this entry did. Nothing about panel visibility reaches the authored document.
 
 ## Consequences
 
-A mode switch lands a Producer somewhere they can work, and the empty-rail dead end is gone. What replaces it is stated rather than implied: `PRESENT-009` now scopes the collapsed layout to Present, and [`DESIGN-021`](../specs/design-session.md) owns what a Producer mode does to the dock on entry.
+Taking up the tools lands a Producer somewhere they can work, and the empty-rail dead end is gone. What replaces it is stated rather than implied: `PRESENT-009` now scopes the collapsed layout to Present, and [`DESIGN-021`](../specs/design-session.md) owns what a Producer workspace does to the dock on entry.
 
-The cost is the one the alternative would have avoided. A Producer who prefers to work in Design with the dock collapsed reopens it on every entry, because nothing remembers that preference per mode. That is deliberate, and it is the cheap end of the trade: the dock is one keystroke away, whereas the state this replaces was unreachable except through a control in a different region of the window.
+The cost is the one the alternative would have avoided. A Producer who prefers to work in Design with the dock collapsed reopens it on every entry, because nothing remembers that preference per workspace. That is deliberate, and it is the cheap end of the trade: the dock is one keystroke away, whereas the state this replaces was unreachable except through a control in a different region of the window.
 
 Because collapse is CSS over a mounted panel, every dock control answers `querySelector` while hidden. The rendered suite had been operating the Design interaction-layer controls and the Direct Scene editor with the dock collapsed for its whole run, green over a surface nobody could press. Studio's own stylesheet is now loaded in that suite and reachability is asserted through `offsetParent`, which is the assertion that can tell the difference. Any future case that reads a dock control has the same obligation.
 

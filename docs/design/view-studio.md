@@ -13,11 +13,11 @@ Studio supports two closely related loops:
 
 Both loops should provide immediate visual feedback while keeping the authored `InfoschematicConfig` serialisable and reviewable. Studio derives runtime state from that configuration; it does not make browser state or React components part of the product.
 
-## Production modes and state ownership
+## The two production axes and state ownership
 
-The application exposes one transient `ProductionMode`: `present`, `design` or `direct`. Present belongs to the Audience; Design and Direct belong to the Producer. A new session and every reload begin in Present, even when an editing draft has been retained.
+The application holds two transient axes. Whether it is producing is a capability boundary: the Producer's tools are out, or what is on screen is what the Audience gets. Which workspace the Producer is in — `design` or `direct` — is an arrangement of those tools over the same document. A new session and every reload begin not producing, even when an editing draft has been retained, and the workspace is kept across that so presenting a drawing and coming back resumes where the Producer left.
 
-Mode does not collapse all interaction into one state object. Audience preferences and filters, active presentation focus and playback, and Producer editing state remain separate. Entering Design or Direct stops playback and clears the active Standalone or Sequence Scene without discarding the Audience's Scope and Flow-family filters. Returning to Present reuses those filters but never resumes a Sequence or restores presentation focus automatically.
+Neither axis collapses all interaction into one state object. Audience preferences and filters, active presentation focus and playback, and Producer editing state remain separate. Taking up the Producer's tools stops playback and clears the active Standalone or Sequence Scene without discarding the Audience's Scope and Flow-family filters. Putting them down reuses those filters but never resumes a Sequence or restores presentation focus automatically.
 
 Design and Direct use the complete authored Infoschematic rather than the filtered Audience projection. Design therefore keeps every editable artefact reachable. Direct derives a separate draft preview from its active authoring target, so navigating or editing production material cannot accidentally change what Present had focused.
 
@@ -166,13 +166,13 @@ Design renders complete authored content with the materialised draft layered int
 
 ## Source panel
 
-When a host supplies an opaque authored document, Studio adds Source as another panel view in Present, Design and Direct modes. The panel shows the exact retained YAML, allows copying, and holds invalid replacement text with addressed diagnostics while the diagram continues to use the last valid document.
+When a host supplies an opaque authored document, Studio adds Source as another panel view for a reader and in both Producer workspaces. The panel shows the exact retained YAML, allows copying, and holds invalid replacement text with addressed diagnostics while the diagram continues to use the last valid document.
 
 Structured document edits and validated whole-source replacements advance one session-local document timeline. Undo and redo select a validated document from that timeline and ask the host to accept it. Studio does not write files or resolve conflicts; the host feeds an accepted document back through the `document` prop.
 
 ## Session boundary
 
-Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. The `ProductionMode`, active Direct target, selection, presentation focus and playback are transient; reload always returns to Present with no active focus or running Sequence. Undo history can remain session-local even where drafts persist.
+Draft changes can survive an accidental reload without making Studio the default experience for a newly opened Audience session. Both production axes, the active Direct target, selection, presentation focus and playback are transient; reload always returns to a not-producing session with no active focus or running Sequence. Undo history can remain session-local even where drafts persist.
 
 Persistence keys belong to the host or an explicitly identified Infoschematic. A configuration without an identity must not accidentally share production state with another blank or embedded instance.
 

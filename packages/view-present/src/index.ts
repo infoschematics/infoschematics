@@ -16,7 +16,8 @@ export {
 export type {
   DirectTarget,
   ProductionAction,
-  ProductionMode,
-  ProductionState
+  ProductionState,
+  Workspace,
+  WorkspaceKind
 } from './production.ts'
-export { createProductionState, directTargetIsValid, reduceProduction } from './production.ts'
+export { createProductionState, directTargetIsValid, directTargetOf, reduceProduction } from './production.ts'

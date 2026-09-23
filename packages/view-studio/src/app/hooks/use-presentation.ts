@@ -9,12 +9,13 @@ import {
   createProductionState,
   type DirectTarget,
   derivePresentation,
+  directTargetOf,
   type PlayingStory,
   type PresentationAction,
   type ProductionAction,
-  type ProductionMode,
   type ProductionState,
-  reduceProduction
+  reduceProduction,
+  type WorkspaceKind
 } from '@infoschematics/view-present'
 import { useEffect, useMemo, useState } from 'react'
 import { usePersistentState } from './use-persistent-state.ts'
@@ -30,7 +31,8 @@ export function usePresentation() {
   const runtime = useInfoschematic()
   const storage = runtime.compatibilityConfig.id
 
-  // Audience preferences persist. Production mode, focus and playback do not.
+  // Audience preferences persist. Whether a Producer is producing, which workspace they are in, focus and
+  // playback do not.
   const [storedAutoAdvance, setStoredAutoAdvance] = usePersistentState(
     storage && `${storage}.presentation.autoAdvance`,
     true
@@ -63,13 +65,28 @@ export function usePresentation() {
     dispatch(presentationAction(action))
   }
 
-  const setMode = (mode: ProductionMode) => {
-    dispatch({ mode, type: 'set-mode' })
+  const setProducing = (producing: boolean) => {
+    dispatch({ producing, type: 'set-producing' })
+  }
+
+  /**
+   * Take up one workspace's tools, which is the gesture the toolbar offers and the two axes underneath it.
+   *
+   * Both actions are folded into one update rather than dispatched twice, so the axes arrive in the same paint and
+   * no render sees a Producer producing in the workspace they have just left.
+   */
+  const produceIn = (kind: WorkspaceKind) => {
+    setProduction((current) =>
+      reduceProduction(reduceProduction(current, { kind, type: 'enter-workspace' }), {
+        producing: true,
+        type: 'set-producing'
+      })
+    )
   }
 
   const setPlaying = (update: PlayingUpdate) => {
     setProduction((current) => {
-      if (current.mode !== 'present') return current
+      if (current.producing) return current
 
       const currentPlaying = current.presentation.playing
       const next = typeof update === 'function' ? update(currentPlaying) : update
@@ -103,15 +120,15 @@ export function usePresentation() {
   }
 
   /*
-   * Which scopes and which families are drawn holds in every mode.
+   * Which scopes and which families are drawn holds on either axis.
    *
    * A Producer laying a Diagram out asks "what is on the surface" as often as a presenter does, and the bank that
-   * answers it sits beside the Diagram wherever the Diagram is. Producer modes used to substitute the complete
+   * answers it sits beside the Diagram wherever the Diagram is. The Producer's workspaces used to substitute the complete
    * authored content here, which is why the bank left with Present: a filter nothing honours is worse company for
    * an editing surface than no filter at all.
    *
    * Scene focus is the part that is Present's own, and it is not in here: `derived` narrows by scope and family
-   * membership and nothing else, and entering a Producer mode clears the focus besides.
+   * membership and nothing else, and taking up the Producer's tools clears the focus besides.
    */
   const visibleFamilies = production.presentation.visibleFamilies
   const visibleScopes = production.presentation.visibleScopes
@@ -130,20 +147,22 @@ export function usePresentation() {
     activeSequence: derived.activeSequence,
     activeSequenceScene: derived.activeSequenceScene,
     autoAdvance: production.presentation.autoAdvance,
-    directTarget: production.directTarget,
-    designing: production.mode === 'design',
+    directTarget: directTargetOf(production),
+    designing: production.producing && production.workspace.kind === 'design',
+    directing: production.producing && production.workspace.kind === 'direct',
     highlight: derived.highlight,
     lightNothing: () => dispatchPresentation({ type: 'clear-focus' }),
-    mode: production.mode,
+    presenting: !production.producing,
+    producing: production.producing,
     overlays,
     playing: production.presentation.playing,
     reconcileDirectTargets: (availableTargets: readonly DirectTarget[]) =>
       dispatch({ availableTargets, type: 'reconcile-direct-target' }),
     runningStory: derived.runningStory,
     runningStoryScene: derived.runningStoryScene,
-    setDesigning: (designing: boolean) => setMode(designing ? 'design' : 'present'),
+    produceIn,
     setDirectTarget: (target: DirectTarget | null) => dispatch({ target, type: 'set-direct-target' }),
-    setMode,
+    setProducing,
     setPlaying,
     standaloneScene: derived.standaloneScene,
     activateSequence: (sequence: (typeof runtime.sequences)[number], step?: number) =>
@@ -189,7 +208,9 @@ export function usePresentation() {
     visibleFabrics,
     visibleFamilies,
     visibleFlows,
-    visibleScopes
+    visibleScopes,
+    /** Which tools the Producer is in, whether or not they are producing with them right now. */
+    workspace: production.workspace.kind
   }
 }
 

@@ -160,7 +160,7 @@ The projection may add, remove, or reorder Sequence and Scene members. Unchanged
 
 _Conformance:_ conforming
 
-_Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers granular Sequence and Scene projection, comment retention, stable insertion, and idempotent reapplication; `App.browser.test.tsx` covers a canonical YAML Scene edit through Direct mode.
+_Verify:_ `packages/view-studio/src/app/editor/document-operations.test.ts` covers granular Sequence and Scene projection, comment retention, stable insertion, and idempotent reapplication; `App.browser.test.tsx` covers a canonical YAML Scene edit through the Direct workspace.
 
 _Evidence:_ `sequencesWithEditorDrafts` in `packages/view-studio/src/app/editor/sequence-editing.ts` retains unexposed canonical fields, while `sequenceOperations` in `document-operations.ts` emits field and stable-ID member operations.
 

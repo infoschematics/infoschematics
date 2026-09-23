@@ -1,5 +1,5 @@
 import { ColourSchemeButton, useInfoschematic } from '@infoschematics/view-canvas'
-import type { ProductionMode } from '@infoschematics/view-present'
+import type { WorkspaceKind } from '@infoschematics/view-present'
 import {
   Clapperboard,
   Layers,
@@ -16,15 +16,14 @@ import {
 } from 'lucide-react'
 import type { Presentation } from '../hooks/use-presentation.ts'
 
-const modes: readonly ProductionMode[] = ['present', 'design', 'direct']
-const modeLabel = (mode: ProductionMode) => `${mode[0]?.toUpperCase()}${mode.slice(1)}`
-const modeIcons: Record<ProductionMode, typeof PresentIcon> = {
+const workspaces: readonly WorkspaceKind[] = ['design', 'direct']
+const workspaceLabel = (kind: WorkspaceKind) => `${kind[0]?.toUpperCase()}${kind.slice(1)}`
+const workspaceIcons: Record<WorkspaceKind, typeof PresentIcon> = {
   design: PenTool,
-  direct: Clapperboard,
-  present: PresentIcon
+  direct: Clapperboard
 }
 
-/* Product identity and production mode remain stable across panel layouts. */
+/* Product identity and the two production axes remain stable across panel layouts. */
 export function TitleBar({
   collapsed,
   fullscreen,
@@ -73,7 +72,7 @@ export function TitleBar({
 
         <span aria-hidden="true" className="tool-divider" />
 
-        {presentation.mode === 'present' ? (
+        {presentation.presenting ? (
           <>
             <fieldset aria-label="Display" className="tool-bank">
               <button
@@ -101,18 +100,36 @@ export function TitleBar({
           </>
         ) : null}
 
-        <fieldset aria-label="Production mode" className="tool-bank">
-          {modes.map((mode) => {
-            const label = modeLabel(mode)
-            const Icon = modeIcons[mode]
+        {/*
+          Two banks for two questions. Whether the Producer's tools are out is a capability, so it is a toggle rather
+          than a third tool: leaving Present returns to the workspace they were in instead of to a default one, which
+          is what the single enum could not express.
+        */}
+        <fieldset aria-label="Presentation" className="tool-bank">
+          <button
+            aria-label="Present"
+            aria-pressed={presentation.presenting}
+            className="icon-button"
+            onClick={() => presentation.setProducing(presentation.presenting)}
+            title={presentation.presenting ? `Back to ${workspaceLabel(presentation.workspace)}` : 'Present'}
+            type="button"
+          >
+            <PresentIcon aria-hidden="true" size={14} />
+          </button>
+        </fieldset>
+
+        <fieldset aria-label="Workspace" className="tool-bank">
+          {workspaces.map((kind) => {
+            const label = `${workspaceLabel(kind)} workspace`
+            const Icon = workspaceIcons[kind]
             return (
               <button
-                aria-label={`${label} mode`}
-                aria-pressed={presentation.mode === mode}
+                aria-label={label}
+                aria-pressed={presentation.producing && presentation.workspace === kind}
                 className="icon-button"
-                key={mode}
-                onClick={() => presentation.setMode(mode)}
-                title={`${label} mode`}
+                key={kind}
+                onClick={() => presentation.produceIn(kind)}
+                title={label}
                 type="button"
               >
                 <Icon aria-hidden="true" size={14} />

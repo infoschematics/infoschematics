@@ -44,7 +44,7 @@ import {
   useRef,
   useState
 } from 'react'
-export type CanvasMode = 'design' | 'scenes' | 'stories' | null
+export type CanvasEditor = 'design' | 'scenes' | 'stories' | null
 export type DiagramMinimapPosition = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'
 export type GraphicVisibility = 'all' | 'none' | 'scene'
 export type DiagramViewportController = Readonly<{
@@ -300,7 +300,7 @@ export function InfoschematicDiagram({
   hovered,
   onAttach,
   layers,
-  mode = null,
+  editor = null,
   litByScene,
   onLight,
   createdCards = [],
@@ -366,8 +366,8 @@ export function InfoschematicDiagram({
    * session's, never the document's: nothing here is written back, and no authored order changes because of it.
    */
   layers?: InteractionLayers
-  /** Which editor is open, if either. The Infoschematic does not infer it. */
-  mode?: CanvasMode
+  /** Which editor is open, if either. The Infoschematic does not infer it, and no longer hears a Producer's axes. */
+  editor?: CanvasEditor
   /** In scene editing, what the selected scene lights, so the Infoschematic can show it. */
   litByScene?: ReadonlySet<string>
   /** In scene editing, a click adds or removes what it lands on. */
@@ -518,7 +518,7 @@ export function InfoschematicDiagram({
   } = runtime
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const flows = useMemo(() => {
-    if (!previewing || mode !== 'design') return suppliedFlows
+    if (!previewing || editor !== 'design') return suppliedFlows
 
     const families = new Set(infoschematicFamilies.map((family) => family.id))
     const suppliedById = new Map(suppliedFlows.map((flow) => [flow.id, flow]))
@@ -557,7 +557,7 @@ export function InfoschematicDiagram({
     infoschematicFamilies,
     infoschematicFlowIsVisible,
     infoschematicFlows,
-    mode,
+    editor,
     previewing,
     suppliedFlows,
     visibleScopes
@@ -588,7 +588,7 @@ export function InfoschematicDiagram({
   const flowArrowhead = (flow: { bidirectional?: boolean; family: string }, end: 'end' | 'start') =>
     (flow.bidirectional ? end === 'start' : end === 'end') ? `url(#${resourcePrefix}-arrow-${flow.family})` : undefined
   const activeGraphicRenderer =
-    mode !== 'design' && graphic
+    editor !== 'design' && graphic
       ? resolveInfoschematicRenderer(
           renderers,
           'graphic',
@@ -670,7 +670,7 @@ export function InfoschematicDiagram({
   /*
    * Which editor is open, told rather than guessed.
    *
-   * This read `Boolean(onLabelMove)` - edit mode inferred from a callback being
+   * This read `Boolean(onLabelMove)` - editing inferred from a callback being
    * present, so the Infoschematic learned what it could do from what it had been handed
    * rather than from what was being edited. That was serviceable while there was
    * one editor and became wrong the moment there were two.
@@ -680,7 +680,7 @@ export function InfoschematicDiagram({
    * them: `TERM-010` requires absent rather than dimmed, so the handles, ports
    * and waypoint controls simply are not rendered.
    */
-  const editing = mode === 'design'
+  const editing = editor === 'design'
   /* Diagram-scoped remains the default from `ADR-INFOSCHEMATICS-037`; a host may explicitly ask for the Scene set,
      matching static output. Design keeps all authored Graphics reachable regardless of the audience policy. */
   const graphics = useMemo(() => {
@@ -693,7 +693,7 @@ export function InfoschematicDiagram({
   }, [config.diagram.overlays, editing, graphic, graphicVisibility])
   // Both editing layers above the Infoschematic light rather than place: a scene says
   // what it shows, and a story's Story Scene does the same through the scene it plays.
-  const focusing = mode === 'scenes' || mode === 'stories'
+  const focusing = editor === 'scenes' || editor === 'stories'
 
   /*
    * Which kinds a press or a key may reach, which is a different question from which kinds are drawn.
@@ -2091,7 +2091,7 @@ export function InfoschematicDiagram({
    * A handle drawn inside the element it operates sits wherever that element sits: a Region's resize corner under a
    * Card that overlaps it, an adapter's remove button under the Card it holds. Lifting the controls rather than the
    * element leaves every authored order, treatment and position exactly as it was - there is no stacking property to
-   * write and nothing to put back - and the layer goes when the selection changes, clears, or Design mode ends.
+   * write and nothing to put back - and the layer goes when the selection changes, clears, or the Design editor closes.
    */
   const selectionControls = ((): SelectionControls | null => {
     // A selected Flow already paints above the cards as a whole route, so its own controls travel with it.

@@ -122,7 +122,7 @@ describe('Canvas visual tokens', () => {
   it('uses the manifest for component and editing-grid geometry', async () => {
     const source = await readFile(new URL('./InfoschematicDiagram.tsx', import.meta.url), 'utf8')
     const markup = renderToStaticMarkup(
-      <Canvas config={defineInfoschematic({ title: 'Token geometry' })} grid mode="design" />
+      <Canvas config={defineInfoschematic({ title: 'Token geometry' })} grid editor="design" />
     )
 
     expect(source).toMatch(/}\s*=\s*visualTokens\.canvas\.geometry/)

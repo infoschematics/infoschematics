@@ -67,7 +67,7 @@ export function DemoFrame({
         {previews.map((variant) => (
           <figure key={variant.id}>
             {mode === 'design' ? (
-              <Canvas config={variant.config} mode="design" />
+              <Canvas config={variant.config} editor="design" />
             ) : (
               <StaticInfoschematic
                 className="demo-frame__rendered"

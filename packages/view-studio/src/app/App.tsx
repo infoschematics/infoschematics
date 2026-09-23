@@ -297,28 +297,34 @@ function AppContent({
   const presentation = usePresentation()
 
   /*
-   * The dock opens when a Producer mode is entered, and the document's own preference decides Present.
+   * The dock opens when the Producer's tools come out, and the document's own preference decides the Audience's view.
    *
-   * Present needs nothing from the dock - the Infoschematic is the whole surface - so `panels.collapsed` defaults to
-   * collapsed and is what a Producer will have left it on. Design and Direct keep everything that does the work in
-   * there, and the collapsed rail is a Present affordance carrying Present's filters, so entering either mode
-   * collapsed left a 48-pixel empty column beside a diagram nobody could edit.
+   * Presenting needs nothing from the dock - the Infoschematic is the whole surface - so `panels.collapsed` defaults
+   * to collapsed and is what a Producer will have left it on. Design and Direct keep everything that does the work in
+   * there, and the collapsed rail is a presenting affordance carrying the Audience's filters, so taking up either
+   * workspace collapsed left a 48-pixel empty column beside a diagram nobody could edit.
    *
-   * The override is transient and is not written back, because one visit to Design must not change what Present looks
-   * like for that document from then on. It is set on the transition rather than held across the mode, so collapsing
-   * the dock inside Design is respected for the rest of that visit. Returning to Present drops it and the persisted
-   * preference decides again. See ADR-INFOSCHEMATICS-028.
+   * Two axes reach this, and each is read for what it decides. Producing is what opens the dock, because that is the
+   * capability question. Changing workspace opens it too, because Design and Direct hold different work and arriving
+   * at either behind a collapsed rail is the same defect.
+   *
+   * The override is transient and is not written back, because one visit to Design must not change what a presented
+   * document looks like from then on. It is set on the transition rather than held, so collapsing the dock inside
+   * Design is respected for the rest of that visit. Presenting again drops it and the persisted preference decides.
+   * See ADR-INFOSCHEMATICS-028.
    */
   const [dockOverride, setDockOverride] = useState<boolean | null>(null)
-  const [dockMode, setDockMode] = useState(presentation.mode)
-  if (dockMode !== presentation.mode) {
-    // Adjusted during render rather than in an effect, so the mode and its dock arrive in the same paint.
-    setDockMode(presentation.mode)
-    setDockOverride(presentation.mode === 'present' ? null : false)
+  const [dockProducing, setDockProducing] = useState(presentation.producing)
+  const [dockWorkspace, setDockWorkspace] = useState(presentation.workspace)
+  if (dockProducing !== presentation.producing || dockWorkspace !== presentation.workspace) {
+    // Adjusted during render rather than in an effect, so the axis and its dock arrive in the same paint.
+    setDockProducing(presentation.producing)
+    setDockWorkspace(presentation.workspace)
+    setDockOverride(presentation.producing ? false : null)
   }
   const collapsed = dockOverride ?? storedCollapsed
   const toggleCollapsed = () => {
-    if (presentation.mode === 'present') setStoredCollapsed((current) => !current)
+    if (presentation.presenting) setStoredCollapsed((current) => !current)
     else setDockOverride(!collapsed)
   }
 
@@ -498,16 +504,15 @@ function AppContent({
       : directUsesStory
         ? sceneList.toggle
         : undefined
-  const canvasMode =
-    presentation.mode === 'design'
-      ? 'design'
-      : presentation.mode === 'direct'
-        ? directUsesStory
-          ? 'stories'
-          : directUsesStandalone || directUsesSequence
-            ? 'scenes'
-            : null
-        : null
+  const canvasEditor = presentation.designing
+    ? 'design'
+    : presentation.directing
+      ? directUsesStory
+        ? 'stories'
+        : directUsesStandalone || directUsesSequence
+          ? 'scenes'
+          : null
+      : null
 
   /*
    * A Direct target owns its editor selection. Present focus is deliberately
@@ -517,7 +522,7 @@ function AppContent({
   const directTargetKey = JSON.stringify(directTarget)
   // biome-ignore lint/correctness/useExhaustiveDependencies: Direct target identity owns this synchronisation; editor callbacks are stable facades intentionally left out.
   useEffect(() => {
-    if (presentation.mode !== 'direct' || !directTarget) return
+    if (!presentation.directing || !directTarget) return
 
     if (directTarget.kind === 'standalone-scene') {
       sceneLibrary.choose(directTarget.sceneId)
@@ -549,7 +554,7 @@ function AppContent({
     if (at >= 0) sceneList.select(at)
     // The target is the dependency: editor callbacks are intentionally
     // transient facades over stable React setters.
-  }, [directTargetKey, presentation.mode])
+  }, [directTargetKey, presentation.directing])
   const {
     activeSequence,
     activeSequenceScene,
@@ -946,7 +951,7 @@ function AppContent({
 
       // Audience stepping never leaks into Design or Direct, including the
       // brief render before their editor panel has synchronised its own mode.
-      if (presentation.mode !== 'present') return
+      if (presentation.producing) return
 
       // A chosen Expanded Scene steps the same way a Story does, minus the
       // hold: there is nothing running to pause. Stepping is by hand either way,
@@ -1005,7 +1010,7 @@ function AppContent({
     editor.redo,
     shortcuts,
     presentation.lightNothing,
-    presentation.mode,
+    presentation.producing,
     presentation.stepExpandedScene,
     presentation.expandedScene,
     drawnFlows,
@@ -1046,7 +1051,7 @@ function AppContent({
   }, [collapsed])
 
   function playStory(story: RuntimeStory) {
-    if (presentation.mode !== 'present') return
+    if (presentation.producing) return
     if (playing?.id === story.id) {
       presentation.stopStory()
       return
@@ -1086,7 +1091,7 @@ function AppContent({
   }
 
   return (
-    <main data-production-mode={presentation.mode}>
+    <main data-producing={presentation.producing ? 'true' : 'false'} data-workspace={presentation.workspace}>
       {shortcuts ? <ShortcutOverlay onClose={() => setShortcuts(false)} /> : null}
       <TitleBar
         collapsed={collapsed}
@@ -1132,14 +1137,14 @@ function AppContent({
                 /*
                  * The Infoschematic is told which editor is open rather than inferring it
                  * from a callback. Everything below is still the Infoschematic editor's:
-                 * in scene mode the diagram renders none of it, so passing them is
+                 * in the scene editor the diagram renders none of it, so passing them is
                  * harmless and removing them would mean two prop sets to keep in
                  * step.
                  */
-                mode={canvasMode}
+                editor={canvasEditor}
                 layers={editor.layers}
-                litByScene={presentation.mode === 'direct' ? directLit : undefined}
-                onLight={presentation.mode === 'direct' ? directToggle : undefined}
+                litByScene={presentation.directing ? directLit : undefined}
+                onLight={presentation.directing ? directToggle : undefined}
                 onCreateLine={editor.editing ? proposeLine : undefined}
                 onFreeEnd={editor.editing ? editor.moveFreeEnd : undefined}
                 onComponentMove={editor.editing ? editor.moveTo : undefined}

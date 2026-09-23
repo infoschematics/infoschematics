@@ -399,7 +399,7 @@ export function DetailsPanel({
       editor.selectedCounts
     ]
   )
-  // Present remembers reading state; Producer modes are selected explicitly by
+  // Present remembers reading state; a Producer's workspace is chosen explicitly by
   // the transient production state rather than masquerading as panel tabs.
   const [presentTab, setPresentTab] = useSessionState<'showing' | 'specifications'>(
     config.id && `${config.id}.panel.tab.present`,
@@ -407,13 +407,15 @@ export function DetailsPanel({
   )
   const [sourceOpen, setSourceOpen] = useState(false)
   /*
-   * Source is the one tab that outlives its mode, and it took priority over the mode's own panel below, so leaving
-   * Present with the YAML open and entering Design showed the YAML instead of the Design tools. A mode change is a
-   * request to work on something, so it lands on that mode's own panel; the tab strip alone never showed this.
+   * Source is the one tab that outlives the panel beside it, and it took priority over that panel, so presenting with
+   * the YAML open and taking up the Design tools showed the YAML instead of the Design tools. Either axis moving is a
+   * request to work on something, so it lands on that work's own panel; the tab strip alone never showed this.
    */
-  const [sourceMode, setSourceMode] = useState(presentation.mode)
-  if (sourceMode !== presentation.mode) {
-    setSourceMode(presentation.mode)
+  const [sourceProducing, setSourceProducing] = useState(presentation.producing)
+  const [sourceWorkspace, setSourceWorkspace] = useState(presentation.workspace)
+  if (sourceProducing !== presentation.producing || sourceWorkspace !== presentation.workspace) {
+    setSourceProducing(presentation.producing)
+    setSourceWorkspace(presentation.workspace)
     setSourceOpen(false)
   }
   const [directKind, setDirectKind] = useState<DirectKind>('standalone-scene')
@@ -597,47 +599,43 @@ export function DetailsPanel({
   const sequenceChanges = sequences.edited
     ? [{ field: 'points' as const, key: 'themes', source: sequences.source }]
     : []
-  const layerChanges =
-    presentation.mode !== 'direct'
-      ? []
-      : directUsesStories
-        ? storyChanges
-        : directUsesSequences
-          ? sequenceChanges
-          : directUsesStandaloneScenes
-            ? libraryChanges
-            : []
-  const layerSource =
-    presentation.mode !== 'direct'
-      ? editor.source
-      : directUsesStories
-        ? stories.source
-        : directUsesSequences
-          ? sequences.source
-          : directUsesStandaloneScenes
-            ? scenes.source
-            : ''
-  const layerDiscard =
-    presentation.mode !== 'direct'
-      ? editor.discard
-      : directUsesStories
-        ? stories.revert
-        : directUsesSequences
-          ? sequences.revert
-          : directUsesStandaloneScenes
-            ? scenes.revert
-            : () => undefined
+  const layerChanges = !presentation.directing
+    ? []
+    : directUsesStories
+      ? storyChanges
+      : directUsesSequences
+        ? sequenceChanges
+        : directUsesStandaloneScenes
+          ? libraryChanges
+          : []
+  const layerSource = !presentation.directing
+    ? editor.source
+    : directUsesStories
+      ? stories.source
+      : directUsesSequences
+        ? sequences.source
+        : directUsesStandaloneScenes
+          ? scenes.source
+          : ''
+  const layerDiscard = !presentation.directing
+    ? editor.discard
+    : directUsesStories
+      ? stories.revert
+      : directUsesSequences
+        ? sequences.revert
+        : directUsesStandaloneScenes
+          ? scenes.revert
+          : () => undefined
   useEffect(() => {
-    const wanted =
-      presentation.mode === 'design'
-        ? 'design'
-        : presentation.mode === 'direct'
-          ? directUsesStories
-            ? 'stories'
-            : 'scenes'
-          : null
+    const wanted = presentation.designing
+      ? 'design'
+      : presentation.directing
+        ? directUsesStories
+          ? 'stories'
+          : 'scenes'
+        : null
     if (wanted !== mode) setMode(wanted)
-  }, [directUsesStories, mode, presentation.mode, setMode])
+  }, [directUsesStories, mode, presentation.designing, presentation.directing, setMode])
 
   /*
    * Which kind tab a target belongs to, and no more. Clearing a target that has left the document is the production
@@ -645,9 +643,9 @@ export function DetailsPanel({
    * chosen and not the only place the document can change under it.
    */
   useEffect(() => {
-    if (presentation.mode !== 'direct' || !selectedDirectTarget || !activeDirectOption) return
+    if (!presentation.directing || !selectedDirectTarget || !activeDirectOption) return
     if (selectedDirectTarget.kind !== directKind) setDirectKind(selectedDirectTarget.kind)
-  }, [activeDirectOption, directKind, presentation.mode, selectedDirectTarget])
+  }, [activeDirectOption, directKind, presentation.directing, selectedDirectTarget])
 
   useEffect(() => {
     if (!reading) return
@@ -661,13 +659,13 @@ export function DetailsPanel({
   return (
     <section className="state-panel" aria-label="What is showing">
       <div className="panel-tabs" role="tablist" aria-label="Panel">
-        {(presentation.mode === 'present'
+        {(presentation.presenting
           ? ([
               ['showing', 'Info'],
               ['specifications', 'Specifications'],
               ...(sourcePanel ? ([['source', 'Source']] as const) : [])
             ] as const)
-          : presentation.mode === 'design'
+          : presentation.designing
             ? ([['design', 'Design'], ...(sourcePanel ? ([['source', 'Source']] as const) : [])] as const)
             : ([...directKinds, ...(sourcePanel ? ([['source', 'Source']] as const) : [])] as const)
         ).map(([id, label]) => (
@@ -677,9 +675,9 @@ export function DetailsPanel({
                 ? sourceOpen
                 : sourceOpen
                   ? false
-                  : presentation.mode === 'present'
+                  : presentation.presenting
                     ? presentTab === id
-                    : presentation.mode === 'design'
+                    : presentation.designing
                       ? id === 'design'
                       : directKind === id
             }
@@ -690,11 +688,11 @@ export function DetailsPanel({
                   : ''
                 : sourceOpen
                   ? ''
-                  : presentation.mode === 'present'
+                  : presentation.presenting
                     ? presentTab === id
                       ? 'active'
                       : ''
-                    : presentation.mode === 'design'
+                    : presentation.designing
                       ? 'active'
                       : directKind === id
                         ? 'active'
@@ -719,13 +717,13 @@ export function DetailsPanel({
 
       {sourceOpen && sourcePanel ? (
         <SourcePanel controller={sourcePanel} />
-      ) : presentation.mode !== 'present' ? (
+      ) : presentation.producing ? (
         <div className="editor-tab">
-          {/* The tab is a two-row grid. Direct mode adds a target chooser, so it
+          {/* The tab is a two-row grid. Direct adds a target chooser, so it
               joins the tools in one header row rather than claiming an implicit
               third that the split pane's bounded track would come out of. */}
           <div className="editor-tab-header">
-            {presentation.mode === 'direct' ? (
+            {presentation.directing ? (
               <label className="text-row">
                 <span>{directKinds.find(([kind]) => kind === directKind)?.[1] ?? 'Target'}</span>
                 <select
@@ -781,7 +779,7 @@ export function DetailsPanel({
                 other's panel, and rendering both was the whole of why Infoschematic
                 editing showed a story. */}
             <div className="editor-panes">
-              {presentation.mode === 'design' ? (
+              {presentation.designing ? (
                 <DesignDetails contexts={artefactContexts} editor={editor} onCreateCard={onCreateCard} />
               ) : directUsesSequences ? (
                 <>
@@ -818,17 +816,17 @@ export function DetailsPanel({
             <ChangePane
               canRedo={editor.canRedo}
               canUndo={editor.canUndo}
-              count={presentation.mode === 'design' ? editor.changeCount : layerChanges.length}
+              count={presentation.designing ? editor.changeCount : layerChanges.length}
               hovered={editor.hovered}
               onDiscard={layerDiscard}
               onDiscardOne={editor.discardOne}
               onHover={editor.hover}
               onSelect={editor.select}
-              pending={presentation.mode === 'design' ? editor.pending : layerChanges}
+              pending={presentation.designing ? editor.pending : layerChanges}
               onRedo={editor.redo}
               onUndo={editor.undo}
               source={layerSource}
-              written={presentation.mode === 'design' ? editor.written : []}
+              written={presentation.designing ? editor.written : []}
             />
           </SplitPane>
         </div>

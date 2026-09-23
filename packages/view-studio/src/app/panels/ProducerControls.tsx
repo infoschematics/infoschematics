@@ -31,7 +31,7 @@ export function ProducerControls({
    * bank that answers it stays wherever the Diagram is. Playback does belong to presenting: a Sequence or a Dynamic
    * runs the view through states a Producer is in the middle of authoring, so those banks are withheld elsewhere.
    */
-  const presenting = presentation.mode === 'present'
+  const { presenting } = presentation
 
   return (
     <section aria-label="Infoschematic controls" className="producer-controls legend" ref={ref}>

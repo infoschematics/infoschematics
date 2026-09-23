@@ -141,7 +141,7 @@ function EditingHarness({ onMove, onRelease }: { onMove?: () => void; onRelease?
     <Canvas
       artefactOperations={operations}
       config={config}
-      mode="design"
+      editor="design"
       onArtefactMove={(selection, point) => {
         onMove?.()
         setOperations([
@@ -175,7 +175,7 @@ function MoveReportHarness() {
     <>
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onArtefactMove={(selection, point) => setReported(`${selection.id}:${point.x},${point.y}`)}
         onArtefactSelect={() => undefined}
       />
@@ -192,7 +192,7 @@ function InteractionHarness() {
     <>
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onArtefactRemove={(selection) => record(`remove:${selection.id}`)}
         onArtefactReorder={(selection, direction) => record(`reorder:${selection.id}:${direction}`)}
         onArtefactResize={(selection, size) =>
@@ -219,7 +219,7 @@ function RouteInteractionHarness({ initialSelection }: { initialSelection: Artef
     <>
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onAttach={(code, end, port, component) => record(`attach:${code}:${end}:${component}:${port}`)}
         onLabelMove={(code) => record(`label:${code}`)}
         onLabelRelease={() => record('label-release')}
@@ -242,7 +242,7 @@ function LayeredHarness({ layers }: { layers: InteractionLayers }) {
       <Canvas
         config={config}
         layers={layers}
-        mode="design"
+        editor="design"
         onArtefactSelect={(selection) => {
           setSelected(selection)
           setEvents((current) => [...current, `select:${selection?.id ?? 'none'}`])
@@ -515,7 +515,7 @@ test('materialised route drafts and newly created endpoints preserve dependent g
         }
       ]}
       config={config}
-      mode="design"
+      editor="design"
     />
   )
   await expect
@@ -569,7 +569,7 @@ test('materialised route drafts and newly created endpoints preserve dependent g
         }
       ]}
       config={config}
-      mode="design"
+      editor="design"
     />
   )
   await expect
@@ -704,7 +704,7 @@ function GroupHarness({ initial }: { initial: ArtefactSelectionSet }) {
     <>
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onArtefactExtend={(selection) => {
           setHeld((current) => toggleArtefactSelection(current, selection))
           record(`extend:${selection.id}`)
@@ -830,7 +830,7 @@ function EmphasisPointerHarness() {
       <Canvas
         config={emphasisPointerConfig}
         dynamics={[{ dynamicId: 'attention', occurrenceKey: 'hold-1' }]}
-        mode="design"
+        editor="design"
         onArtefactSelect={(selection) => {
           setSelected(selection)
           setEvents((current) => [...current, `select:${selection?.id ?? 'none'}`])

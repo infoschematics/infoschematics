@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { PresentationState } from './presentation.ts'
-import { createProductionState, type DirectTarget, type ProductionMode, reduceProduction } from './production.ts'
+import {
+  createProductionState,
+  type DirectTarget,
+  directTargetOf,
+  type ProductionState,
+  reduceProduction,
+  type WorkspaceKind
+} from './production.ts'
 
 const presentation = (): PresentationState => ({
   annotated: true,
@@ -15,76 +22,104 @@ const presentation = (): PresentationState => ({
   visibleScopes: new Set(['scope-one'])
 })
 
-const modes: readonly ProductionMode[] = ['present', 'design', 'direct']
+const workspaces: readonly WorkspaceKind[] = ['design', 'direct']
 
-const enterMode = (mode: ProductionMode) =>
-  reduceProduction(createProductionState(presentation()), {
-    mode,
-    type: 'set-mode'
+const produceIn = (kind: WorkspaceKind, from: ProductionState = createProductionState(presentation())) =>
+  reduceProduction(reduceProduction(from, { kind, type: 'enter-workspace' }), {
+    producing: true,
+    type: 'set-producing'
   })
 
-describe('production mode', () => {
-  it('starts every new session in Present without a Direct target', () => {
+const present = (state: ProductionState) => reduceProduction(state, { producing: false, type: 'set-producing' })
+
+describe('the capability axis', () => {
+  it('starts every new session presenting, in a workspace holding no Direct target', () => {
     const state = createProductionState(presentation())
 
-    expect(state.mode).toBe('present')
-    expect(state.directTarget).toBeNull()
+    expect(state.producing).toBe(false)
+    expect(state.workspace.kind).toBe('design')
+    expect(directTargetOf(state)).toBeNull()
   })
 
-  for (const from of modes) {
-    for (const to of modes) {
-      it(`defines the ${from} to ${to} transition`, () => {
-        const before = enterMode(from)
-        const after = reduceProduction(before, { mode: to, type: 'set-mode' })
+  it('puts away what was being presented when the tools come out, and leaves it alone when they go away', () => {
+    const producing = produceIn('design')
 
-        expect(after.mode).toBe(to)
-        expect(after.presentation.annotated).toBe(true)
-        expect(after.presentation.autoAdvance).toBe(false)
-        expect(after.presentation.takeaways).toBe(false)
-        expect(after.presentation.visibleFamilies).toEqual(new Set(['family-one']))
-        expect(after.presentation.visibleScopes).toEqual(new Set(['scope-one']))
+    expect(producing.presentation.playing).toBeNull()
+    expect(producing.presentation.expandedSceneId).toBeNull()
+    expect(producing.presentation.annotated).toBe(true)
+    expect(producing.presentation.visibleScopes).toEqual(new Set(['scope-one']))
 
-        if (to === 'present' && from === 'present') {
-          expect(after.presentation.playing).toEqual({ id: 'story-one', step: 2 })
-          expect(after.presentation.expandedSceneId).toBe('sequence-scene-one')
-        } else {
-          expect(after.presentation.playing).toBeNull()
-          expect(after.presentation.standaloneSceneId).toBeNull()
-          expect(after.presentation.expandedSceneId).toBeNull()
-        }
-      })
-    }
-  }
-
-  it('does not resume playback when returning to Present', () => {
-    const designing = reduceProduction(createProductionState(presentation()), {
-      mode: 'design',
-      type: 'set-mode'
-    })
-
-    const presenting = reduceProduction(designing, {
-      mode: 'present',
-      type: 'set-mode'
-    })
+    const presenting = present(producing)
 
     expect(presenting.presentation.playing).toBeNull()
     expect(presenting.presentation.expandedSceneId).toBeNull()
+    expect(presenting.presentation.annotated).toBe(true)
+  })
+
+  it('leaves everything alone when the axis it already holds is reasserted', () => {
+    const presenting = createProductionState(presentation())
+    expect(reduceProduction(presenting, { producing: false, type: 'set-producing' })).toBe(presenting)
+
+    const producing = produceIn('direct')
+    expect(reduceProduction(producing, { producing: true, type: 'set-producing' })).toBe(producing)
+    expect(reduceProduction(producing, { kind: 'direct', type: 'enter-workspace' })).toBe(producing)
   })
 
   /*
-   * What the Diagram draws is asked in any mode; how it is presented is asked only while presenting. A Producer
+   * The defect this split exists to fix. Presenting used to overwrite the workspace, so a Producer directing a
+   * Sequence who showed it to someone came back to Design and had to find their way to Direct again.
+   */
+  for (const kind of workspaces) {
+    it(`returns to the ${kind} workspace after presenting from it`, () => {
+      const working = produceIn(kind)
+      const presenting = present(working)
+
+      expect(presenting.producing).toBe(false)
+      expect(presenting.workspace.kind).toBe(kind)
+
+      const resumed = reduceProduction(presenting, { producing: true, type: 'set-producing' })
+
+      expect(resumed.producing).toBe(true)
+      expect(resumed.workspace.kind).toBe(kind)
+    })
+  }
+
+  it('keeps a Direct target across a visit to the Audience view', () => {
+    const target: DirectTarget = { kind: 'sequence', sequenceId: 'sequence-one' }
+    const selected = reduceProduction(produceIn('direct'), { target, type: 'set-direct-target' })
+
+    const resumed = reduceProduction(present(selected), { producing: true, type: 'set-producing' })
+
+    expect(directTargetOf(resumed)).toEqual(target)
+  })
+})
+
+describe('the workspace axis', () => {
+  it('moves between workspaces without touching whether a Producer is producing', () => {
+    const designing = produceIn('design')
+    const directing = reduceProduction(designing, { kind: 'direct', type: 'enter-workspace' })
+
+    expect(directing.producing).toBe(true)
+    expect(directing.workspace.kind).toBe('direct')
+
+    const presenting = present(directing)
+    const designingAgain = reduceProduction(presenting, { kind: 'design', type: 'enter-workspace' })
+
+    expect(designingAgain.producing).toBe(false)
+    expect(designingAgain.workspace.kind).toBe('design')
+  })
+
+  /*
+   * What the Diagram draws is asked on either axis; how it is presented is asked only while presenting. A Producer
    * laying out a Diagram still wants to see one scope at a time, and still does not want a Scene running under them.
    */
-  it('routes visibility actions in any mode and the rest only while Present is active', () => {
+  it('routes visibility actions whether or not a Producer is producing, and the rest only while presenting', () => {
     const initial = createProductionState(presentation())
     const updated = reduceProduction(initial, {
       action: { type: 'toggle-scope', id: 'scope-two' },
       type: 'presentation'
     })
-    const designing = reduceProduction(updated, {
-      mode: 'design',
-      type: 'set-mode'
-    })
+    const designing = produceIn('design', updated)
 
     expect(updated.presentation.visibleScopes).toEqual(new Set(['scope-one', 'scope-two']))
 
@@ -92,7 +127,7 @@ describe('production mode', () => {
       action: { type: 'toggle-scope', id: 'scope-one' },
       type: 'presentation'
     })
-    expect(filtered.mode).toBe('design')
+    expect(filtered.producing).toBe(true)
     expect(filtered.presentation.visibleScopes).toEqual(new Set(['scope-two']))
 
     expect(
@@ -119,18 +154,17 @@ describe('Direct targets', () => {
   ] as const satisfies readonly DirectTarget[]
 
   it.each(targets)('selects the $kind target independently of presentation focus', (target) => {
-    const direct = enterMode('direct')
-    const selected = reduceProduction(direct, {
+    const selected = reduceProduction(produceIn('direct'), {
       target,
       type: 'set-direct-target'
     })
 
-    expect(selected.directTarget).toEqual(target)
+    expect(directTargetOf(selected)).toEqual(target)
     expect(selected.presentation.playing).toBeNull()
     expect(selected.presentation.expandedSceneId).toBeNull()
   })
 
-  it('ignores Direct target actions outside Direct', () => {
+  it('ignores Direct target actions outside the Direct workspace', () => {
     const state = createProductionState(presentation())
 
     expect(
@@ -142,7 +176,7 @@ describe('Direct targets', () => {
   })
 
   it('clears empty and stale targets without throwing', () => {
-    const direct = enterMode('direct')
+    const direct = produceIn('direct')
     const empty = reduceProduction(direct, {
       target: { kind: 'story', storyId: '' },
       type: 'set-direct-target'
@@ -152,18 +186,19 @@ describe('Direct targets', () => {
       type: 'set-direct-target'
     })
 
-    expect(empty.directTarget).toBeNull()
+    expect(directTargetOf(empty)).toBeNull()
     expect(
-      reduceProduction(selected, {
-        availableTargets: [],
-        type: 'reconcile-direct-target'
-      }).directTarget
+      directTargetOf(
+        reduceProduction(selected, {
+          availableTargets: [],
+          type: 'reconcile-direct-target'
+        })
+      )
     ).toBeNull()
   })
 
   it('retains a target that is still available and clears a stale one', () => {
-    const direct = enterMode('direct')
-    const selected = reduceProduction(direct, {
+    const selected = reduceProduction(produceIn('direct'), {
       target: targets[3],
       type: 'set-direct-target'
     })
@@ -174,29 +209,25 @@ describe('Direct targets', () => {
 
     expect(retained).toBe(selected)
     expect(
-      reduceProduction(selected, {
-        availableTargets: [targets[0]],
-        type: 'reconcile-direct-target'
-      }).directTarget
+      directTargetOf(
+        reduceProduction(selected, {
+          availableTargets: [targets[0]],
+          type: 'reconcile-direct-target'
+        })
+      )
     ).toBeNull()
   })
 
-  it('clears Direct targets when another mode takes ownership', () => {
-    const selected = reduceProduction(enterMode('direct'), {
+  it('leaves a Direct target behind when the Producer takes up another workspace', () => {
+    const selected = reduceProduction(produceIn('direct'), {
       target: targets[4],
       type: 'set-direct-target'
     })
 
-    const designed = reduceProduction(selected, {
-      mode: 'design',
-      type: 'set-mode'
-    })
-    const directAgain = reduceProduction(designed, {
-      mode: 'direct',
-      type: 'set-mode'
-    })
+    const designing = reduceProduction(selected, { kind: 'design', type: 'enter-workspace' })
+    const directAgain = reduceProduction(designing, { kind: 'direct', type: 'enter-workspace' })
 
-    expect(designed.directTarget).toBeNull()
-    expect(directAgain.directTarget).toBeNull()
+    expect(directTargetOf(designing)).toBeNull()
+    expect(directTargetOf(directAgain)).toBeNull()
   })
 })

@@ -77,7 +77,8 @@ describe('App', () => {
     expect(source).toContain('current.reorderArtefact(direction)')
     expect(source).toContain('onSelect={editor.select}')
     expect(source).toContain('onMoveWaypoint={editor.editing ? editor.moveWaypoint : undefined}')
-    expect(source).toContain("presentation.mode === 'design'")
+    expect(source).toContain('const canvasEditor = presentation.designing')
+    expect(source).toContain('editor={canvasEditor}')
     expect(source).toContain('presentation.visibleFlows')
     expect(source).toContain('presentation.visibleScopes')
     expect(source).toContain('viewportControllerRef={diagramViewport}')
@@ -123,24 +124,25 @@ diagram:
     expect(markup).toContain('viewBox="0 0 320 200"')
   })
 
-  it('starts each Studio session in explicit Present mode with Producer controls available', () => {
+  it('starts each Studio session not producing, with both axes offered and neither restored', () => {
     const localStorage = {
-      getItem: vi.fn((key: string) => (key.endsWith('.presentation.mode') ? '"direct"' : null)),
+      getItem: vi.fn((key: string) => (key.endsWith('.presentation.workspace') ? '"direct"' : null)),
       setItem: vi.fn()
     }
     const sessionStorage = { getItem: vi.fn(), setItem: vi.fn() }
     vi.stubGlobal('window', { localStorage, sessionStorage })
 
     const markup = renderToStaticMarkup(
-      <App config={defineInfoschematic({ id: 'mode-session', title: 'Mode session' })} />
+      <App config={defineInfoschematic({ id: 'axis-session', title: 'Axis session' })} />
     )
 
-    expect(markup).toContain('data-production-mode="present"')
+    expect(markup).toContain('data-producing="false"')
     expect(markup).toContain('aria-label="Infoschematic controls"')
-    expect(markup).toContain('aria-label="Present mode"')
-    expect(markup).toContain('aria-label="Design mode"')
-    expect(markup).toContain('aria-label="Direct mode"')
-    expect(localStorage.getItem).not.toHaveBeenCalledWith('mode-session.presentation.mode')
+    expect(markup).toContain('aria-label="Present"')
+    expect(markup).toContain('aria-label="Design workspace"')
+    expect(markup).toContain('aria-label="Direct workspace"')
+    expect(localStorage.getItem).not.toHaveBeenCalledWith('axis-session.presentation.workspace')
+    expect(localStorage.getItem).not.toHaveBeenCalledWith('axis-session.presentation.producing')
   })
 
   it('renders structural data supplied by the host configuration', () => {

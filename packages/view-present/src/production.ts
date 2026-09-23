@@ -1,7 +1,5 @@
 import { type PresentationAction, type PresentationState, reducePresentation } from './presentation.ts'
 
-export type ProductionMode = 'present' | 'design' | 'direct'
-
 export type DirectTarget =
   | Readonly<{ kind: 'standalone-scene'; sceneId: string }>
   | Readonly<{ kind: 'sequence'; sequenceId: string }>
@@ -14,33 +12,37 @@ export type DirectTarget =
     }>
   | Readonly<{ kind: 'storyboard'; storyId: string }>
 
-type PresentProductionState = Readonly<{
-  directTarget: null
-  mode: 'present'
-  presentation: PresentationState
-}>
-
-type DesignProductionState = Readonly<{
-  directTarget: null
-  mode: 'design'
-  presentation: PresentationState
-}>
-
-type DirectProductionState = Readonly<{
-  directTarget: DirectTarget | null
-  mode: 'direct'
-  presentation: PresentationState
-}>
+export type WorkspaceKind = 'design' | 'direct'
 
 /**
- * Session-only application state. Persistence adapters intentionally receive no
- * production-mode serialisation contract from this package.
+ * Which set of tools the Producer is working with.
+ *
+ * Design and Direct are two tasks over one document with the same capability, differing in which panels and which
+ * interaction layers are in front of the Producer — what an editing application calls a workspace. A Direct target
+ * is part of that arrangement rather than of the application, which is why it lives here and nowhere else: the
+ * Design workspace has no field to leave null.
  */
-export type ProductionState = PresentProductionState | DesignProductionState | DirectProductionState
+export type Workspace = Readonly<{ kind: 'design' }> | Readonly<{ directTarget: DirectTarget | null; kind: 'direct' }>
+
+/**
+ * Session-only application state, on two independent axes. Persistence adapters intentionally receive no
+ * serialisation contract for either from this package.
+ *
+ * `producing` is a capability boundary: false is the Audience's view of the product, with none of the Producer's
+ * tools, and it is where every mount starts. `workspace` is a preference about tools, and it survives a visit to
+ * the Audience's view — a Producer who presents a Sequence and comes back returns to the workspace they left,
+ * which is the whole reason the two are not one field.
+ */
+export type ProductionState = Readonly<{
+  presentation: PresentationState
+  producing: boolean
+  workspace: Workspace
+}>
 
 export type ProductionAction =
   | Readonly<{ action: PresentationAction; type: 'presentation' }>
-  | Readonly<{ mode: ProductionMode; type: 'set-mode' }>
+  | Readonly<{ producing: boolean; type: 'set-producing' }>
+  | Readonly<{ kind: WorkspaceKind; type: 'enter-workspace' }>
   | Readonly<{
       target: DirectTarget | null
       type: 'set-direct-target'
@@ -51,10 +53,14 @@ export type ProductionAction =
     }>
 
 export const createProductionState = (presentation: PresentationState): ProductionState => ({
-  directTarget: null,
-  mode: 'present',
-  presentation
+  presentation,
+  producing: false,
+  workspace: { kind: 'design' }
 })
+
+/** The Direct target, for the callers that hold a whole state rather than the workspace it carries. */
+export const directTargetOf = (state: ProductionState): DirectTarget | null =>
+  state.workspace.kind === 'direct' ? state.workspace.directTarget : null
 
 const withoutPresentationFocus = (presentation: PresentationState): PresentationState =>
   reducePresentation(presentation, { type: 'clear-focus' })
@@ -111,53 +117,43 @@ const changesWhatIsDrawn = (action: PresentationAction): boolean =>
   action.type === 'show-all-scopes' ||
   action.type === 'show-all-families'
 
-const setMode = (state: ProductionState, mode: ProductionMode): ProductionState => {
-  if (state.mode === mode) return state
-
-  if (mode === 'present') {
-    return {
-      directTarget: null,
-      mode,
-      presentation: state.presentation
-    }
-  }
-
-  if (mode === 'design') {
-    return {
-      directTarget: null,
-      mode,
-      presentation: withoutPresentationFocus(state.presentation)
-    }
-  }
-
-  return {
-    directTarget: null,
-    mode,
-    presentation: withoutPresentationFocus(state.presentation)
-  }
-}
+const emptyWorkspace = (kind: WorkspaceKind): Workspace => (kind === 'direct' ? { directTarget: null, kind } : { kind })
 
 export const reduceProduction = (state: ProductionState, action: ProductionAction): ProductionState => {
   switch (action.type) {
     case 'presentation':
-      if (state.mode !== 'present' && !changesWhatIsDrawn(action.action)) return state
+      if (state.producing && !changesWhatIsDrawn(action.action)) return state
       return {
         ...state,
         presentation: reducePresentation(state.presentation, action.action)
       }
-    case 'set-mode':
-      return setMode(state, action.mode)
+    case 'set-producing':
+      if (state.producing === action.producing) return state
+      // Taking up the tools puts away what was being presented; putting them down leaves the Audience's view where
+      // this Producer left it, so returning shows what the last reader saw rather than a restored performance.
+      return {
+        ...state,
+        presentation: action.producing ? withoutPresentationFocus(state.presentation) : state.presentation,
+        producing: action.producing
+      }
+    case 'enter-workspace':
+      // A workspace is entered afresh: a Direct target belongs to the arrangement of tools, so leaving Direct for
+      // Design leaves its selection behind. Presenting is not leaving, which is what this split exists to say.
+      if (state.workspace.kind === action.kind) return state
+      return { ...state, workspace: emptyWorkspace(action.kind) }
     case 'set-direct-target': {
-      if (state.mode !== 'direct') return state
+      if (state.workspace.kind !== 'direct') return state
       const directTarget = action.target && directTargetIsValid(action.target) ? action.target : null
-      return directTarget === state.directTarget ? state : { ...state, directTarget }
+      return directTarget === state.workspace.directTarget
+        ? state
+        : { ...state, workspace: { directTarget, kind: 'direct' } }
     }
     case 'reconcile-direct-target': {
-      if (state.mode !== 'direct' || !state.directTarget) return state
-      const targetStillExists = action.availableTargets.some((target) =>
-        directTargetsEqual(state.directTarget as DirectTarget, target)
-      )
-      return targetStillExists ? state : { ...state, directTarget: null }
+      if (state.workspace.kind !== 'direct') return state
+      const { directTarget } = state.workspace
+      if (!directTarget) return state
+      const targetStillExists = action.availableTargets.some((target) => directTargetsEqual(directTarget, target))
+      return targetStillExists ? state : { ...state, workspace: { directTarget: null, kind: 'direct' } }
     }
   }
 }

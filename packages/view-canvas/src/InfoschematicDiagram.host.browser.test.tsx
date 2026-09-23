@@ -82,7 +82,7 @@ function Instance({ config, testid }: { config: InfoschematicInput; testid: stri
       <Canvas
         config={config}
         hovered={hovered}
-        mode="design"
+        editor="design"
         onArtefactSelect={(selection) => {
           setSelected(selection)
           record(`select:${selection?.id ?? 'none'}`)

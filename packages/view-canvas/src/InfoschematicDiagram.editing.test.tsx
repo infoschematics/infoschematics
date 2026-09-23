@@ -248,7 +248,7 @@ describe('InfoschematicDiagram Design editing', () => {
   })
 
   it('renders every artefact kind as a labelled keyboard-selectable SVG target', () => {
-    const markup = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const markup = renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} />)
 
     for (const selection of selections) {
       const renderedKind = selection.kind === 'graphic' ? 'overlay' : selection.kind
@@ -271,7 +271,7 @@ describe('InfoschematicDiagram Design editing', () => {
       const markup = renderToStaticMarkup(
         <Canvas
           config={config}
-          mode="design"
+          editor="design"
           onArtefactRemove={() => undefined}
           onArtefactReorder={() => undefined}
           onArtefactResize={() => undefined}
@@ -300,7 +300,7 @@ describe('InfoschematicDiagram Design editing', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onArtefactRemove={() => undefined}
         onArtefactReorder={() => undefined}
         onArtefactResize={() => undefined}
@@ -334,8 +334,8 @@ describe('InfoschematicDiagram Design editing', () => {
   })
 
   it('draws Graphics behind the working diagram while editing and above it while presenting', () => {
-    const design = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
-    // Present mode draws a Graphic only while a Scene calls for one, so the
+    const design = renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} />)
+    // With no editor open a Graphic is drawn only while a Scene calls for one, so the
     // comparison hands it the same entry the editor renders unconditionally.
     const present = renderToStaticMarkup(
       <Canvas config={config} graphic={createInfoschematicRuntime(config).infoschematicOverlays[0]} />
@@ -351,7 +351,7 @@ describe('InfoschematicDiagram Design editing', () => {
   it('keeps in-use ports visible and holds the rest back until they are asked for', () => {
     const ports = (markup: string) => markup.split('<g class="audit-port').slice(1)
     const dormant = (markup: string) => ports(markup).filter((port) => port.startsWith(' dormant')).length
-    const idle = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const idle = renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} />)
     const anchors = ports(idle).filter((port) => /SYS-002:E1|SYS-003:W1/.test(port))
 
     // Both ends of the one route keep their dot — they are what the diagram is
@@ -362,7 +362,7 @@ describe('InfoschematicDiagram Design editing', () => {
 
     const design = (props: Record<string, string>) =>
       dormant(
-        renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} {...props} />)
+        renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} {...props} />)
       )
 
     // Asking about a placeable wakes its whole complement; pointing at one port
@@ -373,9 +373,9 @@ describe('InfoschematicDiagram Design editing', () => {
   })
 
   it('leaves a closed interaction layer drawn, unreachable, and unchanged in the document', () => {
-    const open = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const open = renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} />)
     const closed = renderToStaticMarkup(
-      <Canvas config={config} layers={new Set(['card'] as const)} mode="design" onArtefactSelect={() => undefined} />
+      <Canvas config={config} layers={new Set(['card'] as const)} editor="design" onArtefactSelect={() => undefined} />
     )
 
     // Every kind still renders, in the same order, with the same identity: a layer filters interaction, not the diagram.
@@ -400,7 +400,7 @@ describe('InfoschematicDiagram Design editing', () => {
       <Canvas
         config={config}
         layers={new Set(['card'] as const)}
-        mode="design"
+        editor="design"
         onArtefactRemove={() => undefined}
         onArtefactReorder={() => undefined}
         onArtefactResize={() => undefined}
@@ -419,7 +419,7 @@ describe('InfoschematicDiagram Design editing', () => {
       const markup = renderToStaticMarkup(
         <Canvas
           config={config}
-          mode="design"
+          editor="design"
           onArtefactRemove={() => undefined}
           onArtefactReorder={() => undefined}
           onArtefactResize={() => undefined}
@@ -454,9 +454,9 @@ describe('InfoschematicDiagram Design editing', () => {
    */
   it('gives a Point a press target wider than the mark it paints', () => {
     const { pointRadius, pointTargetRadius } = visualTokens.canvas.geometry
-    const open = renderToStaticMarkup(<Canvas config={config} mode="design" onArtefactSelect={() => undefined} />)
+    const open = renderToStaticMarkup(<Canvas config={config} editor="design" onArtefactSelect={() => undefined} />)
     const closed = renderToStaticMarkup(
-      <Canvas config={config} layers={new Set([])} mode="design" onArtefactSelect={() => undefined} />
+      <Canvas config={config} layers={new Set([])} editor="design" onArtefactSelect={() => undefined} />
     )
 
     expect(pointTargetRadius).toBeGreaterThan(pointRadius * 2)
@@ -470,7 +470,7 @@ describe('InfoschematicDiagram Design editing', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={config}
-        mode="design"
+        editor="design"
         onArtefactRemove={() => undefined}
         onArtefactReorder={() => undefined}
         onArtefactResize={() => undefined}

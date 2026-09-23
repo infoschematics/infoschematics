@@ -1,16 +1,16 @@
 # Design session — DESIGN
 
-Producer mode state, selection, hover, editing visibility, inspection, and rendered Studio verification. Part of the [Specifications corpus](index.md).
+Producer workspace state, selection, hover, editing visibility, inspection, and rendered Studio verification. Part of the [Specifications corpus](index.md).
 
 ## User-observable behaviours
 
-### DESIGN-001 — Production mode is session state
+### DESIGN-001 — Production state is session state
 
-Opening a Producer capability MUST be an explicit action that changes the transient `ProductionMode` to `design` or `direct`. A fresh application session and every reload MUST begin in `present`. Draft changes MAY survive reload, but `ProductionMode`, selection and the active Direct target MUST NOT be persisted.
+Opening a Producer capability MUST be an explicit action that takes up the Producer's tools in a named workspace, `design` or `direct`. A fresh application session and every reload MUST begin not producing. Draft changes MAY survive reload, but neither production axis, nor selection, nor the active Direct target MUST be persisted.
 
 _Conformance:_ conforming
 
-_Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose first case asserts a fresh session starts in Present with no Direct target; then, in a Playground served by `bun run self:dev`, enter Design, select an artefact, edit a property and reload. The session MUST come back in `present` with nothing selected and no Direct target, while the draft change MAY still be listed; a reload that restores the mode or the selection fails the requirement.
+_Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose first case asserts a fresh session is not producing and has no Direct target; then, in a Playground served by `bun run self:dev`, enter Design, select an artefact, edit a property and reload. The session MUST come back not producing, with nothing selected and no Direct target, while the draft change MAY still be listed; a reload that restores either axis or the selection fails the requirement.
 
 _Evidence:_ `packages/view-studio/src/app/editor/use-editor.ts` and `packages/view-studio/src/app/hooks/use-persistent-state.ts`.
 
@@ -48,11 +48,11 @@ _Verify:_ run `bun run --filter=@infoschematics/view-present test`, whose transi
 
 _Evidence:_ `reduceProduction` in `packages/view-present/src/production.ts`, composed by the Studio application.
 
-### DESIGN-005 — Producer modes control what they draw
+### DESIGN-005 — A Producer controls what they draw
 
-Which [Architectural Scopes](../reference/vocabulary.md#scope) and which [Flow families](../reference/vocabulary.md#flow-family) are drawn is a question about the Diagram rather than about presenting it, so the bank that answers it MUST be offered in every Production mode and its state MUST carry across a mode change unchanged. A Producer mode MUST NOT filter its working Canvas by a control it withholds: a filter nothing on screen can change is worse company for an editing surface than no filter at all. Design MUST therefore keep every editable artefact and Flow reachable from the Design Canvas itself, by showing which Scopes and families are currently hidden and letting a [Producer](../reference/vocabulary.md#producer) restore them there.
+Which [Architectural Scopes](../reference/vocabulary.md#scope) and which [Flow families](../reference/vocabulary.md#flow-family) are drawn is a question about the Diagram rather than about presenting it, so the bank that answers it MUST be offered whether or not a Producer is producing, and in either workspace, and its state MUST carry across any move on either axis unchanged. A Producer MUST NOT filter their working Canvas by a control the workspace withholds: a filter nothing on screen can change is worse company for an editing surface than no filter at all. Design MUST therefore keep every editable artefact and Flow reachable from the Design Canvas itself, by showing which Scopes and families are currently hidden and letting a [Producer](../reference/vocabulary.md#producer) restore them there.
 
-Playback is Present's own. A Producer mode MUST NOT run the view through [Scene](../reference/vocabulary.md#scene) focus, and MUST NOT offer [Sequence](../reference/vocabulary.md#sequence) or [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) playback, because those states belong to a presentation the Producer is in the middle of authoring. Direct MUST preview the focus of its own draft target without mutating active presentation focus.
+Playback belongs to the Audience's view. A Producer workspace MUST NOT run the view through [Scene](../reference/vocabulary.md#scene) focus, and MUST NOT offer [Sequence](../reference/vocabulary.md#sequence) or [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic) playback, because those states belong to a presentation the Producer is in the middle of authoring. Direct MUST preview the focus of its own draft target without mutating active presentation focus.
 
 _Conformance:_ conforming
 
@@ -170,7 +170,7 @@ _Evidence:_ `packages/view-model/src/editable.ts` defines the layer set and the 
 
 ### DESIGN-019 — A selection's controls draw above the diagram
 
-While an element is selected, its resize handle and within-kind actions MUST be rendered above every element the diagram places, and MUST return to the ordinary order as soon as the selection changes, clears, or Design mode ends. Nothing about this promotion MAY be authored, and it MUST NOT change the canonical order of any authored array.
+While an element is selected, its resize handle and within-kind actions MUST be rendered above every element the diagram places, and MUST return to the ordinary order as soon as the selection changes, clears, or the Design workspace is left. Nothing about this promotion MAY be authored, and it MUST NOT change the canonical order of any authored array.
 
 _Conformance:_ conforming
 
@@ -194,19 +194,19 @@ _Verify:_ run the group cases in `packages/view-model/src/editable-capabilities.
 
 _Evidence:_ `packages/view-model/src/editable.ts` holds the ordered selection set, reads participation from `artefactCapabilities`, and computes `alignOffsets` and `distributeOffsets` as pure geometry; `packages/view-canvas/src/InfoschematicDiagram.tsx` adds Shift to a press and to Enter, sweeps a range band over the geometry it drew, and marks non-anchor members `group-held`; `packages/view-studio/src/app/editor/use-editor.ts` records every participant's move inside one checkpoint; `packages/view-studio/src/app/editor/EditorTools.tsx` presents the six align and two distribute controls.
 
-### DESIGN-021 — Entering a Producer mode opens the panel dock
+### DESIGN-021 — Taking up a Producer's tools opens the panel dock
 
-Entering `design` or `direct` MUST leave the [Details panel](../reference/vocabulary.md#details-panel) dock open and the entered mode's own controls reachable as rendered. The compact collapsed rail is a Present affordance under `PRESENT-009` and MUST NOT be offered as a Producer mode's working surface, so a Producer mode MUST NOT be entered onto a collapsed dock.
+Taking up the Producer's tools MUST leave the [Details panel](../reference/vocabulary.md#details-panel) dock open and the entered workspace's own controls reachable as rendered. The compact collapsed rail belongs to a reader who is not producing under `PRESENT-009` and MUST NOT be offered as a Producer's working surface, so a Producer MUST NOT be left on a collapsed dock.
 
-The dock MUST open as a transient consequence of the transition and MUST NOT rewrite the persisted collapse preference. Collapsing the dock while a Producer mode is current MUST hold for the rest of that occupancy, across re-renders and selection changes. Returning to `present` MUST restore the persisted preference unchanged, so a visit to a Producer mode MUST NOT alter how Present opens for that document, and a reload MUST restore that preference and no part of the mode that opened the dock, as `DESIGN-001` requires. Entering the other Producer mode is a further entry and MAY open the dock again. Per-mode memory of a Producer's collapse is not required.
+The dock MUST open as a transient consequence of the transition and MUST NOT rewrite the persisted collapse preference. Collapsing the dock while producing MUST hold for the rest of that occupancy, across re-renders and selection changes. Putting the tools down MUST restore the persisted preference unchanged, so a visit to Design MUST NOT alter how the document opens for a reader, and a reload MUST restore that preference and no part of the producing that opened the dock, as `DESIGN-001` requires. Moving to the other workspace is a further entry and MAY open the dock again. Per-workspace memory of a Producer's collapse is not required.
 
-A mode transition MUST leave the dock on the entered mode's own panel. Transient panel state that names a surface shared between modes, such as the authored-source view, MUST NOT survive the transition and take priority over the entered mode's controls.
+Either transition MUST leave the dock on the entered workspace's own panel. Transient panel state that names a surface shared between workspaces, such as the authored-source view, MUST NOT survive the transition and take priority over the entered workspace's controls.
 
 _Conformance:_ conforming
 
 _Verify:_ run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load `packages/view-studio/src/styles.css` and assert reachability through `offsetParent` rather than presence, because the collapsed dock hides a mounted panel rather than unmounting it.
 
-_Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override on entry to a Producer mode, drops it on entry to `present`, and routes the panel toggle to whichever of the two the current mode owns; `packages/view-studio/src/app/panels/PanelRail.tsx` stays Present-only; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when the mode changes; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records the preference model and the rejected alternative.
+_Evidence:_ `packages/view-studio/src/app/App.tsx` holds the persisted preference beside a transient dock override, sets the override whenever either axis moves while producing, drops it when the tools go down, and routes the panel toggle to whichever of the two the current position owns; `packages/view-studio/src/app/panels/PanelRail.tsx` renders nothing while producing; `packages/view-studio/src/app/panels/DetailsPanel.tsx` resets its authored-source view when either axis moves; `packages/view-studio/src/app/App.browser.test.tsx` covers Present to Design, a collapse made inside Design surviving a selection change, Design to Direct, Direct to Present with the `localStorage` preference read back directly, and a fresh mount; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records the preference model and the rejected alternative.
 
 ### DESIGN-022 — A design session resolves in the reader's colour scheme, and the reader may choose it
 

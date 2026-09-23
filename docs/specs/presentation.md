@@ -4,27 +4,29 @@ Audience-facing focus, filtering, controls, information, viewport use, zoom, pan
 
 ## User-observable behaviours
 
-### PRESENT-001 — Production mode is explicit and transient
+### PRESENT-001 — Producing and workspace are two explicit transient axes
 
-The interactive application MUST represent its current production mode as exactly one of `present`, `design` or `direct`. A new mount and every reload MUST start in `present`; the mode MUST NOT be persisted as an Audience preference or authored Infoschematic data.
+The interactive application MUST hold two independent pieces of production state. The first is whether it is producing: a [Producer](../reference/vocabulary.md#producer)'s tools are out, or they are not and what is on screen is what an [Audience](../reference/vocabulary.md#audience) gets. The second is which workspace the Producer is in, exactly one of `design` or `direct`.
 
-_Conformance:_ conforming
-
-_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then read `createProductionState` in `packages/view-present/src/production.ts`: the mode is one of `present`, `design`, or `direct`, never two and never none. Mount fresh and confirm it starts in `present`; switch to `direct`, reload, and confirm it is back in `present`. Then search the persisted Audience preferences and the authored document for the mode — a stored mode is what makes a reload land somewhere a reader did not ask for.
-
-_Evidence:_ `ProductionMode` and `createProductionState` in `packages/view-present/src/production.ts`, composed by `packages/view-studio`.
-
-### PRESENT-002 — Mode changes preserve preferences, not presentation activity
-
-Audience preferences and filters, active Sequence focus and playback, and Producer editing state MUST remain independently owned. Entering `design` or `direct` MUST stop Sequence playback and clear the active Standalone or Sequence Scene while retaining Scope and Flow-family filters and other Audience preferences. Returning to `present` MUST retain those preferences and MUST NOT resume playback or restore cleared focus automatically.
-
-Reasserting the current mode MUST leave all three state areas unchanged.
+A new mount and every reload MUST start not producing. The workspace MUST be retained while not producing, so returning to the Producer's tools resumes the workspace they left rather than a default one. Neither axis MUST be persisted as an Audience preference or authored Infoschematic data.
 
 _Conformance:_ conforming
 
-_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then walk every mode-to-mode transition with all three kinds of state set: Scope and Flow-family filters chosen, a Sequence playing with a Scene active, and Producer editing state in place. Entering `design` or `direct` must stop playback and clear the active Standalone or Sequence Scene while the filters and preferences stand; returning to `present` must keep the preferences and must not resume playback or restore the cleared focus by itself; reasserting the current mode must change none of the three.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then read `createProductionState` in `packages/view-present/src/production.ts`: it is not producing, and it carries a workspace regardless. Mount fresh and confirm nothing of the Producer's is offered; enter Direct, present, and confirm returning lands in Direct rather than Design; then reload and confirm it is back to not producing. Then search the persisted Audience preferences and the authored document for either axis — a stored one is what makes a reload land somewhere a reader did not ask for.
 
-_Evidence:_ `packages/view-present/src/production.test.ts` covers every mode-to-mode transition; rendered Studio tests cover the reload boundary.
+_Evidence:_ `ProductionState`, `WorkspaceKind` and `createProductionState` in `packages/view-present/src/production.ts`, composed by `packages/view-studio`; `packages/view-present/src/production.test.ts` covers each axis separately and the workspace surviving a visit to the Audience's view.
+
+### PRESENT-002 — Moving on either axis preserves preferences, not presentation activity
+
+Audience preferences and filters, active Sequence focus and playback, and Producer editing state MUST remain independently owned. Taking up the Producer's tools MUST stop Sequence playback and clear the active Standalone or Sequence Scene while retaining Scope and Flow-family filters and other Audience preferences. Putting them down MUST retain those preferences and MUST NOT resume playback or restore cleared focus automatically.
+
+Reasserting a position on either axis MUST leave all three state areas unchanged.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then walk every move on both axes with all three kinds of state set: Scope and Flow-family filters chosen, a Sequence playing with a Scene active, and Producer editing state in place. Taking up the Producer's tools must stop playback and clear the active Standalone or Sequence Scene while the filters and preferences stand; putting them down must keep the preferences and must not resume playback or restore the cleared focus by itself; reasserting either axis where it already stands must change none of the three.
+
+_Evidence:_ `packages/view-present/src/production.test.ts` covers both axes and every move on each; rendered Studio tests cover the reload boundary.
 
 ### PRESENT-003 — Filter banks are individually controlled
 
@@ -92,13 +94,13 @@ _Evidence:_ `packages/view-studio/src/app/panels/ShortcutOverlay.tsx`, `packages
 
 Present View MUST offer a collapsed layout in which the Infoschematic panel takes the space otherwise occupied by expanded Producer controls and Details. The collapsed layout MUST retain reachable Architectural Scope, Flow Family and Sequence controls, and the stable title bar MUST retain controls for restoring panels and leaving full screen.
 
-The collapsed layout is a Present affordance. The compact rail MUST NOT be presented as a Producer mode's working surface, and a Producer mode MUST NOT be left on it: `DESIGN-021` states what entering `design` or `direct` does to the panel dock. Reachable means reachable as rendered — a control hidden by the collapsed layout MUST NOT be accepted as evidence for this requirement merely because it remains in the document.
+The collapsed layout belongs to the capability axis and to that axis alone: it is what a reader who is not producing gets, and which workspace the Producer would return to has no bearing on it. The compact rail MUST NOT be presented as a Producer's working surface, and a Producer MUST NOT be left on it: `DESIGN-021` states what taking up the Producer's tools does to the panel dock. Reachable means reachable as rendered — a control hidden by the collapsed layout MUST NOT be accepted as evidence for this requirement merely because it remains in the document.
 
 _Conformance:_ conforming
 
-_Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load Studio's own stylesheet and assert reachability rather than presence.
+_Verify:_ inspect collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; run the dock cases in `packages/view-studio/src/app/App.browser.test.tsx`, which load Studio's own stylesheet and assert reachability rather than presence.
 
-_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent mode controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable in Present and no rail at all in a Producer mode; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records why the rail stays Present-only.
+_Evidence:_ collapsed state and full-screen handling in `packages/view-studio/src/app/App.tsx`; compact controls in `packages/view-studio/src/app/panels/PanelRail.tsx`; persistent axis controls in `packages/view-studio/src/app/panels/TitleBar.tsx`; `packages/view-studio/src/app/App.browser.test.tsx` finds the rail's Scope, Family and Sequence controls reachable while not producing and no rail at all while producing; `docs/decisions/ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md` records why the rail stays Present-only.
 
 ### PRESENT-010 — Zoom follows pointer and resets to fit
 

@@ -14,17 +14,17 @@ Present View should answer three questions in order:
 
 The Infoschematic answers first. Controls and Details help the Audience read it without becoming a competing application surface.
 
-## Production mode boundary
+## The production boundary
 
-Present is one member of the transient `ProductionMode` union: `present`, `design` or `direct`. A newly mounted application and every reload begin in Present. The current mode is session state, never an Audience preference and never part of authored `InfoschematicConfig`.
+Present is one side of a transient capability boundary: either a `Producer`'s tools are out or they are not, and the workspace they would return to — `design` or `direct` — is a second, independent axis. A newly mounted application and every reload begin not producing. Both axes are session state, never an Audience preference and never part of authored `InfoschematicConfig`.
 
-The state behind those modes has three distinct owners:
+The state behind that boundary has three distinct owners:
 
 - **Audience preferences and filters** retain choices such as visible Scopes, visible Flow families, annotations, takeaways and automatic-advance preference.
 - **Presentation activity** holds the active Standalone or Sequence Scene, its step and whether timed playback is currently advancing.
 - **Producer editing** holds Design or Direct selection, draft targets, pending changes and editing history.
 
-Changing mode cleans up only the activity that cannot safely cross the boundary. Entering Design or Direct stops Sequence playback and clears presentation focus while preserving Audience preferences and filters. Returning to Present restores those preferences and filters, but does not restore a previous focus or restart playback.
+Changing either axis cleans up only the activity that cannot safely cross the boundary. Entering Design or Direct stops Sequence playback and clears presentation focus while preserving Audience preferences and filters. Returning to Present restores those preferences and filters, but does not restore a previous focus or restart playback.
 
 ## Visibility and focus
 
@@ -55,7 +55,7 @@ This makes Info useful for orientation without creating another source that can 
 
 The Infoschematic is the presentation surface, so it must be able to take the available canvas. The Details panel and expanded Producer controls may collapse while a compact rail preserves the filters and Sequence controls needed during a presentation. Page-level full screen is a separate action and composes with the collapsed layout.
 
-The title bar remains stable across those modes. Entering a larger presentation mode must not strand the controls needed to leave it or change what the Audience is seeing.
+The title bar remains stable wherever a session stands on either axis. Entering a larger presentation layout must not strand the controls needed to leave it or change what the Audience is seeing.
 
 ## Keyboard and accessibility intent
 

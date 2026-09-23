@@ -2851,7 +2851,7 @@ button:focus-visible,
 
 /*
  * The tab is a two-row grid: what acts on the editor, then the split it acts on.
- * Direct mode inserts a target chooser, which took an implicit third row and
+ * The Direct workspace inserts a target chooser, which took an implicit third row and
  * pushed the split pane out of its bounded track — the hint painted over the
  * select and the form was chopped by the changes pane instead of scrolling.
  * Header and tools share one row, so the tab always has exactly two children.

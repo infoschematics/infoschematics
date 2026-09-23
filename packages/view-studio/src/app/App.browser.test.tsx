@@ -12,6 +12,17 @@ import { Studio } from './App.tsx'
  */
 import '../styles.css'
 
+/**
+ * Which workspace the Producer is working in, or `null` while the application is presenting.
+ *
+ * Both axes are read, because either one alone would pass a state nobody asked for: the workspace attribute is
+ * retained across a visit to the Audience's view, so it says `design` while presenting too.
+ */
+const producingIn = (container: Element) => {
+  const main = container.querySelector('main')
+  return main?.getAttribute('data-producing') === 'true' ? main.getAttribute('data-workspace') : null
+}
+
 const config = defineInfoschematic({
   title: 'Studio interaction',
   infoschematic: {
@@ -92,9 +103,9 @@ test('Studio keyboard edits render one reviewable change with undo, redo and rev
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const card = container.querySelector<SVGGElement>('[data-artefact-id="CARD-A"]')
   if (!card) throw new Error('Studio did not render Card A')
@@ -167,9 +178,9 @@ test('a Card moved off its Flow axis stays rendered, by key, by drag and by type
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const pipeOf = (code: string) =>
     container.querySelector<SVGPathElement>(`[data-artefact-id="${code}"] .infoschematic-pipe`)?.getAttribute('d') ?? ''
@@ -218,9 +229,9 @@ test('Studio creation and property clearing stay rendered and reviewable until d
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const createRegion = container.querySelector<HTMLButtonElement>('button[aria-label="Create Region"]')
   if (!createRegion) throw new Error('Studio has no Region creation control')
@@ -255,7 +266,7 @@ test('Studio creation and property clearing stay rendered and reviewable until d
   expect(container.querySelector('.change-list')).toBeNull()
 })
 
-test('canonical YAML Sequences open in Direct mode and emit stable-id document edits', async () => {
+test('canonical YAML Sequences open in the Direct workspace and emit stable-id document edits', async () => {
   window.localStorage.clear()
   const parsed = parseInfoschematicDocument(`id: HOSTED
 title: Hosted sequences
@@ -281,14 +292,14 @@ sequences:
     <Studio document={parsed.document} onDocumentChange={changed} onDocumentReplace={replaced} />
   )
   const direct = container.querySelector<HTMLButtonElement>('button[aria-label^="Direct"]')
-  if (!direct) throw new Error('Studio has no Direct mode control')
+  if (!direct) throw new Error('Studio has no Direct workspace control')
   direct.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
+  await expect.poll(() => producingIn(container)).toBe('direct')
 
   const label = [...container.querySelectorAll<HTMLInputElement>('.scene-fields input')].find(
     (input) => input.value === 'Opening'
   )
-  if (!label) throw new Error('canonical Overview Scene did not open in Direct mode')
+  if (!label) throw new Error('canonical Overview Scene did not open in the Direct workspace')
   // Direct's editor is in the dock, and entering Direct opens it: this case reached the field without pressing
   // anything, which only holds because the mode brought the dock with it.
   expect(label.offsetParent).not.toBeNull()
@@ -311,7 +322,7 @@ sequences:
   const sourceTab = [...container.querySelectorAll<HTMLButtonElement>('.panel-tabs button')].find(
     (button) => button.textContent?.trim() === 'Source'
   )
-  if (!sourceTab) throw new Error('Direct mode did not retain the Source tab')
+  if (!sourceTab) throw new Error('the Direct workspace did not retain the Source tab')
   sourceTab.click()
   await expect
     .poll(() => container.querySelector<HTMLTextAreaElement>('.source-panel textarea')?.value ?? '')
@@ -460,9 +471,9 @@ diagram:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   await expect.poll(() => container.querySelector('input[aria-label="Design grid size"]')).not.toBeNull()
   const gridSize = container.querySelector<HTMLInputElement>('input[aria-label="Design grid size"]')
@@ -706,11 +717,11 @@ test('Studio layer controls close a kind to interaction and release whatever it 
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
-  // The editor mode follows the production mode through an effect, so the Design tools arrive a render later.
+  // The Canvas editor follows the workspace through an effect, so the Design tools arrive a render later.
   const control = (label: string) => container.querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
   /*
    * Reachable, not merely present. This case used to read the layer controls straight out of the tree with the dock
@@ -794,9 +805,9 @@ test('a Point answers a press across its widened target and lets go when its lay
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const svg = container.querySelector<SVGSVGElement>('.infoschematic-svg')
   const pointA = () => container.querySelector<SVGGElement>('[data-artefact-id="POINT-A"]')
@@ -862,9 +873,9 @@ test('a selected Point moves by key and by typed coordinate, and takes its Flow 
   window.localStorage.clear()
   const { container } = await render(<Studio config={config} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const pointA = () => container.querySelector<SVGGElement>('[data-artefact-id="POINT-A"]')
   const markA = () => container.querySelector<SVGCircleElement>('[data-artefact-id="POINT-A"] .point-mark')
@@ -975,9 +986,9 @@ test('a held group aligns and distributes onto its anchor, and one undo puts the
   window.localStorage.clear()
   const { container } = await render(<Studio config={groupConfig} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const at = (id: string) => container.querySelector<SVGGElement>(`[data-artefact-id="${id}"]`)
   const placedAt = (id: string) => at(id)?.getAttribute('transform')
@@ -1030,9 +1041,9 @@ test('arrow keys carry the whole held group, one step for the group rather than 
   window.localStorage.clear()
   const { container } = await render(<Studio config={groupConfig} />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const at = (id: string) => container.querySelector<SVGGElement>(`[data-artefact-id="${id}"]`)
   const placedAt = (id: string) => at(id)?.getAttribute('transform')
@@ -1112,7 +1123,9 @@ const hostDock = async () => {
   return {
     collapsed: () => container.querySelector('.control-room')?.classList.contains('collapsed'),
     container,
-    mode: () => container.querySelector('main')?.getAttribute('data-production-mode'),
+    workingIn: () => producingIn(container),
+    /* The workspace axis as the DOM carries it, which is readable whether or not the Producer's tools are out. */
+    workspace: () => container.querySelector('main')?.getAttribute('data-workspace') ?? null,
     press: (label: string) => {
       const button = container.querySelector<HTMLButtonElement>(`button[aria-label^="${label}"]`)
       if (!button) throw new Error(`Studio has no control labelled ${label}`)
@@ -1132,7 +1145,7 @@ const hostDock = async () => {
   }
 }
 
-test('the panel dock opens with a Producer mode and keeps a collapse made inside one', async () => {
+test('the panel dock opens with a Producer workspace and keeps a collapse made inside one', async () => {
   window.localStorage.clear()
   const studio = await hostDock()
 
@@ -1146,9 +1159,9 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
   expect(studio.reachable('.panel-rail [aria-label="Sequences"] button')).toBe(true)
   expect(studio.reachable('.state-panel')).toBe(false)
 
-  // Present to Design opens the dock, because the rail carries none of Design's tools and never did.
+  // Presenting to Design opens the dock, because the rail carries none of Design's tools and never did.
   studio.press('Design')
-  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(studio.workingIn).toBe('design')
   await expect.poll(studio.collapsed).toBe(false)
   await expect.poll(() => studio.reachable('button[aria-label="Cards interactive"]')).toBe(true)
   expect(studio.reachable('.editor-tab')).toBe(true)
@@ -1156,7 +1169,7 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
   expect(studio.container.querySelector('.panel-rail')).toBeNull()
 
   /*
-   * The open is a transition, not a state held across the mode. Collapsing inside Design stands, through a re-render
+   * The open is a transition, not a state held across the visit. Collapsing inside Design stands, through a re-render
    * and through a selection change, because otherwise the dock springs back on the next thing the Producer does.
    */
   studio.press('Collapse panels')
@@ -1168,9 +1181,9 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
   await expect.poll(() => card.classList.contains('selected')).toBe(true)
   expect(studio.collapsed()).toBe(true)
 
-  // Design to Direct is another mode entry, so the dock comes back with Direct's target chooser and a target in it.
+  // Design to Direct is another workspace, so the dock comes back with Direct's target chooser and a target in it.
   studio.press('Direct')
-  await expect.poll(studio.mode).toBe('direct')
+  await expect.poll(studio.workingIn).toBe('direct')
   await expect.poll(studio.collapsed).toBe(false)
   await expect.poll(() => studio.reachable('.editor-tab-header select')).toBe(true)
   /*
@@ -1192,7 +1205,7 @@ test('the panel dock opens with a Producer mode and keeps a collapse made inside
    * one visit to Design must not change what Present looks like for this document from then on.
    */
   studio.press('Present')
-  await expect.poll(studio.mode).toBe('present')
+  await expect.poll(studio.workingIn).toBeNull()
   await expect.poll(studio.collapsed).toBe(true)
   expect(window.localStorage.getItem('DOCK.panels.collapsed')).toBe('true')
 })
@@ -1206,7 +1219,7 @@ test('the scope and family banks stay with the Diagram in Design, and playback l
   const studio = await hostDock()
 
   studio.press('Design')
-  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(studio.workingIn).toBe('design')
   await expect.poll(() => studio.reachable('.producer-controls [aria-label="Architectural scopes"] button')).toBe(true)
   expect(studio.reachable('.producer-controls [aria-label="Flow families"] button')).toBe(true)
   // Withheld, not merely hidden: a Sequence runs the view through states this Producer is in the middle of authoring.
@@ -1225,13 +1238,13 @@ test('the scope and family banks stay with the Diagram in Design, and playback l
 
   // And the document does have a Sequence, so the absence above was a decision rather than an empty fixture.
   studio.press('Present')
-  await expect.poll(studio.mode).toBe('present')
+  await expect.poll(studio.workingIn).toBeNull()
   await expect
     .poll(() => studio.container.querySelector('.producer-controls [aria-label="Sequences"] button'))
     .not.toBeNull()
 })
 
-test('a mode change lands on that mode own panel rather than on whatever tab was last open', async () => {
+test('taking up a set of tools lands on their own panel rather than on whatever tab was last open', async () => {
   window.localStorage.clear()
   const studio = await hostDock()
 
@@ -1241,39 +1254,78 @@ test('a mode change lands on that mode own panel rather than on whatever tab was
   await expect.poll(() => studio.reachable('.source-panel textarea')).toBe(true)
 
   /*
-   * Source outlived its mode and took priority over the mode's own panel, so Present with the YAML open became Design
+   * Source outlived the panel beside it and took priority over it, so presenting with the YAML open became Design
    * showing the YAML. The tab strip reads the same either way, which is why no existing case saw this.
    */
   studio.press('Design')
-  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(studio.workingIn).toBe('design')
   await expect.poll(() => studio.reachable('.editor-tab')).toBe(true)
   expect(studio.container.querySelector('.source-panel')).toBeNull()
 
   // The same on the way in from Direct, which is where a Producer reading the YAML of a Scene actually is.
   studio.press('Direct')
-  await expect.poll(studio.mode).toBe('direct')
+  await expect.poll(studio.workingIn).toBe('direct')
   studio.tab('Source')
   await expect.poll(() => studio.reachable('.source-panel textarea')).toBe(true)
   studio.press('Present')
-  await expect.poll(studio.mode).toBe('present')
+  await expect.poll(studio.workingIn).toBeNull()
   expect(studio.container.querySelector('.source-panel')).toBeNull()
   studio.press('Design')
-  await expect.poll(studio.mode).toBe('design')
+  await expect.poll(studio.workingIn).toBe('design')
   await expect.poll(() => studio.reachable('.editor-tab')).toBe(true)
   expect(studio.container.querySelector('.source-panel')).toBeNull()
 })
 
-test('a reload restores the dock preference and none of the Producer mode that opened it', async () => {
+test('a reload restores the dock preference and none of the producing that opened it', async () => {
   window.localStorage.clear()
   // What a Producer who expanded the dock in Present left behind, and all they left behind.
   window.localStorage.setItem('DOCK.panels.collapsed', 'false')
   const studio = await hostDock()
 
-  expect(studio.mode()).toBe('present')
+  expect(studio.workingIn()).toBeNull()
   expect(studio.collapsed()).toBe(false)
   expect(studio.reachable('.state-panel')).toBe(true)
   expect(studio.container.querySelector('.panel-rail')).toBeNull()
   expect(studio.container.querySelector('.editor-tab')).toBeNull()
+})
+
+/*
+ * The behaviour the two axes exist for, and the one no unit assertion reaches: presenting is a capability a Producer
+ * puts down and takes back up, and the workspace they were in is not a casualty of doing so. Under the single enum
+ * this test could not be written, because `present` overwrote `direct` and there was nowhere for it to be kept.
+ */
+test('presenting a drawing returns the Producer to the workspace they left, and a reload returns nobody', async () => {
+  window.localStorage.clear()
+  const studio = await hostDock()
+
+  // A fresh mount is not producing, and still carries a workspace: the axes are independent, not one field in disguise.
+  expect(studio.workingIn()).toBeNull()
+  expect(studio.workspace()).toBe('design')
+
+  studio.press('Direct')
+  await expect.poll(studio.workingIn).toBe('direct')
+
+  // Presenting puts the tools down without discarding where they were put down from.
+  studio.press('Present')
+  await expect.poll(studio.workingIn).toBeNull()
+  expect(studio.workspace()).toBe('direct')
+  const present = studio.container.querySelector<HTMLButtonElement>('button[aria-label="Present"]')
+  expect(present?.getAttribute('aria-pressed')).toBe('true')
+  expect(
+    studio.container
+      .querySelector<HTMLButtonElement>('button[aria-label="Direct workspace"]')
+      ?.getAttribute('aria-pressed')
+  ).toBe('false')
+
+  // And taking them back up resumes Direct rather than landing in Design, which is the defect the split removes.
+  studio.press('Present')
+  await expect.poll(studio.workingIn).toBe('direct')
+  await expect.poll(() => studio.reachable('.editor-tab-header select')).toBe(true)
+
+  // A reload is a fresh mount: neither axis is persisted, so it comes back presenting, per PRESENT-001.
+  const reloaded = await hostDock()
+  expect(reloaded.workingIn()).toBeNull()
+  expect(reloaded.workspace()).toBe('design')
 })
 
 /*
@@ -1319,7 +1371,7 @@ test('a Direct target clears when its Scene leaves the library, and holds while 
 
   press('Show panels')
   press('Direct')
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
+  await expect.poll(() => producingIn(container)).toBe('direct')
   await expect.poll(() => container.querySelector('.editor-tab-header select')).not.toBeNull()
 
   const chooser = container.querySelector<HTMLSelectElement>('.editor-tab-header select')
@@ -1367,7 +1419,7 @@ test('a Direct target clears when its Scene leaves the library, and holds while 
     .poll(() => [...container.querySelectorAll('.scene-row span')].map((row) => row.textContent).join('|'))
     .toBe('Scene SCN-01')
   await expect.poll(focusing).toBe(false)
-  expect(container.querySelector('main')?.getAttribute('data-production-mode')).toBe('direct')
+  expect(producingIn(container)).toBe('direct')
 })
 
 test("Studio plays a Scene's cue in its Present surface while the rehearsal bank still replays on demand", async () => {
@@ -1487,9 +1539,9 @@ diagram:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const changeLines = () =>
     [...container.querySelectorAll('.change-panel .change-list:not(.change-written) code')].map(
@@ -1560,11 +1612,11 @@ diagram:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
-  /* The diagram turns selectable with the production mode, a beat before the editor session behind it opens, and a
+  /* The diagram turns selectable with the workspace, a beat before the editor session behind it opens, and a
      press in that gap selects without dragging. The editing grid is drawn from the session itself, so waiting for it
      is waiting for a press to mean a drag. */
   await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
@@ -1651,9 +1703,9 @@ diagram:
 
   const { container } = await render(<HostedStudio />)
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
   // The editing grid is drawn from the editor session, so waiting for it is waiting for a press to mean a drag.
   await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
 
@@ -1758,9 +1810,9 @@ scopes:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
   await expect.poll(() => container.querySelector('.edit-grid')).not.toBeNull()
 
   const drawnCards = () =>
@@ -1855,9 +1907,9 @@ diagram:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   const createCard = () => container.querySelector<HTMLButtonElement>('button[aria-label="Create Card"]')
   await expect.poll(() => createCard()).not.toBeNull()
@@ -1868,7 +1920,7 @@ diagram:
   /* Pressing it anyway must leave the app standing. Before this, the handler read the first declared Scope without
      asking whether there was one, and the click tore the tree down mid-render. */
   createCard()?.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
   expect(container.querySelectorAll('[data-artefact-kind="card"]').length).toBe(1)
 })
 
@@ -1918,9 +1970,9 @@ scopes:
   showPanels.click()
   await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
   const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
-  if (!design) throw new Error('Studio has no Design mode control')
+  if (!design) throw new Error('Studio has no Design workspace control')
   design.click()
-  await expect.poll(() => container.querySelector('main')?.getAttribute('data-production-mode')).toBe('design')
+  await expect.poll(() => producingIn(container)).toBe('design')
 
   /* What the host holds, read off the diagram it is being drawn from: a Card the projection never wrote would be
      drawn by the overlay and absent here, which is exactly the split this closes. */

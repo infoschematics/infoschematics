@@ -47,7 +47,7 @@ export { drawnElementIds } from './drawn-elements.ts'
 export { elementEmphasisDuration } from './element-emphasis.ts'
 export { flowSignalDuration } from './flow-signals.ts'
 export {
-  type CanvasMode,
+  type CanvasEditor,
   type DiagramMinimapPosition,
   type DiagramViewportController,
   type GraphicVisibility,

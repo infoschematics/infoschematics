@@ -43,7 +43,7 @@ describe('Present', () => {
   it('shows an authored Overlay to an audience', () => {
     /*
      * Present supplies a Scene's own Graphic and nothing else, so before `ADR-INFOSCHEMATICS-037` an authored
-     * Overlay reached Studio's Design mode and no audience. Present is unchanged: Canvas draws the declaration.
+     * Overlay reached Studio's Design workspace and no audience. Present is unchanged: Canvas draws the declaration.
      */
     const markup = renderToStaticMarkup(
       <Present

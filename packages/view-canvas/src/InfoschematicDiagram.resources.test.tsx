@@ -52,7 +52,7 @@ describe('renderer definition identity', () => {
   })
 
   it('keeps every reference resolvable inside the rendering that made it', () => {
-    const markup = renderToStaticMarkup(<Canvas config={config('Closed loop')} grid mode="design" />)
+    const markup = renderToStaticMarkup(<Canvas config={config('Closed loop')} grid editor="design" />)
 
     const defined = new Set([...markup.matchAll(/<(?:marker|pattern)[^>]*\bid="([^"]+)"/g)].map((f) => f[1]))
     const references = [...markup.matchAll(/url\(#([^)"]+)\)/g)].map((found) => found[1])

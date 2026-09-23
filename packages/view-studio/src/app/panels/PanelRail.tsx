@@ -3,12 +3,14 @@ import type { Presentation } from '../hooks/use-presentation.ts'
 import { sceneCanActivate } from '../scene-activation.ts'
 
 /*
- * Present controls folded into 48px for a maximised diagram.
+ * The Audience's controls folded into 48px for a maximised diagram.
  *
- * The rail is a Present affordance and stays one. Scope, Family and Sequence are small, mutually exclusive choices
- * that fit; Design's properties, tools and layer controls and Direct's target chooser are not, so there is no
- * Producer-mode branch here and collapsed is not a compact Producer mode. Entering a Producer mode opens the dock
- * instead - App.tsx holds that transition, and ADR-INFOSCHEMATICS-028 records why it went this way round.
+ * The rail belongs to the capability axis and reads only that one: it is what a reader who is not producing gets,
+ * and which workspace the Producer would return to has no bearing on it. Scope, Family and Sequence are small,
+ * mutually exclusive choices that fit; Design's properties, tools and layer controls and Direct's target chooser
+ * are not, so there is no workspace branch here and collapsed is not a compact set of Producer tools. Taking up
+ * those tools opens the dock instead - App.tsx holds that transition, and ADR-INFOSCHEMATICS-028 records why it
+ * went this way round.
  */
 export function PanelRail({
   onPlay: _onPlay,
@@ -26,7 +28,7 @@ export function PanelRail({
   const canActivate = (scene: (typeof sequences)[number]['scenes'][number]) =>
     sceneCanActivate(scene, validElements, validFlows, validDynamics)
 
-  if (presentation.mode !== 'present') return null
+  if (presentation.producing) return null
 
   return (
     <div className="panel-rail">

@@ -44,6 +44,7 @@ Each term carries a stable `Id`. Code and documents cite a concept by that id ra
 | `present` | <span id="present"></span>Present | viewing, playback |
 | `design` | <span id="design"></span>Design | structural editing |
 | `direct` | <span id="direct"></span>Direct | presentation editing, directing |
+| `workspace` | <span id="workspace"></span>Workspace | Producer's arrangement of tools |
 | `infoschematic-panel` | <span id="infoschematic-panel"></span>Infoschematic panel | canvas, main view |
 | `producer-controls` | <span id="producer-controls"></span>Producer controls | control surface |
 | `details-panel` | <span id="details-panel"></span>Details panel | sidebar, inspector, state |
@@ -100,17 +101,19 @@ A **Diagram Dynamic** is a named semantic change an Audience should perceive: a 
 
 A Dynamic is not an animation. It says what changed and what the change is about, never how to depict it: no duration, easing, colour, selector, or timer is authored. A host says only that a named Dynamic occurred, by id and a host-owned occurrence key; each renderer then chooses a treatment, including a still one for reduced motion and for static output, and states the Dynamic's own label to assistive technology.
 
-## Roles and modes
+## Roles, capability and workspaces
 
 A **Producer** shapes, controls, and presents the product. An **Audience** experiences the product without receiving editorial capability.
 
-The application has three modes:
+The application answers two separate questions. Whether it is **producing** is a capability boundary: either the Producer's tools are out, or what is on screen is what the Audience gets. Which **Workspace** the Producer is in says which of those tools are in front of them, over the same document and with the same capability.
 
-- **Present** — Audience-facing experience and navigation.
-- **Design** — edits the Infoschematic and its six artefact kinds.
-- **Direct** — edits Sequences, their Scenes, Callouts and Storyboards.
+- **Present** — the Audience-facing experience and navigation, which is what a session offers whenever it is not producing.
+- **Design** — the Workspace that edits the Infoschematic and its six artefact kinds.
+- **Direct** — the Workspace that edits Sequences, their Scenes, Callouts and Storyboards.
 
-Its persistent regions are the **Infoschematic panel**, **Producer controls**, and **Details panel**. A region keeps its identity as the selected mode changes what it exposes.
+A Workspace is kept while the product is presented, so a Producer who presents a drawing and comes back resumes the tools they left rather than a default set.
+
+Its persistent regions are the **Infoschematic panel**, **Producer controls**, and **Details panel**. A region keeps its identity as either axis changes what it exposes.
 
 Design divides its elements into one **Interaction layer** per artefact kind. A layer is a filter over what answers the Producer, not over what the Diagram draws: closing one leaves its elements exactly as authored and exactly where they were, and stops them taking a press or a keystroke meant for something else. It is session state, chosen by the Producer for the sitting and never written to authored source.
 

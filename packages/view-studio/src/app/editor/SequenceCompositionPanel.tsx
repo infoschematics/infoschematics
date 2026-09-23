@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { LineList } from './LineList.tsx'
 import type { SequenceComposition } from './use-sequence-composition.ts'
 
-/** Sequence and Expanded Scene authoring for Direct mode. */
+/** Sequence and Expanded Scene authoring for the Direct workspace. */
 export function SequenceCompositionPanel({
   editor,
   selected,

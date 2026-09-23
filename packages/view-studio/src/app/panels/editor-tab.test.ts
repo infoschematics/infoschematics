@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 /*
  * `.editor-tab` is a two-row grid: what acts on the editor, then the split it
- * acts on. Direct mode adds a target chooser, and as a third child it took an
+ * acts on. The Direct workspace adds a target chooser, and as a third child it took an
  * implicit auto row — the hint painted over the select and the Storyboard form
  * was chopped by the changes pane instead of scrolling. The regression is
  * structural, so it is checked where it lives rather than through a screenshot.

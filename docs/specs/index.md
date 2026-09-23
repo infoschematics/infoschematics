@@ -33,9 +33,9 @@ IDs are append-only within their registered prefix and are never reused. The one
 | diagram-dynamics.md           | `DYNAMIC` | Named authored Dynamics, host-owned occurrences, occurrence resolution, and non-motion interpretations.         |
 | presentation.md               | `PRESENT` | Audience-facing focus, filtering, controls, information, viewport use, zoom, pan, and overview navigation.      |
 | scenes-and-callouts.md        | `SCENE`   | Activatable Scenes, ordered presentation, Callout placement, custom Callouts, timing, and playback stability.   |
-| design-session.md             | `DESIGN`  | Producer mode state, selection, hover, editing visibility, inspection, and rendered Studio verification.        |
+| design-session.md             | `DESIGN`  | Producer workspace state, selection, hover, editing visibility, inspection, and rendered Studio verification.   |
 | directing.md                  | `DIRECT`  | Producer control of Scenes and their containing presentation material.                                          |
-| design-editing.md             | `EDIT`    | Geometry, route, attachment, creation, removal, appearance, and complete preview behaviour in Design mode.      |
+| design-editing.md             | `EDIT`    | Geometry, route, attachment, creation, removal, appearance, and preview behaviour in the Design workspace.      |
 | change-management.md          | `CHANGE`  | Atomic drafts, undo, reviewable change sets, consolidation, and selective dropping of pending changes.          |
 | runtime-model.md              | `RUNTIME` | Framework-neutral derivation and immutable materialisation of typed selection and draft operations.             |
 | composition.md                | `COMPOSE` | What two features must still promise when they are used together, one requirement per contended resource.      |

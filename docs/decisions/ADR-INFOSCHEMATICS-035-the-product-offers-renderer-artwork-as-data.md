@@ -40,4 +40,4 @@ Paint deliberately differs between outlets and geometry deliberately does not. T
 
 A passing comparison is still not evidence the artwork looks right. Five real defects in these nine pieces — captions struck through by the rails behind them, a mesh reading as a sparkline, ties ending in open space — were found only by rendering the pieces and looking at them, with the suite green throughout. That is the rule AGENTS.md already states, and this catalogue is the case it was written for.
 
-`INFOSCHEMATICS-TOOL-089` bounds the offer: an authored Overlay is not drawn outside Design mode, so a standard `annotation` reaches a static rendering and the interactive view only as a scene's own graphic until that is fixed. The limitation is stated where authors meet it rather than worked around here.
+`INFOSCHEMATICS-TOOL-089` bounds the offer: an authored Overlay is not drawn outside the Design workspace, so a standard `annotation` reaches a static rendering and the interactive view only as a scene's own graphic until that is fixed. The limitation is stated where authors meet it rather than worked around here.

@@ -34,6 +34,6 @@ Present is unchanged. It keeps passing the active Sequence Scene's Graphic, and 
 
 `STATIC-019` and `DIAGRAM-011` state the rule where an author reads it, and `scripts/visual-treatment-parity.test.ts` holds both renderers to an Overlay authored in a document with no Scene and no options — the case that was previously drawn by handing Canvas a Graphic and asking the static renderer for `'all'`.
 
-A document that authors a decorative Overlay now sees it in every outlet, including a still rendering it may not have expected to carry one. That is the intended reading of an authored declaration, and Design mode is no longer the place a reader goes to find out what a document says.
+A document that authors a decorative Overlay now sees it in every outlet, including a still rendering it may not have expected to carry one. That is the intended reading of an authored declaration, and the Design workspace is no longer the place a reader goes to find out what a document says.
 
 Scene scoping is now the exception rather than the default, so a host that relied on `renderInfoschematicSvg`'s old behaviour must pass `visibility: { graphics: 'scene' }` to keep it. No authored document and no repository caller did.

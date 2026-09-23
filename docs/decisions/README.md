@@ -43,7 +43,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 31. [ADR-INFOSCHEMATICS-025](ADR-INFOSCHEMATICS-025-keep-the-preview-server-local-and-in-memory.md) — bind the development preview to loopback, serve it from memory, and keep it on the standard library.
 32. [ADR-INFOSCHEMATICS-026](ADR-INFOSCHEMATICS-026-name-dynamics-in-the-document.md) — let a document name the Dynamics it can express and leave every occurrence to the host.
 33. [ADR-INFOSCHEMATICS-027](ADR-INFOSCHEMATICS-027-one-ordered-selection-with-an-anchor.md) — make the Design selection one ordered set and measure every group operation from its anchor.
-34. [ADR-INFOSCHEMATICS-028](ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md) — keep the collapsed rail a Present affordance and open the panel dock on entry to a Producer mode.
+34. [ADR-INFOSCHEMATICS-028](ADR-INFOSCHEMATICS-028-panels-follow-the-mode.md) — keep the collapsed rail a reader's affordance and open the panel dock when a Producer takes up their tools.
 35. [ADR-INFOSCHEMATICS-029](ADR-INFOSCHEMATICS-029-author-what-an-emphasis-means-not-how-it-is-played.md) — let a Dynamic say whether it depicts an event or a state, and leave every treatment choice to the renderer.
 36. [ADR-INFOSCHEMATICS-031](ADR-INFOSCHEMATICS-031-a-point-is-its-own-artefact-kind.md) — make a Point a sixth artefact kind with a coordinate geometry role rather than a part of the Flow that owns it.
 37. [ADR-INFOSCHEMATICS-032](ADR-INFOSCHEMATICS-032-a-point-is-created-from-the-library.md) — create a Point from the Library path, alone rather than with a Flow, reversing `ADR-INFOSCHEMATICS-031`'s non-creatability consequence.

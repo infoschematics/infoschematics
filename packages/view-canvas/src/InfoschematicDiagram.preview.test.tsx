@@ -280,7 +280,7 @@ describe('InfoschematicDiagram draft preview', () => {
       }
     ]
 
-    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} editor="design" />)
 
     for (const id of ['region-created', 'FABRIC-C', 'CARD-C', 'FLOW-C', 'graphic-created']) {
       expect(markup).toContain(`data-artefact-id="${id}"`)
@@ -352,7 +352,7 @@ describe('InfoschematicDiagram draft preview', () => {
     ]
 
     const markup = renderToStaticMarkup(
-      <Canvas artefactOperations={operations} config={initial} mode="design" renderers={renderers} />
+      <Canvas artefactOperations={operations} config={initial} editor="design" renderers={renderers} />
     )
 
     expect(markup).toContain('Fabric Replaced:90,60,190,90:drafted')
@@ -392,7 +392,7 @@ describe('InfoschematicDiagram draft preview', () => {
         componentOffsets={new Map([['CARD-A', { dx: 15, dy: 5 }]])}
         config={initial}
         flows={[draftedFlow]}
-        mode="design"
+        editor="design"
       />
     )
 
@@ -420,7 +420,7 @@ describe('InfoschematicDiagram draft preview', () => {
       }
     ]
 
-    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} editor="design" />)
 
     expect(markup).toContain('d="M180 205 H280 V215 H360"')
     expect(markup).toContain('dashed')
@@ -436,7 +436,7 @@ describe('InfoschematicDiagram draft preview', () => {
       }
     ]
 
-    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} mode="design" />)
+    const markup = renderToStaticMarkup(<Canvas artefactOperations={operations} config={initial} editor="design" />)
 
     /* The Flow carries no waypoints, so the preview derives it between the two ports again rather than bending the
        old run onto the moved one: it leaves the east port and arrives at the west port square to both. */
@@ -457,9 +457,9 @@ describe('InfoschematicDiagram draft preview', () => {
       properties: { caption: 'present' },
       kind: { key: 'graphic-preview', version: 1 }
     }
-    const baseMarkup = renderToStaticMarkup(<Canvas config={initial} mode="design" />)
+    const baseMarkup = renderToStaticMarkup(<Canvas config={initial} editor="design" />)
     const rejectedMarkup = renderToStaticMarkup(
-      <Canvas artefactOperations={[duplicate]} config={initial} mode="design" />
+      <Canvas artefactOperations={[duplicate]} config={initial} editor="design" />
     )
     const presentMarkup = renderToStaticMarkup(
       <Canvas
@@ -479,7 +479,7 @@ describe('InfoschematicDiagram draft preview', () => {
       <Canvas config={initial} graphic={activeGraphic} graphicVisibility="none" renderers={renderers} />
     )
     const designMarkup = renderToStaticMarkup(
-      <Canvas config={initial} graphicVisibility="scene" mode="design" renderers={renderers} />
+      <Canvas config={initial} graphicVisibility="scene" editor="design" renderers={renderers} />
     )
 
     expect(rejectedMarkup).toBe(baseMarkup)

@@ -216,7 +216,7 @@ describe('Canvas visual treatments', () => {
   )
 
   it('preserves the legacy boolean Design grid without changing authored treatment', () => {
-    const markup = renderToStaticMarkup(<Canvas config={defineInfoschematic({ title: 'Edit' })} grid mode="design" />)
+    const markup = renderToStaticMarkup(<Canvas config={defineInfoschematic({ title: 'Edit' })} grid editor="design" />)
 
     expect(markup).toContain('data-grid-treatment="none"')
     expect(markup).toContain('<g class="edit-grid">')

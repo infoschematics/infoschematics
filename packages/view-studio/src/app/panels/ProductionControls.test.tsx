@@ -1,6 +1,7 @@
 import { defineInfoschematic } from '@infoschematics/domain-core'
 import { InfoschematicContext } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
+import type { WorkspaceKind } from '@infoschematics/view-present'
 import type { ReactNode } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it, vi } from 'vitest'
@@ -98,14 +99,20 @@ const runtime = createInfoschematicRuntime(
   })
 )
 
-const presentation = (mode: 'present' | 'design' | 'direct') =>
+/* The two axes the controls read, set independently: a reader is not producing, and a Producer is in one workspace. */
+const presentation = (producing: boolean, workspace: WorkspaceKind = 'design') =>
   ({
     annotated: false,
+    designing: producing && workspace === 'design',
+    directing: producing && workspace === 'direct',
     lightNothing: vi.fn(),
-    mode,
     overlays: true,
     playing: null,
-    setMode: vi.fn(),
+    presenting: !producing,
+    produceIn: vi.fn(),
+    producing,
+    setProducing: vi.fn(),
+    workspace,
     startStory: vi.fn(),
     stopStory: vi.fn(),
     expandedScene: null,
@@ -123,7 +130,7 @@ const withRuntime = (children: ReactNode) => (
 )
 
 describe('production controls', () => {
-  it('exposes three explicit modes and keeps Audience options in Present', () => {
+  it('offers the two axes separately and keeps Audience options for a reader', () => {
     const present = renderToStaticMarkup(
       withRuntime(
         <TitleBar
@@ -134,7 +141,7 @@ describe('production controls', () => {
           onToggleFullscreen={vi.fn()}
           onZoomIn={vi.fn()}
           onZoomOut={vi.fn()}
-          presentation={presentation('present')}
+          presentation={presentation(false)}
         />
       )
     )
@@ -148,36 +155,40 @@ describe('production controls', () => {
           onToggleFullscreen={vi.fn()}
           onZoomIn={vi.fn()}
           onZoomOut={vi.fn()}
-          presentation={presentation('direct')}
+          presentation={presentation(true, 'direct')}
         />
       )
     )
 
-    expect(present).toContain('aria-label="Production mode"')
+    expect(present).toContain('aria-label="Presentation"')
+    expect(present).toContain('aria-label="Workspace"')
     expect(present).toContain('aria-label="Diagram zoom"')
     expect(present).toContain('aria-label="Reset zoom to fit"')
-    expect(present).toContain('aria-label="Present mode" aria-pressed="true"')
-    expect(present).toContain('aria-label="Design mode" aria-pressed="false"')
-    expect(present).toContain('aria-label="Direct mode" aria-pressed="false"')
+    expect(present).toContain('aria-label="Present" aria-pressed="true"')
+    expect(present).toContain('aria-label="Design workspace" aria-pressed="false"')
+    expect(present).toContain('aria-label="Direct workspace" aria-pressed="false"')
     expect(present).toContain('aria-label="Show tags"')
     expect(present).toContain('aria-label="Show overlays"')
     expect(present).toContain('aria-label="Window and panels"')
     expect(present.indexOf('aria-label="Diagram zoom"')).toBeLessThan(present.indexOf('aria-label="Display"'))
-    expect(present.indexOf('aria-label="Display"')).toBeLessThan(present.indexOf('aria-label="Production mode"'))
-    expect(present.indexOf('aria-label="Production mode"')).toBeLessThan(
-      present.indexOf('aria-label="Window and panels"')
-    )
-    /* Four now: the Appearance bank holding the colour-scheme switch sits between the mode controls and the window
-       controls, so it brings a divider of its own. */
+    expect(present.indexOf('aria-label="Display"')).toBeLessThan(present.indexOf('aria-label="Presentation"'))
+    expect(present.indexOf('aria-label="Presentation"')).toBeLessThan(present.indexOf('aria-label="Workspace"'))
+    expect(present.indexOf('aria-label="Workspace"')).toBeLessThan(present.indexOf('aria-label="Window and panels"'))
+    /* Four: the two axis banks sit together between one pair of dividers, and the Appearance bank holding the
+       colour-scheme switch brings one of its own. */
     expect(present.match(/class="tool-divider"/g)).toHaveLength(4)
-    expect(direct).toContain('aria-label="Direct mode" aria-pressed="true"')
+    /* Direct is producing, so the Present toggle reads unpressed while its own workspace reads pressed - the pair
+       a single enum could not say at once. */
+    expect(direct).toContain('aria-label="Present" aria-pressed="false"')
+    expect(direct).toContain('aria-label="Direct workspace" aria-pressed="true"')
+    expect(direct).toContain('aria-label="Design workspace" aria-pressed="false"')
     expect(direct).not.toContain('aria-label="Show tags"')
     expect(direct).not.toContain('aria-label="Show overlays"')
   })
 
-  it('keeps the visibility banks in a Producer mode', () => {
+  it('keeps the visibility banks in a Producer workspace', () => {
     const markup = renderToStaticMarkup(
-      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('design')} ref={null} />)
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation(true)} ref={null} />)
     )
 
     /* What the Diagram draws is a Diagram question, so these stay. That playback leaves is asserted in
@@ -188,11 +199,9 @@ describe('production controls', () => {
 
   it('names architectural scopes and flow families without bulk vocabulary controls', () => {
     const expanded = renderToStaticMarkup(
-      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation(false)} ref={null} />)
     )
-    const compact = renderToStaticMarkup(
-      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
-    )
+    const compact = renderToStaticMarkup(withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation(false)} />))
 
     for (const markup of [expanded, compact]) {
       expect(markup).toContain('aria-label="Architectural scopes"')
@@ -210,11 +219,9 @@ describe('production controls', () => {
 
   it('draws a scope and a family by the name its author gave it', () => {
     const expanded = renderToStaticMarkup(
-      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation(false)} ref={null} />)
     )
-    const compact = renderToStaticMarkup(
-      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
-    )
+    const compact = renderToStaticMarkup(withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation(false)} />))
 
     // The fixture's id, code prefix and label all differ, so a control that reached for the wrong one cannot
     // pass by coincidence the way the showcase's word-shaped family ids let it.
@@ -232,11 +239,9 @@ describe('production controls', () => {
 
   it('disables empty and stale activation while retaining ready work', () => {
     const expanded = renderToStaticMarkup(
-      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation('present')} ref={null} />)
+      withRuntime(<ProducerControls onPlay={vi.fn()} presentation={presentation(false)} ref={null} />)
     )
-    const compact = renderToStaticMarkup(
-      withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation('present')} />)
-    )
+    const compact = renderToStaticMarkup(withRuntime(<PanelRail onPlay={vi.fn()} presentation={presentation(false)} />))
 
     expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Empty<\/button>/)
     expect(expanded).toMatch(/<button[^>]*disabled=""[^>]*>Stale<\/button>/)
