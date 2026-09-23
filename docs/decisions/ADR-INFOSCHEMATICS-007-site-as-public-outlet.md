@@ -18,8 +18,6 @@ The public website must present package APIs, examples, and guidance without bec
 
 `apps/site` is the public outlet for this repository. It composes published package APIs, independently authored examples, Site-owned consumer-guide content, and selected canonical repository documents. It owns navigation, page metadata, layout, and deployment, but reusable Infoschematic behaviour belongs in the appropriate package first.
 
-[ADR-INFOSCHEMATICS-014](ADR-INFOSCHEMATICS-014-site-owned-user-guide.md) defines the narrower consumer-guide ownership boundary.
-
 ## Consequences
 
 The website can evolve as a publication without forking product capability or maintainer documentation. Examples continue to prove the same public seams available to external hosts.

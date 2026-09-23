@@ -18,7 +18,7 @@ File kind alone does not reveal who owns behaviour. Reusable calculations, host 
 
 Sort source by ownership before file kind. Domain Model owns serialisable types; Domain Core owns framework-neutral domain behaviour; View Model owns framework-neutral visual and editing derivations; each View or renderer owns output-specific behaviour; examples own authored Infoschematics; applications own hosting and publication composition. Dependencies point from consumers toward reusable owners, never back toward a particular host or example.
 
-Physical workspace roots make those boundaries visible as specified by [ADR-INFOSCHEMATICS-008](ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).
+Physical workspace roots make those boundaries visible.
 
 ## Consequences
 

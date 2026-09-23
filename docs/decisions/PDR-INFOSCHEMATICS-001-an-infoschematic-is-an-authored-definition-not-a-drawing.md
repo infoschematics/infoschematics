@@ -38,4 +38,4 @@ React, SVG, and future outputs share one model without importing one another. Ne
 
 Free rotation, arbitrary shapes, per-item font controls, and unconstrained z-order are deliberately absent rather than missing features. A new visual kind requires a named model or renderer concept before Studio can author it. This is slower than sketching but keeps rendered output trustworthy and portable between renderers.
 
-This record is the single review point for the embedding claim. Guide copy such as [the Getting started overview](../../apps/site/content/getting-started.md) cites it rather than arguing the positioning again, and [the product messaging record](PDR-INFOSCHEMATICS-002-product-messaging.md) takes it as given when it states what public copy may promise.
+This record is the single review point for the embedding claim. Guide copy such as [the Getting started overview](../../apps/site/content/getting-started.md) cites it rather than arguing the positioning again.
