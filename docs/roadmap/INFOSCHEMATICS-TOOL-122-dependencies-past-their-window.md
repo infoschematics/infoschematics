@@ -4,12 +4,12 @@ area: TOOL
 title: Dependencies past their window
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: a4545ba3e1c74c5af939859391545a59eb221b2b
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T19:40:00Z
+updated_at: 2026-09-23T18:45:00Z
 ---
 
 # Dependencies past their window
@@ -41,10 +41,10 @@ What remains is the judgement the rest was never blocking. `vitest` and `@vitest
 ## Steps
 
 - [x] Take the patch and minor updates that carry no argument — `@biomejs/biome`, `@types/react`, `@types/react-dom`, `dependency-cruiser`, `knip`, `lint-staged`, `rumdl` — in one change, and run the full gate behind them.
-- [ ] Take Vitest 4 to 5 with `@vitest/browser-playwright` together, then re-prove the browser evidence rather than trusting a green run: the `emulateColourScheme` command and the reduced-motion cases are the two places a browser-mode major is most likely to change behaviour quietly.
-- [ ] Decide `@types/node` against `GDR-INFOSCHEMATICS-004`'s oldest-supported-line promise and pin deliberately, so the audit stops reading it as neglect.
-- [ ] Record any update deliberately not taken as a dependency hold with its reason, which is what `DEPS-1` asks for; do not leave this item open standing in for that record.
-- [ ] Capture the browser look for at least one colour-scheme case after the Vitest major, per `AGENTS.md`.
+- [x] Take Vitest 4 to 5 with `@vitest/browser-playwright` together, then re-prove the browser evidence rather than trusting a green run: the `emulateColourScheme` command and the reduced-motion cases are the two places a browser-mode major is most likely to change behaviour quietly.
+- [x] Decide `@types/node` against `GDR-INFOSCHEMATICS-004`'s oldest-supported-line promise and pin deliberately, so the audit stops reading it as neglect.
+- [x] Record any update deliberately not taken as a dependency hold with its reason, which is what `DEPS-1` asks for; do not leave this item open standing in for that record.
+- [x] Capture the browser look for at least one colour-scheme case after the Vitest major, per `AGENTS.md`.
 
 ## Files touched
 
@@ -75,6 +75,55 @@ None, unless the Vitest major changes how a contributor runs the browser suites,
 ### Roadmap
 
 If the 14-day window turns out to be wrong for a repository with this much browser surface, or if majors want a longer window than patches, that is a question about `ki-engineering`'s standard rather than about this repository, and belongs upstream.
+
+## Review
+
+### Delivered
+
+Vitest and `@vitest/browser-playwright` moved from 4.1.11 to 5.0.1 together, and the browser evidence the repository rests on was re-proved against the new runner rather than inferred from a green run. `@types/node` stays on the 22 line deliberately, under the hold already recorded in `.ki.toml`. `ki repo audit --skill ki-engineering` now passes, with `DEPS-1` reporting nothing.
+
+### Summary of changes
+
+`package.json` — `vitest` and `@vitest/browser-playwright` to `^5.0.1`.
+
+`apps/site/package.json` — `vitest` to `^5.0.1`. Site declares its own `vitest`, which the root bump left on `^4.0.3`; the two majors then coexisted in one install and `scripts/vitest-workspace.ts` failed to typecheck, because a browser command defined against one version's `BrowserCommandContext` is not the other's. That failure is the useful part of the upgrade: it named the split install rather than letting the suites run against a runner nobody had chosen.
+
+`bun.lock` — regenerated; it now carries no `vitest@4` resolution at all.
+
+`.ki.toml` — unchanged. The `@types/node` hold already reads correctly: it names majors 24 and 26, and 26.6.2 is what `bun outdated` reports today, against an `engines.node` floor of `>=22` in every package that declares one.
+
+### Verification
+
+`bun run self:check` — 52 of 52 tasks, exit 0.
+
+`bunx turbo run test:browser --force` — 15 of 15 tasks, 0 cached, so every browser suite genuinely ran on the 5.0.1 runner rather than replaying a green earned under 4.1.11.
+
+The two browser commands were proved by breaking them, since a suite that passes because a command is being ignored looks exactly like a suite that passes. Both transcripts are in `reports/TOOL-122-browser-command-proofs.txt`:
+
+- `emulateColourScheme` rewritten to answer `light` when asked for `dark` — 5 cases failed across `ColourScheme.browser.test.tsx` and `Canvas.schemes.browser.test.tsx`.
+- `emulateReducedMotion` rewritten to always answer `no-preference` — 3 cases failed in `Canvas.dynamics.browser.test.tsx`.
+
+Both were restored before anything else ran, and the forced run above is after the restoration.
+
+The look, per `AGENTS.md`: `reports/TOOL-122-scheme-probe.mjs` drives a real Chromium at the built site's Canvas page under each preference and writes `reports/tool-122/`. The page resolves `rgb(238, 243, 248)` under light and `rgb(7, 17, 30)` under dark, and both screenshots were looked at — chrome, sidebar and typography follow the preference, and the Canvas specimen keeps its authored blueprint surface in both, which is the authored appearance rather than a scheme failure.
+
+`ki repo audit --skill ki-engineering --repo .` — PASS.
+
+### Outstanding concerns
+
+`node_modules/.bun` still holds fifteen `vitest@4.1.11` trees. They are unreferenced cache leftovers — `bun.lock` resolves nothing to them — but a `rm -rf node_modules && bun install` is the only thing that will clear them, and until then a search of the install directory will keep finding a version this repository does not use.
+
+The question the record raised for upstream — whether a 14-day adoption window is right for a repository with this much browser surface — is untouched. It belongs to `ki-engineering`'s standard, not here.
+
+### Post-change review
+
+The upgrade cost almost nothing and the interesting failure was structural rather than behavioural: no browser API moved, no command signature changed, and no case needed rewriting. What did move is that Vitest 5's types are strict enough to catch two majors resolving in one install, which is the failure a version-bump change is most likely to ship silently.
+
+The mutation proofs are worth keeping as a habit rather than as a one-off for this upgrade. The reduced-motion one took thirty seconds and would have caught a command that had quietly stopped being honoured — which is precisely the failure mode this record was opened to guard against, and precisely the one a green suite cannot report.
+
+### Mini recap
+
+Delivered: Vitest 4 → 5 across the root and Site, browser commands re-proved by breaking them, colour-scheme look captured from a real browser, `@types/node` left held. Verified: full gate green, browser suites forced, engineering audit clean. Outstanding: stale `vitest@4` trees in the install cache, and the adoption-window question for upstream. Learning route: the break-the-command proof belongs in `AGENTS.md`'s evidence guidance if it survives a second upgrade.
 
 ## Discussion
 
