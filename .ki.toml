@@ -15,7 +15,7 @@ description = "The Infoschematic domain model, framework-neutral view model, int
 repo_code = "INFOSCHEMATICS"
 visibility = "public"
 license = "MIT"
-supported_runtimes = ["claude-code", "chatgpt-codex"]
+supported_runtimes = ["claude-code", "claude-desktop", "chatgpt-codex"]
 
 [skills.ki-authoring]
 
