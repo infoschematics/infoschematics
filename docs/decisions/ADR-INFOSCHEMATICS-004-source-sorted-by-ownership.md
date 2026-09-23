@@ -23,3 +23,5 @@ Physical workspace roots make those boundaries visible as specified by [ADR-INFO
 ## Consequences
 
 Generic-looking folders no longer justify misplaced product-specific literals, and reusable capability cannot hide inside an application. Reviews can reason about dependency direction from ownership before considering implementation form.
+
+The shape this rule produces is written down in [the architecture design](references/design-architecture.md): the current packages, what each owns, and the direction between them. That document changes when a package moves; this record changes only when the sorting rule does.

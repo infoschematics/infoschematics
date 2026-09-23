@@ -24,6 +24,8 @@ Infoschematics uses one canonical Sequence concept. Every Sequence owns its Scen
 
 Authors can express all four expanded or collapsed and timed or manual combinations without inventing another container type. Callouts can be enabled independently of selection and timing behaviour, and copied Scenes remain explicit owned data. Runtime and View code gain one presentation collection while the compatibility boundary temporarily retains established Theme and Story inputs. Studio copying, rather than a domain relationship, remains the mechanism for intentional Scene reuse.
 
+[The Present view design](references/design-view-present.md) states the audience-facing shape one Sequence concept has to serve, and is the place where that intent is revised rather than argued again.
+
 ## References
 
 - [ADR-INFOSCHEMATICS-005](ADR-INFOSCHEMATICS-005-host-owned-configuration.md) -- keeps authored configuration serialisable and host-owned.

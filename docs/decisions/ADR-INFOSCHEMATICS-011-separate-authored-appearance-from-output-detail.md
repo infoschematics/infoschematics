@@ -25,3 +25,5 @@ Surface composition proceeds from the diagram backdrop to its authored grid, the
 ## Consequences
 
 One authored model retains its intended visual meaning across interactive and static outputs while each output can fit its available space. Responsive detail cannot silently alter existing output because hosts must opt in, and deterministic dimensions give Canvas and static rendering the same decision inputs. Adding an appearance treatment requires a canonical contract, framework-neutral resolution, documented examples, and renderer-parity evidence.
+
+[The visual language design](references/design-visual-language.md) holds the presentation system this separation makes possible — hierarchy, semantic colour, routing and motion as one coherent character rather than a rule per treatment.

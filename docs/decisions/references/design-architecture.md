@@ -2,7 +2,7 @@
 
 [Infoschematics](/docs/reference/vocabulary/#infoschematic) separates authored product data, framework-neutral behaviour, derived visual calculations, output-specific rendering, authored examples, and host publication.
 
-The reasons for this direction are recorded in [the framework-neutral library decision](../decisions/PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md), [the ownership decision](../decisions/ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), [the host-boundary decision](../decisions/ADR-INFOSCHEMATICS-005-host-owned-configuration.md), and [the monorepo-root decision](../decisions/ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).
+The reasons for this direction are recorded in [the framework-neutral library decision](../PDR-INFOSCHEMATICS-001-an-infoschematic-is-an-authored-definition-not-a-drawing.md), [the ownership decision](../ADR-INFOSCHEMATICS-004-source-sorted-by-ownership.md), [the host-boundary decision](../ADR-INFOSCHEMATICS-005-host-owned-configuration.md), and [the monorepo-root decision](../ADR-INFOSCHEMATICS-008-ownership-based-monorepo-roots.md).
 
 ## Current package graph
 
@@ -93,7 +93,7 @@ Authored Infoschematic examples use the `is-` prefix. Reusable packages and host
 
 Every example package is a copyable starting point rather than a fixture the repository happens to share. Each one authors its Infoschematic as canonical YAML beside its manifest, declares what it contains under an `infoschematics.examples` key, ships a generated typed export for browser consumers, and carries a README, a `check` command, and a `render` command that work unchanged after the directory is copied out of this repository.
 
-The YAML is the single authored source. The typed export is generated from it by `bun run self:examples:generate`, embeds the exact document it was generated from, and parses that document at import time, so a consumer's model and a reader's document cannot disagree. `bun run self:examples:verify` fails the repository check when a committed export no longer matches its YAML. Two hand-maintained copies of one diagram would drift silently, which is the reason for generating rather than authoring the export; [ADR-INFOSCHEMATICS-020](../decisions/ADR-INFOSCHEMATICS-020-generate-example-exports-from-authored-yaml.md) records the trade.
+The YAML is the single authored source. The typed export is generated from it by `bun run self:examples:generate`, embeds the exact document it was generated from, and parses that document at import time, so a consumer's model and a reader's document cannot disagree. `bun run self:examples:verify` fails the repository check when a committed export no longer matches its YAML. Two hand-maintained copies of one diagram would drift silently, which is the reason for generating rather than authoring the export; [ADR-INFOSCHEMATICS-020](../ADR-INFOSCHEMATICS-020-generate-example-exports-from-authored-yaml.md) records the trade.
 
 Discovery follows the same metadata. `scripts/render-example.ts` builds its renderable catalogue from what the packages declare rather than from a list held in the script, so adding an example is a change to that package alone.
 
@@ -121,11 +121,11 @@ View Model normalises either supported input once, then derives lookup tables, r
 
 Canonical `id` values are persistence keys. Established configurations preserve the earlier optional-id behaviour: when their id is absent, Studio does not create a shared persistence key, so a title-only established definition remains a safe blank canvas.
 
-Runtime construction is not allowed to throw for a document the contract accepted: any geometry a renderer refuses to express is refused or reported at the edit, which is why every route derivation reaches the one orthogonal construction (`COMPOSE-002` in [the composition specification](../specs/composition.md)). That is the product's obligation, not the host's, and no host containment substitutes for it. A host still holds the second half: both interactive Views build the runtime inside a render-time memo, so a throw from construction unmounts the tree that contains it — the Diagram, the surrounding chrome and the draft's undo history alike. A host mounting a View in a page that carries anything else should wrap it in an error boundary, so a defect in construction costs one failed surface rather than the page. This is a recommendation to hosts rather than a requirement on them, because a host cannot be asked to compensate for a contract the product owns.
+Runtime construction is not allowed to throw for a document the contract accepted: any geometry a renderer refuses to express is refused or reported at the edit, which is why every route derivation reaches the one orthogonal construction (`COMPOSE-002` in [the composition specification](../../specs/composition.md)). That is the product's obligation, not the host's, and no host containment substitutes for it. A host still holds the second half: both interactive Views build the runtime inside a render-time memo, so a throw from construction unmounts the tree that contains it — the Diagram, the surrounding chrome and the draft's undo history alike. A host mounting a View in a page that carries anything else should wrap it in an error boundary, so a defect in construction costs one failed surface rather than the page. This is a recommendation to hosts rather than a requirement on them, because a host cannot be asked to compensate for a contract the product owns.
 
 ## Additive views
 
-[ADR-INFOSCHEMATICS-006](../decisions/ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) governs the delivered interactive chain:
+[ADR-INFOSCHEMATICS-006](../ADR-INFOSCHEMATICS-006-additive-views-and-renderers.md) governs the delivered interactive chain:
 
 ```text
 @infoschematics/view-canvas
@@ -145,7 +145,7 @@ A host may display static SVG as an inert image or insert the generated string i
 
 ## Renderer boundary
 
-[ADR-INFOSCHEMATICS-009](../decisions/ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Overlays and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.
+[ADR-INFOSCHEMATICS-009](../ADR-INFOSCHEMATICS-009-host-provided-versioned-renderers.md) governs the extension boundary. Authored Fabrics, Overlays and Callouts carry only stable renderer keys and serialisable properties. Configuration never carries JSX, component constructors, callbacks, validators, derived registries, or runtime stores.
 
 Canvas owns immutable, host-provided Fabric and Overlay renderer definitions, runtime property validation, structured diagnostics, and deterministic accessible fallbacks. Present extends the same contract for Callout definitions while retaining ownership of Callout placement, Audience content, and navigation controls. Studio passes the registry through the lower Views and retains compatibility re-exports rather than defining a second contract.
 
@@ -163,6 +163,6 @@ This boundary covers values that must agree across renderers or between TypeScri
 
 ## Website role
 
-[ADR-INFOSCHEMATICS-007](../decisions/ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
+[ADR-INFOSCHEMATICS-007](../ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
 
 The blank and self-describing examples remain separate authored definitions that can be tested and reused independently. The Site mounts the self-describing definition through Studio and renders the same value through the framework-neutral SVG renderer; that composition does not move View or host ownership into the authored package. The former standalone website repository remains outside the monorepo.

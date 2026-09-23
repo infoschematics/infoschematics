@@ -37,3 +37,5 @@ One selection means one thing to filter, one thing to render, one thing to persi
 Measuring from the anchor makes the result depend on the Producer's first pick, which has to be visible to be usable — that is a rendering obligation this decision creates, in every renderer that offers a Design surface.
 
 The cost is in review granularity. One group operation is one undo step, but it lists one row per changed element, because a row names the authored source a review has to read and a collapsed row would hide changed lines. A reviewer therefore sees six rows for a six-element align, and reverses them with one undo.
+
+[The Studio view design](references/design-view-studio.md) states the production workflow this one selection is a part of, so a reader can see what the anchor is ultimately for.

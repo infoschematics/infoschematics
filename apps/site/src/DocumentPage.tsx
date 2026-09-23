@@ -1,9 +1,9 @@
 import { Marked, type Tokens } from 'marked'
 import type { ReactNode } from 'react'
-import architectureMarkdown from '../../../docs/design/architecture.md?raw'
-import viewPresentDesignMarkdown from '../../../docs/design/view-present.md?raw'
-import viewStudioDesignMarkdown from '../../../docs/design/view-studio.md?raw'
-import visualLanguageMarkdown from '../../../docs/design/visual-language.md?raw'
+import architectureMarkdown from '../../../docs/decisions/references/design-architecture.md?raw'
+import viewPresentDesignMarkdown from '../../../docs/decisions/references/design-view-present.md?raw'
+import viewStudioDesignMarkdown from '../../../docs/decisions/references/design-view-studio.md?raw'
+import visualLanguageMarkdown from '../../../docs/decisions/references/design-visual-language.md?raw'
 import vocabularyMarkdown from '../../../docs/reference/vocabulary.md?raw'
 import authoringMarkdown from '../content/authoring.md?raw'
 import explanationMarkdown from '../content/explanation.md?raw'
@@ -34,10 +34,10 @@ const markdownBySourcePath: Record<string, string> = {
   'apps/site/content/react-integration.md': reactIntegrationMarkdown,
   'apps/site/content/representations.md': representationsMarkdown,
   'docs/reference/vocabulary.md': vocabularyMarkdown,
-  'docs/design/architecture.md': architectureMarkdown,
-  'docs/design/visual-language.md': visualLanguageMarkdown,
-  'docs/design/view-present.md': viewPresentDesignMarkdown,
-  'docs/design/view-studio.md': viewStudioDesignMarkdown
+  'docs/decisions/references/design-architecture.md': architectureMarkdown,
+  'docs/decisions/references/design-visual-language.md': visualLanguageMarkdown,
+  'docs/decisions/references/design-view-present.md': viewPresentDesignMarkdown,
+  'docs/decisions/references/design-view-studio.md': viewStudioDesignMarkdown
 }
 
 const publishedPathBySourcePath: Record<string, string> = Object.fromEntries(

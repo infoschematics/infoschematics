@@ -54,7 +54,7 @@ Around twenty-five files in `packages/` and `apps/` read the mode. Studio's `App
 
 ## Files touched
 
-`packages/view-present/src/production.ts` and its tests; `packages/view-studio/src/app/App.tsx`, `panels/PanelRail.tsx`, `panels/TitleBar.tsx`, `panels/DetailsPanel.tsx`, `panels/ProductionControls.test.tsx`, `hooks/use-presentation.ts` and the browser suites; the Canvas prop in `packages/view-canvas/src`; `apps/site/src/Playground.test.tsx` and `visual-guide/DemoFrame.tsx`; `docs/specs/presentation.md`, `docs/specs/design-editing.md`, `docs/reference/vocabulary.md`, `docs/design/view-studio.md`; `ADR-INFOSCHEMATICS-026`.
+`packages/view-present/src/production.ts` and its tests; `packages/view-studio/src/app/App.tsx`, `panels/PanelRail.tsx`, `panels/TitleBar.tsx`, `panels/DetailsPanel.tsx`, `panels/ProductionControls.test.tsx`, `hooks/use-presentation.ts` and the browser suites; the Canvas prop in `packages/view-canvas/src`; `apps/site/src/Playground.test.tsx` and `visual-guide/DemoFrame.tsx`; `docs/specs/presentation.md`, `docs/specs/design-editing.md`, `docs/reference/vocabulary.md`, `docs/decisions/references/design-view-studio.md`; `ADR-INFOSCHEMATICS-026`.
 
 ## Verify
 
@@ -80,7 +80,7 @@ Nothing blocks this. It is adjacent to the Theme-to-Sequence vocabulary drift â€
 
 ### Guides
 
-`docs/design/view-studio.md` is written around production modes and needs the same split. Public site copy that names the modes follows.
+`docs/decisions/references/design-view-studio.md` is written around production modes and needs the same split. Public site copy that names the modes follows.
 
 ### Roadmap
 

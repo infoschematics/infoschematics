@@ -112,28 +112,28 @@ const publishedDocuments = [
     section: 'reference'
   },
   {
-    sourcePath: 'docs/design/architecture.md',
+    sourcePath: 'docs/decisions/references/design-architecture.md',
     path: '/docs/approach/architecture/',
     title: 'Architecture',
     summary: 'Ownership roots, package boundaries and the dependency direction between them.',
     section: 'approach'
   },
   {
-    sourcePath: 'docs/design/visual-language.md',
+    sourcePath: 'docs/decisions/references/design-visual-language.md',
     path: '/docs/approach/visual-language/',
     title: 'Visual language',
     summary: 'Composition, colour, routing, motion, and accessible visual presentation.',
     section: 'approach'
   },
   {
-    sourcePath: 'docs/design/view-present.md',
+    sourcePath: 'docs/decisions/references/design-view-present.md',
     path: '/docs/approach/view-present/',
     title: 'Present view design',
     summary: 'Audience-facing filtering, Scene focus and Story playback design.',
     section: 'approach'
   },
   {
-    sourcePath: 'docs/design/view-studio.md',
+    sourcePath: 'docs/decisions/references/design-view-studio.md',
     path: '/docs/approach/view-studio/',
     title: 'Studio view design',
     summary: 'Generic editing session design: selection, drafts and consolidation.',

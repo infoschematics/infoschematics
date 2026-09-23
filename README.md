@@ -49,7 +49,7 @@ Interactive views are additive. `@infoschematics/view-canvas` owns the reusable 
 - [Documentation](docs/) explains where decisions, specifications, designs, guides, and reference material belong.
 - [Decision records](docs/decisions/) preserve why the product and repository have its current shape.
 - [Vocabulary](docs/reference/vocabulary.md) defines canonical product and production language.
-- [Architecture](docs/design/architecture.md) defines package responsibilities and dependency direction.
+- [Architecture](docs/decisions/references/design-architecture.md) defines package responsibilities and dependency direction.
 - [Package release guide](docs/guides/releasing-packages.md) defines the coordinated version, dry-run, protected publication, and recovery procedure.
 - [Roadmap](ROADMAP.md) points to active and future work.
 - The public website runs at [infoschematics.info](https://infoschematics.info/).

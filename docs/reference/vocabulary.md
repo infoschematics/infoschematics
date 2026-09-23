@@ -127,4 +127,4 @@ Design divides its elements into one **Interaction layer** per artefact kind. A 
 - A renderer reference selects a registered key and property-schema version without embedding a component in configuration; a scalar compatibility key requests version `1`.
 - The host owns mounting, page metadata, routing, static assets and deployment.
 
-Package ownership and dependency direction are defined by [the architecture guide](../design/architecture.md) and its linked decision records, rather than repeated here.
+Package ownership and dependency direction are defined by [the architecture guide](../decisions/references/design-architecture.md) and its linked decision records, rather than repeated here.

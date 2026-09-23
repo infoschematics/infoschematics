@@ -72,7 +72,9 @@ describe('website routes', () => {
   it('keeps Site-owned guide content separate from repository-owned approach documents', () => {
     expect(getDocumentationRoute('/docs/authoring/')?.sourcePath).toBe('apps/site/content/authoring.md')
     expect(getDocumentationRoute('/docs/representations/')?.sourcePath).toBe('apps/site/content/representations.md')
-    expect(getDocumentationRoute('/docs/approach/architecture/')?.sourcePath).toBe('docs/design/architecture.md')
+    expect(getDocumentationRoute('/docs/approach/architecture/')?.sourcePath).toBe(
+      'docs/decisions/references/design-architecture.md'
+    )
     expect(getDocumentationRoute('/docs/guides/authoring/')).toBeUndefined()
   })
 

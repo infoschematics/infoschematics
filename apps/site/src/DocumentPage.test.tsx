@@ -144,7 +144,9 @@ describe('documentation pages', () => {
   })
 
   it('rewrites repository-relative links to their canonical GitHub location', () => {
-    const route = documentationRoutes.find(({ sourcePath }) => sourcePath === 'docs/design/architecture.md')
+    const route = documentationRoutes.find(
+      ({ sourcePath }) => sourcePath === 'docs/decisions/references/design-architecture.md'
+    )
 
     if (!route) {
       throw new Error('The architecture documentation route is missing.')

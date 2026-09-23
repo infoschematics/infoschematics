@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-23T17:10:00Z
-updated_at: 2026-09-23T19:20:00Z
+updated_at: 2026-09-23T20:05:00Z
 ---
 
 # Where a claim lives
@@ -24,17 +24,21 @@ The Decision Record corpus has just been consolidated: five records that said on
 
 Three specific doubts prompted this record. `docs/reference/related-tools.md` framed two of Archify's choices as "deliberately not worth copying", which describes the wrong relationship: this repository is informed by what adjacent projects have learned and argues every choice it reaches in its own Decision Records. `docs/reference/specification-id-migration.md` recorded a one-time rename that has completed. And `docs/reference/vocabulary.md` is a canonical glossary that may not belong under `reference/` at all — it is published to the public site as "Terminology", it is cited by name from specifications, guides and source, and [KDR-INFOSCHEMATICS-001](../decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md) already governs it.
 
-The first two were fixed in the same change that opened this record, because they were corrections rather than questions, and the survey has since moved to `docs/decisions/references/related-tools.md` under [PDR-INFOSCHEMATICS-003](../decisions/PDR-INFOSCHEMATICS-003-adjacent-projects-inform-rather-than-supply.md), which settles what a survey of adjacent projects is for and where it lives. The third is a real question and is the substantial part of the work remaining, together with a read of `docs/design/` and `docs/guides/` against what the product now does.
+The first two were fixed in the same change that opened this record, because they were corrections rather than questions, and the survey has since moved to `docs/decisions/references/related-tools.md` under [PDR-INFOSCHEMATICS-003](../decisions/PDR-INFOSCHEMATICS-003-adjacent-projects-inform-rather-than-supply.md), which settles what a survey of adjacent projects is for and where it lives. The third is a real question and is the substantial part of the work remaining, together with a read of the design documents and `docs/guides/` against what the product now does.
 
 ## Boundary
 
-A documentation-corpus review across `docs/design/`, `docs/guides/`, and `docs/reference/`, plus the site routes that render those documents. It settles where the vocabulary lives, removes or merges documents that no longer carry their own claim, and repairs statements the product has outgrown.
+A documentation-corpus review across the design documents, `docs/guides/`, and `docs/reference/`, plus the site routes that render those documents. It settles where the vocabulary lives, removes or merges documents that no longer carry their own claim, and repairs statements the product has outgrown.
 
 It does not change the model, any package, the specification corpus under `docs/specs/`, or the roadmap records themselves. It does not reopen what the Decision Records decided — where a document disagrees with a record, the document is wrong unless the disagreement reveals a decision that was never taken, in which case that becomes its own record rather than a paragraph here. It does not restructure the site's information architecture beyond the routes whose source documents move.
 
 ## Current state
 
-`docs/design/` holds four documents — `architecture.md`, `visual-language.md`, `view-present.md`, `view-studio.md` — totalling 504 lines. All four are published by the site under `/docs/approach/` through `apps/site/src/routes.ts`. None has been reviewed against the Decision Records that have landed since, and `view-studio.md` in particular predates the two-axis split `ADR-INFOSCHEMATICS-026` now records.
+The four design documents — `design-architecture.md`, `design-visual-language.md`, `design-view-present.md`, `design-view-studio.md`, 604 lines — have moved to `docs/decisions/references/`, where `GDR-INFOSCHEMATICS-001` now places material that supports the records without being one. All four remain published by the site under `/docs/approach/` through `apps/site/src/routes.ts`; only their source paths changed.
+
+The citation check that prompted the move found the relationship running one way. `design-architecture.md` cited seven records and the others cited none, while no record cited any design document at all — so a reader arriving at a decision had no route to the shape it adds up to. Four records now carry that route in their bodies: `ADR-INFOSCHEMATICS-004` to the architecture design, `ADR-INFOSCHEMATICS-011` to the visual language, `ADR-INFOSCHEMATICS-018` to the Present view, and `ADR-INFOSCHEMATICS-025` to Studio.
+
+None has yet been read against the records that have landed since, which is the remaining work. `design-view-studio.md` in particular predates the two-axis split `ADR-INFOSCHEMATICS-026` now records.
 
 `docs/guides/` holds seven guides plus a README, totalling 483 lines, none published by the site: `ADR-INFOSCHEMATICS-014` gives the public consumer journey to `apps/site/content/` and leaves maintainer and operator procedures here. Whether all seven are still maintainer procedures, and whether any duplicates the Site-owned journey, is unexamined.
 
@@ -48,7 +52,7 @@ That question no longer has to be settled here. `docs/decisions/references/` was
 
 ## Steps
 
-- [ ] Read `docs/design/`'s four documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time.
+- [ ] Read the four design documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time. Their move and their citations from the records are done; the drift read is not.
 - [ ] Repair those statements, or delete the passage where the claim now lives in a record or a specification and the design document was only restating it.
 - [ ] Read `docs/guides/`'s seven guides the same way, and confirm each is a maintainer or operator procedure rather than a duplicate of the Site-owned consumer journey `ADR-INFOSCHEMATICS-014` places under `apps/site/content/`.
 - [ ] Decide where the vocabulary belongs — a guide, a reference document, `docs/decisions/references/` beside the record that governs it, or folded into `KDR-INFOSCHEMATICS-001` — and record the reasoning in the review rather than only the outcome. The directory is now available to it, so this is a question about the glossary alone.
@@ -59,7 +63,7 @@ That question no longer has to be settled here. `docs/decisions/references/` was
 
 ## Files touched
 
-`docs/design/*.md`, `docs/guides/*.md`, `docs/reference/*.md`, `apps/site/src/routes.ts`, `apps/site/src/DocumentPage.tsx`, and the vocabulary checks under `scripts/` if the glossary moves. `docs/decisions/README.md` and a new `docs/decisions/references/` if that pattern is adopted. `docs/decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md` if the vocabulary's home changes what that record governs.
+`docs/decisions/references/design-*.md`, `docs/guides/*.md`, `docs/reference/*.md`, `apps/site/src/routes.ts`, `apps/site/src/DocumentPage.tsx`, `apps/site/src/App.test.tsx`, `apps/site/src/DocumentPage.test.tsx`, and the vocabulary checks under `scripts/` if the glossary moves. `docs/decisions/README.md`, `GDR-INFOSCHEMATICS-001`, and the records that cite a design document. `docs/decisions/KDR-INFOSCHEMATICS-001-product-vocabulary.md` if the vocabulary's home changes what that record governs.
 
 ## Verify
 
