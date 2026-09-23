@@ -4,12 +4,12 @@ area: TOOL
 title: Configuration disagrees with itself
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 1ddc5daecf1f7cff1e2ed8829b2ca064a350e448
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T19:40:00Z
+updated_at: 2026-09-23T17:10:00Z
 ---
 
 # Configuration disagrees with itself
@@ -46,10 +46,10 @@ Two standing `ki repo audit --skill ki-engineering` findings, both configuration
 
 ## Steps
 
-- [ ] Add `.claude/skills/` and `.agents/skills/` to `knip.json`'s ignores and confirm `knip --treat-config-hints-as-errors` still passes — if it reports the entries as unused hints, resolve that rather than dropping the exclusion.
-- [ ] Decide whether the four example workspaces declare a no-op `build` or whether `turbo.json` stops expecting one from every workspace, and apply it. `ADR-INFOSCHEMATICS-023` is the record that made examples independently authored; check it before assuming a build script is the right answer.
-- [ ] Declare `self:lockfile:verify` as a task in `turbo.json` so the root script invokes something the graph knows about.
-- [ ] Prove each declaration by editing a file the task reads and confirming it reruns, per `AGENTS.md`'s rule about `inputs`.
+- [x] Add `.claude/skills/` and `.agents/skills/` to `knip.json`'s ignores and confirm `knip --treat-config-hints-as-errors` still passes — if it reports the entries as unused hints, resolve that rather than dropping the exclusion.
+- [x] Decide whether the four example workspaces declare a no-op `build` or whether `turbo.json` stops expecting one from every workspace, and apply it. `ADR-INFOSCHEMATICS-023` is the record that made examples independently authored; check it before assuming a build script is the right answer.
+- [x] Declare `self:lockfile:verify` as a task in `turbo.json` so the root script invokes something the graph knows about.
+- [x] Prove each declaration by editing a file the task reads and confirming it reruns, per `AGENTS.md`'s rule about `inputs`.
 
 ## Files touched
 
@@ -80,6 +80,59 @@ None. No user-observable behaviour changes.
 ### Roadmap
 
 Nothing follows.
+
+## Review
+
+### Delivered
+
+Both standing `ki repo audit --skill ki-engineering` findings are gone: the audit now reports nine findings, all of them owned by `INFOSCHEMATICS-TOOL-128` (the toolchain group) and `INFOSCHEMATICS-TOOL-122` (dependency currency), and none by `GEN-1` or `TURBO-2`.
+
+`GEN-1` was the interesting half. Adding `.claude/skills` and `.agents/skills` to `knip.json` makes Knip report both as configuration hints asking for their removal, because its root project glob is `scripts/**/*.ts` and neither path is anything it would otherwise read. The root script ran `knip --treat-config-hints-as-errors`, so taking the contract seriously failed the check, and the flag cannot tell a hint that is advice from a hint that is the contract working. The resolution is `scripts/unused.ts`: it runs Knip, sanctions exactly those two hints by name, and fails on every other hint and every issue — so the strictness the flag was there for survives without its one wrong answer.
+
+`TURBO-2` was two smaller things. The four example workspaces now declare a `build` that runs their existing `check` — rendering their own YAML to `/dev/null` — which is a real obligation rather than a no-op, and is what `ADR-INFOSCHEMATICS-023` already says an example owes: its content has to render through the published CLI. Each carries a package-level `turbo.json` saying that build has no outputs, because the root `build` task declares `dist/**` and an example emits nothing; without it Turborepo warned about missing output files on every run. And the root `self:check` now names its root tasks as `//#self:…`, which is what the graph calls them.
+
+### Summary of changes
+
+- `scripts/unused.ts` (new) — runs `knip --no-progress`, reading **both** streams, because Knip writes issues to standard output and configuration hints to standard error; a wrapper that read only the first would see an empty report and pass a repository it never looked at. `assess` is pure and exported so every verdict is testable.
+- `scripts/unused-report.test.ts` (new) — seven cases over `assess`, including the two that matter: a sanctioned hint that stops being reported, and one that comes back reworded. Both fail, which is the assertion about the command's own coverage that `AGENTS.md` requires.
+- `knip.json` — gains the two shared exclusions `GEN-1` requires.
+- `package.json` — `self:unused:verify` runs the wrapper; `self:check` prefixes its root tasks with `//#`.
+- `examples/{is-blank,is-infoschematics,is-showcase,is-system}/package.json` — a `build` script delegating to `check`.
+- `examples/*/turbo.json` (four new) — `extends: ["//"]` with `build.outputs: []`.
+- `turbo.json` — `build.inputs` gains `infoschematic.yaml`, which the example builds now read.
+- `README.md` — the command-surface row for `self:unused:verify` describes what it now does.
+
+### Verification
+
+`bun run self:check` — 52 tasks, all successful.
+
+`ki repo audit --skill ki-engineering --repo .` — nine findings, none of them `GEN-1` or `TURBO-2`. The nine are `PKG-5`, `SCR-1`, `SCR-3`, three `SCR-11`, `BUN-2`, `SYNC-1` and `DEPS-1`, all pre-existing and all owned elsewhere.
+
+The declarations were proved by mutation rather than assumed, per `AGENTS.md`. Reading the task hash from `turbo run … --dry=json`, editing a declared input and reading it again:
+
+- `//#self:unused:verify` ← `scripts/unused.ts`: `6410713331a41bdc` → `9fd79a2d20a5ebc8` → back.
+- `build` (`@infoschematics/is-showcase`) ← `examples/is-showcase/infoschematic.yaml`: `9aec597340307a08` → `c50f57fde37b0de0` → back.
+- `//#self:lockfile:verify` ← `examples/is-blank/package.json`: `134e766353024431` → `0dda423ecf1cc8e5` → back.
+
+Seen through the runner as well: `turbo run build --filter=@infoschematics/is-blank` reported 6 cached of 6, then 5 of 6 once `infoschematic.yaml` changed.
+
+The wrapper was exercised against both failures it exists to catch, not only against a passing repository. An orphan module under `scripts/` failed it with `unused files: scripts/zz-probe-unused.ts`; removing `.agents/skills` from `knip.json` failed it with the sanctioned-hint message, and restoring it passed. Evidence in `reports/TOOL-123-turbo-inputs.txt`.
+
+### Outstanding concerns
+
+The sanction is matched against Knip's rendered text, because `--reporter json` emits `{"issues":[]}` and omits configuration hints entirely — there is no structured surface for the thing being sanctioned. The wording is pinned by the requirement that both hints be present, so a reworded hint fails loudly rather than being waved through, but it is a text contract with a tool that has no reason to keep it.
+
+The four example manifests still fail `SYNC-1` with `PackagePropertiesAreNotSorted`, which is about their root property order and not about the `build` script added here. That finding belongs to `INFOSCHEMATICS-TOOL-128`.
+
+### Post-change review
+
+One method error, caught and corrected. The first input proof read `tasks[0]` out of a filtered `--dry=json` run and reported no hash change; `tasks[0]` in a filtered run is a dependency's build, not the filtered package's. Selecting the task by package name showed the change. The note in `reports/TOOL-123-turbo-inputs.txt` records the wrong reading beside the right one, because a proof that silently read the wrong task is exactly the failure mode this step exists to prevent.
+
+The first version of the wrapper read only standard output and reported a clean repository while seeing nothing at all — the `AGENTS.md` failure mode, reproduced on the first attempt at the check meant to avoid it. It was caught because the sanctioned-hints assertion failed, which is the assertion earning its place on its first run.
+
+### Mini recap
+
+Two audit findings that a reader had learned to scroll past are gone, and neither was closed by suppressing it. The Knip one turned out to be a genuine conflict between a cross-tool contract and a tool flag that cannot see it, resolved by a wrapper that sanctions exactly the two entries the contract requires and fails if they ever stop being reported. The Turborepo one turned out to be three small honest declarations: examples build by rendering themselves, that build has no outputs, and root tasks are named as root tasks.
 
 ## Discussion
 

@@ -29,6 +29,7 @@
   "name": "@infoschematics/is-infoschematics",
   "private": true,
   "scripts": {
+    "build": "bun run check",
     "check": "infoschematics render infoschematic.yaml --output /dev/null && infoschematics render overview.yaml --output /dev/null",
     "render": "infoschematics render infoschematic.yaml --output infoschematic.svg && infoschematics render overview.yaml --output overview.svg",
     "test": "vitest run",

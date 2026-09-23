@@ -18,6 +18,7 @@
         "src/**",
         "!src/**/*.test.ts",
         "!src/**/*.test.tsx",
+        "infoschematic.yaml",
         "package.json",
         "tsconfig.build.json",
         "build.mjs"

@@ -8,5 +8,6 @@
   },
   "ignoreBinaries": ["rsvg-convert"],
   "ignoreExportsUsedInFile": true,
-  "exclude": ["duplicates"]
+  "exclude": ["duplicates"],
+  "ignore": [".claude/skills", ".agents/skills"]
 }

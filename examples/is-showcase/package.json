@@ -23,6 +23,7 @@
   "name": "@infoschematics/is-showcase",
   "private": true,
   "scripts": {
+    "build": "bun run check",
     "check": "infoschematics render infoschematic.yaml --output /dev/null",
     "render": "infoschematics render infoschematic.yaml --output infoschematic.svg",
     "test": "vitest run",
