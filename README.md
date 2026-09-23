@@ -50,7 +50,7 @@ Interactive views are additive. `@infoschematics/view-canvas` owns the reusable 
 - [Decision records](docs/decisions/) preserve why the product and repository have its current shape.
 - [Vocabulary](docs/reference/vocabulary.md) defines canonical product and production language.
 - [Architecture](docs/decisions/references/design-architecture.md) defines package responsibilities and dependency direction.
-- [Package release guide](docs/guides/releasing-packages.md) defines the coordinated version, dry-run, protected publication, and recovery procedure.
+- [Package release guide](docs/guides/repository-releasing-packages.md) defines the coordinated version, dry-run, protected publication, and recovery procedure.
 - [Roadmap](ROADMAP.md) points to active and future work.
 - The public website runs at [infoschematics.info](https://infoschematics.info/).
 
@@ -86,7 +86,7 @@ Each script under `scripts/` is a self-describing command as well as a `bun run`
 
 `self:examples:render` writes an authored example, or any JSON or YAML document, to a standalone SVG under `reports/`, so a diagram can be reviewed without starting the site.
 
-Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/releasing-packages.md).
+Public package release candidates compile unbundled ESM and declarations into explicit `dist/` exports, then pass packed clean-consumer verification. Bun resolves matching versions locally in the monorepo. Registry publication remains separately human-authorised; see the [package release guide](docs/guides/repository-releasing-packages.md).
 
 ### Command surface
 

@@ -6,7 +6,7 @@ Read the documentation by the question it answers:
 
 - [Decision records](decisions/) explain why the repository and product are shaped as they are, with the material that supports them — design documents, surveys — in [`decisions/references/`](decisions/references/).
 - [Specifications](specs/) state behaviour that is true now and identify its verification.
-- [Guides](guides/) explain maintainer workflows such as hosting and releasing.
+- [Guides](guides/) explain how, one audience per guide: `host-` for developers building on the packages, `repository-` for people working on Infoschematics itself.
 - [Reference material](reference/) defines shared language and other facts readers need to look up.
 - [Roadmap records](roadmap/) say what work is planned, active, or awaiting review.
 
@@ -19,7 +19,7 @@ The consumer user guide is Site-owned content under [`apps/site/content/`](../ap
 - [the vocabulary reference](reference/vocabulary.md), rendered as Terminology;
 - [the architecture design](decisions/references/design-architecture.md), [the visual language design](decisions/references/design-visual-language.md), [the Present view design](decisions/references/design-view-present.md), and [the Studio view design](decisions/references/design-view-studio.md).
 
-Decision records, specifications, and roadmap records remain maintainer-facing, as do the [Cloudflare hosting guide](guides/cloudflare.md) and the [releasing-packages guide](guides/releasing-packages.md).
+Decision records, specifications, and roadmap records remain maintainer-facing, as do the `repository-` guides.
 
 ## Product research
 

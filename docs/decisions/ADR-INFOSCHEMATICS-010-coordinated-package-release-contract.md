@@ -22,7 +22,7 @@ Stylesheets are opt-in subpath imports and remain marked as side effects. JavaSc
 
 The dependency-closed public package set shares one exact SemVer. Internal package dependencies use that exact version and publication proceeds in dependency order through trusted publishing. A release is a separately authorised operation after local release verification.
 
-The [release guide](../guides/releasing-packages.md) owns current package membership, commands, runtime versions, and recovery procedure.
+The [release guide](../guides/repository-releasing-packages.md) owns current package membership, commands, runtime versions, and recovery procedure.
 
 ## Consequences
 

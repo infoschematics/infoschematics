@@ -23,7 +23,7 @@ Both commands use [`@infoschematics/cli`](https://www.npmjs.com/package/@infosch
 
 ## Edit it
 
-Edit `infoschematic.yaml` and run `bun run check`. Validation reports faults by document path, so a Card placed in a Collection that does not exist names the line that caused it. Each stage is a Collection with its own colour and fill, so renaming a stage or adding a fifth one is a local change. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
+Edit `infoschematic.yaml` and run `bun run check`. Validation reports faults by document path, so a Card placed in a Collection that does not exist names the line that caused it. Each stage is a Collection with its own colour and fill, so renaming a stage or adding a fifth one is a local change. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/host-editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
 
 Inside this repository the typed export is regenerated from the YAML by `bun run self:examples:generate`, and `bun run self:check` fails if the committed export has fallen behind.
 

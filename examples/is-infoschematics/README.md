@@ -26,7 +26,7 @@ Both commands use [`@infoschematics/cli`](https://www.npmjs.com/package/@infosch
 
 ## Edit it
 
-Edit the YAML and run `bun run check`. Validation reports faults by document path, so a Flow attached to a port a Card does not have names the line that caused it. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
+Edit the YAML and run `bun run check`. Validation reports faults by document path, so a Flow attached to a port a Card does not have names the line that caused it. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/host-editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
 
 Inside this repository the typed exports are regenerated from the YAML by `bun run self:examples:generate`, and `bun run self:check` fails if a committed export has fallen behind. Each generated module parses the document it embeds at import time, so it cannot serve a model the YAML does not describe.
 

@@ -33,7 +33,7 @@ Two alternatives were weighed and declined. A `--typescript` flag that loads a m
 
 ## Consequences
 
-The command remains a replaceable adapter over public libraries rather than a second model or renderer. It stays a data-in, SVG-out filter that a pipeline can run against untrusted paths without reasoning about code execution, and `CLI-005`'s narrow dependency set stays narrow. Programmatic authors continue to import libraries and own any TypeScript execution themselves; the CLI's usage text and [the command-line rendering guide](../guides/rendering-from-the-command-line.md) point rejected TypeScript input at the supported programmatic path.
+The command remains a replaceable adapter over public libraries rather than a second model or renderer. It stays a data-in, SVG-out filter that a pipeline can run against untrusted paths without reasoning about code execution, and `CLI-005`'s narrow dependency set stays narrow. Programmatic authors continue to import libraries and own any TypeScript execution themselves; the CLI's usage text and [the command-line rendering guide](../guides/host-rendering-from-the-command-line.md) point rejected TypeScript input at the supported programmatic path.
 
 The cost lands on TypeScript authors, who write their own render script rather than invoking one command. That cost is bounded and visible, where the cost of the alternative is an execution surface that is easy to invoke by accident.
 

@@ -23,7 +23,7 @@ Both commands use [`@infoschematics/cli`](https://www.npmjs.com/package/@infosch
 
 ## Edit it
 
-Edit `infoschematic.yaml` and run `bun run check`. Validation reports faults by document path, so a mistyped port or a Flow pointing at a missing Card names the line that caused it. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
+Edit `infoschematic.yaml` and run `bun run check`. Validation reports faults by document path, so a mistyped port or a Flow pointing at a missing Card names the line that caused it. [The authoring guide](../../apps/site/content/authoring.md) covers the document contract, and [the YAML editing guide](../../docs/guides/host-editing-authored-yaml.md) covers preserving comments and ordering through programmatic edits.
 
 Inside this repository the typed export is regenerated from the YAML by `bun run self:examples:generate`, and `bun run self:check` fails if the committed export has fallen behind. In a copy of this directory you can delete `src/` entirely and keep the document, or keep the module and regenerate it yourself — it simply parses the embedded document at import time.
 

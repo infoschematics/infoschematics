@@ -34,4 +34,4 @@ Editing an example is editing its YAML, then running the generator; a `self:chec
 
 The typed export keeps its existing name and shape, so Site, Playground, and the tests that consume it are unaffected. `scripts/render-example.ts` builds its catalogue from package metadata rather than from imports, so adding an example touches only that package.
 
-Programmatic authoring stays fully supported for consumers: `defineInfoschematicModel` is unchanged, and [the programmatic examples guide](../guides/maintaining-programmatic-examples.md) still describes it. The decision governs what this repository's example packages author, not what a consumer may.
+Programmatic authoring stays fully supported for consumers: `defineInfoschematicModel` is unchanged, and [the programmatic authoring guide](../guides/host-programmatic-models.md) still describes it. The decision governs what this repository's example packages author, not what a consumer may.

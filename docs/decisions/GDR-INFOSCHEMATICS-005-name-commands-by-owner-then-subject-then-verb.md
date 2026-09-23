@@ -36,7 +36,7 @@ The surface is documented in `README.md` under `### Command surface`, and `scrip
 
 ## Consequences
 
-Renaming is a breaking change to muscle memory and to anything outside the repository that calls a command by name. `self:cf:build` is the case that matters: Cloudflare Workers Builds is configured to run it, that configuration lives in the Cloudflare dashboard, and nothing in the gate can see it. The name is kept — the command now delegates to `build` rather than restating it — and [the Cloudflare guide](../guides/cloudflare.md) records that the setting has to change first, in the same pass, if it is ever renamed.
+Renaming is a breaking change to muscle memory and to anything outside the repository that calls a command by name. `self:cf:build` is the case that matters: Cloudflare Workers Builds is configured to run it, that configuration lives in the Cloudflare dashboard, and nothing in the gate can see it. The name is kept — the command now delegates to `build` rather than restating it — and [the Cloudflare guide](../guides/repository-cloudflare-hosting.md) records that the setting has to change first, in the same pass, if it is ever renamed.
 
 The subject-first rule is enforced by a small list of known verbs, so a verb the list does not know is treated as a subject. That is the safe direction: the check never invents a violation, and it catches the one inversion that actually happened. It will not catch a new verb standing where a subject belongs until that verb is added to the list, which is the price of not maintaining a second vocabulary.
 

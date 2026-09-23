@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-23T17:10:00Z
-updated_at: 2026-09-23T20:05:00Z
+updated_at: 2026-09-23T21:10:00Z
 ---
 
 # Where a claim lives
@@ -40,7 +40,9 @@ The citation check that prompted the move found the relationship running one way
 
 None has yet been read against the records that have landed since, which is the remaining work. `design-view-studio.md` in particular predates the two-axis split `ADR-INFOSCHEMATICS-026` now records.
 
-`docs/guides/` holds seven guides plus a README, totalling 483 lines, none published by the site: `ADR-INFOSCHEMATICS-014` gives the public consumer journey to `apps/site/content/` and leaves maintainer and operator procedures here. Whether all seven are still maintainer procedures, and whether any duplicates the Site-owned journey, is unexamined.
+`docs/guides/` holds seven guides plus a README, none published by the site. The README claimed one audience — "how to operate and maintain the Infoschematics repository" — while four of the seven were written for host application developers consuming the published packages. They are now named for the audience they serve, `host-` or `repository-`, and grouped under that split.
+
+The duplication check found no duplicate but one contradiction. `host-integrating-renderers.md` and the Site's `react-integration.md` cover the same ground and disagree about renderer property-schema versions, and the guide is the one `EXTEND-002` and `EXTEND-006` support. That is public copy rather than this corpus, so it is captured as `INFOSCHEMATICS-TOOL-136` rather than repaired here.
 
 `docs/reference/vocabulary.md` is a 130-line glossary whose terms are table rows carrying explicit `<span id>` anchors. Three checks hold it — `scripts/vocabulary-citations.test.ts`, `vocabulary-drift.test.ts`, and `vocabulary-terms.test.ts` — and 107 citations across the repository resolve to 27 distinct anchors. It is published at `/docs/reference/vocabulary/` titled "Terminology". `KDR-INFOSCHEMATICS-001` is 191 words and governs the vocabulary without containing it.
 
@@ -54,7 +56,7 @@ That question no longer has to be settled here. `docs/decisions/references/` was
 
 - [ ] Read the four design documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time. Their move and their citations from the records are done; the drift read is not.
 - [ ] Repair those statements, or delete the passage where the claim now lives in a record or a specification and the design document was only restating it.
-- [ ] Read `docs/guides/`'s seven guides the same way, and confirm each is a maintainer or operator procedure rather than a duplicate of the Site-owned consumer journey `ADR-INFOSCHEMATICS-014` places under `apps/site/content/`.
+- [x] Read `docs/guides/`'s seven guides the same way, and confirm each is a maintainer or operator procedure rather than a duplicate of the Site-owned consumer journey `ADR-INFOSCHEMATICS-014` places under `apps/site/content/`. Four were neither: they serve host application developers, and the guides are now split by audience. None duplicated the journey; one contradicts it, captured as `INFOSCHEMATICS-TOOL-136`.
 - [ ] Decide where the vocabulary belongs — a guide, a reference document, `docs/decisions/references/` beside the record that governs it, or folded into `KDR-INFOSCHEMATICS-001` — and record the reasoning in the review rather than only the outcome. The directory is now available to it, so this is a question about the glossary alone.
 - [x] Settle whether this repository adopts `docs/decisions/references/` at all, and say so in `docs/decisions/README.md`. It does: the directory holds the survey of adjacent projects, and `PDR-INFOSCHEMATICS-003` states what that survey is for.
 - [ ] Apply that decision, keeping every `<span id>` anchor stable if the document moves, and update `apps/site/src/routes.ts` and the three vocabulary checks together with it.
@@ -91,7 +93,7 @@ This item is largely a guide review, so `docs/guides/` is its subject rather tha
 
 ### Roadmap
 
-`docs/roadmap/_ISSUES.md` advances `TOOL` to `135`. Anything the read finds that is a product defect rather than a documentation defect becomes its own record rather than widening this one.
+`docs/roadmap/_ISSUES.md` advances `TOOL` to `136`, the second number taken by the renderer-versioning contradiction this read found in Site copy. Anything the read finds that is a product defect rather than a documentation defect becomes its own record rather than widening this one.
 
 ## Discussion
 

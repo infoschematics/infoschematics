@@ -1,8 +1,8 @@
-# Maintaining programmatic examples
+# Author a model programmatically
 
-A TypeScript definition may remove coordinate repetition while keeping the canonical authored model explicit. This is useful for matrix-like layouts in which several [Regions](../reference/vocabulary.md#region) share an axis.
+This guide is for host application developers who author their models in TypeScript rather than YAML. A TypeScript definition may remove coordinate repetition while keeping the canonical authored model explicit, which is useful for matrix-like layouts in which several [Regions](../reference/vocabulary.md#region) share an axis.
 
-This repository's own example packages no longer author TypeScript: each one authors YAML and generates its typed export from that document, by [ADR-INFOSCHEMATICS-020](../decisions/ADR-INFOSCHEMATICS-020-generate-example-exports-from-authored-yaml.md) and [the example package guide](authoring-example-packages.md). The technique below remains fully supported for consumers who author their models programmatically.
+This repository's own example packages no longer author TypeScript: each one authors YAML and generates its typed export from that document, by [ADR-INFOSCHEMATICS-020](../decisions/ADR-INFOSCHEMATICS-020-generate-example-exports-from-authored-yaml.md) and [the example package guide](repository-authoring-example-packages.md). That is a choice about this repository's examples, not a deprecation: the technique below remains fully supported.
 
 Define immutable coordinate values near the authored example and spread them into each Region's complete `bounds`:
 
