@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-124
 area: TOOL
 title: Guidance without its mechanism
 theme: tool
-horizon: next
-status: ready
+horizon: now
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 3b99aa096215e899c5b4e6c02e91324eee59b0cf
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-22T19:40:00Z
+updated_at: 2026-09-23T02:45:00Z
 ---
 
 # Guidance without its mechanism
@@ -40,11 +40,11 @@ There is no `lint` script in the root `package.json`; the only gate is `self:che
 
 ## Steps
 
-- [ ] Decide between a committed script under `scripts/` and a documented snippet in `AGENTS.md`. A script stays correct and is discoverable; it is also another thing to maintain, and looks vary enough between sessions that a fixed one may not fit. Take the narrower option unless the wider one earns itself.
-- [ ] Land the chosen mechanism, carrying the three constraints a session otherwise rediscovers: the dev-server address the automation cannot reach, `server.fs` and `/tmp`, and why a new directory under `packages/` breaks config load.
-- [ ] Add a Markdown lint command that can be run before committing, so the rumdl pass is not first encountered as a mid-edit rewrite.
-- [ ] State the `lint-staged` timing in `AGENTS.md`: a commit rewrites Markdown files, so finish edits to a document before committing rather than across a commit.
-- [ ] Use the mechanism once for a real look and confirm the capture lands in `reports/`.
+- [x] Decide between a committed script under `scripts/` and a documented snippet in `AGENTS.md`. A script stays correct and is discoverable; it is also another thing to maintain, and looks vary enough between sessions that a fixed one may not fit. Take the narrower option unless the wider one earns itself.
+- [x] Land the chosen mechanism, carrying the three constraints a session otherwise rediscovers: the dev-server address the automation cannot reach, `server.fs` and `/tmp`, and why a new directory under `packages/` breaks config load.
+- [x] Add a Markdown lint command that can be run before committing, so the rumdl pass is not first encountered as a mid-edit rewrite.
+- [x] State the `lint-staged` timing in `AGENTS.md`: a commit rewrites Markdown files, so finish edits to a document before committing rather than across a commit.
+- [x] Use the mechanism once for a real look and confirm the capture lands in `reports/`.
 
 ## Files touched
 
@@ -75,6 +75,48 @@ None.
 ### Roadmap
 
 Nothing follows.
+
+## Review
+
+### Delivered
+
+`AGENTS.md` now names the mechanism for the look it mandates, and the repository has a Markdown gate that can be run before a commit rather than only during one. Both mechanics were being rediscovered by every session that hit them, at the cost of a rewritten Playwright script and a formatter rewrite landing underneath an edit in progress.
+
+### Summary of changes
+
+`scripts/look.ts` is the committed browser look, reached as `bun run self:browser:look`. It serves `apps/site` itself on a port the operating system chooses, so a look never fights a dev server or a preview for a fixed port — the failure that cost the previous session a working mechanism. It drives Chromium through Playwright, writes captures and a log to `reports/<slug>/`, and takes `--probe <file>` for a module that drives the page beyond the first capture.
+
+It refuses to call three things a look, which is the whole reason to commit one rather than describe it: a run that captured nothing, a capture too small to be a rendered page, and a page or console error. `scripts/look.test.ts` holds those rules, and `captureFloor` is set from measurement rather than taste — an empty 1600×1000 page weighs 6,989 bytes against the playground's 319,146.
+
+`ki:lint:md` and `ki:lint:md:fix` run rumdl over the repository in check and fix form. The check is what tells you what the commit will say; the fix is the same rewrite `lint-staged` performs, taken at a moment of the writer's choosing rather than under a half-finished edit.
+
+`AGENTS.md` gains the mechanism sentence beside the existing visual-evidence rule, carrying why it is committed — the browser automation an agent session is given refuses `localhost`, `127.0.0.1` and private addresses, so it cannot reach a dev server — and keeps the `/tmp` and `packages/` constraints where they already were, now beside a command that respects them. A second paragraph states the `lint-staged` timing and the two commands. `README.md` documents both commands in the command surface, as `scripts/command-surface.test.ts` requires.
+
+### Verification
+
+`bun run self:check` — 52 tasks, all successful, with `scripts/look.test.ts` running inside `self:scripts:test`.
+
+The mechanism was used for a real look rather than only shipped: `reports/tool-124/` holds the Studio playground at 319,146 bytes and, after a probe clicked into the Direct workspace, at 340,364 bytes with `data-workspace=direct`. Both were looked at, and the second shows the editor dock open on Scenes — the probe moved the application rather than waiting beside it.
+
+Each refusal was provoked rather than asserted: a probe that captured nothing, a probe that captured `about:blank`, and a probe that threw inside the page each exited 1 with the matching reason, the last while its capture was perfectly good. The Markdown check was run against a deliberately broken document and exited 1 on eight findings; the fix form applied all eight and exited 0. Evidence in `reports/TOOL-124-look-and-lint.md`.
+
+### Outstanding concerns
+
+The wider option was taken where the record said to prefer the narrower one, so it has to earn itself. What earned it was that a snippet cannot fail: the three refusals are the value here, and a session pasting a snippet writes the version without them, which is exactly how a blank frame and a page that threw were both read as clean looks before. The maintenance risk the record named — looks varying enough that a fixed one does not fit — is answered by `--probe`, which leaves every look-specific step outside the committed file.
+
+The Discussion asked whether anything else in `AGENTS.md` mandates a practice without naming how it is performed. Sweeping the file, nothing else does: the vocabulary-citation rule, the `inputs` rule and the coverage-assertion rule each either name their command or are enforced inside `self:check`, so they fail loudly rather than waiting to be rediscovered.
+
+`ki:lint:md` claims a `ki:` name for a command no external standard currently declares under that spelling. The hosted rubric owns rumdl's rules and configuration, and the name is the one plans written elsewhere already reach for, which is what made its absence cost a session — but if the Knowledge Islands standard later spells it differently, this is the line to move.
+
+### Post-change review
+
+The missing mechanism was never missing knowledge — every session worked it out, and worked it out the same way. What a session could not carry was the three refusals, because they are the part you only write after a blank capture has already fooled you once. That is the general argument for committing a mechanism: not that the steps are hard, but that the assertions are the part rediscovery drops.
+
+The port choice is the same shape of lesson. `ki:site:preview` binds a fixed port, and the previous session lost its mechanism to an `Address already in use` it could not safely clear, because the process might have belonged to another writer. Asking the operating system for a port removes the contention rather than resolving it.
+
+### Mini recap
+
+`AGENTS.md` says how to look and how to lint; `bun run self:browser:look` does the looking and fails three ways a snippet would not; `bun run ki:lint:md` moves the Markdown pass ahead of the commit. Every visual item after this one — `INFOSCHEMATICS-TOOL-120`, `-121`, `-125` and `-126` — starts from a working mechanism.
 
 ## Discussion
 

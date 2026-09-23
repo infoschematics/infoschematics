@@ -95,7 +95,7 @@ Every command this repository offers is a script in the root `package.json`, and
 | Prefix | Owner | Meaning |
 | --- | --- | --- |
 | none | the package manager and Turborepo | The lifecycle idioms every workspace answers to: `build`, `clean`, `prepare`, `test`, `test:browser`. A bare name passes straight through to the task it is named after, so `bun run test` and `turbo run test` are the same run. |
-| `ki:` | a Knowledge Islands capability | A command whose shape is mandated outside this repository, so its name and its behaviour are not ours to reword: `ki:deps:update`, `ki:site:build`, `ki:site:clean`, `ki:site:deploy`, `ki:site:dev`, `ki:site:preview`. |
+| `ki:` | a Knowledge Islands capability | A command whose shape is mandated outside this repository, so its name and its behaviour are not ours to reword: `ki:deps:update`, `ki:lint:md`, `ki:lint:md:fix`, `ki:site:build`, `ki:site:clean`, `ki:site:deploy`, `ki:site:dev`, `ki:site:preview`. |
 | `self:` | this repository | Everything specific to Infoschematics, named subject first and verb last. |
 
 The `self:` commands, by subject:
@@ -104,6 +104,7 @@ The `self:` commands, by subject:
 | --- | --- | --- |
 | the whole gate | `self:check`, `self:dev` | `self:check` is the gate to run before committing; `self:dev` builds the packages then starts the site. |
 | boundaries | `self:boundaries:verify` | dependency-cruiser over every workspace source root and `scripts/`, through the TypeScript 6 install root at `tooling/boundaries`, refusing a cruise that measured too little to be evidence. |
+| a browser look | `self:browser:look` | A real browser over the site the command serves itself, writing captures and a log under `reports/`, and refusing to call a look evidence when it captured nothing, when the page or its console reported an error, or when a capture is too small to be a rendered page. |
 | the deployment seam | `self:cf:build` | Cloudflare Pages' configured build command, which delegates to `build` rather than restating it. |
 | examples | `self:examples:generate`, `self:examples:render`, `self:examples:verify` | The generated example registry, and rendering one authored document to a standalone SVG under `reports/`. |
 | lockfile | `self:lockfile:verify` | The frozen install that proves `bun.lock` still agrees with every manifest, the way continuous integration and the release workflow resolve dependencies. |
