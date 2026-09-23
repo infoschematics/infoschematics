@@ -730,15 +730,20 @@
   text-anchor: start;
 }
 
+/* The identity chip is an annotation, and takes the annotation pair every other one takes. It read as the drawing's
+   own paper here and as a contrast chip in the static renderer, which is one intended treatment spelled twice: a
+   paper chip cannot be a shared token at all, because backdrop composited over an authored Card fill is a different
+   colour on every Card, and the static renderer has to write a resolved one. `scripts/visual-treatment-parity.test.ts`
+   holds both spellings against the same roles. */
 .infoschematic-card-identity rect {
-  fill: color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 88%, transparent);
+  fill: var(--infoschematic-canvas-paint-annotation-fill);
   stroke: currentColor;
   stroke-width: 1px;
 }
 
 .infoschematic-card-identity text {
   dominant-baseline: middle;
-  fill: var(--infoschematic-canvas-paint-text-strong);
+  fill: var(--infoschematic-canvas-paint-annotation-text);
   font: 600 9px var(--infoschematic-canvas-typography-code-family);
   letter-spacing: 0.5px;
   text-anchor: middle;

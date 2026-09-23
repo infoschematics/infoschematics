@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
@@ -8,7 +9,7 @@ import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '../
 import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
 import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
-import { paintFor, visualTokens } from '../packages/view-model/src/tokens.ts'
+import { type PaintScheme, paintFor, paintVariable, visualTokens } from '../packages/view-model/src/tokens.ts'
 
 /**
  * Every `url(#…)` reference in one rendering, paired with whether that same rendering defines it.
@@ -191,6 +192,45 @@ const labelBackingBoxes = (output: string) =>
       .map(Number)
     return { height: height as number, width: width as number, x: x as number, y: y as number }
   })
+
+/**
+ * The `fill` one Canvas rule declares, read from the stylesheet rather than from rendered markup.
+ *
+ * Canvas paints from classes and the static renderer writes attributes, so a paired colour cannot be compared as
+ * output: one side has no `fill` to read. What can be compared is which role each side names, and Canvas names its
+ * role in the stylesheet. Throwing on a selector that is not there is the point — a rule renamed out from under this
+ * would otherwise make every assertion below vacuously true.
+ */
+const canvasFill = (selector: string) => {
+  const stylesheet = readFileSync('packages/view-canvas/src/styles.css', 'utf8')
+  /* A selector may head a rule alone or share one with others, and one selector may be another's prefix, so the
+     match has to end on a boundary and reach a `{` without crossing out of the selector list. */
+  const heads = [...stylesheet.matchAll(new RegExp(`${selector.replaceAll('.', '\\.')}(?=[\\s,{])`, 'g'))].filter(
+    (head) => {
+      const brace = stylesheet.indexOf('{', head.index)
+      return brace > 0 && !/[};]/.test(stylesheet.slice(head.index, brace))
+    }
+  )
+  /* A selector may head several rules — the badge's colour and its text anchoring are written apart — so what has
+     to be single is the fill, not the rule. Two spellings of one colour is the defect this whole test exists for. */
+  const fills = heads.flatMap((head) => {
+    const brace = stylesheet.indexOf('{', head.index)
+    return /\bfill:\s*([^;]+);/.exec(stylesheet.slice(brace, stylesheet.indexOf('}', brace)))?.[1]?.trim() ?? []
+  })
+  if (fills.length !== 1)
+    throw new Error(`${selector} declares ${fills.length} fills in packages/view-canvas/src/styles.css`)
+  return fills[0] as string
+}
+
+/** The identity chip's rect and text fills as the static renderer wrote them, for one rendering. */
+const staticIdentityFills = (markup: string) => {
+  const chip = /<g class="infoschematic-card-identity"[\s\S]*?<rect ([^>]*)>[\s\S]*?<text ([^>]*)>/.exec(markup)
+  if (!chip) throw new Error('the static rendering drew no identity chip')
+  return {
+    rect: /fill="([^"]+)"/.exec(chip[1] as string)?.[1],
+    text: /fill="([^"]+)"/.exec(chip[2] as string)?.[1]
+  }
+}
 
 describe('visual treatment renderer parity', () => {
   it('keeps authored visual decisions byte-stable and equivalent across Canvas and static SVG', () => {
@@ -809,6 +849,65 @@ describe('visual treatment renderer parity', () => {
     // cuts — and that the still frame states no direction, because the document does not state one either.
     expect(canvas).toContain(`<animateMotion dur="${visualTokens.canvas.emphasis.duration}" path="${outlines.SNK}"`)
     expect(svg).not.toContain('animateMotion')
+  })
+
+  /**
+   * `INFOSCHEMATICS-TOOL-121`: one chip, and one pair of roles naming it.
+   *
+   * The identity chip was the only annotation the two renderers spelled differently — `annotationFill` here and the
+   * canvas backdrop composited at 88% there, so a rendered Card carried a dark tab and the interactive Card a pale
+   * one. The paper spelling could never become a shared token: backdrop over an authored Card fill is a different
+   * colour on every Card, and the static renderer must write a resolved one for the raster and print paths. This
+   * holds both outlets to the annotation pair, and holds the badge beside it so the convention is measured rather
+   * than assumed.
+   */
+  it('paints the Card identity chip from the annotation roles in both renderers', () => {
+    expect(canvasFill('.infoschematic-card-identity rect')).toBe(paintVariable('annotationFill'))
+    expect(canvasFill('.infoschematic-card-identity text')).toBe(paintVariable('annotationText'))
+    // The badge is the convention the chip is being held to, so a drift in the badge cannot silently redefine it.
+    expect(canvasFill('.audit-component-code-bg')).toBe(paintVariable('annotationFill'))
+    expect(canvasFill('.audit-component-code')).toBe(paintVariable('annotationText'))
+
+    const chipped = defineInfoschematic({
+      title: 'Identity chip reference',
+      infoschematic: {
+        appearance: { card: { identity: true } },
+        scopes: [
+          { color: '#79c9ff', description: 'Placed', fill: '#3f5a70', id: 'placed', label: 'Placed', prefix: 'PLA' }
+        ],
+        cards: [
+          {
+            code: 'CARD-01',
+            detail: 'Carries the identity chip',
+            id: 'source',
+            label: 'Source',
+            placement: { box: { height: 100, width: 220, x: 20, y: 20 }, ports: {} },
+            scope: 'placed',
+            scopes: ['placed']
+          }
+        ]
+      }
+    })
+
+    /* Every scheme, because the defect this closes is exactly a pair that agrees in one and diverges in another:
+       the authored blueprint surface is pinned in either reader scheme, which is where the two spellings happened
+       to land close enough together to look like agreement. */
+    const rendered: Record<PaintScheme, string> = {
+      blueprint: renderInfoschematicSvg({
+        ...chipped,
+        infoschematic: { ...chipped.infoschematic, appearance: { card: { identity: true }, surface: 'blueprint' } }
+      }),
+      dark: renderInfoschematicSvg(chipped, { scheme: 'dark' }),
+      light: renderInfoschematicSvg(chipped, { scheme: 'light' })
+    }
+
+    for (const [scheme, markup] of Object.entries(rendered) as readonly (readonly [PaintScheme, string])[]) {
+      const paint = paintFor(scheme)
+      expect(staticIdentityFills(markup), scheme).toEqual({ rect: paint.annotationFill, text: paint.annotationText })
+      /* A contrast chip is only a contrast chip while the pair differs. Equal values would satisfy the comparison
+         above and draw an unreadable chip. */
+      expect(paint.annotationFill, scheme).not.toBe(paint.annotationText)
+    }
   })
 })
 

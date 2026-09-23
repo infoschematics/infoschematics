@@ -104,11 +104,13 @@ _Evidence:_ `scripts/generate-visual-tokens.ts` projects each manifest leaf to `
 
 Interactive Canvas output MUST consume the generated CSS projection for shared values. Framework-neutral renderers MUST consume the TypeScript manifest directly without importing CSS or an interactive View. Representative tests MUST prove matching semantic names and values across TypeScript, generated CSS, interactive Canvas output, and static output.
 
+Where a treatment pairs a fill with the type read against it, both outlets MUST name the same two paint roles rather than each computing a colour of its own. A Card's identity chip is that pair: it is an annotation, and takes `annotationFill` with `annotationText` in either outlet, as every other annotation does. A treatment one outlet can only compose at draw time — the drawing's own paper mixed over an authored element fill, which resolves differently on every element — MUST NOT be the shared spelling, because the framework-neutral renderer has to write a resolved colour.
+
 _Conformance:_ conforming
 
 _Verify:_ run `scripts/visual-treatment-parity.test.ts`, which renders one configuration through both paths and compares the treatment it finds.
 
-_Evidence:_ `packages/view-canvas/src/tokens.test.tsx` asserts Canvas consumes only the generated custom properties for shared CSS decisions; `packages/render-svg/src/index.ts` imports no stylesheet and reads `visualTokens` directly; `scripts/visual-treatment-parity.test.ts` renders the same document through Canvas and the static renderer and compares the semantic values both produce.
+_Evidence:_ `packages/view-canvas/src/tokens.test.tsx` asserts Canvas consumes only the generated custom properties for shared CSS decisions; `packages/render-svg/src/index.ts` imports no stylesheet and reads `visualTokens` directly; `scripts/visual-treatment-parity.test.ts` renders the same document through Canvas and the static renderer and compares the semantic values both produce. For the identity chip, whose fill only one outlet writes into its markup, that test reads the role Canvas names in `packages/view-canvas/src/styles.css` beside the colour `packages/render-svg/src/index.ts` resolves per scheme, and fails on a selector that heads no rule so a renamed rule cannot pass as agreement.
 
 ### APPEAR-009 — Shared Canvas semantics use generated tokens
 
