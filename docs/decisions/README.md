@@ -60,7 +60,7 @@ Decision Records explain why Infoschematics has its current shape. Read them in 
 
 ## Repository operation
 
-39. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-40. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
-41. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
-42. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-name-commands-by-owner-then-subject-then-verb.md) — name every command owner first, then subject, then verb, and hold the surface in one test.
+48. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+49. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+50. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
+51. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-name-commands-by-owner-then-subject-then-verb.md) — name every command owner first, then subject, then verb, and hold the surface in one test.
