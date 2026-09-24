@@ -64,6 +64,18 @@ _Verify:_ Read `resolveVisualTreatment` and `drawsOwnCode` in `packages/view-mod
 
 _Evidence:_ `packages/view-model/src/appearance.test.ts` covers precedence and responsive survival, `packages/view-model/src/code-badge.test.ts` covers the placement each kind resolves, and `scripts/visual-treatment-parity.test.ts` renders a pinned document through both renderers.
 
+### APPEAR-020 — Detail bands follow rendered scale
+
+A rendering that has opted into responsive Card detail MUST resolve one of four detail bands from the rendered scale, and MUST reveal only what that band names: `minimal` reveals Card names alone, `outline` adds stereotypes, `identified` adds codes, and `full` adds descriptions. The bands sit on the thresholds [ADR-INFOSCHEMATICS-011](../decisions/ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md) fixes, so the same scale MUST reach the same band in an interactive view and in a still. A magnified view MUST resolve its band from the scale the drawing is actually painted at rather than from the authored view box, so magnification changes what is revealed rather than only how large it is drawn.
+
+A band is a ceiling in the sense `APPEAR-016` requires. It MAY withhold a row the request offered and MUST NOT restore a row the request withheld; a pinned element code remains a floor beneath it as `APPEAR-018` requires; and Card compactness is treatment rather than disclosure, so it MUST pass through every band unchanged. Every band MUST retain each Card's label and its accessible identity, so what a reader who is not looking hears does not depend on where the reader has zoomed to.
+
+_Conformance:_ conforming
+
+_Verify:_ resolve a band at each threshold from above and from below, then magnify a Canvas until it settles on a band and compare its Cards with a still asked for that same band.
+
+_Evidence:_ `resolveDetailBand` and `resolveDetailTreatment` in `packages/view-model/src/detail.ts`, held at every threshold by `packages/view-model/src/detail.test.ts` and proved end to end by `packages/view-canvas/src/InfoschematicDiagram.magnification.browser.test.tsx`.
+
 ## Quality properties
 
 ### APPEAR-005 — Renderer invariants are not authored options
@@ -231,6 +243,18 @@ _Conformance:_ conforming
 _Verify:_ inspect `resolveResponsiveCardTreatment` and compare Canvas and static SVG fixtures at equivalent dimensions.
 
 _Evidence:_ `packages/view-model/src/appearance.ts` is a pure dimension-driven resolver consumed by both `packages/view-canvas/src/InfoschematicDiagram.tsx` and `packages/render-svg/src/index.ts`.
+
+### APPEAR-021 — A view remembers a band and a resolver does not
+
+The function that maps rendered scale to a detail band MUST be pure. It MUST NOT read the band previously shown, the direction of a reader's gesture, or any other ambient viewport state, which is what `APPEAR-017` already requires of responsive density; the same scale MUST always produce the same band.
+
+Steadiness at a threshold is therefore the view's responsibility rather than the resolver's. An interactive host MUST hold the band it last settled on, MUST reveal as soon as a threshold is crossed upward, and MUST NOT withdraw detail until the rendered scale has fallen a stated margin below the floor of the band it is holding. A host that draws once, which includes every static rendering, has no previous band to hold and applies no margin.
+
+_Conformance:_ conforming
+
+_Verify:_ read the View Model resolver for any reference to a previous band, then move a Canvas just below a threshold and confirm the drawing does not change, and further below it and confirm it does.
+
+_Evidence:_ `settleDetailBand` and `detailBandMargin` in `packages/view-canvas/src/viewport.ts` hold the memory the resolver refuses, exercised on both sides of every band floor by `packages/view-canvas/src/viewport.test.ts`.
 
 ## Gaps
 

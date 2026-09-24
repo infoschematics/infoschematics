@@ -5,13 +5,13 @@ import {
   resolveCardDomain,
   resolveReadableInk,
   resolveRegionTreatment,
-  resolveResponsiveCardTreatment,
   resolveVisualTreatment
 } from '@infoschematics/view-model/appearance'
 import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschematics/view-model/artefact-draft'
 import { adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
+import { type DetailBand, detailBandAnnouncement, resolveDetailTreatment } from '@infoschematics/view-model/detail'
 import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import {
   type ArtefactKind,
@@ -67,7 +67,9 @@ import {
   centerViewportAt,
   containSurface,
   panViewport,
+  renderedViewportScale,
   sameViewport,
+  settleDetailBand,
   viewportZoomStep,
   zoomViewport
 } from './viewport.ts'
@@ -786,14 +788,49 @@ export function InfoschematicDiagram({
         height: '100%',
         width: '100%'
       }
+  /*
+   * The band this drawing is in, which is the scale it is actually painted at rather than the scale it would be
+   * painted at fitted. A reader who magnifies a part has made that part bigger on the glass, so the rows a small
+   * rendering had to withhold become legible and come back — up to what was asked for and never past it.
+   *
+   * The settled band is held in a ref and read during render, because the alternative is a committed frame drawn in
+   * the band the reader has just left: an effect that corrects it afterwards is a visible flash on every threshold.
+   * Reading it here is safe because settling is idempotent — a band fed back to `settleDetailBand` at the scale that
+   * produced it returns itself — so a repeated render cannot walk the band anywhere.
+   */
+  const detailScale = frameSize ? renderedViewportScale(frameSize, viewport) : null
+  const settledBand = useRef<DetailBand | null>(null)
+  const detailBand = detailScale === null ? null : settleDetailBand(settledBand.current, detailScale)
+  settledBand.current = detailBand
   const visualTreatment = {
     ...requestedVisualTreatment,
     grid: authoredGridSize === 0 ? ('none' as const) : requestedVisualTreatment.grid,
     card:
-      responsiveCardDetails && frameSize
-        ? resolveResponsiveCardTreatment(infoschematicViewBox, frameSize, requestedVisualTreatment.card)
+      responsiveCardDetails && detailBand
+        ? resolveDetailTreatment(detailBand, requestedVisualTreatment.card)
         : requestedVisualTreatment.card
   }
+
+  /*
+   * What a reader who cannot see the reveal is told about it.
+   *
+   * `ADR-INFOSCHEMATICS-029` puts document-level announcements on a surface beside the Diagram, because a host
+   * reconciles which occurrences were accepted and only the host knows. Magnification is not that: the viewport is
+   * this component's own state, no host can observe it, and there is nothing for a host to reconcile. So this one
+   * lives in the frame the Diagram already owns, alongside the zoom controls that cause it.
+   *
+   * It is silent until the band actually moves, so mounting a Diagram announces nothing, and it carries a revision
+   * so that zooming out and back in again is heard as two events rather than as one sentence that never changed.
+   */
+  const announcedBand = useRef<DetailBand | null>(null)
+  const [detailNotice, setDetailNotice] = useState<Readonly<{ band: DetailBand; revision: number }> | null>(null)
+  useEffect(() => {
+    if (!responsiveCardDetails || detailBand === null) return
+    const previous = announcedBand.current
+    announcedBand.current = detailBand
+    if (previous === null || previous === detailBand) return
+    setDetailNotice((current) => ({ band: detailBand, revision: (current?.revision ?? 0) + 1 }))
+  }, [detailBand, responsiveCardDetails])
 
   /*
    * Each drawn Card's own internals, resolved once, with the identity chip asked
@@ -3129,6 +3166,11 @@ export function InfoschematicDiagram({
           </button>
         </div>
       ) : null}
+      {/* Detail follows magnification, so a reader who cannot see the reveal is told what is now shown and told the
+          document did not change. Silent until a threshold is actually crossed. */}
+      <p aria-live="polite" className="infoschematic-signal-announcement" data-detail-announcement="true" role="status">
+        {detailNotice ? `Detail update ${detailNotice.revision}. ${detailBandAnnouncement(detailNotice.band)}` : ''}
+      </p>
     </div>
   )
 }

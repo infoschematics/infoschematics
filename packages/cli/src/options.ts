@@ -10,6 +10,8 @@
  * options, and parsing is the same code reading whichever table the verb names.
  */
 
+import { type DetailBand, detailBands } from '@infoschematics/view-model/detail'
+
 /** Loopback only: a preview is for the person at the keyboard, and anything wider has to be asked for. */
 export const loopbackHost = '127.0.0.1'
 
@@ -25,6 +27,11 @@ export type OptionSpec = Readonly<{
 }>
 
 export const renderOptionSpecs = {
+  detail: {
+    describe: 'Detail band: minimal, outline, identified, or full. Defaults to full.',
+    kind: 'value',
+    placeholder: '<band>'
+  },
   font: {
     describe: 'Use a font file for text, repeatable. Without one, the host font stack is used.',
     kind: 'values',
@@ -76,6 +83,8 @@ export type RenderFormat = 'png' | 'svg'
 export type RenderScheme = 'adaptive' | 'dark' | 'light'
 
 export type RenderArguments = Readonly<{
+  /** The detail band the still is drawn in, as an interactive view would have resolved it from magnification. */
+  detail: DetailBand
   /** Font files pinned for text, in declaration order. Empty means the host font stack. */
   fonts: readonly string[]
   format: RenderFormat
@@ -196,6 +205,19 @@ const schemeOf = (value: string | undefined): RenderScheme => {
   throw new Error(`Unsupported scheme ${value}. Expected light, dark, or adaptive.`)
 }
 
+/**
+ * The band a still is drawn in, which is what a reader's magnification resolves to in an interactive view.
+ *
+ * `full` is the default because it is what this command always rendered: everything the document and the caller asked
+ * for. A narrower band is for a still that has to match a live view a reader has zoomed out of, or for an export made
+ * deliberately sparse; a band only withholds, so none of them can add a row the document did not author.
+ */
+const detailOf = (value: string | undefined): DetailBand => {
+  if (value === undefined) return 'full'
+  if (detailBands.includes(value as DetailBand)) return value as DetailBand
+  throw new Error(`Unsupported detail band ${value}. Expected ${detailBands.join(', ')}.`)
+}
+
 const portOf = (value: string | undefined) => {
   if (value === undefined) return defaultPort
   const port = Number(value)
@@ -223,6 +245,7 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
   const parsed = collected(renderOptionSpecs, argv.slice(1))
   if (parsed.flags.has('help')) return { help: true }
 
+  const detail = detailOf(parsed.single('detail'))
   const format = formatOf(parsed.single('format'))
   const fonts = parsed.values.get('font') ?? []
   const output = parsed.single('output')
@@ -259,5 +282,5 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
     throw new Error('The watch option requires --output, because standard output cannot be rewritten.')
   if (watch && input === '-') throw new Error('The watch option requires a file to watch, not standard input.')
 
-  return { fonts, format, host, input, ...(output ? { output } : {}), port, scale, scheme, serve, watch }
+  return { detail, fonts, format, host, input, ...(output ? { output } : {}), port, scale, scheme, serve, watch }
 }

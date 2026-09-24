@@ -11,6 +11,7 @@ import {
 import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
+import { type DetailBand, resolveDetailTreatment } from '@infoschematics/view-model/detail'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
@@ -79,6 +80,17 @@ export type RenderInfoschematicSvgOptions = {
   annotations?: boolean | SvgCodeAnnotations
   /** Override authored Card metadata visibility without removing authored data. */
   cardDetails?: CardDetailOverrides
+  /**
+   * The detail band this still is drawn in, as an interactive view would have resolved it from magnification.
+   *
+   * This is what makes a still of a magnified part match what a reader saw: the Canvas resolves a band from the scale
+   * its viewport is drawn at, and a caller that wants the same drawing hands that band straight over. Omitted, the
+   * output is `full` — everything asked for — so a caller that never heard of a band renders exactly what it always
+   * did. A band only ever withholds, so it cannot restore a row `cardDetails` turned off.
+   *
+   * Given alongside `responsiveCardDetails`, the band wins: it is an answer, and the size is the question.
+   */
+  detail?: DetailBand
   /** Opt into responsive Card detail for this explicit rendered output size. */
   responsiveCardDetails?: RenderedSize
   /**
@@ -578,9 +590,11 @@ export const renderInfoschematicSvg = (
   const visualTreatment = {
     ...requestedVisualTreatment,
     grid: authoredGridSize === 0 ? ('none' as const) : requestedVisualTreatment.grid,
-    card: options.responsiveCardDetails
-      ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
-      : requestedVisualTreatment.card
+    card: options.detail
+      ? resolveDetailTreatment(options.detail, requestedVisualTreatment.card)
+      : options.responsiveCardDetails
+        ? resolveResponsiveCardTreatment(viewBox, options.responsiveCardDetails, requestedVisualTreatment.card)
+        : requestedVisualTreatment.card
   }
   /* What the caller asked to see, kept apart from what an author said: an element draws its code if either says so,
      and neither answer is derived from the other. */

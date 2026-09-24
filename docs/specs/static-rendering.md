@@ -226,6 +226,18 @@ _Verify:_ Run `bun run test --filter=@infoschematics/render-svg`, render one doc
 
 _Evidence:_ `packages/render-svg/src/index.ts` resolves one palette at the top of the rendering and `adaptivePalettes` emits the deferred pair; `packages/render-svg/src/index.test.ts` covers the locked and adaptive shapes and the blueprint override; `packages/cli/src/options.ts` refuses `--scheme adaptive --format png`; `packages/view-canvas/src/Canvas.schemes.browser.test.tsx` proves the resolved scheme in a browser for the interactive path.
 
+### STATIC-021 — A still may be drawn in a supplied detail band
+
+A static rendering MAY be given the detail band an interactive view resolved, and MUST then draw the Card rows that band names, so a still of a magnified part matches what a Canvas shows at that scale. Omitting the band MUST draw the `full` band, leaving output that never asks for one unchanged. A supplied band MUST take precedence over the explicit target size `STATIC-016` admits, because a caller naming a band has already answered the question that size was asked to answer.
+
+A supplied band remains a reduction and nothing more: it MUST NOT restore a Card row the `cardDetails` override withheld, and MUST NOT remove a pinned element code. The command line MUST expose the band as a render option and MUST reject a value that is not one of the four bands rather than falling back to a default.
+
+_Conformance:_ conforming
+
+_Verify:_ render one document with no options, once per band, and once with a band alongside an explicit target size, and compare the Card rows each still draws.
+
+_Evidence:_ `detail` on `RenderInfoschematicSvgOptions` in `packages/render-svg/src/index.ts`, the `detail` render option in `packages/cli/src/options.ts`, and the band cases in `packages/render-svg/src/index.test.ts`.
+
 ## Gaps
 
 - `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-030](../decisions/ADR-INFOSCHEMATICS-030-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.

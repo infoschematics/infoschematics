@@ -163,6 +163,7 @@ describe('renderInfoschematicSvg', () => {
         points: [],
         regions: []
       },
+      promises: [],
       scopes: [],
       sequences: [],
       specifications: []
@@ -313,6 +314,7 @@ describe('renderInfoschematicSvg', () => {
         points: [],
         regions: []
       },
+      promises: [],
       scopes: [],
       specifications: [],
       sequences: []
@@ -447,6 +449,51 @@ describe('renderInfoschematicSvg', () => {
     expect(labelOnly).not.toContain('data-card-detail=')
     expect(labelOnly).toContain('>Source &amp; gate…<')
     expect(labelOnly).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
+  })
+
+  it('draws a still in the detail band a magnified Canvas resolved', () => {
+    const config: InfoschematicConfig = {
+      ...representative,
+      infoschematic: {
+        ...representative.infoschematic,
+        appearance: { card: { compact: false, description: true, identity: true, stereotype: true } },
+        cards: representative.infoschematic.cards.map((card, index) =>
+          index === 0 ? { ...card, stereotype: 'service' } : card
+        )
+      }
+    }
+
+    /* Omitted, a band changes nothing: a caller that never heard of one renders what it always rendered. */
+    expect(renderInfoschematicSvg(config, { detail: 'full' })).toBe(renderInfoschematicSvg(config))
+
+    const identified = renderInfoschematicSvg(config, { detail: 'identified' })
+    expect(identified).toContain('class="infoschematic-card-identity"')
+    expect(identified).toContain('class="infoschematic-card-stereotype"')
+    expect(identified).not.toContain('class="infoschematic-card-description"')
+
+    const outline = renderInfoschematicSvg(config, { detail: 'outline' })
+    expect(outline).not.toContain('class="infoschematic-card-identity"')
+    expect(outline).toContain('class="infoschematic-card-stereotype"')
+
+    const minimal = renderInfoschematicSvg(config, { detail: 'minimal' })
+    expect(minimal).not.toContain('data-card-detail=')
+    /* The accessible identity is not a row and survives every band, so a still of a magnified part never becomes
+       less readable to someone who is not looking at it. */
+    expect(minimal).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
+
+    /* A band only withholds. Nothing the caller turned off comes back, whatever band is asked for. */
+    const silenced = renderInfoschematicSvg(config, {
+      cardDetails: { description: false, identity: false, stereotype: false },
+      detail: 'full'
+    })
+    expect(silenced).not.toContain('data-card-detail=')
+
+    /* A band is an answer and a target size is the question, so the band settles it. */
+    const both = renderInfoschematicSvg(config, {
+      detail: 'minimal',
+      responsiveCardDetails: { height: 240, width: 400 }
+    })
+    expect(both).not.toContain('data-card-detail=')
   })
 
   it('paints the midground from the palette the drawing resolved rather than one fixed set', () => {
@@ -702,6 +749,7 @@ describe('renderInfoschematicSvg', () => {
         points: [{ id: 'EDGE', label: 'Edge', at: { x: 340, y: 150 } }],
         regions: [{ id: 'ZONE', label: 'Zone', bounds: { height: 120, width: 360, x: 20, y: 20 } }]
       },
+      promises: [],
       scopes: [],
       sequences: [],
       specifications: []
@@ -786,6 +834,7 @@ describe('renderInfoschematicSvg', () => {
         points: [],
         regions: []
       },
+      promises: [],
       scopes: [
         { id: 'shown', label: 'Shown', elements: ['SRC'] },
         { id: 'hidden', label: 'Hidden', elements: ['SNK'] }

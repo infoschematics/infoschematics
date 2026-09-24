@@ -91,7 +91,11 @@ describe('Canvas Diagram Dynamics', () => {
 
     // Server markup holds no announcement for a Dynamic any more than it does for a Flow signal: the text is written
     // when the occurrence is accepted, which is a mounted effect. The live region it is written into is here.
+    //
+    // Two, still: the Diagram carries a third live region for its own detail band, and it is marked as one so that
+    // this count stays a count of the host surface's regions rather than of every polite region on the page.
     expect(markup.match(/aria-live="polite" class="infoschematic-signal-announcement" role="status"/g)).toHaveLength(2)
+    expect(markup.match(/data-detail-announcement="true"/g)).toHaveLength(1)
     expect(markup).not.toContain('Sink needs attention')
   })
 
