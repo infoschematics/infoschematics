@@ -69,10 +69,12 @@ Supporting material lives in [`references/`](references/), inside this directory
 43. [ADR-INFOSCHEMATICS-038](ADR-INFOSCHEMATICS-038-a-creation-reaches-the-document-by-one-route.md) — make every element by one route, a create operation the projection carries to the document, so a defect in creation is one defect rather than one per surface.
 44. [ADR-INFOSCHEMATICS-039](ADR-INFOSCHEMATICS-039-detail-is-a-band-of-scale-and-the-view-holds-the-hysteresis.md) — resolve detail as a band of scale rather than a step into a named view, and leave the hysteresis with the view rather than the resolver.
 45. [ADR-INFOSCHEMATICS-040](ADR-INFOSCHEMATICS-040-a-document-promises-what-it-means-and-a-checker-holds-it-to-it.md) — let a document declare the readings it must keep, as authored data inside the definition, and make a broken promise an error no renderer ever reads.
+46. [ADR-INFOSCHEMATICS-041](ADR-INFOSCHEMATICS-041-a-link-names-a-part-and-arriving-centres-and-selects-it.md) — let a host resolve an address to one artefact or Scope, make arriving centre and select rather than emphasise, and let an unresolvable address pass quietly.
+47. [ADR-INFOSCHEMATICS-042](ADR-INFOSCHEMATICS-042-share-the-measurement-never-the-rule.md) — share the overlap measurement with a creation surface and keep the rule that judges a drawing to the checker.
 
 ## Repository operation
 
-46. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
-47. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
-48. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
-49. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-name-commands-by-owner-then-subject-then-verb.md) — name every command owner first, then subject, then verb, and hold the surface in one test.
+48. [GDR-INFOSCHEMATICS-002](GDR-INFOSCHEMATICS-002-delegated-mechanical-work.md) — retain judgment centrally while delegating bounded, disjoint mechanical work.
+49. [GDR-INFOSCHEMATICS-003](GDR-INFOSCHEMATICS-003-root-build-tsconfig-is-base-not-shape.md) — keep shared build policy at the root and compiled-build shape in each package.
+50. [GDR-INFOSCHEMATICS-004](GDR-INFOSCHEMATICS-004-promise-the-oldest-supported-node-line.md) — promise the oldest Node line still in support, and type against the same line.
+51. [GDR-INFOSCHEMATICS-005](GDR-INFOSCHEMATICS-005-name-commands-by-owner-then-subject-then-verb.md) — name every command owner first, then subject, then verb, and hold the surface in one test.

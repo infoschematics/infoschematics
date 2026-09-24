@@ -48,4 +48,23 @@ Four items carry a decision inside their own boundary — the serial-gap disposi
 | INFOSCHEMATICS-TOOL-116 | awaiting-review | `1319bd1e` | `4d172303` | None |
 | INFOSCHEMATICS-TOOL-114 | awaiting-review | `1319bd1e` | `acbf5ea3` | None |
 | INFOSCHEMATICS-TOOL-115 | awaiting-review | `8dd156a` | `ca0fd536` | None |
-| INFOSCHEMATICS-TOOL-125 | awaiting-review | `8dd156a` | pending | None |
+| INFOSCHEMATICS-TOOL-125 | awaiting-review | `8dd156a` | `197526e7` | None |
+
+## Run outcome
+
+Eight of the nine items reached `awaiting-review`; `INFOSCHEMATICS-TOOL-107` is parked. `completion_target: awaiting-review` grants no closure, so every delivered record waits on a human review packet and none was moved to `done`.
+
+The aggregate gate ran once, at `197526e7`, on a checkout with one writer in it: `bun run self:check` — `Tasks: 52 successful, 52 total`, exit 0; `bun run ki:lint:md` — no issues in 121 files; `ki repo audit --skill ki-work-roadmap --repo .` — PASS; `ki repo audit --skill ki-decision-records --repo .` — PASS. Every measurement taken while a second agent was writing was discarded in favour of this one.
+
+Four Decision Records were opened against the decisions the items named as theirs to take: ADR-INFOSCHEMATICS-039 (detail is a band of scale), ADR-INFOSCHEMATICS-040 (a document promises what it means), ADR-INFOSCHEMATICS-041 (a link names a part), ADR-INFOSCHEMATICS-042 (share the measurement, never the rule). Their index entries were added by the coordinator, because a shared index is the one file concurrent writers cannot both hold.
+
+### Candidates for a later wave
+
+Found while delivering, admitted to no item:
+
+- `ADR-INFOSCHEMATICS-027` still says the interactive Canvas draws no Point, which `INFOSCHEMATICS-TOOL-126` made untrue. An accepted record, so amending it needs its own authority.
+- In a read-only Canvas the `.selected` and `.group-held` treatments are gated behind `.editing`, so an arrival reached under `INFOSCHEMATICS-TOOL-115` is announced and reported but invisible to a sighted reader.
+- Two Cards created back to back collapse to one: `createCard` allocates from the authored register, so the second reissues the first's code. Placement is exonerated — the search did consult the pending box.
+- The vocabulary reference carries no canonical term for a promise, so prose about one cannot cite a stable id.
+- `--detail` is specified in `STATIC-021` rather than beside its siblings in `docs/specs/command-line-rendering.md`.
+- The showcase still names no Point for a Dynamic to emphasise.
