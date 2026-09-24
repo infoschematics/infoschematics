@@ -56,7 +56,7 @@ _Evidence:_ `packages/view-canvas/src/Canvas.tsx`, `packages/view-canvas/src/Inf
 
 A document MAY say that an element draws its own code in every rendering of the Diagram: element by element through an `identity` field on a Card, Fabric, Adapter, Point, Region, or Flow, and Diagram-wide through `appearance.identity` for every element that says nothing. The element's own statement MUST answer first. `appearance.card.identity` is the narrower statement about Cards and MUST answer for a plain Card ahead of the Diagram-wide default, so a document that already authors Card identity does not silently gain codes on the other kinds.
 
-A code the document pinned MUST be drawn wherever that element's own drawing puts it, as `ROUTE-021` in [Routing and placement](routing-and-placement.md) requires, and MUST NOT depend on a viewer control, a renderer option, or a host. It describes the element rather than the rendering, so neither the `cardDetails` output override nor responsive reduction MUST remove it; both act on the Diagram-wide default instead.
+A code the document pinned MUST be drawn wherever that element's own drawing puts it, as `ROUTE-021` in [Routing and placement](routing-and-placement.md) requires, and MUST NOT depend on a viewer control, a renderer option, or a host. It describes the element rather than the rendering, so neither the `cardDetails` output override nor responsive reduction MUST remove it; both act on the Diagram-wide default instead. Where `APPEAR-016` makes an authored Card detail value a ceiling, this is the floor beneath it: the one statement about detail that a smaller rendering cannot lower.
 
 _Conformance:_ conforming
 
@@ -212,11 +212,15 @@ _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.treatments.test.tsx`,
 
 Canvas and static SVG hosts MAY opt into responsive Card detail, but omission MUST preserve the authored and explicitly requested Card treatment exactly; when enabled, output MUST retain every Card label and accessible identity while withholding optional description, identity, then stereotype rows as rendered scale crosses the shared deterministic thresholds defined by [ADR-INFOSCHEMATICS-011](../decisions/ADR-INFOSCHEMATICS-011-separate-authored-appearance-from-output-detail.md).
 
+An authored Card detail value is a ceiling. It states the most a reader may ever be shown, and MUST NOT be read as a fixed answer or as an initial default a rendering may improve on. Three layers resolve one optional row. The document sets the ceiling, which a host MAY restate for a single output through the `cardDetails` override `APPEAR-004` admits. The rendering then shows that or less: its rendered scale, and any magnification that follows, MUST only withhold rows and MUST NOT restore a row the request withheld. An element that pins its own code stands outside both as a floor rather than a ceiling, as `APPEAR-018` requires: neither the override nor the reduction may lower it.
+
+Card compactness is treatment rather than disclosure and MUST take no part in either layer. It decides how a Card stacks its text and at which type size, withholds nothing a reader could otherwise read, and MUST therefore stay outside the `cardDetails` override and pass through responsive reduction unchanged.
+
 _Conformance:_ conforming
 
-_Verify:_ exercise the framework-neutral resolver, measured Canvas output, and explicit-size static SVG above, at, and below every threshold.
+_Verify:_ exercise the framework-neutral resolver, measured Canvas output, and explicit-size static SVG above, at, and below every threshold. Author a Card row as hidden and confirm no rendered size restores it, then author it as shown and confirm a small rendering withholds it. Read `CardDetailOverrides` and `resolveResponsiveCardTreatment` in `packages/view-model/src/appearance.ts`: compactness is absent from the first and copied unchanged by the second. Falsified by a rendering that adds a row the request withheld, or by a reduction that changes compactness.
 
-_Evidence:_ `packages/view-model/src/appearance.test.ts`, `packages/view-canvas/src/InfoschematicDiagram.responsive.browser.test.tsx`, and `packages/render-svg/src/index.test.ts` cover compatibility defaults, threshold resolution, and accessible metadata retention.
+_Evidence:_ `packages/view-model/src/appearance.test.ts`, `packages/view-canvas/src/InfoschematicDiagram.responsive.browser.test.tsx`, and `packages/render-svg/src/index.test.ts` cover compatibility defaults, threshold resolution, accessible metadata retention, and compactness surviving both the override and the reduction.
 
 ### APPEAR-017 — Responsive density is renderer-neutral
 

@@ -17,6 +17,15 @@ export type RegionLabelPlacement =
 
 export type RegionLabelTreatment = 'none' | RegionLabelPlacement
 
+/**
+ * What a Card discloses, as the Diagram's own statement about every Card.
+ *
+ * `identity`, `stereotype` and `description` are a ceiling rather than a fixed answer or an opening default: they say
+ * the most a reader may ever be shown, so a rendering too small for a row may withhold it and no rendered size or
+ * magnification may restore one the document left off. An element that states its own `identity` is the floor beneath
+ * that and survives the reduction. `compact` is treatment rather than disclosure — it decides how a Card stacks its
+ * text and at which size, withholds nothing, and takes no part in either the output override or the reduction.
+ */
 export type CardDetailDefaults = {
   compact?: boolean
   identity?: boolean

@@ -103,7 +103,7 @@ renderInfoschematicSvg(config, {
 })
 ```
 
-Output detail overrides affect only identity, stereotype, and description visibility. Shared corner geometry, notch padding, type scales, fallback colours, and Card compactness are not output-detail knobs.
+Output detail overrides affect only identity, stereotype, and description visibility. Shared corner geometry, notch padding, type scales, fallback colours, and Card compactness are not output-detail knobs. What the definition asks for is the most a reader is ever shown: a rendering too small to hold a row may leave it out, and nothing ever restores a row the definition left off.
 
 Any element can carry its code permanently instead of waiting for a reader to ask for it. Set `identity: true` on a Card, Fabric, Adapter, Point, Region, or Flow, or `appearance: { identity: true }` on the Diagram to say it of everything that says nothing; `appearance: { card: { identity: true } }` stays the narrower statement about plain Cards. A code pinned this way is drawn in every rendering, in the same place a reader's tag control would put it, and neither `cardDetails` nor a small rendering takes it away — those describe the rendering, while `identity` describes the element.
 
