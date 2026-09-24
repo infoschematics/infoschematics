@@ -89,7 +89,9 @@ test('paints an emphasis from the shared tokens and retires it without the host 
 
   /* The host's own two announcement regions, in their order. The Diagram carries a third for its detail band, which
      is not a document event and would otherwise shift these indices out from under every case in this file. */
-  const status = container.querySelectorAll('[role="status"]:not([data-detail-announcement])')[1]
+  const status = container.querySelectorAll(
+    '[role="status"]:not([data-detail-announcement]):not([data-arrival-announcement])'
+  )[1]
   await expect.poll(() => status.textContent).toBe('Dynamic update 1. Sink needs attention.')
 
   await expect.poll(() => emphasisOf(container), { timeout: elementEmphasisDuration * 4 }).toBeNull()
@@ -119,7 +121,12 @@ test('replays on a changed occurrence key and cancels when the host withdraws th
   await screen.getByRole('button', { name: 'Replay' }).click()
   await expect.poll(() => emphasisOf(container)?.dataset.occurrenceKey).toBe('run-2')
   await expect
-    .poll(() => container.querySelectorAll('[role="status"]:not([data-detail-announcement])')[1].textContent)
+    .poll(
+      () =>
+        container.querySelectorAll(
+          '[role="status"]:not([data-detail-announcement]):not([data-arrival-announcement])'
+        )[1].textContent
+    )
     .toBe('Dynamic update 2. Sink needs attention.')
 
   await screen.getByRole('button', { name: 'Stop' }).click()
@@ -142,7 +149,10 @@ test('sustains a held emphasis long past the finite duration and ends it when th
   const screen = await render(<Host />)
   const container = screen.container as HTMLElement
   const heldOf = () => container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="ZONE"]')
-  const status = () => container.querySelectorAll('[role="status"]:not([data-detail-announcement])')[1] as HTMLElement
+  const status = () =>
+    container.querySelectorAll(
+      '[role="status"]:not([data-detail-announcement]):not([data-arrival-announcement])'
+    )[1] as HTMLElement
 
   await expect.poll(() => heldOf()?.dataset.depicts).toBe('state')
   await expect.poll(() => status().textContent).toBe('Dynamic update 1. We are on this stage.')
@@ -182,7 +192,12 @@ test('signals the Flow a signal-flow Dynamic names, leaving every other element 
   expect(container.querySelector('[data-artefact-id="LOAD"] .infoschematic-flow-signal')).not.toBeNull()
   expect(emphasisOf(container)).toBeNull()
   await expect
-    .poll(() => container.querySelectorAll('[role="status"]:not([data-detail-announcement])')[0].textContent)
+    .poll(
+      () =>
+        container.querySelectorAll(
+          '[role="status"]:not([data-detail-announcement]):not([data-arrival-announcement])'
+        )[0].textContent
+    )
     .toContain('Flow LOAD, Source to Sink, signalled.')
 })
 

@@ -12,6 +12,8 @@ export const componentPaths = {
   future: '/docs/components/future/'
 } as const
 export const installationPath = '/docs/installation/'
+/** The React integration guide, which hosts the addressing demonstration as well as its prose. */
+export const reactIntegrationPath = '/docs/react-integration/'
 export const playgroundPath = '/playground/'
 
 export type DocumentSection = 'guide' | 'components' | 'usage' | 'reference' | 'approach'
@@ -99,7 +101,7 @@ const publishedDocuments = [
   },
   {
     sourcePath: 'apps/site/content/react-integration.md',
-    path: '/docs/react-integration/',
+    path: reactIntegrationPath,
     title: 'React integration',
     summary: 'Mount an authored Infoschematic inside a host React application.',
     section: 'usage'
@@ -260,6 +262,10 @@ export function getGuideJourneyNeighbours(pathname: string): {
 
 export function isDocsIndexPath(pathname: string) {
   return pathname === docsIndexPath || pathname === docsIndexPath.slice(0, -1)
+}
+
+export function isReactIntegrationPath(pathname: string) {
+  return pathname === reactIntegrationPath || pathname === reactIntegrationPath.slice(0, -1)
 }
 
 export function getComponentRoute(pathname: string): ComponentRoute | undefined {

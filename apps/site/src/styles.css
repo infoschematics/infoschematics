@@ -863,6 +863,28 @@ a:focus-visible {
   margin: 30px 0 16px;
 }
 
+/* The addresses this page can send a reader to, shown as the addresses they are rather than as prose about them. */
+.destination-demo__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.destination-demo__links button {
+  cursor: pointer;
+  font:
+    600 12px/1.4 "DM Mono",
+    monospace;
+}
+
+.destination-demo__links button:hover,
+.destination-demo__links button:focus-visible {
+  border-color: var(--infoschematic-chrome-paint-accent);
+}
+
 .overview-anatomy {
   width: 100%;
   max-width: 960px;

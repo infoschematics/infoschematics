@@ -238,6 +238,18 @@ _Verify:_ render one document with no options, once per band, and once with a ba
 
 _Evidence:_ `detail` on `RenderInfoschematicSvgOptions` in `packages/render-svg/src/index.ts`, the `detail` render option in `packages/cli/src/options.ts`, and the band cases in `packages/render-svg/src/index.test.ts`.
 
+### STATIC-022 — A still ignores a destination and renders the whole document
+
+A static rendering MUST NOT accept a destination, and MUST NOT crop, centre, pre-frame, or otherwise alter its output because one part of the document has been addressed. An [Infoschematic](../reference/vocabulary.md#infoschematic) rendered to SVG MUST produce the same bytes whether or not the caller holds an address into it.
+
+An SVG has no viewport the reader controls, so arriving has no meaning here: there is nothing to move and nobody watching it move. Pre-framing a crop would make one definition produce a different picture depending on an address the picture itself cannot show, which is the property `STATIC-011` exists to protect. Cropping remains the caller's own concern — a caller who wants part of a document MAY render it and cut the result, or author the part as its own document — and it is never the address's.
+
+_Conformance:_ conforming
+
+_Verify:_ Render one document to SVG, then render it again while the host holds an address into it, and diff the two outputs; inspect the static renderer's option type for any field naming a destination, an artefact to centre on, or a crop.
+
+_Evidence:_ `RenderInfoschematicSvgOptions` in `packages/render-svg/src/index.ts` carries no destination field; `packages/view-canvas/src/InfoschematicDiagram.destination.test.tsx` asserts that server-rendered markup is identical with and without an address, resolvable or not.
+
 ## Gaps
 
 - `STATIC-015`'s composition with `DESIGN-017` — document-global `defs` identifiers across two Diagram hosts on one page — is enumerated in [ADR-INFOSCHEMATICS-030](../decisions/ADR-INFOSCHEMATICS-030-a-composition-is-its-own-requirement.md) and left with the divergence `INFOSCHEMATICS-TOOL-058` tracks, so it has no requirement in [Composition](composition.md) yet.

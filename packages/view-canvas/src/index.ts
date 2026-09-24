@@ -1,4 +1,17 @@
 export type { CardDetailOverrides } from '@infoschematics/view-model/appearance'
+/* A host spells a destination and reads back what it meant, so both halves of the address contract are public from
+   the package it hands the destination to rather than from a second import a consumer has to discover. */
+export {
+  arrivalAnnouncement,
+  artefactDestination,
+  type DestinationRefusal,
+  type DestinationResolution,
+  type InfoschematicDestination,
+  type RefusedDestination,
+  type ResolvedDestination,
+  resolveDestination,
+  scopeDestination
+} from '@infoschematics/view-model/destination'
 export type { DynamicOccurrence, ElementEmphasis } from '@infoschematics/view-model/dynamics'
 export type {
   InfoschematicRuntime,

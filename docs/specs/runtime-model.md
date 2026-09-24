@@ -79,3 +79,13 @@ _Conformance:_ conforming
 _Verify:_ compare canonical and established inputs through `createInfoschematicRuntime`, inspect package boundaries, and run Canvas, Present, Studio and static-renderer suites.
 
 _Evidence:_ `packages/view-model/src/runtime.ts` owns the single normalisation point; `packages/view-model/src/compatibility.test.ts`, `packages/view-model/src/runtime.test.ts`, and cross-View tests cover both input forms.
+
+### RUNTIME-008 — A destination resolves to an extent, a centre and a selection
+
+View Model MUST resolve an authored destination — an artefact code or an [Architectural Scope](../reference/vocabulary.md#scope) id — against a runtime alone, returning either a resolution carrying the addressed extent, its centre, a reader-facing label and an ordered [selection](../reference/vocabulary.md#selection-anchor) whose first member is the anchor, or a refusal carrying a named reason and a sentence explaining it. Resolution MUST be total: an address naming nothing, or naming only unplaced artefacts, MUST refuse rather than throw. A Scope MUST resolve to the union extent of its placed members. Resolution MUST read no browser state, hold no viewport and start no [Diagram Dynamic](../reference/vocabulary.md#diagram-dynamic).
+
+_Conformance:_ conforming
+
+_Verify:_ Resolve an artefact code, a Scope id, an unknown code, an unknown Scope id, a Scope whose members are all unplaced, and an artefact carrying no position, against a runtime built by `createInfoschematicRuntime`. Each call must return rather than throw, the Scope's extent must be the union of its placed members and its selection must lead with the anchor. Replace a refusal with a thrown error, or a Scope union with the anchor's own box, and the run must fail.
+
+_Evidence:_ `packages/view-model/src/destination.ts` exports `resolveDestination` over a `DestinationDocument` projection of the runtime; `packages/view-model/src/destination.test.ts` covers an artefact code, a Scope id, the announcement sentence, and four refusals.

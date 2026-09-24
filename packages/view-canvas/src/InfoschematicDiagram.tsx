@@ -11,6 +11,13 @@ import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschem
 import { adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
+import {
+  arrivalAnnouncement,
+  type DestinationResolution,
+  type InfoschematicDestination,
+  type ResolvedDestination,
+  resolveDestination
+} from '@infoschematics/view-model/destination'
 import { type DetailBand, detailBandAnnouncement, resolveDetailTreatment } from '@infoschematics/view-model/detail'
 import type { ElementEmphasis } from '@infoschematics/view-model/dynamics'
 import {
@@ -317,7 +324,9 @@ export function InfoschematicDiagram({
   litByScene,
   onLight,
   createdCards = [],
+  destination = null,
   onCreateLine,
+  onDestination,
   onFreeEnd,
   onHover,
   onSelect,
@@ -332,8 +341,8 @@ export function InfoschematicDiagram({
   onArtefactSelect,
   portCounts,
   selected,
-  selectedArtefact,
-  selectionSet = noSelectionSet,
+  selectedArtefact: hostSelectedArtefact,
+  selectionSet: hostSelectionSet = noSelectionSet,
   signals = [],
   emphasis = [],
   flows: suppliedFlows,
@@ -400,6 +409,25 @@ export function InfoschematicDiagram({
   onHover?: (code: string | null) => void
   /** What the panel is pointing back at, lit here the way a hover on Infoschematic is. */
   hovered?: string | null
+  /**
+   * The one part of this document a reader was sent to, already resolved from whatever address carried them here.
+   *
+   * `ADR-INFOSCHEMATICS-005` keeps routing with the host, so this is never a URL, a query parameter or a fragment:
+   * the host reads its own address and hands over an authored identity — an artefact code or a Scope id. Arriving
+   * centres the viewport on it and selects it, and does nothing else. It is not an emphasis, because a document's
+   * authored Dynamics are already saying something and an arrival treatment painted over them would argue with them.
+   *
+   * A destination that does not resolve is a quiet no-op: the Diagram mounts and draws the whole document exactly as
+   * it would with no destination at all, and the reason goes to `onDestination` rather than to the reader.
+   */
+  destination?: InfoschematicDestination | null
+  /**
+   * What the destination turned out to mean, reported once per destination — including when it meant nothing.
+   *
+   * The host is the only party that can act on a refusal: it knows which page the link was written on, so it is the
+   * one that can report a reference that has outlived what it pointed at.
+   */
+  onDestination?: (resolution: DestinationResolution) => void
   onSelect?: (code: string) => void
   /** Typed six-kind Design selection. String selection remains for auxiliary handles during migration. */
   onArtefactSelect?: (selection: ArtefactSelection | null) => void
@@ -529,6 +557,36 @@ export function InfoschematicDiagram({
     infoschematicSpecificationsFor,
     infoschematicViewBox
   } = runtime
+
+  /*
+   * Where a reader was sent, resolved against this document rather than against the page that carried them here.
+   *
+   * Keyed by the destination's content rather than by its identity, because a host writes `destination={{ kind:
+   * 'artefact', code }}` inline and a fresh object every render would resolve the same address endlessly and announce
+   * an arrival each time. The key is what "the same destination" means, and it is a string so that it compares by
+   * value.
+   */
+  const destinationKey = destination
+    ? destination.kind === 'artefact'
+      ? `artefact:${destination.code}`
+      : `scope:${destination.id}`
+    : null
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `destinationKey` is `destination` by value; depending on the object itself would re-resolve on every render of a host that spells its destination inline.
+  const destinationResolution = useMemo<DestinationResolution | null>(
+    () => (destination ? resolveDestination(runtime, destination) : null),
+    [destinationKey, runtime]
+  )
+  /*
+   * The arrival this Diagram made, if any, and how many it has made.
+   *
+   * It stands in for a host-held selection rather than replacing one: a host that controls selection keeps control,
+   * and a host that does not — the ordinary embedded reading case — still sees the addressed part lit. The reader's
+   * next press clears it, so an arrival behaves like an opening selection rather than a latch.
+   */
+  const [arrival, setArrival] = useState<Readonly<{ at: ResolvedDestination; revision: number }> | null>(null)
+  const selectedArtefact = hostSelectedArtefact ?? arrival?.at.selection[0] ?? null
+  const selectionSet = hostSelectionSet.length > 0 ? hostSelectionSet : (arrival?.at.selection ?? noSelectionSet)
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const flows = useMemo(() => {
     if (!previewing || editor !== 'design') return suppliedFlows
@@ -833,6 +891,39 @@ export function InfoschematicDiagram({
   }, [detailBand, responsiveCardDetails])
 
   /*
+   * Arriving: centre the viewport on the addressed part, select it, and stop.
+   *
+   * Centre rather than frame. `ADR-INFOSCHEMATICS-039` makes the detail band a pure function of the scale a drawing
+   * is painted at, so zooming to fit a Card would change what the drawing reveals about every other Card on the
+   * surface. An address says which part is being talked about; it has no business deciding how much of the document
+   * its reader is allowed to see, and a link that quietly magnified would make the same page look different to two
+   * readers who arrived by different routes.
+   *
+   * No emphasis, either. A document's authored Dynamics are already saying something with the same visual language,
+   * and an arrival treatment painted over them would argue with the author. Selection is the existing way of saying
+   * "this one", and it is the one a reader already knows.
+   *
+   * Once per destination, tracked by the same value key the resolution is: a host that re-renders for its own reasons
+   * has not sent the reader anywhere, and taking them back to where they already are would fight their scrolling.
+   */
+  const arrivedAt = useRef<string | null>(null)
+  useEffect(() => {
+    if (destinationKey === null || destinationResolution === null) {
+      arrivedAt.current = null
+      return
+    }
+    if (arrivedAt.current === destinationKey) return
+    arrivedAt.current = destinationKey
+    onDestination?.(destinationResolution)
+    /* A destination that resolved to nothing is a no-op the reader never learns about: the host has been told, and
+       the document draws exactly as it would have with no address at all. */
+    if (destinationResolution.outcome !== 'resolved') return
+    const at = destinationResolution
+    setViewport((current) => centerViewportAt(infoschematicViewBox, current, at.centre))
+    setArrival((current) => ({ at, revision: (current?.revision ?? 0) + 1 }))
+  }, [destinationKey, destinationResolution, infoschematicViewBox, onDestination])
+
+  /*
    * Each drawn Card's own internals, resolved once, with the identity chip asked
    * for whether or not it was authored. Nothing else in the layout depends on
    * that flag, so the extra answer costs nothing and tells the annotation layer
@@ -1033,6 +1124,9 @@ export function InfoschematicDiagram({
     zoomPointer.current = null
   }
   const clearSelection = () => {
+    /* Outside the editing guard on purpose: an arrival is this component's own state, so a reader dismissing it is
+       not a Design gesture and does not need a Design session to work. */
+    setArrival(null)
     if (!editing) return
     if (onArtefactSelect) onArtefactSelect(null)
     else onSelect?.('')
@@ -1212,6 +1306,9 @@ export function InfoschematicDiagram({
     artefactInGroup(selection) && !sameArtefact(selectedArtefact, selection) ? ' group-held' : ''
 
   const selectArtefact = (selection: ArtefactSelection, legacyKey: string) => {
+    /* The reader has chosen for themselves, so the arrival stops standing in for a selection: it was an opening
+       position, not a state the Diagram holds against them. */
+    setArrival(null)
     if (onArtefactSelect) onArtefactSelect(selection)
     else onSelect?.(legacyKey)
   }
@@ -3170,6 +3267,18 @@ export function InfoschematicDiagram({
           document did not change. Silent until a threshold is actually crossed. */}
       <p aria-live="polite" className="infoschematic-signal-announcement" data-detail-announcement="true" role="status">
         {detailNotice ? `Detail update ${detailNotice.revision}. ${detailBandAnnouncement(detailNotice.band)}` : ''}
+      </p>
+      {/* Arrival, on the Diagram's own frame for the reason the detail announcement is: `ADR-INFOSCHEMATICS-029`
+          puts document-level announcements on a surface the host reconciles, and a viewport move is not that — the
+          viewport is this component's state and no host can observe it. Silent until a reader is actually sent
+          somewhere, and carrying a revision so that arriving twice at the same part is heard twice. */}
+      <p
+        aria-live="polite"
+        className="infoschematic-signal-announcement"
+        data-arrival-announcement="true"
+        role="status"
+      >
+        {arrival ? `Destination ${arrival.revision}. ${arrivalAnnouncement(arrival.at)}` : ''}
       </p>
     </div>
   )

@@ -88,6 +88,8 @@ const svg = renderInfoschematicSvg(myInfoschematic, {
 
 Output shares the Canvas's visual language — the same tokens, appearance resolution, Region geometry, Card layout, and luminance-resolved text ink — so a static export and the interactive Canvas read as the same diagram.
 
+A still ignores a destination. The [React integration guide](/docs/react-integration/) shows how a link can send a reader to one named part of an interactive Diagram. A still has no viewport a reader controls, so there is nothing to arrive at: the renderer draws the whole document whatever address brought the reader to the page. Crop the result if you want a narrower picture — framing a still is the caller’s decision rather than the link’s.
+
 ## From SVG to anything else
 
 SVG is the renderer's native output; other formats are one rasteriser away. This repository renders documents straight to SVG with `bun run self:examples:render infoschematic.yaml`, and any standard tool converts the result to PNG or PDF for contexts that need pixels.

@@ -38,6 +38,10 @@
       "types": "./dist/detail.d.ts",
       "import": "./dist/detail.js"
     },
+    "./destination": {
+      "types": "./dist/destination.d.ts",
+      "import": "./dist/destination.js"
+    },
     "./diagnostics": {
       "types": "./dist/diagnostics.d.ts",
       "import": "./dist/diagnostics.js"

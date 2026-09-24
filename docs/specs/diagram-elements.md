@@ -121,3 +121,13 @@ _Conformance:_ conforming
 _Verify:_ Run `bun run test --filter=@infoschematics/view-present` and `bun run self:scripts:test`, then author a document with one Overlay and no Scene at all, open it outside Design, and see it. Hand the same Overlay over as a Scene's Graphic as well and confirm the drawing is unchanged rather than doubled. Ask interactive Canvas for `scene` Graphic visibility and confirm no Graphic without an active Scene, only that Scene's Graphic while active, and every authored Graphic still available in Design. Restoring the `editing ?` gate or the parity case MUST fail.
 
 _Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.tsx` defaults to the union of `config.diagram.overlays` and the Scene's Graphic, deduplicated by id, and exposes explicit `all`, `scene`, and `none` host policy; `packages/view-present/src/Present.test.tsx` shows an authored Overlay to an audience; `scripts/visual-treatment-parity.test.ts` draws each standard Overlay treatment in both renderers from the document alone and asserts a Scene's Graphic adds nothing.
+
+### DIAGRAM-012 — Authored identity is what an address can name
+
+An address into an Infoschematic MUST name an authored identity: a [Region](../reference/vocabulary.md#region) id, a [Fabric](../reference/vocabulary.md#fabric) code, a Card code, a [Point](../reference/vocabulary.md#point) id, a [Flow](../reference/vocabulary.md#flow) code, or an [Architectural Scope](../reference/vocabulary.md#scope) id. A [Graphic](../reference/vocabulary.md#graphic) MUST NOT be addressable, because a Graphic may carry no bounds and then covers the whole drawing, leaving nothing particular to arrive at. A [Scene](../reference/vocabulary.md#scene) MUST NOT be addressable through this mechanism, because a Scene is a state of the whole Diagram that Present already selects by its own route rather than a part of the picture.
+
+_Conformance:_ conforming
+
+_Verify:_ Address a Region id, a Fabric code, a Card code, a Point id, a Flow code and a Scope id in a document holding all six, and confirm each resolves to that element's own extent. Then address a Graphic's id and a Scene's id in the same document and confirm both refuse as unknown. Add Graphics to the addressable index and the Graphic case must stop refusing.
+
+_Evidence:_ `packages/view-model/src/destination.ts` builds its addressable index from Regions, Fabrics, Cards, Points and Flows and resolves Scopes by membership, with Graphics deliberately absent; `packages/view-model/src/destination.test.ts` and `packages/view-canvas/src/InfoschematicDiagram.destination.browser.test.tsx` cover the resolved and refused cases.

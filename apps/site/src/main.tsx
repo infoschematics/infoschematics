@@ -1,6 +1,12 @@
 import { type ReactNode, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { getComponentRoute, getDocumentationRoute, isDocsIndexPath, isPlaygroundPath } from './routes.ts'
+import {
+  getComponentRoute,
+  getDocumentationRoute,
+  isDocsIndexPath,
+  isPlaygroundPath,
+  isReactIntegrationPath
+} from './routes.ts'
 
 async function resolvePage(pathname: string): Promise<ReactNode> {
   const documentationRoute = getDocumentationRoute(pathname)
@@ -10,6 +16,11 @@ async function resolvePage(pathname: string): Promise<ReactNode> {
       const { OverviewPage } = await import('./OverviewPage.tsx')
       document.title = `${documentationRoute.title} · Infoschematics`
       return <OverviewPage route={documentationRoute} />
+    }
+    if (isReactIntegrationPath(pathname)) {
+      const { ReactIntegrationPage } = await import('./ReactIntegrationPage.tsx')
+      document.title = `${documentationRoute.title} · Infoschematics`
+      return <ReactIntegrationPage route={documentationRoute} />
     }
     const { DocumentPage } = await import('./DocumentPage.tsx')
     document.title = `${documentationRoute.title} · Infoschematics`

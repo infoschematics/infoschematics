@@ -170,6 +170,45 @@ Everything else is the renderer's. A `signal-flow` Dynamic resolves into the sam
 
 For a still export, pass the same occurrences to the static renderer's `dynamics` option; with none supplied, output is the quiet document.
 
+## Link to one part
+
+Prose that talks about one part of an [Infoschematic](/docs/reference/vocabulary/#infoschematic) needs a way of saying which part. The host owns the address, because the host owns routing: choose your own spelling — a query parameter, a fragment, a path segment — read it, and hand the Diagram an authored identity.
+
+```tsx
+import { artefactDestination, Canvas, scopeDestination } from '@infoschematics/view-canvas'
+import '@infoschematics/view-canvas/styles.css'
+
+const destinationFromSearch = (search: string) => {
+  const parameters = new URLSearchParams(search)
+  const artefact = parameters.get('artefact')
+  if (artefact) return artefactDestination(artefact)
+  const scope = parameters.get('scope')
+  return scope ? scopeDestination(scope) : null
+}
+
+export function AddressedDiagram({ config }: { config: InfoschematicInput }) {
+  return (
+    <Canvas
+      config={config}
+      destination={destinationFromSearch(window.location.search)}
+      onDestination={(at) => at.outcome === 'refused' && reportStaleLink(at)}
+    />
+  )
+}
+```
+
+An address names either an artefact code or an [Architectural Scope](/docs/reference/vocabulary/#scope) id. Regions, Fabrics, Cards, Points, and Flows are all addressable; Graphics are not, because a Graphic may carry no bounds and then covers the whole drawing, so arriving at one would be arriving nowhere. Scenes are not addressable either — [Present](/docs/present/) already selects a Scene through its own route, and a second way of naming one would be two addresses that disagree the moment either moved.
+
+Arriving centres the viewport on the named part and selects it. That is all it does. It does not magnify, because detail follows magnification and a link has no business deciding how much of the document its reader is shown. It does not emphasise, because the emphasis treatment belongs to the document's own [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic) and an arrival painted in the same language would argue with the author. Where the whole document is already in view there is nothing to centre, and the selection is the whole of what arriving means. The reader keeps control throughout: their next press replaces the arrival selection with their own.
+
+An address that no longer resolves is a quiet no-op. The Diagram mounts, draws the document in full, and says nothing to the reader; the reason goes to `onDestination` instead, because the host is the party that knows which page wrote the link and can report it. An address written into someone else's prose outlives the document it points into, so a stale link must never be able to take a host page down.
+
+A reader who cannot see the viewport move is told what they arrived at, once per arrival, in the Diagram's own live region. Do not add a second announcement of your own.
+
+A still ignores a destination entirely and renders the whole document — see [the static rendering guide](/docs/static-rendering/).
+
+The "Try an address" demonstration at the foot of this page runs the mechanism against a small document: press a destination and watch where the drawing takes you, including the one address that no longer resolves.
+
 ## Host responsibilities
 
 The host owns:

@@ -46,4 +46,5 @@ Four items carry a decision inside their own boundary — the serial-gap disposi
 | INFOSCHEMATICS-TOOL-119 | awaiting-review | `28c9bec` | `c2496f11` | None |
 | INFOSCHEMATICS-TOOL-126 | awaiting-review | `cfead13` | `1319bd1e` | None |
 | INFOSCHEMATICS-TOOL-116 | awaiting-review | `1319bd1e` | `4d172303` | None |
-| INFOSCHEMATICS-TOOL-114 | awaiting-review | `1319bd1e` | pending | None |
+| INFOSCHEMATICS-TOOL-114 | awaiting-review | `1319bd1e` | `acbf5ea3` | None |
+| INFOSCHEMATICS-TOOL-115 | awaiting-review | `8dd156a` | pending | None |
