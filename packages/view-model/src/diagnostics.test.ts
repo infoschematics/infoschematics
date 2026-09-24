@@ -2,6 +2,7 @@ import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/do
 import { describe, expect, it } from 'vitest'
 import {
   drawingIsUnreadable,
+  measuredOverlap,
   promisesAreBroken,
   reviewInfoschematicDrawing,
   reviewInfoschematicPromises
@@ -384,6 +385,56 @@ describe('drawingIsUnreadable', () => {
       bounds: 700 40 200 100`)
       )
     ).toBe(true)
+  })
+})
+
+/**
+ * The measurement, held separately from the rule that consumes it.
+ *
+ * `ADR-INFOSCHEMATICS-042` shares this arithmetic with a creation surface and keeps `artefacts-overlap`'s judgement
+ * out of it, so the two have to be proved apart: the cases below say what the number is, and the `artefacts-overlap`
+ * cases above say which of those numbers the rule chooses to report.
+ */
+describe('measuredOverlap', () => {
+  const box = (x: number, y: number, width = 100, height = 50) => ({ height, width, x, y })
+
+  it('reports the shared extent and its area in diagram units', () => {
+    expect(measuredOverlap(box(0, 0), box(60, 20))).toEqual({ area: 40 * 30, height: 30, width: 40 })
+  })
+
+  it('answers the same for either order, because sharing a place is not directional', () => {
+    expect(measuredOverlap(box(60, 20), box(0, 0))).toEqual(measuredOverlap(box(0, 0), box(60, 20)))
+  })
+
+  it('reports nothing for boxes that miss', () => {
+    expect(measuredOverlap(box(0, 0), box(200, 0))).toBeUndefined()
+    expect(measuredOverlap(box(0, 0), box(0, 200))).toBeUndefined()
+  })
+
+  /* Boxes laid edge to edge are two drawn things side by side, which is a layout a person authors on purpose.
+     Counting a zero-width strip as an overlap would make the rule fire on it and a placement search refuse it. */
+  it('reports nothing for boxes that only touch along an edge', () => {
+    expect(measuredOverlap(box(0, 0), box(100, 0))).toBeUndefined()
+    expect(measuredOverlap(box(0, 0), box(0, 50))).toBeUndefined()
+  })
+
+  it('reports the smaller box whole when one contains the other', () => {
+    expect(measuredOverlap(box(0, 0, 400, 400), box(100, 100, 40, 20))).toEqual({ area: 800, height: 20, width: 40 })
+  })
+
+  /*
+   * The measurement has no opinion about a Fabric, and that is the point of exporting it.
+   *
+   * `artefacts-overlap` excuses a Card drawn on a Fabric because a Fabric is a place; a placement search must not,
+   * because landing a new Card on the Message bus is the defect `INFOSCHEMATICS-TOOL-125` was raised for. Both read
+   * the same number here and reach different conclusions above.
+   */
+  it('measures a box over a Fabric-sized box exactly as it measures any other pair', () => {
+    expect(measuredOverlap(box(120, 500, 1440, 120), box(760, 520, 160, 80))).toEqual({
+      area: 160 * 80,
+      height: 80,
+      width: 160
+    })
   })
 })
 

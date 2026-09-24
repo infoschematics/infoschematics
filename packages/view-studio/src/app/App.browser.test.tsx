@@ -1,9 +1,11 @@
 import { defineInfoschematic, defineInfoschematicModel, parseInfoschematicDocument } from '@infoschematics/domain-core'
 import { elementEmphasisDuration } from '@infoschematics/view-canvas'
+import { measuredOverlap } from '@infoschematics/view-model/diagnostics'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { Studio } from './App.tsx'
+import { steppedCentre } from './editor/card-placement.ts'
 /*
  * Studio's stylesheet, because the panel dock is a cascade state over a mounted panel rather than a render branch.
  * Collapsed, `.control-room.collapsed .state-panel` hides everything the dock holds while leaving all of it in the
@@ -1998,4 +2000,183 @@ scopes:
   if (!undo) throw new Error('Studio did not render history controls')
   undo.click()
   await expect.poll(() => authoredCards()).toEqual(['CARD-A'])
+})
+
+/**
+ * Every placed artefact's box, read off what the browser drew.
+ *
+ * A Card carries its position on the group and its extent on the shape; a Fabric carries both on the shape. Reading
+ * both the same way is what lets a creation be measured against a Fabric at all, which is the pair that matters here.
+ */
+const drawnBoxes = (container: Element) =>
+  [...container.querySelectorAll<SVGGElement>('[data-artefact-kind="card"], [data-artefact-kind="fabric"]')].flatMap(
+    (group) => {
+      const shape = group.querySelector('rect')
+      const id = group.getAttribute('data-artefact-id')
+      if (!shape || !id) return []
+      const [, left, top] = /translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(group.getAttribute('transform') ?? '') ?? []
+      return [
+        {
+          box: {
+            height: Number(shape.getAttribute('height')),
+            width: Number(shape.getAttribute('width')),
+            x: Number(shape.getAttribute('x') ?? 0) + Number(left ?? 0),
+            y: Number(shape.getAttribute('y') ?? 0) + Number(top ?? 0)
+          },
+          id
+        }
+      ]
+    }
+  )
+
+/*
+ * Room for a creation.
+ *
+ * `INFOSCHEMATICS-TOOL-125`: the placement put a new Card at the middle of the view and consulted nothing already
+ * drawn, so making one in the Playground landed it squarely on the Message bus Fabric — visible, which was the
+ * intention, and overlapping, which was not. The Producer's first gesture had to be to drag it off something.
+ *
+ * The fixture is that document in miniature: a Fabric across the middle, occupying exactly where the old placement
+ * would have put the Card. The assertion is the one a green suite could not otherwise make — where it landed.
+ */
+test('a Card made into an occupied centre lands clear of everything already drawn', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: OCCUPIED-CENTRE
+title: Occupied centre
+diagram:
+  bounds: 0 0 800 400
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+  fabrics:
+    - id: BUS
+      label: Message bus
+      bounds: 0 140 800 120
+      ports: 0
+scopes:
+  - id: SCOPE
+    label: Scope
+    elements: [CARD-A, BUS]
+`)
+  if (!parsed.ok) throw new Error('occupied-centre fixture should parse')
+  const initialDocument = parsed.document
+
+  /* The centre has to actually be taken, or what follows passes over a document that was never the case in question.
+     This is the old placement's answer, measured against the Fabric it used to land on. */
+  const view = { height: 400, width: 800, x: 0, y: 0 }
+  expect(measuredOverlap(steppedCentre(view, 0), { height: 120, width: 800, x: 0, y: 140 })).toBeDefined()
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design workspace control')
+  design.click()
+  await expect.poll(() => producingIn(container)).toBe('design')
+  expect(
+    drawnBoxes(container)
+      .map((drawn) => drawn.id)
+      .sort()
+  ).toEqual(['BUS', 'CARD-A'])
+
+  const create = container.querySelector<HTMLButtonElement>('button[aria-label="Create Card"]')
+  if (!create) throw new Error('Studio did not render the Card control')
+  create.click()
+  await expect.poll(() => drawnBoxes(container).length).toBe(3)
+
+  const made = drawnBoxes(container).find((drawn) => drawn.id !== 'CARD-A' && drawn.id !== 'BUS')
+  if (!made) throw new Error('the control made no Card')
+  const already = drawnBoxes(container).filter((drawn) => drawn.id !== made.id)
+  expect(already.filter((drawn) => measuredOverlap(made.box, drawn.box) !== undefined)).toEqual([])
+
+  // Clear and still reachable: room found by leaving the view is a Card nobody can see.
+  expect(made.box.x).toBeGreaterThanOrEqual(view.x)
+  expect(made.box.y).toBeGreaterThanOrEqual(view.y)
+  expect(made.box.x + made.box.width).toBeLessThanOrEqual(view.x + view.width)
+  expect(made.box.y + made.box.height).toBeLessThanOrEqual(view.y + view.height)
+
+  // The nearest clear candidate: straight up off the bus, not shunted into a corner.
+  expect(made.box).toEqual({ height: 80, width: 160, x: 320, y: 60 })
+})
+
+/*
+ * A second creation places itself clear of the first, which is still only a pending operation.
+ *
+ * The creation drafts an operation and the document catches up afterwards, so a placement reading only the artefacts
+ * the runtime draws would put the second Card exactly where it put the first.
+ *
+ * Only one Card is drawn at the end of this, and that is a separate defect rather than the placement failing: the
+ * control issues its code from the authored register, so the second creation is offered `SCOPE-01` again and
+ * supersedes the first operation instead of joining it. `INFOSCHEMATICS-TOOL-125` records that under its outstanding
+ * concerns; what is asserted here is the position the second creation chose, which is the part this item owns.
+ */
+test('a second creation places itself clear of the first, still-pending one', async () => {
+  window.localStorage.clear()
+  const parsed = parseInfoschematicDocument(`id: TWICE-IN-A-ROW
+title: Twice in a row
+diagram:
+  bounds: 0 0 800 400
+  gridSize: 10
+  collections:
+    - id: CORE
+      label: Core
+  cards:
+    - id: CARD-A
+      label: Card A
+      collection: CORE
+      bounds: 20 40 80 50
+      ports: 0
+scopes:
+  - id: SCOPE
+    label: Scope
+    elements: [CARD-A]
+`)
+  if (!parsed.ok) throw new Error('twice-in-a-row fixture should parse')
+  const initialDocument = parsed.document
+
+  function HostedStudio() {
+    const [document, setDocument] = useState(initialDocument)
+    return <Studio document={document} onDocumentChange={(change) => setDocument(change.document)} />
+  }
+
+  const { container } = await render(<HostedStudio />)
+  const showPanels = container.querySelector<HTMLButtonElement>('button[aria-label="Show panels"]')
+  if (!showPanels) throw new Error('Studio did not render panel visibility control')
+  showPanels.click()
+  await expect.poll(() => container.querySelector('button[aria-label="Collapse panels"]')).not.toBeNull()
+  const design = container.querySelector<HTMLButtonElement>('button[aria-label^="Design"]')
+  if (!design) throw new Error('Studio has no Design workspace control')
+  design.click()
+  await expect.poll(() => producingIn(container)).toBe('design')
+
+  const create = () => container.querySelector<HTMLButtonElement>('button[aria-label="Create Card"]')
+  const madeBox = () => drawnBoxes(container).find((drawn) => drawn.id !== 'CARD-A')?.box
+
+  create()?.click()
+  await expect.poll(() => madeBox()).toEqual({ height: 80, width: 160, x: 320, y: 160 })
+  const first = madeBox()
+  if (!first) throw new Error('the control made no Card')
+
+  create()?.click()
+  await expect.poll(() => madeBox()).not.toEqual(first)
+  const second = madeBox()
+  if (!second) throw new Error('the second creation drew nothing')
+
+  // Clear of the first creation, which exists nowhere but in the pending operations at the moment this was chosen.
+  expect(measuredOverlap(first, second)).toBeUndefined()
+  expect(second).toEqual({ height: 80, width: 160, x: 340, y: 240 })
 })

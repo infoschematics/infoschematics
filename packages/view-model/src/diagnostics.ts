@@ -70,7 +70,25 @@ const severityOf: Readonly<Record<DrawingRuleCode, DrawingSeverity>> = {
 
 const round = (value: number) => Math.round(value * 100) / 100
 
-const overlap = (left: Box, right: Box) => {
+/** How much of two boxes is drawn in the same place, in diagram units. */
+export type MeasuredOverlap = Readonly<{ area: number; height: number; width: number }>
+
+/**
+ * How much two boxes share, or nothing when they only touch or miss.
+ *
+ * This measures; it does not judge. The distinction is why it is exported rather than left module-private:
+ * `artefacts-overlap` below is a *rule*, and a rule carries a judgement about when a drawing has become unreadable —
+ * it deliberately excuses an Adapter over the Card it clasps and anything at all over a Fabric, because those are what
+ * an Adapter and a Fabric are for. A creation surface asking "is there room for a new box here?" wants the opposite
+ * conclusion from the same number: a new Card dropped onto the Message bus Fabric is precisely the case the rule
+ * excuses and a placement search must not, because the Producer's first gesture would be to drag it back off.
+ *
+ * `ADR-INFOSCHEMATICS-036` says a checker measures and never repairs, and `ADR-INFOSCHEMATICS-042` reads that as
+ * authority over the document rather than custody of geometry: asking how far two boxes intersect is not asking the
+ * checker to move either of them. So the measurement is shared and the rule is not, and the alternative — a second
+ * copy of this arithmetic inside an editor — is the silent drift `AGENTS.md` warns about.
+ */
+export const measuredOverlap = (left: Box, right: Box): MeasuredOverlap | undefined => {
   const width = Math.min(left.x + left.width, right.x + right.width) - Math.max(left.x, right.x)
   const height = Math.min(left.y + left.height, right.y + right.height) - Math.max(left.y, right.y)
   return width > 0 && height > 0 ? { area: width * height, height, width } : undefined
@@ -165,7 +183,7 @@ const overlapFindings = (artefacts: readonly DrawnArtefact[]): readonly DrawingF
       if (!one || !other) continue
       if (one.kind === 'Fabric' || other.kind === 'Fabric') continue
       if (one.holding === other.code || other.holding === one.code) continue
-      const shared = overlap(one.box, other.box)
+      const shared = measuredOverlap(one.box, other.box)
       if (!shared) continue
       findings.push(
         found(

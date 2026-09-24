@@ -12,6 +12,7 @@ import {
   removeArtefactOperation,
   sameArtefact
 } from '@infoschematics/view-model/editable'
+import type { Box } from '@infoschematics/view-model/geometry'
 import { orderSourceChanges, type SourceChangeOrder } from './source-changes.ts'
 
 /**
@@ -268,6 +269,35 @@ export const createdArtefactDetails = (operation: CreateArtefactOperation): Edit
         selection: target
       }
     : undefined
+}
+
+/**
+ * The extents the pending edits already claim, for a surface that has to place something without landing on them.
+ *
+ * A creation is the case that matters: a Card made twice before either operation is written exists only here, so a
+ * placement reading the runtime alone would put the second one on the first. A move or a resize is carried too,
+ * because its geometry is where the artefact is *now* rather than where the document still says it is.
+ *
+ * The vacated position is deliberately not subtracted. A moved artefact's authored box may still be reported by
+ * whatever the caller reads alongside this, so the two together describe a superset of what is occupied — which costs
+ * a placement search a position it could have used and never costs it correctness, and the caller's fallback means a
+ * Card is produced either way.
+ */
+export const pendingArtefactBoxes = (operations: readonly ArtefactDraftOperation[]): readonly Box[] => {
+  const removed = new Set(
+    operations.filter((operation) => operation.operation === 'remove').map((operation) => operation.target.id)
+  )
+  return operations.flatMap((operation) => {
+    if (removed.has(operation.target.id)) return []
+    if (operation.operation === 'create') {
+      const geometry = createdArtefactDetails(operation)?.geometry
+      return geometry?.role === 'box' ? [geometry.box] : []
+    }
+    if (operation.operation === 'move' || operation.operation === 'resize') {
+      return operation.geometry.role === 'box' ? [operation.geometry.box] : []
+    }
+    return []
+  })
 }
 
 const flowSelection = (flow: InfoschematicConfig['infoschematic']['flows'][number]) =>

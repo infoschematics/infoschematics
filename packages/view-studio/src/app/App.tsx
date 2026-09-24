@@ -26,7 +26,7 @@ import {
   type CreatedFlow,
   movableBox
 } from '@infoschematics/view-model/editable'
-import type { Box, Point } from '@infoschematics/view-model/geometry'
+import type { Point } from '@infoschematics/view-model/geometry'
 import { portsForBox } from '@infoschematics/view-model/ports'
 import { routeBetweenPorts } from '@infoschematics/view-model/routing'
 import {
@@ -37,7 +37,8 @@ import {
 import { cueStageHold, type PresentProps, useCueCadence } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { directOptionsFor } from './direct-targets.ts'
-import { nextArtefactIndex } from './editor/artefact-operations.ts'
+import { nextArtefactIndex, pendingArtefactBoxes } from './editor/artefact-operations.ts'
+import { roomForCard } from './editor/card-placement.ts'
 import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
 import {
   isStudioDocumentAcknowledgement,
@@ -170,22 +171,6 @@ const identifierFrom = (name: string) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-
-/**
- * Where a new card lands.
- *
- * The middle of the Infoschematic, stepped along for each card already made this
- * session so a second does not hide the first. It is put somewhere visible
- * rather than somewhere correct - a card belongs where its architecture puts
- * it, which is a judgment, and dragging it there is a gesture the editor
- * already has.
- */
-const roomForCard = (viewBox: Box, made: number): Box => ({
-  height: 80,
-  width: 160,
-  x: viewBox.x + viewBox.width / 2 - 80 + made * 20,
-  y: viewBox.y + viewBox.height / 2 - 40 + made * 20
-})
 
 type StudioSourceProps =
   | Readonly<{
@@ -723,9 +708,13 @@ function AppContent({
       const made = editor.artefactOperations.filter(
         (operation) => operation.operation === 'create' && operation.target.kind === 'card'
       ).length
-      const heldBox = held
-        ? infoschematicPlaceables(visibleScopes).find((candidate) => candidate.id === held.id)?.box
-        : undefined
+      /*
+       * Everything a new Card has to stay off: the artefacts the document draws, read where a drag has left them
+       * rather than where they were authored, and the boxes the pending edits have already claimed. An Adapter is not
+       * placed at all — `ADR-INFOSCHEMATICS-032` draws it from the Card it clasps — so it consults none of this.
+       */
+      const drawn = infoschematicPlaceables(visibleScopes, { offsets: movedComponents, portCounts: editor.portCounts })
+      const heldBox = held ? drawn.find((candidate) => candidate.id === held.id)?.box : undefined
       editor.createArtefact(
         'card',
         {
@@ -734,7 +723,12 @@ function AppContent({
           id: identifierFrom(held ? `${held.label} adapter` : code),
           label,
           placement: {
-            box: heldBox ?? roomForCard(runtime.infoschematicViewBox, made),
+            box:
+              heldBox ??
+              roomForCard(runtime.infoschematicViewBox, made, [
+                ...drawn.map((candidate) => candidate.box),
+                ...pendingArtefactBoxes(editor.artefactOperations)
+              ]),
             ports: held ? { east: 0, north: 0, south: 3, west: 0 } : { east: 3, north: 3, south: 3, west: 3 }
           },
           scope,
@@ -748,9 +742,11 @@ function AppContent({
       compatibilityConfig,
       editor.artefactOperations,
       editor.createArtefact,
+      editor.portCounts,
       infoschematicPlaceables,
       infoschematicRegister,
       infoschematicScopes,
+      movedComponents,
       runtime.infoschematicViewBox,
       visibleScopes,
       wrappable

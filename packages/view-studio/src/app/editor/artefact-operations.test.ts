@@ -20,6 +20,7 @@ import {
   effectiveArtefactOperation,
   effectiveArtefactValue,
   type PropertyPatch,
+  pendingArtefactBoxes,
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
@@ -520,5 +521,69 @@ describe('typed artefact operation lifecycle', () => {
     expect(undone.current.artefactOperations).toEqual([])
     expect(redoEditorDraft(undone).current.artefactOperations).toEqual([latest])
     expect(artefactOperationKey(latest)).toBe('card:card-one:move')
+  })
+})
+
+/**
+ * What a pending edit has already claimed, for a creation surface that must not place anything on top of it.
+ *
+ * `INFOSCHEMATICS-TOOL-125`: a second Card made before the first creation is written exists only in these operations,
+ * so a placement reading the drawn runtime alone would put one squarely on the other.
+ */
+describe('pendingArtefactBoxes', () => {
+  it('carries the extent of every creation that has one, and skips the one that has not', () => {
+    const operations = [
+      createArtefactOperation(card, config.infoschematic.cards[0]!, 0),
+      createArtefactOperation(fabric, config.infoschematic.fabrics[0]!, 1),
+      createArtefactOperation(graphic, config.infoschematic.graphics[0]!, 2),
+      createArtefactOperation(region, config.infoschematic.regions[0]!, 3),
+      // A Point has a position and no extent, so there is no box for it to claim.
+      createArtefactOperation(point, config.infoschematic.points[0]!, 4),
+      // A Flow is a path rather than a place.
+      createArtefactOperation(flow, config.infoschematic.flows[0]!, 5)
+    ].filter((operation): operation is NonNullable<typeof operation> => operation !== undefined)
+
+    expect(pendingArtefactBoxes(operations)).toEqual([
+      { height: 80, width: 120, x: 20, y: 30 },
+      { height: 100, width: 180, x: 300, y: 30 },
+      { height: 60, width: 80, x: 100, y: 100 },
+      { height: 100, radius: 4, width: 500, x: 0, y: 0 }
+    ])
+  })
+
+  /* Where the artefact is now, not where the document still says it was: a placement consulting the authored box
+     alone would refuse a position nothing occupies and offer one something has just been dragged onto. */
+  it('carries a move and a resize at their new geometry', () => {
+    const moved = moveArtefactOperation(
+      card,
+      { box: { height: 80, width: 120, x: 20, y: 30 }, role: 'box' },
+      {
+        dx: 40,
+        dy: 0
+      }
+    )!
+    const resized = resizeArtefactOperation(
+      fabric,
+      { box: { height: 100, width: 180, x: 300, y: 30 }, role: 'box' },
+      {
+        height: 140,
+        width: 200
+      }
+    )!
+    expect(pendingArtefactBoxes([moved, resized])).toEqual([
+      { height: 80, width: 120, x: 60, y: 30 },
+      { height: 140, width: 200, x: 300, y: 30 }
+    ])
+  })
+
+  /* A removal takes the space back. Holding a removed artefact's box would make a Producer clearing room for a Card
+     find that clearing it changed nothing. */
+  it('drops everything belonging to an artefact a pending removal takes out', () => {
+    const created = createArtefactOperation(card, config.infoschematic.cards[0]!, 0)!
+    expect(pendingArtefactBoxes([created, removeArtefactOperation(card)])).toEqual([])
+  })
+
+  it('reports nothing at all when no edit is pending', () => {
+    expect(pendingArtefactBoxes([])).toEqual([])
   })
 })

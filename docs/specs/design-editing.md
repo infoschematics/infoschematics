@@ -274,6 +274,18 @@ _Verify:_ `packages/view-studio/src/app/editor/library.test.ts` asserts the give
 
 _Evidence:_ `detailsArtefactContexts` in `packages/view-studio/src/app/panels/DetailsPanel.tsx` supplies `collection`, and `instantiateLibraryTemplate` in `packages/view-studio/src/app/editor/library.ts` writes `domain` only when it has one and places through `placedBox`. Naming a Scope as though it were a Collection made a document `projectStudioDocumentOperations` rejected whole, so nothing was written at all.
 
+### EDIT-026 — A created element is placed clear of what is already drawn
+
+An element Studio creates MUST be placed clear of the artefacts already drawn where the view allows it: the position offered MUST NOT overlap an authored artefact at its current drawn position, nor a box a pending edit has already claimed. Where no clear position is available inside the view, Studio MUST still place the element somewhere visible rather than refusing to create it.
+
+The placement is provisional in every case. It states nothing about where the element belongs, which is a judgement about architecture the [Producer](../reference/vocabulary.md#producer) makes by dragging it; Studio MUST NOT lay the document out.
+
+_Conformance:_ conforming
+
+_Verify:_ create a Card into a document whose centre is occupied, and read where it lands: it MUST overlap nothing drawn and MUST sit wholly inside the view. Create a second before writing the first and the second MUST avoid the first, which is still only pending. Occupy the whole view and one MUST still be created. `packages/view-studio/src/app/editor/card-placement.test.ts` holds each case, and `packages/view-studio/src/app/App.browser.test.tsx` asserts it through rendered geometry.
+
+_Evidence:_ `roomForCard` in `packages/view-studio/src/app/editor/card-placement.ts` searches outward from the stepped view-box centre and falls back to it; `pendingArtefactBoxes` in `packages/view-studio/src/app/editor/artefact-operations.ts` supplies what the pending edits have claimed; the overlap test is `measuredOverlap` in `packages/view-model/src/diagnostics.ts`, shared with the `artefacts-overlap` rule but not with its exemptions, per [`ADR-INFOSCHEMATICS-042`](../decisions/ADR-INFOSCHEMATICS-042-share-the-measurement-never-the-rule.md). The rule excuses a Card drawn on a [Fabric](../reference/vocabulary.md#fabric) and the placement must not, because the Message bus is what a new Card kept landing on.
+
 ## Gaps
 
 - `EDIT-018`'s compositions are recorded in [Composition](composition.md): with `ROUTE-001` as `COMPOSE-002`, where a committed move of a Card can leave a route the renderer refuses, and with `PRESENT-010` as `COMPOSE-005`, over the keystrokes a placement field and the Diagram's zoom control both claim.
