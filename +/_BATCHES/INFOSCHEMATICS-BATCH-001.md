@@ -40,3 +40,5 @@ Four items carry a decision inside their own boundary — the serial-gap disposi
 
 | Item | Result | Baseline | Result commit | Exception |
 | --- | --- | --- | --- | --- |
+| INFOSCHEMATICS-TOOL-127 | awaiting-review | `6dfc6d5` | `09d820b` | None |
+| INFOSCHEMATICS-TOOL-107 | parked | `09d820b` | — | Where the authoring skill lives is a governance decision this repository has not taken |

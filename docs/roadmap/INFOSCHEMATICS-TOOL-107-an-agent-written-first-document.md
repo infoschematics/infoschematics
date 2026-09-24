@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T09:30:00Z
-updated_at: 2026-09-22T19:40:00Z
+updated_at: 2026-09-24T18:00:00Z
 ---
 
 # An agent-written first document
@@ -106,3 +106,17 @@ The reason the inside answer wins is the one stated against it: the repository d
 Also settled by the owner on 2026-09-21, and it changes the acceptance bar rather than the design. The skill is there to get a document started or to have one amended; it does not have to get it right. Whatever it leaves, the editor resolves — and where an issue needs a judgement, a conversation about it is part of the work rather than a failure of the skill.
 
 That makes one thing explicit which the record had left as an open question: a skill that reports an unresolved document, naming what it could not fix, is behaving correctly. The failure mode to design against is not an imperfect drawing; it is a skill that claims a clean result it did not achieve, because that is the one outcome a person cannot act on.
+
+### Parked on 2026-09-24
+
+Parked by `INFOSCHEMATICS-BATCH-001` before implementation, on a question the record cannot answer itself: **where the skill lives**. The record recorded the answer as "this repository", and that answer has no supported shape here.
+
+This repository tracks no skill content at all. `.agents/skills/` and `.claude/skills/` hold runtime discovery links to the harness and are ignored by `.gitignore`, with one negation — `!.agents/skills/ki-self/` — reserving a slot that does not exist. That slot is the only committed repository-local skill source the `ki-skills` standard recognises, its name is locked to `ki-self` by the rubric's name-matches-directory rule, and it is meant for a repository's own governance rubric rather than a product authoring skill.
+
+The path this record proposes, a top-level `skills/`, is the harness layout. Creating it here makes this repository look like a skills-publishing repository to `ki repo audit`, whose coverage cascade fails a detected-but-undeclared standard. Clearing that failure means declaring `[skills.ki-skills]` in `.ki.toml`, which is a governance commitment — the full SKILL.md rubric, REFRESH ownership, a publication shape — that nothing else in this repository has taken on. The record's own Verify step cannot run either: `ki-skills` is not installed in this checkout.
+
+So the decision owed is not a detail of the skill. It is whether Infoschematics becomes a skill-publishing repository, or whether the authoring skill ships from the harness or a plugin repository and consumes this repository's published contract. Delivering against the record as written would produce a repository that fails its own audit.
+
+Everything the skill would stand on is delivered and needs no re-investigation. `infoschematics check` is real, with `--json` returning `{ document, findings, unreadable }`. A finding is `DrawingFinding` in `packages/view-model/src/diagnostics.ts`, carrying `rule`, `concerns`, `measured`, `reads`, `repairs` and `severity` across seven stable rule codes.
+
+One correction to the record's premise while it is open: `repairs` is `readonly string[]` — English sentences, not structured fixes. The machine-readable triple a repair loop can key off is `rule`, `concerns` and `measured`. The loop the record describes is coded in its rule selection and prose in its repair, which changes what the skill has to do and is worth knowing before it is planned again.
