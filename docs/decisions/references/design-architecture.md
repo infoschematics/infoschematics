@@ -39,7 +39,8 @@ The reasons for this direction are recorded in [the framework-neutral library de
 
 @infoschematics/cli
 ├── @infoschematics/domain-core
-└── @infoschematics/render-svg
+├── @infoschematics/render-svg
+└── @infoschematics/view-model
 
 @infoschematics/is-blank
 └── @infoschematics/domain-core
@@ -50,12 +51,18 @@ The reasons for this direction are recorded in [the framework-neutral library de
 @infoschematics/is-system
 └── @infoschematics/domain-core
 
+@infoschematics/is-showcase
+└── @infoschematics/domain-core
+
 @infoschematics/site
+├── @infoschematics/domain-core
 ├── @infoschematics/render-svg
+├── @infoschematics/view-canvas
+├── @infoschematics/view-present
 ├── @infoschematics/view-studio
 ├── @infoschematics/is-blank
 ├── @infoschematics/is-infoschematics
-└── @infoschematics/is-system
+└── @infoschematics/is-showcase
 ```
 
 Dependencies point downward. Domain Model is the dependency root. Domain Core validates and normalises its serialisable contract; View Model consumes that canonical behaviour before deriving renderer-neutral runtime state. Neither imports an interactive View, authored Infoschematic, or Site. Authored Infoschematics do not import interactive Views. Site consumes public package exports rather than package internals.
@@ -85,6 +92,7 @@ Bun treats every package, application, and example as part of one workspace grap
 - `examples/is-blank` owns an independently authored, serialisable blank definition and depends only on Domain Core.
 - `examples/is-infoschematics` owns independently authored, serialisable homepage-overview and self-description definitions used by static and interactive hosts and depends only on Domain Core.
 - `examples/is-system` owns the independently authored, serialisable four-stage journey definition and depends only on Domain Core.
+- `examples/is-showcase` owns an independently authored, serialisable definition exercising every capability the document contract offers, and depends only on Domain Core.
 - `apps/site` owns the public homepage, documentation presentation, example routing, static assets, and Cloudflare deployment boundary.
 
 Authored Infoschematic examples use the `is-` prefix. Reusable packages and host applications use role-based names. Published package names retain the `@infoschematics/*` namespace.
