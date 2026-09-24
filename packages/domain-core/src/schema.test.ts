@@ -112,3 +112,48 @@ describe('infoschematicJsonSchema', () => {
     expect(JSON.stringify(emitted)).toContain('^(N|E|S|W)')
   })
 })
+
+describe('document promises', () => {
+  const promised = (promises: unknown) => infoschematicSchema.safeParse({ ...minimal, promises })
+
+  it('leaves a document that declares nothing exactly as valid, and accepts one of every kind', () => {
+    expect(infoschematicSchema.safeParse(minimal).success).toBe(true)
+    expect(promised([]).success).toBe(true)
+    expect(
+      promised([
+        { id: 'STARTS', kind: 'origin', label: 'Readings begin at the inlet', allowed: ['IN'] },
+        { id: 'ENDS', kind: 'terminus', label: 'Readings end at the outlet', allowed: ['OUT'] },
+        { id: 'SPEAKS', kind: 'relationship', label: 'One speaks to two', from: ['ONE'], to: ['TWO'] },
+        { id: 'TRACES', kind: 'path', label: 'The document traces end to end', from: ['IN'], to: ['OUT'] }
+      ]).success
+    ).toBe(true)
+  })
+
+  it('normalises the artefacts a promise is written over as a sorted set', () => {
+    const parsed = promised([{ id: 'STARTS', kind: 'origin', label: 'Begins', allowed: ['TWO', 'IN', 'TWO'] }])
+    expect(parsed.success && parsed.data.promises?.[0]).toEqual({
+      id: 'STARTS',
+      kind: 'origin',
+      label: 'Begins',
+      allowed: ['IN', 'TWO']
+    })
+  })
+
+  it('refuses a promise carrying the fields of a kind it is not', () => {
+    expect(promised([{ id: 'STARTS', kind: 'origin', label: 'Begins', from: ['IN'], to: ['OUT'] }]).success).toBe(false)
+    expect(
+      promised([{ id: 'TRACES', kind: 'path', label: 'Traces', from: ['IN'], to: ['OUT'], allowed: ['IN'] }]).success
+    ).toBe(false)
+    expect(promised([{ id: 'GUESS', kind: 'somewhere', label: 'Guess', allowed: ['IN'] }]).success).toBe(false)
+  })
+
+  it('refuses a promise about nothing, because an empty end could never be checked', () => {
+    expect(promised([{ id: 'STARTS', kind: 'origin', label: 'Begins', allowed: [] }]).success).toBe(false)
+    expect(promised([{ id: 'TRACES', kind: 'path', label: 'Traces', from: ['IN'], to: [] }]).success).toBe(false)
+  })
+
+  it('requires a promise to say what it means, so a finding can read it back', () => {
+    expect(promised([{ id: 'STARTS', kind: 'origin', allowed: ['IN'] }]).success).toBe(false)
+    expect(promised([{ kind: 'origin', label: 'Begins', allowed: ['IN'] }]).success).toBe(false)
+  })
+})

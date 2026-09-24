@@ -1,4 +1,5 @@
-import type { InfoschematicInput } from '@infoschematics/domain-model'
+import { defineInfoschematicModel, infoschematicModelOf } from '@infoschematics/domain-core'
+import type { DefinedInfoschematic, DocumentPromise, InfoschematicInput } from '@infoschematics/domain-model'
 import { adapterBoundsFor } from './assembly.ts'
 import { type Box, type Point, pointAlongRoute, routeLength, routePoints } from './geometry.ts'
 import { createInfoschematicRuntime, type RuntimeFlow } from './runtime.ts'
@@ -410,3 +411,248 @@ export const reviewInfoschematicDrawing = (input: InfoschematicInput): readonly 
 /** Whether findings should fail a gate: an error always does, an observation never does. */
 export const drawingIsUnreadable = (findings: readonly DrawingFinding[]) =>
   findings.some((entry) => entry.severity === 'error')
+
+/**
+ * What the document promised about its own meaning, and whether it still holds.
+ *
+ * Everything above measures a drawing. This measures a claim: the author states where a reading may begin, where it
+ * must end, which relationship must exist and which run of Flows must stay traceable, and an edit made months later
+ * either keeps that or does not. Nothing here is geometry — the same boxes in the same places break a promise or keep
+ * it depending only on what was declared — so none of it consults a bound, a route or a port.
+ */
+
+/**
+ * A promise rule code is a sibling contract to `DrawingRuleCode` rather than a member of it.
+ *
+ * `DrawingRuleCode` is a public contract about a *drawing*, and the doc comment above says so: every code in it is a
+ * measurement of geometry, and a pipeline allowlisting `artefacts-overlap` is saying something about layout. Folding
+ * these codes into that union would quietly widen what the older name means for everything already keying off it. The
+ * two unions share the finding shape instead, which is what makes a broken promise read like a geometric finding
+ * without pretending to be one.
+ */
+export type PromiseRuleCode =
+  | 'promise-origin-not-allowed'
+  | 'promise-path-broken'
+  | 'promise-relationship-missing'
+  | 'promise-terminus-not-allowed'
+
+/**
+ * A broken promise carries the shape of a drawing finding, and only one severity.
+ *
+ * `DrawingSeverity` splits because a geometric finding is the checker's own judgement about a drawing and an author may
+ * reasonably disagree: a cramped document is not a wrong one. A promise is the author's own assertion about the
+ * document's meaning, so there is nobody left to disagree with — breaking one is unambiguously wrong, and an
+ * observation that let it pass would make declaring anything decorative.
+ */
+export type PromiseFinding = Readonly<{
+  /** The promise, then the authored identities that broke it, in the order the rule names them. */
+  concerns: readonly string[]
+  /** What the rule counted, so a caller can rank findings without re-deriving the graph. */
+  measured: Readonly<Record<string, number>>
+  /** One sentence naming the promise and what broke it, for a person reading a terminal. */
+  reads: string
+  /** The changes that would legally clear this finding, one of which is always withdrawing the promise. */
+  repairs: readonly string[]
+  rule: PromiseRuleCode
+  severity: Extract<DrawingSeverity, 'error'>
+}>
+
+const promised = (
+  rule: PromiseRuleCode,
+  concerns: readonly string[],
+  measured: Readonly<Record<string, number>>,
+  reads: string,
+  repairs: readonly string[]
+): PromiseFinding => ({ concerns, measured, reads, repairs, rule, severity: 'error' })
+
+/** One direction a Flow can be read in. A bidirectional Flow contributes both, because a reader may follow either. */
+type FlowEdge = Readonly<{ from: string; to: string }>
+
+/**
+ * Every artefact a reading reaches from `starts`, following Flows in the direction they are drawn.
+ *
+ * Breadth-first over an explicit queue rather than recursion, because a document is free to describe a cycle and a
+ * naive walk would never come back out of one. This is the traversal the repository did not have: `routing.ts`
+ * computes the polyline a Flow is drawn along and answers nothing about what reaches what.
+ */
+const reachedFrom = (edges: readonly FlowEdge[], starts: readonly string[]): ReadonlySet<string> => {
+  const leaving = new Map<string, string[]>()
+  for (const edge of edges) leaving.set(edge.from, [...(leaving.get(edge.from) ?? []), edge.to])
+  const reached = new Set(starts)
+  const queue = [...reached]
+  for (let index = 0; index < queue.length; index += 1) {
+    const node = queue[index]
+    for (const next of (node === undefined ? undefined : leaving.get(node)) ?? []) {
+      if (reached.has(next)) continue
+      reached.add(next)
+      queue.push(next)
+    }
+  }
+  return reached
+}
+
+type PromiseGraph = Readonly<{
+  /** Every artefact a Flow can meet, in authored order, so findings come out in a stable sequence. */
+  artefacts: readonly string[]
+  arriving: ReadonlyMap<string, number>
+  edges: readonly FlowEdge[]
+  /** What an authored end stands for: a code for itself, a Scope for the artefacts it covers. */
+  endsOf: (ends: readonly string[]) => readonly string[]
+  leaving: ReadonlyMap<string, number>
+}>
+
+const tallied = (values: readonly string[]): ReadonlyMap<string, number> => {
+  const counts = new Map<string, number>()
+  for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1)
+  return counts
+}
+
+const promiseGraphOf = (model: DefinedInfoschematic): PromiseGraph => {
+  const artefacts = [...model.diagram.cards, ...model.diagram.fabrics, ...model.diagram.points].map(
+    (element) => element.id
+  )
+  const known = new Set(artefacts)
+  const edges = model.diagram.flows.flatMap((flow): readonly FlowEdge[] => {
+    const forward = { from: flow.source.element, to: flow.target.element }
+    return flow.direction === 'bidirectional'
+      ? [forward, { from: flow.target.element, to: flow.source.element }]
+      : [forward]
+  })
+  const covers = new Map(model.scopes.map((scope) => [scope.id, scope.elements.filter((id) => known.has(id))]))
+  return {
+    arriving: tallied(edges.map((edge) => edge.to)),
+    artefacts,
+    edges,
+    /*
+     * A Scope may also cover a Region or an Overlay, and no reading is ever traced through one, so only the artefacts
+     * survive. Domain Core has already refused an end that names neither an artefact nor a Scope, which is why an
+     * unresolved name cannot reach here as a silently empty set.
+     */
+    endsOf: (ends) => [...new Set(ends.flatMap((end) => covers.get(end) ?? [end]))],
+    leaving: tallied(edges.map((edge) => edge.from))
+  }
+}
+
+/** An artefact a Flow leaves and none arrives at begins a reading; one no Flow touches at all begins nothing. */
+const originFindings = (
+  promise: Extract<DocumentPromise, { kind: 'origin' }>,
+  graph: PromiseGraph
+): readonly PromiseFinding[] => {
+  const allowed = new Set(graph.endsOf(promise.allowed))
+  return graph.artefacts
+    .filter((code) => (graph.leaving.get(code) ?? 0) > 0 && (graph.arriving.get(code) ?? 0) === 0 && !allowed.has(code))
+    .map((code) =>
+      promised(
+        'promise-origin-not-allowed',
+        [promise.id, code],
+        { allowed: allowed.size, leaving: graph.leaving.get(code) ?? 0 },
+        `Promise ${promise.id} allows a reading to begin at ${allowed.size} artefacts, and ${code} begins one with ${graph.leaving.get(code) ?? 0} Flow leaving it and none arriving.`,
+        [
+          `Draw a Flow arriving at ${code}, so it no longer begins a reading.`,
+          `Name ${code}, or a Scope covering it, among the origins ${promise.id} allows.`,
+          `Withdraw promise ${promise.id} if the document no longer means it.`
+        ]
+      )
+    )
+}
+
+/** An artefact a Flow arrives at and none leaves ends a reading. */
+const terminusFindings = (
+  promise: Extract<DocumentPromise, { kind: 'terminus' }>,
+  graph: PromiseGraph
+): readonly PromiseFinding[] => {
+  const allowed = new Set(graph.endsOf(promise.allowed))
+  return graph.artefacts
+    .filter((code) => (graph.arriving.get(code) ?? 0) > 0 && (graph.leaving.get(code) ?? 0) === 0 && !allowed.has(code))
+    .map((code) =>
+      promised(
+        'promise-terminus-not-allowed',
+        [promise.id, code],
+        { allowed: allowed.size, arriving: graph.arriving.get(code) ?? 0 },
+        `Promise ${promise.id} allows a reading to end at ${allowed.size} artefacts, and ${code} ends one with ${graph.arriving.get(code) ?? 0} Flow arriving at it and none leaving.`,
+        [
+          `Draw a Flow leaving ${code}, so it no longer ends a reading.`,
+          `Name ${code}, or a Scope covering it, among the terminals ${promise.id} allows.`,
+          `Withdraw promise ${promise.id} if the document no longer means it.`
+        ]
+      )
+    )
+}
+
+/**
+ * A required relationship is one Flow running directly between the two ends.
+ *
+ * A Flow found running the other way is counted and reported, because reversing an endpoint is the single most likely
+ * way this breaks and a finding that said only `0` would leave the author looking for a Flow that is already there.
+ */
+const relationshipFindings = (
+  promise: Extract<DocumentPromise, { kind: 'relationship' }>,
+  graph: PromiseGraph
+): readonly PromiseFinding[] => {
+  const from = new Set(graph.endsOf(promise.from))
+  const to = new Set(graph.endsOf(promise.to))
+  if (graph.edges.some((edge) => from.has(edge.from) && to.has(edge.to))) return []
+  const reversed = graph.edges.filter((edge) => to.has(edge.from) && from.has(edge.to)).length
+  return [
+    promised(
+      'promise-relationship-missing',
+      [promise.id, ...promise.from, ...promise.to],
+      { ends: to.size, reversed, starts: from.size },
+      `Promise ${promise.id} requires a Flow from ${promise.from.join(' or ')} to ${promise.to.join(' or ')}, and the document draws none${reversed > 0 ? `, though ${reversed} runs the other way` : ''}.`,
+      [
+        `Draw a Flow from ${promise.from.join(' or ')} to ${promise.to.join(' or ')}.`,
+        `Turn a Flow already drawn between them the way ${promise.id} reads.`,
+        `Withdraw promise ${promise.id} if the document no longer means it.`
+      ]
+    )
+  ]
+}
+
+/** A required path is any run of Flows, of any length, that a reader can still follow from one end to the other. */
+const pathFindings = (
+  promise: Extract<DocumentPromise, { kind: 'path' }>,
+  graph: PromiseGraph
+): readonly PromiseFinding[] => {
+  const from = graph.endsOf(promise.from)
+  const to = graph.endsOf(promise.to)
+  const reached = reachedFrom(graph.edges, from)
+  if (to.some((code) => reached.has(code))) return []
+  return [
+    promised(
+      'promise-path-broken',
+      [promise.id, ...promise.from, ...promise.to],
+      { ends: to.length, reached: reached.size, starts: from.length },
+      `Promise ${promise.id} requires a path from ${promise.from.join(' or ')} to ${promise.to.join(' or ')}, and following every Flow from ${from.length} starting artefacts reaches ${reached.size} artefacts without reaching any of the ${to.length} it must.`,
+      [
+        `Restore the Flow the path was traced through, so ${promise.to.join(' or ')} is reachable again.`,
+        `Draw another run of Flows from ${promise.from.join(' or ')} to ${promise.to.join(' or ')}.`,
+        `Withdraw promise ${promise.id} if the document no longer means it.`
+      ]
+    )
+  ]
+}
+
+/**
+ * Review what a definition promises about its own meaning and report every promise it no longer keeps.
+ *
+ * A document that promises nothing returns an empty list, which is not a special case here: there is nothing to walk.
+ * Like the drawing review, nothing is moved and nothing is written — the finding says what would restore the reading
+ * and leaves the choice, including withdrawing the promise, to whoever is authoring it.
+ */
+export const reviewInfoschematicPromises = (input: InfoschematicInput): readonly PromiseFinding[] => {
+  const model = defineInfoschematicModel('infoschematic' in input ? infoschematicModelOf(input) : input)
+  const graph = promiseGraphOf(model)
+  return model.promises
+    .flatMap((promise): readonly PromiseFinding[] => {
+      if (promise.kind === 'origin') return originFindings(promise, graph)
+      if (promise.kind === 'terminus') return terminusFindings(promise, graph)
+      if (promise.kind === 'relationship') return relationshipFindings(promise, graph)
+      return pathFindings(promise, graph)
+    })
+    .sort((one, other) => promiseOrder(one).localeCompare(promiseOrder(other)))
+}
+
+const promiseOrder = (finding: PromiseFinding) => [finding.rule, ...finding.concerns].join('\t')
+
+/** Whether findings should fail a gate. Every broken promise does, because the author is the one who declared it. */
+export const promisesAreBroken = (findings: readonly PromiseFinding[]) => findings.length > 0

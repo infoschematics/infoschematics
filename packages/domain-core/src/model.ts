@@ -401,6 +401,7 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
       })),
       regions: input.diagram.regions ?? []
     },
+    promises: input.promises ?? [],
     scopes: input.scopes ?? [],
     specifications: (input.specifications ?? []).map((group) => ({
       ...group,
@@ -485,6 +486,22 @@ export const defineInfoschematicModel = (input: Infoschematic): DefinedInfoschem
   }
   for (const scope of model.scopes) {
     for (const element of scope.elements) requireReference(elementIds, element, `Architectural Scope ${scope.id}`)
+  }
+  /*
+   * A promise names ends, and an end is either an artefact a Flow can meet or a Scope standing for several of them.
+   * A Region or an Overlay named here would be a promise no reading could ever satisfy, so it is refused at load
+   * rather than reported as a broken promise for the rest of the document's life.
+   */
+  const promiseIds = new Set<string>()
+  for (const promise of model.promises) {
+    if (promiseIds.has(promise.id)) throw new Error(`Duplicate promise id: ${promise.id}`)
+    promiseIds.add(promise.id)
+    const ends =
+      promise.kind === 'origin' || promise.kind === 'terminus' ? promise.allowed : [...promise.from, ...promise.to]
+    for (const end of ends) {
+      if (endpointIds.has(end) || scopeIds.has(end)) continue
+      throw new Error(`Promise ${promise.id} references neither an artefact nor a Scope: ${end}`)
+    }
   }
   const specificationPaths = new Set<string>()
   const registerSpecificationPath = (path: string) => {

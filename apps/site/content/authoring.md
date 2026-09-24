@@ -173,6 +173,41 @@ A Scene may focus Flows because focus is durable presentation material. Present 
 
 Ensure the Flow's label, direction, endpoints, and surrounding explanation make sense in a still image. Interactive Canvas announces a signal and replaces travel with in-place emphasis for reduced-motion users; static SVG can show deterministic emphasis only when its caller explicitly requests Flow identifiers. A mark a renderer may run round an emphasised element's perimeter is a different thing from that travel: it is the renderer's own reading of an `emphasise-elements` declaration, taken from the element's geometry rather than from anything the document said, and there is no way to author it. Motion must never carry meaning absent from authored or persistent content.
 
+## Declare what the diagram must keep true
+
+You drew this to make one reading obvious: material enters here, passes through these stages, leaves there. Six months from now somebody who was not in the room deletes a Flow, and the drawing is still immaculate — the boxes line up, nothing overlaps, every check passes, and the reading you drew it for is gone. Write the reading down, under `promises`, and a checker will notice:
+
+```yaml
+promises:
+  - id: PROMISE-ORIGIN
+    kind: origin
+    label: A reading begins only where material enters
+    description: An artefact that quietly starts a reading of its own is a second story nobody asked for.
+    allowed: [INGEST, SCOPE-EDGE]
+  - id: PROMISE-TERMINUS
+    kind: terminus
+    label: Supervision is the only place a reading stops
+    allowed: [SUPERVISOR]
+  - id: PROMISE-RELATIONSHIP
+    kind: relationship
+    label: Ingest hands to Transform directly
+    from: [INGEST]
+    to: [TRANSFORM]
+  - id: PROMISE-PATH
+    kind: path
+    label: Material stays traceable from ingest to the edge
+    from: [INGEST]
+    to: [SCOPE-EDGE]
+```
+
+There are four kinds. An `origin` says where a reading may begin: every artefact a Flow leaves and none arrives at has to be one you allowed. A `terminus` says where one must end, the same way round. A `relationship` requires one Flow running directly between two ends. A `path` requires only that some run of Flows, of any length, still leads from one end to the other — which is the one to reach for when you care that a request reaches the database, and not which way round it goes.
+
+Every end is a list, and each name may be an artefact's code or the id of an [Architectural Scope](/docs/reference/vocabulary/#scope). The choice matters more than it looks. A promise written over a Scope survives an edit that replaces a component inside the boundary, because the boundary is what you were talking about; a promise written over that component's own code breaks — which is exactly what you want when you meant this component and not whatever happens to sit here. Write the one you mean.
+
+All of this is optional, and a document that declares nothing is exactly as valid as it ever was. Nothing is drawn from a promise either: no renderer reads them, so declaring one changes what a check can refuse and never what anybody sees on the page. An artefact no Flow touches — a legend, a thing you have not wired up yet — takes part in no reading, so it is neither an origin nor a terminus and no promise complains about it.
+
+When one breaks, the finding names the promise, names what broke it, and offers the repairs. One of those repairs is always withdrawing the promise. That is deliberate: a document is allowed to change its mind about what it is for. What it is not allowed to do is change its mind quietly.
+
 ## Author with Studio
 
 Open Design when you want the complete authored Infoschematic rather than the Audience's current Scope and Flow-family projection. Draft creates, movement, resize, property edits, within-kind ordering and safe removals appear immediately, but remain serialisable operations until the change set is applied to authored source.

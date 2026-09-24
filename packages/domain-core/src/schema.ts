@@ -56,10 +56,12 @@ const box = z
   .describe('A rectangle, written either as an object or as four numbers: x y width height.')
 
 const identifiers = z.array(z.string()).readonly()
+const sortedUnique = (values: readonly string[]): readonly string[] =>
+  [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0))
 const elementIdentifiers = z
   .array(z.string())
   .describe('Identifiers of the elements this applies to. Repeats are dropped and the list is sorted.')
-  .transform((values) => [...new Set(values)].sort((left, right) => (left < right ? -1 : left > right ? 1 : 0)))
+  .transform(sortedUnique)
   .readonly()
 
 const jsonValue: z.ZodType<JsonValue> = z.lazy(() =>
@@ -690,6 +692,52 @@ const specificationGroup = z.strictObject({
   specifications: z.array(specification).readonly().describe('The Specifications this group owns.')
 })
 
+const promiseSubjects = z
+  .array(z.string())
+  .min(1)
+  .describe('Artefact codes, Scope ids, or both. A Scope stands for the artefacts it covers.')
+  .transform(sortedUnique)
+  .readonly()
+
+const promiseIdentity = {
+  id: z.string().describe('Stable identifier, unique among promises. This is what a broken finding names.'),
+  label: z.string().describe('The reading this promise keeps, in the words a reader would use.'),
+  description: z.string().describe('Why the document must keep it, in a sentence.').optional()
+}
+
+/**
+ * A promise declares a reading the document must keep, and the kind decides which fields carry it.
+ *
+ * The discriminator is the same device the Dynamics use: the two ends of a required path and the allowed set of an
+ * origin are different statements rather than different values, so a strict union says so rather than accepting every
+ * field for every kind. No renderer reads any of it — a promise widens what a checker may refuse, never what an outlet
+ * has to draw.
+ */
+const documentPromise = z.discriminatedUnion('kind', [
+  z.strictObject({
+    ...promiseIdentity,
+    kind: z.literal('origin').describe('Constrain where a reading may begin.'),
+    allowed: promiseSubjects.describe('The only artefacts a Flow may leave without any Flow arriving at them.')
+  }),
+  z.strictObject({
+    ...promiseIdentity,
+    kind: z.literal('terminus').describe('Constrain where a reading must end.'),
+    allowed: promiseSubjects.describe('The only artefacts a Flow may arrive at without any Flow leaving them.')
+  }),
+  z.strictObject({
+    ...promiseIdentity,
+    kind: z.literal('relationship').describe('Require one Flow running directly between two ends.'),
+    from: promiseSubjects.describe('Where the required Flow leaves.'),
+    to: promiseSubjects.describe('Where the required Flow arrives.')
+  }),
+  z.strictObject({
+    ...promiseIdentity,
+    kind: z.literal('path').describe('Require a run of Flows that stays traceable between two ends.'),
+    from: promiseSubjects.describe('Where the required reading starts.'),
+    to: promiseSubjects.describe('Where the required reading has to reach.')
+  })
+])
+
 const diagram = z.strictObject({
   bounds: box.describe('The drawing area every element is placed within.'),
   gridSize: z
@@ -756,6 +804,11 @@ export const infoschematicSchema = z
       .array(architecturalScope)
       .readonly()
       .describe('Named groupings of elements, so a Scene can name many at once.')
+      .optional(),
+    promises: z
+      .array(documentPromise)
+      .readonly()
+      .describe('What the document promises about its own meaning, so an edit cannot quietly break the reading.')
       .optional(),
     specifications: z
       .array(specificationGroup)

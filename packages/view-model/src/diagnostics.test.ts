@@ -1,6 +1,11 @@
 import { formatInfoschematicIssue, parseInfoschematic } from '@infoschematics/domain-core'
 import { describe, expect, it } from 'vitest'
-import { drawingIsUnreadable, reviewInfoschematicDrawing } from './diagnostics.ts'
+import {
+  drawingIsUnreadable,
+  promisesAreBroken,
+  reviewInfoschematicDrawing,
+  reviewInfoschematicPromises
+} from './diagnostics.ts'
 
 /**
  * Every rule is held to a document that breaks it and a document that does not.
@@ -379,5 +384,248 @@ describe('drawingIsUnreadable', () => {
       bounds: 700 40 200 100`)
       )
     ).toBe(true)
+  })
+})
+
+/**
+ * A promise is proved against a document that keeps it and the same document with one edit that breaks it.
+ *
+ * The edit is deliberately a single removed Flow rather than four separate fixtures, because that is how a promise
+ * actually breaks: nobody sets out to violate a declaration, they delete one line and take four readings with it. A
+ * suite that broke each rule in its own hand-built document would never show that.
+ */
+const defaultFlows = `  flows:
+    - id: F1
+      link: IN E1 -> ONE W1
+    - id: F2
+      link: ONE E1 -> TWO W1
+    - id: F3
+      link: TWO E1 -> OUT W1`
+
+const pipeline = (promises: string, flows = defaultFlows) => `id: promise-probe
+title: Promise probe
+diagram:
+  bounds: 0 0 900 300
+  gridSize: 10
+  points:
+    - id: IN
+      label: In
+      at: 40 150
+      ports: 1
+    - id: OUT
+      label: Out
+      at: 860 150
+      ports: 1
+  cards:
+    - id: ONE
+      label: One
+      bounds: 200 100 160 100
+      ports: 1
+    - id: TWO
+      label: Two
+      bounds: 540 100 160 100
+      ports: 1
+${flows}
+scopes:
+  - id: EDGE
+    label: Edge
+    description: Where the document meets the world
+    elements:
+      - IN
+      - OUT
+${promises}`
+
+/** One promise of every kind, so each rule is exercised by a document a person could plausibly have written. */
+const everyKind = `promises:
+  - id: PROMISE-ORIGIN
+    kind: origin
+    label: Every reading begins at the edge
+    allowed:
+      - EDGE
+  - id: PROMISE-TERMINUS
+    kind: terminus
+    label: Every reading ends at the edge
+    allowed:
+      - EDGE
+  - id: PROMISE-RELATIONSHIP
+    kind: relationship
+    label: One speaks to Two directly
+    from:
+      - ONE
+    to:
+      - TWO
+  - id: PROMISE-PATH
+    kind: path
+    label: The document stays traceable end to end
+    from:
+      - IN
+    to:
+      - OUT
+`
+
+const modelOf = (source: string) => {
+  const parsed = parseInfoschematic(source, { pathname: 'promise-probe.yaml' })
+  if (!parsed.ok)
+    throw new Error(['The fixture is not a valid document:', ...parsed.issues.map(formatInfoschematicIssue)].join('\n'))
+  return parsed.model
+}
+
+const promiseFindingsFor = (source: string) => reviewInfoschematicPromises(modelOf(source))
+const named = (source: string) =>
+  promiseFindingsFor(source).map((finding) => [finding.rule, ...finding.concerns].join(' '))
+
+describe('reviewInfoschematicPromises', () => {
+  it('reports nothing about a document that keeps every promise it makes', () => {
+    expect(promiseFindingsFor(pipeline(everyKind))).toEqual([])
+    expect(promisesAreBroken(promiseFindingsFor(pipeline(everyKind)))).toBe(false)
+  })
+
+  it('leaves a document that declares nothing exactly as valid as it was', () => {
+    const silent = pipeline('')
+    expect(modelOf(silent).promises).toEqual([])
+    expect(promiseFindingsFor(silent)).toEqual([])
+    expect(promisesAreBroken(promiseFindingsFor(silent))).toBe(false)
+    expect(reviewInfoschematicDrawing(modelOf(silent))).toEqual(
+      reviewInfoschematicDrawing(modelOf(pipeline(everyKind)))
+    )
+  })
+
+  it('names the promise that broke when one Flow is removed', () => {
+    const severed = pipeline(
+      everyKind,
+      `  flows:
+    - id: F1
+      link: IN E1 -> ONE W1
+    - id: F3
+      link: TWO E1 -> OUT W1`
+    )
+    expect(named(severed)).toEqual([
+      'promise-origin-not-allowed PROMISE-ORIGIN TWO',
+      'promise-path-broken PROMISE-PATH IN OUT',
+      'promise-relationship-missing PROMISE-RELATIONSHIP ONE TWO',
+      'promise-terminus-not-allowed PROMISE-TERMINUS ONE'
+    ])
+    expect(promiseFindingsFor(severed).map((finding) => finding.measured)).toEqual([
+      { allowed: 2, leaving: 1 },
+      { ends: 1, reached: 2, starts: 1 },
+      { ends: 1, reversed: 0, starts: 1 },
+      { allowed: 2, arriving: 1 }
+    ])
+    expect(promiseFindingsFor(severed).every((finding) => finding.severity === 'error')).toBe(true)
+    expect(promisesAreBroken(promiseFindingsFor(severed))).toBe(true)
+    expect(named(severed)).toEqual(named(severed))
+  })
+
+  it('counts a required relationship drawn the other way rather than calling it absent', () => {
+    const reversed = pipeline(
+      everyKind,
+      `  flows:
+    - id: F1
+      link: IN E1 -> ONE W1
+    - id: F2
+      link: TWO W1 -> ONE E1
+    - id: F3
+      link: TWO E1 -> OUT W1`
+    )
+    const finding = promiseFindingsFor(reversed).find((entry) => entry.rule === 'promise-relationship-missing')
+    expect(finding?.measured).toEqual({ ends: 1, reversed: 1, starts: 1 })
+    expect(finding?.reads).toContain('runs the other way')
+    expect(finding?.repairs).toContain('Turn a Flow already drawn between them the way PROMISE-RELATIONSHIP reads.')
+  })
+
+  it('reads a bidirectional Flow in both directions when tracing a path', () => {
+    const both = pipeline(
+      `promises:
+  - id: PROMISE-BACK
+    kind: path
+    label: The archive can be traced back to the source
+    from:
+      - OUT
+    to:
+      - IN
+`,
+      `  flows:
+    - id: F1
+      link: IN E1 <-> ONE W1
+    - id: F2
+      link: ONE E1 <-> TWO W1
+    - id: F3
+      link: TWO E1 <-> OUT W1`
+    )
+    expect(promiseFindingsFor(both)).toEqual([])
+  })
+
+  it('treats an artefact no Flow touches as neither an origin nor a terminus', () => {
+    const aside = `id: promise-probe
+title: Promise probe
+diagram:
+  bounds: 0 0 900 300
+  gridSize: 10
+  points:
+    - id: IN
+      label: In
+      at: 40 150
+      ports: 1
+    - id: OUT
+      label: Out
+      at: 860 150
+      ports: 1
+  cards:
+    - id: LEGEND
+      label: Legend
+      bounds: 200 20 160 60
+  flows:
+    - id: F1
+      link: IN E1 -> OUT W1
+promises:
+  - id: PROMISE-ORIGIN
+    kind: origin
+    label: Readings begin at the inlet
+    allowed:
+      - IN
+  - id: PROMISE-TERMINUS
+    kind: terminus
+    label: Readings end at the outlet
+    allowed:
+      - OUT
+`
+    expect(promiseFindingsFor(aside)).toEqual([])
+  })
+
+  it('terminates on a document that describes a cycle', () => {
+    const circular = pipeline(
+      `promises:
+  - id: PROMISE-PATH
+    kind: path
+    label: The loop reaches the outlet
+    from:
+      - ONE
+    to:
+      - OUT
+`,
+      `  flows:
+    - id: F1
+      link: ONE E1 -> TWO W1
+    - id: F2
+      link: TWO S1 -> ONE N1
+    - id: F3
+      link: TWO E1 -> OUT W1`
+    )
+    expect(promiseFindingsFor(circular)).toEqual([])
+  })
+
+  it('resolves a promise written over a Scope to the artefacts the Scope covers', () => {
+    const scoped = pipeline(
+      `promises:
+  - id: PROMISE-EDGE
+    kind: path
+    label: The edge reaches itself through the middle
+    from:
+      - EDGE
+    to:
+      - TWO
+`
+    )
+    expect(promiseFindingsFor(scoped)).toEqual([])
   })
 })

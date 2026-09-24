@@ -118,6 +118,60 @@ _Verify:_ check one broken document both ways and compare what each form says ab
 
 _Evidence:_ `packages/cli/src/index.test.ts`, whose cases compare the prose and `--json` forms of one document.
 
+## Declared readings
+
+A drawing rule measures geometry the author did not state. These rules measure something the author did state: what the document promises about its own meaning, per [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-document-promises-what-it-means-and-a-checker-holds-it-to-it.md). They keep the `DRAW` series because a requirement id is a stable citation rather than a claim about what the finding measures, and because they are answered by the same review surface in the same finding shape.
+
+### DRAW-014 — A promise is reviewed apart from the drawing, and always as an error
+
+Reviewing promises MUST report findings in the same shape as a drawing finding — rule code, concerned identities, measurement, sentence, repairs, severity — while carrying its own rule codes rather than extending the drawing series, because a promise is not a fact about the layout: the same geometry keeps or breaks it depending only on what was declared. Every promise finding MUST be an error. A drawing finding may be an observation because it is the checker's judgement and an author may reasonably disagree with it; a promise is the author's own assertion, so there is nobody left to disagree. A document that declares nothing MUST report nothing and MUST stay exactly as valid as it was before promises existed. Every repair offered MUST include withdrawing the promise, because retiring a claim the document no longer makes is a legitimate repair and a checker that hid it would be prescribing the design.
+
+_Conformance:_ conforming
+
+_Verify:_ review a document that declares nothing and confirm both the promise list and the drawing list are unchanged by adding declarations that hold; then confirm no promise rule code appears in `DrawingRuleCode`.
+
+_Evidence:_ `PromiseFinding`, `PromiseRuleCode` and `promisesAreBroken` in `packages/view-model/src/diagnostics.ts`, exercised in `packages/view-model/src/diagnostics.test.ts`.
+
+### DRAW-015 — `promise-origin-not-allowed`
+
+An artefact that a Flow leaves and no Flow arrives at begins a reading. Where an `origin` promise is declared, every such artefact MUST be named by that promise, directly or through a [Scope](../reference/vocabulary.md#scope) covering it, and each one that is not MUST be reported with the promise's id, the offending code, the number of artefacts the promise allows, and the number of Flows leaving it. An artefact no Flow touches MUST NOT be reported, because it takes no part in any reading and complaining about it would complain about the legend rather than the explanation.
+
+_Conformance:_ conforming
+
+_Verify:_ declare the origins of a document that already reads, confirm nothing fires, then delete the Flow arriving at one interior artefact and read back the code it now names.
+
+_Evidence:_ `promise-origin-not-allowed` in `packages/view-model/src/diagnostics.ts`, with the untouched-artefact case held in `packages/view-model/src/diagnostics.test.ts`.
+
+### DRAW-016 — `promise-terminus-not-allowed`
+
+An artefact that a Flow arrives at and no Flow leaves ends a reading. Where a `terminus` promise is declared, every such artefact MUST be named by that promise or by a Scope covering it, and each one that is not MUST be reported with the promise's id, the offending code, the number of artefacts allowed, and the number of Flows arriving at it. A bidirectional Flow MUST be read in both directions, so an artefact reachable only over one is neither an origin nor a terminus.
+
+_Conformance:_ conforming
+
+_Verify:_ point a bidirectional Flow at a leaf artefact and confirm it is reported as neither end, then make the same Flow one-way and confirm the terminus rule fires.
+
+_Evidence:_ `promise-terminus-not-allowed` in `packages/view-model/src/diagnostics.ts` and its cases in `packages/view-model/src/diagnostics.test.ts`.
+
+### DRAW-017 — `promise-relationship-missing`
+
+A `relationship` promise MUST hold when one Flow runs directly from any artefact its `from` stands for to any artefact its `to` stands for, and MUST otherwise be reported with the promise's id, both authored ends, and the number of Flows found running the other way. Counting the reversal is required rather than optional: swapping two endpoints is the likeliest way this breaks, and a finding reporting only absence would send an author looking for a Flow that is already drawn.
+
+_Conformance:_ conforming
+
+_Verify:_ reverse the endpoints of the Flow a declared relationship rests on and confirm the finding reports one Flow running the other way rather than none at all.
+
+_Evidence:_ `promise-relationship-missing` in `packages/view-model/src/diagnostics.ts` and the reversed-endpoint case in `packages/view-model/src/diagnostics.test.ts`.
+
+### DRAW-018 — `promise-path-broken`
+
+A `path` promise MUST hold when some run of Flows, of any length, leads from an artefact its `from` stands for to an artefact its `to` stands for, and MUST otherwise be reported with the promise's id, both authored ends, how many artefacts the walk reached, and how many it had to reach. The walk MUST follow a bidirectional Flow both ways and MUST terminate on a document describing a cycle, which is why it is a breadth-first traversal over an explicit queue and not a recursive descent.
+
+_Conformance:_ conforming
+
+_Verify:_ declare a path across a document whose Flows form a loop, confirm the review returns rather than recurses, then remove one Flow in the middle of the run and read back how far the walk got.
+
+_Evidence:_ `promise-path-broken` and `reachedFrom` in `packages/view-model/src/diagnostics.ts`, with the cycle and severed-Flow cases in `packages/view-model/src/diagnostics.test.ts`.
+
 ## Quality properties
 
 ### DRAW-012 — No finding against a published document

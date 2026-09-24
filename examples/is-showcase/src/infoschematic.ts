@@ -309,6 +309,35 @@ scopes:
       - PT-02
       - CARD-05
       - FAB-01
+promises:
+  - id: PROMISE-ORIGIN
+    kind: origin
+    label: A reading begins only where material enters
+    description: An artefact that quietly starts a reading of its own is a second story nobody asked for.
+    allowed:
+      - ADPT-01
+      - CARD-01
+      - SCOPE-EDGE
+  - id: PROMISE-TERMINUS
+    kind: terminus
+    label: Supervision is the only place a reading stops
+    allowed:
+      - WRAP-01
+  - id: PROMISE-RELATIONSHIP
+    kind: relationship
+    label: Ingest hands to Transform directly
+    description: An intermediary between them would change what this Diagram is about.
+    from:
+      - CARD-01
+    to:
+      - CARD-02
+  - id: PROMISE-PATH
+    kind: path
+    label: Material stays traceable from ingest to the edge
+    from:
+      - CARD-01
+    to:
+      - SCOPE-EDGE
 sequences:
   - id: STORY-01
     label: How this document is arranged

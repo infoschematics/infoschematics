@@ -1325,6 +1325,187 @@
         "additionalProperties": false
       }
     },
+    "promises": {
+      "readOnly": true,
+      "description": "What the document promises about its own meaning, so an edit cannot quietly break the reading.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier, unique among promises. This is what a broken finding names."
+              },
+              "label": {
+                "type": "string",
+                "description": "The reading this promise keeps, in the words a reader would use."
+              },
+              "description": {
+                "type": "string",
+                "description": "Why the document must keep it, in a sentence."
+              },
+              "kind": {
+                "type": "string",
+                "const": "origin",
+                "description": "Constrain where a reading may begin."
+              },
+              "allowed": {
+                "readOnly": true,
+                "description": "The only artefacts a Flow may leave without any Flow arriving at them.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "allowed"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier, unique among promises. This is what a broken finding names."
+              },
+              "label": {
+                "type": "string",
+                "description": "The reading this promise keeps, in the words a reader would use."
+              },
+              "description": {
+                "type": "string",
+                "description": "Why the document must keep it, in a sentence."
+              },
+              "kind": {
+                "type": "string",
+                "const": "terminus",
+                "description": "Constrain where a reading must end."
+              },
+              "allowed": {
+                "readOnly": true,
+                "description": "The only artefacts a Flow may arrive at without any Flow leaving them.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "allowed"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier, unique among promises. This is what a broken finding names."
+              },
+              "label": {
+                "type": "string",
+                "description": "The reading this promise keeps, in the words a reader would use."
+              },
+              "description": {
+                "type": "string",
+                "description": "Why the document must keep it, in a sentence."
+              },
+              "kind": {
+                "type": "string",
+                "const": "relationship",
+                "description": "Require one Flow running directly between two ends."
+              },
+              "from": {
+                "readOnly": true,
+                "description": "Where the required Flow leaves.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "to": {
+                "readOnly": true,
+                "description": "Where the required Flow arrives.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Stable identifier, unique among promises. This is what a broken finding names."
+              },
+              "label": {
+                "type": "string",
+                "description": "The reading this promise keeps, in the words a reader would use."
+              },
+              "description": {
+                "type": "string",
+                "description": "Why the document must keep it, in a sentence."
+              },
+              "kind": {
+                "type": "string",
+                "const": "path",
+                "description": "Require a run of Flows that stays traceable between two ends."
+              },
+              "from": {
+                "readOnly": true,
+                "description": "Where the required reading starts.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "to": {
+                "readOnly": true,
+                "description": "Where the required reading has to reach.",
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "kind",
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          }
+        ]
+      }
+    },
     "specifications": {
       "readOnly": true,
       "description": "Specifications the elements realise, grouped by the body that owns them.",

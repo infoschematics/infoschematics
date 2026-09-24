@@ -259,6 +259,63 @@ export type EmphasiseElementsDynamic = DiagramDynamicIdentity & {
  */
 export type DiagramDynamic = SignalFlowDynamic | EmphasiseElementsDynamic
 
+/** Shared identity of a promise, so a broken one is named in a finding the way an element is. */
+export type DocumentPromiseIdentity = {
+  id: string
+  label: string
+  description?: string
+}
+
+/**
+ * Which artefacts a promise is written over: authored codes, Scope ids, or a mixture of both.
+ *
+ * A Scope stands for the artefacts it covers, so a promise written over one survives an edit that replaces a component
+ * inside the boundary, where a promise written over that component's own code does not. Neither is the right answer
+ * everywhere: an author who means this component means the code.
+ */
+export type PromiseSubjects = readonly string[]
+
+/**
+ * Where a reading may begin: every artefact a Flow leaves and none arrives at must be one of `allowed`.
+ *
+ * An artefact no Flow touches is neither an origin nor a terminus. It takes no part in any reading, so reporting it
+ * would complain about the legend rather than the explanation.
+ */
+export type OriginPromise = DocumentPromiseIdentity & {
+  kind: 'origin'
+  allowed: PromiseSubjects
+}
+
+/** Where a reading must end: every artefact a Flow arrives at and none leaves must be one of `allowed`. */
+export type TerminusPromise = DocumentPromiseIdentity & {
+  kind: 'terminus'
+  allowed: PromiseSubjects
+}
+
+/** A relationship the document must keep: one Flow running directly from `from` to `to`. */
+export type RelationshipPromise = DocumentPromiseIdentity & {
+  kind: 'relationship'
+  from: PromiseSubjects
+  to: PromiseSubjects
+}
+
+/** A reading the document must keep traceable: some run of Flows leading from `from` to `to`. */
+export type PathPromise = DocumentPromiseIdentity & {
+  kind: 'path'
+  from: PromiseSubjects
+  to: PromiseSubjects
+}
+
+/**
+ * What a document promises about its own meaning, so an edit cannot quietly break the reading it was drawn for.
+ *
+ * This is authored data inside the definition rather than a claim kept beside it, because the promise is about the
+ * document itself: a file that travels separately is the file that gets left behind, which is the failure the
+ * declaration exists to prevent. It is optional in every document, and no renderer reads it — a promise changes what a
+ * checker can refuse, never what an outlet has to draw.
+ */
+export type DocumentPromise = OriginPromise | TerminusPromise | RelationshipPromise | PathPromise
+
 export type Diagram = {
   bounds: Box
   /** Diagram-unit lattice used by authoring and rendering; zero disables it. */
@@ -283,6 +340,8 @@ export type Infoschematic = {
   description?: string
   diagram: Diagram
   scopes?: readonly ArchitecturalScope[]
+  /** What the document promises about its own meaning. A document that promises nothing stays exactly as valid. */
+  promises?: readonly DocumentPromise[]
   sequences?: readonly Sequence[]
   specifications?: readonly SpecificationGroup[]
 }
@@ -312,8 +371,12 @@ export type DefinedDiagram = Omit<
   regions: readonly Region[]
 }
 
-export type DefinedInfoschematic = Omit<Infoschematic, 'diagram' | 'scopes' | 'sequences' | 'specifications'> & {
+export type DefinedInfoschematic = Omit<
+  Infoschematic,
+  'diagram' | 'promises' | 'scopes' | 'sequences' | 'specifications'
+> & {
   diagram: DefinedDiagram
+  promises: readonly DocumentPromise[]
   scopes: readonly ArchitecturalScope[]
   specifications: readonly SpecificationGroup[]
   sequences: readonly Sequence[]

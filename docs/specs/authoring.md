@@ -186,6 +186,16 @@ _Verify:_ derive the capability list from the contract rather than a list kept b
 
 _Evidence:_ `scripts/example-capability-coverage.test.ts` walks the JSON Schema projected from `infoschematicSchema` in `packages/domain-core/src/schema.ts` and measures `examples/is-showcase/infoschematic.yaml` against it, in both its authored YAML and its canonical model; `examples/is-showcase/src/index.test.ts` covers what that document is for.
 
+### AUTHOR-018 — A document may declare the readings it promises
+
+An author MAY declare, inside the definition, what the document promises about its own meaning: where a reading may begin, where it must end, which relationship must exist directly, and which run of Flows must stay traceable. The declaration MUST be authored data inside the document rather than a claim kept in an artefact beside it, per [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-document-promises-what-it-means-and-a-checker-holds-it-to-it.md), and it MUST be optional: a document that declares nothing MUST stay exactly as valid as it was before promises existed. Each end MAY name an artefact code or an [Architectural Scope](../reference/vocabulary.md#scope), and both MUST be admitted, because a promise written over a Scope survives an edit replacing a component inside the boundary while one written over that component's own code does not, and an author who means this component means the code. A name that resolves to neither, or to an element no reading is ever traced through, MUST be rejected at load rather than reported as a promise broken forever. No renderer reads a promise: it widens what a checker may refuse, never what an outlet has to draw.
+
+_Conformance:_ conforming
+
+_Verify:_ load a document with no `promises` key and confirm it normalises to an empty list unchanged, then name a Region as an end and read back the rejection.
+
+_Evidence:_ `DocumentPromise` in `packages/domain-model/src/model.ts`, `documentPromise` in `packages/domain-core/src/schema.ts`, and the load-time cases in `packages/domain-core/src/model.test.ts` and `packages/domain-core/src/schema.test.ts`.
+
 ## Gaps
 
 - `AUTHOR-005`'s composition with `ROUTE-001` is stated as `COMPOSE-003` in [Composition](composition.md): a document this area accepts can still hold geometry the renderer refuses, and today that refusal arrives as a thrown error rather than an issue.

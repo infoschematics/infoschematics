@@ -477,3 +477,66 @@ describe('Scene cues', () => {
     )
   })
 })
+
+describe('document promises', () => {
+  const promisedModel = (promises: unknown) =>
+    defineInfoschematicModel({
+      id: 'PROMISED',
+      title: 'Promised',
+      diagram: {
+        bounds: { x: 0, y: 0, width: 400, height: 300 },
+        gridSize: 10,
+        cards: [
+          { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 100, height: 60 } },
+          { id: 'SNK', label: 'Sink', bounds: { x: 260, y: 20, width: 100, height: 60 } }
+        ],
+        flows: [{ id: 'LOAD', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }],
+        regions: [{ id: 'ZONE', label: 'Zone', bounds: { x: 0, y: 0, width: 400, height: 120 } }]
+      },
+      scopes: [{ id: 'EDGE', label: 'Edge', description: 'The edge.', elements: ['SRC'] }],
+      promises: promises as never
+    })
+
+  it('promises nothing by default, and leaves such a document exactly as valid as before', () => {
+    const silent = defineInfoschematicModel({
+      id: 'SILENT',
+      title: 'Silent',
+      diagram: { bounds: { x: 0, y: 0, width: 10, height: 10 }, gridSize: 0 }
+    })
+
+    expect(silent.promises).toEqual([])
+    expect(JSON.parse(JSON.stringify(silent))).toEqual(silent)
+  })
+
+  it('carries a promise written over an artefact code and one written over a Scope alike', () => {
+    expect(
+      promisedModel([
+        { id: 'REACHES', kind: 'path', label: 'The sink is reachable', from: ['EDGE'], to: ['SNK'] },
+        { id: 'SPEAKS', kind: 'relationship', label: 'Source speaks to sink', from: ['SRC'], to: ['SNK'] }
+      ]).promises
+    ).toEqual([
+      { id: 'REACHES', kind: 'path', label: 'The sink is reachable', from: ['EDGE'], to: ['SNK'] },
+      { id: 'SPEAKS', kind: 'relationship', label: 'Source speaks to sink', from: ['SRC'], to: ['SNK'] }
+    ])
+  })
+
+  it('refuses two promises sharing an id, because a finding names one of them', () => {
+    expect(() =>
+      promisedModel([
+        { id: 'REACHES', kind: 'path', label: 'One', from: ['SRC'], to: ['SNK'] },
+        { id: 'REACHES', kind: 'path', label: 'Another', from: ['SNK'], to: ['SRC'] }
+      ])
+    ).toThrow('Duplicate promise id: REACHES')
+  })
+
+  it('refuses an end that names neither an artefact nor a Scope, rather than reporting it broken forever', () => {
+    expect(() =>
+      promisedModel([{ id: 'REACHES', kind: 'path', label: 'One', from: ['SRC'], to: ['MISSING'] }])
+    ).toThrow('Promise REACHES references neither an artefact nor a Scope: MISSING')
+
+    // A Region is drawn, not met: no reading is ever traced through one, so a promise over it could never hold.
+    expect(() => promisedModel([{ id: 'STARTS', kind: 'origin', label: 'One', allowed: ['ZONE'] }])).toThrow(
+      'Promise STARTS references neither an artefact nor a Scope: ZONE'
+    )
+  })
+})
