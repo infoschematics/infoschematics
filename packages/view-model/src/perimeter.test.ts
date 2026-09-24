@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emphasisPerimeterPath, roundedRectanglePath } from './perimeter.ts'
+import { emphasisPerimeterPath, emphasisPointRadius, roundedRectanglePath } from './perimeter.ts'
 import { visualTokens } from './tokens.ts'
 
 /** Every coordinate a path names, so a perimeter can be asked whether it stays inside the box it is meant to trace. */
@@ -68,5 +68,16 @@ describe('rounded rectangle perimeter', () => {
     // Outset by six on each side an eight-unit element is twenty across, so the radius fits to ten, not fourteen.
     expect(emphasisPerimeterPath({ height: 8, width: 8, x: 0, y: 0 })).toContain('A10 10 0 0 1')
     expect(visualTokens.canvas.emphasis.radius).toBe(14)
+  })
+
+  it('outsets an emphasis ring for a Point by the same inset it outsets a box by', () => {
+    const { pointRadius } = visualTokens.canvas.geometry
+    const { inset } = visualTokens.canvas.emphasis
+
+    // Derived, not restated: a renderer summing these two tokens itself is exactly the drift this replaces.
+    expect(emphasisPointRadius).toBe(pointRadius + inset)
+    // Outside the Point rather than over it, by the very inset a Card's perimeter is outset by.
+    expect(emphasisPointRadius).toBeGreaterThan(pointRadius)
+    expect(emphasisPointRadius - pointRadius).toBe(inset)
   })
 })

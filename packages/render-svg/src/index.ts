@@ -12,7 +12,7 @@ import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '@in
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
@@ -537,7 +537,10 @@ const pointEmphasis = (at: { x: number; y: number }): EmphasisShape => [
     ['cx', at.x],
     ['cy', at.y],
     ['fill', 'none'],
-    ['r', canvasTokens.geometry.pointRadius + emphasis.inset],
+    /* The shared View Model radius rather than the same two tokens summed here, for the reason the box perimeter is
+       shared: DYNAMIC-003 puts a treatment's geometry in one calculation both renderers draw from, and a ring summed
+       independently in each is a ring that can disagree. */
+    ['r', emphasisPointRadius],
     ['stroke', emphasis.stroke],
     ['stroke-width', emphasis.strokeWidth]
   ]

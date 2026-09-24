@@ -6,7 +6,8 @@
  * the name of the element it happened to outline.
  */
 import { defineInfoschematicModel } from '@infoschematics/domain-core'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import type { ArtefactSelection } from '@infoschematics/view-model/editable'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { useState } from 'react'
 import { afterEach, expect, test } from 'vitest'
 import { commands } from 'vitest/browser'
@@ -27,12 +28,20 @@ const config = defineInfoschematicModel({
       { id: 'SRC', label: 'Source', bounds: { height: 60, width: 120, x: 40, y: 60 } },
       { id: 'SNK', label: 'Sink', bounds: { height: 60, width: 120, x: 300, y: 60 } }
     ],
+    points: [{ id: 'EDGE', label: 'Edge', at: { x: 240, y: 170 } }],
     flows: [
       { id: 'LOAD', family: 'request', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }
     ],
     dynamics: [
       { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
       { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] },
+      {
+        id: 'edge-attention',
+        label: 'Edge needs attention',
+        kind: 'emphasise-elements',
+        elements: ['EDGE'],
+        depicts: 'state'
+      },
       {
         id: 'on-this-stage',
         label: 'We are on this stage',
@@ -43,6 +52,17 @@ const config = defineInfoschematicModel({
     ]
   }
 })
+
+/** Where a diagram coordinate lands on the page, so a press can be aimed at the element rather than at a guess. */
+const screenPoint = (svg: SVGSVGElement, x: number, y: number) => {
+  const matrix = svg.getScreenCTM()
+  if (!matrix) throw new Error('rendered SVG has no screen transform')
+  const place = svg.createSVGPoint()
+  place.x = x
+  place.y = y
+  const screen = place.matrixTransform(matrix)
+  return { clientX: screen.x, clientY: screen.y }
+}
 
 const emphasisOf = (container: HTMLElement) =>
   container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="SNK"]')
@@ -218,6 +238,59 @@ test('sends the mark round the element over time, and never off the line it is t
   )
 })
 
+/**
+ * The emphasis a Point is given, and the press it must still take underneath it.
+ *
+ * A Point is the one emphasis target that is not a box, and the node suite can only read the markup back. What a
+ * browser adds is the two things that markup cannot state: that the ring the layout engine actually resolved runs
+ * outside the six-unit disc rather than over it, and that drawing something on top of the smallest element on the
+ * surface did not take its press away. The second is the real hazard — an emphasis layer that swallowed pointer
+ * events would pass every assertion about what it looks like.
+ */
+test('rings a Point outside its disc and leaves the disc itself pressable', async () => {
+  const selected: (ArtefactSelection | null)[] = []
+  const { container } = await render(
+    <Canvas
+      config={config}
+      dynamics={[{ dynamicId: 'edge-attention', occurrenceKey: 'run-1' }]}
+      editor="design"
+      onArtefactSelect={(selection) => selected.push(selection)}
+    />
+  )
+
+  const svg = container.querySelector<SVGSVGElement>('svg.infoschematic-svg')
+  const emphasis = container.querySelector<SVGGElement>('.infoschematic-element-emphasis[data-artefact-id="EDGE"]')
+  if (!svg || !emphasis) throw new Error('rendered Point emphasis is incomplete')
+
+  const ring = emphasis.firstElementChild as SVGCircleElement
+  expect(ring.tagName).toBe('circle')
+  const painted = getComputedStyle(ring)
+  expect(painted.stroke).toBe('rgb(242, 166, 59)')
+  expect(painted.fill).toBe('none')
+  expect(painted.strokeWidth).toBe('3px')
+
+  /* Asked of the geometry the browser resolved rather than of the attribute written into it, and asked as a box
+     round the Point's own centre: a ring drawn at the Point's radius instead of the outset one would still be a
+     circle in the right place and would read as a thicker Point. */
+  expect(ring.getAttribute('r')).toBe(String(emphasisPointRadius))
+  const drawn = ring.getBBox()
+  expect(drawn.width).toBe(emphasisPointRadius * 2)
+  expect(drawn.x).toBe(240 - emphasisPointRadius)
+  expect(drawn.y).toBe(170 - emphasisPointRadius)
+  const mark = container.querySelector<SVGCircleElement>('.infoschematic-point .point-mark')
+  expect(Number(mark?.getAttribute('r'))).toBeLessThan(emphasisPointRadius)
+
+  /* The press. The emphasis is drawn last and therefore lies over the Point, so the only thing keeping the Point
+     reachable is `pointer-events: none` on the emphasis layer — which is why this asks the browser what is actually
+     at the Point's centre rather than asking the stylesheet what it declared. */
+  const at = screenPoint(svg, 240, 170)
+  const topmost = document.elementFromPoint(at.clientX, at.clientY)
+  expect(topmost?.classList.contains('point-target')).toBe(true)
+  topmost?.dispatchEvent(new PointerEvent('pointerdown', { ...at, bubbles: true, pointerId: 11 }))
+  window.dispatchEvent(new PointerEvent('pointerup', { ...at, bubbles: true, pointerId: 11 }))
+  expect(selected.at(-1)).toMatchObject({ id: 'EDGE', kind: 'point' })
+})
+
 /* One browser context serves this whole file, so an emulated media feature outlives the case that asked for it.
    Every case below either never touches it or hands it back here, which is what keeps the cases above measuring
    full motion. */
@@ -286,4 +359,35 @@ test('removes the travelling mark under reduced motion rather than parking it', 
     setTimeout(resolve, elementEmphasisDuration / 2)
   })
   expect(seen.getBoundingClientRect().width).toBe(0)
+})
+
+test('leaves an emphasised Point the steady ring under reduced motion', async () => {
+  await commands.emulateReducedMotion(true)
+  const { container } = await render(
+    <Canvas config={config} dynamics={[{ dynamicId: 'edge-attention', occurrenceKey: 'run-1' }]} />
+  )
+
+  const ringOf = () =>
+    container.querySelector<SVGCircleElement>('.infoschematic-element-emphasis[data-artefact-id="EDGE"] circle')
+  await expect.poll(ringOf).not.toBeNull()
+  const ring = ringOf() as SVGCircleElement
+
+  /* A Point's ring is reached by the generic `.infoschematic-element-emphasis > *` rules rather than by anything
+     written for a circle, so this is where a treatment that quietly needed its own selector would show up: the
+     reduced-motion restatement for a held occurrence has to land on it exactly as it lands on a box's outline. */
+  expect(getComputedStyle(ring).animationName).toBe('none')
+  expect(getComputedStyle(ring).opacity).toBe('0.9')
+  expect(ring.getAttribute('r')).toBe(String(emphasisPointRadius))
+
+  // Steady rather than slow, and still nothing sent round it — a Point declines the travelling mark at full motion too.
+  await new Promise((resolve) => {
+    setTimeout(resolve, elementEmphasisDuration)
+  })
+  expect(getComputedStyle(ring).animationName).toBe('none')
+  expect(getComputedStyle(ring).opacity).toBe('0.9')
+  expect(
+    container.querySelector(
+      '.infoschematic-element-emphasis[data-artefact-id="EDGE"] .infoschematic-element-emphasis-mark'
+    )
+  ).toBeNull()
 })

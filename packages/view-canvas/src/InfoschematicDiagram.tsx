@@ -23,7 +23,7 @@ import {
   type ResizeMinimum
 } from '@infoschematics/view-model/editable'
 import type { Box, Point } from '@infoschematics/view-model/geometry'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
 import { type Port, type PortCounts, portsForBox } from '@infoschematics/view-model/ports'
 import { regionGeometry } from '@infoschematics/view-model/region-geometry'
@@ -239,48 +239,59 @@ const pointTokens = { fill: paintVariable('backdrop'), stroke: paintVariable('te
  *
  * A travelling mark is offered only where the element has a closed perimeter a mark can be seen to follow. A Flow is
  * a route that may already be carrying a signal along its own length, so a second mark on the same line would be read
- * as one; it keeps the finite route outline. `ADR-INFOSCHEMATICS-027` records which geometries are declined and why.
+ * as one; it keeps the finite route outline. A Point is a six-unit disc, so a mark sent round its ring would be very
+ * nearly the size of the thing it marks and would read as the Point moving rather than as an emphasis; it keeps the
+ * steady ring. `ADR-INFOSCHEMATICS-027` records which geometries are declined and why.
  */
-type CanvasEmphasisGeometry = Readonly<{
-  d: string
-  /** The Flow head this overlay redraws in the emphasis stroke, if the element has one. */
-  markerEnd?: string
-  markerStart?: string
-  travels: boolean
-}>
+type CanvasEmphasisGeometry =
+  | Readonly<{
+      d: string
+      /** The Flow head this overlay redraws in the emphasis stroke, if the element has one. */
+      markerEnd?: string
+      markerStart?: string
+      travels: boolean
+    }>
+  /** A Point, which is a disc and has no perimeter to state: a ring at the shared radius, and nothing travels it. */
+  | Readonly<{ at: Readonly<{ x: number; y: number }>; travels: false }>
 
-const emphasisTreatment = (
-  { d, markerEnd, markerStart, travels }: CanvasEmphasisGeometry,
-  depicts: ElementEmphasis['depicts']
-): ReactNode => (
-  <>
-    {/* The overlay draws its own head over the Flow's, so an emphasised Flow reads as one emphasised thing rather
+const emphasisTreatment = (geometry: CanvasEmphasisGeometry, depicts: ElementEmphasis['depicts']): ReactNode => {
+  if ('at' in geometry) {
+    /* The ring takes its fill, stroke and animation from `.infoschematic-element-emphasis > *`, exactly as the
+       outline does, so the finite fade and the held breath both reach it without a rule of its own. Its radius is
+       the shared View Model one, which is the same number the still renderer writes as an attribute. */
+    return <circle cx={geometry.at.x} cy={geometry.at.y} r={emphasisPointRadius} />
+  }
+  const { d, markerEnd, markerStart, travels } = geometry
+  return (
+    <>
+      {/* The overlay draws its own head over the Flow's, so an emphasised Flow reads as one emphasised thing rather
         than an amber route ending in a family-coloured point. `.arrow-head { fill: context-stroke }` means this
         costs no second marker definition here — the head takes the stroke of the path referencing it, which is the
         emphasis stroke. The Flow's own head is untouched underneath, which is the distinction DYNAMIC-003 draws
         between what an occurrence may decorate and what an element outputs. */}
-    <path
-      className={travels ? undefined : 'infoschematic-element-emphasis-route'}
-      d={d}
-      markerEnd={markerEnd}
-      markerStart={markerStart}
-    />
-    {travels ? (
-      /* The mark travels the very path string the outline is drawn from, so it cannot cut a corner the outline
+      <path
+        className={travels ? undefined : 'infoschematic-element-emphasis-route'}
+        d={d}
+        markerEnd={markerEnd}
+        markerStart={markerStart}
+      />
+      {travels ? (
+        /* The mark travels the very path string the outline is drawn from, so it cannot cut a corner the outline
          rounds. One circuit per token period; for a state it repeats for as long as the host holds the occurrence,
          which is how held and travelling compose without either knowing about the other. Declarative SVG motion is
          beyond the reach of any CSS animation property, so reduced motion removes this element rather than stilling
          it — the rule is in `styles.css` and `Canvas.dynamics.test.tsx` holds it there. */
-      <circle className="infoschematic-element-emphasis-mark" opacity="0" r={emphasisMarkRadius}>
-        <animateMotion
-          dur={emphasisTokens.duration}
-          path={d}
-          repeatCount={depicts === 'state' ? 'indefinite' : undefined}
-        />
-      </circle>
-    ) : null}
-  </>
-)
+        <circle className="infoschematic-element-emphasis-mark" opacity="0" r={emphasisMarkRadius}>
+          <animateMotion
+            dur={emphasisTokens.duration}
+            path={d}
+            repeatCount={depicts === 'state' ? 'indefinite' : undefined}
+          />
+        </circle>
+      ) : null}
+    </>
+  )
+}
 
 export function InfoschematicDiagram({
   artefactOperations = [],
@@ -2148,6 +2159,11 @@ export function InfoschematicDiagram({
   }
   for (const placeable of placeables) {
     emphasisGeometry.set(placeable.id, { d: emphasisPerimeterPath(placeable.box), travels: true })
+  }
+  /* The same `at` the Point layer below draws its mark at, so the ring is round the disc this render actually put on
+     the page rather than round where the document said one was. */
+  for (const point of infoschematicPoints) {
+    emphasisGeometry.set(point.id, { at: point.at, travels: false })
   }
   for (const flow of flows) {
     emphasisGeometry.set(flow.id, {

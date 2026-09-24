@@ -59,3 +59,14 @@ export const emphasisPerimeterPath = (box: Box) => {
     radius
   )
 }
+
+/**
+ * How far an emphasis treatment for a Point runs from that Point's own centre.
+ *
+ * A Point is a disc rather than a box, so there is no perimeter to outset and no path to state: the treatment is a
+ * ring at the Point's radius plus the same emphasis inset every box is outset by. It is one number rather than a
+ * path, but it is the same kind of answer, and it belongs beside `emphasisPerimeterPath` for the same reason — the
+ * two renderers ask where an emphasis runs, and there must be one place that answers. Summed in each renderer
+ * instead, the ring drifts the moment either token moves under only one of them.
+ */
+export const emphasisPointRadius = visualTokens.canvas.geometry.pointRadius + visualTokens.canvas.emphasis.inset

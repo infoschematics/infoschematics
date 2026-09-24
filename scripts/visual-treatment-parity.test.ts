@@ -6,7 +6,7 @@ import { defineInfoschematic, defineInfoschematicModel } from '../packages/domai
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
 import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '../packages/view-model/src/assembly.ts'
-import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
+import { emphasisPerimeterPath, emphasisPointRadius } from '../packages/view-model/src/perimeter.ts'
 import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
 import { type PaintScheme, paintFor, paintVariable, visualTokens } from '../packages/view-model/src/tokens.ts'
@@ -132,6 +132,28 @@ const emphasisOutlines = (output: string) =>
         /<g[^>]*class="infoschematic-element-emphasis"[^>]*data-artefact-id="([^"]+)"[\s\S]*?<path[^>]*\bd="([^"]+)"/g
       )
     ].map((match) => [match[1] as string, match[2] as string])
+  )
+
+/**
+ * The ring each renderer draws round an emphasised Point, keyed by the Point it names.
+ *
+ * `emphasisOutlines` above cannot answer this and must not be asked to: it matches `<path d=`, and a Point's group
+ * holds a `<circle>`, so its `[\s\S]*?` would walk out of that group and pair the Point's id with the next element's
+ * outline — a wrong answer that looks like agreement. This reads the circle inside the group it belongs to, and
+ * reads position and radius rather than the whole tag, because the two renderers write different attributes round
+ * them: the still one states its paint, Canvas takes the same paint from the stylesheet.
+ */
+const emphasisDiscs = (output: string) =>
+  Object.fromEntries(
+    [
+      ...output.matchAll(
+        /<g[^>]*class="infoschematic-element-emphasis"[^>]*data-artefact-id="([^"]+)"[^>]*>\s*<circle([^>]*)>/g
+      )
+    ].map((match) => {
+      const written = match[2] ?? ''
+      const value = (name: string) => written.match(new RegExp(`\\b${name}="([^"]+)"`))?.[1]
+      return [match[1] as string, `${value('cx')},${value('cy')} r${value('r')}`]
+    })
   )
 
 /**
@@ -848,6 +870,43 @@ describe('visual treatment renderer parity', () => {
     // very string the still renderer draws as its outline, so a corner the outline rounds is not one the mark
     // cuts — and that the still frame states no direction, because the document does not state one either.
     expect(canvas).toContain(`<animateMotion dur="${visualTokens.canvas.emphasis.duration}" path="${outlines.SNK}"`)
+    expect(svg).not.toContain('animateMotion')
+  })
+
+  it('rings an emphasised Point out to the same radius in both renderers', () => {
+    const emphasised = defineInfoschematicModel({
+      id: 'point-emphasis-parity',
+      title: 'Point emphasis parity reference',
+      diagram: {
+        bounds: { height: 200, width: 420, x: 0, y: 0 },
+        gridSize: 10,
+        points: [{ id: 'EDGE', label: 'Edge', at: { x: 300, y: 120 } }],
+        dynamics: [{ id: 'attention', label: 'Edge needs attention', kind: 'emphasise-elements', elements: ['EDGE'] }]
+      }
+    })
+    const dynamics = [{ dynamicId: 'attention', occurrenceKey: 'run-1' }]
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: emphasised, dynamics }))
+    const svg = renderInfoschematicSvg(emphasised, { dynamics })
+
+    /* A Point is the one emphasis target that is not a box, so the two renderers have to agree about a radius rather
+       than about a path string. They agree by reading the same View Model number: the still renderer wrote that sum
+       out itself until this case existed to hold it, which is exactly how a shared token drifts under one outlet. */
+    const discs = emphasisDiscs(canvas)
+    expect(Object.keys(discs)).toEqual(['EDGE'])
+    expect(discs).toEqual(emphasisDiscs(svg))
+    expect(discs.EDGE).toBe(`300,120 r${emphasisPointRadius}`)
+
+    /* Both must spell it as a circle. The moment one of them draws a path instead, `emphasisOutlines` finds the
+       Point in that renderer and not the other, and the box case above fails with a difference that has nothing to
+       do with boxes — so the shape is part of what parity means here, not an implementation detail underneath it. */
+    for (const markup of [canvas, svg]) {
+      expect(markup).toContain('class="infoschematic-element-emphasis"')
+      expect(emphasisOutlines(markup)).toEqual({})
+    }
+
+    // The ring is outside the Point rather than over it, and nothing travels it in either outlet.
+    expect(emphasisPointRadius).toBeGreaterThan(visualTokens.canvas.geometry.pointRadius)
+    expect(canvas).not.toContain('animateMotion')
     expect(svg).not.toContain('animateMotion')
   })
 

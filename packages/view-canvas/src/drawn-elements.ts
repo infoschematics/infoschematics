@@ -21,5 +21,9 @@ export const drawnElementIds = (
   for (const fabric of runtime.infoschematicFabrics) {
     if (runtime.infoschematicFabricIsVisible(fabric, scopes)) shown.add(fabric.id)
   }
+  /* Every authored Point, unconditionally, because that is what the Diagram's Point layer draws: a Point carries no
+     Scope of its own, so there is no visibility question to ask about one. Leaving them out is how an occurrence that
+     named a Point was filtered away before any renderer could treat it, while the Point sat visible on the page. */
+  for (const point of runtime.infoschematicPoints) shown.add(point.id)
   return shown
 }

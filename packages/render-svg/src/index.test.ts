@@ -1,5 +1,5 @@
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
-import { emphasisPerimeterPath } from '@infoschematics/view-model/perimeter'
+import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import {
   adaptivePaint,
   annotationLabelWidth,
@@ -673,12 +673,17 @@ describe('renderInfoschematicSvg', () => {
         collections: [],
         dynamics: [
           { id: 'delivered', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
-          { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK', 'ZONE'] },
+          {
+            id: 'attention',
+            label: 'Sink needs attention',
+            kind: 'emphasise-elements',
+            elements: ['SNK', 'ZONE', 'EDGE']
+          },
           {
             id: 'on-this-stage',
             label: 'Sink needs attention',
             kind: 'emphasise-elements',
-            elements: ['SNK', 'ZONE'],
+            elements: ['SNK', 'ZONE', 'EDGE'],
             depicts: 'state'
           }
         ],
@@ -694,7 +699,7 @@ describe('renderInfoschematicSvg', () => {
         ],
         gridSize: 10,
         overlays: [],
-        points: [],
+        points: [{ id: 'EDGE', label: 'Edge', at: { x: 340, y: 150 } }],
         regions: [{ id: 'ZONE', label: 'Zone', bounds: { height: 120, width: 360, x: 20, y: 20 } }]
       },
       scopes: [],
@@ -716,7 +721,8 @@ describe('renderInfoschematicSvg', () => {
     })
     expect(emphasised).toContain('data-artefact-id="SNK" data-dynamic-id="attention" data-emphasised="true"')
     expect(emphasised).toContain('data-artefact-id="ZONE" data-dynamic-id="attention" data-emphasised="true"')
-    expect(emphasised.match(/class="infoschematic-element-emphasis"/g)).toHaveLength(2)
+    expect(emphasised).toContain('data-artefact-id="EDGE" data-dynamic-id="attention" data-emphasised="true"')
+    expect(emphasised.match(/class="infoschematic-element-emphasis"/g)).toHaveLength(3)
     expect(emphasised).toContain(`stroke="${visualTokens.canvas.emphasis.stroke}"`)
     expect(emphasised).toContain('Dynamics: Sink needs attention')
     expect(emphasised).not.toContain('<animate')
@@ -725,6 +731,11 @@ describe('renderInfoschematicSvg', () => {
     // is the very line the interactive renderer sends a mark along. One box, one answer about where its edge runs.
     expect(emphasised).toContain(`<path d="${emphasisPerimeterPath({ height: 60, width: 100, x: 260, y: 40 })}"`)
     expect(emphasised).toContain(`<path d="${emphasisPerimeterPath({ height: 120, width: 360, x: 20, y: 20 })}"`)
+    /* A Point has no box, so it gets the one thing a disc can be given: a ring outside it, at the shared View Model
+       radius rather than the two tokens summed here. It is the Point's own centre, so the ring is round the mark
+       this rendering drew and not merely near it. */
+    expect(emphasised).toContain(`<circle cx="340" cy="150" fill="none" r="${emphasisPointRadius}"`)
+    expect(emphasisPointRadius).toBeGreaterThan(visualTokens.canvas.geometry.pointRadius)
     // Nothing travels in a still frame, and this output cannot tell a travelling emphasis from a finite one. That is
     // a recorded decision rather than an oversight: the direction a mark traces is chosen from the geometry, so there
     // is no authored direction for a still frame to record, and inventing one would show the reader a movement the
