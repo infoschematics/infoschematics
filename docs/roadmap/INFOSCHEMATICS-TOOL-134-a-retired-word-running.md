@@ -4,12 +4,12 @@ area: TOOL
 title: A retired word running
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 7d3cee4b342708ff8038f7917414d89e67f5e5db
 created_at: 2026-09-23T09:30:00Z
-updated_at: 2026-09-23T16:20:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # A retired word running
@@ -105,7 +105,7 @@ Studio and View Present name a Sequence a Sequence. The retired word survives in
 
 The rename found what a survey would not: the retired names were not a parallel set but an overlapping one. `toggle-sequence-scene` and `step-sequence` already existed as canonical actions on the collapsed half, so renaming `toggle-theme-scene` onto them would have silently merged two different actions. They became `toggle-expanded-scene` and `step-expanded` instead, which is what the state they carry actually distinguishes.
 
-### Summary of changes
+### Change Summary
 
 The three Studio editing modules are renamed with their tests, and the editor now declares its own `SequenceDraft` and `SequenceDraftScene` in `sequence-composition.ts` rather than importing `ThemeConfig` from Domain Model. The shapes stay structurally identical, so the `config.themes` fallback in `use-sequence-composition.ts` still assigns into a draft with no conversion — which is the point of doing it this way rather than with an adapter.
 
@@ -142,6 +142,10 @@ The second one is smaller and the same shape. A rename pass guarded on lowercase
 ### Mini recap
 
 The retired word is gone from the code that names a Sequence, retained only where the compatibility input genuinely is a Theme, with each exception named and its reason recorded. A new check reads the vocabulary itself and holds the line, proven by breaking it. Studio was opened and looked at, and the captures are in `reports/`. Left open deliberately: the matching `story` question, which is a behaviour decision.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: Toolchain behind its standard
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 518a5f0cbb06db9b4019fb94b137675edfd9d0ca
 created_at: 2026-09-22T17:50:00Z
-updated_at: 2026-09-23T18:30:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Toolchain behind its standard
@@ -110,7 +110,7 @@ It landed in the two halves the record sequenced. The toolchain group went first
 
 The six identical copies stay six copies. Collapsing them into one shared script is a structural choice about how packages are built, it needs its own decision record, and the duplication it would remove is pre-existing and unchanged by this item; taking it here would have made an output-equality change into a design change.
 
-### Summary of changes
+### Change Summary
 
 Toolchain group, in `71f57131`:
 
@@ -153,6 +153,10 @@ The record asked for one package to be migrated first, with the rest treated as 
 ### Mini recap
 
 The repository now conforms to the engineering standard it declares, apart from one dependency finding another item owns. Commit hooks refuse a malformed message and a drifted manifest, and both were proved by being refused. The eight build scripts are TypeScript run by Bun, type-checked by the packages that own them, and produce a byte-identical `dist/` — 429 files compared, no difference — which is the only claim that mattered about them.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

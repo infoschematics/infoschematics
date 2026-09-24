@@ -4,12 +4,12 @@ area: TOOL
 title: Autocomplete while authoring
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 0b69e9f13d3c77e53eaf76c49f11b84fcc600726
 created_at: 2026-09-22T20:05:00Z
-updated_at: 2026-09-23T00:45:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Autocomplete while authoring
@@ -94,7 +94,7 @@ Every property the contract declares now says what it is for, the schema is serv
 
 The work also produced the finding that a static check would not have: driving the real language server showed that the nine element collections under `diagram` — `cards`, `flows`, `regions` and the rest, the keys an author reaches for first — were still bare after the enum pass looked complete. Those are described now, and a coverage check holds the whole surface at zero undescribed properties.
 
-### Summary of changes
+### Change Summary
 
 `packages/domain-core/src/schema.ts` carries `.describe()` throughout: every closed value set, every named artefact, the geometry, the ports, the unwrapped identity shorthand, and the document root. The regenerated `packages/domain-core/schema/infoschematic.schema.json` holds **0 undescribed properties**, up from zero descriptions of any kind.
 
@@ -129,6 +129,10 @@ That is the same lesson `AGENTS.md` records about a passing suite and visual tre
 ### Mini recap
 
 Descriptions throughout the Zod contract, published at the `$id`, modelines on the corpus, editor mapping for contributors, guide corrected, and a check that holds all of it. Proven by driving the real language server from inside and outside the repository. Left for the owner: whether to push, which is what makes the published URL answer.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

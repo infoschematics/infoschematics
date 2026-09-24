@@ -4,12 +4,12 @@ area: TOOL
 title: Split presenting from workspace
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: [INFOSCHEMATICS-TOOL-129]
 blocked_by: []
 baseline_ref: 843281de8cfec6c22231bba9e3356755f0a2c485
 created_at: 2026-09-22T19:45:00Z
-updated_at: 2026-09-23T02:30:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Split presenting from workspace
@@ -92,7 +92,7 @@ Nothing blocks this. It is adjacent to the Theme-to-Sequence vocabulary drift �
 
 Two independent axes in place of the three-valued `ProductionMode`: whether the application is producing, and which workspace — `design` or `direct` — the Producer is in. The workspace is retained across a visit to the Audience's view, so presenting a drawing and coming back resumes Direct rather than landing in Design. The word `mode` no longer names this axis anywhere in code, attributes, specifications, Decision Records or guide copy, which is what `INFOSCHEMATICS-TOOL-129` was waiting for.
 
-### Summary of changes
+### Change Summary
 
 `packages/view-present/src/production.ts` replaces the enum with `producing: boolean` and a `Workspace` carrying its own `directTarget`, so the structural duplication between the old present and design shapes goes with it. `set-mode` becomes `set-producing`, `enter-workspace` and the two direct-target actions; `directTargetOf` reads a target only from a Direct workspace. `createProductionState` still starts not producing, and `enter-workspace` returns a fresh workspace so leaving Direct drops its target.
 
@@ -121,6 +121,10 @@ The rename surface was larger than the state change by an order of magnitude, an
 ### Mini recap
 
 Delivered the split and the retention with browser evidence; the word `mode` is free for `INFOSCHEMATICS-TOOL-129`, which was the reason this was urgent. One follow-up worth its own record: Site copy that describes the Producer's two axes to a reader.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

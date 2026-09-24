@@ -4,12 +4,12 @@ area: TOOL
 title: Fraction for a distance
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: fe4c9b6e7f81c9b396fe2d6dd12c86844ff37850
 created_at: 2026-09-22T11:40:00Z
-updated_at: 2026-09-23T10:30:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Fraction for a distance
@@ -81,7 +81,7 @@ Nothing follows necessarily. If the decision is to express both units, the compa
 
 `labelAt` means one thing to every consumer that resolves it, and says so in the model, the specification and the authoring guide. The checker that disagreed now agrees, and an author who writes the number in the wrong unit is told which number they meant.
 
-### Summary of changes
+### Change Summary
 
 The item was opened on an inverted premise and the first step disproved it. Every renderer places a Flow label through `placeLabels`, which multiplies the authored value by `routeLength` — so `labelAt` is a fraction, and the five authored values this record proposed to correct were already right. `packages/view-model/src/diagnostics.ts` was the one consumer reading it as an absolute distance, so `flow-label-obstructed` measured a point no reader sees. Correcting the documents would have broken four correct drawings.
 
@@ -118,6 +118,10 @@ The rule this leaves behind is the guard against the same class returning. A uni
 ### Mini recap
 
 `labelAt` is a fraction of route length, which is what both renderers already resolved and what the schema already published; the checker was the outlier and now agrees. The unit is stated in four places, a new observation catches the value written in the wrong unit, and no published document changed — the probe in `reports/` shows all nine authored labels were already drawn where they were meant to be.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

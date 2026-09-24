@@ -4,12 +4,12 @@ area: TOOL
 title: Guidance without its mechanism
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 3b99aa096215e899c5b4e6c02e91324eee59b0cf
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-23T02:45:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Guidance without its mechanism
@@ -82,7 +82,7 @@ Nothing follows.
 
 `AGENTS.md` now names the mechanism for the look it mandates, and the repository has a Markdown gate that can be run before a commit rather than only during one. Both mechanics were being rediscovered by every session that hit them, at the cost of a rewritten Playwright script and a formatter rewrite landing underneath an edit in progress.
 
-### Summary of changes
+### Change Summary
 
 `scripts/look.ts` is the committed browser look, reached as `bun run self:browser:look`. It serves `apps/site` itself on a port the operating system chooses, so a look never fights a dev server or a preview for a fixed port — the failure that cost the previous session a working mechanism. It drives Chromium through Playwright, writes captures and a log to `reports/<slug>/`, and takes `--probe <file>` for a module that drives the page beyond the first capture.
 
@@ -117,6 +117,10 @@ The port choice is the same shape of lesson. `ki:site:preview` binds a fixed por
 ### Mini recap
 
 `AGENTS.md` says how to look and how to lint; `bun run self:browser:look` does the looking and fails three ways a snippet would not; `bun run ki:lint:md` moves the Markdown pass ahead of the commit. Every visual item after this one — `INFOSCHEMATICS-TOOL-120`, `-121`, `-125` and `-126` — starts from a working mechanism.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

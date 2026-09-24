@@ -4,12 +4,12 @@ area: TOOL
 title: Dependencies past their window
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: a4545ba3e1c74c5af939859391545a59eb221b2b
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-23T18:45:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Dependencies past their window
@@ -82,7 +82,7 @@ If the 14-day window turns out to be wrong for a repository with this much brows
 
 Vitest and `@vitest/browser-playwright` moved from 4.1.11 to 5.0.1 together, and the browser evidence the repository rests on was re-proved against the new runner rather than inferred from a green run. `@types/node` stays on the 22 line deliberately, under the hold already recorded in `.ki.toml`. `ki repo audit --skill ki-engineering` now passes, with `DEPS-1` reporting nothing.
 
-### Summary of changes
+### Change Summary
 
 `package.json` — `vitest` and `@vitest/browser-playwright` to `^5.0.1`.
 
@@ -124,6 +124,10 @@ The mutation proofs are worth keeping as a habit rather than as a one-off for th
 ### Mini recap
 
 Delivered: Vitest 4 → 5 across the root and Site, browser commands re-proved by breaking them, colour-scheme look captured from a real browser, `@types/node` left held. Verified: full gate green, browser suites forced, engineering audit clean. Outstanding: stale `vitest@4` trees in the install cache, and the adoption-window question for upstream. Learning route: the break-the-command proof belongs in `AGENTS.md`'s evidence guidance if it survives a second upgrade.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

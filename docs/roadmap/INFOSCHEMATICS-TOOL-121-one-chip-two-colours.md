@@ -4,12 +4,12 @@ area: TOOL
 title: One chip, two colours
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: d9e6125359531ef47fef1577c4a199a0979181f9
 created_at: 2026-09-22T12:20:00Z
-updated_at: 2026-09-23T09:40:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # One chip, two colours
@@ -79,7 +79,7 @@ Nothing follows. If the parity task turns out to miss other paired values, widen
 
 A [Standard Card](../reference/vocabulary.md#standard-card)'s identity chip is now one treatment named in one vocabulary. Both outlets take `annotationFill` and `annotationText`, the pair every other annotation in the repository already takes, and `scripts/visual-treatment-parity.test.ts` fails if either outlet stops naming them.
 
-### Summary of changes
+### Change Summary
 
 The contrast chip won, and the argument is checkable rather than aesthetic. The paper chip is not a colour: it is `color-mix(in srgb, var(--infoschematic-canvas-paint-backdrop) 88%, transparent)` composited over whatever fill the Card's Scope authored, so it resolves differently on every Card and no palette role could name it. The framework-neutral renderer has to write a resolved value — that is what its `scheme` option exists for — so the paper chip could never be the single spelling, whichever outlet was asked to adopt it. Both chips are legible at nine pixels, which is why the choice could not be made on legibility.
 
@@ -114,6 +114,10 @@ The looking still earned its place, in an unplanned way: the scheme gallery was 
 ### Mini recap
 
 One chip, one pair of roles, stated once in `APPEAR-008` and held by a parity test that fails when either outlet stops naming them. The contrast chip won because the paper chip could not be written down as a colour, and both schemes were looked at in a browser to confirm the chip that resulted reads in either direction.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 

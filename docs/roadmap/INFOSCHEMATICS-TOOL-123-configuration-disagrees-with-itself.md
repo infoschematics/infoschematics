@@ -4,12 +4,12 @@ area: TOOL
 title: Configuration disagrees with itself
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 1ddc5daecf1f7cff1e2ed8829b2ca064a350e448
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-23T17:10:00Z
+updated_at: 2026-09-24T16:00:00Z
 ---
 
 # Configuration disagrees with itself
@@ -91,7 +91,7 @@ Both standing `ki repo audit --skill ki-engineering` findings are gone: the audi
 
 `TURBO-2` was two smaller things. The four example workspaces now declare a `build` that runs their existing `check` — rendering their own YAML to `/dev/null` — which is a real obligation rather than a no-op, and is what `ADR-INFOSCHEMATICS-021` already says an example owes: its content has to render through the published CLI. Each carries a package-level `turbo.json` saying that build has no outputs, because the root `build` task declares `dist/**` and an example emits nothing; without it Turborepo warned about missing output files on every run. And the root `self:check` now names its root tasks as `//#self:…`, which is what the graph calls them.
 
-### Summary of changes
+### Change Summary
 
 - `scripts/unused.ts` (new) — runs `knip --no-progress`, reading **both** streams, because Knip writes issues to standard output and configuration hints to standard error; a wrapper that read only the first would see an empty report and pass a repository it never looked at. `assess` is pure and exported so every verdict is testable.
 - `scripts/unused-report.test.ts` (new) — seven cases over `assess`, including the two that matter: a sanctioned hint that stops being reported, and one that comes back reworded. Both fail, which is the assertion about the command's own coverage that `AGENTS.md` requires.
@@ -133,6 +133,10 @@ The first version of the wrapper read only standard output and reported a clean 
 ### Mini recap
 
 Two audit findings that a reader had learned to scroll past are gone, and neither was closed by suppressing it. The Knip one turned out to be a genuine conflict between a cross-tool contract and a tool flag that cannot see it, resolved by a wrapper that sanctions exactly the two entries the contract requires and fails if they ever stop being reported. The Turborepo one turned out to be three small honest declarations: examples build by rendering themselves, that build has no outputs, and root tasks are named as root tasks.
+
+## Done
+
+Accepted 2026-09-24 by Kris Brown on the review packet above.
 
 ## Discussion
 
