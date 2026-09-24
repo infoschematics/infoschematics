@@ -21,7 +21,7 @@ Present is one side of a transient capability boundary: either a `Producer`'s to
 The state behind that boundary has three distinct owners:
 
 - **Audience preferences and filters** retain choices such as visible Scopes, visible Flow families, annotations, takeaways and automatic-advance preference.
-- **Presentation activity** holds the active Standalone or Sequence Scene, its step and whether timed playback is currently advancing.
+- **Presentation activity** holds the active Standalone or Sequence Scene, its step, how far through that Scene's cue cascade the step has reached, and whether timed playback is currently advancing. A stage belongs here rather than in a timer or a ref because derivation must give one answer from one state, and a Sequence spends its step on a stage before spending it on the next Scene.
 - **Producer editing** holds Design or Direct selection, draft targets, pending changes and editing history.
 
 Changing either axis cleans up only the activity that cannot safely cross the boundary. Entering Design or Direct stops Sequence playback and clears presentation focus while preserving Audience preferences and filters. Returning to Present restores those preferences and filters, but does not restore a previous focus or restart playback.

@@ -139,13 +139,23 @@ export type Callout = {
 /**
  * A Scene asking for a named Diagram Dynamic to play while it is the Scene an audience is looking at.
  *
- * The cue names the Dynamic and how often it plays, and nothing else: no duration, no easing, no timer. `once` plays
- * it on entry to the Scene, `repeat` plays it again while the Scene holds, and absence means `once`. A statement that
- * lasts is authored as `depicts: state` on the Dynamic itself, so it is not a playback policy here.
+ * The cue names the Dynamic, how often it plays and where it falls in the Scene's order, and nothing else: no
+ * duration, no easing, no timer. `once` plays it on entry to the Scene, `repeat` plays it again while the Scene holds,
+ * and absence means `once`. A statement that lasts is authored as `depicts: state` on the Dynamic itself, so it is not
+ * a playback policy here.
  */
 export type SceneCue = {
   dynamic: string
   playback?: 'once' | 'repeat'
+  /**
+   * Which stage of the Scene's cascade this cue belongs to, counting from one.
+   *
+   * A stage is an order and never a measurement: the Sequence the Scene sits in paces it, dividing a timed Scene's
+   * hold between the stages and giving each stage one presenter step where the Sequence advances manually, per
+   * `ADR-INFOSCHEMATICS-035`. Absence is stage one, so a Scene whose cues name no stage has a single stage and plays
+   * all of them on entry exactly as it did before cascades existed.
+   */
+  stage?: number
 }
 
 export type Scene = {

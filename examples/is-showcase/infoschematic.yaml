@@ -360,7 +360,7 @@ sequences:
             at: 1180 1060
       - id: SCENE-03
         label: Edges and substrate
-        description: Points enter and leave, and the Fabric everything shares.
+        description: Points enter and leave, and the Fabric everything shares, cued in two stages.
         duration: 4
         visibility:
           show:
@@ -372,8 +372,11 @@ sequences:
             - PT-01
             - PT-02
         cues:
+          - dynamic: DYN-STATE
+            stage: 1
           - dynamic: DYN-SIGNAL
             playback: repeat
+            stage: 2
         callout:
           title: Edges
           body: A Point is a lightweight source or sink. A Fabric is a connectable plane rather than a component.

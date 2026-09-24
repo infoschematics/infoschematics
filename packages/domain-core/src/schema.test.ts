@@ -23,6 +23,32 @@ describe('infoschematicSchema', () => {
     expect(infoschematicSchema.safeParse({ ...minimal, diagram: { ...diagram, gridSize: 1 } }).success).toBe(true)
   })
 
+  it('admits a cue stage as an ordinal, and still refuses a cue that paces itself', () => {
+    const cued = (cue: unknown) =>
+      infoschematicSchema.safeParse({
+        ...minimal,
+        sequences: [
+          {
+            id: 'WALK',
+            label: 'Walkthrough',
+            presentation: { display: 'expanded', timed: true, callouts: true },
+            scenes: [{ id: 'ARRIVAL', label: 'Arrival', cues: [cue] }]
+          }
+        ]
+      }).success
+
+    expect(cued({ dynamic: 'DELIVERY' })).toBe(true)
+    expect(cued({ dynamic: 'DELIVERY', stage: 1 })).toBe(true)
+    expect(cued({ dynamic: 'DELIVERY', stage: 4, playback: 'repeat' })).toBe(true)
+    // A stage counts from one, in whole steps: nothing below the first one is a stage, and there is no half-stage.
+    expect(cued({ dynamic: 'DELIVERY', stage: 0 })).toBe(false)
+    expect(cued({ dynamic: 'DELIVERY', stage: -1 })).toBe(false)
+    expect(cued({ dynamic: 'DELIVERY', stage: 1.5 })).toBe(false)
+    // The Sequence paces a cascade and a declaration never does, per `ADR-INFOSCHEMATICS-035`.
+    expect(cued({ dynamic: 'DELIVERY', stage: 1, duration: 400 })).toBe(false)
+    expect(cued({ dynamic: 'DELIVERY', stage: 1, delay: 400 })).toBe(false)
+  })
+
   it('rejects a misspelt key rather than dropping it', () => {
     const parsed = infoschematicSchema.safeParse({ ...minimal, subtitel: 'Typo' })
     expect(parsed.success).toBe(false)

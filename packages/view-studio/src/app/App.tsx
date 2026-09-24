@@ -34,7 +34,7 @@ import {
   type InfoschematicRuntime,
   type RuntimeStory
 } from '@infoschematics/view-model/runtime'
-import { type PresentProps, useCueCadence } from '@infoschematics/view-present'
+import { cueStageHold, type PresentProps, useCueCadence } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { directOptionsFor } from './direct-targets.ts'
 import { nextArtefactIndex } from './editor/artefact-operations.ts'
@@ -704,7 +704,6 @@ function AppContent({
    * prefix to issue its code from, so the control is withheld rather than
    * offered and then reaching past the end of the list.
    */
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const createCard = useCallback(
     (kind: 'adapter' | 'card') => {
       const held = kind === 'adapter' ? wrappable : undefined
@@ -814,9 +813,16 @@ function AppContent({
     editor.setRoute(selectedRoute.code, routeBetweenPorts(from, selectedRoute.sourcePort, to, selectedRoute.targetPort))
   }, [editor.setRoute, portAt, selectedRoute])
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `presentation.cueStage` is read to re-arm the beat, not by the effect body. A stage advance changes no other runtime object, so removing it sets the timer once per Scene and a cascade stalls on its first stage.
   useEffect(() => {
     if (playing && activeSequence?.presentation.timed && activeSequenceScene && presentation.autoAdvance) {
-      const timer = window.setTimeout(presentation.stepSequence, activeSequenceScene.hold, 1)
+      /* One beat per stage, so Studio's Present surface keeps the same beat as Present: a cascading Scene divides the
+         hold it already had between its stages, and `stepSequence` advances the cascade before the Scene. */
+      const timer = window.setTimeout(
+        presentation.stepSequence,
+        cueStageHold(activeSequenceScene.hold, presentation.cueStages),
+        1
+      )
       return () => window.clearTimeout(timer)
     }
     if (!playing || !runningStory || !presentation.autoAdvance) return
@@ -840,6 +846,10 @@ function AppContent({
     activeSequenceScene,
     playing,
     presentation.autoAdvance,
+    // A stage advance changes no runtime object, so without these the beat would be set once per Scene and a cascade
+    // would stall on its first stage.
+    presentation.cueStage,
+    presentation.cueStages,
     presentation.setPlaying,
     presentation.stepSequence,
     presentation.stopStory,

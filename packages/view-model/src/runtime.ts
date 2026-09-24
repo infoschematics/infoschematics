@@ -87,6 +87,8 @@ export type RuntimeIdentity = {
 export type RuntimeSceneCue = {
   dynamic: string
   playback: 'once' | 'repeat'
+  /** Which stage of the Scene's cascade plays it, counting from one. Resolved here so a View never reads an absence. */
+  stage: number
 }
 
 export type RuntimeSequenceScene = {
@@ -431,8 +433,13 @@ export const createInfoschematicRuntime = (input: InfoschematicInput) => {
         headline: scene.callout?.title ?? scene.label,
         hold: scene.duration ?? defaultSceneDuration,
         // Absence of a policy is `once`: the cue plays on entry, which is what a Scene naming a Dynamic asks for
-        // without saying more. Nothing here carries a duration, per `DYNAMIC-001`.
-        cues: (scene.cues ?? []).map((cue) => ({ dynamic: cue.dynamic, playback: cue.playback ?? 'once' })),
+        // without saying more. Absence of a stage is the first stage, so a Scene that names none has one stage and
+        // plays it all on entry. Nothing here carries a duration, per `DYNAMIC-001`.
+        cues: (scene.cues ?? []).map((cue) => ({
+          dynamic: cue.dynamic,
+          playback: cue.playback ?? 'once',
+          stage: cue.stage ?? 1
+        })),
         components: elements.filter((id) => !flowIds.has(id) && !overlayIds.has(id)),
         flows: elements.filter((id) => flowIds.has(id)),
         graphic: overlay ? overlayById.get(overlay) : undefined,

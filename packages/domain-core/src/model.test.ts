@@ -451,4 +451,29 @@ describe('Scene cues', () => {
       'Sequence walkthrough Scene arrival cues Diagram Dynamic delivery twice'
     )
   })
+
+  it('carries a cascade as an order, and rejects a stage re-cueing what another stage already cues', () => {
+    expect(
+      cuedModel([
+        { dynamic: 'delivery', stage: 1 },
+        { dynamic: 'attention', stage: 2, playback: 'repeat' }
+      ]).sequences[0]?.scenes[0]?.cues
+    ).toEqual([
+      { dynamic: 'delivery', stage: 1 },
+      { dynamic: 'attention', stage: 2, playback: 'repeat' }
+    ])
+
+    // Staging the second cue says when it plays, not that the Scene may ask the same question twice.
+    expect(() =>
+      cuedModel([
+        { dynamic: 'delivery', stage: 1 },
+        { dynamic: 'delivery', stage: 3 }
+      ])
+    ).toThrow('Sequence walkthrough Scene arrival cues Diagram Dynamic delivery twice, at stages 1 and 3')
+
+    // An unstaged cue is the first stage, so the same Dynamic staged and unstaged is still the same question twice.
+    expect(() => cuedModel([{ dynamic: 'delivery' }, { dynamic: 'delivery', stage: 2 }])).toThrow(
+      'Sequence walkthrough Scene arrival cues Diagram Dynamic delivery twice, at stages 1 and 2'
+    )
+  })
 })

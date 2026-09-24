@@ -321,11 +321,24 @@ const validateScene = (
   dynamicIds: ReadonlySet<string>,
   context: string
 ) => {
-  const cued = new Set<string>()
+  const cued = new Map<string, number>()
   for (const cue of scene.cues ?? []) {
-    // Two cues for one Dynamic in one Scene would ask the same question twice with no way to say which answer wins.
-    if (cued.has(cue.dynamic)) throw new Error(`${context} cues Diagram Dynamic ${cue.dynamic} twice`)
-    cued.add(cue.dynamic)
+    /*
+     * Two cues for one Dynamic in one Scene would ask the same question twice with no way to say which answer wins.
+     * A cascade does not relax that: staging the second cue says when it plays, not that the Scene may ask twice, so
+     * a stage that re-cues a Dynamic another stage of the same Scene already cues is the same contradiction wearing
+     * an order. The message names both stages, because the two cues are no longer adjacent in the document.
+     */
+    const held = cued.get(cue.dynamic)
+    if (held !== undefined) {
+      const stage = cue.stage ?? 1
+      throw new Error(
+        held === stage && held === 1
+          ? `${context} cues Diagram Dynamic ${cue.dynamic} twice`
+          : `${context} cues Diagram Dynamic ${cue.dynamic} twice, at stages ${held} and ${stage}`
+      )
+    }
+    cued.set(cue.dynamic, cue.stage ?? 1)
     requireReference(dynamicIds, cue.dynamic, `${context} cue`)
   }
   validateSelection(scene.focus, elementIds, scopeIds, `${context} focus`)

@@ -141,6 +141,10 @@ export function usePresentation() {
     /* The Scene's own cues, derived rather than scheduled here: Studio plays what the document asks for while a
        Scene is on screen, and the rehearsal bank beside it stays the Producer's own occurrence. */
     cueOccurrences: derived.dynamics,
+    /* How many stages the focused Scene cascades through, so a timed Sequence beats per stage here as it does in
+       Present rather than holding a whole Scene for a cascade that has not finished. */
+    cueStages: derived.cueStages,
+    cueStage: production.presentation.cueStage,
     repeatingCues: derived.repeatingCues,
     replayCues: () => dispatchPresentation({ type: 'replay-cues' }),
     sceneOccurrence: production.presentation.sceneOccurrence,

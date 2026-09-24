@@ -10,6 +10,16 @@ import { useEffect } from 'react'
 export const cueRepeatInterval = 1400
 
 /**
+ * How long one stage of a Scene's cascade holds in a timed Sequence.
+ *
+ * The Sequence paces the cascade, so its stages divide the Scene's own `hold` rather than introducing a duration of
+ * their own: a Scene holding six seconds over three stages beats every two, and the Scene still leaves when it always
+ * did. A Scene with no cascade divides by one and holds exactly as before. The division lives here rather than in
+ * derivation because it is a measurement, and derivation reads no clock.
+ */
+export const cueStageHold = (hold: number, stages: number) => Math.max(0, hold) / Math.max(1, stages)
+
+/**
  * Advance a repeating cue's occurrence key on one shared cadence.
  *
  * A cue's key is presentation state, so a repeat is this one interval advancing it rather than a timer per cue, and

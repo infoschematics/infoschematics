@@ -2,7 +2,7 @@ import type { InfoschematicInput } from '@infoschematics/domain-model'
 import { Canvas, type CanvasProps } from '@infoschematics/view-canvas'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useCueCadence } from './cues.ts'
+import { cueStageHold, useCueCadence } from './cues.ts'
 import { PresentationControls } from './PresentationControls.tsx'
 import { PresentationDetails } from './PresentationDetails.tsx'
 import type { SceneSignalPolicy } from './presentation.ts'
@@ -57,25 +57,32 @@ export function Present({
     (delta: number) => dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta }),
     [dispatch, runtime.sequences]
   )
-  // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the effect reads `state` as a whole but depends only on the listed parts. `state.cueStage` is listed on purpose: a stage advance leaves every runtime object identical, so without it the beat would be set once per Scene and the cascade would stall on its first stage.
   useEffect(() => {
     const { playing } = state
     const { activeSequence, activeSequenceScene } = derived
     if (!playing || !activeSequence || !activeSequenceScene || !activeSequence.presentation.timed || !state.autoAdvance)
       return
+    /*
+     * One beat per stage rather than one per Scene. `step-sequence` advances the cascade before the Scene, so the
+     * same timer and the same action carry both: a Scene staging three cues beats three times over the hold it always
+     * had, and a Scene staging none beats once over the whole of it.
+     */
     const timer = window.setTimeout(
       () => {
         dispatch({ type: 'step-sequence', sequences: runtime.sequences, delta: 1 })
       },
-      Math.max(0, activeSequenceScene.hold)
+      cueStageHold(activeSequenceScene.hold, derived.cueStages)
     )
     return () => window.clearTimeout(timer)
   }, [
     derived.activeSequence,
     derived.activeSequenceScene,
+    derived.cueStages,
     dispatch,
     runtime.sequences,
     state.autoAdvance,
+    state.cueStage,
     state.playing
   ])
 

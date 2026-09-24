@@ -579,12 +579,22 @@ const visibility = z
   })
   .describe('What the Scene shows and hides relative to the whole drawing.')
 
-/** A Scene's request that a named Dynamic play: which one, and how often. Never how long or how. */
+/**
+ * A Scene's request that a named Dynamic play: which one, how often, and where in the Scene's order. Never how long
+ * or how. The object stays strict so a cue that carries its own duration is a validation failure, per `DYNAMIC-001`:
+ * a stage is an order, and the Sequence paces it.
+ */
 const sceneCue = z.strictObject({
   dynamic: z.string().describe('Identifier of the Diagram Dynamic to play.'),
   playback: z
     .enum(['once', 'repeat'])
     .describe('Whether the Dynamic plays through once or repeats while the Scene is shown.')
+    .optional(),
+  stage: z
+    .number()
+    .int()
+    .positive()
+    .describe('Which stage of this Scene plays the Dynamic, counting from one. Absent is the first stage.')
     .optional()
 })
 

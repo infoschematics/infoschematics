@@ -2,6 +2,7 @@ import type { DynamicOccurrence } from '@infoschematics/view-model/dynamics'
 import type {
   InfoschematicRuntime,
   RuntimeExpandedScene,
+  RuntimeSceneCue,
   RuntimeSequence,
   RuntimeStandaloneScene,
   RuntimeStory
@@ -25,6 +26,14 @@ export type PresentationState = Readonly<{
   autoAdvance: boolean
   /** Advances while a Scene holds, so a repeating cue plays again under a key a renderer reads as a new occurrence. */
   cueCycle: number
+  /**
+   * How far the focused Scene's cascade has played, as an index into that Scene's stages counting from zero.
+   *
+   * It sits here rather than in a timer because derivation must give one answer from one state: a stage index kept in
+   * a ref or a renderer would make a second derivation disagree with the first. Every Scene change resets it, so a
+   * cascade is never part-played into a Scene that did not start it.
+   */
+  cueStage: number
   playing: PlayingSequence | null
   sceneOccurrence: number
   standaloneSceneId: string | null
@@ -37,6 +46,7 @@ export type PresentationState = Readonly<{
 export type PresentationAction =
   | Readonly<{ type: 'clear-focus' }>
   | Readonly<{ type: 'replay-cues' }>
+  | Readonly<{ type: 'step-cues'; sequences: readonly RuntimeSequence[]; delta: number }>
   | Readonly<{ type: 'set-annotated'; value: boolean }>
   | Readonly<{ type: 'set-auto-advance'; value: boolean }>
   | Readonly<{ type: 'set-takeaways'; value: boolean }>
@@ -59,6 +69,7 @@ export const initialPresentationState = (runtime: InfoschematicRuntime): Present
   annotated: false,
   autoAdvance: true,
   cueCycle: 0,
+  cueStage: 0,
   playing: null,
   sceneOccurrence: 0,
   standaloneSceneId: null,
@@ -67,6 +78,19 @@ export const initialPresentationState = (runtime: InfoschematicRuntime): Present
   visibleFamilies: new Set(runtime.infoschematicFamilies.map((family) => family.id)),
   visibleScopes: new Set(runtime.infoschematicScopes.map((scope) => scope.id))
 })
+
+/**
+ * The distinct stages a Scene's cues declare, in ascending order.
+ *
+ * A Scene with no cues has no stages; one whose cues name none has a single stage, because the runtime resolves an
+ * absent stage to the first. The authored numbers are read as an order rather than a count, so a Scene staging its
+ * cues 1 and 5 has two stages and no empty beat between them.
+ */
+const sceneStages = (cues: readonly RuntimeSceneCue[]): readonly number[] =>
+  [...new Set(cues.map((cue) => cue.stage))].sort((left, right) => left - right)
+
+/** Entering a Scene: a new occurrence, and a cascade that has not started. */
+const entering = (state: PresentationState) => ({ cueStage: 0, sceneOccurrence: state.sceneOccurrence + 1 })
 
 const toggled = (current: ReadonlySet<string>, id: string): ReadonlySet<string> => {
   const next = new Set(current)
@@ -78,13 +102,25 @@ const toggled = (current: ReadonlySet<string>, id: string): ReadonlySet<string> 
 export const presentationReducer = (state: PresentationState, action: PresentationAction): PresentationState => {
   switch (action.type) {
     case 'clear-focus':
-      return { ...state, playing: null, standaloneSceneId: null, expandedSceneId: null }
+      return { ...state, cueStage: 0, playing: null, standaloneSceneId: null, expandedSceneId: null }
     case 'replay-cues':
       // Every Scene change already changes `sceneOccurrence`, which is part of the key, so the cycle needs no reset.
       return { ...state, cueCycle: state.cueCycle + 1 }
+    case 'step-cues': {
+      /*
+       * Move within the focused Scene's cascade and no further. This is the stage half of a presenter's step on its
+       * own: it stops at either end rather than spilling into the neighbouring Scene, so a host that wants to play a
+       * cascade out without risking a Scene change has an action that says exactly that.
+       */
+      if (!state.playing) return state
+      const sequence = action.sequences.find((entry) => entry.id === state.playing?.id)
+      const stages = sceneStages(sequence?.scenes[state.playing.step]?.cues ?? [])
+      const cueStage = Math.min(Math.max(state.cueStage + action.delta, 0), Math.max(0, stages.length - 1))
+      return cueStage === state.cueStage ? state : { ...state, cueStage }
+    }
     case 'stop-story':
     case 'stop-sequence':
-      return { ...state, playing: null }
+      return { ...state, cueStage: 0, playing: null }
     case 'set-annotated':
       return { ...state, annotated: action.value }
     case 'set-auto-advance':
@@ -99,51 +135,66 @@ export const presentationReducer = (state: PresentationState, action: Presentati
       if (action.sequence.scenes.length === 0) return state
       return {
         ...state,
-        playing: { id: action.sequence.id, step: action.step ?? 0 },
-        sceneOccurrence: state.sceneOccurrence + 1
+        ...entering(state),
+        playing: { id: action.sequence.id, step: action.step ?? 0 }
       }
     case 'start-story':
       if (action.story.steps.length === 0) return state
       return {
         ...state,
+        ...entering(state),
         playing: { id: action.story.id, step: 0 },
-        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
         expandedSceneId: null
       }
     case 'toggle-sequence-scene':
       if (action.sequence.scenes.length === 0 || !action.sequence.scenes[action.step]) return state
       if (state.playing?.id === action.sequence.id && state.playing.step === action.step) {
-        return { ...state, playing: null }
+        return { ...state, cueStage: 0, playing: null }
       }
       return {
         ...state,
-        playing: { id: action.sequence.id, step: action.step },
-        sceneOccurrence: state.sceneOccurrence + 1
+        ...entering(state),
+        playing: { id: action.sequence.id, step: action.step }
       }
     case 'step-sequence': {
       if (!state.playing) return state
       const sequence = action.sequences.find((entry) => entry.id === state.playing?.id)
-      if (!sequence || sequence.scenes.length === 0) return { ...state, playing: null }
+      if (!sequence || sequence.scenes.length === 0) return { ...state, cueStage: 0, playing: null }
+      /*
+       * A cascade's stages are steps of the Sequence, per `ADR-INFOSCHEMATICS-035`. The step advances within the
+       * Scene while stages remain and only then moves past it, and a single step of a Scene that stages nothing is
+       * the step it has always been. A jump of more than one Scene skips the cascade rather than crawling it.
+       */
+      const stages = sceneStages(sequence.scenes[state.playing.step]?.cues ?? [])
+      const staysInScene =
+        (action.delta === 1 && state.cueStage < stages.length - 1) || (action.delta === -1 && state.cueStage > 0)
+      if (staysInScene) return presentationReducer(state, { ...action, type: 'step-cues' })
       const step = (state.playing.step + action.delta + sequence.scenes.length) % sequence.scenes.length
+      /*
+       * Stepping backwards arrives at the Scene as it was left, with its cascade played out, so that back and forward
+       * reverse each other instead of replaying the previous Scene from its first stage.
+       */
+      const arriving = sceneStages(sequence.scenes[step]?.cues ?? [])
       return {
         ...state,
-        playing: { ...state.playing, step },
-        sceneOccurrence: state.sceneOccurrence + 1
+        ...entering(state),
+        cueStage: action.delta < 0 ? Math.max(0, arriving.length - 1) : 0,
+        playing: { ...state.playing, step }
       }
     }
     case 'step-story': {
       if (!state.playing) return state
       const story = action.stories.find((entry) => entry.id === state.playing?.id)
-      if (!story || story.steps.length === 0) return { ...state, playing: null }
+      if (!story || story.steps.length === 0) return { ...state, cueStage: 0, playing: null }
       const step = (state.playing.step + action.delta + story.steps.length) % story.steps.length
-      return { ...state, playing: { ...state.playing, step }, sceneOccurrence: state.sceneOccurrence + 1 }
+      return { ...state, ...entering(state), playing: { ...state.playing, step } }
     }
     case 'step-expanded': {
       if (!state.expandedSceneId || action.scenes.length === 0) return state
       const current = action.scenes.findIndex((entry) => entry.id === state.expandedSceneId)
       const scene = action.scenes[(current + action.delta + action.scenes.length) % action.scenes.length]
-      return scene ? { ...state, sceneOccurrence: state.sceneOccurrence + 1, expandedSceneId: scene.id } : state
+      return scene ? { ...state, ...entering(state), expandedSceneId: scene.id } : state
     }
     case 'toggle-family':
       return { ...state, visibleFamilies: toggled(state.visibleFamilies, action.id) }
@@ -152,16 +203,16 @@ export const presentationReducer = (state: PresentationState, action: Presentati
     case 'toggle-standalone-scene':
       return {
         ...state,
+        ...entering(state),
         playing: null,
-        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: state.standaloneSceneId === action.scene.id ? null : action.scene.id,
         expandedSceneId: null
       }
     case 'toggle-expanded-scene':
       return {
         ...state,
+        ...entering(state),
         playing: null,
-        sceneOccurrence: state.sceneOccurrence + 1,
         standaloneSceneId: null,
         expandedSceneId: state.expandedSceneId === action.scene.id ? null : action.scene.id
       }
@@ -203,7 +254,17 @@ export const derivePresentation = (
           occurrenceKey: `present-scene-${state.sceneOccurrence}`
         }))
       : []
-  const cues = signalPolicy === 'focused-flows' ? (focusedScene?.cues ?? []) : []
+  const declared = signalPolicy === 'focused-flows' ? (focusedScene?.cues ?? []) : []
+  /*
+   * A Sequence paces a cascade, and nothing else does, per `ADR-INFOSCHEMATICS-035`. A Scene taken up on its own — a
+   * Standalone Scene, or one expanded beside its Sequence — has no step to divide between stages, so its cues all
+   * play on entry as they always have; a Scene playing inside a Sequence shows the stages up to the one reached.
+   */
+  const stages = focusedScene !== undefined && focusedScene === activeSequenceScene ? sceneStages(declared) : []
+  const reached = stages[Math.min(state.cueStage, stages.length - 1)]
+  const cues = reached === undefined ? declared : declared.filter((cue) => cue.stage <= reached)
+  /** Whether a forward step advances within this Scene's cascade rather than past the Scene. */
+  const stepStaysInScene = state.cueStage < stages.length - 1
   /*
    * A cue becomes an occurrence, and nothing here becomes a timer.
    *
@@ -230,11 +291,14 @@ export const derivePresentation = (
   return {
     activeSequence,
     activeSequenceScene,
+    /** How many stages the focused Scene's cascade has, which is what a timed Sequence divides its hold between. */
+    cueStages: stages.length,
     dynamics,
     focusedScene,
     highlight,
     repeatingCues,
     signals,
+    stepStaysInScene,
     runningStory,
     runningStoryScene,
     standaloneScene,

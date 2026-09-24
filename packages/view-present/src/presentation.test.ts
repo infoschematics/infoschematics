@@ -1,7 +1,13 @@
 import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import { describe, expect, it } from 'vitest'
-import { createPresentationState, derivePresentation, reducePresentation } from './presentation.ts'
+import { cueStageHold } from './cues.ts'
+import {
+  createPresentationState,
+  derivePresentation,
+  type PresentationState,
+  reducePresentation
+} from './presentation.ts'
 
 const runtime = () =>
   createInfoschematicRuntime(
@@ -412,10 +418,11 @@ describe('presentation state', () => {
     const sequence = source.sequences[0]
     if (!sequence) throw new Error('The fixture declares one Sequence')
 
-    // The projection carries the authored policy and no timing: `once` is defaulted in, nothing else is added.
+    // The projection carries the authored policy and order and no timing: `once` and the first stage are defaulted
+    // in, nothing else is added.
     expect(sequence.scenes[0]?.cues).toEqual([
-      { dynamic: 'delivery', playback: 'once' },
-      { dynamic: 'attention', playback: 'repeat' }
+      { dynamic: 'delivery', playback: 'once', stage: 1 },
+      { dynamic: 'attention', playback: 'repeat', stage: 1 }
     ])
     expect(sequence.scenes[1]?.cues).toEqual([])
 
@@ -453,5 +460,124 @@ describe('presentation state', () => {
     // `none` originates nothing at all: a host that wants to own every occurrence gets no cue either.
     expect(derivePresentation(source, entered, 'none').dynamics).toEqual([])
     expect(derivePresentation(source, entered, 'none').repeatingCues).toBe(false)
+
+    // A Scene that stages nothing has one stage, so a step moves past it exactly as it always did.
+    expect(onEntry.cueStages).toBe(1)
+    expect(onEntry.stepStaysInScene).toBe(false)
+    expect(stepped.playing).toEqual({ id: 'walk', step: 1 })
+  })
+
+  it('plays a cascade a stage at a time, and steps past the Scene once the last stage has played', () => {
+    const source = createInfoschematicRuntime(
+      defineInfoschematicModel({
+        id: 'CASCADE',
+        title: 'Cascading Scenes',
+        diagram: {
+          bounds: { x: 0, y: 0, width: 400, height: 200 },
+          gridSize: 10,
+          cards: [
+            { id: 'SRC', label: 'Source', bounds: { x: 20, y: 20, width: 100, height: 60 } },
+            { id: 'SNK', label: 'Sink', bounds: { x: 260, y: 20, width: 100, height: 60 } }
+          ],
+          flows: [{ id: 'LOAD', source: { element: 'SRC', port: 'E1' }, target: { element: 'SNK', port: 'W1' } }],
+          dynamics: [
+            { id: 'delivery', label: 'Record delivered', kind: 'signal-flow', flows: ['LOAD'] },
+            { id: 'attention', label: 'Sink needs attention', kind: 'emphasise-elements', elements: ['SNK'] },
+            { id: 'settled', label: 'Source settled', kind: 'emphasise-elements', elements: ['SRC'] }
+          ]
+        },
+        sequences: [
+          {
+            id: 'walk',
+            label: 'Walkthrough',
+            // Untimed: each stage is one presenter step, which is the case `ADR-INFOSCHEMATICS-035` had to answer.
+            presentation: { display: 'expanded', timed: false, callouts: true },
+            scenes: [
+              {
+                id: 'arrival',
+                label: 'Arrival',
+                cues: [
+                  { dynamic: 'delivery', stage: 1 },
+                  { dynamic: 'attention', stage: 2, playback: 'repeat' },
+                  // The stages are read as an order rather than a count, so the gap to 5 is not an empty beat.
+                  { dynamic: 'settled', stage: 5 }
+                ]
+              },
+              { id: 'quiet', label: 'Quiet' }
+            ]
+          }
+        ]
+      })
+    )
+    const sequence = source.sequences[0]
+    if (!sequence) throw new Error('The fixture declares one Sequence')
+    const step = (state: PresentationState, delta: number) =>
+      reducePresentation(state, { type: 'step-sequence', sequences: source.sequences, delta })
+
+    const first = reducePresentation(createPresentationState(source), { type: 'start-sequence', sequence })
+    const onEntry = derivePresentation(source, first)
+    expect(onEntry.cueStages).toBe(3)
+    expect(onEntry.stepStaysInScene).toBe(true)
+    // Entry plays the first stage alone: the rest of the cascade has not happened yet.
+    expect(onEntry.dynamics).toEqual([{ dynamicId: 'delivery', occurrenceKey: 'present-cue-1' }])
+    expect(onEntry.repeatingCues).toBe(false)
+    // Deriving twice from one state gives one answer, which is the property the stage index is held here to keep.
+    expect(derivePresentation(source, first).dynamics).toEqual(onEntry.dynamics)
+
+    // A step advances within the Scene rather than past it, and the Scene occurrence does not move with it.
+    const second = step(first, 1)
+    expect(second.playing).toEqual({ id: 'walk', step: 0 })
+    expect(second.sceneOccurrence).toBe(first.sceneOccurrence)
+    expect(derivePresentation(source, second).dynamics).toEqual([
+      { dynamicId: 'delivery', occurrenceKey: 'present-cue-1' },
+      { dynamicId: 'attention', occurrenceKey: 'present-cue-1-0' }
+    ])
+    // The cadence starts only once the stage carrying the repeat has played.
+    expect(derivePresentation(source, second).repeatingCues).toBe(true)
+
+    const third = step(second, 1)
+    expect(derivePresentation(source, third).dynamics).toEqual([
+      { dynamicId: 'delivery', occurrenceKey: 'present-cue-1' },
+      { dynamicId: 'attention', occurrenceKey: 'present-cue-1-0' },
+      { dynamicId: 'settled', occurrenceKey: 'present-cue-1' }
+    ])
+    expect(derivePresentation(source, third).stepStaysInScene).toBe(false)
+
+    // The next step lands where it would have landed before the cascade existed, having passed through the stages.
+    const past = step(third, 1)
+    expect(past.playing).toEqual({ id: 'walk', step: 1 })
+    expect(past.cueStage).toBe(0)
+    expect(past.sceneOccurrence).toBe(first.sceneOccurrence + 1)
+    expect(derivePresentation(source, past).dynamics).toEqual([])
+
+    // Stepping back arrives at the Scene as it was left, so back and forward reverse each other.
+    const back = step(past, -1)
+    expect(back.playing).toEqual({ id: 'walk', step: 0 })
+    expect(back.cueStage).toBe(2)
+    expect(derivePresentation(source, back).dynamics).toHaveLength(3)
+    const backAgain = step(back, -1)
+    expect(backAgain.playing).toEqual({ id: 'walk', step: 0 })
+    expect(backAgain.cueStage).toBe(1)
+
+    // `step-cues` is the stage half on its own, and it stops at either end rather than leaving the Scene.
+    const held = reducePresentation(backAgain, { type: 'step-cues', sequences: source.sequences, delta: 5 })
+    expect(held.cueStage).toBe(2)
+    expect(held.playing).toEqual({ id: 'walk', step: 0 })
+    expect(reducePresentation(held, { type: 'step-cues', sequences: source.sequences, delta: -9 }).cueStage).toBe(0)
+
+    // Leaving the Scene cancels a part-played cascade, and a `none` policy originates none of it in the first place.
+    expect(derivePresentation(source, reducePresentation(second, { type: 'stop-sequence' })).dynamics).toEqual([])
+    expect(derivePresentation(source, second, 'none').dynamics).toEqual([])
+  })
+
+  it('divides a timed Scene between its stages, so the Scene leaves when it always did', () => {
+    // Three stages over a six-second hold beat every two seconds, and the three beats spend the whole of it.
+    expect(cueStageHold(6000, 3)).toBe(2000)
+    expect(cueStageHold(6000, 3) * 3).toBe(6000)
+    // A Scene with no cascade divides by one, and a Scene cueing nothing at all still holds rather than flickering.
+    expect(cueStageHold(6000, 1)).toBe(6000)
+    expect(cueStageHold(6000, 0)).toBe(6000)
+    // A negative hold is not a negative timeout.
+    expect(cueStageHold(-1, 2)).toBe(0)
   })
 })
