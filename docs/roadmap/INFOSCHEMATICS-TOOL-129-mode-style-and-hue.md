@@ -6,7 +6,7 @@ theme: tool
 horizon: now
 status: draft
 blocks: []
-blocked_by: [INFOSCHEMATICS-TOOL-131]
+blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T18:20:00Z
 updated_at: 2026-09-22T19:10:00Z
@@ -77,7 +77,7 @@ The evidence that matters is visual and comes from a real browser per `AGENTS.md
 
 ## Dependencies / blocks
 
-`INFOSCHEMATICS-TOOL-131` blocks it: this work needs the word `mode`, which Studio's production enum holds until that record splits it.
+Nothing blocks it. This work needs the word `mode`, which Studio's production enum held until the split that freed it; that work is delivered and accepted, so the word is available here.
 
 It overlaps `INFOSCHEMATICS-TOOL-121` — the identity chip's two spellings — in `packages/render-svg/src/index.ts` and `packages/view-canvas/src/styles.css`. That record now sits in Next, so expect to resolve the chip here rather than inherit it resolved. `INFOSCHEMATICS-TOOL-130` is adjacent and deliberately separate.
 
@@ -111,6 +111,6 @@ Worth stating plainly: this reverses a recorded decision made recently and delib
 
 ### Adoption
 
-It is fully shaped but held at `draft` rather than `ready`, because `INFOSCHEMATICS-TOOL-131` is open and the roadmap standard does not permit active blocked work. It becomes `ready` the moment that record lands; nothing else about it is outstanding.
+It is fully shaped and no longer blocked: the record that held the word `mode` is delivered and accepted. It is held at `draft` only until a planning pass marks it `ready`; nothing else about it is outstanding.
 
 Adopted into Now on 2026-09-22, with the model agreed with the owner in the same conversation: a resolved mode of light or dark with `system` as a third authored and reader-facing choice that resolves to one of them, style owning what cannot be colourised, authored colour as a hue seed, opacity settled so the style's ground reads through, and the five published documents migrated as part of the work rather than after it.
