@@ -149,6 +149,45 @@
   --infoschematic-chrome-paint-text-strong: #08151f;
 }
 
+.infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"] {
+  --infoschematic-canvas-paint-annotation-fill: #0d2b45e8;
+  --infoschematic-canvas-paint-annotation-halo: #0d2b45;
+  --infoschematic-canvas-paint-annotation-stroke: #ffffff44;
+  --infoschematic-canvas-paint-annotation-text: #eaf4fd;
+  --infoschematic-canvas-paint-artwork-accent: #1b6ca8;
+  --infoschematic-canvas-paint-artwork-detail: #3d6280;
+  --infoschematic-canvas-paint-artwork-frame: #5c7f9f78;
+  --infoschematic-canvas-paint-artwork-glyph: #245a85;
+  --infoschematic-canvas-paint-artwork-glyph-fill: #d4e6f5;
+  --infoschematic-canvas-paint-artwork-grid: #2f6a992e;
+  --infoschematic-canvas-paint-artwork-mark: #1b6ca88c;
+  --infoschematic-canvas-paint-artwork-shell: #dce8f4d6;
+  --infoschematic-canvas-paint-artwork-sweep: #1b6ca829;
+  --infoschematic-canvas-paint-artwork-title: #0d2b45;
+  --infoschematic-canvas-paint-artwork-warning: #a06800aa;
+  --infoschematic-canvas-paint-artwork-warning-fill: #a0680016;
+  --infoschematic-canvas-paint-artwork-warning-glyph: #8a5a00;
+  --infoschematic-canvas-paint-audit-stroke: #1b6ca8aa;
+  --infoschematic-canvas-paint-backdrop: #eef3f9;
+  --infoschematic-canvas-paint-fabric-fill: #dce8f4b8;
+  --infoschematic-canvas-paint-fabric-frame: #5c7f9fa8;
+  --infoschematic-canvas-paint-fabric-stroke: #2f6a99c4;
+  --infoschematic-canvas-paint-fabric-text: #234a6b;
+  --infoschematic-canvas-paint-flow-pipe: #f7fafd;
+  --infoschematic-canvas-paint-graphic-fill: #e8e2f5c9;
+  --infoschematic-canvas-paint-graphic-stroke: #6a4fa0;
+  --infoschematic-canvas-paint-region-fill: #2f6a9914;
+  --infoschematic-canvas-paint-region-stroke: #3d6a8f4d;
+  --infoschematic-canvas-paint-region-text: #0d2b4585;
+  --infoschematic-canvas-paint-region-text-notched: #1b6ca8;
+  --infoschematic-canvas-paint-stroke: #2f6a99c4;
+  --infoschematic-canvas-paint-surface: #dce8f4b8;
+  --infoschematic-canvas-paint-text: #0d2b45;
+  --infoschematic-canvas-paint-text-muted: #4a6d8a;
+  --infoschematic-canvas-paint-text-strong: #06192b;
+  --infoschematic-canvas-paint-unauthored: #4a6d8a;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --infoschematic-canvas-paint-annotation-fill: #e3ecf2ee;
@@ -223,6 +262,47 @@
     --infoschematic-chrome-paint-text-on-accent: #07111e;
     --infoschematic-chrome-paint-text-secondary: #a9c4dc;
     --infoschematic-chrome-paint-text-strong: #f5f8ff;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"] {
+    --infoschematic-canvas-paint-annotation-fill: #06101ee8;
+    --infoschematic-canvas-paint-annotation-halo: #06101e;
+    --infoschematic-canvas-paint-annotation-stroke: #ffffff44;
+    --infoschematic-canvas-paint-annotation-text: #dff3ff;
+    --infoschematic-canvas-paint-artwork-accent: #9cd5f5;
+    --infoschematic-canvas-paint-artwork-detail: #b9cde0;
+    --infoschematic-canvas-paint-artwork-frame: #90a8c178;
+    --infoschematic-canvas-paint-artwork-glyph: #a8cde6;
+    --infoschematic-canvas-paint-artwork-glyph-fill: #17354b;
+    --infoschematic-canvas-paint-artwork-grid: #8dc7e72e;
+    --infoschematic-canvas-paint-artwork-mark: #9cd5f58c;
+    --infoschematic-canvas-paint-artwork-shell: #153349d6;
+    --infoschematic-canvas-paint-artwork-sweep: #9ed9ff29;
+    --infoschematic-canvas-paint-artwork-title: #dff3ff;
+    --infoschematic-canvas-paint-artwork-warning: #d79b00aa;
+    --infoschematic-canvas-paint-artwork-warning-fill: #d79b0016;
+    --infoschematic-canvas-paint-artwork-warning-glyph: #f0b23a;
+    --infoschematic-canvas-paint-audit-stroke: #79c9ffaa;
+    --infoschematic-canvas-paint-backdrop: #081725;
+    --infoschematic-canvas-paint-fabric-fill: #102638b8;
+    --infoschematic-canvas-paint-fabric-frame: #6f8ba3a8;
+    --infoschematic-canvas-paint-fabric-stroke: #83b2d2c4;
+    --infoschematic-canvas-paint-fabric-text: #b9cde0;
+    --infoschematic-canvas-paint-flow-pipe: #06101c;
+    --infoschematic-canvas-paint-graphic-fill: #1a1436c9;
+    --infoschematic-canvas-paint-graphic-stroke: #8062b4;
+    --infoschematic-canvas-paint-region-fill: #12273b24;
+    --infoschematic-canvas-paint-region-stroke: #b5c4d54d;
+    --infoschematic-canvas-paint-region-text: #ffffff65;
+    --infoschematic-canvas-paint-region-text-notched: #9ed9ff;
+    --infoschematic-canvas-paint-stroke: #83b2d2c4;
+    --infoschematic-canvas-paint-surface: #102638b8;
+    --infoschematic-canvas-paint-text: #f2f7ff;
+    --infoschematic-canvas-paint-text-muted: #7f9bb3;
+    --infoschematic-canvas-paint-text-strong: #dff3ff;
+    --infoschematic-canvas-paint-unauthored: #7f9bb3;
   }
 }
 
@@ -376,7 +456,46 @@
   --infoschematic-chrome-paint-text-strong: #f5f8ff;
 }
 
-.infoschematic-svg.surface-blueprint, [data-surface-treatment="blueprint"] {
+[data-infoschematic-scheme="light"] .infoschematic-svg.style-blueprint, [data-infoschematic-scheme="light"] [data-infoschematic-style="blueprint"] {
+  --infoschematic-canvas-paint-annotation-fill: #0d2b45e8;
+  --infoschematic-canvas-paint-annotation-halo: #0d2b45;
+  --infoschematic-canvas-paint-annotation-stroke: #ffffff44;
+  --infoschematic-canvas-paint-annotation-text: #eaf4fd;
+  --infoschematic-canvas-paint-artwork-accent: #1b6ca8;
+  --infoschematic-canvas-paint-artwork-detail: #3d6280;
+  --infoschematic-canvas-paint-artwork-frame: #5c7f9f78;
+  --infoschematic-canvas-paint-artwork-glyph: #245a85;
+  --infoschematic-canvas-paint-artwork-glyph-fill: #d4e6f5;
+  --infoschematic-canvas-paint-artwork-grid: #2f6a992e;
+  --infoschematic-canvas-paint-artwork-mark: #1b6ca88c;
+  --infoschematic-canvas-paint-artwork-shell: #dce8f4d6;
+  --infoschematic-canvas-paint-artwork-sweep: #1b6ca829;
+  --infoschematic-canvas-paint-artwork-title: #0d2b45;
+  --infoschematic-canvas-paint-artwork-warning: #a06800aa;
+  --infoschematic-canvas-paint-artwork-warning-fill: #a0680016;
+  --infoschematic-canvas-paint-artwork-warning-glyph: #8a5a00;
+  --infoschematic-canvas-paint-audit-stroke: #1b6ca8aa;
+  --infoschematic-canvas-paint-backdrop: #eef3f9;
+  --infoschematic-canvas-paint-fabric-fill: #dce8f4b8;
+  --infoschematic-canvas-paint-fabric-frame: #5c7f9fa8;
+  --infoschematic-canvas-paint-fabric-stroke: #2f6a99c4;
+  --infoschematic-canvas-paint-fabric-text: #234a6b;
+  --infoschematic-canvas-paint-flow-pipe: #f7fafd;
+  --infoschematic-canvas-paint-graphic-fill: #e8e2f5c9;
+  --infoschematic-canvas-paint-graphic-stroke: #6a4fa0;
+  --infoschematic-canvas-paint-region-fill: #2f6a9914;
+  --infoschematic-canvas-paint-region-stroke: #3d6a8f4d;
+  --infoschematic-canvas-paint-region-text: #0d2b4585;
+  --infoschematic-canvas-paint-region-text-notched: #1b6ca8;
+  --infoschematic-canvas-paint-stroke: #2f6a99c4;
+  --infoschematic-canvas-paint-surface: #dce8f4b8;
+  --infoschematic-canvas-paint-text: #0d2b45;
+  --infoschematic-canvas-paint-text-muted: #4a6d8a;
+  --infoschematic-canvas-paint-text-strong: #06192b;
+  --infoschematic-canvas-paint-unauthored: #4a6d8a;
+}
+
+[data-infoschematic-scheme="dark"] .infoschematic-svg.style-blueprint, [data-infoschematic-scheme="dark"] [data-infoschematic-style="blueprint"] {
   --infoschematic-canvas-paint-annotation-fill: #06101ee8;
   --infoschematic-canvas-paint-annotation-halo: #06101e;
   --infoschematic-canvas-paint-annotation-stroke: #ffffff44;
@@ -489,5 +608,46 @@
     --infoschematic-chrome-paint-text-on-accent: #ffffff;
     --infoschematic-chrome-paint-text-secondary: #2b4558;
     --infoschematic-chrome-paint-text-strong: #08151f;
+  }
+}
+
+@media print {
+  .infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"], [data-infoschematic-scheme="light"] .infoschematic-svg.style-blueprint, [data-infoschematic-scheme="light"] [data-infoschematic-style="blueprint"], [data-infoschematic-scheme="dark"] .infoschematic-svg.style-blueprint, [data-infoschematic-scheme="dark"] [data-infoschematic-style="blueprint"] {
+    --infoschematic-canvas-paint-annotation-fill: #0d2b45e8;
+    --infoschematic-canvas-paint-annotation-halo: #0d2b45;
+    --infoschematic-canvas-paint-annotation-stroke: #ffffff44;
+    --infoschematic-canvas-paint-annotation-text: #eaf4fd;
+    --infoschematic-canvas-paint-artwork-accent: #1b6ca8;
+    --infoschematic-canvas-paint-artwork-detail: #3d6280;
+    --infoschematic-canvas-paint-artwork-frame: #5c7f9f78;
+    --infoschematic-canvas-paint-artwork-glyph: #245a85;
+    --infoschematic-canvas-paint-artwork-glyph-fill: #d4e6f5;
+    --infoschematic-canvas-paint-artwork-grid: #2f6a992e;
+    --infoschematic-canvas-paint-artwork-mark: #1b6ca88c;
+    --infoschematic-canvas-paint-artwork-shell: #dce8f4d6;
+    --infoschematic-canvas-paint-artwork-sweep: #1b6ca829;
+    --infoschematic-canvas-paint-artwork-title: #0d2b45;
+    --infoschematic-canvas-paint-artwork-warning: #a06800aa;
+    --infoschematic-canvas-paint-artwork-warning-fill: #a0680016;
+    --infoschematic-canvas-paint-artwork-warning-glyph: #8a5a00;
+    --infoschematic-canvas-paint-audit-stroke: #1b6ca8aa;
+    --infoschematic-canvas-paint-backdrop: #eef3f9;
+    --infoschematic-canvas-paint-fabric-fill: #dce8f4b8;
+    --infoschematic-canvas-paint-fabric-frame: #5c7f9fa8;
+    --infoschematic-canvas-paint-fabric-stroke: #2f6a99c4;
+    --infoschematic-canvas-paint-fabric-text: #234a6b;
+    --infoschematic-canvas-paint-flow-pipe: #f7fafd;
+    --infoschematic-canvas-paint-graphic-fill: #e8e2f5c9;
+    --infoschematic-canvas-paint-graphic-stroke: #6a4fa0;
+    --infoschematic-canvas-paint-region-fill: #2f6a9914;
+    --infoschematic-canvas-paint-region-stroke: #3d6a8f4d;
+    --infoschematic-canvas-paint-region-text: #0d2b4585;
+    --infoschematic-canvas-paint-region-text-notched: #1b6ca8;
+    --infoschematic-canvas-paint-stroke: #2f6a99c4;
+    --infoschematic-canvas-paint-surface: #dce8f4b8;
+    --infoschematic-canvas-paint-text: #0d2b45;
+    --infoschematic-canvas-paint-text-muted: #4a6d8a;
+    --infoschematic-canvas-paint-text-strong: #06192b;
+    --infoschematic-canvas-paint-unauthored: #4a6d8a;
   }
 }

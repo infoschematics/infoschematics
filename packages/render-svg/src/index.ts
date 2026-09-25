@@ -11,6 +11,7 @@ import {
 import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
+import { resolveAuthoredColour, seedResolver } from '@infoschematics/view-model/colour'
 import { type DetailBand, resolveDetailTreatment } from '@infoschematics/view-model/detail'
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
@@ -30,8 +31,9 @@ import {
 } from '@infoschematics/view-model/standard-artwork'
 import {
   adaptivePaint,
+  type PaintMode,
   type PaintRoles,
-  type PaintScheme,
+  type PaintStyle,
   paintDeclarations,
   paintFor,
   visualTokens
@@ -94,13 +96,22 @@ export type RenderInfoschematicSvgOptions = {
   /** Opt into responsive Card detail for this explicit rendered output size. */
   responsiveCardDetails?: RenderedSize
   /**
-   * Which colour scheme this rendering is painted in. Defaults to `light`.
+   * Which ground this rendering is painted against. Defaults to the mode the document authored, and to `system`.
    *
-   * A named scheme is resolved once and written as colours, which is what a raster encoder and a print path need:
-   * neither has a preference left to read. `adaptive` instead carries both palettes in the document's own
-   * stylesheet behind `prefers-color-scheme`, so one committed SVG reads correctly for someone whose preference
-   * this renderer will never know. An authored blueprint surface is not a scheme and overrides either, per
-   * `ADR-INFOSCHEMATICS-037`.
+   * A named mode is resolved once and written as colours, which is what a raster encoder and a print path need:
+   * neither has a preference left to read. `system` instead carries both palettes in the document's own stylesheet
+   * behind `prefers-color-scheme`, so one committed SVG reads correctly for someone whose ground this renderer will
+   * never know.
+   *
+   * The drawing's style is not answered here and cannot be: it is authored, and this option is about the reader.
+   */
+  mode?: RenderedMode
+  /**
+   * The former name for `mode`, still accepted.
+   *
+   * It carried `blueprint` as one of its values, which is the conflation this option was split to end. A caller
+   * passing `blueprint` is naming a style rather than a ground, so it resolves the ground to `system` and leaves the
+   * style to the document — which is what such a caller was asking for before there was a way to say it.
    */
   scheme?: RenderedScheme
   /** An authored Scene to render without introducing playback or other motion. */
@@ -115,13 +126,29 @@ export type RenderInfoschematicSvgOptions = {
 }
 
 /**
- * How a rendering answers the colour-scheme question.
+ * How a rendering answers the ground question.
  *
- * A `PaintScheme` names the answer, and `adaptive` declines to: the document then carries every palette it might
- * need and lets whatever displays it choose. `blueprint` is accepted here because a caller may pin it, but a
- * document that authored it does not need to.
+ * A `PaintMode` names the answer and `system` declines to: the document then carries both palettes and lets whatever
+ * displays it choose. There is no third ground, and a style is not one of the values — that question is the author's.
  */
-export type RenderedScheme = PaintScheme | 'adaptive'
+export type RenderedMode = PaintMode | 'system'
+
+/**
+ * The values the retired `scheme` option accepted.
+ *
+ * Kept so callers written against it keep working. `adaptive` is the old spelling of `system`, and `blueprint` was a
+ * style wearing a ground's name.
+ */
+export type RenderedScheme = RenderedMode | 'adaptive' | 'blueprint'
+
+/**
+ * The retired `scheme` option as a ground, where it named one.
+ *
+ * `blueprint` returns nothing rather than a ground, because it never was one: a caller passing it wanted the drawing's
+ * own treatment, which the document already carries. Dropping it here lets the document's own mode answer instead.
+ */
+const compatibleMode = (scheme: RenderedScheme | undefined): RenderedMode | undefined =>
+  scheme === undefined || scheme === 'blueprint' ? undefined : scheme === 'adaptive' ? 'system' : scheme
 
 /** The attribute that says which palette a rendering was painted from, and scopes the block that declares it. */
 const paintMarker = 'data-infoschematic-paint'
@@ -141,19 +168,25 @@ const paintMarker = 'data-infoschematic-paint'
  * drawing indistinguishable from `--scheme light`. Declaring the palette it settled on makes those rules resolve to
  * the rendering's own colours rather than the host's.
  *
- * `adaptive` carries every palette it might need instead. Paper is light whatever the screen was: a dark palette
- * printed is a page of ink and a reader who cannot read the result, so the print rule comes last and restores the
- * light palette. An authored blueprint outranks both, because that is a treatment its author chose rather than a
- * scheme resolved for a reader.
+ * A deferring rendering carries every palette it might need instead. Paper is light whatever the screen was: a dark
+ * palette printed is a page of ink and a reader who cannot read the result, so the print rule comes last and restores
+ * the light ground. It restores the light ground *of this drawing's own style*, which is what makes a printed
+ * blueprint a cyanotype rather than a page of navy — the style is the author's and survives; only the ground moves.
  */
-const paintPalettes = (depth: number, marker: RenderedScheme) => {
+const paintPalettes = (
+  depth: number,
+  marker: RenderedMode,
+  style: PaintStyle,
+  seeds: readonly (readonly [name: string, light: string, dark: string])[]
+) => {
   const indentation = '  '.repeat(depth)
-  const block = (indent: string, scheme: PaintScheme) => [
+  const block = (indent: string, mode: PaintMode) => [
     `${indent}[${paintMarker}="${marker}"] {`,
-    ...paintDeclarations(scheme).map(([name, value]) => `${indent}  ${name}: ${value};`),
+    ...paintDeclarations(style, mode).map(([name, value]) => `${indent}  ${name}: ${value};`),
+    ...seeds.map(([name, light, dark]) => `${indent}  ${name}: ${mode === 'dark' ? dark : light};`),
     `${indent}}`
   ]
-  if (marker !== 'adaptive') {
+  if (marker !== 'system') {
     return [`${indentation}<style>`, ...block(`${indentation}  `, marker), `${indentation}</style>`].join('\n')
   }
   return [
@@ -620,17 +653,25 @@ export const renderInfoschematicSvg = (
      painted a light slab onto the blueprint backdrop. There is now nothing to pick: an authored blueprint surface
      is its own palette, anything else takes the scheme the caller asked for, and a role neither answers does not
      exist. */
-  const requestedScheme = options.scheme ?? 'light'
-  /* A drawing that defers the scheme carries the palettes with it; one that was given a scheme carries colours. An
-     authored blueprint is a palette in its own right, so there is nothing for a reader's preference to change. */
-  const adaptive = requestedScheme === 'adaptive' && visualTreatment.surface !== 'blueprint'
-  /* Which palette this rendering settled on, and the value it marks itself with so the block it carries reaches it
-     and nothing else. An authored blueprint answers for itself; a caller who asked to defer and was overruled by one
-     is marked `blueprint` rather than `adaptive`, because that is what it is. */
-  const resolvedScheme: PaintScheme =
-    visualTreatment.surface === 'blueprint' ? 'blueprint' : requestedScheme === 'adaptive' ? 'light' : requestedScheme
-  const paintMarkerValue: RenderedScheme = adaptive ? 'adaptive' : resolvedScheme
-  const paint = adaptive ? adaptivePaint : paintFor(resolvedScheme)
+  /* The style is the document's and the ground is the reader's, so they are read from different places and neither
+     can overrule the other. A blueprint used to suppress deferral outright, on the reasoning that an authored
+     treatment is not a scheme somebody resolved — true, and it does not follow that a blueprint has only one ground.
+     It now has two, so a deferring blueprint carries both exactly as any other drawing does. */
+  /* A document's own mode answers for a drawing authored to be read on one ground. `system` is not such an answer —
+     it is the author declining to pick — so it leaves the ground to whoever renders, and a caller who asked for
+     nothing gets a rendering that resolved rather than one that defers. Deferring is something a caller asks for:
+     a still picture has no preference to read, and an unasked-for `var()` would rasterise to nothing at all. */
+  const style: PaintStyle = visualTreatment.style
+  const authoredMode = visualTreatment.mode === 'system' ? undefined : visualTreatment.mode
+  const requestedMode: RenderedMode = options.mode ?? compatibleMode(options.scheme) ?? authoredMode ?? 'light'
+  const adaptive = requestedMode === 'system'
+  const resolvedMode: PaintMode = adaptive ? 'light' : requestedMode
+  const paintMarkerValue: RenderedMode = adaptive ? 'system' : resolvedMode
+  const paint = adaptive ? adaptivePaint : paintFor(style, resolvedMode)
+  /* Authored colours are seeds, and this rendering's ground is what they are seeds for. A deferring rendering pools
+     them into custom properties instead, declared in the same two blocks its palettes are. */
+  const seeds = seedResolver(adaptive ? 'system' : resolvedMode)
+  const seededInk = (value: string) => seeds.resolve(value, 'ink')
   const backdrop = paint.backdrop
   const regionStroke = paint.regionStroke
   const visibleScopes = new Set(options.visibility?.scopes ?? config.scopes.map((scope) => scope.id))
@@ -685,7 +726,7 @@ export const renderInfoschematicSvg = (
     if (!resolved) return undefined
     const direction = flow.bidirectional ? ('reversed' as const) : ('forward' as const)
     return {
-      color: emphasised ? emphasis.stroke : resolved.family.color,
+      color: emphasised ? emphasis.stroke : seededInk(resolved.family.color),
       direction,
       id: `${resourceIdPrefix}-arrow-${resolved.index}${emphasised ? '-emphasised' : ''}${
         direction === 'reversed' ? '-reversed' : ''
@@ -940,16 +981,19 @@ export const renderInfoschematicSvg = (
   for (const region of runtime.infoschematicRegions) {
     const treatment = resolveRegionTreatment(region)
     const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+    /* The readable ink is measured against the fill that will actually be drawn, not the seed it came from: a seed
+       and its realisation can sit on opposite sides of the threshold, which is the whole point of realising it. */
+    const regionFill = region.fill === undefined ? undefined : seeds.resolve(region.fill, 'ground')
     // A boundary-mounted label sits over the backdrop the notch exposes,
     // not the fill, so only a plain label takes its ink from the fill.
     const ink =
-      region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
+      regionFill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(regionFill) : null
     const content: string[] = []
-    if (region.fill) {
+    if (regionFill) {
       content.push(
         line(2, 'rect', [
           ['class', 'infoschematic-region-fill'],
-          ['fill', region.fill],
+          ['fill', regionFill],
           ['height', region.box.height],
           ['rx', region.box.radius ?? canvasTokens.geometry.cornerRadius],
           ['width', region.box.width],
@@ -988,7 +1032,7 @@ export const renderInfoschematicSvg = (
         labelContent.push(
           line(2, 'rect', [
             ['class', 'infoschematic-region-label-backing'],
-            ['fill', ink !== null && region.fill ? region.fill : backdrop],
+            ['fill', ink !== null && regionFill ? regionFill : backdrop],
             ['height', geometry.labelBacking.height],
             ['width', geometry.labelBacking.width],
             ['x', geometry.labelBacking.x],
@@ -1141,7 +1185,7 @@ export const renderInfoschematicSvg = (
   const flowPipe = paint.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
-    const color = resolved?.family.color ?? paint.unauthored
+    const color = resolved ? seededInk(resolved.family.color) : paint.unauthored
     const head = arrowheadFor(flow, false)
     const dimmed = focusClass(flow.id, focus?.flows, unfocused)
     const signalled = signalledFlows.has(flow.id)
@@ -1295,8 +1339,13 @@ export const renderInfoschematicSvg = (
     const box = card.bounds
     const appearance = card.collection ? collections.get(card.collection) : undefined
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
-    const fill = appearance?.fill ?? paint.surface
-    const ink = resolveReadableInk(fill)
+    const fill = appearance?.fill ? seeds.resolve(appearance.fill, 'fill') : paint.surface
+    /* A deferring rendering draws a seed as a custom property, which is not a colour anything can measure. The ink
+       is therefore read from the realisation on the ground this rendering resolved to, which is the one an adaptive
+       drawing opens on and the only ground a single `data-ink` attribute can speak for. */
+    const ink = resolveReadableInk(
+      appearance?.fill ? resolveAuthoredColour(appearance.fill, resolvedMode, 'fill') : fill
+    )
     const metadataColor = ink === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
     /* The chip is resolved whether or not this Card draws one, because its slot is also where a code the caller
@@ -1322,7 +1371,7 @@ export const renderInfoschematicSvg = (
         ['fill', fill],
         ['height', box.height],
         ['rx', canvasTokens.geometry.cornerRadius],
-        ['stroke', appearance?.color ?? paint.unauthored],
+        ['stroke', appearance?.color ? seededInk(appearance.color) : paint.unauthored],
         ['stroke-width', 2],
         ['width', box.width]
       ])
@@ -1335,7 +1384,7 @@ export const renderInfoschematicSvg = (
           [
             ['class', 'infoschematic-card-stereotype'],
             ['dominant-baseline', 'middle'],
-            ['fill', appearance?.color ?? paint.unauthored],
+            ['fill', appearance?.color ? seededInk(appearance.color) : paint.unauthored],
             ['font-family', canvasTokens.typography.codeFamily],
             ['font-size', 9],
             ['font-weight', 500],
@@ -1361,7 +1410,7 @@ export const renderInfoschematicSvg = (
               ['fill', paint.annotationFill],
               ['height', layout.identity.height],
               ['rx', 4],
-              ['stroke', appearance?.color ?? paint.unauthored],
+              ['stroke', appearance?.color ? seededInk(appearance.color) : paint.unauthored],
               ['stroke-width', 1],
               ['width', layout.identity.width],
               ['x', layout.identity.x],
@@ -1538,9 +1587,9 @@ export const renderInfoschematicSvg = (
           line(2, 'circle', [
             ['cx', point.at.x],
             ['cy', point.at.y],
-            ['fill', point.appearance?.fill ?? paint.backdrop],
+            ['fill', point.appearance?.fill ? seeds.resolve(point.appearance.fill, 'fill') : paint.backdrop],
             ['r', canvasTokens.geometry.pointRadius],
-            ['stroke', point.appearance?.color ?? paint.unauthored],
+            ['stroke', point.appearance?.color ? seededInk(point.appearance.color) : paint.unauthored],
             ['stroke-width', 2]
           ]),
           ...pointLabel(point, flows)
@@ -1623,14 +1672,14 @@ export const renderInfoschematicSvg = (
       ['aria-label', `${config.title} structural Infoschematic`],
       [paintMarker, paintMarkerValue],
       ['data-grid-treatment', visualTreatment.grid],
-      ['data-surface-treatment', visualTreatment.surface],
+      ['data-infoschematic-style', visualTreatment.style],
       ['height', options.responsiveCardDetails?.height ?? viewBox.height],
       ['preserveAspectRatio', 'xMidYMid meet'],
       ['role', 'img'],
       ['viewBox', `${number(viewBox.x)} ${number(viewBox.y)} ${number(viewBox.width)} ${number(viewBox.height)}`],
       ['width', options.responsiveCardDetails?.width ?? viewBox.width]
     ])}>`,
-    paintPalettes(1, paintMarkerValue),
+    paintPalettes(1, paintMarkerValue, style, seeds.declarations()),
     ...body,
     '</svg>'
   ].join('\n')

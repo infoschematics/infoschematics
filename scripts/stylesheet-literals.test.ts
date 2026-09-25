@@ -168,7 +168,7 @@ describe('stylesheet colour literals', () => {
 
   it('references only roles the generated stylesheet declares', () => {
     const declared = new Set([
-      ...paintDeclarations('light').map(([name]) => name),
+      ...paintDeclarations('neutral', 'light').map(([name]) => name),
       ...chromeDeclarations('light').map(([name]) => name)
     ])
     /* Names the manifest writes outside the palettes — geometry, metrics, type — and the per-mount selection

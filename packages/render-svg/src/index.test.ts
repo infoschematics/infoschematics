@@ -1,4 +1,5 @@
 import type { DefinedInfoschematic, InfoschematicConfig } from '@infoschematics/domain-model'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
 import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import {
   adaptivePaint,
@@ -185,16 +186,16 @@ describe('renderInfoschematicSvg', () => {
     const palette = [
       '  <style>',
       '    [data-infoschematic-paint="light"] {',
-      ...paintDeclarations('light').map(([name, value]) => `      ${name}: ${value};`),
+      ...paintDeclarations('neutral', 'light').map(([name, value]) => `      ${name}: ${value};`),
       '    }',
       '  </style>'
     ]
     expect(renderInfoschematicSvg(blank('A & <B> "quoted"'))).toBe(
       [
-        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-infoschematic-paint="light" data-grid-treatment="none" data-surface-treatment="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
+        '<svg xmlns="http://www.w3.org/2000/svg" aria-label="A &amp; &lt;B&gt; &quot;quoted&quot; structural Infoschematic" data-infoschematic-paint="light" data-grid-treatment="none" data-infoschematic-style="neutral" height="80" preserveAspectRatio="xMidYMid meet" role="img" viewBox="0 0 120 80" width="120">',
         ...palette,
         '  <title>A &amp; &lt;B&gt; "quoted"</title>',
-        `  <rect class="infoschematic-backdrop" fill="${paintFor('light').backdrop}" height="80" width="120" x="0" y="0" />`,
+        `  <rect class="infoschematic-backdrop" fill="${paintFor('neutral', 'light').backdrop}" height="80" width="120" x="0" y="0" />`,
         '</svg>'
       ].join('\n')
     )
@@ -339,7 +340,7 @@ describe('renderInfoschematicSvg', () => {
       visibility: { graphics: 'all' }
     })
 
-    expect(svg).toContain(`fill="${paintFor('light').backdrop}"`)
+    expect(svg).toContain(`fill="${paintFor('neutral', 'light').backdrop}"`)
     expect(svg).toContain(`rx="${visualTokens.canvas.geometry.cornerRadius}"`)
     expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.pipeWidth}"`)
     expect(svg).toContain(`stroke-width="${visualTokens.canvas.flows.routeWidth}"`)
@@ -351,10 +352,16 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain(`font-size="${visualTokens.canvas.typography.metadataFontSize}"`)
     expect(svg).toContain(`fill="${visualTokens.canvas.ink.dark}"`)
 
-    expect(svg).toContain('fill="#f8fafc"')
-    expect(svg).toContain('fill="#dbeafe"')
-    expect(svg).toContain('stroke="#2463eb"')
-    expect(svg).toContain('fill="#7c3aed"')
+    /* An authored colour is a seed, not a literal: its hue and its place among the author's other colours survive,
+       and the band its lightness sits in belongs to the ground the drawing was resolved onto. */
+    // A Region is a ground rather than a body, so its seed keeps the ruled lines under it visible.
+    expect(svg).toContain(`fill="${resolveAuthoredColour('#f8fafc', 'light', 'ground')}"`)
+    expect(svg).toContain(`fill="${resolveAuthoredColour('#dbeafe', 'light', 'fill')}"`)
+    expect(svg).toContain(`stroke="${resolveAuthoredColour('#2463eb', 'light', 'ink')}"`)
+    expect(svg).toContain(`fill="${resolveAuthoredColour('#7c3aed', 'light', 'ink')}"`)
+    // And the literal is gone, which is the half of the change that a passing realisation assertion would not catch.
+    expect(svg).not.toContain('fill="#f8fafc"')
+    expect(svg).not.toContain('stroke="#2463eb"')
   })
 
   it('renders authored treatments and output-only Card detail overrides', () => {
@@ -370,7 +377,7 @@ describe('renderInfoschematicSvg', () => {
             stereotype: true
           },
           grid: 'major-plus-minor',
-          surface: 'blueprint'
+          style: 'blueprint'
         },
         domains: [
           {
@@ -401,8 +408,8 @@ describe('renderInfoschematicSvg', () => {
 
     const svg = renderInfoschematicSvg(config)
     expect(svg).toContain('data-grid-treatment="major-plus-minor"')
-    expect(svg).toContain('data-surface-treatment="blueprint"')
-    expect(svg).toContain(`fill="${paintFor('blueprint').backdrop}"`)
+    expect(svg).toContain('data-infoschematic-style="blueprint"')
+    expect(svg).toContain(`fill="${paintFor('blueprint', 'light').backdrop}"`)
     expect(svg).toContain('id="infoschematic-grid-major-plus-minor"')
     expect(svg).toContain('data-frame-treatment="dashed"')
     expect(svg).toContain('data-frame-treatment="dotted"')
@@ -416,11 +423,11 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('data-stereotype="service"')
     expect(svg).toContain('aria-label="ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;"')
     expect(svg).toContain('Cards: ONE-001 · Source &amp; gateway · service · Source &lt;entry&gt;')
-    expect(svg).toContain('fill="#dceeff"')
-    expect(svg).toContain('stroke="#13579b"')
+    expect(svg).toContain(`fill="${resolveAuthoredColour('#dceeff', 'light', 'fill')}"`)
+    expect(svg).toContain(`stroke="${resolveAuthoredColour('#13579b', 'light', 'ink')}"`)
     expect(svg).toContain('class="infoschematic-card-identity"')
     expect(svg).toContain('data-card-detail="identity"')
-    expect(svg).toContain(`<rect fill="${paintFor('blueprint').annotationFill}" height="20" rx="4"`)
+    expect(svg).toContain(`<rect fill="${paintFor('blueprint', 'light').annotationFill}" height="20" rx="4"`)
     expect(svg).toContain('class="infoschematic-card-stereotype"')
     expect(svg).toContain('>SERVICE<')
     expect(svg).toContain('class="infoschematic-card-description"')
@@ -497,8 +504,8 @@ describe('renderInfoschematicSvg', () => {
   })
 
   it('paints the midground from the palette the drawing resolved rather than one fixed set', () => {
-    const light = paintFor('light')
-    const blueprintPaint = paintFor('blueprint')
+    const light = paintFor('neutral', 'light')
+    const blueprintPaint = paintFor('blueprint', 'light')
     const empty = blank('Midground palette')
     const withFabric: InfoschematicConfig = {
       ...empty,
@@ -542,7 +549,7 @@ describe('renderInfoschematicSvg', () => {
       ...withFabric,
       infoschematic: {
         ...withFabric.infoschematic,
-        appearance: { surface: 'blueprint' }
+        appearance: { style: 'blueprint' }
       }
     }
 
@@ -568,20 +575,23 @@ describe('renderInfoschematicSvg', () => {
   })
 
   /*
-   * A still rendering resolves the scheme once and writes what it settled on.
+   * A still rendering resolves the mode once and writes what it settled on.
    *
    * Nothing downstream can re-resolve it: a PNG has no preference to read and an `<img>` carries no stylesheet, so
-   * asking for the dark scheme has to change the bytes rather than add a rule that something else might apply. An
-   * authored blueprint is not a scheme, and a caller asking for dark must not be able to repaint it.
+   * asking for dark has to change the bytes rather than add a rule that something else might apply.
+   *
+   * The style is the other axis and it is the document's, so asking for dark moves a blueprint onto its own dark
+   * realisation and never onto the neutral one. That is the whole point of splitting them: a caller answers what
+   * ground the reader is on, and never what the drawing is.
    */
-  it('writes the scheme it was asked for, and lets an authored blueprint override it', () => {
-    const dark = paintFor('dark')
-    const light = paintFor('light')
-    const document = blank('Scheme lock')
+  it('writes the mode it was asked for, and realises a blueprint on that ground rather than the neutral one', () => {
+    const dark = paintFor('neutral', 'dark')
+    const light = paintFor('neutral', 'light')
+    const document = blank('Mode lock')
 
     const defaulted = renderInfoschematicSvg(document)
-    const asLight = renderInfoschematicSvg(document, { scheme: 'light' })
-    const asDark = renderInfoschematicSvg(document, { scheme: 'dark' })
+    const asLight = renderInfoschematicSvg(document, { mode: 'light' })
+    const asDark = renderInfoschematicSvg(document, { mode: 'dark' })
 
     expect(defaulted).toBe(asLight)
     expect(asLight).toContain(`fill="${light.backdrop}"`)
@@ -593,17 +603,23 @@ describe('renderInfoschematicSvg', () => {
 
     const asBlueprintDocument: InfoschematicConfig = {
       ...document,
-      infoschematic: { ...document.infoschematic, appearance: { surface: 'blueprint' } }
+      infoschematic: { ...document.infoschematic, appearance: { style: 'blueprint' } }
     }
-    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toBe(
-      renderInfoschematicSvg(asBlueprintDocument, { scheme: 'light' })
-    )
-    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toContain(
-      `fill="${paintFor('blueprint').backdrop}"`
-    )
-    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'dark' })).toContain(
-      'data-infoschematic-paint="blueprint"'
-    )
+    const blueprintDark = renderInfoschematicSvg(asBlueprintDocument, { mode: 'dark' })
+    const blueprintLight = renderInfoschematicSvg(asBlueprintDocument, { mode: 'light' })
+
+    expect(blueprintDark).not.toBe(blueprintLight)
+    expect(blueprintDark).toContain(`fill="${paintFor('blueprint', 'dark').backdrop}"`)
+    expect(blueprintLight).toContain(`fill="${paintFor('blueprint', 'light').backdrop}"`)
+    // Neither is the neutral palette: the ground moved, the style did not.
+    expect(blueprintDark).not.toContain(`fill="${dark.backdrop}"`)
+    expect(blueprintLight).not.toContain(`fill="${light.backdrop}"`)
+    // The style is said on the drawing and the ground in the marker, so each is legible on its own.
+    expect(blueprintDark).toContain('data-infoschematic-style="blueprint"')
+    expect(blueprintDark).toContain('data-infoschematic-paint="dark"')
+
+    // The retired spelling still answers: `blueprint` named a style, so it says nothing about the ground.
+    expect(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'blueprint' })).toBe(blueprintLight)
   })
 
   /*
@@ -619,33 +635,37 @@ describe('renderInfoschematicSvg', () => {
   it("declares the palette it resolved, so a host stylesheet paints it in its own scheme rather than the page's", () => {
     const document = blank('Scheme lock')
 
-    for (const scheme of ['light', 'dark'] as const) {
-      const drawn = renderInfoschematicSvg(document, { scheme })
-      expect(drawn, scheme).toContain(`data-infoschematic-paint="${scheme}"`)
-      for (const [name, value] of paintDeclarations(scheme)) expect(drawn, name).toContain(`${name}: ${value};`)
+    for (const mode of ['light', 'dark'] as const) {
+      const drawn = renderInfoschematicSvg(document, { mode })
+      expect(drawn, mode).toContain(`data-infoschematic-paint="${mode}"`)
+      for (const [name, value] of paintDeclarations('neutral', mode))
+        expect(drawn, name).toContain(`${name}: ${value};`)
       // Scoped to the marker, never to `:root` — inlined, `:root` is the host's `<html>`.
-      expect(drawn, scheme).toContain(`[data-infoschematic-paint="${scheme}"] {`)
-      expect(drawn, scheme).not.toContain(':root')
+      expect(drawn, mode).toContain(`[data-infoschematic-paint="${mode}"] {`)
+      expect(drawn, mode).not.toContain(':root')
       // One palette, and no rule that would let anything re-resolve it.
-      expect(drawn, scheme).not.toContain('@media')
-      const other = scheme === 'light' ? 'dark' : 'light'
-      expect(drawn, scheme).not.toContain(`[data-infoschematic-paint="${other}"]`)
+      expect(drawn, mode).not.toContain('@media')
+      const other = mode === 'light' ? 'dark' : 'light'
+      expect(drawn, mode).not.toContain(`[data-infoschematic-paint="${other}"]`)
     }
   })
 
-  it('carries both palettes when it is asked to defer the scheme, and pins an authored blueprint anyway', () => {
+  it('carries both palettes when it is asked to defer the ground, in whichever style the document is', () => {
     const document = blank('Self-theming')
-    const adaptive = renderInfoschematicSvg(document, { scheme: 'adaptive' })
+    const adaptive = renderInfoschematicSvg(document, { mode: 'system' })
 
     /* Both palettes and the rule that chooses between them, so the file answers a preference it was never told. */
-    expect(adaptive).toContain('data-infoschematic-paint="adaptive"')
+    expect(adaptive).toContain('data-infoschematic-paint="system"')
     expect(adaptive).toContain('@media (prefers-color-scheme: dark)')
     /* And paper, last: a drawing that followed a dark-preference reader onto a page is a page of ink. */
     expect(adaptive.indexOf('@media print')).toBeGreaterThan(adaptive.indexOf('@media (prefers-color-scheme: dark)'))
     const printed = adaptive.slice(adaptive.indexOf('@media print'), adaptive.indexOf('</style>'))
-    for (const [name, value] of paintDeclarations('light')) expect(printed, name).toContain(`${name}: ${value};`)
-    for (const scheme of ['light', 'dark'] as const) {
-      for (const [name, value] of paintDeclarations(scheme)) expect(adaptive, name).toContain(`${name}: ${value};`)
+    for (const [name, value] of paintDeclarations('neutral', 'light'))
+      expect(printed, name).toContain(`${name}: ${value};`)
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [name, value] of paintDeclarations('neutral', mode)) {
+        expect(adaptive, name).toContain(`${name}: ${value};`)
+      }
     }
 
     /* Referenced through inline style, never a presentation attribute: `fill="var(...)"` is a CSS value only where
@@ -656,19 +676,34 @@ describe('renderInfoschematicSvg', () => {
        rendering decided, which is the one thing an adaptive rendering does not do. A fallback would be such a
        colour, and buys nothing anyway: a consumer that does not resolve `var()` does not read its fallback. */
     const drawn = adaptive.slice(adaptive.indexOf('</style>'))
-    for (const scheme of ['light', 'dark'] as const) {
-      for (const [name, value] of paintDeclarations(scheme)) expect(drawn, name).not.toContain(value)
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [name, value] of paintDeclarations('neutral', mode)) expect(drawn, name).not.toContain(value)
     }
 
     const asBlueprintDocument: InfoschematicConfig = {
       ...document,
-      infoschematic: { ...document.infoschematic, appearance: { surface: 'blueprint' } }
+      infoschematic: { ...document.infoschematic, appearance: { style: 'blueprint' } }
     }
-    // An authored blueprint has no scheme to defer: there is one palette, and a reader's preference is not about it.
-    const blueprint = renderInfoschematicSvg(asBlueprintDocument, { scheme: 'adaptive' })
-    expect(blueprint).toBe(renderInfoschematicSvg(asBlueprintDocument, { scheme: 'light' }))
-    expect(blueprint).not.toContain('prefers-color-scheme')
-    expect(blueprint).toContain(`fill="${paintFor('blueprint').backdrop}"`)
+    /* A blueprint defers exactly as anything else does. It used to be exempted, on the reasoning that an authored
+       treatment is not a ground somebody resolved — which is true, and does not make it groundless. It has two, so
+       a deferring blueprint carries both of *its own*, and neither of the neutral ones. */
+    const blueprint = renderInfoschematicSvg(asBlueprintDocument, { mode: 'system' })
+    expect(blueprint).not.toBe(renderInfoschematicSvg(asBlueprintDocument, { mode: 'light' }))
+    expect(blueprint).toContain('@media (prefers-color-scheme: dark)')
+    for (const mode of ['light', 'dark'] as const) {
+      for (const [name, value] of paintDeclarations('blueprint', mode)) {
+        expect(blueprint, name).toContain(`${name}: ${value};`)
+      }
+    }
+    expect(blueprint).not.toContain(
+      `${'--infoschematic-canvas-paint-backdrop'}: ${paintFor('neutral', 'dark').backdrop};`
+    )
+    /* And paper takes the blueprint's light realisation rather than its navy one: the cyanotype exists so that a
+       blueprint can be on paper, and printing the dark ground is a page of ink either way. */
+    const blueprintOnPaper = blueprint.slice(blueprint.indexOf('@media print'), blueprint.indexOf('</style>'))
+    for (const [name, value] of paintDeclarations('blueprint', 'light')) {
+      expect(blueprintOnPaper, name).toContain(`${name}: ${value};`)
+    }
   })
 
   it('renders the dots grid treatment as a point pattern at each grid intersection', () => {
@@ -861,7 +896,7 @@ describe('renderInfoschematicSvg', () => {
     expect(renderInfoschematicSvg(representative, { annotations: { flows: true } })).toBe(annotated)
     expect(annotated).toContain('class="infoschematic-flow-annotation"')
     expect(annotated).toContain('>CALL-001</text>')
-    expect(annotated).toContain(`fill="${paintFor('light').annotationFill}"`)
+    expect(annotated).toContain(`fill="${paintFor('neutral', 'light').annotationFill}"`)
     expect(annotated).toContain(`font-family="${visualTokens.canvas.typography.staticCodeFamily}"`)
     expect(annotated).toContain(`width="${annotationLabelWidth('CALL-001')}"`)
     expect(annotated).toContain('x="200" y="114"')
@@ -944,13 +979,21 @@ describe('renderInfoschematicSvg', () => {
     expect(wholeDiagram).toContain('data-artefact-kind="region" data-code="runtime"')
   })
 
-  it('resolves readable ink from each fill and marks it for treatment parity', () => {
+  /*
+   * The ink is measured from the fill that was drawn, which is now the realisation rather than the literal.
+   *
+   * That distinction used to be invisible, because an authored fill reached the page unchanged. It no longer does:
+   * the same near-black a document authors is a pale tint of its own hue on the light ground and a deep one on the
+   * dark, so a renderer that measured what the author wrote would put light text on a pale Card. Both grounds are
+   * asserted from one document for exactly that reason.
+   */
+  it('resolves readable ink from the fill it drew rather than the one that was authored', () => {
     const light = renderInfoschematicSvg(representative)
     expect(light).toContain('data-ink="dark"')
     expect(light).not.toContain('data-ink="light"')
     expect(light).toContain('class="infoschematic-region-label" data-ink="dark"')
 
-    const dark = renderInfoschematicSvg({
+    const authored = {
       ...representative,
       infoschematic: {
         ...representative.infoschematic,
@@ -961,7 +1004,7 @@ describe('renderInfoschematicSvg', () => {
             identity: true,
             stereotype: true
           },
-          surface: 'blueprint'
+          style: 'blueprint'
         },
         domains: [
           {
@@ -978,13 +1021,21 @@ describe('renderInfoschematicSvg', () => {
           region.fill ? { ...region, fill: '#071e2d' } : region
         )
       }
-    })
+    } satisfies InfoschematicConfig
+
+    /* On the dark ground those same authored colours land in the dark band, so the ink turns over with them. */
+    const dark = renderInfoschematicSvg(authored, { mode: 'dark' })
     expect(dark).toContain('data-ink="light"')
-    expect(dark).toContain('data-ink="dark"')
     expect(dark).toContain('class="infoschematic-region-label" data-ink="light"')
     expect(dark).toContain(`fill="${visualTokens.canvas.ink.light}"`)
     expect(dark).toContain(`fill="${visualTokens.canvas.ink.lightMuted}"`)
-    expect(dark).toContain(`fill="${paintFor('light').annotationFill}" height="20"`)
+    expect(dark).toContain(`fill="${paintFor('blueprint', 'dark').annotationFill}" height="20"`)
+
+    /* And on the light ground the very same document reads the other way round, because the fills moved. */
+    const onPaper = renderInfoschematicSvg(authored, { mode: 'light' })
+    expect(onPaper).toContain('data-ink="dark"')
+    expect(onPaper).not.toContain('data-ink="light"')
+    expect(onPaper).toContain(`fill="${paintFor('blueprint', 'light').annotationFill}" height="20"`)
   })
 
   it('applies explicit Scope visibility and Scene focus without motion or browser state', () => {
@@ -1063,14 +1114,14 @@ describe('renderInfoschematicSvg', () => {
     expect(svg).toContain('url(#infoschematic-artwork-1-grid)')
     // A version the catalogue does not state leaves the generic plane, which is `EXTEND-001`'s fallback drawn.
     expect(svg).toContain('>FUTURE: future · A substrate every stage can reach<')
-    expect(svg).toContain(`fill="${paintFor('light').surface}" height="80" rx=`)
+    expect(svg).toContain(`fill="${paintFor('neutral', 'light').surface}" height="80" rx=`)
 
     // Paint is the outlet's: the paper palette by default, the interactive ink where the document asks for blueprint.
-    expect(svg).toContain(`fill="${paintFor('light').artwork.shell}"`)
-    expect(svg).not.toContain(`fill="${paintFor('blueprint').artwork.shell}"`)
+    expect(svg).toContain(`fill="${paintFor('neutral', 'light').artwork.shell}"`)
+    expect(svg).not.toContain(`fill="${paintFor('blueprint', 'light').artwork.shell}"`)
     const blueprint = renderInfoschematicSvg(catalogue('blueprint'))
-    expect(blueprint).toContain(`fill="${paintFor('blueprint').artwork.shell}"`)
-    expect(blueprint).not.toContain(`fill="${paintFor('light').artwork.shell}"`)
+    expect(blueprint).toContain(`fill="${paintFor('blueprint', 'light').artwork.shell}"`)
+    expect(blueprint).not.toContain(`fill="${paintFor('neutral', 'light').artwork.shell}"`)
   })
 
   it('fails explicitly when a selected Scene does not exist', () => {

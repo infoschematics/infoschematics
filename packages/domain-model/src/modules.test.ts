@@ -6,7 +6,7 @@ import type {
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
   RegionLabelTreatment,
-  SurfaceTreatment
+  VisualStyle
 } from '@infoschematics/domain-model/appearance'
 import type { ArtefactIdentity } from '@infoschematics/domain-model/artefact'
 import type { CardConfig } from '@infoschematics/domain-model/card'
@@ -42,7 +42,7 @@ import type { ThematicSceneConfig, ThemeConfig } from '@infoschematics/domain-mo
 import { describe, expect, it } from 'vitest'
 
 type PublicContracts = [
-  SurfaceTreatment,
+  VisualStyle,
   GridTreatment,
   AppearanceOptionControl,
   AppearanceOptionDescriptor,

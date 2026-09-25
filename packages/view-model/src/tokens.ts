@@ -166,14 +166,23 @@ const palette = (roles: PaintRoles): PaintRoles =>
   Object.freeze({ ...roles, artwork: Object.freeze({ ...roles.artwork }) })
 
 /**
- * Which palette a drawing is painted in.
+ * The ground a drawing is read on.
  *
- * `light` and `dark` are the reader's context: the same document is drawn in whichever one the reader is in, and
- * nothing about the document chooses between them. `blueprint` is the authored `appearance.surface` of the same
- * name — a technical-drawing look a document asks for deliberately — so it is pinned rather than following the
- * reader, and a blueprint stays a blueprint in either scheme. `ADR-INFOSCHEMATICS-037` records why.
+ * This is the reader's context and nothing else. A document never authors it: a definition outlives the contexts it
+ * is read in, so the same document is drawn on whichever ground its reader turned out to be on.
  */
-export type PaintScheme = 'blueprint' | 'dark' | 'light'
+export type PaintMode = 'dark' | 'light'
+
+/**
+ * The treatment a document asked for.
+ *
+ * This is authored, per `ADR-INFOSCHEMATICS-011`, and it is a different question from the mode rather than a third
+ * value of it. `blueprint` is a drafting convention a document asks for deliberately; `neutral` asks for nothing and
+ * takes the plain palette. Holding the two apart is what lets a blueprint stay a blueprint while still following its
+ * reader onto paper — which one enum carrying both could not express, because picking a ground meant losing the
+ * treatment. `ADR-INFOSCHEMATICS-037` records the palette rule this refines.
+ */
+export type PaintStyle = 'blueprint' | 'neutral'
 
 /**
  * Framework-neutral visual decisions: what a drawing is painted in, and what the product's own surfaces are.
@@ -250,134 +259,188 @@ export const visualTokens = Object.freeze({
       lightMuted: '#9fb3c8'
     }),
     /**
-     * One complete palette per scheme, over the single role set `PaintRoles` names.
+     * One complete palette per style and mode, over the single role set `PaintRoles` names.
      *
-     * The three are alternatives rather than layers: nothing falls back to another palette, so a role added here
-     * has to be answered three times, and a scheme cannot quietly inherit a colour designed for a different paper.
+     * The two axes are independent and neither inherits from the other: `blueprint` is the treatment an author
+     * asked for and `light`/`dark` is the ground their reader is on, so a role added here has to be answered four
+     * times. Nothing falls back to another palette, because a colour designed for navy paper is not a colour for
+     * white paper dimmed, and a fallback would make that substitution silently.
      */
     paint: Object.freeze({
-      /** The authored technical-drawing surface: navy paper, cyan ink, pinned in either scheme. */
-      blueprint: palette({
-        annotationFill: '#06101ee8',
-        annotationHalo: '#06101e',
-        annotationStroke: '#ffffff44',
-        annotationText: '#dff3ff',
-        artwork: {
-          accent: '#9cd5f5',
-          detail: '#b9cde0',
-          frame: '#90a8c178',
-          glyph: '#a8cde6',
-          glyphFill: '#17354b',
-          grid: '#8dc7e72e',
-          mark: '#9cd5f58c',
-          shell: '#153349d6',
-          sweep: '#9ed9ff29',
-          title: '#dff3ff',
-          warning: '#d79b00aa',
-          warningFill: '#d79b0016',
-          warningGlyph: '#f0b23a'
-        },
-        auditStroke: '#79c9ffaa',
-        backdrop: '#081725',
-        fabricFill: '#102638b8',
-        fabricFrame: '#6f8ba3a8',
-        fabricStroke: '#83b2d2c4',
-        fabricText: '#b9cde0',
-        flowPipe: '#06101c',
-        graphicFill: '#1a1436c9',
-        graphicStroke: '#8062b4',
-        regionFill: '#12273b24',
-        regionStroke: '#b5c4d54d',
-        regionText: '#ffffff65',
-        regionTextNotched: '#9ed9ff',
-        stroke: '#83b2d2c4',
-        surface: '#102638b8',
-        text: '#f2f7ff',
-        textMuted: '#7f9bb3',
-        textStrong: '#dff3ff',
-        unauthored: '#7f9bb3'
+      /** The authored technical-drawing treatment, realised on both grounds rather than pinned to one. */
+      blueprint: Object.freeze({
+        /** Navy paper, cyan ink: the drafting convention as it is usually seen. */
+        dark: palette({
+          annotationFill: '#06101ee8',
+          annotationHalo: '#06101e',
+          annotationStroke: '#ffffff44',
+          annotationText: '#dff3ff',
+          artwork: {
+            accent: '#9cd5f5',
+            detail: '#b9cde0',
+            frame: '#90a8c178',
+            glyph: '#a8cde6',
+            glyphFill: '#17354b',
+            grid: '#8dc7e72e',
+            mark: '#9cd5f58c',
+            shell: '#153349d6',
+            sweep: '#9ed9ff29',
+            title: '#dff3ff',
+            warning: '#d79b00aa',
+            warningFill: '#d79b0016',
+            warningGlyph: '#f0b23a'
+          },
+          auditStroke: '#79c9ffaa',
+          backdrop: '#081725',
+          fabricFill: '#102638b8',
+          fabricFrame: '#6f8ba3a8',
+          fabricStroke: '#83b2d2c4',
+          fabricText: '#b9cde0',
+          flowPipe: '#06101c',
+          graphicFill: '#1a1436c9',
+          graphicStroke: '#8062b4',
+          regionFill: '#12273b24',
+          regionStroke: '#b5c4d54d',
+          regionText: '#ffffff65',
+          regionTextNotched: '#9ed9ff',
+          stroke: '#83b2d2c4',
+          surface: '#102638b8',
+          text: '#f2f7ff',
+          textMuted: '#7f9bb3',
+          textStrong: '#dff3ff',
+          unauthored: '#7f9bb3'
+        }),
+        /**
+         * Cyanotype rather than the navy palette lightened: Prussian-blue ink laid on pale drafting paper.
+         *
+         * A blueprint is a contact print, and the light form of one is a real thing rather than an inversion — so
+         * the hues here are chosen against paper rather than derived from the dark palette by arithmetic.
+         */
+        light: palette({
+          annotationFill: '#0d2b45e8',
+          annotationHalo: '#0d2b45',
+          annotationStroke: '#ffffff44',
+          annotationText: '#eaf4fd',
+          artwork: {
+            accent: '#1b6ca8',
+            detail: '#3d6280',
+            frame: '#5c7f9f78',
+            glyph: '#245a85',
+            glyphFill: '#d4e6f5',
+            grid: '#2f6a992e',
+            mark: '#1b6ca88c',
+            shell: '#dce8f4d6',
+            sweep: '#1b6ca829',
+            title: '#0d2b45',
+            warning: '#a06800aa',
+            warningFill: '#a0680016',
+            warningGlyph: '#8a5a00'
+          },
+          auditStroke: '#1b6ca8aa',
+          backdrop: '#eef3f9',
+          fabricFill: '#dce8f4b8',
+          fabricFrame: '#5c7f9fa8',
+          fabricStroke: '#2f6a99c4',
+          fabricText: '#234a6b',
+          flowPipe: '#f7fafd',
+          graphicFill: '#e8e2f5c9',
+          graphicStroke: '#6a4fa0',
+          regionFill: '#2f6a9914',
+          regionStroke: '#3d6a8f4d',
+          regionText: '#0d2b4585',
+          regionTextNotched: '#1b6ca8',
+          stroke: '#2f6a99c4',
+          surface: '#dce8f4b8',
+          text: '#0d2b45',
+          textMuted: '#4a6d8a',
+          textStrong: '#06192b',
+          unauthored: '#4a6d8a'
+        })
       }),
-      /** Dark paper: slate rather than navy, so a dark reading context is not mistaken for a blueprint. */
-      dark: palette({
-        annotationFill: '#e3ecf2ee',
-        annotationHalo: '#e3ecf2',
-        annotationStroke: '#00000044',
-        annotationText: '#18212a',
-        artwork: {
-          accent: '#7fb8dd',
-          detail: '#a8b6c0',
-          frame: '#76858f78',
-          glyph: '#8fb8d1',
-          glyphFill: '#243039',
-          grid: '#8ba3b52e',
-          mark: '#7fb8dd8c',
-          shell: '#1e272e',
-          sweep: '#7fb8dd29',
-          title: '#e6edf3',
-          warning: '#d79b00aa',
-          warningFill: '#d79b0016',
-          warningGlyph: '#e0a53a'
-        },
-        auditStroke: '#7fb8ddaa',
-        backdrop: '#161b20',
-        fabricFill: '#1c2429',
-        fabricFrame: '#76858fa8',
-        fabricStroke: '#8d9ca6',
-        fabricText: '#c6d2da',
-        flowPipe: '#161b20',
-        graphicFill: '#262f36',
-        graphicStroke: '#8d9ca6',
-        regionFill: '#e3ecf20f',
-        regionStroke: '#8d9ca6',
-        regionText: '#a8b6c0',
-        regionTextNotched: '#9ed9ff',
-        stroke: '#76858f',
-        surface: '#212a31',
-        text: '#e6edf3',
-        textMuted: '#a8b6c0',
-        textStrong: '#f4f8fb',
-        unauthored: '#8d9ca6'
-      }),
-      /** Light paper, which is what most documents are read on and what a committed SVG lands in. */
-      light: palette({
-        annotationFill: '#06101ee8',
-        annotationHalo: '#06101e',
-        annotationStroke: '#ffffff44',
-        annotationText: '#f2f7ff',
-        artwork: {
-          accent: '#4d7ea8',
-          detail: '#46515d',
-          frame: '#687684',
-          glyph: '#3d566b',
-          glyphFill: '#e3ecf2',
-          grid: '#8ba3b52e',
-          mark: '#4d7ea88c',
-          shell: '#e9f0f5',
-          sweep: '#4d7ea829',
-          title: '#27313a',
-          warning: '#b07400aa',
-          warningFill: '#b0740016',
-          warningGlyph: '#8a5a00'
-        },
-        auditStroke: '#4d7ea8aa',
-        backdrop: '#ffffff',
-        fabricFill: '#f2f5f7',
-        fabricFrame: '#8b99a6a8',
-        fabricStroke: '#687684',
-        fabricText: '#27313a',
-        flowPipe: '#ffffff',
-        graphicFill: '#f7f8f9',
-        graphicStroke: '#687684',
-        regionFill: '#27313a0f',
-        regionStroke: '#83909d',
-        regionText: '#46515d',
-        regionTextNotched: '#4d7ea8',
-        stroke: '#687684',
-        surface: '#f2f5f7',
-        text: '#27313a',
-        textMuted: '#46515d',
-        textStrong: '#18212a',
-        unauthored: '#52606d'
+      /** No authored treatment: the drawing takes the ground its reader is already on. */
+      neutral: Object.freeze({
+        /** Dark paper: slate rather than navy, so a dark reading context is not mistaken for an authored blueprint. */
+        dark: palette({
+          annotationFill: '#e3ecf2ee',
+          annotationHalo: '#e3ecf2',
+          annotationStroke: '#00000044',
+          annotationText: '#18212a',
+          artwork: {
+            accent: '#7fb8dd',
+            detail: '#a8b6c0',
+            frame: '#76858f78',
+            glyph: '#8fb8d1',
+            glyphFill: '#243039',
+            grid: '#8ba3b52e',
+            mark: '#7fb8dd8c',
+            shell: '#1e272e',
+            sweep: '#7fb8dd29',
+            title: '#e6edf3',
+            warning: '#d79b00aa',
+            warningFill: '#d79b0016',
+            warningGlyph: '#e0a53a'
+          },
+          auditStroke: '#7fb8ddaa',
+          backdrop: '#161b20',
+          fabricFill: '#1c2429',
+          fabricFrame: '#76858fa8',
+          fabricStroke: '#8d9ca6',
+          fabricText: '#c6d2da',
+          flowPipe: '#161b20',
+          graphicFill: '#262f36',
+          graphicStroke: '#8d9ca6',
+          regionFill: '#e3ecf20f',
+          regionStroke: '#8d9ca6',
+          regionText: '#a8b6c0',
+          regionTextNotched: '#9ed9ff',
+          stroke: '#76858f',
+          surface: '#212a31',
+          text: '#e6edf3',
+          textMuted: '#a8b6c0',
+          textStrong: '#f4f8fb',
+          unauthored: '#8d9ca6'
+        }),
+        /** Light paper, which is what most documents are read on and what a committed SVG lands in. */
+        light: palette({
+          annotationFill: '#06101ee8',
+          annotationHalo: '#06101e',
+          annotationStroke: '#ffffff44',
+          annotationText: '#f2f7ff',
+          artwork: {
+            accent: '#4d7ea8',
+            detail: '#46515d',
+            frame: '#687684',
+            glyph: '#3d566b',
+            glyphFill: '#e3ecf2',
+            grid: '#8ba3b52e',
+            mark: '#4d7ea88c',
+            shell: '#e9f0f5',
+            sweep: '#4d7ea829',
+            title: '#27313a',
+            warning: '#b07400aa',
+            warningFill: '#b0740016',
+            warningGlyph: '#8a5a00'
+          },
+          auditStroke: '#4d7ea8aa',
+          backdrop: '#ffffff',
+          fabricFill: '#f2f5f7',
+          fabricFrame: '#8b99a6a8',
+          fabricStroke: '#687684',
+          fabricText: '#27313a',
+          flowPipe: '#ffffff',
+          graphicFill: '#f7f8f9',
+          graphicStroke: '#687684',
+          regionFill: '#27313a0f',
+          regionStroke: '#83909d',
+          regionText: '#46515d',
+          regionTextNotched: '#4d7ea8',
+          stroke: '#687684',
+          surface: '#f2f5f7',
+          text: '#27313a',
+          textMuted: '#46515d',
+          textStrong: '#18212a',
+          unauthored: '#52606d'
+        })
       })
     }),
     /**
@@ -548,8 +611,8 @@ export const visualTokens = Object.freeze({
   })
 })
 
-/** The palette a drawing is painted in, given what the document authored and what the reader is in. */
-export const paintFor = (scheme: PaintScheme): PaintRoles => visualTokens.canvas.paint[scheme]
+/** The palette a drawing is painted in: the style its author asked for, realised on the ground its reader is on. */
+export const paintFor = (style: PaintStyle, mode: PaintMode): PaintRoles => visualTokens.canvas.paint[style][mode]
 
 export type PaintRole = Exclude<keyof PaintRoles, 'artwork'>
 export type ArtworkPaintRole = keyof PaintRoles['artwork']
@@ -574,7 +637,7 @@ export const artworkPaintVariable = (role: ArtworkPaintRole): string =>
 /** Every artwork role as its custom property, so a catalogue can index by the role a piece names. */
 export const artworkPaintVariables: Readonly<Record<ArtworkPaintRole, string>> = Object.freeze(
   Object.fromEntries(
-    (Object.keys(visualTokens.canvas.paint.blueprint.artwork) as readonly ArtworkPaintRole[]).map((role) => [
+    (Object.keys(visualTokens.canvas.paint.blueprint.dark.artwork) as readonly ArtworkPaintRole[]).map((role) => [
       role,
       artworkPaintVariable(role)
     ])
@@ -596,7 +659,7 @@ export const artworkPaintVariables: Readonly<Record<ArtworkPaintRole, string>> =
  */
 export const adaptivePaint: PaintRoles = Object.freeze({
   ...(Object.fromEntries(
-    (Object.keys(visualTokens.canvas.paint.light) as readonly (keyof PaintRoles)[])
+    (Object.keys(visualTokens.canvas.paint.neutral.light) as readonly (keyof PaintRoles)[])
       .filter((role): role is PaintRole => role !== 'artwork')
       .map((role) => [role, paintVariable(role)])
   ) as Omit<PaintRoles, 'artwork'>),
@@ -630,8 +693,11 @@ export const chromeDeclarations = (scheme: ChromeScheme): readonly (readonly [na
  * themes itself wherever it is embedded. They are produced here rather than in the generator because a package may
  * not reach into `scripts/`, and a second spelling of these names would resolve to nothing without saying so.
  */
-export const paintDeclarations = (scheme: PaintScheme): readonly (readonly [name: string, value: string])[] => {
-  const palette = paintFor(scheme)
+export const paintDeclarations = (
+  style: PaintStyle,
+  mode: PaintMode
+): readonly (readonly [name: string, value: string])[] => {
+  const palette = paintFor(style, mode)
   const named = (Object.keys(palette) as readonly (keyof PaintRoles)[]).flatMap((role) =>
     role === 'artwork'
       ? (Object.keys(palette.artwork) as readonly ArtworkPaintRole[]).map(
@@ -645,11 +711,12 @@ export const paintDeclarations = (scheme: PaintScheme): readonly (readonly [name
 /**
  * Which ink a fill nobody authored is read in.
  *
- * `resolveReadableInk` measures an authored fill, and has nothing to measure when there is none. The answer is
- * then the scheme's: dark ink on light paper, light ink on dark, and a blueprint reads like dark paper because
- * that is what it is.
+ * `resolveReadableInk` measures an authored fill and has nothing to measure when there is none. The answer is then
+ * the ground's: dark ink on light paper, light ink on dark. It asks the mode and not the style, which is the whole
+ * point of separating them — a blueprint used to force light ink because the old enum made it a kind of darkness,
+ * so a blueprint on paper would have been written in the one ink that cannot be read there.
  */
-export const readableInkFallback = (scheme: PaintScheme): 'dark' | 'light' => (scheme === 'light' ? 'dark' : 'light')
+export const readableInkFallback = (mode: PaintMode): 'dark' | 'light' => (mode === 'light' ? 'dark' : 'light')
 
 /** Preserved public scalar while consumers move to the semantic manifest. */
 export const cornerRadius = visualTokens.canvas.geometry.cornerRadius

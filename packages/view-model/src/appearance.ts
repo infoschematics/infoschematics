@@ -1,10 +1,11 @@
 import type {
+  AuthoredColourMode,
   CardDetailDefaults,
   GridTreatment,
   InfoschematicAppearanceConfig,
   RegionLabelFrameTreatment,
   RegionLabelPlacement,
-  SurfaceTreatment
+  VisualStyle
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
@@ -27,7 +28,17 @@ export type ResolvedVisualTreatment = Readonly<{
   grid: GridTreatment
   /** Whether an element that states nothing draws its own code. */
   identity: boolean
-  surface: SurfaceTreatment
+  /**
+   * The ground the document asked for, which is a request rather than an answer.
+   *
+   * `system` stays here deliberately: this is the authored treatment, and the document really did decline to choose.
+   * Whoever renders it resolves that refusal into a ground — the browser from the reader's preference, the command
+   * line from its flag — and no palette is selected from this value.
+   */
+  mode: AuthoredColourMode
+  /** Whether the reader may move off `mode`. */
+  modeLocked: boolean
+  style: VisualStyle
 }>
 
 export type ResolvedRegionTreatment = Readonly<{
@@ -61,7 +72,11 @@ export const resolveVisualTreatment = (
   },
   grid: appearance?.grid ?? 'none',
   identity: appearance?.identity ?? false,
-  surface: appearance?.surface ?? 'neutral'
+  mode: appearance?.mode ?? 'system',
+  modeLocked: appearance?.modeLocked ?? false,
+  /* `surface` is what this field was called, and documents written under that name keep working; `style` is the
+     answer where a document states both, because it is the one the writer of that document chose most recently. */
+  style: appearance?.style ?? appearance?.surface ?? 'neutral'
 })
 
 /**

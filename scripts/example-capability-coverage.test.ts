@@ -25,6 +25,14 @@ const showcaseId = 'showcase'
 
 /** How many values an enum may admit before the document is asked for variety rather than every one of them. */
 const exhaustiveEnumLimit = 3
+/**
+ * Paths the contract still accepts but no longer teaches.
+ *
+ * A retired spelling is kept so documents written against it keep loading, and the showcase is where an author reads
+ * the vocabulary they should be writing today. Demanding both would make the showcase teach a name it is retiring.
+ */
+const retiredPaths = new Set(['diagram.appearance.surface'])
+
 /** Floors the derivation has to clear before its results mean anything. */
 const propertyFloor = 100
 const enumFloor = 8
@@ -194,13 +202,13 @@ describe('example capability coverage', () => {
       repeatable: true,
       values: ['solid', 'dashed', 'dotted']
     })
-    expect(enums.get('diagram.appearance.surface')?.repeatable).toBe(false)
+    expect(enums.get('diagram.appearance.style')?.repeatable).toBe(false)
   })
 
   it('shows every property the contract declares', async () => {
     const { properties } = discover(z.toJSONSchema(infoschematicSchema, { io: 'input' }))
     const exercised = await showcase()
-    const unshown = [...properties].filter((path) => !exercised.paths.has(path)).sort()
+    const unshown = [...properties].filter((path) => !retiredPaths.has(path) && !exercised.paths.has(path)).sort()
     expect(unshown).toEqual([])
   })
 
@@ -209,8 +217,10 @@ describe('example capability coverage', () => {
     const exercised = await showcase()
     const shortfall: string[] = []
     for (const [choice, { paths, repeatable, values }] of pool(enums)) {
-      const shown = new Set([...paths].flatMap((path) => [...(exercised.values.get(path) ?? [])]))
-      const where = [...paths].sort().join(', ')
+      const asked = [...paths].filter((path) => !retiredPaths.has(path))
+      if (asked.length === 0) continue
+      const shown = new Set(asked.flatMap((path) => [...(exercised.values.get(path) ?? [])]))
+      const where = [...asked].sort().join(', ')
       if (!repeatable) {
         if (shown.size === 0) shortfall.push(`${where}: authors none of ${choice}`)
         continue

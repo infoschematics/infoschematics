@@ -11,7 +11,9 @@ import {
   visualTokens
 } from './tokens.ts'
 
-const schemes = ['blueprint', 'dark', 'light'] as const
+const styles = ['blueprint', 'neutral'] as const
+const modes = ['dark', 'light'] as const
+const palettes = styles.flatMap((style) => modes.map((mode) => ({ mode, style }) as const))
 
 describe('visual tokens', () => {
   it('keeps semantic names, representative values and the scalar compatibility export', () => {
@@ -22,7 +24,8 @@ describe('visual tokens', () => {
     expect(visualTokens.canvas.geometry.regionLabelHeight).toBe(14)
     expect(visualTokens.canvas.geometry.regionLabelInset).toBe(16)
     expect(visualTokens.canvas.geometry.regionNotchPadding).toBe(10)
-    expect(visualTokens.canvas.paint.blueprint.backdrop).toBe('#081725')
+    expect(visualTokens.canvas.paint.blueprint.dark.backdrop).toBe('#081725')
+    expect(visualTokens.canvas.paint.blueprint.light.backdrop).toBe('#eef3f9')
     expect(visualTokens.canvas.metrics.regionDash).toBe('8 6')
     expect(visualTokens.canvas.metrics.regionDot).toBe('1.5 5')
     expect(visualTokens.canvas.flows.routeWidth).toBe(4)
@@ -53,34 +56,47 @@ describe('visual tokens', () => {
    * previous block left behind. A drawing half in one palette is the failure this pair of cases exists to catch,
    * and it is invisible in any single-scheme rendering.
    */
-  it('answers every paint role in every scheme', () => {
-    const roles = Object.keys(paintFor('blueprint')).sort()
-    const artworkRoles = Object.keys(paintFor('blueprint').artwork).sort()
+  it('answers every paint role in every style and mode', () => {
+    const roles = Object.keys(paintFor('blueprint', 'dark')).sort()
+    const artworkRoles = Object.keys(paintFor('blueprint', 'dark').artwork).sort()
 
-    for (const scheme of schemes) {
-      const palette = paintFor(scheme)
-      expect(Object.keys(palette).sort(), scheme).toEqual(roles)
-      expect(Object.keys(palette.artwork).sort(), scheme).toEqual(artworkRoles)
+    expect(palettes).toHaveLength(4)
+
+    for (const { mode, style } of palettes) {
+      const palette = paintFor(style, mode)
+      const named = `${style}.${mode}`
+      expect(Object.keys(palette).sort(), named).toEqual(roles)
+      expect(Object.keys(palette.artwork).sort(), named).toEqual(artworkRoles)
       for (const [role, value] of Object.entries(palette)) {
         if (role === 'artwork') continue
-        expect(value, `${scheme}.${role}`).toMatch(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)
+        expect(value, `${named}.${role}`).toMatch(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)
       }
       for (const [role, value] of Object.entries(palette.artwork)) {
-        expect(value, `${scheme}.artwork.${role}`).toMatch(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)
+        expect(value, `${named}.artwork.${role}`).toMatch(/^#[0-9a-f]{6}([0-9a-f]{2})?$/)
       }
     }
+  })
+
+  /**
+   * The two axes have to stay genuinely independent, and the cheapest way for that to fail silently is for one
+   * style to be the other lightened, or for a mode to be ignored. Both would still answer every role.
+   */
+  it('gives each style its own answer on each ground', () => {
+    expect(paintFor('blueprint', 'light').backdrop).not.toBe(paintFor('blueprint', 'dark').backdrop)
+    expect(paintFor('neutral', 'light').backdrop).not.toBe(paintFor('neutral', 'dark').backdrop)
+    expect(paintFor('blueprint', 'light').backdrop).not.toBe(paintFor('neutral', 'light').backdrop)
+    expect(paintFor('blueprint', 'dark').backdrop).not.toBe(paintFor('neutral', 'dark').backdrop)
   })
 
   it('names each role as a custom property a surface can reference instead of resolving a scheme', () => {
     expect(paintVariable('backdrop')).toBe('var(--infoschematic-canvas-paint-backdrop)')
     expect(paintVariable('regionTextNotched')).toBe('var(--infoschematic-canvas-paint-region-text-notched)')
     expect(artworkPaintVariable('glyphFill')).toBe('var(--infoschematic-canvas-paint-artwork-glyph-fill)')
-    expect(Object.keys(artworkPaintVariables).sort()).toEqual(Object.keys(paintFor('light').artwork).sort())
+    expect(Object.keys(artworkPaintVariables).sort()).toEqual(Object.keys(paintFor('neutral', 'light').artwork).sort())
   })
 
-  it('reads an unauthored fill in the ink the scheme makes legible', () => {
+  it('reads an unauthored fill in the ink the ground makes legible', () => {
     expect(readableInkFallback('light')).toBe('dark')
     expect(readableInkFallback('dark')).toBe('light')
-    expect(readableInkFallback('blueprint')).toBe('light')
   })
 })

@@ -30,17 +30,21 @@
       "types": "./dist/code-badge.d.ts",
       "import": "./dist/code-badge.js"
     },
+    "./colour": {
+      "types": "./dist/colour.d.ts",
+      "import": "./dist/colour.js"
+    },
     "./compatibility": {
       "types": "./dist/compatibility.d.ts",
       "import": "./dist/compatibility.js"
     },
-    "./detail": {
-      "types": "./dist/detail.d.ts",
-      "import": "./dist/detail.js"
-    },
     "./destination": {
       "types": "./dist/destination.d.ts",
       "import": "./dist/destination.js"
+    },
+    "./detail": {
+      "types": "./dist/detail.d.ts",
+      "import": "./dist/detail.js"
     },
     "./diagnostics": {
       "types": "./dist/diagnostics.d.ts",

@@ -13,7 +13,7 @@ const completeSpecimen = () =>
     infoschematic: {
       viewBox,
       appearance: {
-        surface: 'blueprint',
+        style: 'blueprint',
         grid: 'major-plus-minor',
         card: {
           compact: false,

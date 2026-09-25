@@ -9,7 +9,7 @@ describe('blankInfoschematic', () => {
       diagram: {
         bounds: { x: 0, y: 0, width: 1920, height: 1080 },
         appearance: {
-          surface: 'blueprint',
+          style: 'blueprint',
           grid: 'major-plus-minor',
           card: {
             description: false,

@@ -11,7 +11,9 @@ diagram:
   bounds: 0 0 1680 1180
   gridSize: 20
   appearance:
-    surface: blueprint
+    style: blueprint
+    mode: system
+    modeLocked: false
     grid: major-plus-minor
     identity: false
     card:

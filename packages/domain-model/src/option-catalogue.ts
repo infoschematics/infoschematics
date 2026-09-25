@@ -13,7 +13,7 @@
 // already do.
 
 import type { CardDetailDefaults, InfoschematicAppearanceConfig } from './appearance.ts'
-import { gridTreatments, regionLabelPlacements, surfaceTreatments } from './appearance.ts'
+import { authoredColourModes, gridTreatments, regionLabelPlacements, visualStyles } from './appearance.ts'
 import type { RegionConfig, RegionFrameConfig } from './region.ts'
 import { regionFrameStyles, regionLabelMounts } from './region.ts'
 
@@ -60,7 +60,9 @@ type RegionFrameField = Extract<keyof RegionFrameConfig, 'opacity' | 'style'>
  * the catalogue below stops compiling until the new option is described.
  */
 export type AppearanceOptionKey =
-  | Exclude<keyof InfoschematicAppearanceConfig, 'card'>
+  /* `surface` is the retired spelling of `style` rather than an option of its own, so it is described nowhere: an
+     option surface that offered both names would be offering the same choice twice. */
+  | Exclude<keyof InfoschematicAppearanceConfig, 'card' | 'surface'>
   | `card.${keyof CardDetailDefaults & string}`
   | `region.${RegionAppearanceField}`
   | `region.frame.${RegionFrameField}`
@@ -90,13 +92,15 @@ export const appearanceOptions: Readonly<Record<AppearanceOptionKey, AppearanceO
   'card.stereotype': { control: 'flag', default: false, term: 'standard-card', values: noValues },
   grid: { control: 'choice', default: 'none', term: 'infoschematic', values: gridTreatments },
   identity: { control: 'flag', default: false, term: 'infoschematic-artefact', values: noValues },
+  mode: { control: 'choice', default: 'system', term: 'infoschematic', values: authoredColourModes },
+  modeLocked: { control: 'flag', default: false, term: 'infoschematic', values: noValues },
   'region.fill': { control: 'colour', term: 'region', values: noValues },
   'region.frame.opacity': { control: 'number', range: { max: 1, min: 0 }, term: 'region', values: noValues },
   'region.frame.style': { control: 'choice', term: 'region', values: regionFrameStyles },
   'region.labelMount': { control: 'choice', default: 'boundary', term: 'region', values: regionLabelMounts },
   'region.labelOffset': { control: 'number', range: { max: 200, min: -200 }, term: 'region', values: noValues },
   'region.labelPlacement': { control: 'choice', term: 'region', values: regionLabelPlacements },
-  surface: { control: 'choice', default: 'neutral', term: 'infoschematic', values: surfaceTreatments }
+  style: { control: 'choice', default: 'neutral', term: 'infoschematic', values: visualStyles }
 })
 
 export const appearanceOptionKeys = Object.keys(appearanceOptions) as readonly AppearanceOptionKey[]

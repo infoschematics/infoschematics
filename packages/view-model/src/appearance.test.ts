@@ -15,7 +15,9 @@ describe('visual treatment resolution', () => {
       card: { compact: false, description: false, identity: false, stereotype: false },
       grid: 'none',
       identity: false,
-      surface: 'neutral'
+      mode: 'system',
+      modeLocked: false,
+      style: 'neutral'
     })
   })
 
@@ -25,7 +27,7 @@ describe('visual treatment resolution', () => {
         {
           card: { compact: true, description: true, identity: true, stereotype: false },
           grid: 'major-plus-minor',
-          surface: 'blueprint'
+          style: 'blueprint'
         },
         { description: false, identity: false, stereotype: true }
       )
@@ -33,7 +35,9 @@ describe('visual treatment resolution', () => {
       card: { compact: true, description: false, identity: false, stereotype: true },
       grid: 'major-plus-minor',
       identity: false,
-      surface: 'blueprint'
+      mode: 'system',
+      modeLocked: false,
+      style: 'blueprint'
     })
   })
 
@@ -88,7 +92,9 @@ describe('visual treatment resolution', () => {
       card: { compact: false, description: false, identity: true, stereotype: false },
       grid: 'none',
       identity: true,
-      surface: 'neutral'
+      mode: 'system',
+      modeLocked: false,
+      style: 'neutral'
     })
     // `card.identity` is the older and narrower statement, so it decides for Cards where both are authored.
     expect(resolveVisualTreatment({ card: { identity: false }, identity: true }).card.identity).toBe(false)

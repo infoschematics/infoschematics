@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { defineInfoschematic } from '@infoschematics/domain-core'
-import { type PaintScheme, paintFor, visualTokens } from '@infoschematics/view-model/tokens'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
+import { type PaintMode, type PaintStyle, paintFor, visualTokens } from '@infoschematics/view-model/tokens'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -32,13 +33,33 @@ const declarationsIn = (css: string, selector: string, after = '') => {
  * Two blocks have the same selector and are told apart by what precedes them, because the media rule they sit in
  * is the whole difference between them: one answers a reader who prefers dark, the other answers paper.
  */
-const paintBlocks: readonly Readonly<{ after?: string; scheme: PaintScheme; selector: string }>[] = [
-  { scheme: 'light', selector: ':root' },
-  { after: '@media (prefers-color-scheme: dark)', scheme: 'dark', selector: '  :root' },
-  { scheme: 'light', selector: '[data-infoschematic-scheme="light"]' },
-  { scheme: 'dark', selector: '[data-infoschematic-scheme="dark"]' },
-  { scheme: 'blueprint', selector: '.infoschematic-svg.surface-blueprint, [data-surface-treatment="blueprint"]' },
-  { after: '@media print', scheme: 'light', selector: '  :root' }
+const blueprintSelector = '.infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"]'
+const under = (prefix: string) =>
+  blueprintSelector
+    .split(', ')
+    .map((one) => `${prefix} ${one}`)
+    .join(', ')
+
+const paintBlocks: readonly Readonly<{
+  after?: string
+  mode: PaintMode
+  selector: string
+  style: PaintStyle
+}>[] = [
+  { mode: 'light', selector: ':root', style: 'neutral' },
+  { mode: 'light', selector: blueprintSelector, style: 'blueprint' },
+  { after: '@media (prefers-color-scheme: dark)', mode: 'dark', selector: '  :root', style: 'neutral' },
+  {
+    after: '@media (prefers-color-scheme: dark)',
+    mode: 'dark',
+    selector: `  ${blueprintSelector}`,
+    style: 'blueprint'
+  },
+  { mode: 'light', selector: '[data-infoschematic-scheme="light"]', style: 'neutral' },
+  { mode: 'dark', selector: '[data-infoschematic-scheme="dark"]', style: 'neutral' },
+  { mode: 'light', selector: under('[data-infoschematic-scheme="light"]'), style: 'blueprint' },
+  { mode: 'dark', selector: under('[data-infoschematic-scheme="dark"]'), style: 'blueprint' },
+  { after: '@media print', mode: 'light', selector: '  :root', style: 'neutral' }
 ]
 
 /**
@@ -65,7 +86,7 @@ describe('Canvas visual tokens', () => {
     expect(references.length).toBeGreaterThan(0)
     for (const name of references) expect(cssValue(generated, name)).toBeDefined()
 
-    expect(cssValue(generated, '--infoschematic-canvas-paint-backdrop')).toBe(paintFor('light').backdrop)
+    expect(cssValue(generated, '--infoschematic-canvas-paint-backdrop')).toBe(paintFor('neutral', 'light').backdrop)
     expect(cssValue(generated, '--infoschematic-canvas-flows-route-width')).toBe(
       String(visualTokens.canvas.flows.routeWidth)
     )
@@ -74,7 +95,7 @@ describe('Canvas visual tokens', () => {
     expect(styles).toContain('stroke-width: var(--infoschematic-canvas-geometry-grid-major-stroke-width);')
     /* One rule paints the paper, because a blueprint drawing redeclares the palette rather than the rule. */
     expect(styles).toContain('.infoschematic-backdrop {\n  fill: var(--infoschematic-canvas-paint-backdrop);')
-    expect(styles).not.toContain('.surface-neutral .infoschematic-backdrop')
+    expect(styles).not.toContain('.style-neutral .infoschematic-backdrop')
     expect(styles).toContain('stroke-dasharray: var(--infoschematic-canvas-metrics-region-dash);')
     expect(styles).toContain('stroke-dasharray: var(--infoschematic-canvas-metrics-region-dot);')
   })
@@ -86,16 +107,19 @@ describe('Canvas visual tokens', () => {
    * block left behind: the drawing is then half one palette and half the other, under a preference no default page
    * expresses. That is the failure mode this case exists to catch, and nothing about a single rendering shows it.
    */
-  it('declares every paint role in every scheme it offers', async () => {
+  it('declares every paint role in every style on every ground it offers', async () => {
     const generated = await readFile(new URL('../../view-model/src/tokens.generated.css', import.meta.url), 'utf8')
     const roleNames = [...declarationsIn(generated, ':root').keys()].sort()
     expect(roleNames.length).toBeGreaterThan(0)
 
-    for (const { after, scheme, selector } of paintBlocks) {
+    for (const { after, mode, selector, style } of paintBlocks) {
       const declared = declarationsIn(generated, selector, after)
-      expect([...declared.keys()].sort(), selector).toEqual(roleNames)
+      /* Only the plain style carries the chrome, so a blueprint block answers the paint roles and no more. */
+      const expected =
+        style === 'blueprint' ? roleNames.filter((name) => !name.startsWith('--infoschematic-chrome')) : roleNames
+      expect([...declared.keys()].sort(), selector).toEqual(expected)
 
-      const palette = paintFor(scheme)
+      const palette = paintFor(style, mode)
       expect(declared.get('--infoschematic-canvas-paint-backdrop'), selector).toBe(palette.backdrop)
       expect(declared.get('--infoschematic-canvas-paint-artwork-glyph-fill'), selector).toBe(palette.artwork.glyphFill)
     }
@@ -106,7 +130,8 @@ describe('Canvas visual tokens', () => {
    *
    * The print block shares `:root`'s specificity with the reader's preference and a host's override, so source
    * order is the whole of what makes it win, and asserting its presence would not assert the behaviour. An
-   * authored blueprint is not a scheme and keeps its own higher specificity, so printing one stays navy.
+   * An authored blueprint keeps its own higher specificity on every path it can have been painted by, which is why
+   * the print block repeats them: a nested selector cannot be outranked by an unnested one however late it is written.
    */
   it('restores the light palette for paper, last so it outranks a resolved scheme', async () => {
     const generated = await readFile(new URL('../../view-model/src/tokens.generated.css', import.meta.url), 'utf8')
@@ -115,7 +140,7 @@ describe('Canvas visual tokens', () => {
     expect(print).toBeGreaterThan(generated.indexOf('@media (prefers-color-scheme: dark)'))
     expect(print).toBeGreaterThan(generated.indexOf('[data-infoschematic-scheme="dark"]'))
     expect(declarationsIn(generated, '  :root', '@media print').get('--infoschematic-canvas-paint-backdrop')).toBe(
-      paintFor('light').backdrop
+      paintFor('neutral', 'light').backdrop
     )
   })
 
@@ -136,7 +161,16 @@ describe('Canvas visual tokens', () => {
     )
   })
 
-  it('keeps authored Scope, Flow-family and Region colours in rendered data', () => {
+  /*
+   * An authored colour reaches the drawing as a seed, and the author keeps a way to say they meant a literal.
+   *
+   * `ADR-INFOSCHEMATICS-037` held that resolving a ground must never repaint an authored colour, and that held for
+   * exactly as long as there was one ground to be on. A blue chosen against navy is a different colour on paper, and
+   * the author wrote one value: they are not in a position to have meant both. So the hue, the saturation and the
+   * ordering among their own colours are theirs, and the band the lightness sits in belongs to the ground. An author
+   * who did mean the literal ends the value with `!` and gets it back untouched.
+   */
+  it('realises authored Scope, Flow-family and Region colours on the ground, and honours a pin', () => {
     const markup = renderToStaticMarkup(
       <Canvas
         config={defineInfoschematic({
@@ -188,9 +222,42 @@ describe('Canvas visual tokens', () => {
       />
     )
 
-    expect(markup).toContain('fill="#abcdef"')
-    expect(markup).toContain('stroke="#123456"')
-    expect(markup).toContain('fill="#a12345"')
-    expect(markup).toContain('fill="#c1d2e3"')
+    /* Canvas resolves a ground for the interface, and the drawing is now painted against the same one. */
+    expect(markup).toContain(`fill="${resolveAuthoredColour('#abcdef', 'light', 'fill')}"`)
+    expect(markup).toContain(`stroke="${resolveAuthoredColour('#123456', 'light', 'ink')}"`)
+    expect(markup).toContain(`fill="${resolveAuthoredColour('#a12345', 'light', 'ink')}"`)
+    expect(markup).toContain(`fill="${resolveAuthoredColour('#c1d2e3', 'light', 'ground')}"`)
+
+    // None of the literals survives, which is the half of this a realisation assertion alone would not catch.
+    for (const literal of ['#abcdef', '#123456', '#a12345', '#c1d2e3']) {
+      expect(markup, literal).not.toContain(`"${literal}"`)
+    }
+  })
+
+  it('draws a pinned authored colour exactly as it was written', () => {
+    const markup = renderToStaticMarkup(
+      <Canvas
+        config={defineInfoschematic({
+          title: 'Pinned colours',
+          infoschematic: {
+            regions: [
+              {
+                box: { height: 120, radius: 8, width: 180, x: 0, y: 0 },
+                fill: '#c1d2e3!',
+                id: 'region',
+                label: 'Region'
+              }
+            ]
+          }
+        })}
+      />
+    )
+
+    /* The pin is a suffix rather than a companion field: every authored colour is already a string in a position
+       that exists, and a parallel boolean beside each one would widen the contract in six places to say something
+       about a value rather than about the thing carrying it. A trailing `!` cannot appear in a valid colour. */
+    expect(markup).toContain('#c1d2e3')
+    expect(markup).not.toContain('#c1d2e3!')
+    expect(markup).not.toContain(resolveAuthoredColour('#c1d2e3', 'light', 'ground'))
   })
 })

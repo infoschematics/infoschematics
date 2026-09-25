@@ -136,7 +136,7 @@ const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promi
   // rather than the process. Hand the author that sentence, never the interpreter's stack.
   let svg: string
   try {
-    svg = renderInfoschematicSvg(document.model, { detail: parsed.detail, scheme: parsed.scheme })
+    svg = renderInfoschematicSvg(document.model, { detail: parsed.detail, mode: parsed.mode })
   } catch (error) {
     return { diagnostic: `Cannot render ${parsed.input}: ${message(error)}\n`, status: rendererCliExit.validation }
   }

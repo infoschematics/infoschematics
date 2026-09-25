@@ -1,5 +1,6 @@
 import { defineInfoschematic, defineInfoschematicModel, parseInfoschematicDocument } from '@infoschematics/domain-core'
 import { elementEmphasisDuration } from '@infoschematics/view-canvas'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
 import { measuredOverlap } from '@infoschematics/view-model/diagnostics'
 import { useState } from 'react'
 import { expect, test, vi } from 'vitest'
@@ -254,7 +255,11 @@ test('Studio creation and property clearing stay rendered and reviewable until d
   await expect
     .poll(() => container.querySelector('[data-artefact-kind="region"]')?.getAttribute('aria-label'))
     .toBe('Region Working area')
-  await expect.poll(() => container.querySelector('.infoschematic-region-fill')?.getAttribute('fill')).toBe('#abcdef')
+  // An authored Region fill is a hue seed realised against the ground Studio is on, so the drawn value is not the
+  // written one. Clearing it below is the claim this case is about, and a literal here would only test the seed maths.
+  await expect
+    .poll(() => container.querySelector('.infoschematic-region-fill')?.getAttribute('fill'))
+    .toBe(resolveAuthoredColour('#abcdef', 'light', 'ground'))
 
   setTextAreaValue.call(properties, '{"fill":null}')
   properties.dispatchEvent(new Event('input', { bubbles: true }))

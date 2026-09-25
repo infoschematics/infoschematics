@@ -6,7 +6,7 @@ description: The repository separates its authored contract, framework-neutral b
 diagram:
   bounds: 0 0 1400 920
   appearance:
-    surface: blueprint
+    style: blueprint
     grid: major-plus-minor
     card:
       description: false

@@ -57,7 +57,7 @@ describe('infoschematicsInfoschematic', () => {
         stereotype: true
       },
       grid: 'major-plus-minor',
-      surface: 'blueprint'
+      style: 'blueprint'
     })
     expect(diagram.collections.map(({ id }) => id)).toEqual([
       'product-foundation',

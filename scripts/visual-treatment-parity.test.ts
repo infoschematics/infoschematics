@@ -6,10 +6,17 @@ import { defineInfoschematic, defineInfoschematicModel } from '../packages/domai
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
 import { adapterBoundsFor, adapterClaspOutline, adapterLabelBaseline } from '../packages/view-model/src/assembly.ts'
+import { resolveAuthoredColour } from '../packages/view-model/src/colour.ts'
 import { emphasisPerimeterPath, emphasisPointRadius } from '../packages/view-model/src/perimeter.ts'
 import { createInfoschematicRuntime } from '../packages/view-model/src/runtime.ts'
 import { standardFabricKeys, standardGraphicKeys } from '../packages/view-model/src/standard-artwork.ts'
-import { type PaintScheme, paintFor, paintVariable, visualTokens } from '../packages/view-model/src/tokens.ts'
+import {
+  type PaintMode,
+  type PaintStyle,
+  paintFor,
+  paintVariable,
+  visualTokens
+} from '../packages/view-model/src/tokens.ts'
 
 /**
  * Every `url(#…)` reference in one rendering, paired with whether that same rendering defines it.
@@ -34,7 +41,7 @@ const config = defineInfoschematic({
     appearance: {
       card: { compact: true, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint'
+      style: 'blueprint'
     },
     domains: [
       {
@@ -186,7 +193,7 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
   labels: values(output, 'data-label-placement'),
   labelTreatments: values(output, 'data-label-treatment'),
   stereotype: output.includes('class="infoschematic-card-stereotype"'),
-  surface: values(output, 'data-surface-treatment')
+  surface: values(output, 'data-infoschematic-style')
 })
 
 /**
@@ -281,7 +288,7 @@ describe('visual treatment renderer parity', () => {
       infoschematic: {
         appearance: {
           card: { compact: true, description: true, identity: true, stereotype: true },
-          surface: 'blueprint'
+          style: 'blueprint'
         },
         domains: [
           { color: '#22c3a6', fill: '#063b35', id: 'dark', label: 'Dark' },
@@ -333,7 +340,17 @@ describe('visual treatment renderer parity', () => {
     const svg = renderInfoschematicSvg(inks)
 
     expect(semantics(canvas, 'data-card-compact')).toEqual(semantics(svg, 'data-compact'))
-    expect(values(canvas, 'data-ink')).toEqual(['dark', 'light', 'light'])
+    /* The ink follows the fill, and the fill is now a seed realised against the ground. Both renderers resolve the
+       same ground here — Canvas from the reader's preference, the static renderer from its default — so the answer
+       has to be the same answer, which is the parity this case exists for. On paper every authored fill lands in
+       the pale band and every Card takes dark ink. */
+    expect(values(canvas, 'data-ink')).toEqual(values(svg, 'data-ink'))
+    expect(values(canvas, 'data-ink')).toEqual(['dark', 'dark', 'dark'])
+    /* And the same document on the other ground reads differently, because the fills moved with it. Not uniformly:
+       the dark band reaches a mid tone, and a Card whose author chose a pale colour lands there rather than at the
+       bottom of it — which is the ordering being preserved, and is exactly why the ink is measured rather than
+       inferred from the ground. */
+    expect(values(renderInfoschematicSvg(inks, { mode: 'dark' }), 'data-ink')).toEqual(['dark', 'light', 'light'])
   })
 
   it('keeps omitted and hidden region treatments equivalent across renderers', () => {
@@ -486,7 +503,7 @@ describe('visual treatment renderer parity', () => {
     const crossed = defineInfoschematic({
       title: 'Crossed label reference',
       infoschematic: {
-        appearance: { surface: 'blueprint' },
+        appearance: { style: 'blueprint' },
         scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
         flowFamilies: [{ color: '#79c9ff', description: 'Calls', id: 'calls', label: 'Calls', prefix: 'CALL' }],
         regions: [
@@ -562,11 +579,14 @@ describe('visual treatment renderer parity', () => {
 
     // Each band is filled with the surface its label sits on: the Region's own fill under a plain label, the
     // backdrop under a boundary-mounted one, which is the same reading the label's ink takes.
-    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="#0b2a3a"`)
-    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="${paintFor('blueprint').backdrop}"`)
+    const seededRegion = resolveAuthoredColour('#0b2a3a', 'light', 'ground')
+    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="${seededRegion}"`)
+    expect(svg).toContain(
+      `<rect class="infoschematic-region-label-backing" fill="${paintFor('blueprint', 'light').backdrop}"`
+    )
     // Canvas states the fill where it beats the class rule that gives every other band its surface colour: a
     // presentation attribute loses to a stylesheet, so the Region's own fill is inline style or it is not applied.
-    expect(canvas).toContain('class="infoschematic-region-label-backing" style="fill:#0b2a3a"')
+    expect(canvas).toContain(`class="infoschematic-region-label-backing" style="fill:${seededRegion}"`)
 
     // Paint order, which is the half of the requirement geometry cannot show: the glyphs are drawn after the routes
     // in both outlets, so the backing covers stroke rather than being covered by it.
@@ -666,7 +686,7 @@ describe('visual treatment renderer parity', () => {
       expect(markup).toContain('cx="120"')
       expect(markup).toContain('cy="90"')
       expect(markup).toContain(`r="${pointRadius}"`)
-      expect(markup).toContain('stroke="#79c9ff"')
+      expect(markup).toContain(`stroke="${resolveAuthoredColour('#79c9ff', 'light', 'ink')}"`)
     }
 
     // The authored label is drawn, in both renderings, at the one place `resolvePointLabel` puts it. A Point with no
@@ -770,7 +790,7 @@ describe('visual treatment renderer parity', () => {
       id: 'adapter-parity',
       title: 'Adapter parity reference',
       diagram: {
-        appearance: { surface: 'blueprint' },
+        appearance: { style: 'blueprint' },
         bounds: { height: 240, width: 420, x: 0, y: 0 },
         gridSize: 10,
         cards: [
@@ -948,24 +968,31 @@ describe('visual treatment renderer parity', () => {
       }
     })
 
-    /* Every scheme, because the defect this closes is exactly a pair that agrees in one and diverges in another:
-       the authored blueprint surface is pinned in either reader scheme, which is where the two spellings happened
-       to land close enough together to look like agreement. */
-    const rendered: Record<PaintScheme, string> = {
-      blueprint: renderInfoschematicSvg({
-        ...chipped,
-        infoschematic: { ...chipped.infoschematic, appearance: { card: { identity: true }, surface: 'blueprint' } }
-      }),
-      dark: renderInfoschematicSvg(chipped, { scheme: 'dark' }),
-      light: renderInfoschematicSvg(chipped, { scheme: 'light' })
-    }
+    /* Every style on every ground, because the defect this closes is exactly a pair that agrees in one rendering and
+       diverges in another, and the two axes are resolved from different places: the style is the document's and the
+       ground is the reader's, so neither can stand in for the other. Four cells are four chances to catch it. */
+    const rendered = (['blueprint', 'neutral'] as const satisfies readonly PaintStyle[]).flatMap((style) =>
+      (['dark', 'light'] as const satisfies readonly PaintMode[]).map(
+        (mode) =>
+          [
+            `${style} on ${mode}`,
+            paintFor(style, mode),
+            renderInfoschematicSvg(
+              {
+                ...chipped,
+                infoschematic: { ...chipped.infoschematic, appearance: { card: { identity: true }, style } }
+              },
+              { mode }
+            )
+          ] as const
+      )
+    )
 
-    for (const [scheme, markup] of Object.entries(rendered) as readonly (readonly [PaintScheme, string])[]) {
-      const paint = paintFor(scheme)
-      expect(staticIdentityFills(markup), scheme).toEqual({ rect: paint.annotationFill, text: paint.annotationText })
+    for (const [name, paint, markup] of rendered) {
+      expect(staticIdentityFills(markup), name).toEqual({ rect: paint.annotationFill, text: paint.annotationText })
       /* A contrast chip is only a contrast chip while the pair differs. Equal values would satisfy the comparison
          above and draw an unreadable chip. */
-      expect(paint.annotationFill, scheme).not.toBe(paint.annotationText)
+      expect(paint.annotationFill, name).not.toBe(paint.annotationText)
     }
   })
 })
@@ -994,9 +1021,9 @@ const artworkPiece = (markup: string, key: string) => {
   return markup.slice(start, closed)
 }
 
-/** Which artwork role a blueprint drawing resolved, keyed by the colour it resolved to. */
+/** Which artwork role a blueprint drawing resolved, keyed by the colour it resolved to on the ground it landed on. */
 const artworkRoleByValue = new Map(
-  Object.entries(paintFor('blueprint').artwork).map(([role, value]) => [value, `artwork:${role}`])
+  Object.entries(paintFor('blueprint', 'light').artwork).map(([role, value]) => [value, `artwork:${role}`])
 )
 
 /**
@@ -1064,7 +1091,7 @@ describe('standard renderer catalogue parity', () => {
     const catalogue = defineInfoschematic({
       title: 'Standard Fabric catalogue',
       infoschematic: {
-        appearance: { surface: 'blueprint' },
+        appearance: { style: 'blueprint' },
         scopes: [{ color: '#79c9ff', description: 'One', fill: '#0d1b2a', id: 'one', label: 'One', prefix: 'ONE' }],
         fabrics: standardFabricKeys.map((key, index) => ({
           appearance: { renderer: key },
@@ -1105,7 +1132,7 @@ describe('standard renderer catalogue parity', () => {
       const drawing = defineInfoschematic({
         title: `Standard ${key}`,
         infoschematic: {
-          appearance: { surface: 'blueprint' },
+          appearance: { style: 'blueprint' },
           graphics: [
             {
               id: key,

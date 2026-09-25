@@ -36,7 +36,7 @@ describe('systemExample', () => {
     expect(diagram.appearance).toEqual({
       card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint'
+      style: 'blueprint'
     })
     expect(diagram.collections.map((collection) => collection.id)).toEqual([
       'observe',

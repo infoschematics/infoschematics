@@ -50,10 +50,15 @@ export const renderOptionSpecs = {
     kind: 'value',
     placeholder: '<number>'
   },
-  scheme: {
-    describe: 'Colour scheme: light, dark, or adaptive. Defaults to light. An authored blueprint is unaffected.',
+  mode: {
+    describe: 'The ground to paint against: light, dark, or system. Defaults to what the document authored.',
     kind: 'value',
-    placeholder: '<scheme>'
+    placeholder: '<mode>'
+  },
+  scheme: {
+    describe: 'The former name for --mode, still accepted. adaptive means system; blueprint is a style, not a ground.',
+    kind: 'value',
+    placeholder: '<mode>'
   },
   serve: { alias: 's', describe: 'Preview the render in a browser and refresh it on every change.', kind: 'flag' },
   scale: { describe: 'Multiply the raster pixel size. Defaults to 1.', kind: 'value', placeholder: '<number>' },
@@ -72,15 +77,16 @@ export type CheckOptionName = keyof typeof checkOptionSpecs
 export type RenderFormat = 'png' | 'svg'
 
 /**
- * The schemes this command offers, which is not every scheme the manifest holds.
+ * The grounds this command offers, which is the whole of that axis and none of the other one.
  *
- * `blueprint` is authored by the document, not chosen by whoever renders it, so offering it here would let a caller
- * contradict the drawing. A document that asks for a blueprint surface gets one whatever this option says.
+ * A style is authored by the document rather than chosen by whoever renders it, so there is no flag for it: offering
+ * one would let a caller contradict the drawing. A document that asks for a blueprint gets a blueprint, realised on
+ * whichever ground is named here.
  *
- * `adaptive` is not a palette but a refusal to pick one: the SVG carries both and whatever displays it decides. A
- * raster cannot take it, because the choice has to be made before the pixels exist.
+ * `system` is not a ground but a refusal to pick one: the SVG carries both and whatever displays it decides. A raster
+ * cannot take it, because the choice has to be made before the pixels exist.
  */
-export type RenderScheme = 'adaptive' | 'dark' | 'light'
+export type RenderMode = 'dark' | 'light' | 'system'
 
 export type RenderArguments = Readonly<{
   /** The detail band the still is drawn in, as an interactive view would have resolved it from magnification. */
@@ -97,7 +103,7 @@ export type RenderArguments = Readonly<{
   serve: boolean
   scale: number
   /** The palette the output is painted in. A still cannot react to a preference, so it resolves one and writes it. */
-  scheme: RenderScheme
+  mode: RenderMode | undefined
   /** Keep rendering until the process is interrupted, rather than converting once and exiting. */
   watch: boolean
 }>
@@ -146,10 +152,10 @@ check options
 ${optionLines(checkOptionSpecs)}
 
 Rendering the same document twice on one machine produces identical bytes. Pass --font to pin text across machines.
---scheme dark writes a dark drawing rather than one that might become dark, because nothing downstream of a file
-reports a reader's preference. --scheme adaptive instead writes one SVG carrying both palettes, which follows the
+--mode dark writes a dark drawing rather than one that might become dark, because nothing downstream of a file
+reports a reader's preference. --mode system instead writes one SVG carrying both palettes, which follows the
 reader wherever CSS applies. It needs a consumer that resolves custom properties: one that does not paints those
-roles black, so name a scheme for anything but a browser. A PNG cannot carry both at all.
+roles black, so name a mode for anything but a browser. A PNG cannot carry both at all.
 Watch mode keeps the last good output while a document does not parse, and recovers when it parses again.
 
 Checking reports what is wrong with the drawing a valid document describes, and changes nothing. It exits 0 when the
@@ -199,10 +205,20 @@ const scaleOf = (value: string | undefined) => {
   return scale
 }
 
-const schemeOf = (value: string | undefined): RenderScheme => {
-  if (value === undefined) return 'light'
-  if (value === 'adaptive' || value === 'dark' || value === 'light') return value
-  throw new Error(`Unsupported scheme ${value}. Expected light, dark, or adaptive.`)
+/**
+ * The ground the caller named, or nothing when they left it to the document.
+ *
+ * Absence is not `light`: a document may author a mode, and a flag that defaulted to a value would overrule it on
+ * every render that did not mention it. The renderer resolves absence against what the document said.
+ *
+ * `--scheme` is the retired spelling and still answers. Its `adaptive` is `system` under an older name, and its
+ * `blueprint` named a style rather than a ground, so it selects no ground and leaves the drawing's own to stand.
+ */
+const modeOf = (mode: string | undefined, scheme: string | undefined): RenderMode | undefined => {
+  const value = mode ?? (scheme === 'adaptive' ? 'system' : scheme === 'blueprint' ? undefined : scheme)
+  if (value === undefined) return undefined
+  if (value === 'system' || value === 'dark' || value === 'light') return value
+  throw new Error(`Unsupported mode ${value}. Expected light, dark, or system.`)
 }
 
 /**
@@ -250,12 +266,12 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
   const fonts = parsed.values.get('font') ?? []
   const output = parsed.single('output')
   const scale = scaleOf(parsed.single('scale'))
-  const scheme = schemeOf(parsed.single('scheme'))
+  const mode = modeOf(parsed.single('mode'), parsed.single('scheme'))
 
   /* A PNG is pixels, and a pixel cannot hold two colours pending a preference. The refusal is here rather than in
      the encoder so the caller is told which of the two options to change. */
-  if (format === 'png' && scheme === 'adaptive') {
-    throw new Error('The adaptive scheme applies to SVG output. A raster cannot carry both palettes.')
+  if (format === 'png' && mode === 'system') {
+    throw new Error('The system mode applies to SVG output. A raster cannot carry both palettes.')
   }
 
   if (format === 'svg') {
@@ -282,5 +298,5 @@ export function parseArguments(argv: readonly string[]): ParsedArguments {
     throw new Error('The watch option requires --output, because standard output cannot be rewritten.')
   if (watch && input === '-') throw new Error('The watch option requires a file to watch, not standard input.')
 
-  return { detail, fonts, format, host, input, ...(output ? { output } : {}), port, scale, scheme, serve, watch }
+  return { detail, fonts, format, host, input, ...(output ? { output } : {}), mode, port, scale, serve, watch }
 }

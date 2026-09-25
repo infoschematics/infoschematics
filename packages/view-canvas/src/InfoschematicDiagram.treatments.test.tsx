@@ -1,5 +1,6 @@
 import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { GridTreatment } from '@infoschematics/domain-model/appearance'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Canvas } from './Canvas.tsx'
@@ -8,7 +9,7 @@ const treatmentConfig = defineInfoschematic({
   title: 'Treatment reference',
   infoschematic: {
     appearance: {
-      surface: 'blueprint',
+      style: 'blueprint',
       grid: 'major-plus-minor',
       card: { compact: true, description: true, identity: true, stereotype: true }
     },
@@ -105,7 +106,7 @@ describe('Canvas visual treatments', () => {
   it('renders authored blueprint, shared region geometry, compact Card metadata and Domain semantics', () => {
     const markup = renderToStaticMarkup(<Canvas config={treatmentConfig} />)
 
-    expect(markup).toContain('data-surface-treatment="blueprint"')
+    expect(markup).toContain('data-infoschematic-style="blueprint"')
     expect(markup).toContain('data-grid-treatment="major-plus-minor"')
     expect(markup).toContain(`fill="url(#${resourcePrefixOf(markup)}-grid-major-plus-minor)"`)
     expect(markup).toContain('data-frame-treatment="dashed"')
@@ -118,9 +119,9 @@ describe('Canvas visual treatments', () => {
 
     expect(markup).toContain('data-card-compact="true"')
     expect(markup).toContain('data-collection="platform"')
-    expect(markup).toContain('fill="#053c35"')
-    expect(markup).toContain('stroke="#00aa88"')
-    expect(markup).not.toContain('stroke="#ff0055"')
+    expect(markup).toContain(`fill="${resolveAuthoredColour('#053c35', 'light', 'fill')}"`)
+    expect(markup).toContain(`stroke="${resolveAuthoredColour('#00aa88', 'light', 'ink')}"`)
+    expect(markup).not.toContain(`stroke="${resolveAuthoredColour('#ff0055', 'light', 'ink')}"`)
     expect(markup).toContain('data-card-detail="identity"')
     expect(markup).toContain('data-card-detail="stereotype"')
     expect(markup).toContain('data-card-detail="description"')
@@ -187,7 +188,7 @@ describe('Canvas visual treatments', () => {
     })
     const markup = renderToStaticMarkup(<Canvas config={config} />)
 
-    expect(markup).toContain('data-surface-treatment="neutral"')
+    expect(markup).toContain('data-infoschematic-style="neutral"')
     expect(markup).toContain('data-grid-treatment="none"')
     expect(markup).not.toContain('class="infoschematic-authored-grid"')
     expect(markup).toContain('data-frame-treatment="solid"')
@@ -199,8 +200,8 @@ describe('Canvas visual treatments', () => {
     expect(markup).toContain('data-label-treatment="notched"')
     expect(markup).not.toContain('data-card-compact=')
     expect(markup).not.toContain('data-card-detail=')
-    expect(markup).toContain('fill="#123456"')
-    expect(markup).toContain('stroke="#456789"')
+    expect(markup).toContain(`fill="${resolveAuthoredColour('#123456', 'light', 'fill')}"`)
+    expect(markup).toContain(`stroke="${resolveAuthoredColour('#456789', 'light', 'ink')}"`)
     expect(markup).toContain('<title>SCP-001 · Default Card · Accessible only by default</title>')
   })
 
@@ -253,7 +254,7 @@ describe('Canvas visual treatments', () => {
     const hidden = renderToStaticMarkup(<Canvas config={treatmentConfig} visibleScopes={new Set()} />)
 
     expect(visible).toContain('data-collection="platform"')
-    expect(visible).toContain('fill="#053c35"')
+    expect(visible).toContain(`fill="${resolveAuthoredColour('#053c35', 'light', 'fill')}"`)
     expect(hidden).not.toContain('data-collection="platform"')
     expect(hidden).not.toContain('Gateway')
   })

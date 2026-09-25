@@ -181,16 +181,20 @@ describe('renderer CLI', () => {
   })
 
   /*
-   * A scheme is resolved by whoever renders, and written into what they get.
+   * A mode is resolved by whoever renders, and written into what they get.
    *
    * The command's output is a file: no stylesheet follows it and no preference reaches it, so asking for dark has to
-   * change the bytes. Asserting the two renderings differ is the whole claim — a `--scheme` that parsed and then
+   * change the bytes. Asserting the two renderings differ is the whole claim — a `--mode` that parsed and then
    * painted the same drawing would pass every other case here.
+   *
+   * A style is orthogonal to that: a blueprint document asked for the dark ground is still a blueprint, and is still
+   * a different drawing from the same document on the light one. `--scheme blueprint` named a style under the retired
+   * spelling, so it is accepted and names no ground at all.
    */
-  it('paints the scheme it was asked for and refuses one it does not offer', async () => {
+  it('paints the mode it was asked for and refuses one it does not offer', async () => {
     const light = harness({ 'model.yaml': yaml })
     const dark = harness({ 'model.yaml': yaml })
-    const authored = `${yaml}  appearance:\n    surface: blueprint\n`
+    const authored = `${yaml}  appearance:\n    style: blueprint\n`
     const blueprint = harness({ 'model.yaml': authored })
     const blueprintDark = harness({ 'model.yaml': authored })
 
@@ -198,12 +202,21 @@ describe('renderer CLI', () => {
     expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'dark'], dark.io)).toBe(rendererCliExit.success)
     expect(dark.output().stdout).not.toBe(light.output().stdout)
 
-    // The document authored its surface, so the caller's scheme does not reach it.
+    // The document authored a style, which says what the drawing is rather than which ground it is read on.
     expect(await runRendererCli(['render', 'model.yaml'], blueprint.io)).toBe(rendererCliExit.success)
-    expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'dark'], blueprintDark.io)).toBe(
+    expect(await runRendererCli(['render', 'model.yaml', '--mode', 'dark'], blueprintDark.io)).toBe(
       rendererCliExit.success
     )
-    expect(blueprintDark.output().stdout).toBe(blueprint.output().stdout)
+    expect(blueprintDark.output().stdout).not.toBe(blueprint.output().stdout)
+    expect(blueprint.output().stdout).toContain('data-infoschematic-style="blueprint"')
+    expect(blueprintDark.output().stdout).toContain('data-infoschematic-style="blueprint"')
+
+    // `--scheme blueprint` chose a palette under the retired spelling; it names a style now, so it selects no ground.
+    const named = harness({ 'model.yaml': yaml })
+    expect(await runRendererCli(['render', 'model.yaml', '--scheme', 'blueprint'], named.io)).toBe(
+      rendererCliExit.success
+    )
+    expect(named.output().stdout).toBe(light.output().stdout)
 
     /* Asked to defer instead of choose, the SVG carries both palettes and the rule that picks between them. */
     const adaptive = harness({ 'model.yaml': yaml })
@@ -222,7 +235,6 @@ describe('renderer CLI', () => {
 
   it.each([
     ['render', 'model.yaml', '--format', 'gif'],
-    ['render', 'model.yaml', '--scheme', 'blueprint'],
     ['render', 'model.yaml', '--scheme', 'sepia'],
     ['render', 'model.yaml', '--format', 'png', '--scale', 'wide'],
     ['render', 'model.yaml', '--format', 'png', '--scale', '0'],

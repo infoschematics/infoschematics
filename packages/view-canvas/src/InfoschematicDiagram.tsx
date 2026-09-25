@@ -11,6 +11,7 @@ import { type ArtefactDraftOperation, applyArtefactOperations } from '@infoschem
 import { adapterClaspOutline, adapterLabelBaseline } from '@infoschematics/view-model/assembly'
 import { resolveCardLayout } from '@infoschematics/view-model/card-layout'
 import { type CodeBadgeAnchor, codeBadgeRadius, resolveCodeBadge } from '@infoschematics/view-model/code-badge'
+import { type SeedResolver, seedResolver } from '@infoschematics/view-model/colour'
 import {
   arrivalAnnouncement,
   type DestinationResolution,
@@ -65,6 +66,7 @@ import {
   type RuntimeFlow as InfoschematicFlow,
   type RuntimeFabric
 } from '@infoschematics/view-model/runtime'
+import { useColourScheme } from './colour-scheme.ts'
 import { elementEmphasisKey } from './element-emphasis.ts'
 import { flowSignalDuration, flowSignalKey } from './flow-signals.ts'
 import type { FabricRendererProps, RendererProperties } from './renderer-contract.ts'
@@ -172,14 +174,16 @@ type CanvasRegion = Parameters<typeof resolveRegionTreatment>[0] &
  * a Flow that legitimately crosses the label's band cannot cut through the glyphs - `ROUTE-019`. Both reads take the
  * same treatment, geometry and ink from here rather than resolving a Region twice and risking two answers.
  */
-const regionVisual = (region: CanvasRegion) => {
+const regionVisual = (region: CanvasRegion, seeds: SeedResolver) => {
   const treatment = resolveRegionTreatment(region)
   const geometry = regionGeometry({ box: region.box, label: region.label, treatment })
+  /* The ink is measured against the fill that will be drawn rather than the seed it came from: realising a seed can
+     move it across the readability threshold, which is what realising it is for. */
+  const fill = region.fill === undefined ? undefined : seeds.resolve(region.fill, 'ground')
   // A boundary-mounted label sits over the backdrop the notch exposes,
   // not the fill, so only a plain label takes its ink from the fill.
-  const ink =
-    region.fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(region.fill) : null
-  return { geometry, ink, treatment }
+  const ink = fill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(fill) : null
+  return { fill, geometry, ink, treatment }
 }
 
 /**
@@ -860,6 +864,15 @@ export function InfoschematicDiagram({
   const settledBand = useRef<DetailBand | null>(null)
   const detailBand = detailScale === null ? null : settleDetailBand(settledBand.current, detailScale)
   settledBand.current = detailBand
+  /*
+   * Authored colours are seeds, so the ground a reader turned out to be on is an input to drawing them. Canvas
+   * already resolves that ground for the interface; the same answer now reaches the drawing, and moving between
+   * grounds re-realises every seed rather than leaving the author's colours pinned where the palette moved.
+   */
+  const [colourMode] = useColourScheme()
+  const seeds = useMemo(() => seedResolver(colourMode), [colourMode])
+  const seededFamilyColour = useCallback((colour: string) => seeds.resolve(colour, 'ink'), [seeds])
+
   const visualTreatment = {
     ...requestedVisualTreatment,
     grid: authoredGridSize === 0 ? ('none' as const) : requestedVisualTreatment.grid,
@@ -1927,7 +1940,7 @@ export function InfoschematicDiagram({
         key={flow.id}
         onKeyDown={interactive('flow') ? artefactKeyDown(selection, flow.code) : undefined}
         role={interactive('flow') ? 'button' : undefined}
-        style={{ color: family.color }}
+        style={{ color: seededFamilyColour(family.color) }}
         tabIndex={interactive('flow') ? 0 : undefined}
       >
         {/* Names for a reader, ports for an editor. It said
@@ -1941,7 +1954,7 @@ export function InfoschematicDiagram({
           d={flow.d}
           markerEnd={flowArrowhead(flow, 'end')}
           markerStart={flowArrowhead(flow, 'start')}
-          stroke={family.color}
+          stroke={seededFamilyColour(family.color)}
         />
         {signals
           .filter((signal) => signal.flowId === flow.id)
@@ -2175,7 +2188,7 @@ export function InfoschematicDiagram({
       kind: 'point'
     } as const satisfies ArtefactSelection
     const legacyKey = `point:${point.id}`
-    const stroke = point.appearance?.color ?? pointTokens.stroke
+    const stroke = point.appearance?.color ? seeds.resolve(point.appearance.color, 'ink') : pointTokens.stroke
     /* The authored label, on the side `resolvePointLabel` picks from the Flows that leave this Point. The draft-aware
        `flows` are passed rather than the authored ones, so a label moves out of the way of a route while it is dragged
        instead of after it is committed. */
@@ -2210,7 +2223,7 @@ export function InfoschematicDiagram({
           className="point-mark"
           cx={point.at.x}
           cy={point.at.y}
-          fill={point.appearance?.fill ?? pointTokens.fill}
+          fill={point.appearance?.fill ? seeds.resolve(point.appearance.fill, 'fill') : pointTokens.fill}
           r={pointRadius}
           stroke={stroke}
           strokeWidth={2}
@@ -2334,9 +2347,9 @@ export function InfoschematicDiagram({
       <svg
         ref={infoschematic}
         aria-label={`${config.title} structural Infoschematic`}
-        className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} surface-${visualTreatment.surface}`}
+        className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} style-${visualTreatment.style}`}
         data-grid-treatment={visualTreatment.grid}
-        data-surface-treatment={visualTreatment.surface}
+        data-infoschematic-style={visualTreatment.style}
         height={infoschematicViewBox.height}
         onPointerCancel={panGesture ? stopPan : undefined}
         onPointerDown={editing || !fitted ? startPan : undefined}
@@ -2453,7 +2466,7 @@ export function InfoschematicDiagram({
                 understood the stylesheet overrides it and the head takes the
                 colour of the line it sits on, so pointing at a line brightens
                 its head with it rather than leaving it behind. */}
-              <path className="arrow-head" d={arrowTokens.forward} fill={family.color} />
+              <path className="arrow-head" d={arrowTokens.forward} fill={seededFamilyColour(family.color)} />
             </marker>
           ))}
         </defs>
@@ -2478,7 +2491,7 @@ export function InfoschematicDiagram({
             kind: 'region'
           } as const satisfies ArtefactSelection
           const legacyKey = `region:${region.id}`
-          const { geometry, treatment } = regionVisual(region)
+          const { fill: regionFill, geometry, treatment } = regionVisual(region, seeds)
           return (
             // biome-ignore lint/a11y/noStaticElementInteractions: role and tabIndex are conditional on editing, which the linter cannot see through.
             <g
@@ -2504,10 +2517,10 @@ export function InfoschematicDiagram({
               role={interactive('region') ? 'button' : undefined}
               tabIndex={interactive('region') ? 0 : undefined}
             >
-              {region.fill ? (
+              {regionFill ? (
                 <rect
                   className="infoschematic-region-fill"
-                  fill={region.fill}
+                  fill={regionFill}
                   height={region.box.height}
                   rx={region.box.radius ?? cornerRadius}
                   width={region.box.width}
@@ -2651,7 +2664,7 @@ export function InfoschematicDiagram({
           the Flow layer and before the Cards, over an opaque backing in the surface the label sits on: a plain label
           sets down on the Region's fill, a boundary-mounted one on the backdrop the notch exposes. `ROUTE-019`. */}
         {infoschematicRegions.map((region) => {
-          const { geometry, ink, treatment } = regionVisual(region)
+          const { fill: regionFill, geometry, ink, treatment } = regionVisual(region, seeds)
           if (!geometry.label) return null
           const selection = {
             code: null,
@@ -2684,7 +2697,7 @@ export function InfoschematicDiagram({
                   /* A `fill` attribute loses to the class rule that gives the band its surface colour, so a Region
                      that states its own fill has to state it where it wins. `ROUTE-019` asks for the Region's
                      resolved surface, and for a plain label that surface is the fill it sets down on. */
-                  style={ink !== null ? { fill: region.fill } : undefined}
+                  style={ink !== null ? { fill: regionFill } : undefined}
                   height={geometry.labelBacking.height}
                   width={geometry.labelBacking.width}
                   x={geometry.labelBacking.x}
@@ -2835,11 +2848,18 @@ export function InfoschematicDiagram({
               kind: 'card'
             } as const satisfies ArtefactSelection
             const domain = resolveCardDomain(card, domains)
-            const appearance = domain ??
+            const authored = domain ??
               scopeAppearance[card.group as keyof typeof scopeAppearance] ?? {
                 color: 'currentColor',
                 fill: 'transparent'
               }
+            /* A Collection's or a Scope's colours are seeds like any other authored colour, so a Card is painted
+               against the ground its reader is on. The ink its label takes is then measured from the fill the Card
+               was drawn with rather than the one that was written, which is the only reading that stays legible. */
+            const appearance = {
+              fill: seeds.resolve(authored.fill, 'fill'),
+              stroke: seeds.resolve('color' in authored ? authored.color : authored.stroke, 'ink')
+            }
             // Card internals are placed and fitted from the Card's own box by View
             // Model, so the Canvas and the static SVG draw the same Card the same
             // way, saying the same thing, at any shape. Resolved above so the
@@ -2893,7 +2913,7 @@ export function InfoschematicDiagram({
                 onPointerEnter={onHover ? () => onHover(card.code) : undefined}
                 onPointerLeave={onHover ? () => onHover(null) : undefined}
                 role={interactive('card') ? 'button' : undefined}
-                style={{ color: 'color' in appearance ? appearance.color : appearance.stroke }}
+                style={{ color: appearance.stroke }}
                 tabIndex={interactive('card') ? 0 : undefined}
                 transform={`translate(${layout.x} ${layout.y})`}
               >
@@ -2902,7 +2922,7 @@ export function InfoschematicDiagram({
                   fill={appearance.fill}
                   height={layout.height}
                   rx={cornerRadius}
-                  stroke={'color' in appearance ? appearance.color : appearance.stroke}
+                  stroke={appearance.stroke}
                   width={layout.width}
                 />
                 {text.identity ? (

@@ -6,7 +6,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import {
   type ChromeScheme,
   chromeDeclarations,
-  type PaintScheme,
+  type PaintMode,
+  type PaintStyle,
   paintDeclarations,
   type VisualTokenValue,
   visualTokens
@@ -16,24 +17,64 @@ import { type CliSpec, isDirectInvocation, runCli } from './cli.ts'
 /**
  * How a palette reaches the drawing.
  *
- * `light` is declared on `:root` so a page that says nothing gets it, and the dark values are declared twice: once
- * behind `prefers-color-scheme`, which is the default path and needs no script at all, and once behind an attribute
- * a host sets when it has resolved the scheme itself. The attribute blocks come last and match the media query's
- * specificity, so source order is what lets a host override the reader's preference deliberately.
+ * Two questions are answered separately here, and the selectors are the proof that they are separate. A style is
+ * authored — it says what the drawing is — and a mode is resolved from the reader's ground. Every style therefore has
+ * to be emitted against every mode, which is why this is a matrix rather than a list.
  *
- * `blueprint` is authored rather than resolved, so it sits on the drawing's own element with a higher specificity
- * than either. Custom properties inherit, so declaring it there paints that drawing and nothing around it.
+ * The plain style is declared on `:root` so a page that says nothing gets its light realisation, and its dark values
+ * are declared twice: once behind `prefers-color-scheme`, which is the default path and needs no script at all, and
+ * once behind an attribute a host sets when it has resolved the mode itself. The attribute blocks come last and match
+ * the media query's specificity, so source order is what lets a host override the reader's preference deliberately.
  *
- * Paper is light whatever the screen was, so the print rule comes last and outranks both the reader's preference
- * and a host's override on equal specificity. An authored blueprint still outranks it: a treatment an author chose
- * is not a scheme somebody resolved.
+ * Blueprint sits on the drawing's own element, so it outranks both on specificity and paints that drawing without
+ * touching anything around it. It used to stop there, as a single pinned palette. It no longer does: the same three
+ * paths repeat for it, nested under the mode selectors, because nesting raises specificity in step and keeps the
+ * override order intact within the style. An author choosing blueprint chooses a treatment, not a ground.
+ *
+ * Paper is light whatever the screen was, so the print rules come last. The neutral one outranks the attribute blocks
+ * on equal specificity by order; the blueprint one has to repeat every path blueprint can have arrived by, because a
+ * nested selector cannot be out-ranked by an unnested one however late it is written.
  */
-const paintSelectors: readonly Readonly<{ scheme: PaintScheme; selector: string; wrap?: string }>[] = [
-  { scheme: 'dark', selector: ':root', wrap: '@media (prefers-color-scheme: dark)' },
-  { scheme: 'light', selector: '[data-infoschematic-scheme="light"]' },
-  { scheme: 'dark', selector: '[data-infoschematic-scheme="dark"]' },
-  { scheme: 'blueprint', selector: '.infoschematic-svg.surface-blueprint, [data-surface-treatment="blueprint"]' },
-  { scheme: 'light', selector: ':root', wrap: '@media print' }
+/** The two ways a drawing says it is a blueprint: the Canvas class, and the attribute both renderers write. */
+const blueprintSelector = '.infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"]'
+
+/**
+ * The same blueprint selector under a resolved mode, which is what makes a style follow its reader.
+ *
+ * A descendant combinator is not decoration here. The mode lands on the document element and the style lands on the
+ * drawing, so the only way to name the pair is to nest them — and nesting raises specificity, which is exactly what
+ * makes a host's resolved mode outrank the unqualified default below it.
+ */
+const under = (prefix: string, selector: string) =>
+  selector
+    .split(', ')
+    .map((one) => `${prefix} ${one}`)
+    .join(', ')
+
+const blueprintUnderLight = under('[data-infoschematic-scheme="light"]', blueprintSelector)
+const blueprintUnderDark = under('[data-infoschematic-scheme="dark"]', blueprintSelector)
+
+const paintSelectors: readonly Readonly<{
+  mode: PaintMode
+  selector: string
+  style: PaintStyle
+  wrap?: string
+}>[] = [
+  { mode: 'light', selector: blueprintSelector, style: 'blueprint' },
+  { mode: 'dark', selector: ':root', style: 'neutral', wrap: '@media (prefers-color-scheme: dark)' },
+  { mode: 'dark', selector: blueprintSelector, style: 'blueprint', wrap: '@media (prefers-color-scheme: dark)' },
+  { mode: 'light', selector: '[data-infoschematic-scheme="light"]', style: 'neutral' },
+  { mode: 'dark', selector: '[data-infoschematic-scheme="dark"]', style: 'neutral' },
+  { mode: 'light', selector: blueprintUnderLight, style: 'blueprint' },
+  { mode: 'dark', selector: blueprintUnderDark, style: 'blueprint' },
+  { mode: 'light', selector: ':root', style: 'neutral', wrap: '@media print' },
+  {
+    mode: 'light',
+    /* Every path a blueprint can have been painted by, so print ties the mode-qualified rules and wins on order. */
+    selector: [blueprintSelector, blueprintUnderLight, blueprintUnderDark].join(', '),
+    style: 'blueprint',
+    wrap: '@media print'
+  }
 ]
 
 export type VisualTokenEntry = Readonly<{
@@ -60,8 +101,8 @@ export const visualTokenEntries = (tokens: TokenTree = visualTokens): readonly V
   const visit = (tree: TokenTree, parent: readonly string[]) => {
     for (const [key, value] of Object.entries(tree)) {
       const path = [...parent, key]
-      /* A palette is not one more branch of the tree: its roles are declared several times over, once per scheme,
-         under names that carry no scheme at all. `paintEntries` reads them instead. */
+      /* A palette is not one more branch of the tree: its roles are declared several times over, once per style and
+         ground, under names that carry neither. `paintEntries` reads them instead. */
       if (key === 'paint' && parent.length === 1) continue
       if (typeof value === 'object' && value !== null) {
         visit(value, path)
@@ -103,12 +144,12 @@ export const visualTokenEntries = (tokens: TokenTree = visualTokens): readonly V
  * why the roles have to agree: a name declared by one scheme and not another would resolve to whatever an earlier
  * block happened to leave behind, and the drawing would be half one palette.
  */
-export const paintEntries = (scheme: PaintScheme): readonly VisualTokenEntry[] =>
+export const paintEntries = (style: PaintStyle, mode: PaintMode): readonly VisualTokenEntry[] =>
   /* Named by the manifest rather than by the tree walk, which skips `canvas.paint` by design: a static rendering
      carries these same declarations, and one spelling is the only thing that keeps the two resolving alike. */
-  paintDeclarations(scheme).map(([cssName, value]) => ({
+  paintDeclarations(style, mode).map(([cssName, value]) => ({
     cssName: cssName as `--infoschematic-${string}`,
-    path: `canvas.paint.${scheme}.${cssName}`,
+    path: `canvas.paint.${style}.${mode}.${cssName}`,
     value
   }))
 
@@ -148,26 +189,47 @@ const chromeRolesAgree = () => {
   return first.names.length
 }
 
-/** Every scheme answers every role, or the stylesheet is not written. */
+/**
+ * Every style answers every role on every ground, or the stylesheet is not written.
+ *
+ * The comparison is over the whole matrix rather than a list of palettes, because splitting the axes added a way for
+ * this to fail that a flat check could not see: a style that answers every role on one ground and not the other is
+ * complete by any per-palette measure and still paints half a drawing the moment its reader switches.
+ */
 const paintRolesAgree = () => {
-  const schemes = Object.keys(visualTokens.canvas.paint) as readonly PaintScheme[]
-  const byScheme = schemes.map((scheme) => ({ names: paintEntries(scheme).map((entry) => entry.cssName), scheme }))
-  const first = byScheme[0]
-  if (!first) throw new Error('The visual token manifest declares no paint schemes.')
+  const styles = Object.keys(visualTokens.canvas.paint) as readonly PaintStyle[]
+  const first = styles[0]
+  if (!first) throw new Error('The visual token manifest declares no paint styles.')
 
-  for (const other of byScheme.slice(1)) {
-    const missing = first.names.filter((name) => !other.names.includes(name))
-    const extra = other.names.filter((name) => !first.names.includes(name))
+  const modesOf = (style: PaintStyle) => Object.keys(visualTokens.canvas.paint[style]) as readonly PaintMode[]
+  const byPalette = styles.flatMap((style) =>
+    modesOf(style).map((mode) => ({ mode, names: paintEntries(style, mode).map((entry) => entry.cssName), style }))
+  )
+
+  const reference = byPalette[0]
+  if (!reference) throw new Error('The visual token manifest declares no paint modes.')
+
+  for (const other of byPalette.slice(1)) {
+    const missing = reference.names.filter((name) => !other.names.includes(name))
+    const extra = other.names.filter((name) => !reference.names.includes(name))
     if (missing.length > 0 || extra.length > 0) {
       throw new Error(
-        `Paint schemes disagree about their roles: ${other.scheme} is missing ${
+        `Paint palettes disagree about their roles: ${other.style}.${other.mode} is missing ${
           missing.join(', ') || 'nothing'
-        } and adds ${extra.join(', ') || 'nothing'} against ${first.scheme}.`
+        } and adds ${extra.join(', ') || 'nothing'} against ${reference.style}.${reference.mode}.`
       )
     }
   }
 
-  return first.names.length
+  /* A style that answers no ground at all would pass the comparison above by never entering it. */
+  for (const style of styles) {
+    const modes = modesOf(style)
+    if (!modes.includes('dark') || !modes.includes('light')) {
+      throw new Error(`Paint style ${style} does not answer both grounds: it declares ${modes.join(', ') || 'none'}.`)
+    }
+  }
+
+  return reference.names.length
 }
 
 const block = (selector: string, entries: readonly VisualTokenEntry[], indent = '') => [
@@ -176,9 +238,9 @@ const block = (selector: string, entries: readonly VisualTokenEntry[], indent = 
   `${indent}}`
 ]
 
-/* A blueprint drawing does not repaint the interface around it, so only the reader's own schemes carry chrome. */
-const entriesFor = (scheme: PaintScheme): readonly VisualTokenEntry[] =>
-  scheme === 'blueprint' ? paintEntries(scheme) : [...paintEntries(scheme), ...chromeEntries(scheme)]
+/* A blueprint drawing does not repaint the interface around it, so only the plain style carries chrome. */
+const entriesFor = (style: PaintStyle, mode: PaintMode): readonly VisualTokenEntry[] =>
+  style === 'blueprint' ? paintEntries(style, mode) : [...paintEntries(style, mode), ...chromeEntries(mode)]
 
 export const generateVisualTokenCss = (tokens: TokenTree = visualTokens): string => {
   paintRolesAgree()
@@ -186,16 +248,16 @@ export const generateVisualTokenCss = (tokens: TokenTree = visualTokens): string
 
   const lines = [
     '/* Generated by scripts/generate-visual-tokens.ts. Do not edit. */',
-    ...block(':root', [...visualTokenEntries(tokens), ...entriesFor('light')])
+    ...block(':root', [...visualTokenEntries(tokens), ...entriesFor('neutral', 'light')])
   ]
 
-  for (const { scheme, selector, wrap } of paintSelectors) {
+  for (const { mode, selector, style, wrap } of paintSelectors) {
     lines.push('')
     if (wrap === undefined) {
-      lines.push(...block(selector, entriesFor(scheme)))
+      lines.push(...block(selector, entriesFor(style, mode)))
       continue
     }
-    lines.push(`${wrap} {`, ...block(selector, entriesFor(scheme), '  '), '}')
+    lines.push(`${wrap} {`, ...block(selector, entriesFor(style, mode), '  '), '}')
   }
 
   return `${lines.join('\n')}\n`
@@ -247,9 +309,10 @@ if (isDirectInvocation(import.meta.url)) {
 
     await generateVisualTokens({ check, output })
     const count = visualTokenEntries().length
-    const roles = paintEntries('light').length
+    const roles = paintEntries('neutral', 'light').length
     const chrome = chromeEntries('light').length
-    const shape = `${count} declarations, ${roles} paint roles in ${Object.keys(visualTokens.canvas.paint).length} schemes, and ${chrome} chrome roles in ${Object.keys(visualTokens.chrome.paint).length}`
+    const styles = Object.keys(visualTokens.canvas.paint).length
+    const shape = `${count} declarations, ${roles} paint roles across ${styles} styles on 2 grounds, and ${chrome} chrome roles in ${Object.keys(visualTokens.chrome.paint).length}`
     console.log(
       check
         ? `Visual tokens current: ${shape} in ${fileURLToPath(output)}`

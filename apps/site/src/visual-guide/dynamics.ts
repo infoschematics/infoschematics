@@ -13,7 +13,7 @@ export const dynamicsSpecimen = defineInfoschematicModel({
     bounds: { x: 0, y: 0, width: 720, height: 300 },
     gridSize: 10,
     appearance: {
-      surface: 'blueprint',
+      style: 'blueprint',
       grid: 'major-plus-minor',
       card: { compact: false, description: true, identity: true, stereotype: false }
     },

@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
-import { gridTreatments, regionLabelPlacements, surfaceTreatments } from './appearance.ts'
+import { gridTreatments, regionLabelPlacements, visualStyles } from './appearance.ts'
 import { type AppearanceOptionKey, appearanceOptionKeys, appearanceOptions } from './option-catalogue.ts'
 import { regionFrameStyles, regionLabelMounts } from './region.ts'
 
 describe('appearance option catalogue', () => {
   it('offers each choice the values its union states, in order', () => {
-    expect(appearanceOptions.surface.values).toEqual(surfaceTreatments)
+    expect(appearanceOptions.style.values).toEqual(visualStyles)
     expect(appearanceOptions.grid.values).toEqual(gridTreatments)
     expect(appearanceOptions['region.frame.style'].values).toEqual(regionFrameStyles)
     expect(appearanceOptions['region.labelMount'].values).toEqual(regionLabelMounts)
@@ -30,7 +30,9 @@ describe('appearance option catalogue', () => {
       'region.labelMount',
       'region.labelOffset',
       'region.labelPlacement',
-      'surface'
+      'mode',
+      'modeLocked',
+      'style'
     ]
 
     expect([...appearanceOptionKeys].sort()).toEqual([...expected].sort())

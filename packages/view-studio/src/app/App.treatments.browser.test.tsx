@@ -9,6 +9,7 @@
  * These cases assert Canvas-owned treatments through Studio's stylesheet, so the shadowing is observable.
  */
 import { defineInfoschematic } from '@infoschematics/domain-core'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
 import { paintFor } from '@infoschematics/view-model/tokens'
 import { afterEach, expect, test } from 'vitest'
 import { commands, page } from 'vitest/browser'
@@ -106,6 +107,16 @@ const paintedFrom = (element: Element, colour: string) => {
   return { actual: getComputedStyle(element).backgroundColor, expected }
 }
 
+/** The `rgb()` a browser normalises a colour to, so an expectation is spelled the way the drawing's is. */
+const asPainted = (colour: string) => {
+  const probe = document.createElement('div')
+  probe.style.color = colour
+  document.body.append(probe)
+  const painted = getComputedStyle(probe).color
+  probe.remove()
+  return painted
+}
+
 /* One browser context serves this whole file, so a preference outlives the case that asked for it. */
 afterEach(async () => {
   await commands.emulateColourScheme('no-preference')
@@ -126,7 +137,7 @@ test('paints the diagram container from the backdrop token, not a literal Studio
 
   for (const scheme of ['light', 'dark'] as const) {
     await commands.emulateColourScheme(scheme)
-    expect(backdropToken(), scheme).toBe(paintFor(scheme).backdrop)
+    expect(backdropToken(), scheme).toBe(paintFor('neutral', scheme).backdrop)
     const { actual, expected } = paintedFrom(surface, backdropToken())
     expect(actual, scheme).toBe(expected)
   }
@@ -144,8 +155,9 @@ test("keeps a Card's identity chip out of the Card's own selection treatment", a
   // paint the nested chip as though it were a second selected Card.
   const chip = card.querySelector('.infoschematic-card-identity rect')
   if (!chip) throw new Error('Card A has no identity chip')
-  // Its own Scope colour, not the Card's selection: asserting the positive catches a chip left unstyled as well.
-  expect(getComputedStyle(chip).stroke).toBe('rgb(36, 99, 235)')
+  /* Its own Scope colour, not the Card's selection: asserting the positive catches a chip left unstyled as well.
+     The Scope's colour is a hue seed, so the expected value is its realisation on the ground this page is on. */
+  expect(getComputedStyle(chip).stroke).toBe(asPainted(resolveAuthoredColour('#2463eb', 'light', 'ink')))
 })
 
 test('lets the split seam show that a pane continues past it, rather than cutting whatever lies on the clip edge', async () => {

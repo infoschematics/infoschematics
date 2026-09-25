@@ -6,8 +6,8 @@ import {
   type RegionLabelPlacement,
   type RegionLabelTreatment,
   regionLabelPlacements,
-  type SurfaceTreatment,
-  surfaceTreatments
+  type VisualStyle,
+  visualStyles
 } from '@infoschematics/domain-model/appearance'
 import type { CardConfig } from '@infoschematics/domain-model/card'
 import type { DomainConfig } from '@infoschematics/domain-model/domain'
@@ -17,7 +17,7 @@ import { describe, expect, expectTypeOf, it } from 'vitest'
 describe('authored appearance contracts', () => {
   it('keeps every treatment a closed serialisable value', () => {
     expectTypeOf<GridTreatment>().toEqualTypeOf<'none' | 'major' | 'major-plus-minor' | 'dots'>()
-    expectTypeOf<SurfaceTreatment>().toEqualTypeOf<'neutral' | 'blueprint'>()
+    expectTypeOf<VisualStyle>().toEqualTypeOf<'neutral' | 'blueprint'>()
     expectTypeOf<RegionFrameStyle>().toEqualTypeOf<'solid' | 'dashed' | 'dotted'>()
     expectTypeOf<RegionLabelMount>().toEqualTypeOf<'boundary' | 'internal'>()
     expectTypeOf<RegionLabelFrameTreatment>().toEqualTypeOf<'plain' | 'notched'>()
@@ -27,7 +27,7 @@ describe('authored appearance contracts', () => {
     expectTypeOf<RegionLabelTreatment>().toEqualTypeOf<'none' | RegionLabelPlacement>()
 
     const appearance = {
-      surface: 'blueprint',
+      style: 'blueprint',
       grid: 'major-plus-minor',
       card: { compact: true, identity: false, stereotype: true, description: false }
     } satisfies InfoschematicAppearanceConfig
@@ -46,14 +46,14 @@ describe('authored appearance contracts', () => {
   })
 
   it('enumerates every closed treatment union at runtime', () => {
-    expect(surfaceTreatments.toSorted()).toEqual(['blueprint', 'neutral'])
+    expect(visualStyles.toSorted()).toEqual(['blueprint', 'neutral'])
     expect(gridTreatments.toSorted()).toEqual(['dots', 'major', 'major-plus-minor', 'none'])
     expect(regionLabelPlacements.toSorted()).toEqual(
       ['center', 'east', 'north', 'north-east', 'north-west', 'south', 'south-east', 'south-west', 'west'].toSorted()
     )
 
-    for (const surface of surfaceTreatments) {
-      expectTypeOf(surface).toEqualTypeOf<SurfaceTreatment>()
+    for (const surface of visualStyles) {
+      expectTypeOf(surface).toEqualTypeOf<VisualStyle>()
     }
     for (const grid of gridTreatments) {
       expectTypeOf(grid).toEqualTypeOf<GridTreatment>()

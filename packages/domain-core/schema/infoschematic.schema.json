@@ -68,13 +68,34 @@
         "appearance": {
           "type": "object",
           "properties": {
+            "style": {
+              "type": "string",
+              "enum": [
+                "neutral",
+                "blueprint"
+              ],
+              "description": "The treatment the drawing is painted in. `neutral` is the plain treatment; `blueprint` is a drafting convention. A style is realised on whichever ground the reader is on, so it does not decide light or dark."
+            },
             "surface": {
               "type": "string",
               "enum": [
                 "neutral",
                 "blueprint"
               ],
-              "description": "Which palette the drawing is painted from. `neutral` follows the palette the reader is in; `blueprint` is a drafting convention with a palette of its own."
+              "description": "The former name for `style`, accepted so existing documents keep working. `style` wins where both are written."
+            },
+            "mode": {
+              "type": "string",
+              "enum": [
+                "light",
+                "dark",
+                "system"
+              ],
+              "description": "The ground the document would like to be read on. `system` declines to choose and follows the reader, which is what absence means."
+            },
+            "modeLocked": {
+              "type": "boolean",
+              "description": "Whether the reader may change the mode away from the one this document authored."
             },
             "grid": {
               "type": "string",
@@ -141,11 +162,11 @@
                 "properties": {
                   "color": {
                     "type": "string",
-                    "description": "Stroke colour, as any CSS colour. Used exactly as authored."
+                    "description": "Stroke colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "fill": {
                     "type": "string",
-                    "description": "Fill colour, as any CSS colour. Used exactly as authored."
+                    "description": "Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "icon": {
                     "type": "string",
@@ -199,11 +220,11 @@
                 "properties": {
                   "color": {
                     "type": "string",
-                    "description": "Stroke colour, as any CSS colour. Used exactly as authored."
+                    "description": "Stroke colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "fill": {
                     "type": "string",
-                    "description": "Fill colour, as any CSS colour. Used exactly as authored."
+                    "description": "Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "icon": {
                     "type": "string",
@@ -504,11 +525,11 @@
                 "properties": {
                   "color": {
                     "type": "string",
-                    "description": "Stroke colour, as any CSS colour. Used exactly as authored."
+                    "description": "Stroke colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "fill": {
                     "type": "string",
-                    "description": "Fill colour, as any CSS colour. Used exactly as authored."
+                    "description": "Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "icon": {
                     "type": "string",
@@ -622,11 +643,11 @@
                 "properties": {
                   "color": {
                     "type": "string",
-                    "description": "Stroke colour, as any CSS colour. Used exactly as authored."
+                    "description": "Stroke colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "fill": {
                     "type": "string",
-                    "description": "Fill colour, as any CSS colour. Used exactly as authored."
+                    "description": "Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "icon": {
                     "type": "string",
@@ -717,7 +738,7 @@
                 "properties": {
                   "fill": {
                     "type": "string",
-                    "description": "Fill colour, as any CSS colour. Used exactly as authored."
+                    "description": "Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written."
                   },
                   "cornerRadius": {
                     "type": "number",

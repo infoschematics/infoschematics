@@ -4,12 +4,12 @@ area: TOOL
 title: Where a claim lives
 theme: tool
 horizon: now
-status: ready
+status: in-progress
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: a7b186329c71e6f8936ecf9ee652e04c13a16da6
 created_at: 2026-09-23T17:10:00Z
-updated_at: 2026-09-25T10:44:44Z
+updated_at: 2026-09-25T10:45:48Z
 ---
 
 # Where a claim lives

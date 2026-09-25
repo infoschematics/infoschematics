@@ -18,6 +18,8 @@ export const guideAppearanceOptions = {
   'card.identity': { control: 'flag', values: [] },
   'card.stereotype': { control: 'flag', values: [] },
   identity: { control: 'flag', values: [] },
+  mode: { control: 'choice', values: ['light', 'dark', 'system'] },
+  modeLocked: { control: 'flag', values: [] },
   grid: {
     control: 'choice',
     values: ['none', 'major', 'major-plus-minor', 'dots']
@@ -42,7 +44,7 @@ export const guideAppearanceOptions = {
     control: 'choice',
     values: ['north-west', 'north', 'north-east', 'west', 'center', 'east', 'south-west', 'south', 'south-east']
   },
-  surface: { control: 'choice', values: ['neutral', 'blueprint'] }
+  style: { control: 'choice', values: ['neutral', 'blueprint'] }
 } as const
 
 export type GuidePropertyKey =

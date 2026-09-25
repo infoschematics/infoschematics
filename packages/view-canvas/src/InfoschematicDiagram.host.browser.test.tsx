@@ -9,6 +9,7 @@
  */
 import { defineInfoschematic, defineInfoschematicModel } from '@infoschematics/domain-core'
 import type { InfoschematicInput } from '@infoschematics/domain-model'
+import { resolveAuthoredColour } from '@infoschematics/view-model/colour'
 import type { ArtefactSelection } from '@infoschematics/view-model/editable'
 import { visualTokens } from '@infoschematics/view-model/tokens'
 import { useState } from 'react'
@@ -241,9 +242,11 @@ test('unmounting one instance leaves the survivor interactive, and a remount sta
 test('each instance draws the arrowhead it defined, not the one that reached the document first', async () => {
   const { container } = await render(<HostDocument />)
 
+  /* An authored family colour is a hue seed, so the value on the head is its realisation on the ground the page
+     settled on rather than the string the fixture wrote. Two families still have to reach two different heads. */
   for (const [testid, colour] of [
-    ['orders', '#7c3aed'],
-    ['billing', '#b91c1c']
+    ['orders', resolveAuthoredColour('#7c3aed', 'light', 'ink')],
+    ['billing', resolveAuthoredColour('#b91c1c', 'light', 'ink')]
   ] as const) {
     const root = rootOf(container, testid)
     const route = root.querySelector<SVGPathElement>('path.infoschematic-route')

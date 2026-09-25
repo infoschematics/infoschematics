@@ -13,7 +13,7 @@ description: Structure and presentation material combine in one Infoschematic, w
 diagram:
   bounds: 0 0 1268 408
   appearance:
-    surface: blueprint
+    style: blueprint
     grid: major-plus-minor
     card:
       description: true

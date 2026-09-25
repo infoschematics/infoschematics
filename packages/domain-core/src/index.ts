@@ -1,12 +1,15 @@
 export type { InfoschematicConfig } from '@infoschematics/domain-model'
 export {
+  type AuthoredColourMode,
+  authoredColourModes,
   type CardDetailDefaults,
+  type ColourMode,
   type GridTreatment,
   gridTreatments,
   type RegionLabelPlacement,
   regionLabelPlacements,
-  type SurfaceTreatment,
-  surfaceTreatments
+  type VisualStyle,
+  visualStyles
 } from '@infoschematics/domain-model/appearance'
 export {
   defaultInfoschematicAppearance,

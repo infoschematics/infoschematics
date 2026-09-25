@@ -13,7 +13,7 @@ description: Observation gathers signals, arrangement gives them structure, illu
 diagram:
   bounds: 0 0 1268 248
   appearance:
-    surface: blueprint
+    style: blueprint
     grid: major-plus-minor
     card:
       description: true

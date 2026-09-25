@@ -8,7 +8,9 @@ describe('defineInfoschematic', () => {
       infoschematic: {
         viewBox: { x: 0, y: 0, width: 1200, height: 800 },
         appearance: {
-          surface: 'neutral',
+          style: 'neutral',
+          mode: 'system',
+          modeLocked: false,
           grid: 'none',
           card: {
             compact: false,
@@ -41,15 +43,19 @@ describe('defineInfoschematic', () => {
       title: 'Blueprint',
       infoschematic: {
         appearance: {
-          surface: 'blueprint',
+          style: 'blueprint',
           grid: 'major-plus-minor',
           card: { compact: true, identity: false }
         }
       }
     })
 
+    /* `mode` and `modeLocked` are the ground axis, and the defaults say the document has not answered it: `system`
+       is the author declining to pick a ground, not a third one. */
     expect(config.infoschematic.appearance).toEqual({
-      surface: 'blueprint',
+      style: 'blueprint',
+      mode: 'system',
+      modeLocked: false,
       grid: 'major-plus-minor',
       card: {
         compact: true,

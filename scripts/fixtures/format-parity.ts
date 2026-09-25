@@ -8,7 +8,7 @@ export const formatParityDefinition: Infoschematic = {
   diagram: {
     gridSize: 10,
     bounds: { x: 0, y: 0, width: 800, height: 500 },
-    appearance: { surface: 'blueprint', grid: 'major', card: { compact: true, identity: true } },
+    appearance: { style: 'blueprint', grid: 'major', card: { compact: true, identity: true } },
     collections: [
       {
         id: 'CORE',

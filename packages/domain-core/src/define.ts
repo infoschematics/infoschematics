@@ -4,7 +4,9 @@ import type { InfoschematicAppearanceConfig } from '@infoschematics/domain-model
 const defaultViewBox = { x: 0, y: 0, width: 1200, height: 800 } as const
 
 export const defaultInfoschematicAppearance = {
-  surface: 'neutral',
+  style: 'neutral',
+  mode: 'system',
+  modeLocked: false,
   grid: 'none',
   card: {
     compact: false,
@@ -14,14 +16,22 @@ export const defaultInfoschematicAppearance = {
   }
 } as const satisfies InfoschematicAppearanceConfig
 
-const normaliseAppearance = (appearance: InfoschematicAppearanceConfig | undefined): InfoschematicAppearanceConfig => ({
-  ...defaultInfoschematicAppearance,
-  ...appearance,
-  card: {
-    ...defaultInfoschematicAppearance.card,
-    ...appearance?.card
+/*
+ * Normalisation is where the retired `surface` name stops travelling. A document may still write it and mean `style`,
+ * but everything downstream reads one name, so the compatibility is paid for once here rather than at every use.
+ */
+const normaliseAppearance = (appearance: InfoschematicAppearanceConfig | undefined): InfoschematicAppearanceConfig => {
+  const { surface, ...authored } = appearance ?? {}
+  return {
+    ...defaultInfoschematicAppearance,
+    ...authored,
+    style: authored.style ?? surface ?? defaultInfoschematicAppearance.style,
+    card: {
+      ...defaultInfoschematicAppearance.card,
+      ...appearance?.card
+    }
   }
-})
+}
 
 const validateDomains = (input: InfoschematicConfigInput) => {
   const domains = input.infoschematic?.domains ?? []

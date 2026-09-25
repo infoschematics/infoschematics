@@ -38,7 +38,7 @@ describe('homepageInfoschematic', () => {
     expect(diagram.appearance).toEqual({
       card: { compact: false, description: true, identity: true, stereotype: true },
       grid: 'major-plus-minor',
-      surface: 'blueprint'
+      style: 'blueprint'
     })
     expectSerialisable(homepageInfoschematic)
   })

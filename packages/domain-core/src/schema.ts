@@ -85,8 +85,18 @@ const rendererReference = z
   .describe('Which renderer draws this, as a key and a version. A bare string names the key at version 1.')
 
 const visualIdentity = z.strictObject({
-  color: z.string().describe('Stroke colour, as any CSS colour. Used exactly as authored.').optional(),
-  fill: z.string().describe('Fill colour, as any CSS colour. Used exactly as authored.').optional(),
+  color: z
+    .string()
+    .describe(
+      'Stroke colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written.'
+    )
+    .optional(),
+  fill: z
+    .string()
+    .describe(
+      'Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written.'
+    )
+    .optional(),
   icon: z.string().describe('Renderer key for an icon drawn with the element.').optional()
 })
 
@@ -169,11 +179,27 @@ const waypoints = z
 
 const appearance = z
   .strictObject({
+    style: z
+      .enum(['neutral', 'blueprint'])
+      .describe(
+        'The treatment the drawing is painted in. `neutral` is the plain treatment; `blueprint` is a drafting convention. A style is realised on whichever ground the reader is on, so it does not decide light or dark.'
+      )
+      .optional(),
     surface: z
       .enum(['neutral', 'blueprint'])
       .describe(
-        'Which palette the drawing is painted from. `neutral` follows the palette the reader is in; `blueprint` is a drafting convention with a palette of its own.'
+        'The former name for `style`, accepted so existing documents keep working. `style` wins where both are written.'
       )
+      .optional(),
+    mode: z
+      .enum(['light', 'dark', 'system'])
+      .describe(
+        'The ground the document would like to be read on. `system` declines to choose and follows the reader, which is what absence means.'
+      )
+      .optional(),
+    modeLocked: z
+      .boolean()
+      .describe('Whether the reader may change the mode away from the one this document authored.')
       .optional(),
     grid: z
       .enum(['none', 'major', 'major-plus-minor', 'dots'])
@@ -324,7 +350,12 @@ const region = z.strictObject({
   identity: z.boolean().describe('Whether the Region shows its identity chip.').optional(),
   appearance: z
     .strictObject({
-      fill: z.string().describe('Fill colour, as any CSS colour. Used exactly as authored.').optional(),
+      fill: z
+        .string()
+        .describe(
+          'Fill colour, as any CSS colour. Read as a hue seed and realised against the ground the drawing is read on. End it with `!` to draw it exactly as written.'
+        )
+        .optional(),
       cornerRadius: number.describe('How far the corners are rounded, in diagram units.').optional(),
       frame: z
         .strictObject({
