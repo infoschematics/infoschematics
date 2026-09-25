@@ -648,11 +648,6 @@ export const renderInfoschematicSvg = (
       (id) => legacyFlowIds.get(id) ?? id
     )
   )
-  /* One palette, resolved once, for every colour this rendering writes.
-     The surface-sensitive tokens used to be picked one branch at a time, and a token left on the light set alone
-     painted a light slab onto the blueprint backdrop. There is now nothing to pick: an authored blueprint surface
-     is its own palette, anything else takes the scheme the caller asked for, and a role neither answers does not
-     exist. */
   /* The style is the document's and the ground is the reader's, so they are read from different places and neither
      can overrule the other. A blueprint used to suppress deferral outright, on the reasoning that an authored
      treatment is not a scheme somebody resolved — true, and it does not follow that a blueprint has only one ground.
@@ -986,8 +981,9 @@ export const renderInfoschematicSvg = (
     const regionFill = region.fill === undefined ? undefined : seeds.resolve(region.fill, 'ground')
     // A boundary-mounted label sits over the backdrop the notch exposes,
     // not the fill, so only a plain label takes its ink from the fill.
-    const ink =
-      regionFill && geometry.label && treatment.labelTreatment === 'plain' ? resolveReadableInk(regionFill) : null
+    const regionInkOn = (mode: PaintMode) =>
+      region.fill === undefined ? null : resolveReadableInk(resolveAuthoredColour(region.fill, mode, 'ground'))
+    const ink = regionFill && geometry.label && treatment.labelTreatment === 'plain' ? regionInkOn(resolvedMode) : null
     const content: string[] = []
     if (regionFill) {
       content.push(
@@ -1050,9 +1046,10 @@ export const renderInfoschematicSvg = (
             [
               'fill',
               ink !== null
-                ? ink === 'light'
-                  ? canvasTokens.ink.lightMuted
-                  : canvasTokens.ink.darkMuted
+                ? seeds.pair(
+                    regionInkOn('light') === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted,
+                    regionInkOn('dark') === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted
+                  )
                 : paint.textMuted
             ],
             ['dominant-baseline', geometry.label.dominantBaseline],
@@ -1340,13 +1337,23 @@ export const renderInfoschematicSvg = (
     const appearance = card.collection ? collections.get(card.collection) : undefined
     const dimmed = focusClass(card.id, focus?.artefacts, unfocused)
     const fill = appearance?.fill ? seeds.resolve(appearance.fill, 'fill') : paint.surface
-    /* A deferring rendering draws a seed as a custom property, which is not a colour anything can measure. The ink
-       is therefore read from the realisation on the ground this rendering resolved to, which is the one an adaptive
-       drawing opens on and the only ground a single `data-ink` attribute can speak for. */
-    const ink = resolveReadableInk(
-      appearance?.fill ? resolveAuthoredColour(appearance.fill, resolvedMode, 'fill') : fill
+    /* A deferring rendering draws a seed as a custom property, not as a colour anything can measure, so the ink is
+       measured on each ground from the fill that ground will actually show, and the pair travels with the palettes.
+       `data-ink` still names one answer, because an attribute cannot carry two: it speaks for the ground this
+       rendering resolved to, which is the one an adaptive drawing opens on. */
+    const cardInkOn = (mode: PaintMode) =>
+      resolveReadableInk(
+        appearance?.fill ? resolveAuthoredColour(appearance.fill, mode, 'fill') : paintFor(style, mode).surface
+      )
+    const ink = cardInkOn(resolvedMode)
+    const inkColour = seeds.pair(
+      cardInkOn('light') === 'light' ? canvasTokens.ink.light : canvasTokens.ink.dark,
+      cardInkOn('dark') === 'light' ? canvasTokens.ink.light : canvasTokens.ink.dark
     )
-    const metadataColor = ink === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted
+    const metadataColor = seeds.pair(
+      cardInkOn('light') === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted,
+      cardInkOn('dark') === 'light' ? canvasTokens.ink.lightMuted : canvasTokens.ink.darkMuted
+    )
     const accessibleDetail = [card.code, card.label, card.stereotype, card.detail].filter(Boolean).join(' · ')
     /* The chip is resolved whether or not this Card draws one, because its slot is also where a code the caller
        asked for goes, and nothing else in the layout depends on the flag. The Card draws it only where its author
@@ -1460,7 +1467,7 @@ export const renderInfoschematicSvg = (
         [
           ['class', 'infoschematic-card-label'],
           ['dominant-baseline', 'middle'],
-          ['fill', ink === 'light' ? canvasTokens.ink.light : canvasTokens.ink.dark],
+          ['fill', inkColour],
           ['font-family', canvasTokens.typography.bodyFamily],
           ['font-size', visualTreatment.card.compact ? 13 : 14],
           ['font-weight', 700],

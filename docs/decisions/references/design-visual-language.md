@@ -42,11 +42,13 @@ The grid is an authoring aid and a visual character, not an excuse to fill every
 
 Colour belongs to authored or themed meaning. A Flow family can own a hue, a scope or domain can tint a Card, and health can use a separate status treatment. These meanings should not borrow one another's colours.
 
-Use lighter variants for text and restrained emphasis, darker variants for translucent fills, and strong saturation only where it changes how the Infoschematic is read. Colour must remain configurable: a particular product palette is not part of the library's visual contract.
+Lightness belongs to the ground rather than to the author. A colour is authored as a hue and realised into a band chosen for the ground it is read on, so text and restrained emphasis land well clear of the paper while translucent fills stay close to it. Saturation, and the ordering an author chose across a set of colours, survive that move; strong saturation still belongs only where it changes how an Infoschematic is read. Colour must remain configurable: a particular product palette is not part of the library's visual contract.
 
 ## Authored appearance and output policy
 
-Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint surface, one of the standard grid treatments, and compact Cards with default Card metadata visibility. A Region's frame style, fill, label placement and label treatment are authored on the Region record itself. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
+Authored appearance records stable presentation intent that should travel with an Infoschematic. It may select a neutral or blueprint style, one of the standard grid treatments, and compact Cards with default Card metadata visibility. A Region's frame style, fill, label placement and label treatment are authored on the Region record itself. These are semantic choices, not an escape hatch for arbitrary CSS or coordinates.
+
+Style and mode are orthogonal and neither stands in for the other. A style — `neutral` or `blueprint` — is authored and travels with the definition, because it says what the drawing is. A mode — `light` or `dark` — is resolved against the ground the reader is on, and its authored `system` value is the author declining to pick rather than an instruction to defer: it falls through to the caller, and a still picture that was never asked to defer resolves to light. `modeLocked` is how a definition says it must be read on the ground it names whatever the reader prefers.
 
 Output policy can reduce optional Card detail for the available space. Canvas and static SVG may override identity, stereotype, and description visibility without changing the authored definition. Compactness remains authored because it changes the Card's composition rather than merely revealing or hiding metadata.
 
@@ -54,9 +56,9 @@ Region geometry is shared View Model behaviour. A frame is independently absent,
 
 Domain and Scope communicate separate facts. Domain classifies a Card and supplies semantic colour. Scope controls applicability and filtering. A Card may use both, and changing the visible Scope set must not silently reclassify its Domain treatment. Colour must still be paired with labels and other non-colour evidence.
 
-Omitted appearance intentionally preserves the established readable treatment: neutral surface, no authored grid, non-compact Cards, hidden optional metadata, and unframed, unfilled Regions with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
+Omitted appearance intentionally preserves the established readable treatment: neutral style, no authored grid, non-compact Cards, hidden optional metadata, and unframed, unfilled Regions with plain labels. Homepage-like blueprint treatment remains explicit authored intent.
 
-Renderer parity is a token-selection duty. Canvas draws the blueprint palette natively and overrides only the values neutral changes, so every other renderer of the same definition must pick the same side of that split for each surface-sensitive value. A value left on the neutral output set alone paints a light Fabric, Graphic or Region onto the blueprint backdrop — a parity defect rather than an authored difference, because the same definition must not read differently for having been drawn by a different renderer.
+Renderer parity is a token-selection duty. A style says what the drawing is and a mode says which ground it is read on; the palettes are those two axes crossed, and every renderer given the same definition must resolve the same pair. A value left on the neutral set alone paints a light Fabric, Graphic or Region onto a blueprint backdrop — a parity defect rather than an authored difference, because the same definition must not read differently for having been drawn by a different renderer.
 
 Ink is invariant behaviour, not an authored knob. Card and Region-label text resolves dark or light ink from the relative luminance of the fill it sits on, so an author choosing a dark fill gets legible text in every renderer without recording a text colour. Flow-code annotation chips are a render option for hosts — deterministic output detail at the shared placement — and are likewise never part of the authored definition.
 
@@ -102,7 +104,7 @@ That shape language holds across proportions rather than only at the landscape d
 
 Glow is a focused state cue. It should not become a general surface treatment, and a decorative status dot should not be added where it communicates no state.
 
-A stylesheet rule beats a presentation attribute, whatever the selector. An element whose colour is both defaulted by a class and stated per-instance must state the instance colour as an inline `style`, or the class default silently wins — a Region label's backing drew in the backdrop colour over a Region that had declared its own fill. The same asymmetry governs lifting an element into a later paint layer: the treatment it carried must travel at the weight it had, so carrying it as a `data-` attribute on the new wrapper put it above the surface rules that set the label's colour and painted a neutral-surface label in the blueprint's blue.
+A stylesheet rule beats a presentation attribute, whatever the selector. An element whose colour is both defaulted by a class and stated per-instance must state the instance colour as an inline `style`, or the class default silently wins — a Region label's backing drew in the backdrop colour over a Region that had declared its own fill. The same asymmetry governs lifting an element into a later paint layer: the treatment it carried must travel at the weight it had, so carrying it as a `data-` attribute on the new wrapper put it above the surface rules that set the label's colour and painted a neutral-style label in the blueprint's blue.
 
 ## Typography
 

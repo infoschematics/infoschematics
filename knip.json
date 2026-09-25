@@ -4,7 +4,10 @@
     "packages/*": { "entry": ["src/*.{ts,tsx}", "src/**/*.test.{ts,tsx}"], "project": ["src/**/*.{ts,tsx}"] },
     "apps/site": { "project": ["src/**/*.{ts,tsx}"], "entry": ["src/**/*.test.{ts,tsx}"] },
     "examples/*": { "project": ["src/**/*.ts"], "entry": ["src/*.ts", "src/**/*.test.ts"] },
-    ".": { "entry": ["scripts/**/*.test.ts", "scripts/ibc-visual-compatibility.ts"], "project": ["scripts/**/*.ts"] }
+    ".": {
+      "entry": ["scripts/**/*.test.ts", "scripts/ibc-visual-compatibility.ts", "scripts/probes/*.ts"],
+      "project": ["scripts/**/*.ts"]
+    }
   },
   "ignoreBinaries": ["rsvg-convert"],
   "ignoreExportsUsedInFile": true,

@@ -49,7 +49,7 @@ export const guideAppearanceOptions = {
 
 export type GuidePropertyKey =
   | 'canvas.grid'
-  | 'canvas.surface'
+  | 'canvas.style'
   | 'canvas.viewBox.height'
   | 'canvas.viewBox.width'
   | 'card.compact'
@@ -100,7 +100,7 @@ export type GuidePropertyDescriptor = Readonly<{
 }>
 
 export const guideProperties: Readonly<Record<GuidePropertyKey, GuidePropertyDescriptor>> = {
-  'canvas.surface': { control: 'choice', values: ['neutral', 'blueprint'] },
+  'canvas.style': { control: 'choice', values: ['neutral', 'blueprint'] },
   'canvas.grid': {
     control: 'choice',
     values: ['none', 'major', 'major-plus-minor', 'dots']
@@ -204,7 +204,7 @@ export const guideProperties: Readonly<Record<GuidePropertyKey, GuidePropertyDes
 }
 
 export const propertyLabels: Readonly<Record<GuidePropertyKey, string>> = {
-  'canvas.surface': 'Surface',
+  'canvas.style': 'Style',
   'canvas.grid': 'Grid',
   'canvas.viewBox.width': 'View box width',
   'canvas.viewBox.height': 'View box height',
@@ -268,16 +268,16 @@ export const componentSections: readonly ComponentSection[] = [
     id: 'canvas',
     title: 'Canvas',
     summary:
-      'The Canvas is the drawing area behind every element. Its view box sets the coordinate space; its surface and grid set the backdrop.',
-    propertyKeys: ['canvas.surface', 'canvas.grid', 'canvas.viewBox.width', 'canvas.viewBox.height'],
+      'The Canvas is the drawing area behind every element. Its view box sets the coordinate space; its style and grid set the backdrop.',
+    propertyKeys: ['canvas.style', 'canvas.grid', 'canvas.viewBox.width', 'canvas.viewBox.height'],
     properties: [
       {
         name: 'viewBox',
         summary: 'The x, y, width, and height of the shared diagram coordinate space.'
       },
       {
-        name: 'appearance.surface',
-        summary: 'The neutral or blueprint surface; omitting it uses the neutral default.'
+        name: 'appearance.style',
+        summary: 'The neutral or blueprint style; omitting it uses the neutral default.'
       },
       {
         name: 'appearance.grid',

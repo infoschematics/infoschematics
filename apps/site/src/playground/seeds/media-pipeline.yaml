@@ -6,7 +6,7 @@ diagram:
   bounds: 0 0 1260 520
   gridSize: 10
   appearance:
-    surface: blueprint
+    style: blueprint
     grid: major
     card: { compact: true, identity: true, stereotype: true }
   collections:

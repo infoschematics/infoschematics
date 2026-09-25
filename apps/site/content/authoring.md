@@ -30,12 +30,12 @@ Coordinates use the `Box` and `Point` shapes exposed through Domain Model config
 
 ## Configure appearance properties
 
-Appearance is optional serialisable presentation intent. This fragment selects the blueprint surface, uses a visible grid, and asks every renderer for compact Cards with authored metadata defaults:
+Appearance is optional serialisable presentation intent. This fragment selects the blueprint style, uses a visible grid, and asks every renderer for compact Cards with authored metadata defaults:
 
 ```ts
 infoschematic: {
   appearance: {
-    surface: 'blueprint',
+    style: 'blueprint',
     grid: 'major-plus-minor',
     card: {
       compact: true,
@@ -46,6 +46,18 @@ infoschematic: {
   }
 }
 ```
+
+### A style is what the drawing is; a mode is the ground it is read on
+
+`style` says what the drawing is — `neutral` or `blueprint` — and travels with the definition, because it is a choice the author made. `mode` says which ground the reader is on, `light` or `dark`, and its third value `system` is the author declining to pick rather than an instruction to defer: a document that says `system` leaves the answer to whoever draws it, which is the page for an interactive view and the caller for a rendered file. Set `modeLocked: true` when the drawing must be read on the ground it names whatever the reader prefers.
+
+The two are orthogonal. A blueprint is realised on both grounds — navy paper in the dark, cyanotype on light — so choosing a style never decides a mode, and choosing a mode never changes what the drawing is.
+
+### An authored colour is a hue, not a literal value
+
+Every colour you author — a Card `fill`, a Region fill, a Family `color` — is read as a seed. Your hue, your saturation, and your ordering relative to the other colours you chose all survive; the lightness band those colours sit in belongs to the ground, so a set tuned against navy still reads on paper. Values the renderers cannot interpret, such as a named colour or a gradient reference, pass through untouched.
+
+Where you meant a literal value, say so with a trailing `!` — `fill: '#6c8ebf!'` is drawn as exactly that colour on either ground, and it is then yours to check that it reads on both.
 
 A Region authors its frame, fill, and label properties on the record itself, each independently of the others:
 

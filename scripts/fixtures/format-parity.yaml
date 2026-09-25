@@ -6,7 +6,7 @@ diagram:
   bounds: 0 0 800 500
   gridSize: 10
   appearance:
-    surface: blueprint
+    style: blueprint
     grid: major
     card:
       compact: true

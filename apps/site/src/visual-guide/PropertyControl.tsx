@@ -8,7 +8,7 @@ type PropertyControlProps = {
 }
 
 export const choiceLabel = (propertyKey: GuidePropertyKey, choice: string) => {
-  if (propertyKey === 'canvas.surface' && choice === 'neutral') return 'default (neutral)'
+  if (propertyKey === 'canvas.style' && choice === 'neutral') return 'default (neutral)'
   if (propertyKey === 'canvas.grid') {
     return (
       {

@@ -165,13 +165,13 @@ const withDiagramParts = (
 })
 
 /**
- * One drawing that leaves to the palette everything a document does not state, so a scheme is what decides it.
+ * One drawing that leaves to the palette everything a document does not state, so a mode is what decides it.
  *
- * Every other specimen authors a blueprint surface and fills tuned for it, which is a deliberate treatment and
- * therefore the same in either scheme — correct, and useless for showing what a scheme changes. This one authors
- * no surface, no grid colour, no Region fill and no frame colour, so paper, grid, frames and every piece of type
- * come from the palette. A Card still names a Scope and a Flow still names a family, and both carry an author's
- * colour: those stay put in either scheme, which is the other half of what the page has to show.
+ * Every other specimen authors a blueprint style and fills tuned for it, which fixes what the drawing is and
+ * therefore shows less of what a mode changes. This one authors no style, no grid colour, no Region fill and no
+ * frame colour, so paper, grid, frames and every piece of type come from the palette. A Card still names a Scope
+ * and a Flow still names a family, and both carry an author's colour: those keep their hue in either mode and are
+ * realised onto the ground the reader is on, which is the other half of what the page has to show.
  */
 export const schemeSpecimen: InfoschematicConfig = defineInfoschematic({
   title: 'Colour scheme example',
@@ -375,8 +375,8 @@ export const guidePropertyValue = (config: InfoschematicConfig, key: GuideProper
       return diagram.viewBox.width
     case 'canvas.viewBox.height':
       return diagram.viewBox.height
-    case 'canvas.surface':
-      return diagram.appearance?.surface ?? 'neutral'
+    case 'canvas.style':
+      return diagram.appearance?.style ?? 'neutral'
     case 'canvas.grid':
       return diagram.appearance?.grid ?? 'none'
     case 'region.width':
@@ -473,7 +473,7 @@ export const withGuideProperty = (
   const diagram = config.infoschematic
   const appearance = diagram.appearance ?? {}
 
-  if (key === 'canvas.surface' || key === 'canvas.grid') {
+  if (key === 'canvas.style' || key === 'canvas.grid') {
     const field = key.slice('canvas.'.length)
     return {
       ...config,
@@ -729,7 +729,7 @@ export type SpecimenSnippetFormat = 'typescript' | 'yaml'
 const specimenSnippetInput = (config: InfoschematicConfig, kind: SpecimenKind) => {
   const diagram = config.infoschematic
   const backdrop = {
-    surface: diagram.appearance?.surface,
+    style: diagram.appearance?.style,
     grid: diagram.appearance?.grid
   }
   const base = { viewBox: diagram.viewBox, appearance: backdrop }

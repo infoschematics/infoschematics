@@ -45,7 +45,7 @@ An artefact marked for removal remains visible, selectable and visibly pending u
 
 The switch in the title bar changes the colour scheme — the whole surface, not only the drawing. Your choice is remembered, so Studio opens the way you left it, and until you make one it follows your operating system: a machine that goes dark at dusk takes Studio with it.
 
-A colour scheme is your context, not part of the document. Nothing about the scheme is written into what you author, and a definition you make in dark reads the same way to someone who opens it in light. The exception is a blueprint surface, which is a treatment you chose deliberately and stays a blueprint in either scheme.
+The mode you are working in is your context. A definition you make in dark reads the same way to someone who opens it in light, because the colours you author are read as hues and realised onto whichever ground the reader is on. What the drawing _is_ — a blueprint, say — is the style you chose, and that travels with the document: a blueprint is still a blueprint in light, drawn as a cyanotype rather than on navy paper. A document may also state a `mode` of its own; leave it at `system` and it follows the reader.
 
 ## Where next
 

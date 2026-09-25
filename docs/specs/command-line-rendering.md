@@ -116,15 +116,17 @@ _Evidence:_ `packages/cli/src/index.test.ts`, whose `drawing check` cases cover 
 
 ## Quality properties
 
-### CLI-013 — The caller names the colour scheme
+### CLI-013 — A caller names a ground, not a style
 
-`render` MUST accept `--scheme` with `light`, `dark`, or `adaptive`, defaulting to `light`. A named scheme MUST be resolved once and written as colours, so the file keeps the scheme it was given rather than becoming another one later. `adaptive` MUST write one SVG carrying every palette behind `prefers-color-scheme`, and MUST be refused with a usage exit for `--format png`, because a raster's colour is settled before the pixels exist.
+`render` MUST accept `--mode` as `light`, `dark`, or `system`. A named mode MUST be resolved once and written as colours, so the file keeps the ground it was given rather than becoming another one later. `system` MUST write one SVG carrying both palettes behind `prefers-color-scheme`, and MUST be refused with the usage exit for `--format png`, because a raster's colour is settled before its pixels exist.
 
-The command MUST NOT offer `blueprint`. A blueprint surface is authored by the document per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md), and offering it here would let whoever renders a document contradict it; a document that authors one gets it whatever this option says.
+Absence MUST NOT mean `light`. A document may author its own mode, and a flag defaulted to a value would overrule it on every render; the command MUST pass nothing on rather than choosing for the document. Where neither the caller nor the document names a ground, the rendering MUST resolve to `light`, because a still picture has no reader's preference to read and an unresolved palette rasterises to nothing.
+
+`--scheme` MUST keep working as the retired spelling of `--mode`, with `adaptive` accepted for `system`. It MUST also accept `blueprint`, which named a palette under the retired vocabulary and names a style now, and MUST treat it as naming no ground at all: a style is authored by the document per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md), and letting a caller name one here would let whoever renders a document contradict what it is.
 
 _Conformance:_ conforming
 
-_Verify:_ render one document under each scheme and confirm the outputs differ; render a document authoring a blueprint surface under both and confirm they are identical; confirm `--scheme adaptive` emits the media rule, and that `--scheme adaptive --format png` and `--scheme sepia` both exit with the usage status and write nothing to standard output.
+_Verify:_ Render one document under each mode and confirm the outputs differ; render a document authoring a blueprint style under both grounds and confirm it stays a blueprint on each while the two differ; confirm `--scheme blueprint` renders the same bytes as passing no option at all; confirm `--mode system` emits the media rule, and that `--mode system --format png` and `--scheme sepia` both exit with the usage status and write nothing to standard output.
 
 _Evidence:_ `packages/cli/src/options.ts` and `packages/cli/src/index.test.ts`.
 

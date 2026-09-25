@@ -158,6 +158,14 @@ export type SeedResolver = Readonly<{
    * Empty on a resolved ground, where every seed was written as the colour it came to.
    */
   declarations: () => readonly (readonly [name: string, light: string, dark: string])[]
+  /**
+   * One value that differs by ground but was not authored, as the value to draw.
+   *
+   * A readable ink is the case this exists for: it is measured against a seeded fill, so it moves with the ground
+   * even though nobody wrote it down, and a deferring rendering that wrote one ground's answer would leave a Card
+   * label unreadable for half its readers.
+   */
+  pair: (light: string, dark: string) => string
   /** One authored colour as the value to draw. */
   resolve: (value: string, job: ColourJob) => string
 }>
@@ -174,22 +182,27 @@ export type SeedResolver = Readonly<{
  */
 export const seedResolver = (ground: ColourGround): SeedResolver => {
   if (ground !== 'system') {
-    return { declarations: () => [], resolve: (value, job) => resolveAuthoredColour(value, ground, job) }
+    return {
+      declarations: () => [],
+      pair: (light, dark) => (ground === 'dark' ? dark : light),
+      resolve: (value, job) => resolveAuthoredColour(value, ground, job)
+    }
   }
 
   const declared = new Map<string, readonly [name: string, light: string, dark: string]>()
+  const pool = (light: string, dark: string) => {
+    if (light === dark) return light
+    const key = `${light}/${dark}`
+    const existing = declared.get(key)
+    if (existing) return `var(${existing[0]})`
+    const name = `--infoschematic-seed-${declared.size + 1}`
+    declared.set(key, [name, light, dark])
+    return `var(${name})`
+  }
+
   return {
     declarations: () => [...declared.values()],
-    resolve: (value, job) => {
-      const light = resolveAuthoredColour(value, 'light', job)
-      const dark = resolveAuthoredColour(value, 'dark', job)
-      if (light === dark) return light
-      const key = `${light}/${dark}`
-      const existing = declared.get(key)
-      if (existing) return `var(${existing[0]})`
-      const name = `--infoschematic-seed-${declared.size + 1}`
-      declared.set(key, [name, light, dark])
-      return `var(${name})`
-    }
+    pair: pool,
+    resolve: (value, job) => pool(resolveAuthoredColour(value, 'light', job), resolveAuthoredColour(value, 'dark', job))
   }
 }

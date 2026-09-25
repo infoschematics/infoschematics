@@ -48,7 +48,7 @@ Where a document declares named [Diagram Dynamics](/docs/reference/vocabulary/#d
 
 ## Light and dark
 
-A presentation takes the colour scheme of the page it is on, and carries no switch of its own. Changing scheme partway through is a change everyone in the room sees, and the person who wants it is rarely the person at the controls — so pin the scheme before you start, in the Studio you present from or in the page you embed into.
+A presentation takes the colour mode of the page it is on, and carries no switch of its own. Changing mode partway through is a change everyone in the room sees, and the person who wants it is rarely the person at the controls — so pin the mode before you start, in the Studio you present from or in the page you embed into.
 
 ## Where next
 

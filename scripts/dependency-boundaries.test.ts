@@ -31,7 +31,10 @@ afterEach(async () => {
   await rm(control, { force: true })
 })
 
-describe('dependency boundaries', () => {
+/* Every case here drives a real TypeScript cruise, which costs seconds cold and runs beside every other workspace
+   task in the gate. The default five seconds is a measure of contention rather than of a boundary violation, and a
+   gate that fails on load tells its reader nothing about the graph. */
+describe('dependency boundaries', { timeout: 60_000 }, () => {
   it('resolves a workspace import to the package that owns it', async () => {
     const graph = await graphOf('packages/view-canvas/src/InfoschematicDiagram.tsx')
     const module = graph.modules.find((candidate) => candidate.source.endsWith('InfoschematicDiagram.tsx'))

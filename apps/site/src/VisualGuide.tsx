@@ -63,10 +63,10 @@ const chromeRoles = [
   'negative'
 ] as const
 
-const schemeDrawings = [
-  { id: 'light', label: 'Light', options: { scheme: 'light' } },
-  { id: 'dark', label: 'Dark', options: { scheme: 'dark' } },
-  { id: 'adaptive', label: 'Follows your preference', options: { scheme: 'adaptive' } }
+const modeDrawings = [
+  { id: 'light', label: 'Light', options: { mode: 'light' } },
+  { id: 'dark', label: 'Dark', options: { mode: 'dark' } },
+  { id: 'system', label: 'Follows your preference', options: { mode: 'system' } }
 ] as const
 
 const futureRoute = {
@@ -172,7 +172,9 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
       currentPath={route.path}
       outline={[
         { depth: 2, slug: `${component.id}-example`, label: 'Example' },
-        ...(component.id === 'canvas' ? ([{ depth: 2, slug: 'canvas-schemes', label: 'Colour scheme' }] as const) : []),
+        ...(component.id === 'canvas'
+          ? ([{ depth: 2, slug: 'canvas-schemes', label: 'Style and mode' }] as const)
+          : []),
         { depth: 2, slug: `${component.id}-properties`, label: 'Properties' }
       ]}
     >
@@ -248,26 +250,28 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
         </section>
         {component.id === 'canvas' && (
           <section aria-labelledby="canvas-schemes" className="component-page__section">
-            <h2 id="canvas-schemes">Colour scheme</h2>
+            <h2 id="canvas-schemes">Style and mode</h2>
             <p>
-              A colour scheme is the reader's context, not part of the definition: there is no appearance field for it,
-              and the same document is drawn in whichever scheme it is read in. An authored <code>surface</code> is the
-              other thing entirely — a blueprint drawing stays a blueprint in either scheme, because that is a treatment
-              its author chose.
+              These are two different things and a drawing carries both. A <em>style</em> says what the drawing is —{' '}
+              <code>appearance.style: blueprint</code> makes it a blueprint, and it stays one wherever it is read. A{' '}
+              <em>mode</em> says which ground the reader is on, light or dark. A blueprint is realised on both: navy
+              paper in the dark, cyanotype on light, because the style is the author's and the ground is the reader's.
             </p>
             <p>
-              An interactive drawing follows the page. A rendered file cannot, so{' '}
-              <code>infoschematics render --scheme dark</code> writes a dark drawing rather than one that might become
-              dark, and <code>--scheme adaptive</code> writes one SVG carrying both palettes — which is what the third
+              Mode is authorable too, as <code>appearance.mode</code>, and its <code>system</code> value is the author
+              declining to pick rather than an instruction to defer — it falls through to whoever is drawing. An
+              interactive drawing follows the page. A rendered file cannot, so{' '}
+              <code>infoschematics render --mode dark</code> writes a dark drawing rather than one that might become
+              dark, and <code>--mode system</code> writes one SVG carrying both palettes — which is what the third
               drawing below is.
             </p>
             <ul className="scheme-gallery">
-              {schemeDrawings.map(({ id, label, options }) => (
+              {modeDrawings.map(({ id, label, options }) => (
                 <li className="scheme-gallery__item" key={id}>
                   <StaticInfoschematic
                     className="scheme-gallery__drawing"
                     input={schemeSpecimen}
-                    label={`Colour scheme example, ${label.toLowerCase()}`}
+                    label={`Colour mode example, ${label.toLowerCase()}`}
                     options={options}
                     resourceIdPrefix={`scheme-${id}`}
                   />
@@ -276,8 +280,8 @@ export function VisualGuide({ route }: { route?: ComponentRoute }) {
               ))}
             </ul>
             <p>
-              The interface around a drawing answers the same schemes, from its own set of roles. These swatches are
-              painted from those roles rather than listed, so they are showing you the scheme you are actually in — use
+              The interface around a drawing answers the same modes, from its own set of roles. These swatches are
+              painted from those roles rather than listed, so they are showing you the mode you are actually in — use
               the switch in the header and they move with everything else.
             </p>
             <ul className="chrome-roles">

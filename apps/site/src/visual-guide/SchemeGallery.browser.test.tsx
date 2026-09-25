@@ -1,7 +1,7 @@
 /**
  * A rendered file that themes itself, proved by a browser rather than by reading the markup.
  *
- * `--scheme adaptive` writes the palettes into the document and lets whatever displays it choose. Which declaration
+ * `--mode system` writes the palettes into the document and lets whatever displays it choose. Which declaration
  * wins is decided by `(prefers-color-scheme)` and by the cascade together, so a case that read the embedded
  * stylesheet would be asserting the rule it hoped applied. Asking the page for a preference and reading back what
  * the drawing resolved is the only evidence that the file works where it is going.
@@ -23,13 +23,13 @@ afterEach(async () => {
   await commands.emulateColourScheme('no-preference')
 })
 
-test('an adaptive rendering paints itself in the scheme the page prefers', async () => {
+test('a deferring rendering paints itself in the mode the page prefers', async () => {
   const { container } = await render(
     <StaticInfoschematic
       input={schemeSpecimen}
       label="Colour scheme example"
-      options={{ scheme: 'adaptive' }}
-      resourceIdPrefix="scheme-adaptive-case"
+      options={{ mode: 'system' }}
+      resourceIdPrefix="scheme-system-case"
     />
   )
 
@@ -42,12 +42,12 @@ test('an adaptive rendering paints itself in the scheme the page prefers', async
   expect(backdropOf(container)).toBe('rgb(22, 27, 32)')
 })
 
-test('a rendering given a scheme keeps it whatever the page prefers', async () => {
+test('a rendering given a mode keeps it whatever the page prefers', async () => {
   const { container } = await render(
     <StaticInfoschematic
       input={schemeSpecimen}
       label="Light colour scheme example"
-      options={{ scheme: 'light' }}
+      options={{ mode: 'light' }}
       resourceIdPrefix="scheme-light-case"
     />
   )
