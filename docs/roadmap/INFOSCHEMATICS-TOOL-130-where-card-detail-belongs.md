@@ -4,12 +4,12 @@ area: TOOL
 title: Where Card detail belongs
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: cfead134fa5faef9fe960b9d8ef6a202d1c1621a
 created_at: 2026-09-22T19:15:00Z
-updated_at: 2026-09-24T18:30:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Where Card detail belongs
@@ -153,6 +153,10 @@ Verified by both package suites, the repository script suite bar one failure bel
 Concerns: whether `examples/is-showcase` means its coarse-beside-narrow pairing, and `INFOSCHEMATICS-TOOL-129`'s double-migration worry, now moot.
 
 Learning route, proposed rather than promoted: a decision the code has already made twice still needs its word written down before a dependent record can be planned on it, and re-grounding a shaped record against the code before implementing is what catches the steps whose premise has dissolved. Both are general delivery lessons rather than Infoschematics facts, so they belong in the harness rather than in any document here.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

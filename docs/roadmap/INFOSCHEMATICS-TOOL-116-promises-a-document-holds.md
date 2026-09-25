@@ -4,12 +4,12 @@ area: TOOL
 title: Promises a document holds
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 1319bd1e18fe2f6600eb4b5484fa8b10255e7fe7
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-24T22:49:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Promises a document holds
@@ -136,6 +136,10 @@ Verification: scoped typecheck and tests across Domain Model, Domain Core and Vi
 Concerns carried: the `check` command still prints only drawing findings; there is no vocabulary term for a promise; the requirements borrow the `DRAW` prefix; and nothing verifies that a promise is the right one to have made.
 
 Two routes are worth considering, neither promoted here. Surfacing promise findings through `infoschematics check` is the natural next item and is small once `packages/cli/` is free. A vocabulary entry for the concept, with the drift check that keeps it honest, would let every future document about promises cite a stable id — and would be the moment to decide whether the requirements should move out of the `DRAW` series.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: Linking to one part
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8dd156a960b7948e203c0e9e442f5926125257fe
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-24T23:46:50Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Linking to one part
@@ -158,6 +158,10 @@ What the suites could not have caught, the look did: two defects were sitting un
 ### Mini recap
 
 An address is an authored identity — an artefact code or a Scope id — that a host spells and the Diagram resolves. Arriving centres the viewport and selects the named part, and does nothing else: no magnification, no emphasis, no authored Dynamic disturbed. An address that no longer resolves is a quiet no-op with a reason reported to the host, because a link in someone else's prose outlives the document it points into. A still ignores a destination and draws the whole document.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

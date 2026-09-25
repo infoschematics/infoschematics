@@ -4,12 +4,12 @@ area: TOOL
 title: Ordered cascade of cues
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: cfead134fa5faef9fe960b9d8ef6a202d1c1621a
 created_at: 2026-09-21T21:15:00Z
-updated_at: 2026-09-24T18:30:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Ordered cascade of cues
@@ -134,6 +134,10 @@ One deliberate omission: occurrence keys do not encode the stage. They did not n
 ### Mini recap
 
 A Scene's cues can now be ordered, and the Sequence holding the Scene paces that order: it divides a timed Scene's hold between the stages, or spends one presenter step on each. Nothing in a document gained a duration, both hosts keep the same beat, and a document that stages nothing is unchanged in behaviour and byte for byte in render.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

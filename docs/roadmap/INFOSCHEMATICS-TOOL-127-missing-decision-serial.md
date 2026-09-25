@@ -4,12 +4,12 @@ area: TOOL
 title: Missing decision serial
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 6dfc6d5f1060a3b56bfab4f3aec87971ac3248a0
 created_at: 2026-09-22T12:10:00Z
-updated_at: 2026-09-24T17:30:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Missing decision serial
@@ -129,6 +129,10 @@ Verified by the governing skill's own audit, clean.
 Concerns: the harness cannot declare an accepted serial gap; no identifier here because this repository does not need one.
 
 Learning route, proposed not promoted: "a record's premise can dissolve between shaping and delivery, and re-grounding before implementing is what catches it" is a general delivery lesson rather than an infoschematics fact. Its owner would be the implementation standard in the harness, not any document here.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

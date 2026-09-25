@@ -4,12 +4,12 @@ area: TOOL
 title: Detail follows magnification
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 1319bd1e18fe2f6600eb4b5484fa8b10255e7fe7
 created_at: 2026-09-21T19:30:00Z
-updated_at: 2026-09-24T23:55:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Detail follows magnification
@@ -149,6 +149,10 @@ Acceptance readiness: ready, with the three documentation hand-overs above under
 ### Mini recap
 
 Detail now follows magnification, continuously, in four bands over thresholds that already existed. The View Model function is pure and has no memory; the Canvas holds the previous band and a margin, so revealing is immediate and withdrawing is reluctant. The still renderer and the command line take a band, defaulting to `full` so nothing that never asks for one changes. `ADR-INFOSCHEMATICS-039` records both decisions including the named-view alternative that belongs to TOOL-115, and `APPEAR-020`, `APPEAR-021` and `STATIC-021` make the bands a contract. A browser look proved the reveal and, in the process, caught that the site reads the built packages rather than their source. What is left is documentation someone else owns: the visual guide, the consumer guide, and a home for `--detail` beside its sibling command-line options.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

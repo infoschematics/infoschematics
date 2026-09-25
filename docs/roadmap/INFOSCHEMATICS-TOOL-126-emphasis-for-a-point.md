@@ -4,12 +4,12 @@ area: TOOL
 title: Emphasis for a Point
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: cfead134fa5faef9fe960b9d8ef6a202d1c1621a
 created_at: 2026-09-22T12:10:00Z
-updated_at: 2026-09-24T19:00:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Emphasis for a Point
@@ -137,6 +137,10 @@ Two smaller traps. The parity helper for emphasis outlines matches `<path d=` wi
 ### Mini recap
 
 A Dynamic naming a Point now marks it in both outlets, from one shared radius, with the travelling mark declined for a reason that is written down and tested. The static renderer already did most of this; the interactive one was filtering the occurrence away before it could. Parity holds the two together, the spec's evidence names it, and the Canvas browser suite asks the runner for reduced motion rather than reading the stylesheet. What is left is not code: another writer's worktree and its three uncommitted files need a decision from their owner, the showcase still names no Point in a Dynamic, and one clause of `ADR-INFOSCHEMATICS-027` now says the opposite of what the Canvas does.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 

@@ -4,12 +4,12 @@ area: TOOL
 title: Room for a creation
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 8dd156a960b7948e203c0e9e442f5926125257fe
 created_at: 2026-09-22T15:30:00Z
-updated_at: 2026-09-25T00:45:00Z
+updated_at: 2026-09-25T08:50:27Z
 ---
 
 # Room for a creation
@@ -154,6 +154,10 @@ The placement went to its own module against this item's `## Files touched`, whi
 ### Mini recap
 
 A new Card no longer lands on the Message bus. The stepped centre is tried first, and when it is occupied the placement steps outward until it finds room, avoiding what is drawn and what is merely pending, falling back to where it always went when the document has no room at all. The overlap arithmetic is now shared with the checker; the checker's judgement about when overlap matters is not, because it excuses the very case this had to catch.
+
+## Done
+
+Accepted 2026-09-25 by Kris Brown on the review packet above.
 
 ## Discussion
 
