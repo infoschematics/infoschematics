@@ -4,12 +4,12 @@ area: TOOL
 title: Mode, style and hue
 theme: tool
 horizon: now
-status: draft
+status: ready
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-22T18:20:00Z
-updated_at: 2026-09-22T19:10:00Z
+updated_at: 2026-09-25T10:44:44Z
 ---
 
 # Mode, style and hue
