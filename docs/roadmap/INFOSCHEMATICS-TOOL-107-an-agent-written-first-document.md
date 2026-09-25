@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-21T09:30:00Z
-updated_at: 2026-09-24T18:00:00Z
+updated_at: 2026-09-25T08:52:17Z
 ---
 
 # An agent-written first document
@@ -32,7 +32,7 @@ The bar also turns out to be lower than it looked. Studio edits a validated docu
 
 A decision item. It does not add a model concept, change what a definition may carry, or put a language runtime inside any package: authored definitions stay serialisable data, hosts keep mounting, and `ADR-INFOSCHEMATICS-017` keeps command-line input inert. It does not adopt automatic layout as a product capability — the skill chooses placement the way an author does, and the checker judges the result.
 
-It does not cover the diagnostics surface itself, which is delivered as [the drawing diagnostics](../specs/diagnostics.md), or the semantic promises a document might declare, which is [INFOSCHEMATICS-TOOL-116](INFOSCHEMATICS-TOOL-116-promises-a-document-holds.md).
+It does not cover the diagnostics surface itself, which is delivered as [the drawing diagnostics](../specs/diagnostics.md), or the semantic promises a document might declare, which `INFOSCHEMATICS-TOOL-116` delivered.
 
 ## Current state
 
