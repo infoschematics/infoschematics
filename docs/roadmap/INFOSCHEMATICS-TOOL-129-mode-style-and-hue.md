@@ -71,7 +71,7 @@ The static outlet mirrors the pin: `packages/render-svg/src/index.ts:609` suppre
 
 ## Verify
 
-`bun run self:check`. The generated stylesheet is checked in and verified by `self:tokens:verify`, so regeneration is part of the change rather than a follow-up. `scripts/ibc-visual-compatibility.ts` holds a rendered baseline at `scripts/fixtures/ibc-2026-visual-baseline.json`; expect it to move, and review the movement rather than accepting it.
+`bun run self:check`. The generated stylesheet is checked in and verified by `self:tokens:verify`, so regeneration is part of the change rather than a follow-up. `scripts/ibc-visual-compatibility.ts` holds a rendered baseline at `scripts/fixtures/ibc-2026-visual-baseline.json`; expect it to move, and review the movement rather than accepting it. That last instruction turned out to be unperformable and its expectation wrong; see `### Outstanding concerns` below and [INFOSCHEMATICS-TOOL-146](INFOSCHEMATICS-TOOL-146-a-baseline-nobody-can-recapture.md) rather than attempting the recapture.
 
 The evidence that matters is visual and comes from a real browser per `AGENTS.md`: the showcase in light and dark, captured to `reports/`, asking the page for each preference through the browser command rather than reading the resolved value out of the stylesheet. A derived brightness step can satisfy every role-floor assertion and still put an unreadable fill next to a legible one, and a fill opacity that looks right on one ground routinely hides the grid on the other.
 

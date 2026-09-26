@@ -83,7 +83,7 @@ The check that matters most is negative: no citation anywhere in the repository 
 
 ## Dependencies / blocks
 
-Nothing blocks it and it blocks nothing. It follows the Decision Record consolidation only in the sense that the consolidation established what the records now say, which is the yardstick this item measures the surrounding documents against.
+Nothing blocks it and it blocks nothing. It follows the Decision Record consolidation only in the sense that the consolidation established what the records now say, which is the yardstick this item measures the surrounding documents against. That was true when the item was adopted and is no longer true of every step: step 4 is blocked on a decision only the owner can take, and step 6 cannot start without it, because moving the glossary changes a published site address. `blocked_by` stays empty because no other record holds the answer — the block is a human decision rather than a dependency. Steps 1, 2, 7 and 8 are unblocked and can proceed on their own.
 
 ## Documentation impact
 
