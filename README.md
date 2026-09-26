@@ -95,7 +95,7 @@ Every command this repository offers is a script in the root `package.json`, and
 | Prefix | Owner | Meaning |
 | --- | --- | --- |
 | none | the package manager and Turborepo | The lifecycle idioms every workspace answers to: `build`, `clean`, `prepare`, `test`, `test:browser`. A bare name passes straight through to the task it is named after, so `bun run test` and `turbo run test` are the same run. |
-| `ki:` | a Knowledge Islands capability | A command whose shape is mandated outside this repository, so its name and its behaviour are not ours to reword: `ki:deps:update`, `ki:lint:md`, `ki:lint:md:fix`, `ki:site:build`, `ki:site:clean`, `ki:site:deploy`, `ki:site:dev`, `ki:site:preview`. |
+| `ki:` | a Knowledge Islands capability | A command whose shape is mandated outside this repository, so its name and its behaviour are not ours to reword: `ki:deps:update`, `ki:site:build`, `ki:site:clean`, `ki:site:deploy`, `ki:site:dev`, `ki:site:preview`. |
 | `self:` | this repository | Everything specific to Infoschematics, named subject first and verb last. |
 
 The `self:` commands, by subject:

@@ -3,9 +3,6 @@
   "description": "The Infoschematic domain model, framework-neutral view model, interactive views, authored examples, guidance, and public website.",
   "version": "0.1.0",
   "author": "Infoschematics",
-  "bugs": {
-    "url": "https://github.com/infoschematics/infoschematics/issues"
-  },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
     "@commitlint/cli": "^21.2.3",
@@ -67,8 +64,6 @@
     "build": "turbo run build",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "ki:deps:update": "bun update --latest",
-    "ki:lint:md": "bunx rumdl check .",
-    "ki:lint:md:fix": "bunx rumdl check --fix .",
     "ki:site:build": "bun run --cwd apps/site build",
     "ki:site:clean": "bun run --cwd apps/site clean",
     "ki:site:deploy": "bun run --cwd apps/site deploy",

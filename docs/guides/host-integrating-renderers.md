@@ -1,6 +1,6 @@
 # Integrate a host renderer
 
-This guide is for host application developers adding a visual implementation for an authored [Fabric](../reference/vocabulary.md#fabric), Overlay, or [Callout](../reference/vocabulary.md#callout). The host owns executable React components and validators; the Infoschematic document selects only their serialisable contract, as required by [renderer extensions](../specs/renderer-extensions.md).
+This guide is for host application developers adding a visual implementation for an authored Fabric, Overlay, or Callout. The host owns executable React components and validators; the Infoschematic document selects only their serialisable contract.
 
 ## Author the reference
 
