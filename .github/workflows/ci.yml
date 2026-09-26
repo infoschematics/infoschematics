@@ -82,6 +82,9 @@ jobs:
       - name: Build workspace prerequisites
         run: bun run self:packages:build
 
+      - name: Link built workspace CLI
+        run: bun install --frozen-lockfile
+
       - name: Audit
         run: ki repo audit --repo .
 
