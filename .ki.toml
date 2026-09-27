@@ -9,6 +9,8 @@
 harnesses = ["knowledgeislands/ki-agentic-harness"]
 
 [skills.ki-repo]
+repo_type = "project"
+primary_shape = "ki-repo-website"
 repository = "https://github.com/infoschematics/infoschematics"
 title = "Infoschematics"
 description = "The Infoschematic domain model, framework-neutral view model, interactive views, authored examples, guidance, and public website."
