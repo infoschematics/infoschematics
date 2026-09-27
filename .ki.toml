@@ -50,6 +50,7 @@ dependency_holds = [
 [skills.ki-git]
 
 [skills.ki-housekeeping-claude]
+auto_memory = "transition"
 
 [skills.ki-tokenomics]
 
