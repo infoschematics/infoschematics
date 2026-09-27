@@ -78,7 +78,7 @@ areas.TOOL = "tool"
 # -----------------------------------------------------------------------------
 
 [skills.ki-agora]
-memberships.hnr = { home = "https://github.com/krisb/kit-hnr", role = "maintainer" }
+memberships.hnr = { home = "https://github.com/krisb/kit-hnr", role = "member" }
 
 [skills.ki-specs]
 
