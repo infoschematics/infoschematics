@@ -18,6 +18,11 @@ license = "MIT"
 supported_runtimes = ["claude-code", "claude-desktop", "chatgpt-codex"]
 
 [skills.ki-authoring]
+[skills.ki-binding]
+[skills.ki-binding-claude]
+[skills.ki-binding-chatgpt]
+[skills.ki-housekeeping-chatgpt]
+auto_memory = "disabled"
 
 # -----------------------------------------------------------------------------
 # Repository shape
@@ -47,6 +52,9 @@ dependency_holds = [
 # Change management
 # -----------------------------------------------------------------------------
 
+[skills.ki-agent-coordination-paperclip]
+organisation_code = "HNR"
+
 [skills.ki-git]
 
 [skills.ki-housekeeping-claude]
@@ -56,7 +64,7 @@ auto_memory = "transition"
 
 [skills.ki-tokenomics-claude]
 
-[skills.ki-tokenomics-codex]
+[skills.ki-tokenomics-chatgpt]
 
 [skills.ki-work]
 adapter = "roadmap"
