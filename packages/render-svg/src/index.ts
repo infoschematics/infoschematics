@@ -16,7 +16,7 @@ import { type DetailBand, resolveDetailTreatment } from '@infoschematics/view-mo
 import { type DynamicOccurrence, resolveDiagramDynamics } from '@infoschematics/view-model/dynamics'
 import { emphasisPerimeterPath, emphasisPointRadius } from '@infoschematics/view-model/perimeter'
 import { resolvePointLabel } from '@infoschematics/view-model/point-layout'
-import { regionGeometry } from '@infoschematics/view-model/region-geometry'
+import { type RegionLabelBackingGeometry, regionGeometry } from '@infoschematics/view-model/region-geometry'
 import { svgResourcePrefix } from '@infoschematics/view-model/resources'
 import { createInfoschematicRuntime } from '@infoschematics/view-model/runtime'
 import {
@@ -841,6 +841,8 @@ export const renderInfoschematicSvg = (
      the band would otherwise cut through. Cards are drawn after this, so the label rises above the routes and stays
      under the elements the Region contains. */
   const regionLabelLayer: string[] = []
+  const regionLabelBands: RegionLabelBackingGeometry[] = []
+  const regionLabelMaskId = `${resourceIdPrefix}-region-label-clearance`
   if (artworkDefs.length > 0) body.push(['  <defs>', ...artworkDefs, '  </defs>'].join('\n'))
   body.push(line(1, 'title', [], xmlText(config.title)))
   if (accessibleSummary) body.push(line(1, 'desc', [], xmlText(accessibleSummary)))
@@ -1019,23 +1021,10 @@ export const renderInfoschematicSvg = (
       )
     }
     if (geometry.label) {
-      /* The glyphs and the band beneath them, drawn in the Region's own layer group over the routes rather than in
-         the Region's group under them. The backing takes the surface the label actually sits on: a plain label sets
-         down on the fill, a boundary-mounted one sits on the frame line over the backdrop the notch exposes - the
-         same reading the ink above takes. */
+      /* The glyphs rise above the routes; their bands clear the routes through a shared mask below. This exposes the
+         actual surface composition beneath translucent and overlapping Regions. */
       const labelContent: string[] = []
-      if (geometry.labelBacking) {
-        labelContent.push(
-          line(2, 'rect', [
-            ['class', 'infoschematic-region-label-backing'],
-            ['fill', ink !== null && regionFill ? regionFill : backdrop],
-            ['height', geometry.labelBacking.height],
-            ['width', geometry.labelBacking.width],
-            ['x', geometry.labelBacking.x],
-            ['y', geometry.labelBacking.y]
-          ])
-        )
-      }
+      if (geometry.labelBacking) regionLabelBands.push(geometry.labelBacking)
       labelContent.push(
         line(
           2,
@@ -1179,6 +1168,51 @@ export const renderInfoschematicSvg = (
     )
   }
 
+  if (regionLabelBands.length > 0) {
+    body.push(
+      container(
+        1,
+        'defs',
+        [],
+        [
+          container(
+            2,
+            'mask',
+            [
+              ['id', regionLabelMaskId],
+              ['maskContentUnits', 'userSpaceOnUse'],
+              ['mask-type', 'luminance'],
+              ['maskUnits', 'userSpaceOnUse'],
+              ['height', viewBox.height],
+              ['width', viewBox.width],
+              ['x', viewBox.x],
+              ['y', viewBox.y]
+            ],
+            [
+              line(3, 'rect', [
+                ['fill', 'white'],
+                ['height', viewBox.height],
+                ['width', viewBox.width],
+                ['x', viewBox.x],
+                ['y', viewBox.y]
+              ]),
+              ...regionLabelBands.map((band) =>
+                line(3, 'rect', [
+                  ['class', 'infoschematic-region-label-clearance'],
+                  ['fill', 'black'],
+                  ['height', band.height],
+                  ['width', band.width],
+                  ['x', band.x],
+                  ['y', band.y]
+                ])
+              )
+            ]
+          ).join('\n')
+        ]
+      ).join('\n')
+    )
+  }
+
   const flowPipe = paint.flowPipe
   for (const flow of flows) {
     const resolved = families.get(flow.family)
@@ -1231,6 +1265,7 @@ export const renderInfoschematicSvg = (
           ['data-artefact-kind', 'flow'],
           ['data-id', flow.id],
           ['data-signalled', signalled || undefined],
+          ['mask', regionLabelBands.length > 0 ? `url(#${regionLabelMaskId})` : undefined],
           ['opacity', dimmed ? canvasTokens.metrics.unfocusedOpacity : undefined]
         ],
         content

@@ -204,15 +204,15 @@ _Evidence:_ `packages/view-model/src/region-geometry.test.ts` covers shared valu
 
 ### ROUTE-019 — A Region label survives a route that crosses its band
 
-A Flow route MAY occupy a Region label's band. A Flow between a Card inside a Region and one outside it crosses that Region's frame, and a label mounted on the frame shares the crossing legitimately, so the band MUST NOT be reserved by refusing the route: the label MUST survive the crossing instead. Every renderer MUST draw a Region label above the routes that cross its band, over an opaque backing in the Region's resolved surface colour, so no route stroke is left standing between the glyph strokes. The backing MUST be derived from the same resolved label geometry both renderers already consume, so each covers the same band rather than estimating its own.
+A Flow route MAY occupy a Region label's band. A Flow between a Card inside a Region and one outside it crosses that Region's frame, and a label mounted on the frame shares the crossing legitimately, so the band MUST NOT be reserved by refusing the route: the label MUST survive the crossing instead. Every renderer MUST draw a Region label above the routes and clear route strokes from its band, revealing the actual surface composition beneath translucent or overlapping Regions. The clearance MUST be derived from the same resolved label geometry both renderers already consume, so each clears the same band rather than estimating its own.
 
 Legibility here MUST NOT be pursued by moving the label. ROUTE-018 fixes Region label geometry to shared deterministic metrics, and a label whose position depends on which engine measured it would break the parity that requirement exists to hold.
 
 _Conformance:_ conforming
 
-_Verify:_ `scripts/visual-treatment-parity.test.ts` — "keeps a Region label legible under a route that crosses its band, in both renderers", which drives a Flow down the middle of a boundary-mounted label and a plain one, compares the two renderers' bands, and asserts each is drawn after the routes.
+_Verify:_ `scripts/visual-treatment-parity.test.ts` — "keeps a Region label legible under a route that crosses its band, in both renderers", which drives a Flow down the middle of a boundary-mounted label and a plain one, compares both renderers' clearance bands, and asserts the labels are drawn after the routes. Inspect a translucent or overlapping Region in a browser and static SVG for a seamless underlying surface.
 
-_Evidence:_ `regionGeometry` resolves a `labelBacking` band from the same label geometry both renderers already consume (`packages/view-model/src/region-geometry.ts`), and each renderer draws its Region labels in a layer after the Flows rather than in the Region's own group: `regionLabelLayer` in `packages/render-svg/src/index.ts`, `infoschematic-region-label-layer` in `packages/view-canvas/src/InfoschematicDiagram.tsx`. Read on 2026-09-21 in both outlets, on a blueprint and a paper surface: the glyphs survive the crossing and the band takes the surface its label sits on.
+_Evidence:_ `regionGeometry` resolves the shared `labelBacking` band (`packages/view-model/src/region-geometry.ts`); Canvas and static SVG use it to mask Flow strokes beneath labels and draw the labels after Flows (`packages/view-canvas/src/InfoschematicDiagram.tsx`, `packages/render-svg/src/index.ts`). `scripts/visual-treatment-parity.test.ts` checks both masks and the crossing route.
 
 ## Gaps
 

@@ -651,6 +651,11 @@ export function InfoschematicDiagram({
      a React root and stable across a render pass, which is what makes an unconfigured two-Canvas host correct while
      keeping identical markup identical. A host that assembles a document from separate passes supplies its own. */
   const resourcePrefix = svgResourcePrefix(resourceIdPrefix, useId())
+  const regionLabelBands = infoschematicRegions.flatMap((region) => {
+    const geometry = regionGeometry({ box: region.box, label: region.label, treatment: resolveRegionTreatment(region) })
+    return geometry.labelBacking ? [{ ...geometry.labelBacking, id: region.id }] : []
+  })
+  const regionLabelMask = regionLabelBands.length > 0 ? `url(#${resourcePrefix}-region-label-clearance)` : undefined
   /* One definition per family serves both ends of every Flow here, because a browser resolves the SVG 2
      `orient="auto-start-reverse"` and turns the same triangle to face back out of a source when it is a
      `marker-start`. The static renderer cannot: the rasteriser behind the command line ignores that value, so it
@@ -2376,6 +2381,36 @@ export function InfoschematicDiagram({
           y={infoschematicViewBox.y}
         />
         <defs>
+          {regionLabelBands.length > 0 ? (
+            <mask
+              id={`${resourcePrefix}-region-label-clearance`}
+              maskContentUnits="userSpaceOnUse"
+              maskUnits="userSpaceOnUse"
+              height={infoschematicViewBox.height}
+              width={infoschematicViewBox.width}
+              x={infoschematicViewBox.x}
+              y={infoschematicViewBox.y}
+            >
+              <rect
+                fill="white"
+                height={infoschematicViewBox.height}
+                width={infoschematicViewBox.width}
+                x={infoschematicViewBox.x}
+                y={infoschematicViewBox.y}
+              />
+              {regionLabelBands.map((band) => (
+                <rect
+                  className="infoschematic-region-label-clearance"
+                  fill="black"
+                  height={band.height}
+                  key={band.id}
+                  width={band.width}
+                  x={band.x}
+                  y={band.y}
+                />
+              ))}
+            </mask>
+          ) : null}
           <pattern
             height={gridSize}
             id={`${resourcePrefix}-grid-minor`}
@@ -2629,7 +2664,7 @@ export function InfoschematicDiagram({
             )
           })}
 
-        <g className="infoschematic-flows">
+        <g className="infoschematic-flows" mask={regionLabelMask}>
           {[...flows]
             // Family order decides the resting stack, but a lit line always paints
             // last. A lower family can otherwise leave its
@@ -2658,13 +2693,10 @@ export function InfoschematicDiagram({
             .map(renderFlow)}
         </g>
 
-        {/* A Region's label, over the routes rather than under them.
-          A Flow between a Card inside a Region and one outside it crosses the frame the label is mounted on, and the
-          crossing is legitimate - the band is not reserved by refusing the route. So the glyphs are drawn here, after
-          the Flow layer and before the Cards, over an opaque backing in the surface the label sits on: a plain label
-          sets down on the Region's fill, a boundary-mounted one on the backdrop the notch exposes. `ROUTE-019`. */}
+        {/* Region labels rise above the routes, whose shared mask clears their bands. The exposed surface is the
+          actual composition underneath each label, including translucent and overlapping Regions. `ROUTE-019`. */}
         {infoschematicRegions.map((region) => {
-          const { fill: regionFill, geometry, ink, treatment } = regionVisual(region, seeds)
+          const { geometry, ink, treatment } = regionVisual(region, seeds)
           if (!geometry.label) return null
           const selection = {
             code: null,
@@ -2674,7 +2706,6 @@ export function InfoschematicDiagram({
           } as const satisfies ArtefactSelection
           const legacyKey = `region:${region.id}`
           return (
-            // biome-ignore lint/a11y/noStaticElementInteractions: the region's own group carries the role and the accessible name; this is the same target lifted into a later layer.
             <g
               className={`infoschematic-region-label-layer${pendingRemovals[region.id] ? ' going' : ''}${inert('region')}`}
               data-artefact-id={selection.id}
@@ -2691,19 +2722,6 @@ export function InfoschematicDiagram({
                   : undefined
               }
             >
-              {geometry.labelBacking ? (
-                <rect
-                  className="infoschematic-region-label-backing"
-                  /* A `fill` attribute loses to the class rule that gives the band its surface colour, so a Region
-                     that states its own fill has to state it where it wins. `ROUTE-019` asks for the Region's
-                     resolved surface, and for a plain label that surface is the fill it sets down on. */
-                  style={ink !== null ? { fill: regionFill } : undefined}
-                  height={geometry.labelBacking.height}
-                  width={geometry.labelBacking.width}
-                  x={geometry.labelBacking.x}
-                  y={geometry.labelBacking.y}
-                />
-              ) : null}
               <text
                 className={`infoschematic-region-label${treatment.labelTreatment === 'notched' ? ' notched' : ''}${interactive('region') && (onSelect || onArtefactSelect) ? ' region-selectable' : ''}${
                   artefactSelected(selection, legacyKey) ? ' selected' : ''
@@ -2982,7 +3000,11 @@ export function InfoschematicDiagram({
 
         {/* Above the cards, so a selected line and its controls are never behind
           one. It leaves this layer the moment it is deselected. */}
-        {selectedFlow ? <g className="infoschematic-flows">{renderFlow(selectedFlow)}</g> : null}
+        {selectedFlow ? (
+          <g className="infoschematic-flows" mask={regionLabelMask}>
+            {renderFlow(selectedFlow)}
+          </g>
+        ) : null}
 
         {/* The selection's own controls, above every element the diagram places, for as long as it is selected. */}
         {selectionControls ? (

@@ -22,9 +22,9 @@ export type RegionNotchGeometry = Readonly<{
 }>
 
 /**
- * The opaque band a Region label is drawn over, so a route that crosses it legitimately leaves no stroke standing
- * between the glyph strokes - `ROUTE-019`. Derived from the resolved label rather than measured, so both renderers
- * cover the same band instead of each estimating its own.
+ * The band cleared from Flow routes beneath a Region label, so a crossing leaves no stroke standing between the
+ * glyph strokes - `ROUTE-019`. Derived from the resolved label rather than measured, so both renderers clear the
+ * same band instead of each estimating its own.
  */
 export type RegionLabelBackingGeometry = Readonly<{
   height: number

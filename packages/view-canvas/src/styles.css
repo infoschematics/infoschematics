@@ -190,20 +190,9 @@
 }
 
 /* The lifted label layer is a place in the stack rather than a target: the
-   glyphs stay as clickable as they were inside the region's own group, and the
-   backing takes no pointer at all - it is drawn over the routes it protects,
-   and one that answered a click would take it from the line underneath. */
+   glyphs stay as clickable as they were inside the region's own group. */
 .infoschematic-region-label-layer {
   pointer-events: visible;
-}
-
-/* The band the label is read against, so a route that crosses it legitimately
-   leaves no stroke standing between the glyph strokes. A plain label over a
-   fill takes that fill inline; everything else reads against the backdrop the
-   notch exposes, which is the surface, not a colour of its own. */
-.infoschematic-region-label-backing {
-  fill: var(--infoschematic-canvas-paint-backdrop);
-  pointer-events: none;
 }
 
 /* Ink follows the Region fill's own luminance so both renderers agree. */

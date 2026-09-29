@@ -197,14 +197,13 @@ const semantics = (output: string, compactAttribute: 'data-card-compact' | 'data
 })
 
 /**
- * The band each renderer draws beneath a Region label, as geometry rather than as markup.
+ * The band each renderer clears from routes beneath a Region label, as geometry rather than as markup.
  *
- * `ROUTE-019` requires both to derive it from the same resolved label geometry, and the two write the same rectangle
- * with different attributes around it - Canvas omits a fill it takes from the stylesheet, the static renderer always
- * states one - so the comparable thing is the rectangle, read attribute by attribute rather than as a string.
+ * `ROUTE-019` requires both to derive it from the same resolved label geometry. Their mask IDs differ, so compare
+ * the clearance rectangles attribute by attribute rather than as whole mask markup.
  */
-const labelBackings = (output: string) =>
-  [...output.matchAll(/<rect class="infoschematic-region-label-backing"[^>]*>/g)].map((match) => {
+const labelClearances = (output: string) =>
+  [...output.matchAll(/<rect class="infoschematic-region-label-clearance"[^>]*>/g)].map((match) => {
     const attributes = Object.fromEntries(
       [...match[0].matchAll(/([a-z-]+)="([^"]*)"/g)].map((attribute) => [
         attribute[1] as string,
@@ -214,8 +213,8 @@ const labelBackings = (output: string) =>
     return `${attributes.width}x${attributes.height}@${attributes.x},${attributes.y}`
   })
 
-const labelBackingBoxes = (output: string) =>
-  labelBackings(output).map((band) => {
+const labelClearanceBoxes = (output: string) =>
+  labelClearances(output).map((band) => {
     const [width, height, x, y] = (band.match(/([\d.-]+)x([\d.-]+)@([\d.-]+),([\d.-]+)/) as RegExpMatchArray)
       .slice(1)
       .map(Number)
@@ -517,7 +516,7 @@ describe('visual treatment renderer parity', () => {
           },
           {
             box: { height: 60, width: 280, x: 60, y: 130 },
-            fill: '#0b2a3a',
+            fill: '#0b2a3aaa',
             id: 'inner',
             label: 'Inner band',
             labelPlacement: 'north'
@@ -563,33 +562,28 @@ describe('visual treatment renderer parity', () => {
     const canvas = renderToStaticMarkup(createElement(Canvas, { config: crossed }))
     const svg = renderInfoschematicSvg(crossed)
 
-    // One rectangle per label, identical in both, because both take it from the resolved label geometry rather than
-    // measuring their own. Two labels are drawn, so two bands are.
-    expect(labelBackings(canvas)).toEqual(labelBackings(svg))
-    expect(labelBackings(canvas)).toHaveLength(2)
+    // One black mask rectangle per label, identical in both, because both take it from shared label geometry.
+    expect(labelClearances(canvas)).toEqual(labelClearances(svg))
+    expect(labelClearances(canvas)).toHaveLength(2)
 
     // The route is what the band exists for, so the case asserts the crossing rather than assuming it: the line runs
     // down x=200 from y=200 to y=80, and each band has to contain that column over its own run of the line.
-    for (const band of labelBackingBoxes(svg)) {
+    for (const band of labelClearanceBoxes(svg)) {
       expect(band.x).toBeLessThan(200)
       expect(band.x + band.width).toBeGreaterThan(200)
       expect(band.y).toBeGreaterThan(80)
       expect(band.y + band.height).toBeLessThan(200)
     }
 
-    // Each band is filled with the surface its label sits on: the Region's own fill under a plain label, the
-    // backdrop under a boundary-mounted one, which is the same reading the label's ink takes.
-    const seededRegion = resolveAuthoredColour('#0b2a3a', 'light', 'ground')
-    expect(svg).toContain(`<rect class="infoschematic-region-label-backing" fill="${seededRegion}"`)
-    expect(svg).toContain(
-      `<rect class="infoschematic-region-label-backing" fill="${paintFor('blueprint', 'light').backdrop}"`
-    )
-    // Canvas states the fill where it beats the class rule that gives every other band its surface colour: a
-    // presentation attribute loses to a stylesheet, so the Region's own fill is inline style or it is not applied.
-    expect(canvas).toContain(`class="infoschematic-region-label-backing" style="fill:${seededRegion}"`)
+    // Clearing a route reveals the existing translucent Region composition without painting its fill a second time.
+    for (const output of [canvas, svg]) {
+      expect(output).toContain('class="infoschematic-region-label-clearance" fill="black"')
+      expect(output).not.toContain('infoschematic-region-label-backing')
+      expect(output).toMatch(/mask="url\(#[^"]+-region-label-clearance\)"/)
+    }
 
     // Paint order, which is the half of the requirement geometry cannot show: the glyphs are drawn after the routes
-    // in both outlets, so the backing covers stroke rather than being covered by it.
+    // in both outlets, so the glyphs are above the cleared stroke.
     expect(canvas.indexOf('infoschematic-region-label-layer')).toBeGreaterThan(canvas.lastIndexOf('flow-family-calls'))
     expect(svg.indexOf('infoschematic-region-label-layer')).toBeGreaterThan(
       svg.lastIndexOf('class="infoschematic-flow"')
