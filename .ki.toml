@@ -79,9 +79,6 @@ areas.TOOL = "tool"
 # Relationships
 # -----------------------------------------------------------------------------
 
-[skills.ki-agora]
-memberships.hnr = { home = "https://github.com/krisb/kit-hnr" }
-
 [skills.ki-specs]
 
 [skills.ki-decision-records]
