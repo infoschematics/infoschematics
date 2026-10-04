@@ -46,11 +46,11 @@ _Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`
 
 ### CLI-006 — Opt-in raster output
 
-The command MUST write SVG when no format is named, and MUST write PNG bytes when `--format png` is given, leaving standard output binary-clean so the result can be piped or redirected. Raster-only options MUST be rejected as usage errors when the output stays SVG.
+The command MUST write SVG when no format is named, and MUST write PNG bytes when `--format png` is given, leaving standard output binary-clean so the result can be piped or redirected. `--scale` multiplies the raster pixel size from a default of `1` and MUST be a positive number. It and `--font` are raster-only options, and MUST be rejected as usage errors when the output stays SVG.
 
 _Conformance:_ conforming
 
-_Verify:_ render one document with and without `--format png`, assert the PNG signature on standard output and in a written file, and provoke a raster option against SVG output.
+_Verify:_ render one document with and without `--format png`, assert the PNG signature on standard output and in a written file, provoke a raster option against SVG output, and pass a `--scale` that is not a positive number.
 
 _Evidence:_ `packages/cli/src/index.test.ts` and `scripts/release/pack-smoke.ts`.
 
@@ -86,11 +86,11 @@ _Evidence:_ `packages/cli/src/index.test.ts`.
 
 ### CLI-010 — Local preview surface
 
-`--serve` MUST bind loopback only unless another interface is named by `--host`, which MUST report that the preview is reachable from the network. It MUST serve exactly the preview page, the current render, and a refresh stream, returning 404 for every other pathname without consulting the filesystem, per [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-the-preview-server-local-and-in-memory.md). Responses MUST forbid caching. An occupied port MUST fail with status `6` rather than binding a different one.
+`--serve` MUST bind loopback only unless another interface is named by `--host`, which MUST report that the preview is reachable from the network. It MUST serve exactly the preview page, the current render, and a refresh stream, returning 404 for every other pathname without consulting the filesystem, per [ADR-INFOSCHEMATICS-023](../decisions/ADR-INFOSCHEMATICS-023-keep-the-preview-server-local-and-in-memory.md). Responses MUST forbid caching. `--port` MUST name the port to bind, defaulting to `4680`, and `0` MUST let the system choose one. An occupied port MUST fail with status `6` rather than binding a different one. `--host` and `--port` MUST be rejected as usage errors without `--serve`, since there is no preview for them to configure.
 
 _Conformance:_ conforming
 
-_Verify:_ fetch the render and compare it with the equivalent file render, request paths outside the served surface, inspect cache headers, and start a session against a port already bound.
+_Verify:_ fetch the render and compare it with the equivalent file render, request paths outside the served surface, inspect cache headers, start a session against a port already bound, and pass `--port` without `--serve`.
 
 _Evidence:_ `packages/cli/src/index.test.ts` and `packages/cli/src/serve.ts`.
 
@@ -113,6 +113,16 @@ _Conformance:_ conforming
 _Verify:_ check a well-drawn document, a document with an error, and a document whose only finding is an observation, and read the status and the streams of each; then check an invalid document and confirm it fails as a validation failure.
 
 _Evidence:_ `packages/cli/src/index.test.ts`, whose `drawing check` cases cover the clean, error, observation, `--json`, rejected-option and invalid-document paths.
+
+### CLI-014 — A caller names a detail band
+
+`render` MUST accept `--detail` naming one of the four detail bands, `minimal`, `outline`, `identified` or `full`, and MUST draw the still in that band as [`STATIC-021`](static-rendering.md) defines it. Without the option the command MUST draw the `full` band, so a caller that never names one gets the output it always got. Any other value MUST fail as a usage error naming the accepted bands rather than falling back to a default.
+
+_Conformance:_ conforming
+
+_Verify:_ render an example document with no option, with `--detail full` and with `--detail outline`, and confirm all three succeed, the first two are byte-identical, and the third differs where the document's Cards carry rows the `outline` band omits; pass `--detail wide` and confirm the usage status and empty standard output.
+
+_Evidence:_ `detailOf` and the `detail` render option in `packages/cli/src/options.ts`, and the band cases in `packages/render-svg/src/index.test.ts`.
 
 ## Quality properties
 
