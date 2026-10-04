@@ -4,12 +4,12 @@ area: TOOL
 title: An arrival nobody sees
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 817da6ada51ef41c6db27e93fcd06d539858d185
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:33:42Z
+updated_at: 2026-10-04T20:45:00Z
 ---
 
 # An arrival nobody sees
@@ -124,6 +124,10 @@ The goal is met: a sighted reader arriving at a part sees which part was address
 ### Mini recap
 
 Arrival selection is painted on read-only Canvases through an `arrived` surface class and twin selectors; browser case, spec requirement and a real-browser look land with it, and `self:check` passes. Learning route (not promoted): when a state is gated behind a mode class, decide whether the gate protects the paint or the affordance before relaxing it - here only the affordance needed protecting.
+
+## Done
+
+Accepted 2026-10-04 on the review packet above after an independent Fable review returned ACCEPT: the `arrived` class paints the anchor selected and the rest of the Scope held on a read-only Canvas only while the Diagram shows an arrival and the host holds no selection, editing affordances stay withheld, Studio selection styling is unchanged, and the browser test reads computed styles. Following its non-blocking finding, `DIAGRAM-013` now claims only that a first unresolved address selects nothing, and the case of a later unresolved address leaving an earlier arrival painted is captured as `INFOSCHEMATICS-TOOL-149`. Decided by the Fable reviewer under delegated autonomy (2026-10-04), reversible.
 
 ## Discussion
 
