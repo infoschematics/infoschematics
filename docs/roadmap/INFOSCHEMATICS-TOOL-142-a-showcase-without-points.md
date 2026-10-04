@@ -4,12 +4,12 @@ area: TOOL
 title: A showcase without Points
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 9f7d117b91cfd52cbef73c31e3023f338c8bc23f
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T21:12:00Z
+updated_at: 2026-10-04T21:55:00Z
 ---
 
 # A showcase without Points
@@ -130,6 +130,10 @@ Goal met: Point emphasis is now exercised by an authored document, held by a nam
 ### Mini recap
 
 Authored `DYN-SOURCE` on the Camera Point into the showcase's edges Scene, tested it, corrected the README and looked at it in Chromium at both motion preferences. The look found that timed Scene durations are read in the wrong unit (TOOL-150). Proposed learning route: none beyond TOOL-150. The finding that a held state hides a spinning Story, while a finite event shows it, is recorded there.
+
+## Done
+
+Accepted 2026-10-04 on the review packet above after an independent Fable review returned ACCEPT: `DYN-SOURCE` emphasises the Camera Point once at the start of the third Scene, the showcase test now requires highlights on a Card, a Fabric and a Point and fails without the new Dynamic, the README matches the document, and generated examples are current. The Scene timing fault found on the way stays out of scope as `INFOSCHEMATICS-TOOL-150`; the ring remains visible meanwhile, in full under reduced motion. Non-blocking note: the committed probe hardcodes its close-up directory rather than deriving it from `--name`. Decided by the Fable reviewer under delegated autonomy (2026-10-04), reversible.
 
 ## Discussion
 
