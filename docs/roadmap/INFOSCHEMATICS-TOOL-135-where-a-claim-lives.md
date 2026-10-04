@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: a7b186329c71e6f8936ecf9ee652e04c13a16da6
 created_at: 2026-09-23T17:10:00Z
-updated_at: 2026-09-25T10:45:48Z
+updated_at: 2026-10-04T14:00:00Z
 ---
 
 # Where a claim lives
@@ -60,16 +60,67 @@ The remaining statements span `design-architecture.md`, `design-view-present.md`
 
 The lesson is in step 1 below, which now requires the list to land in this record rather than in a thread. A read whose output is held only in a conversation has to be paid for twice, and the second reader has no way to know what the first one decided.
 
+### The second drift read, 2026-10-04
+
+Read against the Decision Records through `ADR-INFOSCHEMATICS-042`, the specifications, and the code at `f626bee4`. It covers `design-architecture.md`, `design-view-present.md` and `design-view-studio.md`. `design-visual-language.md` is excluded: `INFOSCHEMATICS-TOOL-129` is still changing it, so its residual drift read is deferred until that item lands, and so is the Visual token boundary section of `design-architecture.md` (A8 to A10), which describes the same token manifest TOOL-129 is reshaping.
+
+It found 34 statements: 30 repaired or deleted under step 2, 3 deferred to TOOL-129, and 1 left unresolved. Line numbers are those before the repair.
+
+`design-architecture.md`:
+
+- A1 (line 85). View Model is said to own "guides"; there are none since `ccec3f41` left the grid as the only thing a placement is drawn towards, and the list omits the standard artwork catalogue (`ADR-INFOSCHEMATICS-031`) and the drawing checker (`ADR-INFOSCHEMATICS-036`). Repaired.
+- A2 (line 87). Present's responsibilities omit the production-state reducer both interactive Views share (`reduceProduction` in `packages/view-present/src/production.ts`) and Scene cue resolution (`cues.ts`, `ADR-INFOSCHEMATICS-034` and `-035`). Repaired.
+- A3 (lines 112-124). The host example teaches the compatibility name `App` rather than `Studio`, and omits `gridSize`, which `Diagram` requires (`packages/domain-model/src/model.ts`, `diagram-elements.md`), so it would not typecheck. Repaired.
+- A4 (line 109). The host boundary names only a model input; Studio also accepts an opaque source-retaining `document` and hands back validated document changes (`ADR-INFOSCHEMATICS-019`, `EDIT-020`). Repaired.
+- A5 (line 131). "Both interactive Views build the runtime inside a render-time memo"; Canvas, Present and Studio all do (`Canvas.tsx`, `Present.tsx`, `App.tsx`). Repaired.
+- A6 (lines 157-161). The renderer boundary predates the standard catalogue: resolution consults the host registry first and the catalogue second, a catalogue answer reports no diagnostic, and static SVG draws the same artwork from the same data (`ADR-INFOSCHEMATICS-031`). Repaired.
+- A7 (line 161). "a Overlay". Repaired.
+- A8 (line 165). The `visualTokens` groups named — `canvas.surfaces`, `canvas.text`, `canvas.output` — no longer exist; the manifest now holds `geometry`, `artwork`, `ink`, `paint`, `arrowhead`, `flows`, `emphasis`, `focus`, `selection`, `metrics` and `typography` under `canvas`, plus a top-level `chrome`. Deferred to TOOL-129.
+- A9 (line 167). The generated CSS is described as one `--infoschematic-canvas-*` namespace; it also emits `--infoschematic-chrome-paint-*`. Deferred to TOOL-129.
+- A10 (line 169). Present and Studio chrome are said to stay with each View, and the manifest to introduce no theming; chrome paint is now one manifest palette per colour scheme consumed by Canvas, Present, Studio and Site, which `ADR-INFOSCHEMATICS-037` records. Deferred to TOOL-129, whose review may still move that record.
+- A11 (line 175). The Site is said to mount the self-describing definition through Studio; it mounts none. The homepage renders `homepageInfoschematic` through the static renderer as inline SVG, and the Playground mounts the blank, homepage and showcase definitions in Studio as source-retaining documents. Repaired.
+- U1 (line 127). "Compatibility-only Studio source-edit projections remain explicitly named until the document-edit protocol owns them." The protocol exists (`ADR-INFOSCHEMATICS-019`), yet `projectStudioDocumentOperations` still takes a `compatibilityConfig`. Whether the protocol now "owns" those projections is a reading of intent rather than of code. Unresolved and left unchanged.
+
+`design-view-present.md`:
+
+- P1 (line 21). The axes are "never part of authored `InfoschematicConfig`"; the canonical authored value is the Infoschematic. Repaired.
+- P2 (line 27). "Entering Design or Direct … Returning to Present" is the single-enum reading. Under two axes it is taking up and putting down the Producer's tools that cleans up presentation activity (`PRESENT-002`). Repaired.
+- P3 (line 37). "Design and Direct do not inherit this Audience filtering. They operate on complete authored content." The Scope and Flow-family filters now hold on either axis, and Design keeps an artefact reachable by showing what is hidden and letting the Producer restore it (`DESIGN-005`, `use-presentation.ts`); only Scene focus is Present's own. Repaired.
+- P4 (line 32). A Scene is described only as emphatic; it may also cue the Diagram Dynamics its Diagram declares, in ordered stages a Sequence paces (`SCENE-007`, `ADR-INFOSCHEMATICS-034`, `-035`). Repaired.
+
+`design-view-studio.md`:
+
+- S1 (line 5). "This document describes intent rather than claiming what is implemented today." Most of it is implemented and specified; the specifications own those claims. Repaired.
+- S2 (line 14). "The authored `InfoschematicConfig`"; Studio takes a canonical model or a source-retaining document. Repaired.
+- S3 (line 22). "Design and Direct use the complete authored Infoschematic rather than the filtered Audience projection"; see P3. Repaired.
+- S4 (line 34). "The five authored kinds"; a Point is the sixth (`ADR-INFOSCHEMATICS-028`, `DESIGN-014`). Repaired.
+- S5 (lines 36-42). The capability table lacks Point, uses the compatibility name Graphic, and restates `DESIGN-014` and `artefactCapabilities`. Deleted in favour of the specification.
+- S6 (line 46). Box geometry and minimums name Graphic rather than Overlay, omit the Point's coordinate role, and restate `artefactResizeMinimums`. Repaired.
+- S7 (line 48). "Graphic depths". Repaired to Overlay.
+- S8 (line 54). The grid "is the only alignment aid: a placement rounds to the grid". Group align and distribute now measure against the selection anchor (`ADR-INFOSCHEMATICS-025`, `DESIGN-020`), numeric placement is exact, and `gridSize: 0` stops rounding (`EDIT-018`, `DESIGN-006`). Repaired.
+- S9 (line 58). Grid interval is "a product-level configuration or source decision"; `gridSize` is authored per Diagram and Studio offers a Design grid-size control that writes a document edit (`EditorTools.tsx`, `App.tsx`). Repaired.
+- S10 (line 62). "One primary selection unless a concrete operation requires more"; Design holds one ordered selection whose first element is the anchor, and closes interaction per kind (`ADR-INFOSCHEMATICS-025`, `DESIGN-018`, `DESIGN-020`). Repaired.
+- S11 (line 97). A Card's "optional stereotype or family"; a Card belongs to a Card Collection, and family is a Flow's. Repaired.
+- S12 (line 105). The Library "allocates a fresh `id` and `code`" and "applies the current Scope"; a created element answers to one name, its code (`EDIT-024`), takes its Card Collection from the document (`EDIT-025`) and lands clear of what is drawn (`EDIT-026`), and nothing enters "`InfoschematicConfig`" because the document is the authored value. Repaired.
+- S13 (line 109). "Ports divide a Card or Fabric side"; a Point carries ports too (`ADR-INFOSCHEMATICS-028`). Repaired.
+- S14 (line 119). Flow endpoints "identify Cards or Fabrics"; a Flow may end on a Point. Repaired.
+- S15 (line 133). "Guides are offered only on the axis the label can actually move along"; there are no guides. Deleted.
+- S16 (line 139). "A Scene declares deterministic focus, visible Graphics and optional Callout material"; a Scene shows or hides Overlays, may carry a Callout, and cues Diagram Dynamics (`Scene` in `packages/domain-model/src/model.ts`, `SCENE-007`). Repaired.
+- S17 (line 151). "Applying that set is a deliberate handoff"; in document mode Studio projects each completed gesture into a validated document change the host accepts, and accounts for what was written (`EDIT-020`, `CHANGE-010`, `CHANGE-011`). Repaired.
+- S18 (line 171). "Design renders complete authored content"; see P3. Repaired.
+
+Two findings fall outside this item's Boundary. `EDIT-014` in `docs/specs/design-editing.md` still requires Design to "start from complete authored content rather than Audience filters", which `DESIGN-005` and the code have since reversed; that is a specification defect and is captured as [INFOSCHEMATICS-TOOL-147](INFOSCHEMATICS-TOOL-147-a-filter-design-no-longer-ignores.md). And the header comment in `packages/view-studio/src/app/editor/ChangePane.tsx` still calls the model "authored TypeScript under review"; that is a stale code comment, noted here for whoever next touches the file rather than captured. No statement revealed a decision never taken.
+
 ## Steps
 
-- [ ] Read the four design documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time. Their move and their citations from the records are done; the drift read is not. Write that list into this record as it is made, under `## Current state`, rather than holding it in the session: the first pass of this read was done on 2026-09-25 and its output was lost, which is why the step is still open.
-- [ ] Repair those statements, or delete the passage where the claim now lives in a record or a specification and the design document was only restating it.
+- [ ] Read the four design documents against the current Decision Records and specifications, and list every statement the product has outgrown before changing any of them, so the size of the drift is known rather than discovered one paragraph at a time. Their move and their citations from the records are done; the drift read is not. Write that list into this record as it is made, under `## Current state`, rather than holding it in the session: the first pass of this read was done on 2026-09-25 and its output was lost, which is why the step is still open. The second pass on 2026-10-04 read three of the four and is listed under `## Current state`; `design-visual-language.md` and the architecture document's Visual token boundary section wait for `INFOSCHEMATICS-TOOL-129`, which is changing both, so the step stays open until that read is made.
+- [ ] Repair those statements, or delete the passage where the claim now lives in a record or a specification and the design document was only restating it. On 2026-10-04, 30 of the 34 statements the second read listed were repaired or deleted; A8-A10 wait for `INFOSCHEMATICS-TOOL-129`, and U1 is left as it stands for the owner's reading, so the step stays open.
 - [x] Read `docs/guides/`'s seven guides the same way, and confirm each is a maintainer or operator procedure rather than a duplicate of the Site-owned consumer journey `ADR-INFOSCHEMATICS-014` places under `apps/site/content/`. Four were neither: they serve host application developers, and the guides are now split by audience. None duplicated the journey; one contradicts it, captured as `INFOSCHEMATICS-TOOL-136`.
 - [ ] Decide where the vocabulary belongs — a guide, a reference document, `docs/decisions/references/` beside the record that governs it, or folded into `KDR-INFOSCHEMATICS-001` — and record the reasoning in the review rather than only the outcome. The directory is now available to it, so this is a question about the glossary alone. No approval has been given for any of those destinations as at 2026-09-26, and none may be inferred: the options were laid out in a session and the owner did not pick one, which is an open question rather than a licence to take the most likely answer. Moving the glossary changes a published site address, so it needs the decision before the work.
 - [x] Settle whether this repository adopts `docs/decisions/references/` at all, and say so in `docs/decisions/README.md`. It does: the directory holds the survey of adjacent projects, and `PDR-INFOSCHEMATICS-003` states what that survey is for.
 - [ ] Apply that decision, keeping every `<span id>` anchor stable if the document moves, and update `apps/site/src/routes.ts` and the three vocabulary checks together with it.
 - [ ] Decide whether `docs/reference/` still names a distinct kind of document once the migration table is gone, and merge it away if it does not.
-- [ ] Look at every site route whose source document moved, in a real browser per `AGENTS.md`, because a route that resolves is not evidence that the page reads.
+- [ ] Look at every site route whose source document moved, in a real browser per `AGENTS.md`, because a route that resolves is not evidence that the page reads. On 2026-10-04, after the second drift read, all four `/docs/approach/` routes were captured with `bun run self:browser:look` into `reports/tool-135-approach-architecture/`, `reports/tool-135-approach-view-present/`, `reports/tool-135-approach-view-studio/` and `reports/tool-135-approach-visual-language/`, and the eleven repaired sections individually through a probe into `reports/tool-135-approach/`. Each rendered with its links and code intact. The step stays open because step 6 may still move the glossary, whose route would need the same look.
 
 ## Files touched
 
@@ -101,7 +152,7 @@ This item is largely a guide review, so `docs/guides/` is its subject rather tha
 
 ### Roadmap
 
-`docs/roadmap/_ISSUES.md` advances `TOOL` to `136`, the second number taken by the renderer-versioning contradiction this read found in Site copy. Anything the read finds that is a product defect rather than a documentation defect becomes its own record rather than widening this one.
+`docs/roadmap/_ISSUES.md` advances `TOOL` to `136`, the second number taken by the renderer-versioning contradiction this read found in Site copy, and later to `147` for `INFOSCHEMATICS-TOOL-147`, the `EDIT-014` contradiction the second drift read found. Anything the read finds that is a product defect rather than a documentation defect becomes its own record rather than widening this one.
 
 ## Discussion
 

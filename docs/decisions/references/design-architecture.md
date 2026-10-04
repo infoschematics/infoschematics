@@ -83,9 +83,9 @@ Bun treats every package, application, and example as part of one workspace grap
 
 - `packages/domain-model` owns the dependency-free canonical `Infoschematic` data contract and the established `InfoschematicConfig` compatibility input.
 - `packages/domain-core` owns canonical parsing, definition, defaults, validation, serialisation, document editing, and established-input normalisation.
-- `packages/view-model` owns canonical runtime derivation, geometry, ports, routing, guides, placement, editing primitives, and shared visual tokens.
+- `packages/view-model` owns canonical runtime derivation, geometry, ports, routing, placement, editing primitives, drawing diagnostics, the standard renderer artwork catalogue, and shared visual tokens.
 - `packages/view-canvas` owns the interactive React Infoschematic surface, renderer bindings, and Canvas interaction contract.
-- `packages/view-present` owns Audience filtering, Scene focus, Sequence playback, Callouts, and presentation details over Canvas.
+- `packages/view-present` owns Audience filtering, Scene focus and cues, Sequence playback, Callouts, presentation details over Canvas, and the production-state reducer that both Present and Studio hold their two axes in.
 - `packages/view-studio` owns Producer-facing Design and Direct capabilities while retaining `App` as a compatibility name for `Studio`.
 - `packages/render-svg` owns deterministic, framework-neutral SVG output over Domain Model and View Model.
 - `packages/cli` owns Node command parsing, streams, files, and exit behaviour over Domain Core and the static renderer.
@@ -111,25 +111,27 @@ A host imports one complete canonical `Infoschematic`, owns the document title, 
 
 ```tsx
 import { defineInfoschematicModel } from "@infoschematics/domain-core";
-import { App } from "@infoschematics/view-studio";
+import { Studio } from "@infoschematics/view-studio";
 import "@infoschematics/view-studio/styles.css";
 
 const config = defineInfoschematicModel({
   id: "MY-DIAGRAM",
   title: "My Infoschematic",
-  diagram: { bounds: { x: 0, y: 0, width: 1200, height: 800 } },
+  diagram: { bounds: { x: 0, y: 0, width: 1200, height: 800 }, gridSize: 10 },
 });
 
 export function Page() {
-  return <App config={config} />;
+  return <Studio config={config} />;
 }
 ```
+
+`App` remains exported as a compatibility name for `Studio`. A host that retains authored YAML may instead pass Studio the opaque `InfoschematicDocument` Domain Core parsed, through the `document` prop. Studio then hands back only validated document changes and whole-source replacements, and the host alone accepts, persists, and reconciles source, as [ADR-INFOSCHEMATICS-019](../ADR-INFOSCHEMATICS-019-preserve-authored-source-through-validated-edits.md) records.
 
 View Model normalises either supported input once, then derives lookup tables, routed paths, visibility state, and editing state from the canonical value. Descendants consume the derived runtime through internal context rather than importing or re-projecting authored data. `InfoschematicConfig` remains accepted only at the public compatibility boundary; Canvas, Present, Studio presentation, and static rendering consume canonical runtime concepts internally. Compatibility-only Studio source-edit projections remain explicitly named until the document-edit protocol owns them.
 
 Canonical `id` values are persistence keys. Established configurations preserve the earlier optional-id behaviour: when their id is absent, Studio does not create a shared persistence key, so a title-only established definition remains a safe blank canvas.
 
-Runtime construction is not allowed to throw for a document the contract accepted: any geometry a renderer refuses to express is refused or reported at the edit, which is why every route derivation reaches the one orthogonal construction (`COMPOSE-002` in [the composition specification](../../specs/composition.md)). That is the product's obligation, not the host's, and no host containment substitutes for it. A host still holds the second half: both interactive Views build the runtime inside a render-time memo, so a throw from construction unmounts the tree that contains it — the Diagram, the surrounding chrome and the draft's undo history alike. A host mounting a View in a page that carries anything else should wrap it in an error boundary, so a defect in construction costs one failed surface rather than the page. This is a recommendation to hosts rather than a requirement on them, because a host cannot be asked to compensate for a contract the product owns.
+Runtime construction is not allowed to throw for a document the contract accepted: any geometry a renderer refuses to express is refused or reported at the edit, which is why every route derivation reaches the one orthogonal construction (`COMPOSE-002` in [the composition specification](../../specs/composition.md)). That is the product's obligation, not the host's, and no host containment substitutes for it. A host still holds the second half: every interactive View — Canvas, Present and Studio — builds the runtime inside a render-time memo, so a throw from construction unmounts the tree that contains it — the Diagram, the surrounding chrome and the draft's undo history alike. A host mounting a View in a page that carries anything else should wrap it in an error boundary, so a defect in construction costs one failed surface rather than the page. This is a recommendation to hosts rather than a requirement on them, because a host cannot be asked to compensate for a contract the product owns.
 
 ## Additive views
 
@@ -159,7 +161,9 @@ Canvas owns immutable, host-provided Fabric and Overlay renderer definitions, ru
 
 React context distributes one application's supplied registry internally; it is not a mutable public registration surface. Shared SVG definitions and Scope icons remain host-level supporting renderers. They do not change the versioned property contract.
 
-Unknown keys, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, a Overlay receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry.
+The product also offers a standard catalogue of named treatments, stated as serialisable artwork data in View Model rather than as components, so every outlet draws the same piece from one description. [ADR-INFOSCHEMATICS-031](../ADR-INFOSCHEMATICS-031-the-product-offers-renderer-artwork-as-data.md) extends the registry decision rather than reversing it: resolution consults the host's registry first and reaches the catalogue only where the host answers nothing, so a host registration under a standard key wins, and a catalogue answer reports no diagnostic.
+
+Keys that neither the host nor the catalogue answers, unsupported definition versions, invalid properties, and duplicate keys are reported through structured host diagnostics without becoming Audience-facing exceptions. A Fabric keeps labelled bounds and interaction geometry, an Overlay receives a labelled placeholder, and a Callout keeps its standard accessible presentation. Static SVG follows the same serialisable input boundary and never imports the React registry; it draws catalogue artwork from the same data Canvas does.
 
 ## Visual token boundary
 
@@ -173,4 +177,4 @@ This boundary covers values that must agree across renderers or between TypeScri
 
 [ADR-INFOSCHEMATICS-007](../ADR-INFOSCHEMATICS-007-site-as-public-outlet.md) makes Site the public outlet for packages, canonical consumer documentation, and examples. The homepage may explain Infoschematics visually, but Site does not define product types or reusable behaviour.
 
-The blank and self-describing examples remain separate authored definitions that can be tested and reused independently. The Site mounts the self-describing definition through Studio and renders the same value through the framework-neutral SVG renderer; that composition does not move View or host ownership into the authored package. The former standalone website repository remains outside the monorepo.
+The examples remain separate authored definitions that can be tested and reused independently. The homepage renders the homepage overview from `is-infoschematics` through the framework-neutral SVG renderer as inline SVG, and the Playground mounts the blank, homepage and showcase definitions in Studio as source-retaining documents; neither composition moves View or host ownership into an authored package. The former standalone website repository remains outside the monorepo.

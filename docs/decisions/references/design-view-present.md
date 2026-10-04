@@ -16,7 +16,7 @@ The Infoschematic answers first. Controls and Details help the Audience read it 
 
 ## The production boundary
 
-Present is one side of a transient capability boundary: either a `Producer`'s tools are out or they are not, and the workspace they would return to — `design` or `direct` — is a second, independent axis. A newly mounted application and every reload begin not producing. Both axes are session state, never an Audience preference and never part of authored `InfoschematicConfig`.
+Present is one side of a transient capability boundary: either a `Producer`'s tools are out or they are not, and the workspace they would return to — `design` or `direct` — is a second, independent axis. A newly mounted application and every reload begin not producing. Both axes are session state, never an Audience preference and never part of the authored Infoschematic.
 
 The state behind that boundary has three distinct owners:
 
@@ -24,18 +24,18 @@ The state behind that boundary has three distinct owners:
 - **Presentation activity** holds the active Standalone or Sequence Scene, its step, how far through that Scene's cue cascade the step has reached, and whether timed playback is currently advancing. A stage belongs here rather than in a timer or a ref because derivation must give one answer from one state, and a Sequence spends its step on a stage before spending it on the next Scene.
 - **Producer editing** holds Design or Direct selection, draft targets, pending changes and editing history.
 
-Changing either axis cleans up only the activity that cannot safely cross the boundary. Entering Design or Direct stops Sequence playback and clears presentation focus while preserving Audience preferences and filters. Returning to Present restores those preferences and filters, but does not restore a previous focus or restart playback.
+Moving on either axis cleans up only the activity that cannot safely cross the boundary. Taking up the Producer's tools stops Sequence playback and clears presentation focus while preserving Audience preferences and filters. Putting them down keeps those preferences and filters, but does not restore a previous focus or restart playback. Moving between Design and Direct while producing touches neither.
 
 ## Visibility and focus
 
 Visibility filters and Scene focus are independent dimensions.
 
 - Scope and flow-family controls are **subtractive**. They decide which artefacts and Flows remain present.
-- A Scene is **emphatic**. It keeps the visible Infoschematic in place, brings named content forward and pushes the remaining visible content back.
+- A Scene is **emphatic**. It keeps the visible Infoschematic in place, brings named content forward and pushes the remaining visible content back. It may also cue the [Diagram Dynamics](/docs/reference/vocabulary/#diagram-dynamic) its Diagram declares, which play while the Scene is active and stop when it is left; where the cues fall into ordered stages, the Sequence paces them as it paces its Scenes.
 
 These dimensions compose in one direction: Present applies Scope and Flow-family filters first, then focuses only the content that remains visible. The state permits at most one Standalone or Sequence Scene to be active. Clearing every Scene leaves all visible content at full strength.
 
-Design and Direct do not inherit this Audience filtering. They operate on complete authored content so a hidden artefact cannot become unreachable in Design and Direct can preview its own draft focus without changing the focus Present will use.
+Which Scopes and Flow families are drawn is a question about the Diagram rather than about presenting it, so the same filters hold on either axis. Design keeps a hidden artefact reachable by showing which Scopes and families are hidden and letting the Producer restore them on the Design Canvas. Scene focus is the part that is Present's own: a Producer workspace runs no Scene focus or playback, and Direct previews its own draft focus without changing the focus Present will use.
 
 ## Stable composition
 
