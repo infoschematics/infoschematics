@@ -9,7 +9,7 @@ blocks: []
 blocked_by: []
 baseline_ref: a7b186329c71e6f8936ecf9ee652e04c13a16da6
 created_at: 2026-09-22T18:20:00Z
-updated_at: 2026-09-25T13:08:18Z
+updated_at: 2026-10-04T13:10:00Z
 ---
 
 # Mode, style and hue
@@ -67,7 +67,17 @@ The static outlet mirrors the pin: `packages/render-svg/src/index.ts:609` suppre
 
 ## Files touched
 
-`packages/view-model/src/tokens.ts`, `tokens.test.ts`, `tokens.generated.css` and `appearance.ts`; `packages/domain-model/src/appearance.ts` and `model.ts`; `packages/domain-core/schema/infoschematic.schema.json` via `scripts/generate-schema.ts`; `packages/view-model/src/compatibility.ts` and `runtime.ts`; `scripts/generate-visual-tokens.ts`; `packages/render-svg/src/index.ts`; `packages/cli/src/options.ts`; `packages/view-canvas/src/Canvas.schemes.browser.test.tsx`, `tokens.test.tsx`, `colour-scheme.ts` and `styles.css`; `packages/view-studio` for the hue control; `apps/site/src/VisualGuide.tsx`; the five documents under `examples/`; `docs/specs/appearance.md` and `docs/specs/command-line-rendering.md`; `ADR-INFOSCHEMATICS-037`.
+What shipped, across both deliveries:
+
+- **Contract:** `packages/domain-model/src/appearance.ts` and `option-catalogue.ts`; `packages/domain-core/src/schema.ts` and `define.ts`, with `packages/domain-core/schema/infoschematic.schema.json` regenerated.
+- **View model:** `packages/view-model/src/colour.ts` (new), `tokens.ts`, `tokens.generated.css`, `appearance.ts`, `compatibility.ts` and their tests; `scripts/generate-visual-tokens.ts`.
+- **Renderers and command:** `packages/render-svg/src/index.ts`; `packages/cli/src/index.ts` and `options.ts`, with their tests.
+- **Canvas and the control:** `packages/view-canvas/src/colour-scheme.ts`, `ColourSchemeButton.tsx`, `InfoschematicDiagram.tsx`, `index.ts`, `styles.css`, `tokens.test.tsx`, `Canvas.schemes.browser.test.tsx` and `ColourScheme.browser.test.tsx`.
+- **Studio:** `packages/view-studio/src/app/panels/TitleBar.tsx` and `App.schemes.browser.test.tsx`. No hue control, because that step had no subject.
+- **Site:** `apps/site/src/VisualGuide.tsx`, `SiteNav.browser.test.tsx` and `styles.css`; `apps/site/content/authoring.md`, `studio.md` and `present.md`.
+- **Corpus:** the published documents under `examples/` and their generated `src/` modules.
+- **Documentation:** `docs/specs/appearance.md`, `command-line-rendering.md`, `static-rendering.md` and `design-session.md`; `ADR-INFOSCHEMATICS-037`; `docs/decisions/references/design-visual-language.md`; `docs/reference/vocabulary.md`, with `scripts/vocabulary-drift.test.ts`.
+- **Probes:** `scripts/probes/style-mode.ts`.
 
 ## Verify
 
@@ -107,7 +117,13 @@ The two axes the Goal asked for. A **style** is what the drawing is and is autho
 
 Approved boundary exclusions held: `readableInk` still measures what it measured, Card detail disclosure is untouched and stays with `INFOSCHEMATICS-TOOL-130`, and the identity-chip overlap with `INFOSCHEMATICS-TOOL-121` was left where that record holds it.
 
-Baseline `a7b186329c71e6f8936ecf9ee652e04c13a16da6`. The delivery landed in two parts: `f208527e` carried the contract, the view model, both renderers, the CLI and the corpus; this commit carries the documentation, the site, the probe and the two defects found by looking.
+**Follow-up after review (2026-10-04).** The independent review returned CHANGES on three counts, and all three are delivered.
+
+- **The lock and an authored mode are honoured everywhere.** An authored `light` or `dark` is where the drawing opens; a reader's explicit choice or a render flag moves an unlocked one; `modeLocked` holds it whatever is asked.
+- **The reader control offers light, dark and system** in Canvas, Studio and the site, and Studio withholds it from a locked document.
+- **The two copied palette tokens in the corpus are gone.** The showcase's `#4d7ea8` was the neutral light accent and is now an authored hue, and the same check over the other published documents removed three more copied tokens.
+
+Baseline `a7b186329c71e6f8936ecf9ee652e04c13a16da6`. The first delivery landed in two parts: `f208527e` carried the contract, the view model, both renderers, the CLI and the corpus; this commit carries the documentation, the site, the probe and the two defects found by looking.
 
 ### Change Summary
 
@@ -120,6 +136,50 @@ Baseline `a7b186329c71e6f8936ecf9ee652e04c13a16da6`. The delivery landed in two 
 **Documents and specifications.** `APPEAR-019`, `CLI-013` and `STATIC-020` were each rewritten wholesale rather than patched, because each stated the old one-enum model as its subject. [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md) is amended in place at `status: current`. [The visual-language reference](../decisions/references/design-visual-language.md) restates the palette rule as the two axes crossed.
 
 **Site and guides.** `apps/site/src/VisualGuide.tsx` teaches style and mode as separate things and its gallery demonstrates the claim; `apps/site/content/authoring.md` gains two sections, one for each axis; `studio.md` and `present.md` each carried a sentence that was materially false under the new model and were rewritten.
+
+**Follow-up: one precedence rule.** `resolveDocumentMode` in `packages/view-model/src/appearance.ts` is the single rule every outlet now uses.
+
+- An unlocked authored mode is a default, and a request — the reader's explicit choice or the caller's flag — wins over it.
+- A locked mode wins over any request.
+- `undefined` means nobody answered, and each outlet supplies its own last resort.
+
+`render-svg` applies the rule and falls back to `light`. The CLI applies the same rule and does three things with the outcome:
+
+- when the lock blocked `--mode`, it writes a note on standard error and still succeeds, because the caller receives the drawing the author meant;
+- it refuses a document locked to `system` for `--format png` with the validation exit;
+- its usage text says all of this.
+
+Print stays light whatever the lock, consistent with the record's existing "paper is light" position. `CLI-013`, `APPEAR-019` and ADR-037 state the precedence.
+
+**Follow-up: Canvas and the control share one store.** `packages/view-canvas/src/colour-scheme.ts` is rebuilt on `useSyncExternalStore` over a module store. That store is notified by:
+
+- the media query;
+- a mutation observer on the root attribute;
+- cross-tab storage events;
+- `applyColourScheme` itself.
+
+This fixes a defect review did not name. The control and each drawing used to keep separate React state, so pressing the control repainted the roles but left authored seeds realised for the old ground. Storage now records an explicit `system`, distinct from never having chosen: never touched lets a document's own mode stand, while `system` asks for the machine over it.
+
+Canvas writes `data-infoschematic-scheme` on its own `<svg>` only when the document has an opinion. `scripts/generate-visual-tokens.ts` emits own-element blueprint selectors and extends the print selectors so paper still wins, which keeps the chrome around a locked drawing in the reader's scheme.
+
+`ColourSchemeButton` renders a labelled group of three `aria-pressed` buttons, Light, Dark and System. It keeps its name pending `INFOSCHEMATICS-TOOL-143`.
+
+Studio's `TitleBar.tsx` omits the Appearance bank for a locked document. The site's header keeps its control, because it sets the site's chrome rather than any one document's ground. `DESIGN-022` and ADR-037 now say three choices, and say that a locked document gets none.
+
+**Follow-up: corpus.**
+
+- `examples/is-showcase` FAB-01 `#4d7ea8`, the neutral light accent, is now the authored hue `#3f8fa8`.
+- In `is-infoschematics/overview.yaml` and `is-system`, two `#12273b24` Region fills are dropped. They were the blueprint dark `regionFill`, so the palette role now answers.
+- `#16345136`, the dark chrome accent surface plus alpha, is now the authored hue `#2f6db536`.
+- In `is-infoschematics`, the `dependency` Family's `#52606d` is dropped. It was the light `unauthored` token, so that role now answers.
+
+Two values were kept deliberately. `#82b366` is one of the draw.io palette hues the corpus uses beside `#9673a6`, `#6c8ebf` and `#b85450`, and only coincides with the `selection.selected` interaction token. `#79c9ff` is the product's brand cyan, used by the favicon and the demo frames. Both are authored hues, not copied palette roles.
+
+**Follow-up: documentation and vocabulary.**
+
+- The schema descriptions of `mode` and `modeLocked` state the precedence, and the schema is regenerated.
+- `authoring.md` and the visual-language reference describe the default, the lock and the PNG refusal.
+- `docs/reference/vocabulary.md` gains an Appearance glossary with Visual Style, Colour Mode and Hue Seed. The option catalogue cites the first two, and the drift table records their glosses.
 
 Three material decisions departed from the Steps as written, each stated where it lands:
 
@@ -137,6 +197,26 @@ The evidence that mattered was visual and came from a real browser, per `AGENTS.
 
 Looking found a real defect that the suite did not. In a deferring rendering, `resolveReadableInk` was measured at the resolved mode, which is `light` whenever a rendering defers, so a Card label was written in dark ink over a fill that becomes dark for a reader whose browser prefers dark. Half of it pre-dated this work and half was new with the seeds; both are fixed by `SeedResolver.pair`, which sends a value that varies by ground but was never authored through the same custom-property mechanism as a seed. Confirmed in the recaptured dark PNG, where the labels are now light and legible.
 
+**Follow-up verification.**
+
+- **Unit tests:**
+  - `resolveDocumentMode` is tabled over seven cases in `packages/view-model/src/appearance.test.ts`;
+  - `packages/render-svg/src/index.test.ts` proves by byte equality that a drawing opens on its own mode, that an unlocked one moves, and that a locked one never does;
+  - `packages/cli/src/index.test.ts` proves the held flag, the standard-error note and the locked-system PNG refusal.
+- **Browser suites:**
+  - `Canvas.schemes.browser.test.tsx` covers the authored default and lock for both styles, including print over a locked dark mode. It also covers a locked `system` following the machine whatever the page chose, and seeds re-realising when the control is pressed.
+  - `ColourScheme.browser.test.tsx` covers the three named choices, keyboard operation, the return to system, and persistence.
+  - `App.schemes.browser.test.tsx` covers the three choices in Studio and their absence for a locked document.
+  - `SiteNav.browser.test.tsx` covers the site's group.
+- **Browser look:** `reports/tool-129-mode-lock/`, through the probe `reports/tool-129-mode-lock.ts` (untracked). The machine says light throughout. In order, the captures show:
+  - the Benchmark under System;
+  - the Benchmark after pressing Dark;
+  - the Pipeline seed served locked to dark, drawn dark inside light chrome with no Studio control;
+  - the site header with its three choices, under System and under Dark.
+
+  The run's log records the pressed states and the drawing's own attribute.
+- **Gate:** `bun run self:check` passes all 52 tasks on top of `47302b33`, after the colour-scheme wrapper became a `<fieldset>` to satisfy Biome's semantic-element rule. An earlier run had one unrelated failure in `specification-evidence` for the withdrawn `ROUTE-011`, which `21479360` has since fixed upstream.
+
 `scripts/dependency-boundaries.test.ts` was timing out at Vitest's default five seconds under the gate while passing in under a second standalone: every case there drives a real TypeScript cruise, and the default was measuring contention rather than a boundary violation. It now carries a 60-second timeout with the reason beside it.
 
 ### Outstanding concerns
@@ -149,19 +229,25 @@ Looking found a real defect that the suite did not. In a deferring rendering, `r
 
 **The Studio step had no subject**, as noted against it: Studio shows authored colours but offers no control that picks one, so there was nothing to convert to a hue.
 
+**The site's own control stays visible over a locked drawing.** On the playground, the site header's control still moves the site's chrome, and a locked drawing simply does not follow it. Studio's control, the one for the document, is withheld. This is a deliberate reading of "hidden when the document is locked", recorded in ADR-037 rather than left implicit.
+
 ### Post-change review
 
 The Goal is met on both halves. A reader switching the page between light and dark now sees the drawing change with it, including a blueprint drawing, which was the concrete failure that opened this record — every published example authored `surface: blueprint` and therefore pinned itself dark whatever the reader preferred. And an author picks a colour once and it reads on either ground, with `!` available when they meant a literal.
 
 Regression risk sits in two places. The first is the compatibility path: `surface` is accepted and mapped, and `--scheme`/`adaptive` still answer, so existing documents and existing invocations keep working; the suites cover both spellings. The second is the seed resolution itself, which changes the drawn colour of every authored value in the corpus. That is the intended behaviour rather than a regression, but it is a visible change to five published documents and the packet should be read with that in mind.
 
-Acceptance readiness: everything mechanical is green and the deviations are stated. The blueprint light palette is the open judgement.
+The follow-up closes what review found missing. `modeLocked` was a field that changed nothing; it now changes the same thing in every outlet, because there is one function to change it. Its regression risk is the control's stored value. A reader who previously pressed a ground still has that ground stored and keeps it, and storage that was empty stays empty, so no remembered choice is lost. Only a reader who now presses System gets the new explicit value.
+
+Acceptance readiness: everything this record owns is green and the deviations are stated. The blueprint light palette is the open judgement.
 
 ### Mini recap
 
 Delivered the two-axis model — authored style, resolved mode — with authored colour read as a hue seed, across the contract, the view model, both renderers, the command, the corpus, the specifications, the decision record and the site.
 
 Verified by `bun run self:check` green at 52 of 52 tasks, by the roadmap audit, and by four browser captures at `reports/style-and-mode/` taken through a new probe that asserts the ground it asked for. Looking at those captures found and fixed an illegible-ink defect that the green suite had not.
+
+The review follow-up made authored mode a default and `modeLocked` a lock in Canvas, `render-svg` and the CLI through one rule. It gave the reader a three-way control backed by one shared store, withheld in Studio for a locked document, and replaced the corpus colours that had been copied from palette tokens. It is proven by unit, renderer, CLI and browser cases and by captures at `reports/tool-129-mode-lock/`.
 
 Concerns: the blueprint light palette needs a human eye; the IBC baseline step could not be performed here and the record's prediction about it was wrong; the internal naming sweep is deferred to [INFOSCHEMATICS-TOOL-143](INFOSCHEMATICS-TOOL-143-one-word-for-mode.md).
 
