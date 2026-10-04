@@ -180,7 +180,7 @@ diagram:
         topics: 12
         durable: true
       appearance:
-        color: "#4d7ea8"
+        color: "#3f8fa8"
         fill: "#0a1524"
         icon: bus
     - id: FAB-02

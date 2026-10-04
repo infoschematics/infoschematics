@@ -43,7 +43,6 @@ diagram:
     - id: dependency
       label: Depends on
       description: A package or host consumes a lower-level package.
-      color: "#52606d"
   cards:
     - id: PKG-DM
       label: Domain Model

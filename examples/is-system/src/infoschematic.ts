@@ -94,7 +94,6 @@ diagram:
         cornerRadius: 12
         frame:
           style: solid
-        fill: "#12273b24"
   flows:
     - id: SELECT
       family: progression

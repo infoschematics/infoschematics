@@ -108,7 +108,6 @@ diagram:
         cornerRadius: 12
         frame:
           style: solid
-        fill: "#12273b24"
     - id: product
       label: Product
       bounds: 474 104 320 200
@@ -119,7 +118,7 @@ diagram:
         cornerRadius: 12
         frame:
           style: solid
-        fill: "#16345136"
+        fill: "#2f6db536"
     - id: outputs
       label: Outputs
       bounds: 924 24 320 360
@@ -130,7 +129,6 @@ diagram:
         cornerRadius: 12
         frame:
           style: solid
-        fill: "#12273b24"
   flows:
     - id: SHAPE
       family: composition
