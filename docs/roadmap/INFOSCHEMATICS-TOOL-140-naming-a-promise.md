@@ -4,12 +4,12 @@ area: TOOL
 title: Naming a promise
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: db3b86593ff001b0c0401b15a2ee306c1f565d5e
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:52:04Z
+updated_at: 2026-10-04T21:25:00Z
 ---
 
 # Naming a promise
@@ -134,6 +134,10 @@ The goal is met: a reader can cite the concept by a stable id, and the vocabular
 ### Mini recap
 
 Named the concept Promise (`promise`), added its vocabulary row, section and code-name note, linked its first use in two specifications, ADR-INFOSCHEMATICS-040 and the Site authoring guide, and classified the new glosses. Gates green; audit PASS. Proposed learning route, not promoted: Specification and realisation claim lack vocabulary ids although the Product sentence relies on the first - a candidate record for `ki-next`.
+
+## Done
+
+Accepted 2026-10-04 on the review packet above after an independent Fable review returned ACCEPT: the Promise entry distinguishes a Promise from a Specification and a realisation claim consistently with `ADR-INFOSCHEMATICS-040`, the schema key, types and four `promise-*` rule codes, citations sit at genuine first use, and the in-place ADR amendment follows `GDR-INFOSCHEMATICS-001`. Following its non-blocking findings, the realisation claim now covers `realisedBy` on a Specification's Interfaces and Operations as well as the Specification itself (`ADR-INFOSCHEMATICS-015`), and the Specification line is recast without a spaced-hyphen parenthetical. Decided by the Fable reviewer under delegated autonomy (2026-10-04), reversible.
 
 ## Discussion
 

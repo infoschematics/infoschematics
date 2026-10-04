@@ -123,8 +123,8 @@ A Promise is optional and is authored inside the document, in its `promises` lis
 A Promise, a Specification and a realisation claim are three different statements about intent, told apart by what each is checked against:
 
 - A **Promise** is a claim about the document itself, checked against the Flows the document already contains, and false the moment an edit breaks it.
-- A **Specification** describes something outside the document - a standard, an interface, an operation - that the drawing refers to.
-- A **realisation claim** is a Specification's `realisedBy` list, saying which Diagram elements satisfy it. Its references are validated, but whether the component really does satisfy the standard is a fact about the world that no checker here can test.
+- A **Specification** describes something outside the document that the drawing refers to, such as a standard, an interface or an operation.
+- A **realisation claim** is a `realisedBy` list on a Specification, or on one of its Interfaces or Operations, saying which Diagram elements satisfy it. Its references are validated, but whether the component really does satisfy the standard is a fact about the world that no checker here can test.
 
 ## Roles, capability and workspaces
 
