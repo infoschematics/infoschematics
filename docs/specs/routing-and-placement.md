@@ -108,6 +108,14 @@ _Verify:_ nudge an artefact once with the grid active and read the authored coor
 
 _Evidence:_ grid projection in `packages/view-studio/src/app/editor/use-editor.ts` and `minimumPortGap` in `packages/view-model/src/ports.ts`.
 
+### ROUTE-011 — ~~Alignment guides come from the scene~~ (deprecated)
+
+Withdrawn when guide snapping was removed, leaving the grid as the only thing a placement is drawn towards (INFOSCHEMATICS-TOOL-101). The serial stays claimed.
+
+### ROUTE-012 — ~~Each axis snaps independently~~ (deprecated)
+
+Withdrawn with ROUTE-011 when guide snapping was removed (INFOSCHEMATICS-TOOL-101). The serial stays claimed.
+
 ### ROUTE-013 — A flow label belongs to its route
 
 A flow-label position MUST be represented as a share of route length rather than as a free coordinate. Projecting a loose point onto a route MUST return the nearest point on one of its runs.
