@@ -4,12 +4,12 @@ area: TOOL
 title: A fifth target kind
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: af3437867b1a88f9332474faf02802457e35043a
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T12:10:00Z
+updated_at: 2026-10-04T12:31:00Z
 ---
 
 # A fifth target kind
@@ -38,8 +38,8 @@ The requirement's Callout sentence is already right in canonical terms: a Callou
 
 ## Steps
 
-- [ ] Rewrite `DIRECT-001`'s enumeration as five kinds in canonical terms: a Standalone Scene, an expanded Sequence, a collapsed Sequence, a Callout, or a Storyboard, with a Sequence target discriminated by its display.
-- [ ] Update the requirement's Evidence line to say which `DirectTarget` member carries which kind, so the `story` member is accounted for by name.
+- [x] Rewrite `DIRECT-001`'s enumeration as five kinds in canonical terms: a Standalone Scene, an expanded Sequence, a collapsed Sequence, a Callout, or a Storyboard, with a Sequence target discriminated by its display.
+- [x] Update the requirement's Evidence line to say which `DirectTarget` member carries which kind, so the `story` member is accounted for by name.
 
 ## Files touched
 
@@ -70,6 +70,38 @@ None.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+`DIRECT-001` now enumerates the five Direct target kinds the product has - a Standalone Scene, an expanded Sequence, a collapsed Sequence, a Callout, or a Storyboard - in canonical vocabulary, and its Evidence line names which `DirectTarget` member carries which kind, so the `story` member is accounted for. The record's open question is settled as neither of its two anticipated answers: the requirement did not predate a new kind and the type is not wrong. Under `ADR-INFOSCHEMATICS-018` a Story is a Sequence, and the type's `sequence` and `story` members are an expanded and a collapsed Sequence; the requirement named four concepts where the type discriminates five kinds. Excluded and untouched: `DirectTarget`, `reduceProduction`, the Studio chooser, the vocabulary, and `DIRECT-003`, which lists artefacts a target names rather than kinds. Baseline `af3437867b1a88f9332474faf02802457e35043a`; the change is the commit carrying this packet.
+
+### Change Summary
+
+- `docs/specs/directing.md` - `DIRECT-001`'s first sentence enumerates five kinds and adds that a Sequence target is discriminated by the Sequence's display; its Evidence line maps `standalone-scene`, `sequence`, `story`, `callout` and `storyboard` to those kinds and cites `packages/view-studio/src/app/direct-targets.ts`, which offers all five. The Callout sentence ("its owning Sequence Scene") was already right in canonical terms and is unchanged.
+- No approved deviation. Using "Story" as a sixth canonical name was rejected because the vocabulary lists "story" as another name for Sequence and `AGENTS.md` requires canonical concepts only.
+
+### Verification
+
+- Read against code: `DirectTarget` in `packages/view-present/src/production.ts` has five members; `directOptionsFor` in `packages/view-studio/src/app/direct-targets.ts` builds `sequence` targets from the expanded-Sequence composition and `story` and `storyboard` targets from the collapsed-Sequence list, which `packages/view-model/src/runtime.ts` derives from Sequences with `display: collapsed`. Each member maps to exactly one named kind.
+- `bunx vitest run --root . scripts/specification-evidence.test.ts` - 5 passed, 1 failed; the failure is `ROUTE-011` in `docs/specs/routing-and-placement.md` declaring no conformance state, committed at `638e2818` before this item and outside it. The evidence-path cases covering this requirement pass.
+- `ki repo audit --skill ki-specs` - PASS.
+- `bunx rumdl check docs/specs/directing.md` - no issues.
+- `bun run self:check` - red for the same unrelated causes recorded on `INFOSCHEMATICS-TOOL-136`.
+
+### Outstanding concerns
+
+- The `story` member's name is the compatibility name for a collapsed Sequence. Renaming it is a code change outside this boundary and is not proposed here.
+- Repository-wide `bun run self:check` is red for unrelated causes.
+
+### Post-change review
+
+The goal is met: the requirement's enumeration matches the type its Verify line points at, so a reader can tell conformance from omission, and it does so without introducing a non-canonical term. Scope held to one requirement. No behavioural regression risk. Ready for acceptance.
+
+### Mini recap
+
+`DIRECT-001` enumerates five kinds in canonical terms and its evidence names each type member; the specification audit passes. Learning route (not promoted): when a requirement names concepts and the type names kinds, say which maps to which, because a compatibility name in the type reads as a missing concept.
 
 ## Discussion
 

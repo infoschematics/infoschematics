@@ -6,7 +6,7 @@ Producer control of Scenes and their containing presentation material. Part of t
 
 ### DIRECT-001 — Direct has a discriminated active target
 
-Direct MUST represent its active authoring target as a discriminated value for exactly one Standalone Scene, Sequence, Callout or Storyboard. Every target MUST carry the stable identity required by its kind. A Callout target MUST identify its owning Sequence Scene. Mode selection, Direct target selection and Present focus MUST remain distinct operations.
+Direct MUST represent its active authoring target as a discriminated value for exactly one of five kinds: a Standalone Scene, an expanded Sequence, a collapsed Sequence, a Callout, or a Storyboard. A Sequence target MUST be discriminated by the Sequence's display, because Direct offers an expanded and a collapsed Sequence as separate targets. Every target MUST carry the stable identity required by its kind. A Callout target MUST identify its owning Sequence Scene. Mode selection, Direct target selection and Present focus MUST remain distinct operations.
 
 A Callout storyboard MUST be associated with its selected presentation owner rather than introduced as another presentation-focus source.
 
@@ -14,7 +14,7 @@ _Conformance:_ conforming
 
 _Verify:_ inspect `DirectTarget` and `reduceProduction` in `packages/view-present/src/production.ts`, and confirm mode, target and focus move independently.
 
-_Evidence:_ `packages/view-present/src/production.ts` defines `DirectTarget` as a discriminated union whose Callout variant carries its owning Sequence and Scene, and `directTargetIsValid` requires the identity each kind needs. `packages/view-present/src/production.test.ts` starts every session in Present without a target, routes presentation actions only while Present is active, ignores Direct target actions outside Direct, and clears targets when another mode takes ownership.
+_Evidence:_ `packages/view-present/src/production.ts` defines `DirectTarget` as a discriminated union of five members - `standalone-scene`, `sequence` for an expanded Sequence, `story` for a collapsed Sequence, `callout` and `storyboard` - whose Callout variant carries its owning Sequence, by display, and Scene; `packages/view-studio/src/app/direct-targets.ts` offers all five, and `directTargetIsValid` requires the identity each kind needs. `packages/view-present/src/production.test.ts` starts every session in Present without a target, routes presentation actions only while Present is active, ignores Direct target actions outside Direct, and clears targets when another mode takes ownership.
 
 ### DIRECT-002 — Empty Sequences remain authorable
 
