@@ -60,7 +60,7 @@ organisation_code = "HNR"
 [skills.ki-git]
 
 [skills.ki-housekeeping-claude]
-auto_memory = "transition"
+auto_memory = "disabled"
 
 [skills.ki-tokenomics]
 
