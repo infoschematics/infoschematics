@@ -4,12 +4,12 @@ area: TOOL
 title: Mode, style and hue
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: a7b186329c71e6f8936ecf9ee652e04c13a16da6
 created_at: 2026-09-22T18:20:00Z
-updated_at: 2026-10-04T13:10:00Z
+updated_at: 2026-10-04T16:34:51Z
 ---
 
 # Mode, style and hue
@@ -252,6 +252,10 @@ The review follow-up made authored mode a default and `modeLocked` a lock in Can
 Concerns: the blueprint light palette needs a human eye; the IBC baseline step could not be performed here and the record's prediction about it was wrong; the internal naming sweep is deferred to [INFOSCHEMATICS-TOOL-143](INFOSCHEMATICS-TOOL-143-one-word-for-mode.md).
 
 Learning routes proposed, not taken: that a default test timeout can measure contention rather than the thing under test is a repository-level fact and would belong in `AGENTS.md` beside the existing note about checks that measure nothing; and that a value which varies by ground but was never authored has to travel by the same mechanism as an authored one is the generalisation behind `SeedResolver.pair`, which belongs with the module rather than anywhere wider.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. The three findings from the first review were re-verified against `caa872cb`, `b969bcc7` and `e9843bd9`: `resolveDocumentMode` is the one rule in `packages/view-model/src/appearance.ts` and is applied by `render-svg`, the CLI and Canvas, with the stderr note and the locked-`system` PNG refusal proven in `packages/cli/src/index.test.ts`; the three-way `<fieldset>` control is shared by Canvas, Studio and the site and Studio withholds it for a locked document; and no `#4d7ea8` remains under `examples/`. `bun run self:check` passes 52 of 52, the view-model, render-svg and CLI suites pass uncached, `ki repo audit` passes, and the captures in `reports/tool-129-mode-lock/` show a locked dark drawing inside light chrome with no Studio control. The blueprint light palette still wants a human eye, as the packet says; that is a design judgement held outside this closure. No nits.
 
 ## Discussion
 
