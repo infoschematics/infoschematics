@@ -4,12 +4,12 @@ area: TOOL
 title: An unrecapturable baseline
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f071cda5e8adbef04c912bcd879e5fe411e57680
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T21:20:00Z
+updated_at: 2026-10-04T22:20:00Z
 ---
 
 # An unrecapturable baseline
@@ -134,6 +134,10 @@ The goal asked that a checked-in baseline be regenerable by its repository or sa
 ### Mini recap
 
 Retired the IBC visual baseline and instrument in one revertable commit, `3bae5824`, after proving the revert restores them and their test passes. Learning route: none needed beyond this record; the `AGENTS.md` rule about checks that measure nothing already covers the general lesson.
+
+## Done
+
+Accepted 2026-10-04 on the review packet above after an independent Fable review returned ACCEPT. The reviewer reproduced the restoration in a throwaway worktree: `git revert 3bae582499be2a6cf9e4a04bed24cef3234eac40` applies cleanly on top of the delivery, returns `scripts/`, `README.md` and `knip.json` to the pre-retirement state, and the restored test passes. No dangling reference to the baseline, the script or a direct `sharp` dependency remains outside historical roadmap records, and `packages/view-model/src/compatibility.ts` stays because runtime and Studio still use it. Retiring the baseline was decided by Fable under delegated autonomy (2026-10-04), reversible by that single revert.
 
 ## Discussion
 
