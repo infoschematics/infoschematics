@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-146
 area: TOOL
 title: An unrecapturable baseline
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: f071cda5e8adbef04c912bcd879e5fe411e57680
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-09-26T00:00:00Z
+updated_at: 2026-10-04T21:14:00Z
 ---
 
 # An unrecapturable baseline
@@ -31,6 +31,72 @@ So the baseline is external-fixture evidence living in this repository's fixture
 What the repository says and can do about this one baseline and its instrument. The decision is which of three it is: a genuine cross-repository check that needs its invocation and its external prerequisite documented where a reader of the fixture will find them; a check that belongs in the IBC repository rather than this one, in which case it hands over per the cross-repository rule in the harness workflow; or evidence of a comparison already made and finished, in which case it is a record rather than a baseline and should stop looking like something a gate maintains.
 
 It does not decide whether visual compatibility with IBC still matters as a product concern, and it does not add `sharp` to this repository to make the capture work locally — that would be answering the question by making the repository carry a native image dependency it has so far avoided, which is a trade worth naming rather than falling into.
+
+## Current state
+
+Three files make up the instrument and its evidence, all under `scripts/`: `ibc-visual-compatibility.ts` (the `capture` and `compare` command, 15 KB), `ibc-visual-compatibility.test.ts` (checks the comparison rules against the stored manifest, never rendering anything) and `fixtures/ibc-2026-visual-baseline.json` (a version 2 manifest of 39 presentation states of the external `is-ibc-2026` package, rasterised with `sharp@0.35.2/libvips@8.18.3`). The baseline was last written on 2026-09-15 by `310be105`. No `is-ibc-2026` package exists in any workspace checkout under `~/workspaces`, so the capture cannot be repeated here or alongside.
+
+Two places point at it: `knip.json` names `scripts/ibc-visual-compatibility.ts` as a root entry, because no command reaches it, and the `## Command surface` section of `README.md` documents its two invocations and its `sharp` prerequisite as the one command deliberately not wrapped in a root script. No specification, guide, decision record, Turborepo task, `package.json` script or CI workflow names it. `packages/view-model/src/compatibility.ts`, which the script imports, is used by the runtime and the Studio and is not affected.
+
+### Decisions
+
+- **The baseline is evidence of a comparison already made, and it is retired rather than kept as a record.** Of the three readings in `## Boundary`, the third fits: the comparison was made against an external package while the domain model's compatibility was being proved (`bd9b6c3b`, `533653e7`), and nothing in this repository can make it again. Keeping the files as a labelled record would still leave a 97 KB fixture and a test in the gate that look maintained; git history keeps the evidence without that cost. Decided by Fable under delegated autonomy (2026-10-04), reversible.
+- **The instrument goes with the baseline.** A capture and compare command with no baseline and no reachable fixture is unused code that `knip.json` has to be told to keep. Decided by Fable under delegated autonomy (2026-10-04), reversible.
+- **Reversibility is one commit.** The retirement removes the three files and the two pointers in a single commit containing nothing else, so `git revert <sha>` of that commit restores all of it byte for byte. The restore procedure, with that sha, is recorded under `## Review` once delivered. Decided by Fable under delegated autonomy (2026-10-04), reversible.
+- **No handover to the IBC repository.** Whether IBC visual compatibility still matters is outside this record's boundary; a handover would be answering it. It is left as a non-blocking owner question below instead.
+- **No Decision Record.** Removing an unreachable instrument establishes no rule the product must keep; the reasoning lives in this record and in the retirement commit message, which survives pruning.
+
+### Open question for the owner (non-blocking)
+
+Does visual compatibility with the IBC 2026 walkthrough still matter as a product concern? If it does, the natural home for a capture and compare instrument is the repository that owns `is-ibc-2026` and already depends on `sharp`, restored from this item's retirement commit and moved there; if not, nothing further is needed.
+
+## Steps
+
+- [ ] Delete `scripts/ibc-visual-compatibility.ts`, `scripts/ibc-visual-compatibility.test.ts` and `scripts/fixtures/ibc-2026-visual-baseline.json`.
+- [ ] Remove `scripts/ibc-visual-compatibility.ts` from the root workspace `entry` list in `knip.json`.
+- [ ] Remove the paragraph, code block and `sharp` note in `README.md`'s command-surface section that document the instrument, leaving the surrounding rules intact.
+- [ ] Commit those five paths alone as one `chore(scripts)` commit whose message states the restore command.
+- [ ] Record the retirement sha and the restore procedure under `## Review` in this record.
+
+## Files touched
+
+- `scripts/ibc-visual-compatibility.ts` (deleted)
+- `scripts/ibc-visual-compatibility.test.ts` (deleted)
+- `scripts/fixtures/ibc-2026-visual-baseline.json` (deleted)
+- `knip.json`
+- `README.md`
+- This record
+
+Not touched: `packages/view-model/src/compatibility.ts` and its exports, `docs/roadmap/INFOSCHEMATICS-TOOL-129-mode-style-and-hue.md` (a delivered record whose account stays true as history), and the Site content.
+
+## Verify
+
+- `grep -rn "ibc-visual\|ibc-2026-visual" --exclude-dir=node_modules --exclude-dir=.git .` finds only roadmap records.
+- `bun run self:unused:verify` passes, proving the `knip.json` entry removal leaves no stale hint, and `bun run self:scripts:test` and `bun run self:scripts:typecheck` pass without the module.
+- `git revert --no-commit <retirement sha>` in a scratch worktree restores the three files and two pointers, and `bunx vitest run scripts/ibc-visual-compatibility.test.ts` passes there; the worktree is then discarded.
+- `bun run self:check` passes; `bunx rumdl check` is clean on the touched Markdown; `ki repo audit --repo .` reports FAIL=0.
+
+## Dependencies / blocks
+
+None.
+
+## Documentation impact
+
+### Decision Records
+
+None; see `### Decisions`.
+
+### Specifications
+
+None. No specification names the instrument or the baseline.
+
+### Guides
+
+`README.md`'s command-surface section loses its description of the instrument.
+
+### Roadmap
+
+None. [INFOSCHEMATICS-TOOL-129](INFOSCHEMATICS-TOOL-129-mode-style-and-hue.md) is delivered and keeps its account as written.
 
 ## Discussion
 
