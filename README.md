@@ -19,6 +19,8 @@ Ownership determines the top-level workspace root:
   - [Blank Infoschematic](examples/is-blank/) — `@infoschematics/is-blank`, the minimum executable definition.
   - [Infoschematics examples](examples/is-infoschematics/) — `@infoschematics/is-infoschematics`, a concise homepage overview and substantial self-description.
   - [A system, explained](examples/is-system/) — `@infoschematics/is-system`, a four-stage narrative from observed signals to a shared view.
+- **Skills** contain Agent Skills versioned with the contract they teach:
+  - [Infoschematics authoring](skills/infoschematics-authoring/SKILL.md) — writes a first Infoschematic from a description, or amends one, for correction in Studio.
 
 ## Use Studio View
 
@@ -37,6 +39,12 @@ export function InfoschematicPage() {
 ```
 
 A title-only definition renders a blank canvas safely. An Infoschematic can equally be authored as a JSON or YAML document and loaded with `parseInfoschematic`, which validates it against the same contract and reports faults by path. See [the authoring guide](apps/site/content/authoring.md) and [the React integration guide](apps/site/content/react-integration.md) for the complete ownership boundary.
+
+## Start a document with an agent
+
+The [`infoschematics-authoring`](skills/infoschematics-authoring/SKILL.md) Agent Skill turns a plain-language description into a first canonical YAML document, or makes a requested change to an existing one and leaves the rest alone. It chooses a representation pattern before placing anything, then writes a candidate and repairs it against `infoschematics check` until the drawing reads or its stop rule ends the loop. Copy or link the directory into the skills directory your agent runtime reads, such as a project's `.claude/skills/` or `.agents/skills/`.
+
+What it produces is a starting point, not a finished drawing. When it stops with findings it names each one rather than reporting a clean result, and correcting those — and anything else — in Studio is the expected next step: paste the YAML into the [Playground](https://infoschematics.info/playground/)'s Source view and shape it in Design. It writes data only, chooses placement the way an author does rather than running a layout engine, and changes nothing in the packages it reads. [PDR-INFOSCHEMATICS-004](docs/decisions/PDR-INFOSCHEMATICS-004-an-authoring-skill-starts-a-document-and-names-what-it-leaves.md) records why it lives here and what it promises.
 
 ## Package direction
 

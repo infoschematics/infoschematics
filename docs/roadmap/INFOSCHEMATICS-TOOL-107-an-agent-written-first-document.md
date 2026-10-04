@@ -4,12 +4,12 @@ area: TOOL
 title: An agent-written first document
 theme: tool
 horizon: next
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: f626bee411d7eb1badc1c10e100e1cdbeec5cd0a
 created_at: 2026-09-21T09:30:00Z
-updated_at: 2026-09-25T08:52:17Z
+updated_at: 2026-10-04T12:12:46Z
 ---
 
 # An agent-written first document
@@ -44,13 +44,13 @@ The owner has settled the two questions this record was holding. The skill lives
 
 ## Steps
 
-- [ ] Add `skills/infoschematics-authoring/SKILL.md`, describing when to use it, what it produces, and what it hands over unfinished.
-- [ ] Have it choose a representation pattern from the guide before placing anything, so composition is a decision rather than an accident of generation order.
-- [ ] Have it write a candidate document immediately and never reason about coordinates in prose, then validate and repair against `infoschematics check` under a bounded stop rule.
-- [ ] Support amending an existing document as a first-class mode, not only writing a new one: read the document, change what was asked for, and leave the rest alone.
-- [ ] Make it report an unresolved document plainly — the remaining findings, named — rather than claiming a clean result, and say that Studio or a conversation is where those are settled.
-- [ ] Keep the catalogues out of the instructions: artwork kinds, artefact kinds and option values are read from the repository at authoring time, because a list inside a skill drifts from the contract that owns it.
-- [ ] Document the skill for a reader: what it is for, what it is not, and how to correct what it produces.
+- [x] Add `skills/infoschematics-authoring/SKILL.md`, describing when to use it, what it produces, and what it hands over unfinished.
+- [x] Have it choose a representation pattern from the guide before placing anything, so composition is a decision rather than an accident of generation order.
+- [x] Have it write a candidate document immediately and never reason about coordinates in prose, then validate and repair against `infoschematics check` under a bounded stop rule.
+- [x] Support amending an existing document as a first-class mode, not only writing a new one: read the document, change what was asked for, and leave the rest alone.
+- [x] Make it report an unresolved document plainly — the remaining findings, named — rather than claiming a clean result, and say that Studio or a conversation is where those are settled.
+- [x] Keep the catalogues out of the instructions: artwork kinds, artefact kinds and option values are read from the repository at authoring time, because a list inside a skill drifts from the contract that owns it.
+- [x] Document the skill for a reader: what it is for, what it is not, and how to correct what it produces.
 
 ## Files touched
 
@@ -85,6 +85,54 @@ The consumer guide gains the on-ramp: how to get a first document from a descrip
 ### Roadmap
 
 Consumes the delivered drawing diagnostics. Repository inspection as an input is deliberately left for its own record rather than folded in here.
+
+## Review
+
+### Delivered
+
+The approved boundary, delivered from baseline `f626bee411d7eb1badc1c10e100e1cdbeec5cd0a`: a runtime-neutral Agent Skill at `skills/infoschematics-authoring/` with a NEW mode (plain-language description to a first canonical YAML document) and an AMEND mode (change what was asked, leave every other identity alone), both ending in a check-repair loop under a bounded stop rule, a render-and-look step, and a hand-over that names every remaining finding and points to Studio or a conversation. The Decision Record the item called for is [PDR-INFOSCHEMATICS-004](../decisions/PDR-INFOSCHEMATICS-004-an-authoring-skill-starts-a-document-and-names-what-it-leaves.md).
+
+Excluded as the record states: no model concept, no contract or package change, no automatic layout, no repository inspection as an input. Site-owned consumer prose is captured separately as `INFOSCHEMATICS-SITE-032` (triage), per `AGENTS.md`, because Site output follows a settled feature and `apps/site/content/authoring.md` was under concurrent change by `INFOSCHEMATICS-TOOL-129`.
+
+The parked question is answered by declaring the standard rather than relocating the skill. The owner's settled answer — the skill lives here — stands; `.ki.toml` now declares `[skills.ki-skills]`, so the coverage cascade that would have failed on an undeclared `skills/**/SKILL.md` passes. Probing showed the commitment is smaller than the park feared: for a product skill the rubric's only mechanical demand beyond the open standard was `ki-depends-on: []` and a refresh marker on its source file, and `ki-skills` was available through the installed harness, so the record's own verify step could run.
+
+### Change Summary
+
+- `skills/infoschematics-authoring/SKILL.md` — when to use it, the two modes, the hand-over contract and its boundaries.
+- `skills/infoschematics-authoring/references/sources.md` — where each catalogue lives (schema, vocabulary, representation patterns, YAML convention, standard artwork keys, rule codes, worked examples), in a checkout and from the published site, and how to resolve and confirm the checker. It names locations and never copies a catalogue.
+- `skills/infoschematics-authoring/references/placement.md` — lanes from the representation pattern, sizes and gutters, ports and Flows, Regions and canvas bounds.
+- `skills/infoschematics-authoring/references/repair-loop.md` — validity before drawing, one diagnosed repair per round keyed off `rule`, `concerns` and `measured` (with `repairs` read as prose, per the correction recorded under Parked), the stop rule, and an identity-level comparison for amendments.
+- `docs/decisions/PDR-INFOSCHEMATICS-004-…md` and its entry in `docs/decisions/README.md` (renumbering the four Repository operation entries after it).
+- `.ki.toml` — `[skills.ki-skills]` declared, with its reason.
+- `README.md` — the skill in the repository layout and a short "Start a document with an agent" section.
+- `docs/roadmap/INFOSCHEMATICS-SITE-032-first-document-from-prose.md` and `docs/roadmap/_ISSUES.md` — the Site follow-up captured in triage, and its serial reserved.
+
+### Verification
+
+- **Exercised end to end** by a fresh agent following only the skill, in ignored `tmp/tool-107/`. The checker resolved to `bun packages/cli/src/bin.ts` and confirmed on `examples/is-system/infoschematic.yaml` (`the drawing reads.`, exit `0`).
+  - NEW, from a five-sentence order-fulfilment description: the agent chose "architecture with boundaries, left to right", wrote the candidate, and every check exited `0` with `findings: []`. Its first PNG validated but read badly — no Region frame, Card detail hidden, a Fabric label truncated — which it repaired from the image, not the checker. The final render was looked at by the agent and again by the implementer: it reads left to right, the cloud boundary encloses the right parts, the courier sits outside, and the families are distinguishable. One description is still truncated on the message bus Fabric.
+  - AMEND, on a copy of `examples/is-system/infoschematic.yaml` (rename one Card and replace its description): the check gave `the drawing reads.`; the identity comparison printed exactly `changed diagram.cards.OBS-01`; `diff -u` showed two changed lines with comments, order and quoting intact; the render showed the new text unclipped.
+  - The agent's critique was applied: appearance as the lever for what is drawn, Fabric-versus-Card choice, port and `link` notation pointer, required schema fields, id casing, where the before copy goes, and when to stop polishing.
+- **`ki repo audit --skill ki-skills`**: PASS (one WARN, LONG-4 refresh marker, fixed before the final run).
+- **`bun run self:check`**, in a clean worktree holding the baseline plus only this change, with `--continue`: 51 of 52 tasks pass. The one failure, `scripts/specification-evidence.test.ts` on `docs/specs/routing-and-placement.md` ROUTE-011, fails identically at the baseline with this change removed; it comes from `638e2818`, which this item does not touch.
+- **`ki repo audit`**: the coverage cascade passes with the skill present. In the shared checkout the remaining FAILs (TSC-1, BIO-1) come from other agents' uncommitted package changes; the clean worktree shows only RUNTIMES-2, because a worktree carries no runtime discovery links.
+- **`bunx rumdl check`** on every Markdown file changed: no issues.
+
+### Outstanding concerns
+
+- `self:check` is red at baseline on ROUTE-011's empty conformance state (`638e2818`); it needs its owner's fix and is not caused or masked by this change.
+- Declaring `[skills.ki-skills]` is a governance commitment the owner should confirm: the repository is now held to the Agent Skills rubric for anything under `skills/`, and the skill must be refreshed when the schema, vocabulary, representation guidance or checker output change. PDR-INFOSCHEMATICS-004 records that consequence.
+- The exercise produced a document the checker passed on the first round, so the repair loop was proven against the known-good path and the stop rule was not reached. A document that starts with errors was not exercised.
+- A checker-clean render can still truncate text and hide detail; the skill now tells an agent to look, but the checker cannot hold it to that.
+- The consumer-guide on-ramp is deferred to `INFOSCHEMATICS-SITE-032`.
+
+### Post-change review
+
+The goal holds: from a sentence, an agent following the skill produced a document that validates, reads, and is ready for Studio, and from an amendment request it changed exactly the requested identity. Scope held to the record's boundary — no package, schema, specification or Site content changed — and regression risk is confined to documentation and configuration: no code path reads `skills/`, and the only gate effect is the coverage cascade, which now passes. The skill meets its own rubric. It is ready for review, with the governance declaration and the unexercised error path as the points a reviewer should weigh.
+
+### Mini recap
+
+Delivered the `infoschematics-authoring` skill, its decision record, the README on-ramp and the `ki-skills` declaration, and captured the Site guide follow-up. Verified by a real NEW and AMEND run with renders looked at, a clean `ki-skills` audit, and a clean-worktree `self:check` whose only failure predates this item. Proposed learning routes, not promoted: the `AGENTS.md` point that a checker-clean drawing can still read badly gains a second instance (truncated Fabric text and hidden Card detail); and the ki-skills coverage cascade could say in its finding how small a product skill's declaration actually is, since its cost was overestimated when this record was parked.
 
 ## Discussion
 

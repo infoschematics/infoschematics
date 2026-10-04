@@ -38,6 +38,9 @@ auto_memory = "disabled"
 
 [skills.ki-repo-website-cloudflare]
 
+# The product's one Agent Skill, `skills/infoschematics-authoring/`, per PDR-INFOSCHEMATICS-004.
+[skills.ki-skills]
+
 # -----------------------------------------------------------------------------
 # Governance runtime
 # -----------------------------------------------------------------------------
