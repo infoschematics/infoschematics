@@ -4,12 +4,12 @@ area: TOOL
 title: A stale decision record
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: 73d2622dba360c7920922d3151e50bf3b0a7c5ea
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T12:10:00Z
+updated_at: 2026-10-04T12:50:00Z
 ---
 
 # A stale decision record
@@ -38,9 +38,9 @@ The answer to the Boundary's question is an amendment in place. The `ki-decision
 
 ## Steps
 
-- [ ] Rewrite the Point sentence so both renderers ring a Point at the shared radius and send nothing round it, keeping the reason a mark says nothing a ring did not.
-- [ ] Rewrite the Overlay Graphic sentence to state that both renderers draw one and that it is offered no mark, that still output outlines one stating its bounds, and that the finite outline is what a renderer owes it under the fallback the paragraph already states. Do not supply a new rationale for declining the mark: the record never had one beyond the false premise.
-- [ ] Capture the Canvas drawing nothing for an emphasised Overlay Graphic as its own Triage record: it is a renderer defect against the fallback rule, outside this record's boundary, and in a file under concurrent change.
+- [x] Rewrite the Point sentence so both renderers ring a Point at the shared radius and send nothing round it, keeping the reason a mark says nothing a ring did not.
+- [x] Rewrite the Overlay Graphic sentence to state that both renderers draw one and that it is offered no mark, that still output outlines one stating its bounds, and that the finite outline is what a renderer owes it under the fallback the paragraph already states. Do not supply a new rationale for declining the mark: the record never had one beyond the false premise.
+- [x] Capture the Canvas drawing nothing for an emphasised Overlay Graphic as its own Triage record: it is a renderer defect against the fallback rule, outside this record's boundary, and in a file under concurrent change.
 
 ## Files touched
 
@@ -71,6 +71,40 @@ None.
 ### Roadmap
 
 One new Triage record for the Canvas emphasis of an Overlay Graphic.
+
+## Review
+
+### Delivered
+
+`ADR-INFOSCHEMATICS-027` no longer rests on two claims about the interactive Canvas that stopped being true: it says both renderers ring a Point at the shared Point radius and send nothing round it, and that both renderers draw an Overlay Graphic, which is offered no mark and is owed the finite outline. The record was amended in place, because a Decision Record is a living present-state record and the decision itself - which geometries a travelling mark is offered on - is unchanged; only its description of the renderers was stale, so neither supersession nor a new record applies. The Canvas falling short of the outline it owes an Overlay Graphic is captured as [INFOSCHEMATICS-TOOL-148](INFOSCHEMATICS-TOOL-148-an-emphasis-that-draws-nothing.md) rather than fixed here. Baseline `73d2622dba360c7920922d3151e50bf3b0a7c5ea`; the change is the commit carrying this packet.
+
+### Change Summary
+
+- `docs/decisions/ADR-INFOSCHEMATICS-027-author-what-an-emphasis-means-not-how-it-is-played.md` - the Point sentence keeps its reason (a mark round a disc says nothing its ring did not) and replaces "the interactive Canvas draws no Point at all" with both renderers ringing it at `emphasisPointRadius`; the Overlay Graphic sentence replaces "the interactive Canvas draws none" with both renderers drawing one, no mark offered, still output outlining a Graphic that states its bounds, and the finite outline owed by any renderer that draws one. No new rationale for declining a Graphic the mark was supplied: the record had none beyond the false premise, and TOOL-148 records that question for a decision rather than inventing an answer.
+- `docs/roadmap/INFOSCHEMATICS-TOOL-148-an-emphasis-that-draws-nothing.md` - new Triage capture: the Canvas emphasis geometry map (`InfoschematicDiagram.tsx`, Regions, placeables, Points and Flows) has no Overlay entry, so an emphasised Overlay Graphic draws nothing there although `render-svg` outlines a bounded one (`index.ts`, `graphic.bounds` -> `boxEmphasis`).
+- `docs/roadmap/_ISSUES.md` - `TOOL` high-water mark raised to `148`. Number `147` was skipped because another concurrent agent holds an uncommitted `INFOSCHEMATICS-TOOL-147`; only the `TOOL` hunk was staged, leaving that agent's working-tree changes untouched.
+
+### Verification
+
+- `grep -nE "draws no Point at all|interactive Canvas draws none" docs/decisions/ADR-INFOSCHEMATICS-027-*.md` - no output (exit 1).
+- The rewritten sentences were checked against the emphasis geometry: `packages/view-canvas/src/InfoschematicDiagram.tsx` sets a Point entry `{ at, travels: false }` drawn as a circle of `emphasisPointRadius`, and has no Overlay entry; `packages/render-svg/src/index.ts` sets `pointEmphasis(point.at)` with the same radius and `boxEmphasis(graphic.bounds)` only where a Graphic states bounds.
+- `ki repo audit --skill ki-decision-records` - PASS.
+- `ki repo audit --skill ki-work-roadmap` - the only FAIL is ITEM-1 on another agent's uncommitted `INFOSCHEMATICS-TOOL-147-a-filter-design-no-longer-ignores.md`; this item's records pass.
+- `bunx rumdl check` on the touched files - no issues.
+- `bun run self:check` - red for the unrelated causes recorded on `INFOSCHEMATICS-TOOL-136` (`ROUTE-011` without a conformance state from `638e2818`, and another agent's uncommitted `view-canvas` work); not attributable to this change, which touches only Markdown.
+
+### Outstanding concerns
+
+- With the false premise gone, the record states no reason for declining a bounded Graphic a travelling mark, though the Canvas draws one as a box. That is noted on TOOL-148 for a decision and deliberately not answered here.
+- Repository-wide `bun run self:check` is red for unrelated causes.
+
+### Post-change review
+
+The goal is met: no sentence in the record describes either renderer contrary to the code, and the decision's substance - Region, Card and Fabric offered the mark; Point, Flow and Graphic declined with the finite outline as fallback - is unchanged. Amending in place is the conventions' prescribed route for a living record whose decision holds. The scope held to the two sentences; the renderer gap it exposed was captured, not fixed. Fable was consulted on the amend-in-place reading before editing. Ready for acceptance.
+
+### Mini recap
+
+`ADR-INFOSCHEMATICS-027`'s Point and Overlay Graphic sentences now match both renderers, amended in place, and the Canvas's missing Graphic outline is captured as TOOL-148. Learning route (not promoted): a premise of the form "renderer X draws none" ages silently as renderers grow; stating what each renderer owes rather than what it currently lacks keeps a record true.
 
 ## Discussion
 
