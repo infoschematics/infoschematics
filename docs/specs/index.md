@@ -14,7 +14,7 @@ The two lines carry different jobs and must not restate each other. A `_Verify:_
 
 Requirements are grouped as **user-observable behaviours** or **quality properties**. A numbered requirement remains accepted while pending or divergent. Unnumbered Gaps are candidates not yet accepted.
 
-IDs are append-only within their registered prefix and are never reused.
+IDs are append-only within their registered prefix and are never reused. A withdrawn requirement keeps its heading with the title struck through and marked `(deprecated)`, followed by a line saying why, so its serial stays claimed; it carries no lifecycle fields.
 
 ## Areas
 

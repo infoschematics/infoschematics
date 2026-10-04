@@ -72,21 +72,28 @@ const method = (verify: string) =>
 /** Where the two lines' jobs are written down, quoted into the failures below so a reader is not left guessing. */
 const convention = '`docs/specs/index.md`, "Reading a requirement"'
 
+const isWithdrawn = (block: string) =>
+  /^### [A-Z][A-Z-]*-\d+ — .*\(deprecated\)\s*$/.test(block.split('\n', 1)[0] ?? '')
+
 const requirements = async (): Promise<Requirement[]> => {
   const files = (await readdir(specificationsDirectory)).filter((name) => name.endsWith('.md')).sort()
   const parsed = await Promise.all(
     files.map(async (name) => {
       const file = join(specificationsDirectory, name)
       const blocks = (await readFile(file, 'utf8')).split(/^(?=### [A-Z][A-Z-]*-\d+ — )/m).slice(1)
-      return blocks.map((block) => ({
-        citations: citations(block),
-        conformance: block.match(/^_Conformance:_ (.*)$/m)?.[1]?.trim() ?? '',
-        evidence: stated(block, 'Evidence'),
-        file,
-        id: block.match(/^### ([A-Z][A-Z-]*-\d+) — /)?.[1] ?? '',
-        named: namedThings(block),
-        verify: stated(block, 'Verify')
-      }))
+      // A withdrawn requirement keeps its serial claimed under a struck-through `(deprecated)` heading and states no
+      // contract, so it carries no conformance, Verify or Evidence line to hold it to.
+      return blocks
+        .filter((block) => !isWithdrawn(block))
+        .map((block) => ({
+          citations: citations(block),
+          conformance: block.match(/^_Conformance:_ (.*)$/m)?.[1]?.trim() ?? '',
+          evidence: stated(block, 'Evidence'),
+          file,
+          id: block.match(/^### ([A-Z][A-Z-]*-\d+) — /)?.[1] ?? '',
+          named: namedThings(block),
+          verify: stated(block, 'Verify')
+        }))
     })
   )
   return parsed.flat()
