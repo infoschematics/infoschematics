@@ -4,12 +4,12 @@ area: TOOL
 title: An unrecapturable baseline
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: f071cda5e8adbef04c912bcd879e5fe411e57680
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T21:14:00Z
+updated_at: 2026-10-04T21:20:00Z
 ---
 
 # An unrecapturable baseline
@@ -52,11 +52,11 @@ Does visual compatibility with the IBC 2026 walkthrough still matter as a produc
 
 ## Steps
 
-- [ ] Delete `scripts/ibc-visual-compatibility.ts`, `scripts/ibc-visual-compatibility.test.ts` and `scripts/fixtures/ibc-2026-visual-baseline.json`.
-- [ ] Remove `scripts/ibc-visual-compatibility.ts` from the root workspace `entry` list in `knip.json`.
-- [ ] Remove the paragraph, code block and `sharp` note in `README.md`'s command-surface section that document the instrument, leaving the surrounding rules intact.
-- [ ] Commit those five paths alone as one `chore(scripts)` commit whose message states the restore command.
-- [ ] Record the retirement sha and the restore procedure under `## Review` in this record.
+- [x] Delete `scripts/ibc-visual-compatibility.ts`, `scripts/ibc-visual-compatibility.test.ts` and `scripts/fixtures/ibc-2026-visual-baseline.json`.
+- [x] Remove `scripts/ibc-visual-compatibility.ts` from the root workspace `entry` list in `knip.json`.
+- [x] Remove the paragraph, code block and `sharp` note in `README.md`'s command-surface section that document the instrument, leaving the surrounding rules intact.
+- [x] Commit those five paths alone as one `chore(scripts)` commit whose message states the restore command.
+- [x] Record the retirement sha and the restore procedure under `## Review` in this record.
 
 ## Files touched
 
@@ -97,6 +97,43 @@ None. No specification names the instrument or the baseline.
 ### Roadmap
 
 None. [INFOSCHEMATICS-TOOL-129](INFOSCHEMATICS-TOOL-129-mode-style-and-hue.md) is delivered and keeps its account as written.
+
+## Review
+
+### Delivered
+
+The IBC visual baseline and its capture and compare instrument are retired, within the boundary: nothing was handed to another repository, `sharp` was not added, and whether IBC visual compatibility still matters is left as the owner question above. Baseline `a9a4ef7d1f66980798238c752233eb1562b9eef4`; the retirement is `3bae582499be2a6cf9e4a04bed24cef3234eac40` (`chore(scripts): retire the unrecapturable IBC visual baseline`), a commit containing those five paths and nothing else.
+
+**How to restore it.** Run `git revert 3bae582499be2a6cf9e4a04bed24cef3234eac40` on `main`. That restores `scripts/ibc-visual-compatibility.ts`, `scripts/ibc-visual-compatibility.test.ts`, `scripts/fixtures/ibc-2026-visual-baseline.json`, the `knip.json` entry and the `README.md` paragraph exactly as they were at `a9a4ef7d`; no other data or artefact exists. Recapturing the baseline after a restore still needs the external `is-ibc-2026` workspace with `sharp` installed, which is not in any local checkout. To read the retired files without restoring them, `git show a9a4ef7d:scripts/fixtures/ibc-2026-visual-baseline.json` and likewise for the other two.
+
+### Change Summary
+
+- `scripts/ibc-visual-compatibility.ts`, `scripts/ibc-visual-compatibility.test.ts`, `scripts/fixtures/ibc-2026-visual-baseline.json`: deleted.
+- `knip.json`: the root workspace no longer names the instrument as an entry.
+- `README.md`: the command-surface paragraph, code block and `sharp` note describing the instrument are removed; the surrounding command rules are unchanged.
+- This record: shaped in `a9a4ef7d`, review packet added here.
+
+No deviations from the plan. `packages/view-model/src/compatibility.ts` stays, used by the runtime and the Studio.
+
+### Verification
+
+- Residual references: `grep -rn "ibc-visual\|ibc-2026-visual"` outside `node_modules` and `.git` finds only this record and the delivered `INFOSCHEMATICS-TOOL-129` record.
+- `bun run self:check`: exit 0, 52 of 52 tasks successful; `self:scripts:test` 122 passed; `self:unused:verify` "No unused files, dependencies or exports, with 2 sanctioned hints"; `self:boundaries:verify` cruised 390 modules.
+- Reversibility: in a scratch detached worktree at `3bae5824`, `git revert --no-commit 3bae5824` restored all five paths, `git diff --cached --quiet a9a4ef7d -- scripts README.md knip.json` confirmed them identical to the pre-retirement tree, and `bunx vitest run scripts/ibc-visual-compatibility.test.ts` passed 3 of 3. The worktree was removed.
+- Markdown: rumdl clean through the commit hook on `README.md` and this record.
+- `ki repo audit --repo .`: PASS, 23 skills, no FAIL.
+
+### Outstanding concerns
+
+None blocking. The owner question above (does IBC visual compatibility still matter, and if so should the instrument live in the `is-ibc-2026` repository) is unanswered by design.
+
+### Post-change review
+
+The goal asked that a checked-in baseline be regenerable by its repository or say who can regenerate it; the repository now holds no baseline it cannot regenerate, and git history plus this record say what it was and how to bring it back. Scope held to five paths in one commit. Regression risk is low: the deleted test exercised only the deleted module, no command or task invoked the instrument, and the full gate passes. Ready for review.
+
+### Mini recap
+
+Retired the IBC visual baseline and instrument in one revertable commit, `3bae5824`, after proving the revert restores them and their test passes. Learning route: none needed beyond this record; the `AGENTS.md` rule about checks that measure nothing already covers the general lesson.
 
 ## Discussion
 
