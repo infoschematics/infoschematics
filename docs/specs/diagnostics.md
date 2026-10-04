@@ -120,7 +120,7 @@ _Evidence:_ `packages/cli/src/index.test.ts`, whose cases compare the prose and 
 
 ## Declared readings
 
-A drawing rule measures geometry the author did not state. These rules measure something the author did state: what the document promises about its own meaning, per [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-document-promises-what-it-means-and-a-checker-holds-it-to-it.md). They keep the `DRAW` series because a requirement id is a stable citation rather than a claim about what the finding measures, and because they are answered by the same review surface in the same finding shape.
+A drawing rule measures geometry the author did not state. These rules measure something the author did state: the [Promises](../reference/vocabulary.md#promise) a document makes about its own meaning, per [ADR-INFOSCHEMATICS-040](../decisions/ADR-INFOSCHEMATICS-040-a-document-promises-what-it-means-and-a-checker-holds-it-to-it.md). They keep the `DRAW` series because a requirement id is a stable citation rather than a claim about what the finding measures, and because they are answered by the same review surface in the same finding shape.
 
 ### DRAW-014 — A promise is reviewed apart from the drawing, and always as an error
 

@@ -24,7 +24,7 @@ Three decisions had to be taken together, because each one is only defensible in
 
 ### A promise is authored data inside the definition, and it is optional
 
-What a document promises about its own meaning is authored **inside the document**, as an optional `promises` list beside `diagram`, `scopes`, `sequences` and `specifications`.
+What a document promises about its own meaning, a [Promise](../reference/vocabulary.md#promise), is authored **inside the document**, as an optional `promises` list beside `diagram`, `scopes`, `sequences` and `specifications`.
 
 The tempting alternative is the overlay precedent of [ADR-INFOSCHEMATICS-015](ADR-INFOSCHEMATICS-015-specifications-own-realisations.md), which keeps realisation claims out of the Diagram and beside it. That precedent does not transfer, and the reason is worth stating precisely rather than treating as a matter of taste. A realisation claim is a fact about the world **outside** the document: which component satisfies which specification, which is knowledge the document neither contains nor can check, and which properly belongs to whoever owns that world. A promise is a claim about the document's **own** meaning — it can be checked against nothing but the Flows already written down, and it is false the moment the document changes. An artefact that travels separately from the thing it describes is exactly the artefact that gets left behind, and being left behind is precisely the failure a promise exists to prevent. A promise kept beside the document would go stale in the one situation it was written for.
 
@@ -64,4 +64,4 @@ The Domain Model, the Domain Core schema and the published JSON Schema all widen
 
 A promise is only as good as the reading its author described, and nothing here checks that the promise is the right one. A document may declare a path that was never the point and pass forever. That is the same limitation every specification has and is not one a checker can close; what it can do, and does, is refuse to let a stated intention decay in silence.
 
-The word "promise" is used here as plain English rather than as a canonical product concept, because the [vocabulary reference](../reference/vocabulary.md) does not yet carry a term for it. It should, and until it does, prose about promises cannot cite a stable id the way prose about a Card or a Scope can.
+The concept this record introduced is the canonical [Promise](../reference/vocabulary.md#promise), so prose about it cites a stable id the way prose about a Card or a Scope does. The vocabulary also tells a Promise apart from a Specification and a realisation claim by what each is checked against, which is the distinction the overlay precedent above turns on.

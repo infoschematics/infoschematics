@@ -4,12 +4,12 @@ area: TOOL
 title: Naming a promise
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: db3b86593ff001b0c0401b15a2ee306c1f565d5e
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:49:15Z
+updated_at: 2026-10-04T20:52:04Z
 ---
 
 # Naming a promise
@@ -50,11 +50,11 @@ The uses that rely on the concept and cannot yet link it are `AUTHOR-018` in `do
 
 ## Steps
 
-- [ ] Add a `promise` row to the Product table in `docs/reference/vocabulary.md`, with glosses as alternatives, and name Promises in the Product sentence beside Scopes, Specifications and Sequences.
-- [ ] Add a `## Promises` section to the vocabulary that defines a Promise, its four kinds, that it may be written over artefact codes or Scope ids, that no renderer reads it and a broken one is an error, and that tells it apart from a Specification and a realisation claim by what each is checked against.
-- [ ] Add a Code conventions bullet naming `DocumentPromise` as the code type for a Promise.
-- [ ] Classify each new alternative in `scripts/vocabulary-drift.test.ts`.
-- [ ] Link the first use of the concept to `vocabulary.md#promise` in `AUTHOR-018`, in the "Declared readings" section of `docs/specs/diagnostics.md`, in ADR-INFOSCHEMATICS-040, and in `apps/site/content/authoring.md`; replace ADR-INFOSCHEMATICS-040's closing paragraph, which records the gap, with one that cites the term.
+- [x] Add a `promise` row to the Product table in `docs/reference/vocabulary.md`, with glosses as alternatives, and name Promises in the Product sentence beside Scopes, Specifications and Sequences.
+- [x] Add a `## Promises` section to the vocabulary that defines a Promise, its four kinds, that it may be written over artefact codes or Scope ids, that no renderer reads it and a broken one is an error, and that tells it apart from a Specification and a realisation claim by what each is checked against.
+- [x] Add a Code conventions bullet naming `DocumentPromise` as the code type for a Promise.
+- [x] Classify each new alternative in `scripts/vocabulary-drift.test.ts`.
+- [x] Link the first use of the concept to `vocabulary.md#promise` in `AUTHOR-018`, in the "Declared readings" section of `docs/specs/diagnostics.md`, in ADR-INFOSCHEMATICS-040, and in `apps/site/content/authoring.md`; replace ADR-INFOSCHEMATICS-040's closing paragraph, which records the gap, with one that cites the term.
 
 ## Files touched
 
@@ -96,6 +96,44 @@ The Site authoring guide links the term at first use.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+The concept ADR-INFOSCHEMATICS-040 introduced now has a canonical vocabulary term, [Promise](../reference/vocabulary.md#promise) with id `promise`, and every first use that relies on it links that id. Planning baseline `db3b86593ff001b0c0401b15a2ee306c1f565d5e`; delivery baseline `b9c2367d99130c7fc2a813c8dd81e88a46260fc9`, the commit that made this record Ready. Excluded as planned: the authored `promises` key, the `DocumentPromise` types, the `promise-*` rule codes, the schema, checker and showcase, and the ordinary-English verb elsewhere.
+
+### Change Summary
+
+- `docs/reference/vocabulary.md` - a `promise` row in the Product table with the glosses "declared reading" and "stated meaning"; Promises named in the Product sentence; a `## Promises` section defining the four kinds, the two ways of naming an end, that no renderer reads one and a broken one is an error, and telling a Promise apart from a Specification and a realisation claim by what each is checked against; a Code conventions bullet naming `DocumentPromise`.
+- `scripts/vocabulary-drift.test.ts` - both new alternatives classified as `gloss`.
+- `docs/specs/authoring.md` (`AUTHOR-018`) and `docs/specs/diagnostics.md` ("Declared readings") - first use linked; no requirement text changed.
+- `docs/decisions/ADR-INFOSCHEMATICS-040-...` - first use linked, and the closing paragraph that recorded the missing term now cites it and points at the three-way distinction.
+- `apps/site/content/authoring.md` - first use linked, under the decision recorded above.
+
+No deviation from the plan.
+
+### Verification
+
+- `bunx vitest run scripts/vocabulary-terms.test.ts scripts/vocabulary-citations.test.ts scripts/vocabulary-drift.test.ts` - 3 files, 7 tests passed.
+- Non-vacuity: with the anchor and id renamed to `promis`, `vocabulary-citations.test.ts` failed with "ADR-INFOSCHEMATICS-040... cites unknown vocabulary id promise"; restored, it passes. The test scans both `docs/` and `apps/site/content/`, so the Site link is covered by the same check.
+- `bun run self:check` - exit 0, 52 of 52 tasks; `//#self:scripts:test` and `@infoschematics/site:build` ran as cache misses, and the built Site carries `id="promise"`.
+- `bunx rumdl check` on the five touched documents - no issues.
+- `ki repo audit --repo .` - PASS, 23 skills, no FAIL.
+
+No browser look was taken: no visual treatment changed, and the vocabulary page renders the new row through the same Markdown path as every other term.
+
+### Outstanding concerns
+
+None blocking. Non-blocking owner question: the word Promise was kept under delegated autonomy because every authored and code surface already carries it. If the owner prefers another word, the time to rename is before [INFOSCHEMATICS-TOOL-041](INFOSCHEMATICS-TOOL-041-initial-package-publication.md) publishes the schema, and the cost is the `promises` key, the `promise-*` rule codes, the types, the showcase ids and the prose linked here.
+
+### Post-change review
+
+The goal is met: a reader can cite the concept by a stable id, and the vocabulary separates the three statements about intent the Discussion called awkward. Scope held to naming and citing; no behaviour, schema or rule changed, so regression risk is confined to documentation checks, all of which pass. Ready for acceptance review.
+
+### Mini recap
+
+Named the concept Promise (`promise`), added its vocabulary row, section and code-name note, linked its first use in two specifications, ADR-INFOSCHEMATICS-040 and the Site authoring guide, and classified the new glosses. Gates green; audit PASS. Proposed learning route, not promoted: Specification and realisation claim lack vocabulary ids although the Product sentence relies on the first - a candidate record for `ki-next`.
 
 ## Discussion
 

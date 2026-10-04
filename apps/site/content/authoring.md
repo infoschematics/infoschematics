@@ -187,7 +187,7 @@ Ensure the Flow's label, direction, endpoints, and surrounding explanation make 
 
 ## Declare what the diagram must keep true
 
-You drew this to make one reading obvious: material enters here, passes through these stages, leaves there. Six months from now somebody who was not in the room deletes a Flow, and the drawing is still immaculate — the boxes line up, nothing overlaps, every check passes, and the reading you drew it for is gone. Write the reading down, under `promises`, and a checker will notice:
+You drew this to make one reading obvious: material enters here, passes through these stages, leaves there. Six months from now somebody who was not in the room deletes a Flow, and the drawing is still immaculate — the boxes line up, nothing overlaps, every check passes, and the reading you drew it for is gone. Write the reading down as a [Promise](/docs/reference/vocabulary/#promise), under `promises`, and a checker will notice:
 
 ```yaml
 promises:

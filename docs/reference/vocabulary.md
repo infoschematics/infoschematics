@@ -6,7 +6,7 @@ This reference defines the public language used by packages, authored configurat
 
 ### Product
 
-The **product** is one Infoschematic: its structural Diagram plus optional Scopes, Specifications and Sequences.
+The **product** is one Infoschematic: its structural Diagram plus optional Scopes, Specifications, Promises and Sequences.
 
 | Id | Infoschematics term | Also known as |
 | --- | --- | --- |
@@ -28,6 +28,7 @@ The **product** is one Infoschematic: its structural Diagram plus optional Scope
 | `sequence` | <span id="sequence"></span>Sequence | theme, story, walkthrough, deck |
 | `callout` | <span id="callout"></span>Callout | narration card, caption card |
 | `diagram-dynamic` | <span id="diagram-dynamic"></span>Diagram Dynamic | animation, transition, motion effect |
+| `promise` | <span id="promise"></span>Promise | declared reading, stated meaning |
 
 The alternatives help readers recognise a concept; they do not introduce additional public terms.
 
@@ -113,6 +114,18 @@ A **Diagram Dynamic** is a named semantic change an Audience should perceive: a 
 
 A Dynamic is not an animation. It says what changed and what the change is about, never how to depict it: no duration, easing, colour, selector, or timer is authored. A host says only that a named Dynamic occurred, by id and a host-owned occurrence key; each renderer then chooses a treatment, including a still one for reduced motion and for static output, and states the Dynamic's own label to assistive technology.
 
+## Promises
+
+A **Promise** is what a document declares about its own meaning, so that an edit cannot quietly take away the reading it was drawn for. It is one of four kinds: an `origin` says where a reading may begin, a `terminus` where it must end, a `relationship` that one Flow must run directly between two ends, and a `path` that some run of Flows must keep two ends traceable. Each end names artefact codes or Architectural Scope ids; a Scope stands for the artefacts it covers, so a Promise written over one survives replacing a component inside the boundary, where a Promise written over that component's code does not.
+
+A Promise is optional and is authored inside the document, in its `promises` list. No renderer reads it: it changes what a check can refuse, never what is drawn, and a broken Promise is always an error, because it is the author's own assertion rather than the checker's judgement.
+
+A Promise, a Specification and a realisation claim are three different statements about intent, told apart by what each is checked against:
+
+- A **Promise** is a claim about the document itself, checked against the Flows the document already contains, and false the moment an edit breaks it.
+- A **Specification** describes something outside the document - a standard, an interface, an operation - that the drawing refers to.
+- A **realisation claim** is a Specification's `realisedBy` list, saying which Diagram elements satisfy it. Its references are validated, but whether the component really does satisfy the standard is a fact about the world that no checker here can test.
+
 ## Roles, capability and workspaces
 
 A **Producer** shapes, controls, and presents the product. An **Audience** experiences the product without receiving editorial capability.
@@ -133,6 +146,7 @@ Design divides its elements into one **Interaction layer** per artefact kind. A 
 
 - `Infoschematic` is the canonical complete host-supplied product definition; `DefinedInfoschematic` is its normalised form.
 - `InfoschematicConfig` is the established compatibility input accepted at public boundaries.
+- `DocumentPromise` is the code name for a Promise, because `Promise` is JavaScript's own.
 - Canonical authored data uses one stable code-like `id`; runtime compatibility aliases do not create a second domain identity.
 - Runtime types derive from canonical authored data and do not leak into authored definitions.
 - Identifiers and renderer keys are stable strings.
