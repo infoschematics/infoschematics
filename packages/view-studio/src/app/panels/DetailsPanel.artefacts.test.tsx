@@ -107,6 +107,7 @@ const editor = (overrides: Partial<DetailsPanelEditor> = {}): DetailsPanelEditor
   canWrap: false,
   changeCount: 0,
   createArtefact: vi.fn() as unknown as DetailsPanelEditor['createArtefact'],
+  creations: {},
   discard: vi.fn(),
   discardOne: vi.fn(),
   distributeArtefacts: vi.fn(),

@@ -21,6 +21,7 @@ import {
   effectiveArtefactValue,
   type PropertyPatch,
   pendingArtefactBoxes,
+  pendingArtefactCodes,
   planArtefactRemoval,
   recordArtefactOperation,
   recordArtefactOperations,
@@ -585,5 +586,59 @@ describe('pendingArtefactBoxes', () => {
 
   it('reports nothing at all when no edit is pending', () => {
     expect(pendingArtefactBoxes([])).toEqual([])
+  })
+})
+
+/**
+ * What a pending edit has already named, for an allocator that must not issue the same code twice.
+ *
+ * `INFOSCHEMATICS-TOOL-139`: a second Card made before the first creation is written was offered the first one's code,
+ * and `recordArtefactOperation` then read the second creation as superseding the first.
+ */
+describe('pendingArtefactCodes', () => {
+  it('names the code of every pending creation that carries one, once each', () => {
+    const operations = [
+      createArtefactOperation(card, config.infoschematic.cards[0]!, 0),
+      createArtefactOperation(flow, config.infoschematic.flows[0]!, 1),
+      // A Region and a Graphic are named by id alone, so there is no code for them to claim.
+      createArtefactOperation(region, config.infoschematic.regions[0]!, 2),
+      moveArtefactOperation(card, { box: { height: 80, width: 120, x: 20, y: 30 }, role: 'box' }, { dx: 10, dy: 0 })
+    ].filter((operation): operation is NonNullable<typeof operation> => operation !== undefined)
+
+    expect(pendingArtefactCodes(operations)).toEqual(['CARD-01', 'FLOW-01'])
+  })
+
+  /* A removal keeps its gap, as ADR-INFOSCHEMATICS-003 keeps an authored one: the code stays claimed. */
+  it('keeps the code of an artefact a pending removal takes out', () => {
+    expect(pendingArtefactCodes([removeArtefactOperation(card)])).toEqual(['CARD-01'])
+  })
+
+  /* The property the item is about: two creations under two codes are two operations, not one superseding the other. */
+  it('lets two creations under distinct codes both stand', () => {
+    const second = defineArtefactSelection({ code: 'CARD-02', geometry: 'box' as const, id: 'card-two', kind: 'card' })
+    const first = createArtefactOperation(card, config.infoschematic.cards[0]!, 0)!
+    const next = createArtefactOperation(
+      second,
+      { ...config.infoschematic.cards[0]!, code: 'CARD-02', id: 'card-two' },
+      1
+    )!
+    const recorded = recordArtefactOperation(recordArtefactOperation([], first), next)
+    expect(recorded.filter((operation) => operation.operation === 'create')).toHaveLength(2)
+    expect(pendingArtefactCodes(recorded)).toEqual(['CARD-01', 'CARD-02'])
+  })
+
+  /* A line drawn between ports is held in the draft's `creations` map rather than as an operation, and is pending too. */
+  it('names the codes of drawn lines alongside the pending operations, once each', () => {
+    const operations = [createArtefactOperation(flow, config.infoschematic.flows[0]!, 0)!]
+    const drawn = {
+      'FLOW-01': { family: 'data', source: 'card-one', sourcePort: 'east-0', target: 'card-two', targetPort: 'west-0' },
+      'FLOW-02': { family: 'data', source: 'card-one', sourcePort: 'east-1', target: 'card-two', targetPort: 'west-1' }
+    }
+    expect(pendingArtefactCodes(operations, drawn)).toEqual(['FLOW-01', 'FLOW-02'])
+  })
+
+  it('names nothing when no edit is pending', () => {
+    expect(pendingArtefactCodes([])).toEqual([])
+    expect(pendingArtefactCodes([], {})).toEqual([])
   })
 })

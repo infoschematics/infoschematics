@@ -2124,10 +2124,9 @@ scopes:
  * The creation drafts an operation and the document catches up afterwards, so a placement reading only the artefacts
  * the runtime draws would put the second Card exactly where it put the first.
  *
- * Only one Card is drawn at the end of this, and that is a separate defect rather than the placement failing: the
- * control issues its code from the authored register, so the second creation is offered `SCOPE-01` again and
- * supersedes the first operation instead of joining it. `INFOSCHEMATICS-TOOL-125` records that under its outstanding
- * concerns; what is asserted here is the position the second creation chose, which is the part this item owns.
+ * Both Cards are drawn at the end of this. Until `INFOSCHEMATICS-TOOL-139` the control issued its code from the
+ * authored register alone, so the second creation was offered `SCOPE-01` again and superseded the first operation
+ * instead of joining it; the code now comes from the register and the pending creations together.
  */
 test('a second creation places itself clear of the first, still-pending one', async () => {
   window.localStorage.clear()
@@ -2177,11 +2176,21 @@ scopes:
   if (!first) throw new Error('the control made no Card')
 
   create()?.click()
-  await expect.poll(() => madeBox()).not.toEqual(first)
-  const second = madeBox()
-  if (!second) throw new Error('the second creation drew nothing')
+  const made = () => drawnBoxes(container).filter((drawn) => drawn.id !== 'CARD-A')
+  // Two creations, two Cards: the second joins the first rather than superseding it.
+  await expect.poll(() => made().length).toBe(2)
+  const boxes = made().map((drawn) => drawn.box)
+  expect(boxes).toContainEqual(first)
+  const other = boxes.find((box) => JSON.stringify(box) !== JSON.stringify(first))
+  if (!other) throw new Error('the second creation drew nothing')
 
   // Clear of the first creation, which exists nowhere but in the pending operations at the moment this was chosen.
-  expect(measuredOverlap(first, second)).toBeUndefined()
-  expect(second).toEqual({ height: 80, width: 160, x: 340, y: 240 })
+  expect(measuredOverlap(first, other)).toBeUndefined()
+  expect(other).toEqual({ height: 80, width: 160, x: 340, y: 240 })
+  // Under two codes issued in sequence from the Scope's prefix.
+  expect(
+    made()
+      .map((drawn) => drawn.id)
+      .sort()
+  ).toEqual(['SCOPE-01', 'SCOPE-02'])
 })

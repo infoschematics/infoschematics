@@ -20,11 +20,12 @@ import { type SetStateAction, useEffect, useMemo, useState } from 'react'
 import { type DirectOption, directOptionsFor, directTargetKey } from '../direct-targets.ts'
 import { ArtefactControls, type ArtefactControlsEditor } from '../editor/ArtefactControls.tsx'
 import { type ArtefactFactoryContext, createFactoryIdentityAllocator } from '../editor/artefact-factories.ts'
-import { type ArtefactPropertiesPatch, nextArtefactIndex } from '../editor/artefact-operations.ts'
+import { type ArtefactPropertiesPatch, nextArtefactIndex, pendingArtefactCodes } from '../editor/artefact-operations.ts'
 import { ChangePane } from '../editor/ChangePane.tsx'
 import type { StudioSourcePanelController } from '../editor/document-history.ts'
 import { EditorPanel } from '../editor/EditorPanel.tsx'
 import { EditorTools } from '../editor/EditorTools.tsx'
+import type { Creation } from '../editor/editor-draft.ts'
 import {
   createLibraryIdentityAllocator,
   isValidLibraryFlowContext,
@@ -87,6 +88,8 @@ export type DetailsPanelEditor = {
   canUndo: boolean
   canWrap: boolean
   changeCount: number
+  /** Lines drawn between ports and not yet written, keyed by the code each was issued. */
+  creations: Readonly<Record<string, Creation>>
   createArtefact: <K extends ArtefactKind>(
     kind: K,
     value: ArtefactValueByKind[K],
@@ -206,7 +209,7 @@ export const detailsArtefactContexts = (
   config: InfoschematicConfig,
   editor: Pick<
     DetailsPanelEditor,
-    'artefactGeometry' | 'artefactOperations' | 'artefactValue' | 'selectedArtefact' | 'selectedCounts'
+    'artefactGeometry' | 'artefactOperations' | 'artefactValue' | 'creations' | 'selectedArtefact' | 'selectedCounts'
   >
 ): ArtefactContexts => {
   const definition = config.infoschematic
@@ -224,7 +227,7 @@ export const detailsArtefactContexts = (
   ]
   const usedCodes = [
     ...allAuthored.flatMap((value) => ('code' in value ? [value.code] : [])),
-    ...editor.artefactOperations.flatMap((operation) => (operation.target.code ? [operation.target.code] : []))
+    ...pendingArtefactCodes(editor.artefactOperations, editor.creations)
   ]
   const view = definition.viewBox
   const width = Math.min(240, view.width)
@@ -395,6 +398,7 @@ export function DetailsPanel({
       editor.artefactGeometry,
       editor.artefactOperations,
       editor.artefactValue,
+      editor.creations,
       editor.selectedArtefact,
       editor.selectedCounts
     ]

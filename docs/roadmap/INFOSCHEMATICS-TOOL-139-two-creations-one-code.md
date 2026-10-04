@@ -4,12 +4,12 @@ area: TOOL
 title: Two creations, one code
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: f92606c39d7bbfda82596899aec9fbe49cfa7bc1
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:41:00Z
+updated_at: 2026-10-04T20:50:00Z
 ---
 
 # Two creations, one code
@@ -53,10 +53,10 @@ So the fault reaches Flows as well as Cards, across the two pending stores rathe
 
 ## Steps
 
-- [ ] Give `pendingArtefactCodes` the drawn-line `creations` as well as the pending operations, keeping each code once, and cover it in `artefact-operations.test.ts`: every pending creation's code, a pending removal's code kept, drawn lines included, two creations under distinct codes both standing, and nothing when nothing is pending.
-- [ ] Read it in `createCard`, in the `FamilyChoice` handler, and in `detailsArtefactContexts`, so each allocator composes the authored register with the same pending view.
-- [ ] Extend `App.browser.test.tsx`'s second-creation case to assert both Cards are drawn, as `SCOPE-01` and `SCOPE-02`.
-- [ ] Amend `EDIT-024` in `docs/specs/design-editing.md` to require the allocator's register to include pending creations, and update its Verify and Evidence.
+- [x] Give `pendingArtefactCodes` the drawn-line `creations` as well as the pending operations, keeping each code once, and cover it in `artefact-operations.test.ts`: every pending creation's code, a pending removal's code kept, drawn lines included, two creations under distinct codes both standing, and nothing when nothing is pending.
+- [x] Read it in `createCard`, in the `FamilyChoice` handler, and in `detailsArtefactContexts`, so each allocator composes the authored register with the same pending view.
+- [x] Extend `App.browser.test.tsx`'s second-creation case to assert both Cards are drawn, as `SCOPE-01` and `SCOPE-02`.
+- [x] Amend `EDIT-024` in `docs/specs/design-editing.md` to require the allocator's register to include pending creations, and update its Verify and Evidence.
 
 ## Files touched
 
@@ -94,6 +94,41 @@ None here. Any Site mention is a follow-up record under `AGENTS.md`.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+Within the approved boundary: every Studio surface that issues a code - the element controls' Card and Adapter, the Library, and the family choice that codes a line drawn between ports - now reads the authored register together with one view of the codes pending creations have claimed. Two Cards made from the control before either is written are two Cards, `SCOPE-01` and `SCOPE-02`; a Library Flow and a drawn line pending together cannot be issued the same Flow code. Excluded as planned: the creation route, the shape of a code, placement, the Adapter `canWrap` question, and Site content. Baseline `f92606c39d7bbfda82596899aec9fbe49cfa7bc1`; the result is the implementation commit that lands this packet.
+
+### Change Summary
+
+- `packages/view-studio/src/app/editor/artefact-operations.ts`: `pendingArtefactCodes(operations, drawnLines)` names, once each, every code a pending artefact operation targets (a pending removal's included) and every drawn line's code.
+- `packages/view-studio/src/app/App.tsx`: `createCard` and the `FamilyChoice` handler add it to the register they read; `editor.creations` joins `createCard`'s dependencies.
+- `packages/view-studio/src/app/panels/DetailsPanel.tsx`: `DetailsPanelEditor` carries `creations`, and `detailsArtefactContexts` reads the same helper for the Library allocator; the memo depends on it. `DetailsPanel.artefacts.test.tsx`'s editor fixture gains `creations: {}`.
+- Tests: `artefact-operations.test.ts` covers the helper; `App.browser.test.tsx`'s second-creation case now asserts both Cards are drawn as `SCOPE-01` and `SCOPE-02`, clear of each other.
+- `docs/specs/design-editing.md`: `EDIT-024` requires the allocator's register to include pending creations, operations and drawn lines alike, with Verify and Evidence updated.
+- No deviation from the plan. Partial work drafted earlier in the session (the helper, the Card and Library call sites, the browser case and the spec text) was reviewed and kept; the drawn-line half was added.
+
+### Verification
+
+- `bunx vitest run src/app/editor/artefact-operations.test.ts src/app/panels/DetailsPanel.artefacts.test.tsx` in `packages/view-studio`: 29 passed.
+- `bunx vitest run --config vitest.browser.config.ts src/app/App.browser.test.tsx`: 29 passed. With `createCard`'s pending composition removed, the second-creation case fails (`expected 1 to be 2`), so the case measures the fix.
+- `bun run self:check`: 52 tasks successful.
+- `bunx biome ci --diagnostic-level=error .`: clean. `ki repo audit --repo .`: PASS across 23 skills.
+
+### Outstanding concerns
+
+- `canWrap` reads the authored register alone, so a second Adapter can be offered for a Card whose first Adapter is still pending. It now receives a distinct code; whether it should be offered at all is outside this item and has no record yet.
+- No browser case drives the Library-Flow-then-drawn-line collision end to end; it is covered at the helper and by the shared call sites.
+
+### Post-change review
+
+The goal holds: the reported fault is fixed and proved by a case that fails without the fix, and the same fault in Flows is fixed by the same composition rather than by a second mechanism. Scope held to code allocation. Regression risk is low: the allocators only see more codes, so the worst case is a skipped serial, which `ADR-INFOSCHEMATICS-003` already tolerates. Ready for acceptance review.
+
+### Mini recap
+
+Delivered one pending-codes view read by all three code allocators, with unit and browser evidence and the `EDIT-024` amendment; full gate and audit green. Concerns: the Adapter `canWrap` question and the absent end-to-end Flow case. Learning route: none proposed beyond this record - `pendingArtefactCodes` beside `pendingArtefactBoxes` is the reusable shape for any future allocator.
 
 ## Discussion
 

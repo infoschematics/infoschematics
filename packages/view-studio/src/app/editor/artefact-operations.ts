@@ -300,6 +300,30 @@ export const pendingArtefactBoxes = (operations: readonly ArtefactDraftOperation
   })
 }
 
+/**
+ * The codes the pending edits already name, for a surface that issues a new code and must not issue one twice.
+ *
+ * `INFOSCHEMATICS-TOOL-139`: a Card made before an earlier creation is written exists only in these operations, so an
+ * allocator reading the authored register alone offers the earlier code again, and the second creation supersedes
+ * the first instead of joining it. This is the same composition `pendingArtefactBoxes` gives placement, for naming.
+ *
+ * A line drawn between two ports is pending too, but it is held in the draft's `creations` map, keyed by its code,
+ * rather than as an operation. Both stores are read here so that a Flow made from the Library and a line drawn before
+ * either is written cannot be issued the same Flow code by the two surfaces that issue them.
+ *
+ * A removal does not hand its code back. `ADR-INFOSCHEMATICS-003` keeps the gap a removal leaves, and a code a pending
+ * edit has named is one a change set under review may still be talking about.
+ */
+export const pendingArtefactCodes = (
+  operations: readonly ArtefactDraftOperation[],
+  drawnLines: Readonly<Record<string, unknown>> = {}
+): readonly string[] => [
+  ...new Set([
+    ...operations.flatMap((operation) => (operation.target.code ? [operation.target.code] : [])),
+    ...Object.keys(drawnLines)
+  ])
+]
+
 const flowSelection = (flow: InfoschematicConfig['infoschematic']['flows'][number]) =>
   defineArtefactSelection({
     code: flow.code,

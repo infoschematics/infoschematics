@@ -37,7 +37,7 @@ import {
 import { cueStageHold, type PresentProps, useCueCadence } from '@infoschematics/view-present'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { directOptionsFor } from './direct-targets.ts'
-import { nextArtefactIndex, pendingArtefactBoxes } from './editor/artefact-operations.ts'
+import { nextArtefactIndex, pendingArtefactBoxes, pendingArtefactCodes } from './editor/artefact-operations.ts'
 import { roomForCard } from './editor/card-placement.ts'
 import { type StudioDocumentReplacementHandler, useDocumentTimeline } from './editor/document-history.ts'
 import {
@@ -698,7 +698,11 @@ function AppContent({
       if (!scope || !prefix) return
 
       const label = held ? `${held.label} adapter` : 'New card'
-      const taken = infoschematicRegister.all.map((entry) => entry.code)
+      // The authored register and the pending creations are one namespace, so two Cards made in a row get two codes.
+      const taken = [
+        ...infoschematicRegister.all.map((entry) => entry.code),
+        ...pendingArtefactCodes(editor.artefactOperations, editor.creations)
+      ]
       const code = nextCodeIn(prefix, taken)
       /*
        * Each new Card a step along from the last, counted from the creations already drafted so two made in a row do
@@ -742,6 +746,7 @@ function AppContent({
       compatibilityConfig,
       editor.artefactOperations,
       editor.createArtefact,
+      editor.creations,
       editor.portCounts,
       infoschematicPlaceables,
       infoschematicRegister,
@@ -1228,7 +1233,11 @@ function AppContent({
                   onChoose={(family) => {
                     const prefix = infoschematicFamilies.find((entry) => entry.id === family)?.prefix
                     if (prefix) {
-                      const taken = [...infoschematicFlows.map((line) => line.code), ...Object.keys(editor.creations)]
+                      // The Library's pending Flows as well as the lines already drawn: one namespace, one series.
+                      const taken = [
+                        ...infoschematicFlows.map((line) => line.code),
+                        ...pendingArtefactCodes(editor.artefactOperations, editor.creations)
+                      ]
                       editor.create(nextCodeIn(prefix, taken), { family, ...proposed.ends })
                     }
                     setProposed(null)
