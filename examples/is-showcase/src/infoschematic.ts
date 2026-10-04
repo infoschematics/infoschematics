@@ -284,6 +284,13 @@ diagram:
       elements:
         - FAB-01
       depicts: state
+    - id: DYN-SOURCE
+      label: The camera started sending
+      description: Something happened at a Point, where material enters the Diagram.
+      kind: emphasise-elements
+      elements:
+        - PT-01
+      depicts: event
   calloutPositions:
     - 120 1060
     - 1180 1060
@@ -411,6 +418,9 @@ sequences:
             - PT-02
         cues:
           - dynamic: DYN-STATE
+            stage: 1
+          - dynamic: DYN-SOURCE
+            playback: once
             stage: 1
           - dynamic: DYN-SIGNAL
             playback: repeat

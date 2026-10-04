@@ -81,14 +81,31 @@ describe('showcaseExample', () => {
     }
   })
 
-  it('names three Dynamics, covering a signal and both depictions of emphasis', () => {
+  it('names four Dynamics, covering a signal and both depictions of emphasis', () => {
     expect(diagram.dynamics.map((dynamic) => dynamic.kind)).toEqual([
       'signal-flow',
+      'emphasise-elements',
       'emphasise-elements',
       'emphasise-elements'
     ])
     expect(diagram.dynamics[1]).toMatchObject({ depicts: 'event', elements: ['CARD-02'] })
     expect(diagram.dynamics[2]).toMatchObject({ depicts: 'state', elements: ['FAB-01'] })
+    expect(diagram.dynamics[3]).toMatchObject({ depicts: 'event', elements: ['PT-01'] })
+  })
+
+  it('emphasises a Card, a Fabric and a Point, so each emphasis treatment has an authored document', () => {
+    // Point emphasis was held only by tests and a throwaway page until the showcase named a Point in a Dynamic.
+    const kindOf = new Map<string, string>([
+      ...diagram.cards.map((card) => [card.id, 'card'] as const),
+      ...diagram.fabrics.map((fabric) => [fabric.id, 'fabric'] as const),
+      ...diagram.points.map((point) => [point.id, 'point'] as const)
+    ])
+    const emphasised = new Set(
+      diagram.dynamics.flatMap((dynamic) =>
+        dynamic.kind === 'emphasise-elements' ? dynamic.elements.map((element) => kindOf.get(element)) : []
+      )
+    )
+    expect([...emphasised].sort()).toEqual(['card', 'fabric', 'point'])
   })
 
   it('carries a Story whose Scenes drive visibility, focus and Callouts', () => {

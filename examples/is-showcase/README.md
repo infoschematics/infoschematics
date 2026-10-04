@@ -30,8 +30,8 @@ Both commands use [`@infoschematics/cli`](https://www.npmjs.com/package/@infosch
 | Structure | A standard Card with a Collection, a stereotype, a description and ports, authored both as a scalar count and as a per-side object |
 | Adaptation | An Adapter Card (`adapts:`) and a Wrapper Card (`wraps:`), each clasping the Card it holds |
 | Substrate | A Fabric with a `kind`, `properties` and its own appearance |
-| Edges | Points as source and sink, one carrying its own appearance and an `icon` |
-| Throughout | Four Regions covering each frame style, both label mounts and four label placements; Flow Families with a default line and a per-Flow override; a bidirectional Flow; a routed Flow with waypoints and `labelAt`; a Graphic overlay; two overlapping Scopes; a Story whose Scenes carry visibility, focus and Callouts; three Diagram Dynamics, two of them cued by Scenes (`once` and on a `repeat`); and a Specification group |
+| Edges | Points as source and sink, one carrying its own appearance and an `icon`, and the source emphasised by a Diagram Dynamic |
+| Throughout | Four Regions covering each frame style, both label mounts and four label placements; Flow Families with a default line and a per-Flow override; a bidirectional Flow; a routed Flow with waypoints and `labelAt`; a Graphic overlay; two overlapping Scopes; a Story whose Scenes carry visibility, focus and Callouts; four Diagram Dynamics, three of them cued by Scenes (`once` and on a `repeat`); and a Specification group |
 
 ## Authoring constraints this document observes
 
