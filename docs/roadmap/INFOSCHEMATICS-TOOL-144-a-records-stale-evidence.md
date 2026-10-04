@@ -4,12 +4,12 @@ area: TOOL
 title: A record's stale evidence
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: debb840f7fd296abd5fc0644e3538b65c9c027c9
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T12:10:00Z
+updated_at: 2026-10-04T12:28:00Z
 ---
 
 # A record's stale evidence
@@ -36,7 +36,7 @@ The record's conclusion holds and only its mechanism is stale. `reconcileDirectT
 
 ## Steps
 
-- [ ] Restate the paragraph's mechanism: Studio keeps the active target in step with the targets the document offers, which releases one that has left the document and never chooses one on the Producer's behalf. Keep the observation that Direct does not preselect and that this is the panel's own content rather than the dock's visibility.
+- [x] Restate the paragraph's mechanism: Studio keeps the active target in step with the targets the document offers, which releases one that has left the document and never chooses one on the Producer's behalf. Keep the observation that Direct does not preselect and that this is the panel's own content rather than the dock's visibility.
 
 ## Files touched
 
@@ -67,6 +67,38 @@ None.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+`ADR-INFOSCHEMATICS-026`'s Direct paragraph now gives a mechanism that is true of the code: `reconcileDirectTargets` keeps the active target in step with the targets the document offers, releasing one that has left the document and never choosing one. The observation the paragraph exists to keep - Direct does not preselect a target when it opens, and that is the panel's content rather than the dock's visibility - is unchanged. Excluded and untouched: what the record decided about panels following both axes, and Direct's preselection behaviour. Baseline `debb840f7fd296abd5fc0644e3538b65c9c027c9`; the change is the commit carrying this packet.
+
+### Change Summary
+
+- `docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-both-axes.md` - one sentence in the paragraph beginning "Direct still does not preselect a target" replaces "`reconcileDirectTargets` is declared and never called" with what the function does. Amended in place under the `ki-decision-records` living-record rule: a correction of stated evidence, not a change of decision, so no new record and no dated note.
+- No approved deviation.
+
+### Verification
+
+- Read against code: `reduceProduction`'s `reconcile-direct-target` case in `packages/view-present/src/production.ts` clears a held target absent from the available list and otherwise returns the same state; it never sets one. `packages/view-studio/src/app/App.tsx` derives the list through `directOptionsFor` and calls `reconcileDirectTargets` whenever it changes; a target is set only through `setDirectTarget` from the chooser.
+- `grep -n "declared and never called" docs/decisions/ADR-INFOSCHEMATICS-026-panels-follow-both-axes.md` - no match.
+- `bunx rumdl check` on the record - no issues.
+- `ki repo audit --skill ki-decision-records` - PASS.
+- `bun run self:check` - fails for causes outside this change, as recorded on `INFOSCHEMATICS-TOOL-136`: `ROUTE-011` without a conformance state at `638e2818`, and view-canvas token cases against the concurrent uncommitted `INFOSCHEMATICS-TOOL-129` work.
+
+### Outstanding concerns
+
+- Repository-wide `bun run self:check` is red for the unrelated causes above.
+- Whether Direct should preselect remains undecided, as the record's Discussion notes; that would be its own product record.
+
+### Post-change review
+
+The goal is met: a reader checking the record against the code now finds the named function doing what the record says. Scope held to one sentence. No regression risk beyond documentation. Ready for acceptance.
+
+### Mini recap
+
+One sentence of `ADR-INFOSCHEMATICS-026` corrected in place to describe reconciliation rather than claim the function is unused; decision records audit passes. Learning route (not promoted): a Decision Record that names a function as evidence ages with that function; prefer stating the behaviour and naming the function as the place to read it.
 
 ## Discussion
 
