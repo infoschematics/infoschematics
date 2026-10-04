@@ -4,12 +4,12 @@ area: TOOL
 title: A record's stale evidence
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: debb840f7fd296abd5fc0644e3538b65c9c027c9
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T12:28:00Z
+updated_at: 2026-10-04T16:32:48Z
 ---
 
 # A record's stale evidence
@@ -99,6 +99,10 @@ The goal is met: a reader checking the record against the code now finds the nam
 ### Mini recap
 
 One sentence of `ADR-INFOSCHEMATICS-026` corrected in place to describe reconciliation rather than claim the function is unused; decision records audit passes. Learning route (not promoted): a Decision Record that names a function as evidence ages with that function; prefer stating the behaviour and naming the function as the place to read it.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. No nits.
 
 ## Discussion
 

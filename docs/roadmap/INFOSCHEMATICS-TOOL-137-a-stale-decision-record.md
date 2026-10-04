@@ -4,12 +4,12 @@ area: TOOL
 title: A stale decision record
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: 73d2622dba360c7920922d3151e50bf3b0a7c5ea
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T12:50:00Z
+updated_at: 2026-10-04T16:32:46Z
 ---
 
 # A stale decision record
@@ -105,6 +105,10 @@ The goal is met: no sentence in the record describes either renderer contrary to
 ### Mini recap
 
 `ADR-INFOSCHEMATICS-027`'s Point and Overlay Graphic sentences now match both renderers, amended in place, and the Canvas's missing Graphic outline is captured as TOOL-148. Learning route (not promoted): a premise of the form "renderer X draws none" ages silently as renderers grow; stating what each renderer owes rather than what it currently lacks keeps a record true.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. No nits. The Canvas Overlay defect is captured as INFOSCHEMATICS-TOOL-148.
 
 ## Discussion
 

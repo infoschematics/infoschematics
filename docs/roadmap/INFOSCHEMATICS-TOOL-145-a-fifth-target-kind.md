@@ -4,12 +4,12 @@ area: TOOL
 title: A fifth target kind
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: af3437867b1a88f9332474faf02802457e35043a
 created_at: 2026-09-26T00:00:00Z
-updated_at: 2026-10-04T12:31:00Z
+updated_at: 2026-10-04T16:32:49Z
 ---
 
 # A fifth target kind
@@ -102,6 +102,10 @@ The goal is met: the requirement's enumeration matches the type its Verify line 
 ### Mini recap
 
 `DIRECT-001` enumerates five kinds in canonical terms and its evidence names each type member; the specification audit passes. Learning route (not promoted): when a requirement names concepts and the type names kinds, say which maps to which, because a compatibility name in the type reads as a missing concept.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. No nits.
 
 ## Discussion
 

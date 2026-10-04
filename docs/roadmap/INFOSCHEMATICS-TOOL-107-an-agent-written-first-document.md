@@ -4,12 +4,12 @@ area: TOOL
 title: An agent-written first document
 theme: tool
 horizon: next
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f626bee411d7eb1badc1c10e100e1cdbeec5cd0a
 created_at: 2026-09-21T09:30:00Z
-updated_at: 2026-10-04T12:12:46Z
+updated_at: 2026-10-04T16:32:44Z
 ---
 
 # An agent-written first document
@@ -133,6 +133,10 @@ The goal holds: from a sentence, an agent following the skill produced a documen
 ### Mini recap
 
 Delivered the `infoschematics-authoring` skill, its decision record, the README on-ramp and the `ki-skills` declaration, and captured the Site guide follow-up. Verified by a real NEW and AMEND run with renders looked at, a clean `ki-skills` audit, and a clean-worktree `self:check` whose only failure predates this item. Proposed learning routes, not promoted: the `AGENTS.md` point that a checker-clean drawing can still read badly gains a second instance (truncated Fabric text and hidden Card detail); and the ki-skills coverage cascade could say in its finding how small a product skill's declaration actually is, since its cost was overestimated when this record was parked.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. Nits carried over: the repair-loop error path is unexercised, and the owner should confirm the ki-skills governance commitment.
 
 ## Discussion
 

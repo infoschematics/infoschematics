@@ -4,12 +4,12 @@ area: TOOL
 title: Site copy contradicts versioning
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: cc88b70c305a7e2f3f3aebb29ac198a90a6ff710
 created_at: 2026-09-23T21:05:00Z
-updated_at: 2026-10-04T12:25:00Z
+updated_at: 2026-10-04T16:32:45Z
 ---
 
 # Site copy contradicts versioning
@@ -108,6 +108,10 @@ The goal is met: every renderer-versioning claim on the page is now one the spec
 ### Mini recap
 
 Three paragraphs of Site copy corrected to match `EXTEND-002`/`EXTEND-006` and the resolver; Site build and tests green; the repository gate is red for unrelated reasons. Learning route (not promoted): the duplication test between a guide and a Site page is "do they say the same thing", which the record's Discussion already states; a check comparing renderer-versioning claims across the guide and the page is not proposed.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. No nits.
 
 ## Discussion
 

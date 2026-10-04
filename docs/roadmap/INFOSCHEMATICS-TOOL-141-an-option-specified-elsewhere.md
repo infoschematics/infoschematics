@@ -4,12 +4,12 @@ area: TOOL
 title: An option specified elsewhere
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: c70df23730a545f9c6bfcbc47c1f1818552d832f
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T13:25:00Z
+updated_at: 2026-10-04T16:32:47Z
 ---
 
 # An option specified elsewhere
@@ -111,6 +111,10 @@ The goal is met: a reader can assemble the command's whole option surface from t
 ### Mini recap
 
 `--detail`, `--scale` and `--port` are now specified in the command-line specification, confirmed against the running command. Learning route (not promoted): with several agents committing from one checkout, staging ahead of the commit leaves the index exposed, so stage and commit in one command.
+
+## Done
+
+Accepted 2026-10-04 by the Fable reviewer on the review packet above, under the owner's delegated estate-push authority. Nit carried over: CLI-014 has no command-level `--detail` test.
 
 ## Discussion
 

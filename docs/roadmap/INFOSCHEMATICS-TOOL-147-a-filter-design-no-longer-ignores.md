@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-147
 area: TOOL
-title: A filter Design no longer ignores
+title: Design ignores filters
 theme: tool
 horizon: triage
 status: draft
@@ -12,7 +12,7 @@ created_at: 2026-10-04T13:30:00Z
 updated_at: 2026-10-04T13:30:00Z
 ---
 
-# A filter Design no longer ignores
+# Design ignores filters
 
 ## Goal
 
