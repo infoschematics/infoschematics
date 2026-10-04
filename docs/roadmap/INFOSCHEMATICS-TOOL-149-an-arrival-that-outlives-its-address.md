@@ -1,7 +1,7 @@
 ---
 id: INFOSCHEMATICS-TOOL-149
 area: TOOL
-title: An arrival that outlives its address
+title: Arrival outlives its address
 theme: tool
 horizon: triage
 status: draft
@@ -12,7 +12,7 @@ created_at: 2026-10-04T20:45:00Z
 updated_at: 2026-10-04T20:45:00Z
 ---
 
-# An arrival that outlives its address
+# Arrival outlives its address
 
 ## Goal
 
