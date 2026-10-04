@@ -130,15 +130,6 @@ A generated artefact's `generate` command is always paired with a `verify` comma
 
 A new command belongs in the root manifest when it spans workspaces, and in the workspace's own manifest when it does not — a package's suite, typecheck, or build stays with the package, so Turborepo can cache it there. A root script that wraps a module under `scripts/` names that module directly, because the test above rejects a command module no root script, commit hook, or this section reaches.
 
-One command is deliberately not a root script. `scripts/ibc-visual-compatibility.ts` captures and compares visual compatibility evidence against an external IBC fixture package, so it cannot run from a checkout of this repository alone:
-
-```bash
-bun scripts/ibc-visual-compatibility.ts capture --fixture <IBC package> --manifest <file> --output <directory>
-bun scripts/ibc-visual-compatibility.ts compare --fixture <IBC package> --manifest <file> --output <directory>
-```
-
-The fixture directory must be a workspace that already has `sharp` installed — the script resolves Sharp by walking upward from the fixture, never from here, so this repository holds no dependency on it. A root script would advertise a command that fails for every contributor without that fixture, so the procedure is documented rather than wrapped.
-
 ## Licence
 
 Infoschematics is available under the [MIT License](LICENSE).
