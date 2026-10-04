@@ -155,7 +155,8 @@ Rendering the same document twice on one machine produces identical bytes. Pass 
 --mode dark writes a dark drawing rather than one that might become dark, because nothing downstream of a file
 reports a reader's preference. --mode system instead writes one SVG carrying both palettes, which follows the
 reader wherever CSS applies. It needs a consumer that resolves custom properties: one that does not paints those
-roles black, so name a mode for anything but a browser. A PNG cannot carry both at all.
+roles black, so name a mode for anything but a browser. A PNG cannot carry both at all. A document that sets
+modeLocked keeps its own mode whatever --mode says, and the command says when it did not apply one.
 Watch mode keeps the last good output while a document does not parse, and recovers when it parses again.
 
 Checking reports what is wrong with the drawing a valid document describes, and changes nothing. It exits 0 when the

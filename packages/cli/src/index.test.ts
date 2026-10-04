@@ -233,6 +233,46 @@ describe('renderer CLI', () => {
     expect(raster.output().stderr).toContain('A raster cannot carry both palettes.')
   })
 
+  /*
+   * A locked document's mode is not the caller's to change, and the command says so rather than quietly disobeying.
+   *
+   * An unlocked authored mode is a default and the flag outranks it; a locked one is the author saying it cannot be
+   * outranked. The render still succeeds — the document is valid, and the caller gets what its author said it must
+   * look like — with a sentence on standard error naming what was not applied. A locked `system` is the one ground a
+   * raster cannot carry, so a PNG of it is refused as the document's answer, not the caller's usage.
+   */
+  it("holds a locked document's mode against the flag, and says it did", async () => {
+    const lockedDark = `${yaml}  appearance:\n    mode: dark\n    modeLocked: true\n`
+    const unlockedDark = `${yaml}  appearance:\n    mode: dark\n`
+    const dark = harness({ 'model.yaml': yaml })
+    await runRendererCli(['render', 'model.yaml', '--mode', 'dark'], dark.io)
+    const light = harness({ 'model.yaml': yaml })
+    await runRendererCli(['render', 'model.yaml', '--mode', 'light'], light.io)
+
+    const opened = harness({ 'model.yaml': unlockedDark })
+    expect(await runRendererCli(['render', 'model.yaml'], opened.io)).toBe(rendererCliExit.success)
+    expect(opened.output().stdout).toBe(dark.output().stdout)
+    const moved = harness({ 'model.yaml': unlockedDark })
+    expect(await runRendererCli(['render', 'model.yaml', '--mode', 'light'], moved.io)).toBe(rendererCliExit.success)
+    expect(moved.output().stdout).toBe(light.output().stdout)
+    expect(moved.output().stderr).toBe('')
+
+    const held = harness({ 'model.yaml': lockedDark })
+    expect(await runRendererCli(['render', 'model.yaml', '--mode', 'light'], held.io)).toBe(rendererCliExit.success)
+    expect(held.output().stdout).toBe(dark.output().stdout)
+    expect(held.output().stderr).toBe('model.yaml locks its mode to dark; --mode light was not applied.\n')
+
+    const lockedSystem = `${yaml}  appearance:\n    mode: system\n    modeLocked: true\n`
+    const deferred = harness({ 'model.yaml': lockedSystem })
+    expect(await runRendererCli(['render', 'model.yaml', '--mode', 'dark'], deferred.io)).toBe(rendererCliExit.success)
+    expect(deferred.output().stdout).toContain('@media (prefers-color-scheme: dark)')
+    const raster = harness({ 'model.yaml': lockedSystem })
+    expect(await runRendererCli(['render', 'model.yaml', '--format', 'png'], raster.io)).toBe(
+      rendererCliExit.validation
+    )
+    expect(raster.output().stderr).toContain('locks its mode to system')
+  })
+
   it.each([
     ['render', 'model.yaml', '--format', 'gif'],
     ['render', 'model.yaml', '--scheme', 'sepia'],

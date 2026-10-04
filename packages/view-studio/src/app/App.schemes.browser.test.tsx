@@ -78,27 +78,43 @@ test("paints Studio's own chrome from the scheme, not from colours of its own", 
   expect(getComputedStyle(document.documentElement).backgroundColor).toBe(rgb(chromeFor('dark').page))
 })
 
-test('carries the switch in the tool bank a reader already looks at', async () => {
+test('carries the control in the tool bank a reader already looks at', async () => {
   await commands.emulateColourScheme('light')
   const { bar } = await studio()
 
   const appearance = bar.querySelector('fieldset[aria-label="Appearance"]')
   if (!appearance) throw new Error('The title bar has no Appearance bank')
 
-  const button = appearance.querySelector('button.colour-scheme-button')
-  if (!button) throw new Error('The Appearance bank holds no scheme switch')
-  expect(button.getAttribute('aria-label')).toBe('Switch to the dark colour scheme')
-  expect(button.getAttribute('aria-pressed')).toBe('false')
+  const choices = [...appearance.querySelectorAll<HTMLButtonElement>('button.colour-scheme-button')]
+  expect(choices.map((choice) => choice.getAttribute('aria-label'))).toEqual(['Light', 'Dark', 'System'])
+  expect(choices.map((choice) => choice.getAttribute('aria-pressed'))).toEqual(['false', 'false', 'true'])
 
   /* It has to be reachable, not merely mounted — the title bar collapses controls at narrow widths. */
-  expect((button as HTMLElement).offsetParent).not.toBeNull()
+  for (const choice of choices) expect(choice.offsetParent).not.toBeNull()
 })
 
-test('repaints the whole surface when the switch is used, and remembers the choice', async () => {
+/* A locked document has answered for the reader, so Studio offers no control a reader could press to no effect. */
+test('offers no control for a document that locks its mode', async () => {
+  const locked = defineInfoschematic({
+    ...config,
+    infoschematic: { ...config.infoschematic, appearance: { mode: 'dark', modeLocked: true } }
+  })
+  window.localStorage.clear()
+  const { container } = await render(<Studio config={locked} />)
+  const bar = container.querySelector('.title-bar')
+  if (!bar) throw new Error('Studio rendered no title bar')
+
+  expect(bar.querySelector('fieldset[aria-label="Appearance"]')).toBeNull()
+  expect(bar.querySelector('button.colour-scheme-button')).toBeNull()
+  /* And the drawing is on the ground the document locked, though the page around it is light. */
+  expect(container.querySelector('.infoschematic-svg')?.getAttribute('data-infoschematic-scheme')).toBe('dark')
+})
+
+test('repaints the whole surface when the control is used, and remembers the choice', async () => {
   await commands.emulateColourScheme('light')
   const { bar } = await studio()
-  const button = bar.querySelector<HTMLButtonElement>('button.colour-scheme-button')
-  if (!button) throw new Error('The title bar holds no scheme switch')
+  const button = bar.querySelector<HTMLButtonElement>('button.colour-scheme-button[aria-label="Dark"]')
+  if (!button) throw new Error('The title bar holds no dark choice')
 
   button.click()
   await expect.poll(() => getComputedStyle(bar).borderBottomColor).toBe(rgb(chromeFor('dark').border))
@@ -112,8 +128,8 @@ test('repaints the whole surface when the switch is used, and remembers the choi
 test('reads emphatic type against the selected wash rather than over it', async () => {
   await commands.emulateColourScheme('light')
   const { bar } = await studio()
-  const button = bar.querySelector<HTMLButtonElement>('button.colour-scheme-button')
-  if (!button) throw new Error('The title bar holds no scheme switch')
+  const button = bar.querySelector<HTMLButtonElement>('button.colour-scheme-button[aria-label="Dark"]')
+  if (!button) throw new Error('The title bar holds no dark choice')
 
   button.click()
   await expect.poll(() => button.getAttribute('aria-pressed')).toBe('true')

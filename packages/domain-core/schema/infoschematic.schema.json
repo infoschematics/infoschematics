@@ -91,11 +91,11 @@
                 "dark",
                 "system"
               ],
-              "description": "The ground the document would like to be read on. `system` declines to choose and follows the reader, which is what absence means."
+              "description": "The ground the document opens on. A choice by the reader or a render flag may move it unless `modeLocked` is set. `system` declines to choose and follows the reader, which is what absence means."
             },
             "modeLocked": {
               "type": "boolean",
-              "description": "Whether the reader may change the mode away from the one this document authored."
+              "description": "Hold the drawing on its authored mode whatever a reader or a render flag asks. A locked document is offered no colour-scheme control."
             },
             "grid": {
               "type": "string",

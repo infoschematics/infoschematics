@@ -3,6 +3,7 @@ import {
   type CardDetailOverrides,
   drawsOwnCode,
   resolveCardDomain,
+  resolveDocumentMode,
   resolveReadableInk,
   resolveRegionTreatment,
   resolveVisualTreatment
@@ -870,11 +871,23 @@ export function InfoschematicDiagram({
   const detailBand = detailScale === null ? null : settleDetailBand(settledBand.current, detailScale)
   settledBand.current = detailBand
   /*
-   * Authored colours are seeds, so the ground a reader turned out to be on is an input to drawing them. Canvas
-   * already resolves that ground for the interface; the same answer now reaches the drawing, and moving between
-   * grounds re-realises every seed rather than leaving the author's colours pinned where the palette moved.
+   * The ground this drawing is on, which is the page's unless the document said otherwise.
+   *
+   * A document that authored no mode follows its page, which is what an embedded drawing undertakes to do. One that
+   * authored a ground opens on it, and a reader who has asked for a ground — or pressed `system` — is answered over
+   * it, because an unlocked mode is a default. A locked one is not: it is drawn on the ground it names whatever the
+   * page is on, and a locked `system` follows the machine rather than any choice made on the page.
+   * `resolveDocumentMode` is the rule every outlet shares, so a lock means the same here as in a rendered file.
+   *
+   * Authored colours are seeds, so that ground is also an input to drawing them, and moving between grounds
+   * re-realises every seed rather than leaving the author's colours pinned where the palette moved.
    */
-  const [colourMode] = useColourScheme()
+  const reader = useColourScheme()
+  const documentMode = resolveDocumentMode(requestedVisualTreatment, reader.asked)
+  const colourMode =
+    documentMode === undefined ? reader.scheme : documentMode === 'system' ? reader.preferred : documentMode
+  /* Only a document with an opinion carries its own ground; one without it inherits the page's and says nothing. */
+  const ownsGround = requestedVisualTreatment.modeLocked || requestedVisualTreatment.mode !== 'system'
   const seeds = useMemo(() => seedResolver(colourMode), [colourMode])
   const seededFamilyColour = useCallback((colour: string) => seeds.resolve(colour, 'ink'), [seeds])
 
@@ -2354,6 +2367,7 @@ export function InfoschematicDiagram({
         aria-label={`${config.title} structural Infoschematic`}
         className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} style-${visualTreatment.style}`}
         data-grid-treatment={visualTreatment.grid}
+        data-infoschematic-scheme={ownsGround ? colourMode : undefined}
         data-infoschematic-style={visualTreatment.style}
         height={infoschematicViewBox.height}
         onPointerCancel={panGesture ? stopPan : undefined}

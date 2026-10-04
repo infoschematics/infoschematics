@@ -132,13 +132,15 @@ _Evidence:_ `detailOf` and the `detail` render option in `packages/cli/src/optio
 
 Absence MUST NOT mean `light`. A document may author its own mode, and a flag defaulted to a value would overrule it on every render; the command MUST pass nothing on rather than choosing for the document. Where neither the caller nor the document names a ground, the rendering MUST resolve to `light`, because a still picture has no reader's preference to read and an unresolved palette rasterises to nothing.
 
+A named mode MUST win over a document's authored mode, which is a default, unless the document sets `modeLocked`. A locked document MUST be rendered on its own mode whatever `--mode` says, by the same rule `APPEAR-019` gives Canvas, and the command MUST say so on standard error when it did not apply a flag, while still succeeding: the caller gets the drawing the author locked, and is told why it is not the one they asked for. A document locked to `system` MUST be refused for `--format png` with the validation exit, because the refusal follows from what the document says rather than from how the command was called.
+
 `--scheme` MUST keep working as the retired spelling of `--mode`, with `adaptive` accepted for `system`. It MUST also accept `blueprint`, which named a palette under the retired vocabulary and names a style now, and MUST treat it as naming no ground at all: a style is authored by the document per [ADR-INFOSCHEMATICS-037](../decisions/ADR-INFOSCHEMATICS-037-a-palette-belongs-to-a-colour-scheme-not-an-outlet.md), and letting a caller name one here would let whoever renders a document contradict what it is.
 
 _Conformance:_ conforming
 
-_Verify:_ Render one document under each mode and confirm the outputs differ; render a document authoring a blueprint style under both grounds and confirm it stays a blueprint on each while the two differ; confirm `--scheme blueprint` renders the same bytes as passing no option at all; confirm `--mode system` emits the media rule, and that `--mode system --format png` and `--scheme sepia` both exit with the usage status and write nothing to standard output.
+_Verify:_ Render one document under each mode and confirm the outputs differ; render a document authoring a blueprint style under both grounds and confirm it stays a blueprint on each while the two differ; confirm `--scheme blueprint` renders the same bytes as passing no option at all; confirm `--mode system` emits the media rule, and that `--mode system --format png` and `--scheme sepia` both exit with the usage status and write nothing to standard output. Render a document locked to `dark` with `--mode light` and confirm the output is byte-identical to `--mode dark` and that standard error names the lock; render one locked to `system` as PNG and confirm the validation exit.
 
-_Evidence:_ `packages/cli/src/options.ts` and `packages/cli/src/index.test.ts`.
+_Evidence:_ `packages/cli/src/options.ts`, `packages/cli/src/index.ts` and `packages/cli/src/index.test.ts`, with the precedence itself in `resolveDocumentMode` in `packages/view-model/src/appearance.ts`.
 
 ### CLI-005 — Publishable package boundary
 

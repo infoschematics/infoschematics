@@ -140,12 +140,19 @@ export function TitleBar({
 
         <span aria-hidden="true" className="tool-divider" />
 
-        {/* The reader's own preference, not the document's: it sits with the window controls rather than the tools. */}
-        <fieldset aria-label="Appearance" className="tool-bank">
-          <ColourSchemeButton />
-        </fieldset>
+        {/*
+          The reader's own preference, not the document's: it sits with the window controls rather than the tools.
+          A document that locks its mode has answered for the reader, so there is nothing here to offer them.
+        */}
+        {config.diagram.appearance?.modeLocked ? null : (
+          <>
+            <fieldset aria-label="Appearance" className="tool-bank">
+              <ColourSchemeButton />
+            </fieldset>
 
-        <span aria-hidden="true" className="tool-divider" />
+            <span aria-hidden="true" className="tool-divider" />
+          </>
+        )}
 
         <fieldset aria-label="Window and panels" className="tool-bank">
           <button

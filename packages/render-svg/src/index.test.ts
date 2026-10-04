@@ -623,6 +623,41 @@ describe('renderInfoschematicSvg', () => {
   })
 
   /*
+   * A document's own mode is its default, and its lock is the one answer a caller cannot move.
+   *
+   * The flag is the caller's request, so it answers an unlocked document over the mode the document authored — that is
+   * what a default is. A locked document is the author saying the drawing must be read on the ground it names, so a
+   * render that let the flag through would make the lock mean something in Canvas and nothing in a committed file.
+   * A locked `system` is held too: it defers to whoever displays the file, not to whoever rendered it.
+   */
+  it("opens on the document's own mode, lets a caller move an unlocked one, and never moves a locked one", () => {
+    const document = blank('Authored mode')
+    const authored = (mode: 'dark' | 'light' | 'system', modeLocked: boolean): InfoschematicConfig => ({
+      ...document,
+      infoschematic: { ...document.infoschematic, appearance: { mode, modeLocked } }
+    })
+    const asLight = renderInfoschematicSvg(document, { mode: 'light' })
+    const asDark = renderInfoschematicSvg(document, { mode: 'dark' })
+    const deferred = renderInfoschematicSvg(document, { mode: 'system' })
+    /* The documents differ only in an appearance the drawing does not write down, so their bytes compare. */
+    const same = (drawn: string, expected: string) => expect(drawn).toBe(expected)
+
+    same(renderInfoschematicSvg(authored('dark', false)), asDark)
+    same(renderInfoschematicSvg(authored('dark', false), { mode: 'light' }), asLight)
+    same(renderInfoschematicSvg(authored('dark', false), { scheme: 'adaptive' }), deferred)
+
+    same(renderInfoschematicSvg(authored('dark', true), { mode: 'light' }), asDark)
+    same(renderInfoschematicSvg(authored('dark', true), { mode: 'system' }), asDark)
+    same(renderInfoschematicSvg(authored('light', true), { scheme: 'dark' }), asLight)
+    same(renderInfoschematicSvg(authored('system', true), { mode: 'dark' }), deferred)
+    expect(renderInfoschematicSvg(authored('system', true))).toContain('prefers-color-scheme')
+
+    // An unlocked `system` is the author declining, so it leaves the ground to the caller and then to light.
+    same(renderInfoschematicSvg(authored('system', false)), asLight)
+    same(renderInfoschematicSvg(authored('system', false), { mode: 'dark' }), asDark)
+  })
+
+  /*
    * And the colours it wrote survive being inlined into a page that has colours of its own.
    *
    * Written as attributes they do not: a presentation attribute loses to every CSS declaration, so the Canvas

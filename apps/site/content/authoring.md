@@ -49,7 +49,7 @@ infoschematic: {
 
 ### A style is what the drawing is; a mode is the ground it is read on
 
-`style` says what the drawing is — `neutral` or `blueprint` — and travels with the definition, because it is a choice the author made. `mode` says which ground the reader is on, `light` or `dark`, and its third value `system` is the author declining to pick rather than an instruction to defer: a document that says `system` leaves the answer to whoever draws it, which is the page for an interactive view and the caller for a rendered file. Set `modeLocked: true` when the drawing must be read on the ground it names whatever the reader prefers.
+`style` says what the drawing is — `neutral` or `blueprint` — and travels with the definition, because it is a choice the author made. `mode` says which ground the reader is on, `light` or `dark`, and its third value `system` is the author declining to pick rather than an instruction to defer: a document that says `system` leaves the answer to whoever draws it, which is the page for an interactive view and the caller for a rendered file. A document that names `light` or `dark` opens on that ground, and a reader's choice or a render flag can still move it. Set `modeLocked: true` when the drawing must be read on the ground it names whatever the reader prefers: the reader is offered no colour-scheme control, and `--mode` is not applied — the command says so rather than failing. A document locked to `system` follows each reader's machine, so it renders as an SVG carrying both palettes and cannot be rendered as a PNG.
 
 The two are orthogonal. A blueprint is realised on both grounds — navy paper in the dark, cyanotype on light — so choosing a style never decides a mode, and choosing a mode never changes what the drawing is.
 

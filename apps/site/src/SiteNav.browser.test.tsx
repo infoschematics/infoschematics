@@ -27,19 +27,26 @@ afterEach(async () => {
   await commands.emulateColourScheme('no-preference')
 })
 
-test('offers the switch in the header every reader of the public site sees', async () => {
+test('offers the control in the header every reader of the public site sees', async () => {
   await commands.emulateColourScheme('light')
   const { container, getByRole } = await render(<SiteNav />)
 
   const header = container.querySelector('.site-nav')
   if (!header) throw new Error('The site rendered no header')
 
-  const button = getByRole('button', { name: 'Switch to the dark colour scheme' })
-  await expect.element(button).toHaveAttribute('aria-pressed', 'false')
-  expect(header.contains(button.element())).toBe(true)
-
-  /* The site has no icon dependency of its own, so the mark has to arrive with the control. */
-  expect(button.element().querySelector('svg')).not.toBeNull()
+  /* The site shows no one document, so nothing can lock the page's scheme: the control is always offered here. */
+  const group = getByRole('group', { name: 'Colour scheme' })
+  expect(header.contains(group.element())).toBe(true)
+  for (const [name, pressed] of [
+    ['Light', 'false'],
+    ['Dark', 'false'],
+    ['System', 'true']
+  ] as const) {
+    const button = getByRole('button', { name })
+    await expect.element(button).toHaveAttribute('aria-pressed', pressed)
+    /* The site has no icon dependency of its own, so each mark has to arrive with the control. */
+    expect(button.element().querySelector('svg')).not.toBeNull()
+  }
 })
 
 test('reaches the chrome roles at all, and resolves them differently in each scheme', async () => {
@@ -72,7 +79,7 @@ test('takes the reader at their word over the machine they are on', async () => 
   const { getByRole } = await render(<SiteNav />)
   const light = role('page')
 
-  await getByRole('button').click()
+  await getByRole('button', { name: 'Dark' }).click()
   await expect.poll(() => role('page')).not.toBe(light)
 
   /* The whole point of the control: the machine still says light, and the page is dark because the reader said so. */

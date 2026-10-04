@@ -194,12 +194,14 @@ const appearance = z
     mode: z
       .enum(['light', 'dark', 'system'])
       .describe(
-        'The ground the document would like to be read on. `system` declines to choose and follows the reader, which is what absence means.'
+        'The ground the document opens on. A choice by the reader or a render flag may move it unless `modeLocked` is set. `system` declines to choose and follows the reader, which is what absence means.'
       )
       .optional(),
     modeLocked: z
       .boolean()
-      .describe('Whether the reader may change the mode away from the one this document authored.')
+      .describe(
+        'Hold the drawing on its authored mode whatever a reader or a render flag asks. A locked document is offered no colour-scheme control.'
+      )
       .optional(),
     grid: z
       .enum(['none', 'major', 'major-plus-minor', 'dots'])

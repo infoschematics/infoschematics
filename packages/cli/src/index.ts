@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 import { basename, dirname } from 'node:path'
 import { formatInfoschematicIssue, infoschematicFormatOf, parseInfoschematic } from '@infoschematics/domain-core'
 import { renderInfoschematicSvg } from '@infoschematics/render-svg'
+import { resolveDocumentMode, resolveVisualTreatment } from '@infoschematics/view-model/appearance'
 import {
   type DrawingFinding,
   drawingIsUnreadable,
@@ -131,6 +132,22 @@ type RenderOutcome = Readonly<{ diagnostic?: string; rendered?: string | Uint8Ar
 const renderDocument = async (parsed: RenderArguments, io: RendererCliIo): Promise<RenderOutcome> => {
   const document = await readDocument(parsed.input, io)
   if ('diagnostic' in document) return document
+
+  /* A locked document answers the ground itself, so a flag naming another one is not obeyed. Say so rather than
+     hand back a drawing that quietly disagrees with what was asked; the render still succeeds, because the document
+     is valid and the caller gets exactly what its author said it must look like. A locked `system` defers to whoever
+     displays the file, and a raster has nobody to defer to — the same reason `--mode system` is refused for one. */
+  const treatment = resolveVisualTreatment(document.model.diagram.appearance)
+  const ground = resolveDocumentMode(treatment, parsed.mode)
+  if (treatment.modeLocked && parsed.format === 'png' && ground === 'system') {
+    return {
+      diagnostic: `Cannot render ${parsed.input} as png: the document locks its mode to system, which follows whoever displays it, and a raster cannot carry both palettes.\n`,
+      status: rendererCliExit.validation
+    }
+  }
+  if (treatment.modeLocked && parsed.mode !== undefined && parsed.mode !== ground) {
+    io.writeStderr(`${parsed.input} locks its mode to ${treatment.mode}; --mode ${parsed.mode} was not applied.\n`)
+  }
 
   // Geometry the renderer cannot express is refused after parsing, so a construction error is about the document
   // rather than the process. Hand the author that sentence, never the interpreter's stack.

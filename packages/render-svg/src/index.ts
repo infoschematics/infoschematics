@@ -3,6 +3,7 @@ import {
   type CardDetailOverrides,
   drawsOwnCode,
   type RenderedSize,
+  resolveDocumentMode,
   resolveReadableInk,
   resolveRegionTreatment,
   resolveResponsiveCardTreatment,
@@ -96,7 +97,9 @@ export type RenderInfoschematicSvgOptions = {
   /** Opt into responsive Card detail for this explicit rendered output size. */
   responsiveCardDetails?: RenderedSize
   /**
-   * Which ground this rendering is painted against. Defaults to the mode the document authored, and to `system`.
+   * Which ground this rendering is painted against. Defaults to the mode the document authored, and to `light` where
+   * the document authored `system` or nothing. Ignored for a document that sets `modeLocked`: its authored mode is
+   * the answer whatever a caller asks, because that is what the lock says.
    *
    * A named mode is resolved once and written as colours, which is what a raster encoder and a print path need:
    * neither has a preference left to read. `system` instead carries both palettes in the document's own stylesheet
@@ -652,13 +655,16 @@ export const renderInfoschematicSvg = (
      can overrule the other. A blueprint used to suppress deferral outright, on the reasoning that an authored
      treatment is not a scheme somebody resolved — true, and it does not follow that a blueprint has only one ground.
      It now has two, so a deferring blueprint carries both exactly as any other drawing does. */
-  /* A document's own mode answers for a drawing authored to be read on one ground. `system` is not such an answer —
-     it is the author declining to pick — so it leaves the ground to whoever renders, and a caller who asked for
-     nothing gets a rendering that resolved rather than one that defers. Deferring is something a caller asks for:
-     a still picture has no preference to read, and an unasked-for `var()` would rasterise to nothing at all. */
+  /* The caller's ground answers an unlocked document, and the document's own mode answers when the caller named
+     none. `system` authored is not such an answer — it is the author declining to pick — so a caller who asked for
+     nothing gets a rendering that resolved rather than one that defers: a still picture has no preference to read,
+     and an unasked-for `var()` would rasterise to nothing at all. A locked document is the exception the lock exists
+     for: its authored mode is the answer whatever the caller asked, a locked `system` included, which defers to
+     whoever displays the file rather than to whoever rendered it. `resolveDocumentMode` holds that rule for every
+     outlet. */
   const style: PaintStyle = visualTreatment.style
-  const authoredMode = visualTreatment.mode === 'system' ? undefined : visualTreatment.mode
-  const requestedMode: RenderedMode = options.mode ?? compatibleMode(options.scheme) ?? authoredMode ?? 'light'
+  const requestedMode: RenderedMode =
+    resolveDocumentMode(visualTreatment, options.mode ?? compatibleMode(options.scheme)) ?? 'light'
   const adaptive = requestedMode === 'system'
   const resolvedMode: PaintMode = adaptive ? 'light' : requestedMode
   const paintMarkerValue: RenderedMode = adaptive ? 'system' : resolvedMode

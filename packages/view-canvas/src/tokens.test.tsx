@@ -30,14 +30,22 @@ const declarationsIn = (css: string, selector: string, after = '') => {
 /**
  * Where each palette is declared. `:root` carries the one a page that says nothing gets.
  *
- * Two blocks have the same selector and are told apart by what precedes them, because the media rule they sit in
- * is the whole difference between them: one answers a reader who prefers dark, the other answers paper.
+ * Blocks inside a media rule are told apart by what precedes them, because the rule they sit in is the whole
+ * difference between them and the unconditional block with the same selector: one answers a reader who prefers
+ * dark, the other answers paper. Paper also reaches a drawing that states its own mode, which is why its selector
+ * names the attribute as well as the root.
  */
 const blueprintSelector = '.infoschematic-svg.style-blueprint, [data-infoschematic-style="blueprint"]'
 const under = (prefix: string) =>
   blueprintSelector
     .split(', ')
     .map((one) => `${prefix} ${one}`)
+    .join(', ')
+
+const on = (suffix: string) =>
+  blueprintSelector
+    .split(', ')
+    .map((one) => `${one}${suffix}`)
     .join(', ')
 
 const paintBlocks: readonly Readonly<{
@@ -59,7 +67,10 @@ const paintBlocks: readonly Readonly<{
   { mode: 'dark', selector: '[data-infoschematic-scheme="dark"]', style: 'neutral' },
   { mode: 'light', selector: under('[data-infoschematic-scheme="light"]'), style: 'blueprint' },
   { mode: 'dark', selector: under('[data-infoschematic-scheme="dark"]'), style: 'blueprint' },
-  { after: '@media print', mode: 'light', selector: '  :root', style: 'neutral' }
+  /* A drawing whose document states its own mode carries it on its own element, below the page's. */
+  { mode: 'light', selector: on('[data-infoschematic-scheme="light"]'), style: 'blueprint' },
+  { mode: 'dark', selector: on('[data-infoschematic-scheme="dark"]'), style: 'blueprint' },
+  { after: '@media print', mode: 'light', selector: '  :root, [data-infoschematic-scheme]', style: 'neutral' }
 ]
 
 /**
@@ -139,9 +150,11 @@ describe('Canvas visual tokens', () => {
 
     expect(print).toBeGreaterThan(generated.indexOf('@media (prefers-color-scheme: dark)'))
     expect(print).toBeGreaterThan(generated.indexOf('[data-infoschematic-scheme="dark"]'))
-    expect(declarationsIn(generated, '  :root', '@media print').get('--infoschematic-canvas-paint-backdrop')).toBe(
-      paintFor('neutral', 'light').backdrop
-    )
+    expect(
+      declarationsIn(generated, '  :root, [data-infoschematic-scheme]', '@media print').get(
+        '--infoschematic-canvas-paint-backdrop'
+      )
+    ).toBe(paintFor('neutral', 'light').backdrop)
   })
 
   it('uses the manifest for component and editing-grid geometry', async () => {

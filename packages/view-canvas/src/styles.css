@@ -1238,11 +1238,21 @@
 }
 
 /*
- * The reader's colour-scheme switch, which every host mounts and each host places.
+ * The reader's colour-scheme control, which every host mounts and each host places.
  *
- * Only what the control itself needs is here — the mark's size and the fact that a pressed switch is not a selected
- * tool. Where it sits, and what bank it sits in, belongs to whichever chrome mounted it.
+ * Only what the control itself needs is here — the three choices kept together as one group, and the mark's size.
+ * Where it sits, and what bank it sits in, belongs to whichever chrome mounted it.
  */
+.colour-scheme-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 .colour-scheme-button {
   display: inline-flex;
   align-items: center;

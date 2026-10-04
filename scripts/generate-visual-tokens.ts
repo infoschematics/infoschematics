@@ -54,6 +54,23 @@ const under = (prefix: string, selector: string) =>
 const blueprintUnderLight = under('[data-infoschematic-scheme="light"]', blueprintSelector)
 const blueprintUnderDark = under('[data-infoschematic-scheme="dark"]', blueprintSelector)
 
+/**
+ * A blueprint drawing that carries its own mode, which is a document that authored one.
+ *
+ * The mode attribute then sits on the drawing itself, and a descendant combinator cannot see it there. Qualifying
+ * the same element ties the nested rules on specificity, and these blocks come after them, so the drawing's own
+ * ground outranks whichever one the page around it is on — a locked dark blueprint stays dark inside a light page.
+ * The plain style needs no counterpart: its mode selectors already match the drawing's own element, and a
+ * declaration on the drawing outranks one it would otherwise inherit from the page.
+ */
+const blueprintOn = (mode: PaintMode) =>
+  blueprintSelector
+    .split(', ')
+    .map((one) => `${one}[data-infoschematic-scheme="${mode}"]`)
+    .join(', ')
+const blueprintOnLight = blueprintOn('light')
+const blueprintOnDark = blueprintOn('dark')
+
 const paintSelectors: readonly Readonly<{
   mode: PaintMode
   selector: string
@@ -67,11 +84,17 @@ const paintSelectors: readonly Readonly<{
   { mode: 'dark', selector: '[data-infoschematic-scheme="dark"]', style: 'neutral' },
   { mode: 'light', selector: blueprintUnderLight, style: 'blueprint' },
   { mode: 'dark', selector: blueprintUnderDark, style: 'blueprint' },
-  { mode: 'light', selector: ':root', style: 'neutral', wrap: '@media print' },
+  { mode: 'light', selector: blueprintOnLight, style: 'blueprint' },
+  { mode: 'dark', selector: blueprintOnDark, style: 'blueprint' },
+  /* A drawing carrying its own mode declares it on itself, so print has to reach that element too: paper is light
+     whatever ground the document locked, the same as whatever ground the reader chose. */
+  { mode: 'light', selector: ':root, [data-infoschematic-scheme]', style: 'neutral', wrap: '@media print' },
   {
     mode: 'light',
     /* Every path a blueprint can have been painted by, so print ties the mode-qualified rules and wins on order. */
-    selector: [blueprintSelector, blueprintUnderLight, blueprintUnderDark].join(', '),
+    selector: [blueprintSelector, blueprintUnderLight, blueprintUnderDark, blueprintOnLight, blueprintOnDark].join(
+      ', '
+    ),
     style: 'blueprint',
     wrap: '@media print'
   }

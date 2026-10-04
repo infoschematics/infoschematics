@@ -66,6 +66,18 @@ Card Collections and Flow Families classify Diagram elements and supply their se
 
 `collection`, `family` and `scope` are acceptable shorthand where the surrounding code or prose makes the full meaning unambiguous.
 
+### Appearance
+
+A Visual Style and a Colour Mode are orthogonal: the style, `neutral` or `blueprint`, says what the drawing is and travels with it, while the mode, `light` or `dark`, says which ground it is read on and is resolved by whoever draws it; an authored `system` leaves that to the reader. An authored colour is a Hue Seed: its hue and saturation are kept and its lightness belongs to the ground, unless a trailing `!` pins it.
+
+| Id | Infoschematics term | Meaning |
+| --- | --- | --- |
+| `visual-style` | <span id="visual-style"></span>Visual Style | Authored treatment of the whole drawing |
+| `colour-mode` | <span id="colour-mode"></span>Colour Mode | Ground the drawing is read on |
+| `hue-seed` | <span id="hue-seed"></span>Hue Seed | Authored colour realised for the ground it lands on |
+
+`style` and `mode` are the authored field names. "Mode" alone names a Studio workspace mode, so prose and interfaces say colour mode, or colour scheme where a reader chooses it.
+
 ## Infoschematic
 
 An **Infoschematic** is the complete structural diagram. It establishes what exists, where it is placed, and how it is connected.

@@ -80,6 +80,27 @@ export const resolveVisualTreatment = (
 })
 
 /**
+ * The ground a document is drawn on, given what its reader or its caller asked for.
+ *
+ * One rule for every outlet, so a locked document cannot be locked in Canvas and open in a rendered file. An unlocked
+ * document's authored mode is a default: whoever asked for a ground — a reader's explicit choice, a render flag — is
+ * answered, and the document speaks only when nobody did. A locked document's authored mode is the answer whatever
+ * was asked, because the lock is precisely the author saying a request cannot move it; that includes a locked
+ * `system`, which binds the drawing to the reader's machine rather than to anything a caller can name.
+ *
+ * `undefined` means nobody answered — the document declined and nothing was asked — and each outlet supplies its own
+ * last resort: the reader's machine for an interactive view, `light` for a still picture. `system` means the answer
+ * is to defer, which an interactive view resolves from the machine and a static one by carrying both palettes.
+ */
+export const resolveDocumentMode = (
+  treatment: Pick<ResolvedVisualTreatment, 'mode' | 'modeLocked'>,
+  requested: AuthoredColourMode | undefined
+): AuthoredColourMode | undefined => {
+  if (treatment.modeLocked) return treatment.mode
+  return requested ?? (treatment.mode === 'system' ? undefined : treatment.mode)
+}
+
+/**
  * Whether one element draws its own code, permanently, in every rendering of the Diagram.
  *
  * The element's own answer is the specific one and wins; the Diagram's default for its kind answers for everything

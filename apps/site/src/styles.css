@@ -99,24 +99,35 @@ a:focus-visible {
   color: var(--infoschematic-chrome-paint-accent);
 }
 
-/* The site has no icon bank, so the switch carries its own frame rather than borrowing a tool button's. */
+/* The site has no icon bank, so the control carries its own frame rather than borrowing a tool button's. */
+.site-nav .colour-scheme-control {
+  padding: 2px;
+  border: 1px solid var(--infoschematic-chrome-paint-border);
+  border-radius: 8px;
+  background: var(--infoschematic-chrome-paint-surface-raised);
+}
+
 .site-nav__scheme {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   padding: 0;
-  border: 1px solid var(--infoschematic-chrome-paint-border);
-  border-radius: 8px;
-  background: var(--infoschematic-chrome-paint-surface-raised);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--infoschematic-chrome-paint-text-muted);
   cursor: pointer;
 }
 
 .site-nav__scheme:hover {
-  border-color: var(--infoschematic-chrome-paint-accent-border);
   color: var(--infoschematic-chrome-paint-text-strong);
+}
+
+.site-nav__scheme[aria-pressed="true"] {
+  background: var(--infoschematic-chrome-paint-accent-soft);
+  color: var(--infoschematic-chrome-paint-accent);
 }
 
 .site-nav__scheme:focus-visible {

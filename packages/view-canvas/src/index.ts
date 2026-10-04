@@ -48,9 +48,10 @@ export { ColourSchemeButton } from './ColourSchemeButton.tsx'
 export {
   applyColourScheme,
   type ColourScheme,
+  type ColourSchemeChoice,
+  type ColourSchemeState,
   colourSchemeAttribute,
   colourSchemeStorageKey,
-  otherColourScheme,
   preferredColourScheme,
   resolveColourScheme,
   storedColourScheme,

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   drawsOwnCode,
   resolveCardDomain,
+  resolveDocumentMode,
   resolveReadableInk,
   resolveRegionTreatment,
   resolveResponsiveCardTreatment,
@@ -39,6 +40,20 @@ describe('visual treatment resolution', () => {
       modeLocked: false,
       style: 'blueprint'
     })
+  })
+
+  /* The lock is what an author uses to say a request cannot move the drawing, so it has to win over every request —
+     including a locked `system`, which binds the drawing to the machine rather than to a ground anyone can name. */
+  it.each([
+    ['an unlocked document follows a request', { mode: 'dark', modeLocked: false }, 'light', 'light'],
+    ['an unlocked document answers when nothing was asked', { mode: 'dark', modeLocked: false }, undefined, 'dark'],
+    ['an unlocked system document leaves the answer open', { mode: 'system', modeLocked: false }, undefined, undefined],
+    ['an unlocked system document follows a request', { mode: 'system', modeLocked: false }, 'dark', 'dark'],
+    ['a locked document refuses a request', { mode: 'light', modeLocked: true }, 'dark', 'light'],
+    ['a locked document refuses a request to defer', { mode: 'dark', modeLocked: true }, 'system', 'dark'],
+    ['a locked system document refuses a named ground', { mode: 'system', modeLocked: true }, 'light', 'system']
+  ] as const)('%s', (_, treatment, requested, expected) => {
+    expect(resolveDocumentMode(treatment, requested)).toBe(expected)
   })
 
   it.each([
