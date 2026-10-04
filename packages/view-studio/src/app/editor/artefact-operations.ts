@@ -312,7 +312,9 @@ export const pendingArtefactBoxes = (operations: readonly ArtefactDraftOperation
  * either is written cannot be issued the same Flow code by the two surfaces that issue them.
  *
  * A removal does not hand its code back. `ADR-INFOSCHEMATICS-003` keeps the gap a removal leaves, and a code a pending
- * edit has named is one a change set under review may still be talking about.
+ * edit has named is one a change set under review may still be talking about. That holds for an authored element only:
+ * a creation discarded before it is written leaves no operation behind, so its code is released, since nothing
+ * written ever named it.
  */
 export const pendingArtefactCodes = (
   operations: readonly ArtefactDraftOperation[],

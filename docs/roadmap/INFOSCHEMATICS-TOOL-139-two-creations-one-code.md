@@ -4,12 +4,12 @@ area: TOOL
 title: Two creations, one code
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: f92606c39d7bbfda82596899aec9fbe49cfa7bc1
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:50:00Z
+updated_at: 2026-10-04T21:05:00Z
 ---
 
 # Two creations, one code
@@ -48,7 +48,7 @@ So the fault reaches Flows as well as Cards, across the two pending stores rathe
 
 - **One view of pending codes, read by every allocator.** `pendingArtefactCodes` in `packages/view-studio/src/app/editor/artefact-operations.ts` names every code a pending edit has claimed - the codes the pending artefact operations target, and the codes of the lines drawn and not yet written - and the Card control, the Library and the drawn-line family choice each add it to the authored register they already read. This is the single view the Discussion below anticipated, in the same module as `pendingArtefactBoxes`, which gives placement the equivalent. Decided under delegated autonomy (2026-10-04), reversible: one helper and three call sites.
 - **Flows are fixed in the same change rather than recorded as a follow-up.** The Boundary asks whether the fault reaches other kinds before Cards are fixed alone; it reaches Flows by the same mechanism, and the fix is the same composition at one more call site. Decided under delegated autonomy (2026-10-04), reversible.
-- **A pending removal keeps its code claimed.** `ADR-INFOSCHEMATICS-003` keeps the gap a removal leaves, and an allocator that offered a code back while its removal is still pending would hand out a name a change set under review is still talking about. Decided under delegated autonomy (2026-10-04), reversible.
+- **A pending removal keeps its code claimed.** `ADR-INFOSCHEMATICS-003` keeps the gap a removal leaves, and an allocator that offered a code back while its removal is still pending would hand out a name a change set under review is still talking about. This holds for authored elements only: a creation discarded before it is written leaves no operation, so its code is released, since nothing written ever named it. Decided under delegated autonomy (2026-10-04), reversible.
 - **Out of scope: whether an Adapter may wrap a Card whose Adapter is still pending.** `canWrap` reads the authored register too, so a second Adapter can be offered for a Card whose first Adapter is unwritten. That is a question about what may be made, not what it is called; it now receives a distinct code under this change, and is left for a separate record if it matters. Decided under delegated autonomy (2026-10-04), reversible.
 
 ## Steps
@@ -129,6 +129,10 @@ The goal holds: the reported fault is fixed and proved by a case that fails with
 ### Mini recap
 
 Delivered one pending-codes view read by all three code allocators, with unit and browser evidence and the `EDIT-024` amendment; full gate and audit green. Concerns: the Adapter `canWrap` question and the absent end-to-end Flow case. Learning route: none proposed beyond this record - `pendingArtefactCodes` beside `pendingArtefactBoxes` is the reusable shape for any future allocator.
+
+## Done
+
+Accepted 2026-10-04 on the review packet above after an independent Fable review returned ACCEPT: every code-issuing allocator (the Card control, the Library and the drawn-line family choice) now reads the authored register together with `pendingArtefactCodes`, which covers both the artefact operations and the drawn-line store, and the two-Card browser case fails without the fix. Following a non-blocking finding, the helper comment and the removal decision now state that only a removal of an authored element keeps its code; a creation discarded before writing releases it. The Adapter question and the missing end-to-end Library-Flow-then-drawn-line browser case remain as recorded. Decided by the Fable reviewer under delegated autonomy (2026-10-04), reversible.
 
 ## Discussion
 
