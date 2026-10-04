@@ -98,6 +98,54 @@ test('arriving at a Scope holds every element it names, anchor first', async () 
   )
 })
 
+/**
+ * What a sighted reader sees on arriving, read from the styles the browser resolved rather than from a class name.
+ *
+ * `INFOSCHEMATICS-TOOL-138`: the selection treatments were gated behind an editing surface, so a read-only Canvas held
+ * the selection, announced it, and painted nothing. Every assertion here compares the addressed part with one the
+ * address did not name, so it fails if the selection is present in the markup and invisible on the page.
+ */
+const shapeOf = (container: HTMLElement, id: string) => {
+  const shape = container.querySelector(`[data-artefact-id="${id}"] > rect`)
+  if (!shape) throw new Error(`${id} drew no rect`)
+  return getComputedStyle(shape)
+}
+
+test('a sighted reader can see the part they arrived at, without a Design session', async () => {
+  const screen = await render(<Host initial={scopeDestination('edge')} />)
+  await expect.poll(() => selectedIds(screen.container)).toEqual(['ED-01'])
+  expect(screen.container.querySelector('svg.infoschematic-svg')?.classList.contains('editing')).toBe(false)
+
+  const arrived = shapeOf(screen.container, 'ED-01')
+  const elsewhere = shapeOf(screen.container, 'IN-01')
+  expect(arrived.stroke).not.toBe(elsewhere.stroke)
+  expect(arrived.strokeWidth).toBe('3px')
+  expect(arrived.filter).not.toBe('none')
+
+  // The rest of the Scope is held behind the anchor, drawn in the selection's colour and broken rather than solid.
+  const mark = screen.container.querySelector('[data-artefact-id="PT-01"] .point-mark')
+  if (!mark) throw new Error('PT-01 drew no mark')
+  const held = getComputedStyle(mark)
+  expect(held.stroke).toBe(arrived.stroke)
+  expect(held.strokeDasharray).not.toBe('none')
+})
+
+/**
+ * Only an arrival is painted outside Design. A host that holds its own read-only selection — Studio's Direct does —
+ * draws exactly what it drew before this treatment existed, so the arrival's visibility does not leak into a surface
+ * that never asked for it.
+ */
+test('a read-only selection the host holds is not painted as an arrival', async () => {
+  const screen = await render(
+    <div style={surface}>
+      <Canvas config={config} selectedArtefact={{ code: 'ED-01', geometry: 'box', id: 'ED-01', kind: 'card' }} />
+    </div>
+  )
+  await expect.poll(() => selectedIds(screen.container)).toEqual(['ED-01'])
+  expect(screen.container.querySelector('svg.infoschematic-svg')?.classList.contains('arrived')).toBe(false)
+  expect(shapeOf(screen.container, 'ED-01').stroke).toBe(shapeOf(screen.container, 'IN-01').stroke)
+})
+
 test('arriving does not start anything the author animated', async () => {
   const screen = await render(<Host initial={artefactDestination('ED-01')} />)
 

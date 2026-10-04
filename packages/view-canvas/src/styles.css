@@ -258,7 +258,8 @@
 }
 
 /* A Fabric remains selectable regardless of the host renderer it uses. */
-.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell,
+.infoschematic-svg.arrived .infoschematic-fabric.selected .fabric-shell {
   stroke: var(--infoschematic-canvas-paint-text-strong);
   stroke-width: 2.5px;
 }
@@ -310,7 +311,9 @@
 }
 
 .infoschematic-svg.editing .infoschematic-region.selected > rect,
-.infoschematic-svg.editing .infoschematic-graphic.selected .fabric-shell {
+.infoschematic-svg.arrived .infoschematic-region.selected > rect,
+.infoschematic-svg.editing .infoschematic-graphic.selected .fabric-shell,
+.infoschematic-svg.arrived .infoschematic-graphic.selected .fabric-shell {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
@@ -323,11 +326,17 @@
  * others are brought onto and a Producer has to be able to see which one that is before pressing a control.
  */
 .infoschematic-svg.editing .infoschematic-service.group-held > rect,
+.infoschematic-svg.arrived .infoschematic-service.group-held > rect,
 .infoschematic-svg.editing .infoschematic-region.group-held > rect,
+.infoschematic-svg.arrived .infoschematic-region.group-held > rect,
 .infoschematic-svg.editing .infoschematic-graphic.group-held .fabric-shell,
+.infoschematic-svg.arrived .infoschematic-graphic.group-held .fabric-shell,
 .infoschematic-svg.editing .infoschematic-fabric.group-held .fabric-shell,
+.infoschematic-svg.arrived .infoschematic-fabric.group-held .fabric-shell,
 .infoschematic-svg.editing .infoschematic-adapter.group-held .adapter-socket,
-.infoschematic-svg.editing .audit-flow.group-held rect {
+.infoschematic-svg.arrived .infoschematic-adapter.group-held .adapter-socket,
+.infoschematic-svg.editing .audit-flow.group-held rect,
+.infoschematic-svg.arrived .audit-flow.group-held rect {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-dasharray: 5 4;
   stroke-width: 2px;
@@ -335,13 +344,17 @@
 
 /* The selection's own glow at a little over half its strength, so the group reads as one thing with one element of
    it to the front rather than as several separate selections. */
-.infoschematic-svg.editing .group-held {
+.infoschematic-svg.editing .group-held,
+.infoschematic-svg.arrived .group-held {
   --glow: color-mix(in srgb, var(--infoschematic-canvas-selection-selected) 60%, transparent);
 }
 
 .infoschematic-svg.editing .infoschematic-service.group-held > rect,
+.infoschematic-svg.arrived .infoschematic-service.group-held > rect,
 .infoschematic-svg.editing .infoschematic-fabric.group-held .fabric-shell,
-.infoschematic-svg.editing .infoschematic-adapter.group-held .adapter-socket {
+.infoschematic-svg.arrived .infoschematic-fabric.group-held .fabric-shell,
+.infoschematic-svg.editing .infoschematic-adapter.group-held .adapter-socket,
+.infoschematic-svg.arrived .infoschematic-adapter.group-held .adapter-socket {
   filter: drop-shadow(0 0 10px color-mix(in srgb, var(--glow) 48%, transparent));
 }
 
@@ -601,7 +614,17 @@
    points at it - the pointer on the Infoschematic or a change in the panel. Pointing is
    the lighter half: it says "this one" while the pointer rests and nothing once
    it moves on. Selecting keeps the same glow in the selection's own colour, so
-   what has been chosen goes on saying so after the pointer leaves. */
+   what has been chosen goes on saying so after the pointer leaves.
+
+   Every selected and group-held treatment is stated twice: for an editing
+   surface, and for a surface a reader has just arrived on. Outside Design a
+   selection is withheld, but an arrival's selection is the whole of that
+   arrival (`ADR-INFOSCHEMATICS-041`), and gated behind `.editing` it was
+   announced to an assistive reader and painted for nobody
+   (`INFOSCHEMATICS-TOOL-138`). Only the paint is shared: handles, cursors,
+   ports and the grid stay behind `.editing`, so nothing on the read-only
+   surface invites an edit. `.arrived` carries the same specificity as
+   `.editing`, so the editing cascade is left exactly as it was. */
 .infoschematic-svg .pointed {
   --glow: var(--infoschematic-canvas-selection-pointed);
 }
@@ -611,7 +634,8 @@
 }
 
 .infoschematic-svg .infoschematic-service.pointed > rect,
-.infoschematic-svg.editing .infoschematic-service.selected > rect {
+.infoschematic-svg.editing .infoschematic-service.selected > rect,
+.infoschematic-svg.arrived .infoschematic-service.selected > rect {
   filter: drop-shadow(
     0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
   );
@@ -622,7 +646,8 @@
 }
 
 .infoschematic-svg .audit-flow.pointed rect,
-.infoschematic-svg.editing .audit-flow.selected rect {
+.infoschematic-svg.editing .audit-flow.selected rect,
+.infoschematic-svg.arrived .audit-flow.selected rect {
   filter: drop-shadow(0 0 8px color-mix(in srgb, var(--glow) 55%, transparent));
 }
 
@@ -632,7 +657,8 @@
 }
 
 .infoschematic-svg .infoschematic-fabric.pointed .fabric-shell,
-.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell {
+.infoschematic-svg.editing .infoschematic-fabric.selected .fabric-shell,
+.infoschematic-svg.arrived .infoschematic-fabric.selected .fabric-shell {
   filter: drop-shadow(
     0 0 12px color-mix(in srgb, var(--glow) 40%, transparent)
   );
@@ -641,7 +667,8 @@
 /* A region's heading is text, so the glow is a text shadow.
    Geography is pointed at the same way a component is; only dragging differs. */
 .infoschematic-svg .region-selectable.pointed,
-.infoschematic-svg.editing .region-selectable.selected {
+.infoschematic-svg.editing .region-selectable.selected,
+.infoschematic-svg.arrived .region-selectable.selected {
   text-shadow: 0 0 9px color-mix(in srgb, var(--glow) 70%, transparent);
 }
 
@@ -676,13 +703,15 @@
 }
 
 .infoschematic-adapter.pointed .adapter-socket,
-.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket,
+.infoschematic-svg.arrived .infoschematic-adapter.selected .adapter-socket {
   filter: drop-shadow(
     0 0 10px color-mix(in srgb, var(--glow) 48%, transparent)
   );
 }
 
-.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket {
+.infoschematic-svg.editing .infoschematic-adapter.selected .adapter-socket,
+.infoschematic-svg.arrived .infoschematic-adapter.selected .adapter-socket {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
@@ -820,7 +849,8 @@
   pointer-events: auto;
 }
 
-.infoschematic-svg.editing .infoschematic-service.selected > rect {
+.infoschematic-svg.editing .infoschematic-service.selected > rect,
+.infoschematic-svg.arrived .infoschematic-service.selected > rect {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
@@ -834,7 +864,8 @@
 .infoschematic-svg.editing .region-selectable {
   pointer-events: auto;
 }
-.infoschematic-svg.editing .audit-flow.selected rect {
+.infoschematic-svg.editing .audit-flow.selected rect,
+.infoschematic-svg.arrived .audit-flow.selected rect {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 2px;
 }
@@ -1222,7 +1253,8 @@
 /* Selection, hover and being held are stated on the mark rather than as a ring around it: the Point is the smallest
    thing on the surface, and a second shape appearing beside it reads as another element rather than as this one
    answering. Each of these overrides the authored stroke, which arrives as a presentation attribute. */
-.infoschematic-svg.editing .infoschematic-point.selected .point-mark {
+.infoschematic-svg.editing .infoschematic-point.selected .point-mark,
+.infoschematic-svg.arrived .infoschematic-point.selected .point-mark {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-width: 3px;
 }
@@ -1231,7 +1263,8 @@
   stroke: var(--infoschematic-canvas-selection-pointed);
 }
 
-.infoschematic-svg.editing .infoschematic-point.group-held .point-mark {
+.infoschematic-svg.editing .infoschematic-point.group-held .point-mark,
+.infoschematic-svg.arrived .infoschematic-point.group-held .point-mark {
   stroke: var(--infoschematic-canvas-selection-selected);
   stroke-dasharray: 5 4;
   stroke-width: 2px;

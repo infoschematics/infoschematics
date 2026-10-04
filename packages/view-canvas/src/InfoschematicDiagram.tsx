@@ -591,6 +591,15 @@ export function InfoschematicDiagram({
   const [arrival, setArrival] = useState<Readonly<{ at: ResolvedDestination; revision: number }> | null>(null)
   const selectedArtefact = hostSelectedArtefact ?? arrival?.at.selection[0] ?? null
   const selectionSet = hostSelectionSet.length > 0 ? hostSelectionSet : (arrival?.at.selection ?? noSelectionSet)
+  /*
+   * Whether the selection drawn is the arrival's rather than a host's.
+   *
+   * Outside Design the selection treatments are withheld, because a read-only surface is not where a Producer chooses
+   * what to change. An arrival is the exception: there the selection is the whole of what happened, and holding it
+   * without painting it told an assistive reader and nobody else (`INFOSCHEMATICS-TOOL-138`). Only the arrival is
+   * marked, so a host that holds its own read-only selection draws exactly what it drew before.
+   */
+  const arrived = arrival !== null && hostSelectedArtefact == null && hostSelectionSet.length === 0
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: pre-existing dependency shape kept as-is; TOOL-015 is toolchain-only and does not change effect/callback behaviour.
   const flows = useMemo(() => {
@@ -2365,7 +2374,7 @@ export function InfoschematicDiagram({
       <svg
         ref={infoschematic}
         aria-label={`${config.title} structural Infoschematic`}
-        className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} style-${visualTreatment.style}`}
+        className={`${highlight ? 'infoschematic-svg highlighting' : 'infoschematic-svg'}${editing ? ' editing' : ''}${arrived ? ' arrived' : ''}${focusing ? ' focusing' : ''}${fitted ? '' : ' zoomed'}${panGesture ? ' panning' : ''} style-${visualTreatment.style}`}
         data-grid-treatment={visualTreatment.grid}
         data-infoschematic-scheme={ownsGround ? colourMode : undefined}
         data-infoschematic-style={visualTreatment.style}

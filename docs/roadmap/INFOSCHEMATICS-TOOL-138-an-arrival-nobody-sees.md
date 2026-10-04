@@ -4,12 +4,12 @@ area: TOOL
 title: An arrival nobody sees
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: 817da6ada51ef41c6db27e93fcd06d539858d185
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-10-04T20:30:00Z
+updated_at: 2026-10-04T20:33:42Z
 ---
 
 # An arrival nobody sees
@@ -47,11 +47,11 @@ A read-only Canvas can also hold a selection that is not an arrival: Studio pass
 
 ## Steps
 
-- [ ] In `InfoschematicDiagram.tsx`, add `arrived` to the surface's class while an arrival stands and the host holds no selection.
-- [ ] In `styles.css`, give every `.infoschematic-svg.editing` selected and group-held treatment an `.infoschematic-svg.arrived` twin, and say why beside the selection treatments.
-- [ ] Add a browser case reading the resolved styles of an arrival in a read-only Canvas against an unaddressed part, and one showing a host-held read-only selection is still unpainted.
-- [ ] State the behaviour as a Canvas requirement in `docs/specs/diagram-elements.md` beside `DIAGRAM-012`.
-- [ ] Look at the result in a real browser with `bun run self:browser:look`, on the site's destination demonstration, and write the captures to `reports/`.
+- [x] In `InfoschematicDiagram.tsx`, add `arrived` to the surface's class while an arrival stands and the host holds no selection.
+- [x] In `styles.css`, give every `.infoschematic-svg.editing` selected and group-held treatment an `.infoschematic-svg.arrived` twin, and say why beside the selection treatments.
+- [x] Add a browser case reading the resolved styles of an arrival in a read-only Canvas against an unaddressed part, and one showing a host-held read-only selection is still unpainted.
+- [x] State the behaviour as a Canvas requirement in `docs/specs/diagram-elements.md` beside `DIAGRAM-012`.
+- [x] Look at the result in a real browser with `bun run self:browser:look`, on the site's destination demonstration, and write the captures to `reports/`.
 
 ## Files touched
 
@@ -88,6 +88,42 @@ None here. Site content, if it should mention the visible arrival, is a follow-u
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+An arrival in a read-only Canvas now paints its selection: the anchor with the selection stroke and glow, and the rest of a Scope with the broken held stroke, exactly as Design draws them. The treatment is scoped to the arrival - the Diagram marks its surface `arrived` only while the drawn selection is the arrival's - so a host-held read-only selection such as Studio's Direct is unchanged, and editing affordances (handles, cursors, ports, grid, selectable hover) stay behind `.editing`. Arriving still neither magnifies nor emphasises, and does nothing further when the whole document is already in view. Excluded and untouched: addressing and resolution, Studio, Present, `docs/specs/design-editing.md`, and Site content. Baseline `817da6ada51ef41c6db27e93fcd06d539858d185`; the change is the commit carrying this packet.
+
+### Change Summary
+
+- `packages/view-canvas/src/InfoschematicDiagram.tsx` - derives `arrived` (an arrival stands and the host holds neither a selected artefact nor a selection set) and adds it to the surface class.
+- `packages/view-canvas/src/styles.css` - every `.infoschematic-svg.editing` selected and group-held treatment gains an `.infoschematic-svg.arrived` twin of equal specificity, with the rationale beside the selection treatments.
+- `packages/view-canvas/src/InfoschematicDiagram.destination.browser.test.tsx` - one case reads resolved styles of a Scope arrival against an unaddressed Card and a held Point; a second shows a host-held read-only selection is unpainted.
+- `docs/specs/diagram-elements.md` - new `DIAGRAM-013`, "An arrival is visible to a sighted reader".
+- Deviation from the partial work found in the tree: it ungated the treatments for every read-only surface with `:not(.editing)`. That would have painted Studio's Direct selection too, outside this boundary, so the twins were retargeted to `.arrived`.
+
+### Verification
+
+- `bunx vitest run --config vitest.browser.config.ts src/InfoschematicDiagram.destination.browser.test.tsx` in `packages/view-canvas` - 10 passed. With the `arrived` class removed from the surface, the arrival case fails (1 failed, 9 passed), so the case measures the treatment rather than the markup.
+- `bun run self:check` - exit 0, 52 of 52 tasks, run with the unrelated `INFOSCHEMATICS-TOOL-139` edits also present in the working tree.
+- `bunx vitest run --root . scripts/specification-evidence.test.ts` - 6 passed; `ki repo audit --skill ki-specs` and `--skill ki-work-roadmap` - PASS.
+- `bun run self:browser:look -- --name TOOL-138-arrival --path "/docs/react-integration/?artefact=STORE" --probe reports/TOOL-138-arrival-probe.ts` - captures in `reports/TOOL-138-arrival/`. With the whole document in view (viewBox unchanged), `STORE` is outlined in the selection green with its glow; after `?scope=edge`, `CLIENT` is the 3px green anchor and `INTAKE` the dashed held Card. Looked at, not only measured.
+- `ki repo audit --repo .` - BIO-1 FAIL, caused only by files outside this item: `biome.json` declares schema 2.5.12 against CLI 2.5.14, and `noNonNullAssertion` in committed `packages/view-model/src/artefact-draft.test.ts` and `packages/view-canvas/src/InfoschematicDiagram.preview.test.tsx`. The three files this item changes pass Biome.
+
+### Outstanding concerns
+
+- `ki repo audit` BIO-1 remains red for the pre-existing causes above, which are neither this item's nor `INFOSCHEMATICS-TOOL-139`'s.
+- An unresolvable address after a resolved one leaves the earlier arrival painted (the look's third capture). That is `INFOSCHEMATICS-TOOL-115`'s quiet no-op keeping prior state, now visible rather than introduced; whether a failed address should withdraw a standing arrival is a question for `ADR-INFOSCHEMATICS-041`, not this item.
+- A Point anchor carries the selection stroke but no glow, as it does in Design; it reads, but is the faintest of the treatments.
+
+### Post-change review
+
+The goal is met: a sighted reader arriving at a part sees which part was addressed, including when nothing moves, and the assistive and visual accounts now agree. Scope held to the treatment an arrival gets; addressing is untouched and the editing cascade is unchanged because the twins share its specificity. Regression risk is low: only a surface with an arrival and no host selection gains paint, and the second browser case pins the host-held read-only case. Ready for acceptance.
+
+### Mini recap
+
+Arrival selection is painted on read-only Canvases through an `arrived` surface class and twin selectors; browser case, spec requirement and a real-browser look land with it, and `self:check` passes. Learning route (not promoted): when a state is gated behind a mode class, decide whether the gate protects the paint or the affordance before relaxing it - here only the affordance needed protecting.
 
 ## Discussion
 

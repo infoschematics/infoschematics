@@ -131,3 +131,13 @@ _Conformance:_ conforming
 _Verify:_ Address a Region id, a Fabric code, a Card code, a Point id, a Flow code and a Scope id in a document holding all six, and confirm each resolves to that element's own extent. Then address a Graphic's id and a Scene's id in the same document and confirm both refuse as unknown. Add Graphics to the addressable index and the Graphic case must stop refusing.
 
 _Evidence:_ `packages/view-model/src/destination.ts` builds its addressable index from Regions, Fabrics, Cards, Points and Flows and resolves Scopes by membership, with Graphics deliberately absent; `packages/view-model/src/destination.test.ts` and `packages/view-canvas/src/InfoschematicDiagram.destination.browser.test.tsx` cover the resolved and refused cases.
+
+### DIAGRAM-013 — An arrival is visible to a sighted reader
+
+When a Diagram arrives at an addressed part and the host holds no selection of its own, the arrival's [selection](../reference/vocabulary.md#selection-anchor) MUST be painted with the selection treatment on a read-only surface as well as in [Design](../reference/vocabulary.md#design): the anchor drawn as selected and the rest of a Scope drawn as held behind it. Only the paint MUST be shared; handles, pointer affordances, ports and the grid MUST remain withheld outside Design, so an arrival does not read as an invitation to edit. A read-only selection the host holds MUST be drawn as it is without an arrival. Arriving MUST NOT magnify or emphasise to compensate for a document already wholly in view: the visible selection is the arrival, and an address that does not resolve selects nothing, so the two remain distinguishable.
+
+_Conformance:_ conforming
+
+_Verify:_ Run `bun run test:browser --filter=@infoschematics/view-canvas`, then arrive at a Scope in a read-only Canvas and read the resolved styles: the anchor's stroke differs from an unaddressed Card's and carries the selection's width and glow, and a held Point is broken in the selection's colour. Mount a read-only Canvas whose host holds the same selection and confirm it is unpainted. Remove the `arrived` class from the Diagram's surface and the first case MUST fail.
+
+_Evidence:_ `packages/view-canvas/src/InfoschematicDiagram.tsx` marks its surface `arrived` while the drawn selection is an arrival's; `packages/view-canvas/src/styles.css` gives each `.editing` selected and group-held treatment an `.arrived` twin; `packages/view-canvas/src/InfoschematicDiagram.destination.browser.test.tsx` compares resolved styles for both cases.
