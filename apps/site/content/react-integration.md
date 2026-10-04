@@ -111,9 +111,9 @@ export const renderers = defineInfoschematicRenderers({
 
 A Fabric implementation receives the authored Fabric, its effective `bounds`, and validated properties. A Graphic implementation receives the resolved authored Graphic, the Infoschematic `viewBox`, and validated properties. A Callout implementation receives the authored Callout, validated properties, and the standard Audience content as `children`. Present keeps the positioned `role="status"` frame and Story actions outside the custom component, so custom presentation cannot remove navigation or announcements.
 
-`defineInfoschematicRenderers` snapshots and freezes the supplied definition arrays. Every definition needs a stable key, schema version `1`, validator, and component. The first duplicate key wins. The `onDiagnostic` callback receives a `RendererDiagnostic` containing `code`, `kind`, `key`, `message`, and the available `schemaVersion` or `artefactId`. Its codes are `duplicate-key`, `unsupported-version`, `unknown-key`, and `invalid-properties`. Unknown or invalid Fabrics keep labelled generic bounds, Graphics receive labelled placeholders, and Callouts retain their standard title, body, and takeaways.
+`defineInfoschematicRenderers` snapshots and freezes the supplied definition arrays. Every definition needs a stable key, a positive integer `schemaVersion` naming the schema of its properties, a validator, and a component. Several versions may share one key; when the same key and version are registered twice, the first registration wins. The `onDiagnostic` callback receives a `RendererDiagnostic` containing `code`, `kind`, `key`, `message`, and the available `schemaVersion` or `artefactId`. Its codes are `duplicate-key`, `unsupported-version`, `unknown-key`, and `invalid-properties`. Unknown or invalid Fabrics keep labelled generic bounds, Graphics receive labelled placeholders, and Callouts retain their standard title, body, and takeaways.
 
-Component-only Fabric and Graphic maps remain a compatibility bridge, but new integrations should use definition arrays so properties are validated and failures are diagnosable. Shared SVG `definitions` and `scopeIcons` remain host-level supporting renderers.
+Component-only Fabric and Graphic maps remain a compatibility bridge that answers schema version `1` only, but new integrations should use definition arrays so properties are validated and failures are diagnosable. Shared SVG `definitions` and `scopeIcons` remain host-level supporting renderers.
 
 ### Evolve renderer properties
 
@@ -128,7 +128,15 @@ const validateTone = (properties: RendererProperties | undefined) => ({
 })
 ```
 
-The current authored renderer reference does not carry a separate schema version, and the registry supports definition schema version `1`. For an incompatible property change, register a new stable key such as `example.fabric.network-v2`, keep the old definition while supported Infoschematics still refer to it, migrate authored definitions deliberately, and remove the old definition only after those references are gone. Do not reinterpret old properties under the same key or put a migration callback in authored data.
+An authored renderer reference names a key and a version. A scalar such as `kind: example.fabric.network` remains accepted and always means version `1`; the structured form requests another:
+
+```yaml
+kind:
+  key: example.fabric.network
+  version: 2
+```
+
+For an incompatible property change, register a new `schemaVersion` under the same key beside the old definition, keep the old definition while supported Infoschematics still request it, migrate authored definitions deliberately, and remove the old definition only after those requests are gone. Resolution selects the exact key-and-version pair and never negotiates a version down: a requested version that is not registered reports `unsupported-version` with the versions the key does offer, which is the contract working rather than a defect. Do not reinterpret old properties under the same version or put a migration callback in authored data.
 
 The renderer object is host runtime configuration, not part of `InfoschematicConfig`: do not place React components, callbacks, validators, diagnostic handlers, or shared SVG definitions in authored data.
 
