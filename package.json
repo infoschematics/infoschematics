@@ -69,7 +69,7 @@
     "ki:site:deploy": "bun run --cwd apps/site deploy",
     "ki:site:dev": "bun run --cwd apps/site ki:site:dev",
     "ki:site:preview": "bun run --cwd apps/site preview",
-    "prepare": "husky",
+    "prepare": "husky && bun install --frozen-lockfile --cwd tooling/boundaries",
     "self:boundaries:verify": "bun scripts/boundaries.ts",
     "self:browser:look": "bun scripts/look.ts",
     "self:cf:build": "bun run build",
