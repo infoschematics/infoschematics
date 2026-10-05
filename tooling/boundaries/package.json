@@ -4,7 +4,7 @@
   "private": true,
   "description": "Install root for the dependency-boundary checker, which needs a TypeScript dependency-cruiser can drive. Not a workspace member, and nothing else resolves it.",
   "dependencies": {
-    "dependency-cruiser": "^18.4.0",
+    "dependency-cruiser": "^18.5.0",
     "typescript": "^6.0.3"
   }
 }
