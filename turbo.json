@@ -37,6 +37,21 @@
     "test": {
       "dependsOn": ["^typecheck"]
     },
+    "@infoschematics/site#test": {
+      "dependsOn": ["^typecheck"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/.dependency-cruiser.ts",
+        "$TURBO_ROOT$/tooling/boundaries/package.json",
+        "$TURBO_ROOT$/tooling/boundaries/bun.lock",
+        "$TURBO_ROOT$/packages/*/package.json",
+        "$TURBO_ROOT$/packages/*/src/**",
+        "$TURBO_ROOT$/apps/*/package.json",
+        "$TURBO_ROOT$/apps/*/src/**",
+        "$TURBO_ROOT$/examples/*/package.json",
+        "$TURBO_ROOT$/examples/*/src/**"
+      ]
+    },
     "test:browser": {
       "dependsOn": ["^typecheck"]
     },
