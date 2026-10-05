@@ -30,6 +30,6 @@ The Canvas emphasis of an Overlay Graphic. It does not offer a Graphic a travell
 
 ## Discussion
 
-Found on 2026-10-04 while delivering [INFOSCHEMATICS-TOOL-137](INFOSCHEMATICS-TOOL-137-a-stale-decision-record.md), which corrected `ADR-INFOSCHEMATICS-027`'s claim that the Canvas draws no Graphic. That premise was the record's only stated reason for declining a Graphic the mark; with it gone, a reviewer may also want to ask whether a bounded Graphic, which the Canvas draws as a box, should be offered one. That question is noted here rather than decided, and belongs to a decision rather than to this repair.
+Found on 2026-10-04 while delivering [INFOSCHEMATICS-TOOL-137](https://github.com/infoschematics/infoschematics/blob/38d882f9f7ed9ce974ee5f5406ddceaaae41e30b/docs/roadmap/INFOSCHEMATICS-TOOL-137-a-stale-decision-record.md), which corrected `ADR-INFOSCHEMATICS-027`'s claim that the Canvas draws no Graphic. That premise was the record's only stated reason for declining a Graphic the mark; with it gone, a reviewer may also want to ask whether a bounded Graphic, which the Canvas draws as a box, should be offered one. That question is noted here rather than decided, and belongs to a decision rather than to this repair.
 
 Captured rather than fixed under TOOL-137 because the fix is a renderer change outside that record's boundary, in a file under concurrent change at the time.
