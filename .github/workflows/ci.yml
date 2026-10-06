@@ -43,7 +43,7 @@ jobs:
 
       - name: Install and verify released KI
         env:
-          KI_VERSION: v0.7.0
+          KI_VERSION: v0.7.1
           KI_ROOT: ${{ runner.temp }}/ki-fnd-001
         run: |
           set -euo pipefail
