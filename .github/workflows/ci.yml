@@ -43,44 +43,45 @@ jobs:
 
       - name: Install and verify released KI
         env:
-          KI_VERSION: v0.4.1
-          KI_CLI_INSTALL_DIR: ${{ runner.temp }}/ki/bin
-          KI_MAN_INSTALL_DIR: ${{ runner.temp }}/ki/man/man1
-          KI_DATA_HOME: ${{ runner.temp }}/ki/data
-          KI_CONFIG_HOME: ${{ runner.temp }}/ki/config
-          KI_CACHE_HOME: ${{ runner.temp }}/ki/cache
-          XDG_STATE_HOME: ${{ runner.temp }}/ki/state
-          KI_STATE_HOME: ${{ runner.temp }}/ki/state/ki
+          KI_VERSION: v0.7.0
+          KI_ROOT: ${{ runner.temp }}/ki-fnd-001
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.agents" "$HOME/.claude"
           printf '{}\n' > "$HOME/.claude/settings.json"
-          curl --fail --silent --show-error --location --max-redirs 3 --proto '=https' --proto-redir '=https' \
-            --output "$RUNNER_TEMP/ki-install.sh" "https://raw.githubusercontent.com/knowledgeislands/tools-ki/$KI_VERSION/install.sh"
-          bash "$RUNNER_TEMP/ki-install.sh" "$KI_VERSION"
+          export KI_CLI_INSTALL_DIR="$KI_ROOT/bin"
+          export KI_MAN_INSTALL_DIR="$KI_ROOT/share/man/man1"
+          export XDG_DATA_HOME="$KI_ROOT/data"
+          export XDG_CONFIG_HOME="$KI_ROOT/config"
+          export XDG_CACHE_HOME="$KI_ROOT/cache"
+          export XDG_STATE_HOME="$KI_ROOT/state"
+          mkdir -p "$KI_ROOT"
+          mkdir -p "$XDG_CONFIG_HOME/ki"
+          printf 'mcpServers: []\n' > "$XDG_CONFIG_HOME/ki/mcp-servers.yaml"
+          curl --fail -sSL --proto '=https' -o "$RUNNER_TEMP/install.sh" "https://raw.githubusercontent.com/knowledgeislands/tools-ki/$KI_VERSION/install.sh"
+          bash "$RUNNER_TEMP/install.sh" "$KI_VERSION"
           export PATH="$KI_CLI_INSTALL_DIR:$PATH"
           test "$(command -v ki)" = "$KI_CLI_INSTALL_DIR/ki"
           test "$(ki --version)" = "${KI_VERSION#v}"
-          ki manage diag | grep -F 'Installation: regular'
-          ki manage diag | grep -F "Executable: $KI_CLI_INSTALL_DIR/ki"
           ki bootstrap
           ki registry add --repo .
           ki repo repair --repo .
           project_key=${GITHUB_WORKSPACE//\//-}
           mkdir -p "$HOME/.claude/projects/$project_key/memory"
           touch "$HOME/.claude/projects/$project_key/memory/MEMORY.md"
-          ki manage diag | grep -F 'Status: valid'
+          ki diag | tee "$KI_ROOT/ki-diag.txt"
+          grep -F "Configuration: valid" "$KI_ROOT/ki-diag.txt"
+          grep -F "Registry: valid" "$KI_ROOT/ki-diag.txt"
           ki harness list | grep -F 'knowledgeislands/ki-agentic-harness'
           {
-            printf 'KI_CLI_INSTALL_DIR=%s\n' "$KI_CLI_INSTALL_DIR"
-            printf 'KI_MAN_INSTALL_DIR=%s\n' "$KI_MAN_INSTALL_DIR"
-            printf 'KI_DATA_HOME=%s\n' "$KI_DATA_HOME"
-            printf 'KI_CONFIG_HOME=%s\n' "$KI_CONFIG_HOME"
-            printf 'KI_CACHE_HOME=%s\n' "$KI_CACHE_HOME"
-            printf 'XDG_STATE_HOME=%s\n' "$XDG_STATE_HOME"
-            printf 'KI_STATE_HOME=%s\n' "$KI_STATE_HOME"
+            echo "KI_CLI_INSTALL_DIR=$KI_CLI_INSTALL_DIR"
+            echo "KI_MAN_INSTALL_DIR=$KI_MAN_INSTALL_DIR"
+            echo "XDG_DATA_HOME=$XDG_DATA_HOME"
+            echo "XDG_CONFIG_HOME=$XDG_CONFIG_HOME"
+            echo "XDG_CACHE_HOME=$XDG_CACHE_HOME"
+            echo "XDG_STATE_HOME=$XDG_STATE_HOME"
           } >> "$GITHUB_ENV"
-          printf '%s\n' "$KI_CLI_INSTALL_DIR" >> "$GITHUB_PATH"
+          echo "$KI_CLI_INSTALL_DIR" >> "$GITHUB_PATH"
 
       # The native read-only gate resolves the repository's declared skills from the
       # verified active harness collection and runs their registered operations.
