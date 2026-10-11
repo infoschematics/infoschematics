@@ -6,7 +6,9 @@
 # -----------------------------------------------------------------------------
 
 [repo]
-harnesses = ["knowledgeislands/ki-agentic-harness"]
+harnesses = [
+  "knowledgeislands/ki-agentic-harness",
+]
 
 [skills.ki-repo]
 repo_type = "project"
@@ -18,12 +20,20 @@ description = "The Infoschematic domain model, framework-neutral view model, int
 repo_code = "INFOSCHEMATICS"
 visibility = "public"
 license = "MIT"
-supported_runtimes = ["claude-code", "claude-desktop", "chatgpt-codex"]
+supported_runtimes = [
+  "claude-code",
+  "claude-desktop",
+  "chatgpt-codex",
+]
 
 [skills.ki-authoring]
+
 [skills.ki-binding]
+
 [skills.ki-binding-claude]
+
 [skills.ki-binding-chatgpt]
+
 [skills.ki-housekeeping-chatgpt]
 auto_memory = "disabled"
 
@@ -49,11 +59,14 @@ auto_memory = "disabled"
 [skills.ki-engineering]
 # `test:browser` is a bare name the standard's six lifecycle idioms do not include. GDR-INFOSCHEMATICS-005 keeps it:
 # four workspaces declare the task, and a root script that did not match the task name would stop being a passthrough.
-script_exclusions = ["test:browser"]
+script_exclusions = [
+  "test:browser",
+]
 # Each hold is a deliberate deferral of a major release pending its own verified migration.
 dependency_holds = [
   "@types/node — major releases (24, 26); the definitions track the oldest Node the packages promise in engines, per GDR-INFOSCHEMATICS-004, so this lifts when that floor does",
 ]
+
 # -----------------------------------------------------------------------------
 # Change management
 # -----------------------------------------------------------------------------
@@ -74,6 +87,8 @@ auto_memory = "disabled"
 
 [skills.ki-work]
 adapter = "roadmap"
+
+[skills.ki-work-roadmap]
 
 [skills.ki-work-roadmap.areas]
 SITE = "Site experience and consumer guide"
