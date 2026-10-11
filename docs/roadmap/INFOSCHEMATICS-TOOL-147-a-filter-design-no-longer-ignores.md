@@ -3,13 +3,13 @@ id: INFOSCHEMATICS-TOOL-147
 area: TOOL
 title: Design ignores filters
 theme: tool
-horizon: triage
-status: draft
+horizon: now
+status: ready
 blocks: []
 blocked_by: []
-baseline_ref: null
+baseline_ref: db6b2d8a1df72c86f461458258b436de13677639
 created_at: 2026-10-04T13:30:00Z
-updated_at: 2026-10-04T13:30:00Z
+updated_at: 2026-10-11T02:55:00Z
 ---
 
 # Design ignores filters
@@ -31,6 +31,59 @@ So a reader following `EDIT-014`'s verification would expect a result the produc
 Amend `EDIT-014` so its requirement, `_Verify:_` and `_Evidence:_` lines agree with `DESIGN-005`. The likely shape is that Design materialises its draft over the authored content the Producer's own filters leave drawn, and that Scene focus, which is Present's alone, never narrows it. Check `APPEAR`, `PRESENT` and `CHANGE` requirements for the same stale phrase while there.
 
 It does not change behaviour; the code and `DESIGN-005` already agree. If the review finds the code wrong rather than the specification, that is a different item.
+
+## Current state
+
+`EDIT-014` in `docs/specs/design-editing.md` still says Design starts "from complete authored content rather than Audience filters", calls Present's preview "Design's complete-content Overlay preview", and verifies by applying an Audience filter and confirming Design ignores it. Its `_Evidence:_` names `App.tsx` and `InfoschematicDiagram.tsx` but not `use-presentation.ts`, where the visibility the requirement describes is derived. A grep of the `APPEAR`, `PRESENT` and `CHANGE` specifications for the same claim finds one more: `PRESENT-006` says Design and Direct must not use "that filtered Audience projection", and its `_Verify:_` expects their editable content not to be "the Audience projection a filter just narrowed", which a reader takes to mean a Scope hidden in Present is drawn in Design. `appearance.md` and `change-management.md` carry no such claim.
+
+### Decisions
+
+- **Both requirements are amended, not only `EDIT-014`.** `PRESENT-006`'s second paragraph makes the same stale claim the Boundary asks to look for, and leaving it would keep one specification contradicting `DESIGN-005`. Decided under state-of-play Decision 42 (2026-10-11), reversible.
+- **No Decision Record.** The change brings two requirements into line with an existing one and the code; it sets no new rule.
+
+## Steps
+
+- [ ] Rewrite `EDIT-014`'s requirement so Design materialises its draft over the authored content the Producer's bank leaves drawn, never narrowed by Scene focus, and drop "complete-content" from the Overlay sentence.
+- [ ] Rewrite `EDIT-014`'s `_Verify:_` opening to hide a Scope, enter Design, and expect the bank to read off, restore the Scope's artefacts as editable, and show no Scene focus.
+- [ ] Add `packages/view-studio/src/app/hooks/use-presentation.ts` to `EDIT-014`'s `_Evidence:_`.
+- [ ] Amend `PRESENT-006`'s Design and Direct paragraph and the matching `_Verify:_` sentence to the same shape.
+- [ ] Record the review packet in this record.
+
+## Files touched
+
+- `docs/specs/design-editing.md`
+- `docs/specs/presentation.md`
+- This record
+
+Not touched: code, `docs/specs/design-session.md` (already right) and Site content.
+
+## Verify
+
+- `grep -rn -i "ignores it\|complete authored content\|complete-content\|filtered Audience projection" docs/specs` finds nothing.
+- `EDIT-014` and `PRESENT-006` read consistently with `DESIGN-005` and the comment in `use-presentation.ts`.
+- `bunx rumdl check` is clean on the touched Markdown through the commit hook; `bun run self:check` passes.
+
+## Dependencies / blocks
+
+None.
+
+## Documentation impact
+
+### Decision Records
+
+None; see `### Decisions`.
+
+### Specifications
+
+`EDIT-014` and `PRESENT-006` as above.
+
+### Guides
+
+None.
+
+### Roadmap
+
+None.
 
 ## Discussion
 
