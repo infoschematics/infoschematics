@@ -62,11 +62,11 @@ _Evidence:_ Present state is reduced to visibility and highlight sets in `packag
 
 Present MUST apply Scope and Flow-family filters before deriving Scene emphasis. An active Scene MUST NOT make a filtered artefact or Flow visible, and filtered content MUST NOT contribute to the resulting focus set.
 
-Design and Direct MUST NOT use that filtered Audience projection as their editable content source.
+Design and Direct MUST NOT use that Audience projection as their editable content source: their content is the authored document with the Producer's draft, narrowed only by the shared Scope and Flow-family bank under `DESIGN-005` and never by Scene focus.
 
 _Conformance:_ conforming
 
-_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then filter out a Scope and a Flow family whose members a Scene names as focused: the filtered artefacts and Flows must stay invisible, and the resulting focus set must not include them. Reverse the order in reading too — derive the Scene emphasis and confirm it was computed over the already-filtered content rather than over the whole document. Then enter Design and Direct and confirm their editable content is the authored document, not the Audience projection a filter just narrowed.
+_Verify:_ Run `bun run test --filter=@infoschematics/view-present`, then filter out a Scope and a Flow family whose members a Scene names as focused: the filtered artefacts and Flows must stay invisible, and the resulting focus set must not include them. Reverse the order in reading too — derive the Scene emphasis and confirm it was computed over the already-filtered content rather than over the whole document. Then enter Design and Direct and confirm their editable content is the authored document, not the Audience projection: the filtered Scope stays hidden with its bank reading off and can be restored there, and no Scene emphasis carries into either workspace.
 
 _Evidence:_ presentation derivation in `packages/view-present/src/presentation.ts` and compatible integrated derivation in `packages/view-studio/src/app/hooks/use-presentation.ts`.
 

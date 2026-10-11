@@ -146,17 +146,17 @@ _Evidence:_ `packages/view-studio/src/app/editor/library.test.ts`, `packages/vie
 
 ### EDIT-014 — Design previews the complete materialised draft
 
-Design MUST start from complete authored content rather than Audience filters and MUST materialise typed operations into a derived runtime for Canvas. Creates, movement, resize, property replacement, within-kind reorder and safe removal MUST be visible without mutating the host configuration. Existing component-offset, route, waypoint and attachment drafts MUST remain effective later overlays.
+Design MUST materialise typed operations over the authored content into a derived runtime for Canvas, drawing what the Producer's own Scope and Flow-family bank leaves drawn under `DESIGN-005` and never narrowing it by Scene focus, which belongs to Present alone. Creates, movement, resize, property replacement, within-kind reorder and safe removal MUST be visible without mutating the host configuration. Existing component-offset, route, waypoint and attachment drafts MUST remain effective later overlays.
 
-Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Sequence Overlay independently of Design's complete-content Overlay preview.
+Rejected operations MUST leave their base output unchanged. Present MUST continue to resolve and render its active Sequence Overlay independently of Design's draft Overlay preview.
 
 Draft projection MUST follow dependency order: effective component geometry, effective port geometry, endpoint attachment, interior route geometry, then route-label placement. A later draft layer MUST NOT restore an endpoint coordinate made stale by an earlier component move, resize or port-count change. Combining typed artefact operations with established draft fields MUST produce one coherent preview and one coherent change set rather than whichever representation happened to render last.
 
 _Conformance:_ conforming
 
-_Verify:_ in Design, apply an Audience filter and confirm the Design preview ignores it; then make a create, a move, a resize, a property replacement, a within-kind reorder and a removal, and confirm each is visible without the host configuration changing. Move a Card whose Flow has a route draft and a placed route label: the endpoint MUST follow the moved port rather than the draft restoring the stale coordinate, which is what the dependency order exists to prevent. Reject an operation and the base output MUST be unchanged.
+_Verify:_ hide a Scope, enter Design and confirm the Scope stays hidden with its bank reading off, that turning it back on returns its artefacts to the Design Canvas as editable, and that no Scene focus narrows the preview; then make a create, a move, a resize, a property replacement, a within-kind reorder and a removal, and confirm each is visible without the host configuration changing. Move a Card whose Flow has a route draft and a placed route label: the endpoint MUST follow the moved port rather than the draft restoring the stale coordinate, which is what the dependency order exists to prevent. Reject an operation and the base output MUST be unchanged.
 
-_Evidence:_ composition in `packages/view-studio/src/app/App.tsx` and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
+_Evidence:_ composition in `packages/view-studio/src/app/App.tsx`, Scope and Flow-family visibility in `packages/view-studio/src/app/hooks/use-presentation.ts`, and preview derivation in `packages/view-canvas/src/InfoschematicDiagram.tsx`.
 
 ### EDIT-015 — Removal plans make consequences explicit
 
