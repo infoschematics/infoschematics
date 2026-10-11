@@ -109,7 +109,7 @@ It found 34 statements: 30 repaired or deleted under step 2, 3 deferred to TOOL-
 - S17 (line 151). "Applying that set is a deliberate handoff"; in document mode Studio projects each completed gesture into a validated document change the host accepts, and accounts for what was written (`EDIT-020`, `CHANGE-010`, `CHANGE-011`). Repaired.
 - S18 (line 171). "Design renders complete authored content"; see P3. Repaired.
 
-Two findings fall outside this item's Boundary. `EDIT-014` in `docs/specs/design-editing.md` still requires Design to "start from complete authored content rather than Audience filters", which `DESIGN-005` and the code have since reversed; that is a specification defect and is captured as [INFOSCHEMATICS-TOOL-147](INFOSCHEMATICS-TOOL-147-a-filter-design-no-longer-ignores.md). And the header comment in `packages/view-studio/src/app/editor/ChangePane.tsx` still calls the model "authored TypeScript under review"; that is a stale code comment, noted here for whoever next touches the file rather than captured. No statement revealed a decision never taken.
+Two findings fall outside this item's Boundary. `EDIT-014` in `docs/specs/design-editing.md` still requires Design to "start from complete authored content rather than Audience filters", which `DESIGN-005` and the code have since reversed; that is a specification defect and was captured as `INFOSCHEMATICS-TOOL-147` and fixed on 2026-10-11. And the header comment in `packages/view-studio/src/app/editor/ChangePane.tsx` still calls the model "authored TypeScript under review"; that is a stale code comment, noted here for whoever next touches the file rather than captured. No statement revealed a decision never taken.
 
 ## Steps
 
