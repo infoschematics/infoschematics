@@ -2,7 +2,7 @@
 id: INFOSCHEMATICS-TOOL-135
 area: TOOL
 title: Where a claim lives
-theme: tool
+kind: deliver
 horizon: now
 status: in-progress
 blocks: []
@@ -156,7 +156,11 @@ This item is largely a guide review, so `docs/guides/` is its subject rather tha
 
 ## Discussion
 
+### Origin
+
 Raised on 2026-09-23 while reviewing the consolidated Decision Records, on the observation that the consolidation only covered one directory and the same neglect probably applies to its neighbours. The two corrections named in Context — the "copying" framing in `related-tools.md` and the completed `specification-id-migration.md` — were applied immediately rather than deferred into this item, because neither needed a decision: the first was wrong about the relationship this repository has with adjacent projects, and the second was a table whose only remaining readers in the repository were two stale citations, now repaired to `APPEAR-010` and `AUTHOR-010`.
+
+### Where the vocabulary lives
 
 The vocabulary question is left open deliberately. Folding a glossary into a Decision Record is attractive because it puts the canonical terms with the record that governs them, and wrong for mechanical reasons the record standard makes explicit; but "wrong for mechanical reasons" is worth writing down once rather than re-deriving, which is what this item's review section is for.
 

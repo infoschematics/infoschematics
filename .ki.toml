@@ -75,9 +75,9 @@ auto_memory = "disabled"
 [skills.ki-work]
 adapter = "roadmap"
 
-[skills.ki-work-roadmap]
-areas.SITE = "site-experience"
-areas.TOOL = "tool"
+[skills.ki-work-roadmap.areas]
+SITE = "Site experience and consumer guide"
+TOOL = "Product tooling, packages and documentation"
 
 # -----------------------------------------------------------------------------
 # Relationships

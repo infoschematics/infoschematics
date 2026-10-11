@@ -2,9 +2,7 @@
 id: INFOSCHEMATICS-SITE-032
 area: SITE
 title: First document from prose
-theme: site-experience
-horizon: triage
-status: draft
+status: triage
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -29,5 +27,7 @@ The consumer guide shows a newcomer how to get a first [Infoschematic](../refere
 Consumer prose only: where the on-ramp sits in the guide journey, how a reader installs the skill in their runtime, what it produces and leaves unresolved, and the hand-off into the Playground's Source and Design views. It does not change the skill, the checker, or the Playground.
 
 ## Discussion
+
+### Origin
 
 Captured on 2026-10-04 while delivering `INFOSCHEMATICS-TOOL-107`. `apps/site/content/authoring.md` was being changed concurrently by `INFOSCHEMATICS-TOOL-129`, which is a second reason the feature item did not touch it.

@@ -2,9 +2,7 @@
 id: INFOSCHEMATICS-TOOL-150
 area: TOOL
 title: Seconds read as milliseconds
-theme: tool
-horizon: triage
-status: draft
+status: triage
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -30,6 +28,10 @@ The unit of an authored Scene `duration` as the runtime reads it, in Studio's Pr
 
 ## Discussion
 
+### Origin
+
 Captured on 2026-10-04 by the agent delivering `INFOSCHEMATICS-TOOL-142`, which needed a real-browser look at a finite emphasis and could only take one by holding the Story still. Not fixed there because it is a runtime change outside that record's boundary, which authors one Dynamic into an example.
+
+### Open questions
 
 Worth checking while shaping: whether any browser or unit test exercises an authored `duration` end to end, since one that had would have caught this, and whether the Studio's Scene editor round-trips a typed hold through the same unit.

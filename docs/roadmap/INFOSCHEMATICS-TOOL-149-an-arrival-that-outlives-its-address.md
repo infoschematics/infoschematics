@@ -2,9 +2,7 @@
 id: INFOSCHEMATICS-TOOL-149
 area: TOOL
 title: Arrival outlives its address
-theme: tool
-horizon: triage
-status: draft
+status: triage
 blocks: []
 blocked_by: []
 baseline_ref: null
@@ -27,5 +25,7 @@ A reader who follows an address that does not resolve, after an earlier one that
 Whether a later unresolved address withdraws a standing arrival, and how that is shown. What is addressable and what arriving means stay with `ADR-INFOSCHEMATICS-041`; this may need an amendment to it rather than only a code change.
 
 ## Discussion
+
+### Origin
 
 Raised as a non-blocking finding in the Fable review of `INFOSCHEMATICS-TOOL-138` (2026-10-04). Capture `reports/TOOL-138-arrival/03-address-that-leads-nowhere.png` shows the case.

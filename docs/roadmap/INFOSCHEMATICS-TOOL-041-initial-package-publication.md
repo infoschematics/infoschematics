@@ -2,8 +2,11 @@
 id: INFOSCHEMATICS-TOOL-041
 area: TOOL
 title: Initial package publication
-theme: tool
-horizon: waiting-for
+kind: deliver
+horizon: hold
+hold:
+  reason: waiting-for
+  condition: npm scope ownership and trusted publishing are confirmed for every public package, the dependency-closed version set is named, the release commit is clean and verified, and the owner explicitly authorises the publication run
 status: draft
 blocks: []
 blocked_by: []
