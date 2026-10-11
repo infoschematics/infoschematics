@@ -1,0 +1,5 @@
+# Ideas
+
+Ideas that do not yet graduate to a work record. Each is a plain bullet with no identifier, horizon or status; graduation links the new record from here and removes the bullet.
+
+- **One word for mode.** The reader's ground is called mode everywhere a reader or author sees it, since `ADR-INFOSCHEMATICS-037`, but internal names still say scheme: `useColourScheme`, `colourSchemeAttribute`, `colourSchemeStorageKey` and `ColourSchemeButton` in `packages/view-canvas/src/colour-scheme.ts`, `RenderedScheme`, and the Site gallery's `SchemeGallery`, `schemeSpecimen` and `.scheme-gallery`. A naming-only sweep of about thirty files. Two points need a decision rather than a sweep: `data-infoschematic-scheme` and `infoschematics.colour-scheme` are observable by a host page and a returning reader's browser, so moving them needs a one-time migration or a stated decision that the remembered choice is expendable; and `--scheme` stays as a published command-line spelling under `CLI-013`. Kept on 2026-10-11 in place of the cancelled `INFOSCHEMATICS-TOOL-143`.
