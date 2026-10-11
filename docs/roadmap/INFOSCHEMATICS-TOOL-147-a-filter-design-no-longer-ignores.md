@@ -4,12 +4,12 @@ area: TOOL
 title: Design ignores filters
 theme: tool
 horizon: now
-status: ready
+status: awaiting-review
 blocks: []
 blocked_by: []
 baseline_ref: db6b2d8a1df72c86f461458258b436de13677639
 created_at: 2026-10-04T13:30:00Z
-updated_at: 2026-10-11T02:55:00Z
+updated_at: 2026-10-11T03:05:00Z
 ---
 
 # Design ignores filters
@@ -43,11 +43,11 @@ It does not change behaviour; the code and `DESIGN-005` already agree. If the re
 
 ## Steps
 
-- [ ] Rewrite `EDIT-014`'s requirement so Design materialises its draft over the authored content the Producer's bank leaves drawn, never narrowed by Scene focus, and drop "complete-content" from the Overlay sentence.
-- [ ] Rewrite `EDIT-014`'s `_Verify:_` opening to hide a Scope, enter Design, and expect the bank to read off, restore the Scope's artefacts as editable, and show no Scene focus.
-- [ ] Add `packages/view-studio/src/app/hooks/use-presentation.ts` to `EDIT-014`'s `_Evidence:_`.
-- [ ] Amend `PRESENT-006`'s Design and Direct paragraph and the matching `_Verify:_` sentence to the same shape.
-- [ ] Record the review packet in this record.
+- [x] Rewrite `EDIT-014`'s requirement so Design materialises its draft over the authored content the Producer's bank leaves drawn, never narrowed by Scene focus, and drop "complete-content" from the Overlay sentence.
+- [x] Rewrite `EDIT-014`'s `_Verify:_` opening to hide a Scope, enter Design, and expect the bank to read off, restore the Scope's artefacts as editable, and show no Scene focus.
+- [x] Add `packages/view-studio/src/app/hooks/use-presentation.ts` to `EDIT-014`'s `_Evidence:_`.
+- [x] Amend `PRESENT-006`'s Design and Direct paragraph and the matching `_Verify:_` sentence to the same shape.
+- [x] Record the review packet in this record.
 
 ## Files touched
 
@@ -59,7 +59,7 @@ Not touched: code, `docs/specs/design-session.md` (already right) and Site conte
 
 ## Verify
 
-- `grep -rn -i "ignores it\|complete authored content\|complete-content\|filtered Audience projection" docs/specs` finds nothing.
+- `grep -rn -i "ignores it\|complete authored content\|complete-content\|filtered Audience projection" docs/specs` finds only the unrelated `FLOW` line in `flow-signals.md` about an unknown Flow identifier.
 - `EDIT-014` and `PRESENT-006` read consistently with `DESIGN-005` and the comment in `use-presentation.ts`.
 - `bunx rumdl check` is clean on the touched Markdown through the commit hook; `bun run self:check` passes.
 
@@ -84,6 +84,37 @@ None.
 ### Roadmap
 
 None.
+
+## Review
+
+### Delivered
+
+`EDIT-014` and `PRESENT-006` now agree with `DESIGN-005` and the code: Design materialises its draft over the authored content the Producer's Scope and Flow-family bank leaves drawn, and the presented Scene's focus never narrows a Producer workspace. Within the boundary; no code or behaviour changed. Baseline `db6b2d8a1df72c86f461458258b436de13677639`; delivery `8a6ce1f4` (`docs(specs): align EDIT-014 and PRESENT-006 with DESIGN-005 filters`) and review follow-up `ed881fa2`.
+
+### Change Summary
+
+- `docs/specs/design-editing.md`: `EDIT-014` requirement, Overlay sentence, `_Verify:_` opening and `_Evidence:_` (adds `use-presentation.ts`).
+- `docs/specs/presentation.md`: `PRESENT-006`'s Design and Direct paragraph and its `_Verify:_` sentence; the follow-up says the presented Scene's focus narrows neither workspace, since Direct still previews focus on its own draft target.
+- This record: shaped in `b513e562`, review packet here.
+
+### Verification
+
+- Residual claims: the grep in `## Verify` finds only the unrelated `flow-signals.md` line.
+- `bun run self:check`: exit 0, 52 of 52 tasks successful.
+- Markdown: rumdl clean through the commit hook on both specifications.
+- Independent read-only review (Claude subagent, 2026-10-11): ACCEPT. It confirmed `reduceProduction` admits only Scope and family toggles while producing and clears focus, `use-presentation.ts` narrows `derived` by Scope and family only, `App.tsx` feeds the visible Scopes and Flows into the Design preview, and every `_Evidence:_` path exists. Its one wording note on `PRESENT-006` is fixed in `ed881fa2`.
+
+### Outstanding concerns
+
+None.
+
+### Post-change review
+
+The goal asked that `EDIT-014` agree with `DESIGN-005` and the code; both stale requirements now do, and a reader following either `_Verify:_` line gets the result the product gives. Regression risk is nil: documentation only.
+
+### Mini recap
+
+Rewrote `EDIT-014` and `PRESENT-006` so Design is described as drawing what the Producer's bank leaves drawn. Learning route: none beyond this record.
 
 ## Discussion
 
