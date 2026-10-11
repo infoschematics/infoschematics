@@ -3,13 +3,12 @@ id: INFOSCHEMATICS-TOOL-143
 area: TOOL
 title: One word for mode
 theme: tool
-horizon: triage
-status: draft
+status: cancelled
 blocks: []
 blocked_by: []
 baseline_ref: null
 created_at: 2026-09-25T00:00:00Z
-updated_at: 2026-09-25T00:00:00Z
+updated_at: 2026-10-11T03:15:00Z
 ---
 
 # One word for mode
@@ -38,3 +37,7 @@ Two things are deliberately _not_ simple renames and have to be decided rather t
 Recorded on 2026-09-25 while delivering `INFOSCHEMATICS-TOOL-129`, whose consequences in ADR-INFOSCHEMATICS-037 name this sweep as deferred. Held back there because it touches roughly thirty files without changing a single behaviour, and a rename that large landing inside a change that moves the model would have made the model change unreviewable.
 
 Worth doing, and worth doing separately: the cost of the confusion is paid by every later reader, and the change is mechanical enough that a reviewer can check it by reading the diff rather than the tests.
+
+## Cancelled
+
+Cancelled 2026-10-11 by Kris in state-of-play Decision 42: a rename sweep of about thirty files with no behaviour change, idle since 2026-09-25, is worth doing eventually but is speculative cleanup for now. It is kept as the idea "One word for mode" in `docs/roadmap/_ISSUES.md`, including the two points that need a decision rather than a sweep.
