@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { defineInfoschematic, defineInfoschematicModel } from '../packages/domain-core/src/index.ts'
 import { renderInfoschematicSvg } from '../packages/render-svg/src/index.ts'
 import { Canvas } from '../packages/view-canvas/src/index.ts'
-import { emphasisPerimeterPath } from '../packages/view-model/src/perimeter.ts'
+import { emphasisPerimeterPath, emphasisPointRadius } from '../packages/view-model/src/perimeter.ts'
 import { visualTokens } from '../packages/view-model/src/tokens.ts'
 
 /**
@@ -519,6 +519,40 @@ describe('visual treatment renderer parity', () => {
     // very string the still renderer draws as its outline, so a corner the outline rounds is not one the mark
     // cuts — and that the still frame states no direction, because the document does not state one either.
     expect(canvas).toContain(`<animateMotion dur="${visualTokens.canvas.emphasis.duration}" path="${outlines.SNK}"`)
+    expect(svg).not.toContain('animateMotion')
+  })
+
+  it('runs an emphasised Point out to the same radius in both renderers', () => {
+    const emphasisedPoint = defineInfoschematicModel({
+      id: 'point-emphasis-parity',
+      title: 'Point emphasis parity reference',
+      diagram: {
+        bounds: { height: 200, width: 420, x: 0, y: 0 },
+        gridSize: 10,
+        points: [{ id: 'EDGE', label: 'Edge', at: { x: 300, y: 120 } }],
+        dynamics: [{ id: 'attention', label: 'Edge needs attention', kind: 'emphasise-elements', elements: ['EDGE'] }]
+      }
+    })
+    const dynamics = [{ dynamicId: 'attention', occurrenceKey: 'run-1' }]
+    const canvas = renderToStaticMarkup(createElement(Canvas, { config: emphasisedPoint, dynamics }))
+    const svg = renderInfoschematicSvg(emphasisedPoint, { dynamics })
+
+    // A Point has a coordinate rather than a box, so the two renderers cannot agree by agreeing on a perimeter
+    // string: the only thing they share is how far out the disc runs, and it is named once for exactly that reason.
+    // Read against the Point's own mark, because a radius equal to it would paint the emphasis onto the Point.
+    for (const markup of [canvas, svg]) {
+      const outline = /class="infoschematic-element-emphasis"[^>]*data-artefact-id="EDGE"[\s\S]*?<circle[^>]*>/.exec(
+        markup
+      )?.[0]
+      expect(outline).toContain(`r="${emphasisPointRadius}"`)
+      expect(outline).toContain('cx="300"')
+      expect(outline).toContain('cy="120"')
+      expect(emphasisPointRadius).toBeGreaterThan(visualTokens.canvas.geometry.pointRadius)
+    }
+    // Neither renderer has a route to send a mark round, and a mark circling a six-unit disc would be the size of
+    // the thing it marks, so this geometry declines it on both sides rather than on one.
+    expect(emphasisOutlines(canvas)).toEqual({})
+    expect(canvas).not.toContain('animateMotion')
     expect(svg).not.toContain('animateMotion')
   })
 })
