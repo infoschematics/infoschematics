@@ -4,12 +4,12 @@ area: TOOL
 title: Design ignores filters
 theme: tool
 horizon: now
-status: awaiting-review
+status: done
 blocks: []
 blocked_by: []
 baseline_ref: db6b2d8a1df72c86f461458258b436de13677639
 created_at: 2026-10-04T13:30:00Z
-updated_at: 2026-10-11T03:05:00Z
+updated_at: 2026-10-11T03:10:00Z
 ---
 
 # Design ignores filters
@@ -115,6 +115,10 @@ The goal asked that `EDIT-014` agree with `DESIGN-005` and the code; both stale 
 ### Mini recap
 
 Rewrote `EDIT-014` and `PRESENT-006` so Design is described as drawing what the Producer's bank leaves drawn. Learning route: none beyond this record.
+
+## Done
+
+Accepted 2026-10-11 on the review packet above, after the independent review returned ACCEPT and its one wording note was fixed in `ed881fa2`. Closure is authorised by Kris in state-of-play Decision 42 (2026-10-11), which approved doing, closing and pruning this record.
 
 ## Discussion
 
