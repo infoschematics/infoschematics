@@ -15,12 +15,12 @@
     },
     ".": {
       "entry": ["scripts/**/*.test.ts", "scripts/probes/*.ts"],
-      "project": ["scripts/**/*.ts"],
-      "ignoreDependencies": ["@commitlint/cli", "lint-staged", "syncpack"]
+      "project": ["scripts/**/*.ts"]
     }
   },
   "ignoreBinaries": ["rsvg-convert"],
   "ignoreExportsUsedInFile": true,
   "exclude": ["duplicates"],
-  "ignore": [".claude/skills", ".agents/skills"]
+  "ignore": [".claude/skills", ".agents/skills"],
+  "husky": { "config": [".githooks/pre-commit", ".githooks/commit-msg"] }
 }
