@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process'
 import { existsSync, statSync } from 'node:fs'
 import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -7,7 +8,7 @@ import { releaseNodeEngine } from './release/packages.ts'
 /**
  * The repository's own command surface, read as a whole rather than one command at a time.
  *
- * Every finding this file asserts was first found by reading `package.json`, `turbo.json`, `.husky/pre-commit`, and
+ * Every finding this file asserts was first found by reading `package.json`, `turbo.json`, `.githooks/pre-commit`, and
  * `scripts/` by hand, which is exactly the audit that had never been done. An inventory written as prose goes stale
  * the next time a feature adds a command; written as a test it fails instead, so the surface cannot quietly grow a
  * second entry point, a command nothing invokes, or a command whose target no longer exists.
@@ -33,7 +34,7 @@ type Manifest = Readonly<{
 const rootManifest = JSON.parse(await read('package.json')) as Manifest
 const rootScripts = rootManifest.scripts ?? {}
 const turboTasks = Object.keys((JSON.parse(await read('turbo.json')) as { tasks: object }).tasks)
-const preCommit = await read('.husky/pre-commit')
+const preCommit = await read('.githooks/pre-commit')
 const readme = await read('README.md')
 
 const workspaceDirectories = (
@@ -98,6 +99,7 @@ type Target = Readonly<
   | { kind: 'file'; name: string }
   | { kind: 'rootScript'; name: string }
   | { kind: 'task'; name: string }
+  | { kind: 'systemBinary'; name: string }
   | { kind: 'workspaceScript'; name: string; workspace: string }
 >
 
@@ -135,6 +137,8 @@ const targetsOf = (segment: string): readonly Target[] => {
         return [{ kind: 'workspaceScript', name: rest[3], workspace: rest[2] }]
       }
       return rest[1] ? [{ kind: 'rootScript', name: rest[1] }] : []
+    case 'git':
+      return [{ kind: 'systemBinary', name: 'git' }]
     case 'bunx':
       return rest[0] ? [{ kind: 'binary', name: rest[0] }] : []
     case 'depcruise': {
@@ -170,6 +174,8 @@ const unreachable = (target: Target): string | undefined => {
   switch (target.kind) {
     case 'binary':
       return isFile(`node_modules/.bin/${target.name}`) ? undefined : `no ${target.name} on the installed path`
+    case 'systemBinary':
+      return spawnSync(target.name, ['--version']).status === 0 ? undefined : `no working ${target.name} on PATH`
     case 'directory':
       return isDirectory(target.name) ? undefined : `no directory ${target.name}`
     case 'file':

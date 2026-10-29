@@ -131,7 +131,7 @@
     },
     "//#self:unused:verify": {
       "inputs": [
-        ".husky/**",
+        ".githooks/**",
         "apps/*/package.json",
         "apps/site/src/**",
         "biome.json",
@@ -151,7 +151,7 @@
       "inputs": [
         ".dependency-cruiser.ts",
         ".github/workflows/release-npm.yml",
-        ".husky/**",
+        ".githooks/**",
         ".ki.toml",
         ".vscode/settings.json",
         "README.md",
