@@ -71,7 +71,7 @@ dependency_holds = [
 # Change management
 # -----------------------------------------------------------------------------
 
-[skills.ki-agent-coordination-paperclip]
+[skills.ki-delegation-paperclip]
 organisation_code = "HNR"
 
 [skills.ki-git]
