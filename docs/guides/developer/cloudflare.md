@@ -1,12 +1,12 @@
 # Cloudflare hosting
 
-This is the one guide for every Cloudflare aspect of this repository. The split rule: [`apps/site/wrangler.jsonc`](../../../apps/site/wrangler.jsonc) owns everything it can express — the Worker name (`infoschematics-website`), the served assets directory, single-page-application not-found handling, both custom-domain routes, and observability. This guide records only the dashboard-owned settings, as the exact values an operator enters, so the dashboard can be reconstructed from the repository alone. A dashboard change and its edit to this guide travel together.
+This is the one guide for every Cloudflare aspect of this repository. The split rule: [`apps/site/wrangler.jsonc`](../../../apps/site/wrangler.jsonc) owns everything it can express — the Worker name (`info-infoschematics`, the hostname reversed, as every Personal-account Worker is named), the served assets directory, single-page-application not-found handling, both custom-domain routes, and observability. This guide records only the dashboard-owned settings, as the exact values an operator enters, so the dashboard can be reconstructed from the repository alone. A dashboard change and its edit to this guide travel together.
 
 The Worker lives in the **Kit** Cloudflare account (`08c2b231fcf136f225cdb985fd3ac196`), which also manages DNS for the `infoschematics.info` zone.
 
 ## workers.dev
 
-The `workers.dev` subdomain does **not** serve: both the workers.dev route and preview URLs are disabled for `infoschematics-website` (Worker → Settings → Domains & Routes). The custom domains below are the only public endpoints.
+The `workers.dev` subdomain does **not** serve: both the workers.dev route and preview URLs are disabled for `info-infoschematics`, declared as `workers_dev` and `preview_urls` in `wrangler.jsonc` and shown at Worker → Settings → Domains & Routes. The custom domains below are the only public endpoints.
 
 ## Custom domains and redirects
 
