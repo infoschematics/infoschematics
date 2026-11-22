@@ -43,8 +43,6 @@ auto_memory = "disabled"
 # Repository shape
 # -----------------------------------------------------------------------------
 
-[skills.ki-repo-project]
-
 [skills.ki-repo-website]
 
 [skills.ki-repo-website-app]
