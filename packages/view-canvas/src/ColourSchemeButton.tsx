@@ -9,8 +9,8 @@
  * here rather than taken from an icon set, because Studio has an icon dependency and the website deliberately does
  * not: a shared control that needed `lucide-react` would be a control the site could not use without acquiring one.
  *
- * The name still says button; the internal naming sweep is the "One word for mode" idea in
- * `docs/roadmap/_IDEAS.md`.
+ * The name still says button; the internal naming sweep is the "One word for mode" idea, now in Harbour's ideas area:
+ * https://github.com/krisb/ki-cairn-harbour/blob/main/knowledge/maturation/ideas/humans-not-robots/infoschematics/one-word-for-mode.md
  */
 import { type ColourSchemeChoice, useColourScheme } from './colour-scheme.ts'
 
